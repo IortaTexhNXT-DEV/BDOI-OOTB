@@ -129,6 +129,30 @@ class ClaimsService {
    * @param {string} claimId - The claim ID to reject
    * @returns {Promise<Object>} API response
    */
+  /**
+   * Checker decision on a settlement in "Pending Approval" (the approver must differ from the requester)
+   * @param {string} claimId - Claim ID or number
+   * @param {{decision: "approve"|"return", approvedAmount?: number, note?: string}} payload
+   * @returns {Promise<Object>} { success, data } or { success: false, error }
+   */
+  async approveSettlement(claimId, payload) {
+    try {
+      const response = await fetch(`${this.baseURL}/claims/approve-settlement/${claimId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Failed to record the settlement decision");
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
   async rejectClaim(claimId) {
     try {
       const controller = new AbortController();
@@ -719,83 +743,6 @@ class ClaimsService {
           error.name === "AbortError"
             ? "Request timeout. Please try again."
             : error.message || "Failed to get claim documents",
-      };
-    }
-  }
-
-  /**
-   * Generate claims report
-   * @param {Object} reportParams - Report parameters including startDate, endDate, criteria, and reportType
-   * @returns {Promise<Object>} API response with Excel file download
-   */
-  async generateClaimsReport(reportParams) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for report generation
-
-      console.log("=== GENERATE CLAIMS REPORT ===");
-      console.log("Report Parameters:", reportParams);
-      console.log("=== END GENERATE CLAIMS REPORT ===");
-
-      // Build query parameters
-      const params = new URLSearchParams();
-      params.append("startDate", reportParams.startDate);
-      params.append("endDate", reportParams.endDate);
-      params.append("criteria", reportParams.criteria);
-      params.append("reportType", reportParams.reportType || "excel");
-
-      const response = await fetch(
-        `${this.baseURL}/claims/reports/criteria?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            ...authService.getAuthHeader(),
-          },
-          signal: controller.signal,
-        }
-      );
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message ||
-            `Failed to generate report (status ${response.status})`
-        );
-      }
-
-      // Handle Excel file response
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      // Create download link
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `claims-report-${reportParams.criteria}-${reportParams.startDate}-to-${reportParams.endDate}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      console.log("Claims report generated and downloaded successfully");
-
-      return {
-        success: true,
-        data: {
-          blob: blob,
-          url: url,
-          fileName: `claims-report-${reportParams.criteria}-${reportParams.startDate}-to-${reportParams.endDate}.xlsx`,
-        },
-      };
-    } catch (error) {
-      console.error("Generate claims report error:", error);
-      return {
-        success: false,
-        error:
-          error.name === "AbortError"
-            ? "Request timeout. Please try again."
-            : error.message || "Failed to generate claims report",
       };
     }
   }

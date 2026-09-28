@@ -23,6 +23,8 @@ import {
   clearCurrentQuoteCreation,
 } from "../Store/quotationReducer";
 import { calculatePremiumBreakdown } from "../utils/premiumCalculations";
+import useTaxRates from "../utils/useTaxRates";
+import quotationService from "../../../services/quotationService";
 import { transformToBackendFormat } from "../utils/quotationDataTransform";
 import policyService from "../../../services/policyService";
 import { BASE_URL } from "../../../utility/constant";
@@ -174,7 +176,22 @@ const transformPolicyToQuotationFormat = (policyData) => {
 };
 
 // Helper function to get form values from quotation data
-const getFormValues = (quotationData, productConfigurator) => {
+/** Premium fields of the server breakdown (POST /quotations/calculate-premium) in the form's string format. */
+const toPremiumFields = (breakdown) => {
+  const fixed = (value) => Number(value || 0).toFixed(2);
+  return {
+    netPremium: fixed(breakdown.netPremium),
+    valueAddedTax: fixed(breakdown.valueAddedTax),
+    documentaryStampTax: fixed(breakdown.documentaryStampTax),
+    localGovernmentTax: fixed(breakdown.localGovernmentTax),
+    accountPremiumOthers: fixed(breakdown.accountPremiumOthers),
+    NCD: fixed(breakdown.NCD),
+    grossPremium: fixed(breakdown.grossPremium),
+    totalSumInsured: fixed(breakdown.totalSumInsured),
+  };
+};
+
+const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => {
   if (quotationData) {
     console.log("=== GET FORM VALUES ===");
     console.log("Input quotation data:", quotationData);
@@ -203,7 +220,8 @@ const getFormValues = (quotationData, productConfigurator) => {
     console.log("⚠️ Calculating premium (no data from Coverage Details)");
     const premiumValues = calculatePremiumBreakdown(
       quotationData,
-      productConfigurator
+      productConfigurator,
+      settingsTaxRates
     );
 
     console.log("Final premium values:", premiumValues);
@@ -390,8 +408,24 @@ const OrderSummary = ({ action, flow }) => {
   console.log("Final quotationData to use:", quotationData);
 
   // Use useMemo to recalculate initial values when quotationData changes
+  // The server computes the premium (and recomputes it on save); show its breakdown
+  const settingsTaxRates = useTaxRates();
+  const [serverPremium, setServerPremium] = useState(null);
+  useEffect(() => {
+    if (!quotationData) return undefined;
+    let active = true;
+    quotationService
+      .calculatePremium(quotationData)
+      .then((breakdown) => active && setServerPremium(toPremiumFields(breakdown)))
+      .catch(() => active && setServerPremium(null));
+    return () => {
+      active = false;
+    };
+  }, [quotationData]);
+
   const initialValue = React.useMemo(() => {
-    const values = getFormValues(quotationData, productConfigurator);
+    const pricedQuotation = quotationData && serverPremium ? { ...quotationData, ...serverPremium } : quotationData;
+    const values = getFormValues(pricedQuotation, productConfigurator, settingsTaxRates);
     console.log(
       "=== CALCULATING INITIAL VALUES ===",
       values,
@@ -400,7 +434,7 @@ const OrderSummary = ({ action, flow }) => {
     console.log("quotationData:", quotationData);
     console.log("Calculated initial values:", values);
     return values;
-  }, [quotationData, productConfigurator]);
+  }, [quotationData, serverPremium, productConfigurator, settingsTaxRates]);
 
   // Update toast message based on quotationId
   useEffect(() => {
@@ -573,7 +607,7 @@ const OrderSummary = ({ action, flow }) => {
             customerAccepted: null, // Must be String or Null, not boolean
 
             // Audit fields
-            createdBy: "system", // TODO: Get from auth context
+            createdBy: localStorage.getItem("USERNAME") || undefined,
 
             // Vehicle Details (from policy)
             insuranceVehicleDetails: [

@@ -7,7 +7,7 @@ import SvgEarnCollection from "../../../../assets/agentIcon/SvgEarnCollection";
 import SvgReceivable from "../../../../assets/agentIcon/SvgReceivable";
 import SvgGrossPremium from "../../../../assets/agentIcon/SvgGrossPremium";
 
-const BottomCard = () => {
+const BottomCard = ({ detail }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   return (
@@ -19,7 +19,7 @@ const BottomCard = () => {
               <SvgEarnCollection />
             </div>
             <div className="bottom__card__inner__container__title mt-2">
-              {formatCurrency(13920)}
+              {formatCurrency(detail?.earnedCommission)}
             </div>
             <div className="bottom__card__inner__container__sub__title mt-2">
               {t("dashboard.earnedCommission")}
@@ -34,7 +34,7 @@ const BottomCard = () => {
               <SvgCollectedPremium />
             </div>
             <div className="bottom__card__inner__container__title mt-2">
-              {formatCurrency(8920)}
+              {formatCurrency(detail?.collectedPremium)}
             </div>
             <div className="bottom__card__inner__container__sub__title mt-2">
               {t("dashboard.collectedPremium")}
@@ -49,7 +49,7 @@ const BottomCard = () => {
               <SvgReceivable />
             </div>
             <div className="bottom__card__inner__container__title mt-2">
-              {formatCurrency(8920)}
+              {formatCurrency(detail?.receivables)}
             </div>
             <div className="bottom__card__inner__container__sub__title mt-2">
               {t("dashboard.receivables")}
@@ -64,7 +64,7 @@ const BottomCard = () => {
               <SvgGrossPremium />
             </div>
             <div className="bottom__card__inner__container__title mt-2">
-              {formatCurrency(174050)}
+              {formatCurrency(detail?.grossPremium)}
             </div>
             <div className="bottom__card__inner__container__sub__title mt-2">
               {t("dashboard.grossPremium")}

@@ -241,7 +241,7 @@ const PaymentConfirmation = () => {
         const result = await quotationService.convertQuotationToPolicy(
           quotationId,
           additionalPolicyData,
-          "agent", // TODO: Get actual username from auth
+          localStorage.getItem("USERNAME") || "agent",
           state?.lob || null // Pass LOB for Fire API format (insuredName, inception, expiry)
         );
 

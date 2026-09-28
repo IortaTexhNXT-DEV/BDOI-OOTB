@@ -13,10 +13,11 @@ import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
 import SvgSendToInsurerIcon from "../../../../assets/agentIcon/SvgSendToInsurerIcon";
 import emailService from "../../../../services/emailService";
 import documentTemplateService from "../../../../services/documentTemplateService";
-import { InsuranceCompanyOptions } from "../../policyDetails/mock";
+import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
+  const InsuranceCompanyOptions = useInsuranceCompanyOptions();
   const { formatCurrency } = useFormatCurrency();
   // Detect Fire and Allied Perils LOB
   const isFireLOB = useMemo(

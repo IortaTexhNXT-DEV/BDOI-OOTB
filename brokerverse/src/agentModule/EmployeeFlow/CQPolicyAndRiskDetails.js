@@ -8,7 +8,6 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import {
     AccountCodes,
-    InsuranceCompanyOptions,
     InsurancePolicyTypes,
     ModelVariants,
     ModelYears,
@@ -17,6 +16,7 @@ import {
     VehicleModels, PolicyTypes,
     InstallmentType,
 } from "./mockdataforpolicyDetails";
+import useInsuranceCompanyOptions from "../component/useInsuranceCompanyOptions";
 import SvgTable from "../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
 import DropdownField from "../component/DropdwonField";
@@ -30,6 +30,7 @@ import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 import ArrowUpToLineIcon from "./uploadIcon";
 
 const CQPolicyAndRiskDetails = ({ action, flow, }) => {
+    const InsuranceCompanyOptions = useInsuranceCompanyOptions();
     const { t } = useTranslation();
     const { type } = useParams();
     console.log(action, type, "action111");
@@ -103,13 +104,14 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
         },
     });
 
+    const { setFieldValue } = formik;
     useEffect(() => {
-        if (action === "quotedetails") {
-            formik.setFieldValue(
-                "InsuranceCompanyName",
-                InsuranceCompanyOptions[0].value
-            );
+        if (action === "quotedetails" && InsuranceCompanyOptions.length > 0) {
+            setFieldValue("InsuranceCompanyName", InsuranceCompanyOptions[0].value);
         }
+    }, [action, InsuranceCompanyOptions, setFieldValue]);
+
+    useEffect(() => {
         if (action === "quotedetails") {
             formik.setFieldValue(
                 "InsurancePolicyType",

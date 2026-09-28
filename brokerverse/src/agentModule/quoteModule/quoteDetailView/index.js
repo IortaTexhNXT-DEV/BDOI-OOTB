@@ -15,6 +15,7 @@ import ShareOption from "./Modal/ShareOption";
 import StatusBadge from "../../../components/StatusBadge";
 import { canConvertToPolicy } from "../../../utils/statusHelpers";
 import { calculatePremiumBreakdown } from "../utils/premiumCalculations";
+import useTaxRates from "../utils/useTaxRates";
 import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { getLeadByIdMiddleware } from "../../leadModule/Store/leadMiddleware";
 import { BASE_URL } from "../../../utility/constant";
@@ -107,7 +108,7 @@ const QuoteDetailView = ({ action }) => {
       };
     }
   );
-  console.log("FETCHING", productConfigurator);
+  const settingsTaxRates = useTaxRates();
   useEffect(() => {
     const productType = quotationData?.productType || "";
     const isFire = productType.toLowerCase().includes("fire");
@@ -190,10 +191,11 @@ const QuoteDetailView = ({ action }) => {
     }
 
     // Motor: FALLBACK: Calculate from coverage details
-    return calculatePremiumBreakdown(quotationData, productConfigurator);
+    return calculatePremiumBreakdown(quotationData, productConfigurator, settingsTaxRates);
   }, [
     quotationData,
     productConfigurator,
+    settingsTaxRates,
     isFireLOB,
     isIarLOB,
     firePremiumDetails,

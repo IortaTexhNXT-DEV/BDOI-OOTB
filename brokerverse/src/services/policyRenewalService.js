@@ -1,13 +1,9 @@
 import { BASE_URL } from "../utility/constant";
+import authService from "./authService";
 
 class PolicyRenewalService {
   constructor() {
     this.baseURL = BASE_URL;
-  }
-
-  getAuthHeader() {
-    const token = localStorage.getItem("accessToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   async getRenewals({ clientId, policyId, status, page = 1, limit = 50 } = {}) {
@@ -29,7 +25,7 @@ class PolicyRenewalService {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...this.getAuthHeader(),
+            ...authService.getAuthHeader(),
           },
           signal: controller.signal,
         }
@@ -75,7 +71,6 @@ class PolicyRenewalService {
           },
       };
     } catch (error) {
-      console.error("Policy renewal fetch error:", error);
       return {
         success: false,
         error:

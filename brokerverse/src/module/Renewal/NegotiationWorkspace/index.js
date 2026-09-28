@@ -23,7 +23,7 @@ import { Chip } from "primereact/chip";
 import { FileUpload } from "primereact/fileupload";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Splitter, SplitterPanel } from "primereact/splitter";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
@@ -37,7 +37,8 @@ const NegotiationWorkspace = () => {
   const [agentFilter, setAgentFilter] = useState("All");
   const [loading, setLoading] = useState(false);
   const [selectedNegotiation, setSelectedNegotiation] = useState(null);
-  const [negotiations, setNegotiations] = useState(renewalMockData.negotiations);
+  const [negotiations, setNegotiations] = useState([]);
+  const [approvals, setApprovals] = useState([]);
   const [filteredNegotiations, setFilteredNegotiations] = useState([]);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [approvalVisible, setApprovalVisible] = useState(false);
@@ -74,18 +75,12 @@ const NegotiationWorkspace = () => {
 
   const statusFilterOptions = [
     { label: "All Statuses", value: "All" },
-    { label: "Pending Approval", value: "Pending Approval" },
-    { label: "Active Negotiation", value: "Active Negotiation" },
-    { label: "Counter Offer", value: "Counter Offer" },
-    { label: "Awaiting Response", value: "Awaiting Response" },
-    { label: "Closed", value: "Closed" }
+    ...[...new Set(negotiations.map(n => n.currentStage).filter(Boolean))].map(stage => ({ label: stage, value: stage }))
   ];
 
   const agentFilterOptions = [
     { label: "All Agents", value: "All" },
-    { label: "Juan Dela Cruz", value: "Juan Dela Cruz" },
-    { label: "Ana Reyes", value: "Ana Reyes" },
-    { label: "Carlos Mendoza", value: "Carlos Mendoza" }
+    ...[...new Set(negotiations.map(n => n.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
   const updateTypeOptions = [
@@ -143,72 +138,65 @@ const NegotiationWorkspace = () => {
     }
   }, [negotiations]);
 
+  const showError = (error, fallbackKey) => {
+    toast.current.show({
+      severity: 'error',
+      summary: t("common.error"),
+      detail: error?.message || t(fallbackKey),
+      life: 3000
+    });
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Simulate loading additional negotiations from renewal queue
-      const activeNegotiations = renewalMockData.renewalQueue
-        .filter(policy => policy.status === 'Under Negotiation')
-        .map(policy => ({
-          negotiationId: `NEG-2025-${String(Math.floor(Math.random() * 1000)).padStart(4, '0')}`,
-          policyNumber: policy.policyNumber,
-          clientName: policy.insuredName,
-          currentStage: 'Active Negotiation',
-          currentPremium: policy.currentPremium,
-          quotedPremium: policy.quotedPremium || Math.round(policy.currentPremium * 1.1),
-          timeline: [
-            {
-              date: "2025-01-20",
-              type: "Initial Contact",
-              method: "Email",
-              description: "Sent renewal notice with quote",
-              outcome: "Client requested meeting"
-            },
-            {
-              date: "2025-01-25",
-              type: "Meeting",
-              method: "Face-to-face",
-              description: "Discussed renewal terms",
-              outcome: "Client concerned about premium increase"
-            }
-          ],
-          competitorAnalysis: {
-            ourAdvantages: [
-              "Established relationship",
-              "Quick claims processing",
-              "Local service team"
-            ],
-            competitorAdvantages: [
-              "Lower premium quoted",
-              "Additional features"
-            ]
-          },
-          finalOffer: null,
-          createdDate: "2025-01-20",
-          lastUpdated: "2025-01-25",
-          assignedAgent: policy.assignedAgent
-        }));
-
-      const combinedData = [...renewalMockData.negotiations, ...activeNegotiations];
-      setNegotiations(combinedData);
-      calculateDashboard(combinedData);
-
-      setTimeout(() => {
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.negotiationDataLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
+      const [rows, pending] = await Promise.all([
+        renewalsWorkspaceService.getNegotiations(),
+        renewalsWorkspaceService.getApprovals()
+      ]);
+      setNegotiations(rows);
+      setApprovals(pending);
+      setSelectedNegotiation(current => rows.find(n => n.id === current?.id) || rows[0] || null);
+      calculateDashboard(rows);
     } catch (error) {
+      showError(error, "renewal.failedToLoadNegotiationData");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Adds an entry to the selected renewal's timeline and reloads the workspace. */
+  const recordActivity = async (activity, successSummary, successDetail, fallbackKey) => {
+    setLoading(true);
+    try {
+      await renewalsWorkspaceService.addActivity(selectedNegotiation.id, activity);
+      toast.current.show({ severity: 'success', summary: successSummary, detail: successDetail, life: 3000 });
+      await loadInitialData();
+      return true;
+    } catch (error) {
+      showError(error, fallbackKey);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pendingApproval = approvals.find(a => a.renewalId === selectedNegotiation?.id);
+
+  const handleDecision = async (decision) => {
+    setLoading(true);
+    try {
+      await renewalsWorkspaceService.decide(selectedNegotiation.id, decision);
       toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToLoadNegotiationData"),
+        severity: 'success',
+        summary: decision === 'approve' ? t("renewal.approved", "Approved") : t("renewal.rejected", "Rejected"),
+        detail: selectedNegotiation.policyNumber,
         life: 3000
       });
+      await loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToSubmitApprovalRequest");
+    } finally {
       setLoading(false);
     }
   };
@@ -301,134 +289,60 @@ const NegotiationWorkspace = () => {
   };
 
   const handleSaveUpdate = async () => {
-    setLoading(true);
-    try {
-      const updatedNegotiation = {
-        ...selectedNegotiation,
-        timeline: [
-          ...selectedNegotiation.timeline,
-          {
-            date: new Date().toISOString().split('T')[0],
-            type: newUpdate.type,
-            method: newUpdate.method,
-            description: newUpdate.description,
-            outcome: newUpdate.outcome,
-            nextAction: newUpdate.nextAction,
-            followUpDate: newUpdate.followUpDate?.toISOString().split('T')[0]
-          }
-        ],
-        lastUpdated: new Date().toISOString().split('T')[0]
-      };
-
-      const updatedNegotiations = negotiations.map(n =>
-        n.negotiationId === selectedNegotiation.negotiationId ? updatedNegotiation : n
-      );
-
-      setNegotiations(updatedNegotiations);
-      setSelectedNegotiation(updatedNegotiation);
-      setUpdateVisible(false);
-
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.updateAdded"),
-        detail: t("renewal.negotiationTimelineUpdated"),
-        life: 3000
-      });
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSaveUpdate"),
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+    const saved = await recordActivity(
+      {
+        type: newUpdate.type,
+        method: newUpdate.method,
+        description: newUpdate.description,
+        outcome: newUpdate.outcome || undefined,
+        nextAction: newUpdate.nextAction || undefined,
+        followUpDate: newUpdate.followUpDate?.toLocaleDateString('en-CA')
+      },
+      t("renewal.updateAdded"),
+      t("renewal.negotiationTimelineUpdated"),
+      "renewal.failedToSaveUpdate"
+    );
+    if (saved) setUpdateVisible(false);
   };
 
   const handleSubmitApproval = async () => {
     setLoading(true);
     try {
-      const approvalUpdate = {
-        date: new Date().toISOString().split('T')[0],
-        type: "Approval Request",
-        requestedBy: "Current User",
-        requestedPremium: approvalRequest.requestedPremium,
-        discountPercent: approvalRequest.discountPercent,
-        specialTerms: approvalRequest.specialTerms,
-        justification: approvalRequest.justification,
-        urgency: approvalRequest.urgency,
-        status: "Pending"
-      };
-
-      const updatedNegotiation = {
-        ...selectedNegotiation,
-        currentStage: 'Pending Approval',
-        timeline: [
-          ...selectedNegotiation.timeline,
-          approvalUpdate
-        ],
-        pendingApproval: approvalUpdate
-      };
-
-      const updatedNegotiations = negotiations.map(n =>
-        n.negotiationId === selectedNegotiation.negotiationId ? updatedNegotiation : n
-      );
-
-      setNegotiations(updatedNegotiations);
-      setSelectedNegotiation(updatedNegotiation);
+      const note = [
+        `Requested premium ${approvalRequest.requestedPremium} (${approvalRequest.discountPercent}% discount)`,
+        approvalRequest.specialTerms.length ? `Terms: ${approvalRequest.specialTerms.join(', ')}` : '',
+        `Urgency: ${approvalRequest.urgency}`,
+        approvalRequest.justification
+      ].filter(Boolean).join('; ');
+      await renewalsWorkspaceService.submitForApproval(selectedNegotiation.id, note);
       setApprovalVisible(false);
-
       toast.current.show({
         severity: 'success',
         summary: t("renewal.approvalRequested"),
         detail: t("renewal.specialTermsApprovalSubmitted"),
         life: 3000
       });
+      await loadInitialData();
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSubmitApprovalRequest"),
-        life: 3000
-      });
+      showError(error, "renewal.failedToSubmitApprovalRequest");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendCommunicationConfirm = () => {
-    setCommunicationVisible(false);
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.communicationSent"),
-      detail: t("renewal.communicationSentToClient", { method: newCommunication.method }),
-      life: 3000
-    });
-
-    // Add communication to timeline
-    const communicationUpdate = {
-      date: new Date().toISOString().split('T')[0],
-      type: "Communication",
-      method: newCommunication.method,
-      description: `${newCommunication.subject}: ${newCommunication.message}`,
-      outcome: "Sent successfully"
-    };
-
-    const updatedNegotiation = {
-      ...selectedNegotiation,
-      timeline: [
-        ...selectedNegotiation.timeline,
-        communicationUpdate
-      ]
-    };
-
-    const updatedNegotiations = negotiations.map(n =>
-      n.negotiationId === selectedNegotiation.negotiationId ? updatedNegotiation : n
+  const handleSendCommunicationConfirm = async () => {
+    const sent = await recordActivity(
+      {
+        type: "Communication",
+        method: newCommunication.method,
+        description: `${newCommunication.subject}: ${newCommunication.message}`,
+        followUpDate: newCommunication.scheduledDate?.toLocaleDateString('en-CA')
+      },
+      t("renewal.communicationSent"),
+      t("renewal.communicationSentToClient", { method: newCommunication.method }),
+      "renewal.failedToSaveUpdate"
     );
-
-    setNegotiations(updatedNegotiations);
-    setSelectedNegotiation(updatedNegotiation);
+    if (sent) setCommunicationVisible(false);
   };
 
   const statusBodyTemplate = (rowData) => {
@@ -739,6 +653,22 @@ const NegotiationWorkspace = () => {
                   onClick={handleSendCommunication}
                   disabled={!selectedNegotiation}
                 />
+                {pendingApproval && (
+                  <>
+                    <Button
+                      label={t("renewal.approve", "Approve")}
+                      icon="pi pi-check"
+                      className="p-button-success"
+                      onClick={() => handleDecision('approve')}
+                    />
+                    <Button
+                      label={t("renewal.reject", "Reject")}
+                      icon="pi pi-times"
+                      className="p-button-danger"
+                      onClick={() => handleDecision('reject')}
+                    />
+                  </>
+                )}
               </div>
             </div>
 
@@ -746,11 +676,11 @@ const NegotiationWorkspace = () => {
               <SplitterPanel className="negotiations-list" size={35}>
                 <div className="list-header">
                   <h4>Active Negotiations</h4>
-                  <Badge value={filteredNegotiations.length || negotiations.length} />
+                  <Badge value={filteredNegotiations.length} />
                 </div>
                 <ScrollPanel style={{ width: '100%', height: '520px' }}>
                   <DataTable
-                    value={filteredNegotiations.length > 0 ? filteredNegotiations : negotiations}
+                    value={filteredNegotiations}
                     className="negotiations-table compact"
                     loading={loading}
                     emptyMessage="No negotiations found"

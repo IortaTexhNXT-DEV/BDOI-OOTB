@@ -16,7 +16,7 @@ import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
 import { Knob } from "primereact/knob";
 import { Badge } from "primereact/badge";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
@@ -32,7 +32,8 @@ const RetentionAnalytics = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
-  const [analyticsData, setAnalyticsData] = useState(renewalMockData.performanceMetrics);
+  const [analyticsData, setAnalyticsData] = useState({});
+  const [riskCounts, setRiskCounts] = useState({});
   const toast = useRef(null);
 
   const timeFilterOptions = [
@@ -43,21 +44,18 @@ const RetentionAnalytics = () => {
     { label: t("renewal.customRange"), value: 'Custom Range' }
   ];
 
+  const productKeys = Object.keys(analyticsData.byProduct || {});
   const productFilterOptions = [
     { label: t("renewal.allProducts"), value: 'All Products' },
-    { label: t("renewal.motorInsurance"), value: 'motor' },
-    { label: t("renewal.fireInsurance"), value: 'fire' },
-    { label: t("renewal.marineInsurance"), value: 'marine' },
-    { label: t("renewal.healthInsurance"), value: 'health' },
-    { label: t("renewal.personalAccident"), value: 'personalAccident' }
+    ...productKeys.map(key => ({ label: productLabel(key), value: key }))
   ];
+  const shownProducts = productFilter === 'All Products' ? productKeys : productKeys.filter(key => key === productFilter);
 
   const agentFilterOptions = [
     { label: t("renewal.allAgents"), value: 'All Agents' },
-    { label: 'Juan Dela Cruz', value: 'Juan Dela Cruz' },
-    { label: 'Ana Reyes', value: 'Ana Reyes' },
-    { label: 'Carlos Mendoza', value: 'Carlos Mendoza' }
+    ...(analyticsData.byAgent || []).map(agent => ({ label: agent.agentName, value: agent.agentName }))
   ];
+  const shownAgents = (analyticsData.byAgent || []).filter(agent => agentFilter === 'All Agents' || agent.agentName === agentFilter);
 
   const items = [
     { label: t("renewal.renewals"), url: "#" },
@@ -68,32 +66,29 @@ const RetentionAnalytics = () => {
 
   useEffect(() => {
     loadAnalyticsData();
+  }, [timeFilter, dateRange]);
+
+  useEffect(() => {
     setupCharts();
-  }, [timeFilter, productFilter, agentFilter]);
+  }, [analyticsData, riskCounts, productFilter, agentFilter]);
 
   const loadAnalyticsData = async () => {
     setLoading(true);
     try {
-      // Simulate loading analytics data
-      setTimeout(() => {
-        // In real app, would fetch based on filters
-        setAnalyticsData(renewalMockData.performanceMetrics);
-        setLoading(false);
-
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.analyticsDataUpdatedSuccess"),
-          life: 3000
-        });
-      }, 1000);
+      const [performance, queue] = await Promise.all([
+        renewalsWorkspaceService.getPerformance(periodRange(timeFilter, dateRange)),
+        renewalsWorkspaceService.getQueue()
+      ]);
+      setAnalyticsData(performance);
+      setRiskCounts(queue.items.reduce((counts, item) => ({ ...counts, [item.retentionRisk]: (counts[item.retentionRisk] || 0) + 1 }), {}));
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToLoadAnalyticsData"),
+        detail: error?.message || t("renewal.failedToLoadAnalyticsData"),
         life: 3000
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -123,17 +118,11 @@ const RetentionAnalytics = () => {
 
     // Product Performance Chart
     const productData = {
-      labels: ['Motor', 'Fire', 'Marine', 'Health', 'Personal Accident'],
+      labels: shownProducts.map(productLabel),
       datasets: [
         {
           label: 'Renewal Rate (%)',
-          data: [
-            analyticsData.byProduct?.motor?.renewalRate || 0,
-            analyticsData.byProduct?.fire?.renewalRate || 0,
-            analyticsData.byProduct?.marine?.renewalRate || 0,
-            analyticsData.byProduct?.health?.renewalRate || 0,
-            analyticsData.byProduct?.personalAccident?.renewalRate || 0
-          ],
+          data: shownProducts.map(key => analyticsData.byProduct[key]?.renewalRate || 0),
           backgroundColor: [primaryColor, successColor, warningColor, dangerColor, '#8B5CF6'],
           borderWidth: 0
         }
@@ -142,17 +131,17 @@ const RetentionAnalytics = () => {
 
     // Agent Performance Chart
     const agentData = {
-      labels: analyticsData.byAgent?.map(agent => agent.agentName.split(' ')[0]) || [],
+      labels: shownAgents.map(agent => agent.agentName.split(' ')[0]),
       datasets: [
         {
           label: 'Renewal Rate (%)',
-          data: analyticsData.byAgent?.map(agent => agent.renewalRate) || [],
+          data: shownAgents.map(agent => agent.renewalRate),
           backgroundColor: primaryColor,
           borderWidth: 0
         },
         {
           label: 'Premium Retained (M)',
-          data: analyticsData.byAgent?.map(agent => agent.premiumRetained / 1000000) || [],
+          data: shownAgents.map(agent => agent.premiumRetained / 1000000),
           backgroundColor: successColor,
           borderWidth: 0,
           yAxisID: 'y1'
@@ -165,7 +154,7 @@ const RetentionAnalytics = () => {
       labels: ['Low Risk', 'Medium Risk', 'High Risk', 'Critical Risk'],
       datasets: [
         {
-          data: [45, 30, 20, 5], // Sample distribution
+          data: ['Low', 'Medium', 'High', 'Critical'].map(level => riskCounts[level] || 0),
           backgroundColor: [successColor, warningColor, dangerColor, '#DC2626'],
           borderWidth: 0
         }
@@ -458,12 +447,12 @@ const RetentionAnalytics = () => {
               <div className="kpi-visual">
                 <div className="satisfaction-visual">
                   <i className="pi pi-star-fill"></i>
-                  <span className="rating">{analyticsData.overall?.customerSatisfaction}</span>
+                  <span className="rating">{analyticsData.overall?.customerSatisfaction ?? '-'}</span>
                 </div>
               </div>
               <div className="kpi-info">
                 <span className="kpi-label">Customer Satisfaction</span>
-                <span className="kpi-value">{analyticsData.overall?.customerSatisfaction}/5.0</span>
+                <span className="kpi-value">{analyticsData.overall?.customerSatisfaction ?? '-'}/5.0</span>
                 <span className="kpi-change positive">+0.3 vs last period</span>
               </div>
             </div>
@@ -514,10 +503,10 @@ const RetentionAnalytics = () => {
                     <h3>Product Metrics</h3>
                   </div>
                   <div className="product-list">
-                    {Object.entries(analyticsData.byProduct || {}).map(([key, product]) => (
+                    {shownProducts.map(key => [key, analyticsData.byProduct[key]]).map(([key, product]) => (
                       <div key={key} className="product-item">
                         <div className="product-info">
-                          <span className="product-name">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                          <span className="product-name">{productLabel(key)}</span>
                           <span className="product-rate">{formatPercentage(product.renewalRate)}</span>
                         </div>
                         <div className="product-premium">
@@ -553,7 +542,7 @@ const RetentionAnalytics = () => {
                     <h3>Agent Leaderboard</h3>
                   </div>
                   <DataTable
-                    value={analyticsData.byAgent || []}
+                    value={shownAgents}
                     className="leaderboard-table"
                   >
                     <Column

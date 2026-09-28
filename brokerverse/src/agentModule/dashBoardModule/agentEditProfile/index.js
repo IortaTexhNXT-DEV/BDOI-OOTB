@@ -2,8 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import "./index.scss";
-import { Image } from "primereact/image";
 import AgentProfileEditCard from "./agentProfileEditCard";
+import InitialsAvatar from "../../component/InitialsAvatar";
 
 const AgentEditProfile = () => {
   const { t } = useTranslation();
@@ -14,12 +14,12 @@ const AgentEditProfile = () => {
         <div className="back__btn__text">{t("agentProfile.profile")}</div>
       </div>
       <div className="agent__profile__detail__container mt-5">
-        <Image src="https://i.ibb.co/7jx27CN/Mask-group-1.png" width="65px" height="65px" className="mt-2" />
+        <InitialsAvatar size="65px" className="mt-2" />
         <div>
         <div className="agent__profile__name">
-        John Visser
+        {localStorage.getItem("USER_NAME")}
         </div>
-        <div className="agent__profile__id">{t("agentProfile.agentId")} : 12345678</div>
+        <div className="agent__profile__id">{t("agentProfile.agentId")} : {localStorage.getItem("USERNAME")}</div>
         </div>
       </div>
       <AgentProfileEditCard/>

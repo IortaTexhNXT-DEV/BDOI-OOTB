@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import "./index.scss";
-import { Image } from "primereact/image";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { Dropdown } from "primereact/dropdown";
@@ -15,6 +14,7 @@ import SvgArrow from "../../../assets/icons/SvgArrow";
 import Cookies from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
+import InitialsAvatar from "../InitialsAvatar";
 
 const getLanguageOptions = (t) => [
   { label: t("common.english"), value: "en" },
@@ -396,12 +396,7 @@ const AgentNavBar = () => {
         aria-controls="popup_menu_right"
         aria-haspopup
       >
-        <Image
-          src="https://i.ibb.co/7jx27CN/Mask-group-1.png"
-          width="40px"
-          height="40px"
-          className="navbar__container__profile__image"
-        />
+        <InitialsAvatar size="40px" className="navbar__container__profile__image" />
       </Button>
     </div>
   );

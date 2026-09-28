@@ -14,6 +14,7 @@ import {
   COVER_CONFIG,
 } from "../../../leadModule/FireLeadCreation/fireRiskConstants";
 import InputNumberField from "../../../component/inputNumberField";
+import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 
 const getSiForCover = (cover, vals) => {
   if (cover.smiGroupCode === "SMIGRP1") {
@@ -27,7 +28,7 @@ const getSiForCover = (cover, vals) => {
   return 0;
 };
 
-const computePremiumFromSi = (vals) => {
+const computePremiumFromSi = (vals, vatRate) => {
   const coverBreakupComputed = COVER_CONFIG.map((cover) => {
     const si = getSiForCover(cover, vals);
     const rate = cover.rate || 0;
@@ -35,7 +36,7 @@ const computePremiumFromSi = (vals) => {
     return { ...cover, si, premium: Math.round(premium * 100) / 100 };
   });
   const totalCoverPremium = coverBreakupComputed.reduce((s, c) => s + c.premium, 0);
-  const vat = totalCoverPremium * 0.12;
+  const vat = totalCoverPremium * vatRate;
   return { totalCoverPremium, valueAddedTax: vat };
 };
 
@@ -47,6 +48,7 @@ const FireDetailsChange = ({
   fireDetails,
 }) => {
   const { t } = useTranslation();
+  const { valueAddedTax: vatRate } = useTaxRates();
   const quotation = fireDetails?.quotation || {};
   const fireRisk =
     fireDetails?.fireRiskDetails ||
@@ -132,7 +134,7 @@ const FireDetailsChange = ({
 
       const totalCoverPremium =
         coverBreakupComputed.reduce((s, c) => s + c.premium, 0) || totalPremium;
-      const vat = Number(values.valueAddedTax) || totalCoverPremium * 0.12;
+      const vat = Number(values.valueAddedTax) || totalCoverPremium * vatRate;
 
       onSectionSubmitted?.(index, {
         personalDetails: {
@@ -321,7 +323,7 @@ const FireDetailsChange = ({
                 setSiValues((prev) => ({ ...prev, [f.key]: numVal }));
                 const nextSi = { ...formik.values, [f.key]: numVal };
                 const { totalCoverPremium, valueAddedTax } =
-                  computePremiumFromSi(nextSi);
+                  computePremiumFromSi(nextSi, vatRate);
                 formik.setFieldValue("totalPremium", totalCoverPremium);
                 formik.setFieldValue("valueAddedTax", valueAddedTax);
               }}

@@ -957,6 +957,45 @@ class QuotationService {
       };
     }
   }
+
+  async request(path, options = {}) {
+    const response = await fetch(`${this.baseURL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...authService.getAuthHeader(),
+      },
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body.success === false) {
+      throw new Error(body.message || `Request failed (${response.status})`);
+    }
+    return body.data;
+  }
+
+  /** Server-side premium breakdown (cover premiums, taxes, gross, commission) for a quotation document. */
+  calculatePremium(quotationData) {
+    return this.request("/quotations/calculate-premium", {
+      method: "POST",
+      body: JSON.stringify(quotationData),
+    });
+  }
+
+  /** Insurance company master as dropdown options ({ id, code, label, value }). */
+  getInsuranceCompanyOptions() {
+    return this.request("/masters/insurance-company/options");
+  }
+
+  /** Tax rates (decimals) from settings: { valueAddedTax, documentaryStampTax, localGovernmentTax }. */
+  async getTaxRates() {
+    const rows = await this.request("/settings?group=tax");
+    const rate = (key) => Number(rows.find((row) => row.key === key)?.value) || 0;
+    return {
+      valueAddedTax: rate("tax.vat_rate"),
+      documentaryStampTax: rate("tax.dst_rate"),
+      localGovernmentTax: rate("tax.lgt_rate"),
+    };
+  }
 }
 
 const quotationService = new QuotationService();

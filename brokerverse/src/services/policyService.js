@@ -365,55 +365,6 @@ class PolicyService {
     };
   }
 
-  /**
-   * Fetch individual policy details by policy ID
-   * @param {string} policyId - Policy ID to fetch details for
-   * @returns {Promise<Object>} API response with policy details
-   */
-  async getPolicyDetails(policyId) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      console.log(`Fetching policy details for ID: ${policyId}`);
-
-      const response = await fetch(`${this.baseURL}/policies/${policyId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...this.getAuthHeader(),
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Policy details API response:", data);
-
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      console.error("Get policy details error:", error);
-      return {
-        success: false,
-        error:
-          error.name === "AbortError"
-            ? "Request timeout. Please try again."
-            : error.message || "Failed to fetch policy details",
-      };
-    }
-  }
-
   async getPolicyEndorsementDetails(policyId) {
     try {
       const response = await fetch(

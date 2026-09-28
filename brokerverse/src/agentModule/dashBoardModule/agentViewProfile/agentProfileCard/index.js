@@ -4,7 +4,7 @@ import InputTextField from "../../../component/inputText/index";
 import { Button } from "primereact/button";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
-import { patchProfileEditMiddleware } from "../agentProfileCard/store/profileMiddleware";
+import { getProfileMiddleware, patchProfileEditMiddleware } from "../agentProfileCard/store/profileMiddleware";
 import { RadioButton } from "primereact/radiobutton";
 import DatepickerField from "../../../component/datePicker";
 const AgentProfileCard = () => {
@@ -121,6 +121,10 @@ const AgentProfileCard = () => {
     dispatch(patchProfileEditMiddleware(value));
     setFormAction("view");
   };
+  useEffect(() => {
+    dispatch(getProfileMiddleware());
+  }, [dispatch]);
+
   useEffect(() => {
     setFormikValues();
   }, [profileData]);

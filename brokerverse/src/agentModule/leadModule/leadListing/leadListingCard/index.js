@@ -28,11 +28,12 @@ const LeadListingCard = () => {
           <TabPanel header={t("dashboard.Motor")}>
             {viewMode === "table" ? (
               <LeadListingMotorTable
+                lob="MOTOR"
                 leadtabledata={leadtabledata}
                 paymentSearchList={paymentSearchList}
               />
             ) : (
-              <LeadListingMotorCards lob={null} activeTab={activeTab} tabIndex={0} />
+              <LeadListingMotorCards lob="MOTOR" activeTab={activeTab} tabIndex={0} />
             )}
           </TabPanel>
           <TabPanel header={t("dashboard.Fire and Allied Perils")}>

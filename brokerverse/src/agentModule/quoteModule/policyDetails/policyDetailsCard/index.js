@@ -11,7 +11,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import {
   AccountCodes,
-  InsuranceCompanyOptions,
   InsurancePolicyTypes,
   ModelVariants,
   ModelYears,
@@ -21,6 +20,7 @@ import {
   PolicyTypes,
   InstallmentType,
 } from "../mock";
+import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { postPolicyDetailsMiddleware } from "../store/policyDetailsMiddleware";
 import {
   setQuotePolicyDetails,
@@ -35,6 +35,7 @@ import { VEHICLE_TYPE_OPTIONS } from "../../../../module/ProductConfigurator/Pod
 
 const PolicyDetailsCard = ({ action, flow }) => {
   const { t } = useTranslation();
+  const InsuranceCompanyOptions = useInsuranceCompanyOptions();
   const { type, id: leadRefId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();

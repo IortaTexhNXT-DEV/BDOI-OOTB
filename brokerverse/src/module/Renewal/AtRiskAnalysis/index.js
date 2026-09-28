@@ -21,7 +21,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
 import { Knob } from "primereact/knob";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
@@ -38,7 +38,7 @@ const AtRiskAnalysis = () => {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [actionPlanVisible, setActionPlanVisible] = useState(false);
   const [escalateVisible, setEscalateVisible] = useState(false);
-  const [riskPolicies, setRiskPolicies] = useState(renewalMockData.atRiskPolicies);
+  const [riskPolicies, setRiskPolicies] = useState([]);
   const [filteredPolicies, setFilteredPolicies] = useState([]);
   const [dashboardData, setDashboardData] = useState({
     totalAtRisk: 0,
@@ -65,9 +65,7 @@ const AtRiskAnalysis = () => {
 
   const agentFilterOptions = [
     { label: t("renewal.allAgents"), value: "All" },
-    { label: "Juan Dela Cruz", value: "Juan Dela Cruz" },
-    { label: "Ana Reyes", value: "Ana Reyes" },
-    { label: "Carlos Mendoza", value: "Carlos Mendoza" }
+    ...[...new Set(riskPolicies.map(p => p.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
   const priorityOptions = [
@@ -92,61 +90,36 @@ const AtRiskAnalysis = () => {
     applyFilters();
   }, [search, riskFilter, agentFilter, riskPolicies]);
 
+  /** At-risk rows with the plan / escalation recorded on the renewal timeline. */
+  const withTimelineFlags = (rows, negotiations) => rows.map(row => {
+    const timeline = negotiations.find(n => n.id === row.id)?.timeline || [];
+    const plan = [...timeline].reverse().find(item => item.type === 'Action Plan');
+    return {
+      ...row,
+      assignedAgent: row.actionPlan?.assignedTo,
+      actionPlan: plan ? { ...row.actionPlan, ...plan.details, status: 'Active' } : row.actionPlan,
+      escalated: timeline.some(item => item.type === 'Escalation')
+    };
+  });
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Get at-risk policies from renewal queue
-      const atRiskFromQueue = renewalMockData.renewalQueue
-        .filter(policy => policy.retentionRisk === 'High' || policy.retentionRisk === 'Critical')
-        .map(policy => ({
-          policyNumber: policy.policyNumber,
-          insuredName: policy.insuredName,
-          product: policy.product,
-          currentPremium: policy.currentPremium,
-          daysToExpiry: policy.daysToExpiry,
-          assignedAgent: policy.assignedAgent,
-          riskScore: policy.retentionRisk === 'Critical' ? 92 : 78,
-          riskCategory: policy.retentionRisk,
-          riskFactors: [
-            { factor: "Payment History", score: 20, details: "Late payments recorded" },
-            { factor: "Claims Ratio", score: 15, details: policy.claimsHistory?.hasClaimsLastYear ? "Recent claims filed" : "No recent claims" },
-            { factor: "Market Competition", score: 25, details: "Competitor activity detected" },
-            { factor: "Customer Engagement", score: 10, details: "Low interaction frequency" }
-          ],
-          recommendedActions: [
-            "Schedule retention meeting",
-            "Prepare competitive analysis",
-            "Review pricing options",
-            "Assess loyalty incentives"
-          ],
-          actionPlan: {
-            priority: policy.retentionRisk === 'Critical' ? 'Critical' : 'High',
-            assignedTo: policy.assignedAgent,
-            deadline: new Date(Date.now() + (policy.retentionRisk === 'Critical' ? 3 : 7)*24*60*60*1000),
-            status: 'Pending'
-          }
-        }));
-
-      const combinedData = [...renewalMockData.atRiskPolicies, ...atRiskFromQueue];
+      const [rows, negotiations] = await Promise.all([
+        renewalsWorkspaceService.getAtRisk(),
+        renewalsWorkspaceService.getNegotiations()
+      ]);
+      const combinedData = withTimelineFlags(rows, negotiations);
       setRiskPolicies(combinedData);
       calculateDashboard(combinedData);
-
-      setTimeout(() => {
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.atRiskDataLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToLoadAtRiskData"),
+        detail: error?.message || t("renewal.failedToLoadAtRiskData"),
         life: 3000
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -198,9 +171,15 @@ const AtRiskAnalysis = () => {
     });
   };
 
-  const handleViewDetails = (rowData) => {
+  const handleViewDetails = async (rowData) => {
     setSelectedPolicy(rowData);
     setDetailsVisible(true);
+    try {
+      const renewal = await renewalsWorkspaceService.getRenewal(rowData.id);
+      setSelectedPolicy({ ...rowData, activities: renewal.activities || [] });
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: t("common.error"), detail: error?.message, life: 3000 });
+    }
   };
 
   const handleCreateActionPlan = (rowData) => {
@@ -224,23 +203,17 @@ const AtRiskAnalysis = () => {
   const handleSaveActionPlan = async () => {
     setLoading(true);
     try {
-      // Update the policy with action plan
-      const updatedPolicies = riskPolicies.map(p =>
-        p.policyNumber === selectedPolicy.policyNumber
-          ? {
-              ...p,
-              actionPlan: {
-                ...actionPlan,
-                status: 'Active',
-                createdDate: new Date().toISOString(),
-                createdBy: 'Current User'
-              }
-            }
-          : p
-      );
-
-      setRiskPolicies(updatedPolicies);
+      const deadline = actionPlan.deadline?.toLocaleDateString('en-CA');
+      await renewalsWorkspaceService.addActivity(selectedPolicy.id, {
+        type: 'Action Plan',
+        description: actionPlan.notes || actionPlan.specialOffer || `Retention action plan (${actionPlan.priority})`,
+        outcome: actionPlan.specialOffer || undefined,
+        nextAction: actionPlan.assignedTo ? `Assigned to ${actionPlan.assignedTo}` : undefined,
+        followUpDate: deadline,
+        details: { ...actionPlan, deadline }
+      });
       setActionPlanVisible(false);
+      loadInitialData();
 
       toast.current.show({
         severity: 'success',
@@ -252,7 +225,7 @@ const AtRiskAnalysis = () => {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToCreateActionPlan"),
+        detail: error?.message || t("renewal.failedToCreateActionPlan"),
         life: 3000
       });
     } finally {
@@ -260,22 +233,24 @@ const AtRiskAnalysis = () => {
     }
   };
 
-  const handleEscalateConfirm = () => {
+  const handleEscalateConfirm = async () => {
     setEscalateVisible(false);
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.policyEscalated"),
-      detail: t("renewal.policyEscalatedToSenior", { policy: selectedPolicy.policyNumber }),
-      life: 3000
-    });
-
-    // Update policy status
-    const updatedPolicies = riskPolicies.map(p =>
-      p.policyNumber === selectedPolicy.policyNumber
-        ? { ...p, escalated: true, escalatedDate: new Date().toISOString() }
-        : p
-    );
-    setRiskPolicies(updatedPolicies);
+    try {
+      await renewalsWorkspaceService.addActivity(selectedPolicy.id, {
+        type: 'Escalation',
+        description: `Escalated to senior management (risk score ${selectedPolicy.riskScore})`,
+        details: { riskScore: selectedPolicy.riskScore, riskCategory: selectedPolicy.riskCategory }
+      });
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.policyEscalated"),
+        detail: t("renewal.policyEscalatedToSenior", { policy: selectedPolicy.policyNumber }),
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: t("common.error"), detail: error?.message, life: 3000 });
+    }
   };
 
   const riskScoreBodyTemplate = (rowData) => {
@@ -530,7 +505,7 @@ const AtRiskAnalysis = () => {
             </div>
 
             <DataTable
-              value={filteredPolicies.length > 0 ? filteredPolicies : riskPolicies}
+              value={filteredPolicies}
               className="risk-table"
               stripedRows
               paginator
@@ -705,29 +680,15 @@ const AtRiskAnalysis = () => {
 
               <TabPanel header="Communication History">
                 <div className="communication-history">
-                  <div className="history-item">
-                    <div className="history-header">
-                      <strong>Initial Contact</strong>
-                      <small>2025-01-20</small>
+                  {(selectedPolicy.activities || []).map(item => (
+                    <div className="history-item" key={item.id}>
+                      <div className="history-header">
+                        <strong>{item.type}{item.method ? ` (${item.method})` : ''}</strong>
+                        <small>{new Date(item.date).toLocaleDateString()}</small>
+                      </div>
+                      <p>{item.description}{item.outcome ? ` - ${item.outcome}` : ''}</p>
                     </div>
-                    <p>Sent renewal notice via email. No response received.</p>
-                  </div>
-
-                  <div className="history-item">
-                    <div className="history-header">
-                      <strong>Follow-up Call</strong>
-                      <small>2025-01-25</small>
-                    </div>
-                    <p>Phone call made. Customer expressed concerns about premium increase.</p>
-                  </div>
-
-                  <div className="history-item">
-                    <div className="history-header">
-                      <strong>Competitor Quote Received</strong>
-                      <small>2025-01-26</small>
-                    </div>
-                    <p>Customer informed us of competitive quote 20% lower than current premium.</p>
-                  </div>
+                  ))}
                 </div>
               </TabPanel>
             </TabView>

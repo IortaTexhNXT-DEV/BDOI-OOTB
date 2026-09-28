@@ -15,10 +15,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Card } from "primereact/card";
 import { Calendar } from "primereact/calendar";
+import { useReportFilterOptions, useReportGenerator } from "../../shared/useReportGenerator";
 
 const SoaPremiumReceivable = () => {
     const { t } = useTranslation();
     const toastRef = useRef(null);
+    const { AgentCode, CompanyCode, BranchCode, ClientCode } = useReportFilterOptions(toastRef);
 
     const initialValues = {
         ReportCriteria: "",
@@ -29,31 +31,7 @@ const SoaPremiumReceivable = () => {
         Branch: "",
         Client: ""
     };
-    const BranchCode = [
-        { label: "ARIANS INSURANCE BROKERS INC", value: "ARIANS INSURANCE BROKERS INC" },
-        { label: "Branch1", value: "Branch1" },
-        { label: "Branch2", value: "Branch2" },
-    ];
 
-    const CompanyCode = [
-        { label: "ARIANS INSURANCE BROKERS INC,", value: "ARIANS INSURANCE BROKERS INC" },
-        // { label: "Branch1", value: "Branch1" },
-        // { label: "Branch2", value: "Branch2" },
-    ];
-
-    const ClientCode = [
-        { label: "iorta", value: "iorta" },
-        { label: "iNXT", value: "iNXT" },
-
-    ];
-
-    const AgentCode = [
-        { label: "Rohan", value: "Rohan" },
-        { label: "Manoj", value: "Manoj" },
-
-    ];
-    const minDate = new Date();
-    minDate.setDate(minDate.getDate() + 1);
     const items = [
         { label: t("reports.financialReports") },
         { label: t("reports.soaPremiumReceivable") },
@@ -82,27 +60,13 @@ const SoaPremiumReceivable = () => {
     //     return errors;
     // };
     const dispatch = useDispatch();
-    const handleSubmit = (values) => {
-
-        console.log(values, "find values");
-        toastRef.current.showToast();
-        const pdfUrl = "https://drive.google.com/file/d/1SYLHiyoAogD7zHziMa3neAbza8aaoGnk/view?usp=sharing";
-        const link = document.createElement("a");
-        link.href = pdfUrl;
-        link.download = "document.pdf"; // specify the filename
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-
-    };
+    const { generate: handleSubmit } = useReportGenerator("premium-receivable-soa", toastRef);
 
     const formik = useFormik({
         initialValues: initialValues,
         // validate: customValidation,
         onSubmit: handleSubmit,
     });
-
 
     const navigate = useNavigate();
     const handlePrint = () => {
@@ -136,7 +100,6 @@ const SoaPremiumReceivable = () => {
                             onChange={(e) => {
                                 formik.setFieldValue("ReportCriteria", e.value);
                                 const isCriteria1 = e.value === "Criteria1";
-                                console.log("first", isCriteria1)
                                 formik.setFieldValue("DepartmentCode", isCriteria1 ? null : formik.values.DepartmentCode);
                                 formik.setFieldValue("Company", isCriteria1 ? null : formik.values.Company);
                                 formik.setFieldValue("Branch", isCriteria1 ? null : formik.values.Branch);
@@ -157,7 +120,6 @@ const SoaPremiumReceivable = () => {
 
                             className="calendar_container"
                             value={formik.values.FromDate}
-                            minDate={minDate}
                             onChange={(e) => {
                                 formik.setFieldValue("FromDate", e.target.value);
                             }}
@@ -173,7 +135,6 @@ const SoaPremiumReceivable = () => {
 
                             className="calendar_container"
                             value={formik.values.ToDate}
-                            minDate={minDate}
                             onChange={(e) => {
                                 formik.setFieldValue("ToDate", e.target.value);
                             }}

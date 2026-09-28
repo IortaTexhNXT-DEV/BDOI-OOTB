@@ -12,6 +12,8 @@ import { useFormik } from "formik";
 import InputTextField from "../component/inputText";
 import SvgBlueArrow from "../../assets/agentIcon/SvgBlueArrow";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
+import documentTemplateService from "../../services/documentTemplateService";
+import billingService from "../../services/billingService";
 
 const initialValues = {
   PolicyNumber: "",
@@ -95,26 +97,14 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
     },
   });
 
+  const policyId = state?.policyId || state?.id;
+
   const handlePolicySubmit = () => {
-    const pdfUrl =
-      "https://drive.google.com/file/d/1vGQQmRiSLyf5Tsu1VfYa6IOmFrXK_0gp/view";
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.download = "document.pdf"; // specify the filename
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (policyId) documentTemplateService.getPolicySchedulePdf(policyId);
   };
 
   const handleInvoiceSubmit = () => {
-    const pdfUrl =
-      "https://drive.google.com/file/d/18LjJnT_J0jgpn9wKG1EKDsipYxIS6W7X/view";
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.download = "document.pdf"; // specify the filename
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (policyId) billingService.generatePolicyBillingStatement(policyId);
   };
   let flow = "renewal";
 

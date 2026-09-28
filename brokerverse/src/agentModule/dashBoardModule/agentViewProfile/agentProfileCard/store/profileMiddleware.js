@@ -1,79 +1,62 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-// import { getRequest } from "../../../utility/commonServices";
-// import { APIROUTES } from "../../../routes/apiRoutes";
 import {
   GET_PROFILE_DETAILS,
- 
   PATCH_PROFILE_EDIT,
- 
   GET_EDIT_PROFILE,
 } from "../../../../../redux/actionTypes";
+import profileService from "../../../../../services/profileService";
+
+/** API profile -> the profile card's field names (fields the API does not store stay empty). */
+const toProfileCard = (profile) => ({
+  id: profile.userId,
+  firstName: profile.firstName || "",
+  lastName: profile.lastName || "",
+  prefferedName: profile.displayName || "",
+  emailId: profile.email || "",
+  contactNumber: profile.phone || "",
+  employeeCode: profile.employeeCode || "",
+  dateOfBirth: "",
+  gender: "",
+  houseNoUnitNoStreet: "",
+  barangaySubd: "",
+  country: "",
+  province: "",
+  city: "",
+  zipCode: "",
+});
+
+const blankToUndefined = (value) => (value ? value : undefined);
 
 export const getProfileMiddleware = createAsyncThunk(
   GET_PROFILE_DETAILS,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"action find")
+  async (_payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
+      return [toProfileCard(await profileService.getProfile())];
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(error.message);
     }
   }
 );
-
 
 export const patchProfileEditMiddleware = createAsyncThunk(
   PATCH_PROFILE_EDIT,
-  async (payload, { rejectWithValue,getState }) => {
-    console.log(payload,"find payload")
-    const data = {
-      id:payload?.id,
-      firstName:payload.firstName,
-      lastName: payload.lastName,
-      prefferedName: payload.prefferedName,
-      lastName: payload.lastName,
-      dateOfBirth:payload.dateOfBirth,
-      gender: payload.gender,
-      houseNoUnitNoStreet:payload.houseNoUnitNoStreet,
-      emailId:payload.emailId,
-      contactNumber:payload.contactNumber,
-      barangaySubd:payload.barangaySubd,
-      idNumber: payload.idNumber,
-      
-      zipCode: payload.zipCode,
-      city: payload.city,
-      province: payload.province,
-      country: payload.country
-     
-    };
-  
+  async (payload, { rejectWithValue }) => {
     try {
-      console.log(data,"find data")
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return data;
-      
+      await profileService.updateProfile({
+        displayName: blankToUndefined(payload.prefferedName),
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        email: blankToUndefined(payload.emailId),
+        phone: payload.contactNumber,
+      });
+      return toProfileCard(await profileService.getProfile());
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(error.message);
     }
   }
 );
-
-
-
-
-
 
 export const getProfileEditMiddleWare = createAsyncThunk(
   GET_EDIT_PROFILE,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (payload) => payload
 );
-
-

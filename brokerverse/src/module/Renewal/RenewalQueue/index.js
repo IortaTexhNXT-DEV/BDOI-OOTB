@@ -18,7 +18,7 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
 import { Avatar } from "primereact/avatar";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
@@ -44,7 +44,7 @@ const RenewalQueue = () => {
     inGracePeriod: 0
   });
   const [filteredPolicies, setFilteredPolicies] = useState([]);
-  const [policies, setPolicies] = useState(renewalMockData.renewalQueue);
+  const [policies, setPolicies] = useState([]);
   const toast = useRef(null);
 
   const statusOptions = [
@@ -66,9 +66,7 @@ const RenewalQueue = () => {
 
   const agentOptions = [
     { label: t("renewal.allAgents"), value: "All" },
-    { label: "Juan Dela Cruz", value: "Juan Dela Cruz" },
-    { label: "Ana Reyes", value: "Ana Reyes" },
-    { label: "Carlos Mendoza", value: "Carlos Mendoza" }
+    ...[...new Set(policies.map(p => p.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
   const reminderMethods = [
@@ -96,26 +94,79 @@ const RenewalQueue = () => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Simulate loading
-      setTimeout(() => {
-        calculateDashboard(policies);
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.renewalQueueLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
+      const { items } = await renewalsWorkspaceService.getQueue();
+      setPolicies(items);
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToLoadRenewalData"),
+        detail: error?.message || t("renewal.failedToLoadRenewalData"),
         life: 3000
       });
+    } finally {
       setLoading(false);
     }
+  };
+
+  const showError = (error, fallbackKey) => {
+    toast.current.show({
+      severity: 'error',
+      summary: t("common.error"),
+      detail: error?.message || t(fallbackKey),
+      life: 3000
+    });
+  };
+
+  const handleRefresh = async () => {
+    try {
+      const result = await renewalsWorkspaceService.refreshPipeline();
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.dataLoaded"),
+        detail: t("renewal.pipelineRefreshed", "Pipeline refreshed: {{created}} added, {{lapsed}} lapsed", result),
+        life: 3000
+      });
+    } catch (error) {
+      showError(error, "renewal.failedToLoadRenewalData");
+    }
+    loadInitialData();
+  };
+
+  const handleSendNotice = async (rowData) => {
+    try {
+      await renewalsWorkspaceService.sendNotice(rowData.id);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.reminderSent"),
+        detail: `${rowData.nextNotice?.label}: ${rowData.policyNumber}`,
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToSendReminder");
+    }
+  };
+
+  const handleComplete = (rowData) => {
+    confirmDialog({
+      message: t("renewal.confirmCompleteRenewal", "Renew policy {{policy}} for a new term?", { policy: rowData.policyNumber }),
+      header: t("renewal.completeRenewal", "Complete Renewal"),
+      icon: 'pi pi-check-circle',
+      accept: async () => {
+        try {
+          const result = await renewalsWorkspaceService.complete(rowData.id);
+          toast.current.show({
+            severity: 'success',
+            summary: t("renewal.completeRenewal", "Complete Renewal"),
+            detail: result?.newPolicy?.policyNumber,
+            life: 3000
+          });
+          loadInitialData();
+        } catch (error) {
+          showError(error, "renewal.failedToLoadRenewalData");
+        }
+      }
+    });
   };
 
   const calculateDashboard = (data) => {
@@ -185,7 +236,7 @@ const RenewalQueue = () => {
   };
 
   const handleGenerateQuote = (rowData) => {
-    navigate('/renewals/quote-generation', { state: { policy: rowData } });
+    navigate(`/renewal/generate-quote/${rowData.id}`, { state: { policy: rowData } });
   };
 
   const handleSendReminder = (rowData) => {
@@ -196,18 +247,8 @@ const RenewalQueue = () => {
   const handleSendReminderConfirm = async () => {
     setLoading(true);
     try {
-      const result = await renewalCrudOperations.sendReminder(
-        selectedPolicy.id,
-        reminderMethod
-      );
-
-      // Update renewal attempts
-      const updatedPolicies = policies.map(p =>
-        p.id === selectedPolicy.id
-          ? { ...p, renewalAttempts: p.renewalAttempts + 1, lastContactDate: new Date().toISOString().split('T')[0] }
-          : p
-      );
-      setPolicies(updatedPolicies);
+      await renewalsWorkspaceService.sendReminder(selectedPolicy.id, reminderMethod);
+      loadInitialData();
 
       setSendReminderVisible(false);
       toast.current.show({
@@ -217,12 +258,7 @@ const RenewalQueue = () => {
         life: 3000
       });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSendReminder"),
-        life: 3000
-      });
+      showError(error, "renewal.failedToSendReminder");
     } finally {
       setLoading(false);
     }
@@ -308,7 +344,7 @@ const RenewalQueue = () => {
   const agentBodyTemplate = (rowData) => {
     return (
       <div className="agent-cell">
-        <Avatar label={rowData.assignedAgent.split(' ').map(n => n[0]).join('')}
+        <Avatar label={(rowData.assignedAgent || '').split(' ').map(n => n[0]).join('')}
                 size="small" shape="circle" />
         <span>{rowData.assignedAgent}</span>
       </div>
@@ -341,7 +377,7 @@ const RenewalQueue = () => {
           className="p-button-text"
           onClick={() => handleGenerateQuote(rowData)}
           tooltip={t("renewal.generateQuote")}
-          disabled={rowData.status === 'Quote Sent'}
+          disabled={!rowData.isOpen || rowData.statusCode === 'pending-approval'}
         />
         <Button
           icon="pi pi-send"
@@ -349,6 +385,21 @@ const RenewalQueue = () => {
           onClick={() => handleSendReminder(rowData)}
           tooltip={t("renewal.sendReminder")}
         />
+        <Button
+          icon="pi pi-envelope"
+          className="p-button-text"
+          onClick={() => handleSendNotice(rowData)}
+          tooltip={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
+          disabled={!rowData.nextNotice}
+        />
+        {rowData.statusCode === 'approved' && (
+          <Button
+            icon="pi pi-check-circle"
+            className="p-button-text p-button-success"
+            onClick={() => handleComplete(rowData)}
+            tooltip={t("renewal.completeRenewal", "Complete Renewal")}
+          />
+        )}
       </div>
     );
   };
@@ -503,7 +554,7 @@ const RenewalQueue = () => {
                 <Button
                   icon="pi pi-refresh"
                   className="p-button-text"
-                  onClick={loadInitialData}
+                  onClick={handleRefresh}
                   tooltip={t("renewal.refresh")}
                 />
                 <Button
@@ -523,7 +574,7 @@ const RenewalQueue = () => {
             </div>
 
             <DataTable
-              value={filteredPolicies.length > 0 ? filteredPolicies : policies}
+              value={filteredPolicies}
               className="renewal-table"
               stripedRows
               paginator
@@ -650,15 +701,15 @@ const RenewalQueue = () => {
                 <div className="detail-grid">
                   <div className="detail-item">
                     <label>{t("renewal.mobile")}</label>
-                    <span>{selectedPolicy.insuredContact.mobile}</span>
+                    <span>{selectedPolicy.insuredContact?.mobile}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.email")}</label>
-                    <span>{selectedPolicy.insuredContact.email}</span>
+                    <span>{selectedPolicy.insuredContact?.email}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.preferredContact")}</label>
-                    <span>{selectedPolicy.insuredContact.preferredContact}</span>
+                    <span>{selectedPolicy.insuredContact?.preferredContact}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.lastContact")}</label>
@@ -728,9 +779,9 @@ const RenewalQueue = () => {
               <div className="form-field">
                 <label>{t("renewal.contactInfo")}</label>
                 <span>
-                  {reminderMethod === 'Email' && selectedPolicy.insuredContact.email}
-                  {reminderMethod === 'SMS' && selectedPolicy.insuredContact.mobile}
-                  {reminderMethod === 'Phone' && selectedPolicy.insuredContact.mobile}
+                  {reminderMethod === 'Email' && selectedPolicy.insuredContact?.email}
+                  {reminderMethod === 'SMS' && selectedPolicy.insuredContact?.mobile}
+                  {reminderMethod === 'Phone' && selectedPolicy.insuredContact?.mobile}
                   {reminderMethod === 'Letter' && t("renewal.mailingAddressOnFile")}
                 </span>
               </div>

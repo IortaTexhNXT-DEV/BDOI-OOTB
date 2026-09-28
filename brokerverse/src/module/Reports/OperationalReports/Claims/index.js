@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -10,12 +10,12 @@ import { useFormik } from "formik";
 import CustomToast from "../../../../components/Toast";
 import { Card } from "primereact/card";
 import { Calendar } from "primereact/calendar";
-import claimsService from "../../../../services/claimsService";
+import { useReportFilterOptions, useReportGenerator } from "../../shared/useReportGenerator";
 
 const Claims = () => {
   const { t } = useTranslation();
   const toastRef = useRef(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const { AgentCode, CompanyCode, BranchCode, ClientCode } = useReportFilterOptions(toastRef);
 
   const initialValues = {
     ReportCriteria: "All", // Default to "All"
@@ -26,34 +26,6 @@ const Claims = () => {
     Branch: "",
     Client: "",
   };
-
-  const BranchCode = [
-    {
-      label: "ARIANS INSURANCE BROKERS INC",
-      value: "ARIANS INSURANCE BROKERS INC",
-    },
-    { label: "Branch1", value: "Branch1" },
-    { label: "Branch2", value: "Branch2" },
-  ];
-
-  const CompanyCode = [
-    {
-      label: "ARIANS INSURANCE BROKERS INC,",
-      value: "ARIANS INSURANCE BROKERS INC",
-    },
-    // { label: "Branch1", value: "Branch1" },
-    // { label: "Branch2", value: "Branch2" },
-  ];
-
-  const ClientCode = [
-    { label: "iorta", value: "iorta" },
-    { label: "iNXT", value: "iNXT" },
-  ];
-
-  const AgentCode = [
-    { label: "Rohan", value: "Rohan" },
-    { label: "Manoj", value: "Manoj" },
-  ];
 
   // Date validation: FromDate should be in the past, ToDate should be <= today
   const today = new Date();
@@ -71,47 +43,7 @@ const Claims = () => {
     { label: t("reports.rejected"), value: "Rejected" },
     { label: t("reports.aging"), value: "Aging" },
   ];
-  const handleSubmit = async (values) => {
-    console.log("=== GENERATING CLAIMS REPORT ===");
-    console.log("Form values:", values);
-    console.log("=== END GENERATING CLAIMS REPORT ===");
-
-    setIsGenerating(true);
-
-    try {
-      // Format dates to YYYY-MM-DD format
-      const formatDate = (date) => {
-        if (!date) return "";
-        const d = new Date(date);
-        return d.toISOString().split("T")[0];
-      };
-
-      const reportParams = {
-        startDate: formatDate(values.FromDate),
-        endDate: formatDate(values.ToDate),
-        criteria: values.ReportCriteria,
-        reportType: "excel",
-      };
-
-      console.log("Report parameters:", reportParams);
-
-      const result = await claimsService.generateClaimsReport(reportParams);
-
-      if (result.success) {
-        console.log("Report generated successfully:", result.data);
-        toastRef.current.showToast();
-      } else {
-        console.error("Failed to generate report:", result.error);
-        // You can add error handling here, like showing an error toast
-        alert(`${t("reports.failedToGenerate")}: ${result.error}`);
-      }
-    } catch (error) {
-      console.error("Error generating report:", error);
-      alert(`${t("reports.errorGenerating")}: ${error.message}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  const { generate: handleSubmit, isGenerating } = useReportGenerator("claims-position", toastRef);
 
   const formik = useFormik({
     initialValues: initialValues,

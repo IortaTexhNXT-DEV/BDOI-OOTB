@@ -17,7 +17,7 @@ import { Badge } from "primereact/badge";
 import { Knob } from "primereact/knob";
 import { Avatar } from "primereact/avatar";
 import { Calendar } from "primereact/calendar";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
@@ -31,7 +31,7 @@ const PerformanceTracking = () => {
   const [teamFilter, setTeamFilter] = useState('All Teams');
   const [productFilter, setProductFilter] = useState('All Products');
   const [dateRange, setDateRange] = useState([null, null]);
-  const [performanceData, setPerformanceData] = useState(renewalMockData.performanceMetrics);
+  const [performanceData, setPerformanceData] = useState({});
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
   const toast = useRef(null);
@@ -52,14 +52,12 @@ const PerformanceTracking = () => {
     { label: t("renewal.juniorAgents"), value: 'Junior' }
   ];
 
+  const productKeys = Object.keys(performanceData.byProduct || {});
   const productFilterOptions = [
     { label: t("renewal.allProducts"), value: 'All Products' },
-    { label: t("renewal.motorInsurance"), value: 'motor' },
-    { label: t("renewal.fireInsurance"), value: 'fire' },
-    { label: t("renewal.marineInsurance"), value: 'marine' },
-    { label: t("renewal.healthInsurance"), value: 'health' },
-    { label: t("renewal.personalAccident"), value: 'personalAccident' }
+    ...productKeys.map(key => ({ label: productLabel(key), value: key }))
   ];
+  const shownProducts = productFilter === 'All Products' ? productKeys : productKeys.filter(key => key === productFilter);
 
   const items = [
     { label: t("renewal.renewals"), url: "#" },
@@ -70,30 +68,24 @@ const PerformanceTracking = () => {
 
   useEffect(() => {
     loadPerformanceData();
+  }, [timeFilter, dateRange]);
+
+  useEffect(() => {
     setupCharts();
-  }, [timeFilter, teamFilter, productFilter]);
+  }, [performanceData, productFilter]);
 
   const loadPerformanceData = async () => {
     setLoading(true);
     try {
-      // Simulate loading performance data based on filters
-      setTimeout(() => {
-        setPerformanceData(renewalMockData.performanceMetrics);
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.performanceDataUpdatedSuccess"),
-          life: 3000
-        });
-      }, 1000);
+      setPerformanceData(await renewalsWorkspaceService.getPerformance(periodRange(timeFilter, dateRange)));
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToLoadPerformanceData"),
+        detail: error?.message || t("renewal.failedToLoadPerformanceData"),
         life: 3000
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -142,16 +134,10 @@ const PerformanceTracking = () => {
 
     // Product Performance Pie Chart
     const productPerformanceData = {
-      labels: ['Motor', 'Fire', 'Marine', 'Health', 'Personal Accident'],
+      labels: shownProducts.map(productLabel),
       datasets: [
         {
-          data: [
-            performanceData.byProduct?.motor?.renewalRate || 0,
-            performanceData.byProduct?.fire?.renewalRate || 0,
-            performanceData.byProduct?.marine?.renewalRate || 0,
-            performanceData.byProduct?.health?.renewalRate || 0,
-            performanceData.byProduct?.personalAccident?.renewalRate || 0
-          ],
+          data: shownProducts.map(key => performanceData.byProduct[key]?.renewalRate || 0),
           backgroundColor: [primaryColor, successColor, warningColor, dangerColor, '#8B5CF6'],
           borderWidth: 0
         }
@@ -332,34 +318,34 @@ const PerformanceTracking = () => {
     );
   };
 
-  // Sample KPI targets and achievements
+  // KPI targets and achievements for the selected period
   const kpiData = [
     {
       category: 'Renewal Rate',
       target: 85,
-      achieved: performanceData.overall?.renewalRate || 82.5,
+      achieved: performanceData.overall?.renewalRate ?? 0,
       unit: '%'
     },
     {
       category: 'Premium Retention',
       target: 90,
-      achieved: performanceData.overall?.premiumRetention || 87.3,
+      achieved: performanceData.overall?.premiumRetention ?? 0,
       unit: '%'
     },
     {
       category: 'Cycle Time',
       target: 15,
-      achieved: performanceData.overall?.avgCycleTime || 18,
+      achieved: performanceData.overall?.avgCycleTime ?? 0,
       unit: 'days',
       inverse: true // Lower is better
     },
     {
       category: 'Customer Satisfaction',
       target: 4.5,
-      achieved: performanceData.overall?.customerSatisfaction || 4.2,
+      achieved: performanceData.overall?.customerSatisfaction,
       unit: '/5'
     }
-  ];
+  ].filter(kpi => kpi.achieved !== undefined && kpi.achieved !== null);
 
   const kpiAchievementTemplate = (rowData) => {
     const percentage = rowData.inverse
@@ -602,12 +588,10 @@ const PerformanceTracking = () => {
                       showGridlines={false}
                       header={null}
                     >
-                      <Column field="product" header={t("renewal.product")} body={() => 'Motor'} />
-                      <Column body={(data) => productRateTemplate(data, 'motor')} header={t("renewal.motor")} />
-                      <Column body={(data) => productRateTemplate(data, 'fire')} header={t("renewal.fire")} />
-                      <Column body={(data) => productRateTemplate(data, 'marine')} header={t("renewal.marine")} />
-                      <Column body={(data) => productRateTemplate(data, 'health')} header={t("renewal.health")} />
-                      <Column body={(data) => productRateTemplate(data, 'personalAccident')} header={t("renewal.pa")} />
+                      <Column field="product" header={t("renewal.product")} body={() => t("renewal.renewalRate", "Renewal Rate")} />
+                      {shownProducts.map(key => (
+                        <Column key={key} body={(data) => productRateTemplate(data, key)} header={productLabel(key)} />
+                      ))}
                     </DataTable>
                   </Card>
                 </div>
@@ -683,7 +667,7 @@ const PerformanceTracking = () => {
                       <div className="summary-item">
                         <span className="metric-label">Top Performer</span>
                         <span className="metric-value primary">
-                          {performanceData.byAgent?.[0]?.agentName || 'Ana Reyes'}
+                          {performanceData.byAgent?.[0]?.agentName || '-'}
                         </span>
                       </div>
                       <div className="summary-item">

@@ -19,6 +19,7 @@ import SvgFrame from "../../../assets/agentIcon/SvgFrame";
 import { InputText } from "primereact/inputtext";
 import { getClientTableSearchListMiddleware } from "../../quoteModule/clientListing/store/clientsMiddleware";
 import EmployeeBenefitIcon from "../../EmployeeFlow/EmployeeBenefitIcon";
+import { getDashboardDataMiddleware } from "./store/homeMiddleware";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -183,6 +184,10 @@ const Dashboard = () => {
   ];
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getDashboardDataMiddleware());
+  }, [dispatch]);
   useEffect(() => {
     if (search?.length > 0) {
       dispatch(getClientTableSearchListMiddleware(search));

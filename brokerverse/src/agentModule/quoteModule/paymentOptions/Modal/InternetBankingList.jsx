@@ -18,9 +18,7 @@ const InternetBankingList = ({ modalVisible, setModalVisible }) => {
 
   const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(
-        "https://www.figma.com/file/STJkBwHGeOlCFmrkBBL"
-      );
+      await navigator.clipboard.writeText(window.location.href);
     } catch (err) {
       console.error(err);
     }

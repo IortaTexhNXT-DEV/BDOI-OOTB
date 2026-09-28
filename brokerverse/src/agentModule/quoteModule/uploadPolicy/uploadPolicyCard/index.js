@@ -5,7 +5,7 @@ import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
 import DropdownField from "../../../component/DropdwonField";
 import DatepickerField from "../../../component/datePicker";
-import { InsuranceCompanyOptions } from "../../policyDetails/mock";
+import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { Button } from "primereact/button";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../components/Toast";
@@ -33,6 +33,7 @@ const UploadPolicyCard = ({
 }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const InsuranceCompanyOptions = useInsuranceCompanyOptions();
   const [policyDocumentUrl, setPolicyDocumentUrl] = useState(null);
   const [showUploadError, setShowUploadError] = useState(false);
   const [resolvedPolicyData, setResolvedPolicyData] = useState(

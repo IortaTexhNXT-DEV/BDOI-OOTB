@@ -1,11 +1,11 @@
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Image } from "primereact/image";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import SvgRightarrow from "../../../../assets/agentIcon/SvgRightArrow";
 import policyService from "../../../../services/policyService";
+import StatusIllustration from "../../../component/StatusIllustration";
 
 const PolicyApprovalCard = ({ state }) => {
   const { t } = useTranslation();
@@ -76,11 +76,7 @@ const PolicyApprovalCard = ({ state }) => {
       <Card className="pt-5">
         <div className="policy__approval__card__title">{t("agent.waitingForPolicy")}</div>
         <div className="policy__approval__card__image__containe mt-4">
-          <Image
-            src="https://i.ibb.co/gz54P23/Hourglass.png"
-            width="106px"
-            height="187px"
-          />
+          <StatusIllustration variant="waiting" size="8rem" />
         </div>
         <div className="policy__approval__card__sub__text__container mt-3">
           <div className="policy__approval__card__sub__text">

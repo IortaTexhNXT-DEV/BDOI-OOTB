@@ -102,7 +102,8 @@ export const calculateOrderSummary = (
   accessories = {},
   discountPercent = 0,
   ncdPercent = 0,
-  productConfigurator = {}
+  productConfigurator = {},
+  settingsRates = {}
 ) => {
   // Calculate NET Premium (sum of all coverage premiums)
   const ldPremium = parseNumericValue(
@@ -157,8 +158,8 @@ export const calculateOrderSummary = (
   netPremium = netPremium - ncdAmount;
 
   // Use centralized tax rates from product configurator (consistent with calculatePremiumBreakdown)
-  const taxRates = getTaxRates(productConfigurator);
-  
+  const taxRates = getTaxRates(productConfigurator, settingsRates);
+
   // Tax rates are already decimals (e.g., 0.12 for 12%), so multiply directly
   const valueAddedTax = netPremium * taxRates.valueAddedTax;
   const documentaryStampTax = netPremium * taxRates.documentaryStampTax;
@@ -340,27 +341,22 @@ const validatePremiumCalculation = ({
 /**
  * Get centralized tax rates from product configurator
  * @param {Object} productConfigurator - Product configuration object
+ * @param {Object} settingsRates - Decimal rates from GET /settings?group=tax (see useTaxRates), used when the template has none
  * @returns {Object} Tax rates as decimals (e.g., 0.12 for 12%)
  */
-export const getTaxRates = (productConfigurator) => {
+export const getTaxRates = (productConfigurator, settingsRates = {}) => {
   const config = productConfigurator?.configuration?.taxes;
-  
-  // Helper to convert percentage to decimal
-  // Tax rates in config are stored as percentages (e.g., "12" for 12%, "0.5" for 0.5%)
-  // Backend divides by 100, so frontend should also divide by 100 for consistency
-  // ALL rates in database are percentages, so always divide by 100
-  const toDecimal = (value, defaultDecimal) => {
-    if (!value) return defaultDecimal;
+
+  // Template rates are stored as percentages (e.g., "12" for 12%), so divide by 100
+  const toDecimal = (value, fallback) => {
     const num = parseFloat(value);
-    if (isNaN(num)) return defaultDecimal;
-    // Always divide by 100 - all rates in DB are stored as percentages
-    return num / 100;
+    return Number.isNaN(num) || !value ? Number(fallback) || 0 : num / 100;
   };
-  
+
   return {
-    documentaryStampTax: toDecimal(config?.documentary_stamp_tax, 0.005), // 0.5%
-    valueAddedTax: toDecimal(config?.value_added_tax, 0.12), // 12%
-    localGovernmentTax: toDecimal(config?.local_government_tax, 0.05), // 5%
+    documentaryStampTax: toDecimal(config?.documentary_stamp_tax, settingsRates.documentaryStampTax),
+    valueAddedTax: toDecimal(config?.value_added_tax, settingsRates.valueAddedTax),
+    localGovernmentTax: toDecimal(config?.local_government_tax, settingsRates.localGovernmentTax),
   };
 };
 
@@ -372,7 +368,8 @@ export const getTaxRates = (productConfigurator) => {
  */
 export const calculatePremiumBreakdown = (
   coverageValues,
-  productConfigurator = {}
+  productConfigurator = {},
+  settingsRates = {}
 ) => {
   // Helper to parse string values
   const parseValue = (val) => {
@@ -412,7 +409,7 @@ export const calculatePremiumBreakdown = (
     appaPremium;
 
   // Use centralized tax rates
-  const taxRates = getTaxRates(productConfigurator);
+  const taxRates = getTaxRates(productConfigurator, settingsRates);
   
   const documentaryStampTax = netPremium * taxRates.documentaryStampTax;
   const valueAddedTax = netPremium * taxRates.valueAddedTax;

@@ -129,7 +129,7 @@ const PaymentConfirmation = () => {
         const currentUser = getUserData();
 
         try {
-          const policyResponse = await policyService.getPolicyById(
+          const policyResponse = await policyService.getPolicyDetails(
             targetPolicyId
           );
           policyData = policyResponse?.data || policyResponse;

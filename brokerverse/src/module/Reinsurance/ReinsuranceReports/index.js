@@ -1,1 +1,3 @@
-export { ReinsuranceReports as default } from '../ReinsuranceScreens';
+import { ReinsuranceReports } from "../ReinsuranceScreens";
+
+export default ReinsuranceReports;

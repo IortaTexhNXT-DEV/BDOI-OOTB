@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -9,6 +9,7 @@ import "./index.scss";
 import CustomToast from "../../../components/Toast";
 import claimsService from "../../../services/claimsService";
 import customHistory from "../../../routes/customHistory";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const SettlementApproval = () => {
   const { t } = useTranslation();
@@ -21,11 +22,39 @@ const SettlementApproval = () => {
 
   // Get claim ID from URL params or navigation state
   const claimId = id || location.state?.claimId || location.state?.id;
+  const [claim, setClaim] = useState(null);
+  const [deciding, setDeciding] = useState(false);
+  const isPendingApproval = claim?.lifecycleStatus === "pending-approval";
+
+  useEffect(() => {
+    if (!claimId) return;
+    claimsService.getClaimDetails(claimId).then((result) => {
+      if (result.success) setClaim(result.data?.data || result.data);
+    });
+  }, [claimId]);
+
+  const showError = (detail) =>
+    toastRef.current.showToast({ severity: "error", summary: t("common.error", "Error"), detail });
+
+  /** Checker decision (approve | return) on a settlement waiting in "Pending Approval". */
+  const handleSettlementDecision = async (decision) => {
+    setDeciding(true);
+    const result = await claimsService.approveSettlement(claimId, {
+      decision,
+      ...(decision === "approve" && claim?.settlementAmount ? { approvedAmount: claim.settlementAmount } : {}),
+    });
+    setDeciding(false);
+    if (!result.success) {
+      showError(result.error);
+      return;
+    }
+    toastRef.current.showToast({ severity: "success", detail: result.data?.message });
+    navigate(`/agent/claimdetailedview/${claimId}`, { replace: true });
+  };
 
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
@@ -38,18 +67,6 @@ const SettlementApproval = () => {
 
   const claimNumber = reduxClaimNumber || t("agent.loading");
 
-  console.log("=== SETTLEMENT APPROVAL PAGE DATA ===");
-  console.log("URL Params:", params);
-  console.log("Navigation State:", location.state);
-  console.log("Claim ID:", claimId);
-  console.log("=== REDUX POLICY HOLDER DATA ===");
-  console.log("Redux Policy Holder Name:", reduxPolicyHolderName);
-  console.log("Redux Policy Number:", reduxPolicyNumber);
-  console.log("Redux Claim Number:", reduxClaimNumber);
-  console.log("Final Policy Holder Name:", policyHolderName);
-  console.log("Final Claim Number:", claimNumber);
-  console.log("=== END REDUX POLICY HOLDER DATA ===");
-  console.log("=== END SETTLEMENT APPROVAL PAGE DATA ===");
   const handleReject = async () => {
     if (!claimId) {
       console.error("No claim ID available for rejection");
@@ -129,33 +146,51 @@ const SettlementApproval = () => {
         <div>
           <div className="claim__title_txt mt-6">{t("settlementApproval.waitingForSettlement")}</div>
           <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/4pbj1hp/waiting-for-approval.png"
-              className="claimtitle__img__container"
-            />
+            <StatusIllustration variant="waiting" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>{t("settlementApproval.claimBeingProcessed")}</div>
             <div>{t("settlementApproval.kindlyBePatientSettlement")}</div>
           </div>
         </div>
-        <div className="claimtitle__butt_container mt-6">
-          <Button
-            link
-            onClick={handleReject}
-            className="claim__back__but"
-            disabled={loading}
-            loading={loading}
-          >
-            {loading ? t("settlementApproval.rejecting") : t("settlementApproval.reject")}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            className="claim__snd__but"
-          >
-            {t("settlementApproval.proceed")}
-          </Button>
-        </div>
+        {isPendingApproval ? (
+          <div className="claimtitle__butt_container mt-6">
+            <Button
+              link
+              onClick={() => handleSettlementDecision("return")}
+              className="claim__back__but"
+              disabled={deciding}
+            >
+              {t("settlementApproval.returnSettlement", "Return")}
+            </Button>
+            <Button
+              onClick={() => handleSettlementDecision("approve")}
+              className="claim__snd__but"
+              disabled={deciding}
+              loading={deciding}
+            >
+              {t("settlementApproval.approveSettlement", "Approve Settlement")}
+            </Button>
+          </div>
+        ) : (
+          <div className="claimtitle__butt_container mt-6">
+            <Button
+              link
+              onClick={handleReject}
+              className="claim__back__but"
+              disabled={loading}
+              loading={loading}
+            >
+              {loading ? t("settlementApproval.rejecting") : t("settlementApproval.reject")}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="claim__snd__but"
+            >
+              {t("settlementApproval.proceed")}
+            </Button>
+          </div>
+        )}
       </Card>
     </div>
   );

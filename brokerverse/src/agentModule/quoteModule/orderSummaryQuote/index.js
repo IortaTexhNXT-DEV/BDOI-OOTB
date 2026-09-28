@@ -19,6 +19,7 @@ import { createQuotationMiddleware, updateQuotationMiddleware } from "../Store/q
 import { setQuoteOrderSummary, clearCurrentQuoteCreation } from "../Store/quotationReducer";
 import { transformToBackendFormat } from "../utils/quotationDataTransform";
 import { calculateOrderSummary } from "../utils/premiumCalculations";
+import useTaxRates from "../utils/useTaxRates";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 
 const initialValue = {
@@ -52,6 +53,8 @@ const OrderSummary = () => {
     })
   );
 
+  const settingsTaxRates = useTaxRates();
+
   // Fetch product configurator on mount
   useEffect(() => {
     dispatch(
@@ -72,11 +75,12 @@ const OrderSummary = () => {
         currentQuoteCreation.accessories,
         discount,
         ncd,
-        productConfigurator // Pass productConfigurator for consistent tax rates
+        productConfigurator, // Pass productConfigurator for consistent tax rates
+        settingsTaxRates
       );
     }
     return null;
-  }, [currentQuoteCreation?.coverageDetails, currentQuoteCreation?.accessories, discount, ncd, productConfigurator]);
+  }, [currentQuoteCreation?.coverageDetails, currentQuoteCreation?.accessories, discount, ncd, productConfigurator, settingsTaxRates]);
 
   const handleclick = async (values) => {
     setIsSubmitting(true);
@@ -103,7 +107,7 @@ const OrderSummary = () => {
         ...currentQuoteCreation,
         orderSummary: orderSummaryData,
       },
-      'agent' // TODO: Get actual username
+      localStorage.getItem("USERNAME") || "agent"
     );
     
     try {

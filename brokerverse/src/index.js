@@ -1,5 +1,6 @@
 import "./utility/productionConsole";
 import "./utility/sessionRefresh";
+import { startTableNumericAlign } from "./utility/tableNumericAlign";
 import "primeflex/primeflex.css"; // layout utilities (bundled first to keep the old cascade order; was loaded unpinned from unpkg)
 import "./i18n";
 import ReactDOM from "react-dom/client";
@@ -40,3 +41,5 @@ root.render(<Root />);
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+startTableNumericAlign();

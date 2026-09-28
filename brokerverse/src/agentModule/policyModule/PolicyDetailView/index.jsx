@@ -22,6 +22,7 @@ import billingService from "../../../services/billingService";
 import documentTemplateService from "../../../services/documentTemplateService";
 import authService from "../../../services/authService";
 import { BASE_URL } from "../../../utility/constant";
+import useTaxRates from "../../quoteModule/utils/useTaxRates";
 import "./index.scss";
 
 const ENDORSEMENT_TYPE_KEYS = {
@@ -283,6 +284,7 @@ HighlightCard.defaultProps = {
 const PolicyDetailView = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const taxRates = useTaxRates();
   const { policyId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -349,13 +351,15 @@ const PolicyDetailView = () => {
 
     if (rawPolicyData?.grossPremium) {
       const gross = rawPolicyData.grossPremium;
-      const net = gross / 1.265;
+      const totalRate =
+        taxRates.documentaryStampTax + taxRates.valueAddedTax + taxRates.localGovernmentTax;
+      const net = gross / (1 + totalRate);
 
       return {
         netPremium: net,
-        documentaryStampTax: net * 0.125,
-        valueAddedTax: net * 0.12,
-        localGovernmentTax: net * 0.02,
+        documentaryStampTax: net * taxRates.documentaryStampTax,
+        valueAddedTax: net * taxRates.valueAddedTax,
+        localGovernmentTax: net * taxRates.localGovernmentTax,
         accountPremiumOthers: 0,
         grossPremium: gross,
         _calculated: true,
@@ -363,7 +367,7 @@ const PolicyDetailView = () => {
     }
 
     return null;
-  }, [rawPolicyData]);
+  }, [rawPolicyData, taxRates]);
 
   useEffect(() => {
     if (policyId) {

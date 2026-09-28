@@ -11,12 +11,10 @@ import { Chart } from 'primereact/chart';
 import { ProgressBar } from 'primereact/progressbar';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
-import { Knob } from 'primereact/knob';
-import { Panel } from 'primereact/panel';
-import { Timeline } from 'primereact/timeline';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import productConfiguratorMockService from '../../../services/mockData/productConfiguratorMockData';
+import productConfiguratorService from '../../../services/productConfiguratorService';
+import mastersService from '../../../services/mastersService';
 import './style.scss';
 
 const ProductDashboard = () => {
@@ -24,6 +22,7 @@ const ProductDashboard = () => {
   const { formatCurrency } = useFormatCurrency();
   const [productTemplates, setProductTemplates] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [categoryValues, setCategoryValues] = useState([]);
   const [loading, setLoading] = useState(false);
   const [globalFilter, setGlobalFilter] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -37,17 +36,19 @@ const ProductDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [templates, analyticsData] = await Promise.all([
-        productConfiguratorMockService.getProductTemplates(),
-        productConfiguratorMockService.getProductAnalytics()
+      const [templates, analyticsData, categoryOptions] = await Promise.all([
+        productConfiguratorService.getProductTemplates(),
+        productConfiguratorService.getProductAnalytics(),
+        mastersService.options('product-category')
       ]);
       setProductTemplates(templates);
       setAnalytics(analyticsData);
+      setCategoryValues([...new Set([...categoryOptions.map((o) => o.value), ...templates.map((p) => p.category)])].filter(Boolean));
     } catch (error) {
       toast.current?.show({
         severity: 'error',
         summary: t('productConfiguratorDashboard.error'),
-        detail: t('productConfiguratorDashboard.errorLoadFailed')
+        detail: error?.message || t('productConfiguratorDashboard.errorLoadFailed')
       });
     } finally {
       setLoading(false);
@@ -57,6 +58,20 @@ const ProductDashboard = () => {
   const statusBodyTemplate = (rowData) => {
     const severity = rowData.status === 'Active' ? 'success' : 'warning';
     return <Tag value={rowData.status} severity={severity} />;
+  };
+
+  const cloneProduct = async (rowData) => {
+    try {
+      const version = await productConfiguratorService.createProductVersion(rowData.id);
+      toast.current?.show({
+        severity: 'success',
+        summary: t('productTemplateManager.success'),
+        detail: `${version.templateCode} ${version.version}`
+      });
+      navigate(`/product-configurator/template/${version.id}`);
+    } catch (error) {
+      toast.current?.show({ severity: 'error', summary: t('productConfiguratorDashboard.error'), detail: error.message });
+    }
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -72,11 +87,13 @@ const ProductDashboard = () => {
           icon="pi pi-copy"
           className="p-button-rounded p-button-text"
           tooltip={t('productConfiguratorDashboard.cloneProduct')}
+          onClick={() => cloneProduct(rowData)}
         />
         <Button
           icon="pi pi-chart-line"
           className="p-button-rounded p-button-text"
           tooltip={t('productConfiguratorDashboard.viewAnalytics')}
+          onClick={() => navigate('/product-configurator/analytics')}
         />
       </div>
     );
@@ -151,11 +168,20 @@ const ProductDashboard = () => {
     ? productTemplates
     : productTemplates.filter((p) => p.category === selectedCategory);
 
-  const categoryKeys = ['all', 'motor', 'health', 'property', 'travel', 'marine'];
-  const categories = categoryKeys.map((key) => ({
-    label: t(`productConfiguratorDashboard.${key}`),
-    value: key === 'all' ? 'All' : key.charAt(0).toUpperCase() + key.slice(1)
-  }));
+  const categories = [
+    { label: t('productConfiguratorDashboard.all'), value: 'All' },
+    ...categoryValues.map((value) => ({ label: value, value }))
+  ];
+
+  const topProducts = analytics?.topProducts || [];
+  const totalTopPremium = topProducts.reduce((total, p) => total + (p.totalPremium || 0), 0);
+  const avgLossRatio = totalTopPremium
+    ? topProducts.reduce((total, p) => total + (p.lossRatio || 0) * (p.totalPremium || 0), 0) / totalTopPremium
+    : 0;
+  const commissionRates = productTemplates.map((p) => p.commissionRate).filter((rate) => rate !== null && rate !== undefined);
+  const avgCommission = commissionRates.length
+    ? commissionRates.reduce((total, rate) => total + Number(rate), 0) / commissionRates.length
+    : 0;
 
   return (
     <div className="product-dashboard">
@@ -189,7 +215,7 @@ const ProductDashboard = () => {
           <Card>
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.totalPremium')}</span>
-              <span className="stat-value">{formatCurrency(1020000000)}</span>
+              <span className="stat-value">{formatCurrency(analytics?.totals?.premium ?? 0)}</span>
               <span className="stat-change positive">{t('productConfiguratorDashboard.ytd')}</span>
             </div>
           </Card>
@@ -198,7 +224,7 @@ const ProductDashboard = () => {
           <Card>
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.avgLossRatio')}</span>
-              <span className="stat-value">61.5%</span>
+              <span className="stat-value">{avgLossRatio.toFixed(1)}%</span>
               <span className="stat-change positive">{t('productConfiguratorDashboard.improved')}</span>
             </div>
           </Card>
@@ -207,7 +233,7 @@ const ProductDashboard = () => {
           <Card>
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.avgCommission')}</span>
-              <span className="stat-value">16.8%</span>
+              <span className="stat-value">{avgCommission.toFixed(1)}%</span>
               <span className="stat-change neutral">{t('productConfiguratorDashboard.noChange')}</span>
             </div>
           </Card>

@@ -419,6 +419,14 @@ const ClaimTable = () => {
       return;
     }
 
+    if (status === "PENDING APPROVAL") {
+      const pendingClaimId = claim.id || claim.claimId;
+      navigate(`/agent/claimrequest/settlementapproval/${pendingClaimId}`, {
+        state: { claimId: pendingClaimId, policyNumber: claim.policyNumber },
+      });
+      return;
+    }
+
     if (status === "PROCESSING" || status === "PENDING") {
       const claimId = claim.id || claim.claimId;
 

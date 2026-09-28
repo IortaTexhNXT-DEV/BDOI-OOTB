@@ -20,7 +20,7 @@ import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
 import { Chip } from "primereact/chip";
 import { Calendar } from "primereact/calendar";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
@@ -39,7 +39,9 @@ const LapseManagement = () => {
   const [campaignVisible, setCampaignVisible] = useState(false);
   const [lapsedPolicies, setLapsedPolicies] = useState([]);
   const [filteredPolicies, setFilteredPolicies] = useState([]);
-  const [winBackCampaigns, setWinBackCampaigns] = useState(renewalMockData.winBackCampaigns);
+  const [winBackCampaigns, setWinBackCampaigns] = useState([]);
+  const [lapseVisible, setLapseVisible] = useState(false);
+  const [lapseReason, setLapseReason] = useState('');
   const [dashboardData, setDashboardData] = useState({
     totalLapsed: 0,
     inGracePeriod: 0,
@@ -122,49 +124,58 @@ const LapseManagement = () => {
     applyFilters();
   }, [search, statusFilter, reasonFilter, lapsedPolicies]);
 
+  const showError = (error, fallbackKey) => {
+    toast.current.show({
+      severity: 'error',
+      summary: t("common.error"),
+      detail: error?.message || t(fallbackKey),
+      life: 3000
+    });
+  };
+
+  const addDays = (date, days) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + Number(days || 0));
+    return d.toLocaleDateString('en-CA');
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Get lapsed and grace period policies from renewal queue
-      const gracePeriodPolicies = renewalMockData.renewalQueue
-        .filter(policy => policy.status === 'In Grace Period')
+      const [lapsed, queue, campaigns, settings] = await Promise.all([
+        renewalsWorkspaceService.getLapsed(),
+        renewalsWorkspaceService.getQueue(),
+        renewalsWorkspaceService.getCampaigns(),
+        renewalsWorkspaceService.getSettings("renewals")
+      ]);
+      const graceDays = settings["renewals.grace_period_days"];
+      const gracePeriodPolicies = queue.items
+        .filter(policy => policy.inGracePeriod)
         .map(policy => ({
           ...policy,
+          status: 'In Grace Period',
+          gracePeriodEnd: addDays(policy.expiryDate, graceDays),
           lapseDate: null,
           daysLapsed: 0,
           premiumLost: policy.currentPremium,
           lapseReason: null,
           winBackAttempts: [],
-          reinstatementEligible: true,
-          reinstatementDeadline: policy.gracePeriodEnd,
+          reinstatementEligible: false,
           winBackStatus: 'Eligible'
         }));
+      const lapsedPolicies = lapsed.map(policy => ({
+        ...policy,
+        status: 'Lapsed',
+        winBackAttempts: (policy.winBackAttempts || []).map(a => ({ ...a, response: a.outcome || 'Pending' }))
+      }));
 
-      // Combine with existing lapsed policies
-      const combinedData = [
-        ...renewalMockData.lapsedPolicies,
-        ...gracePeriodPolicies
-      ];
-
+      const combinedData = [...lapsedPolicies, ...gracePeriodPolicies];
       setLapsedPolicies(combinedData);
+      setWinBackCampaigns(campaigns);
       calculateDashboard(combinedData);
-
-      setTimeout(() => {
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.lapseDataLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToLoadLapseData"),
-        life: 3000
-      });
+      showError(error, "renewal.failedToLoadLapseData");
+    } finally {
       setLoading(false);
     }
   };
@@ -256,77 +267,99 @@ const LapseManagement = () => {
   const handleSendWinBack = async () => {
     setLoading(true);
     try {
-      const result = await renewalCrudOperations.processWinBack(
-        selectedPolicy.policyNumber,
-        winBackOffer
-      );
-
-      if (result.success) {
-        // Update policy status
-        const updatedPolicies = lapsedPolicies.map(p =>
-          p.policyNumber === selectedPolicy.policyNumber
-            ? {
-                ...p,
-                winBackAttempts: [
-                  ...p.winBackAttempts,
-                  {
-                    date: new Date().toISOString().split('T')[0],
-                    method: 'Email',
-                    offer: `${winBackOffer.discount}% discount`,
-                    response: 'Pending'
-                  }
-                ],
-                winBackStatus: 'In Progress'
-              }
-            : p
-        );
-
-        setLapsedPolicies(updatedPolicies);
-        setWinBackVisible(false);
-
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.winBackSent"),
-          detail: t("renewal.winBackOfferSentTo", { name: selectedPolicy.insuredName }),
-          life: 3000
-        });
-      }
-    } catch (error) {
+      const offer = [
+        `${winBackOffer.discount}% discount`,
+        ...winBackOffer.additionalBenefits,
+        `${winBackOffer.paymentTerms} payment terms`,
+        `valid until ${winBackOffer.validUntil?.toLocaleDateString('en-CA')}`
+      ].join(', ');
+      const activeCampaign = winBackCampaigns.find(c => c.status === 'active');
+      await renewalsWorkspaceService.winBack(selectedPolicy.id, {
+        offer,
+        method: 'Email',
+        campaignId: activeCampaign?.id,
+        response: winBackOffer.message || undefined
+      });
+      setWinBackVisible(false);
       toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSendWinBackOffer"),
+        severity: 'success',
+        summary: t("renewal.winBackSent"),
+        detail: t("renewal.winBackOfferSentTo", { name: selectedPolicy.insuredName }),
         life: 3000
       });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToSendWinBackOffer");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateCampaignConfirm = () => {
-    const campaignId = `WB-2025-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+  const handleCreateCampaignConfirm = async () => {
+    try {
+      await renewalsWorkspaceService.createCampaign({
+        campaignName: newCampaign.name,
+        targetSegment: newCampaign.targetSegment,
+        startDate: newCampaign.startDate?.toLocaleDateString('en-CA'),
+        endDate: newCampaign.endDate?.toLocaleDateString('en-CA'),
+        discount: newCampaign.discount,
+        budget: newCampaign.budget,
+        offers: newCampaign.benefits
+      });
+      setCampaignVisible(false);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.campaignCreated"),
+        detail: t("renewal.campaignCreatedSuccess", { name: newCampaign.name }),
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToLoadLapseData");
+    }
+  };
 
-    const campaign = {
-      ...newCampaign,
-      campaignId,
-      statistics: {
-        targetedPolicies: 0,
-        contacted: 0,
-        responded: 0,
-        converted: 0,
-        conversionRate: 0,
-        revenueRecovered: 0
+  const openLapse = (rowData) => {
+    setSelectedPolicy(rowData);
+    setLapseReason('');
+    setLapseVisible(true);
+  };
+
+  const handleLapseConfirm = async () => {
+    try {
+      await renewalsWorkspaceService.lapse(selectedPolicy.id, lapseReason);
+      setLapseVisible(false);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.lapsed"),
+        detail: selectedPolicy.policyNumber,
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToLoadLapseData");
+    }
+  };
+
+  const handleReinstate = (rowData) => {
+    confirmDialog({
+      message: t("renewal.confirmReinstate", "Reinstate {{policy}}?", { policy: rowData.policyNumber }),
+      header: t("renewal.reinstated"),
+      icon: 'pi pi-replay',
+      accept: async () => {
+        try {
+          await renewalsWorkspaceService.reinstate(rowData.id);
+          toast.current.show({
+            severity: 'success',
+            summary: t("renewal.reinstated"),
+            detail: rowData.policyNumber,
+            life: 3000
+          });
+          loadInitialData();
+        } catch (error) {
+          showError(error, "renewal.failedToLoadLapseData");
+        }
       }
-    };
-
-    setWinBackCampaigns([...winBackCampaigns, campaign]);
-    setCampaignVisible(false);
-
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.campaignCreated"),
-      detail: t("renewal.campaignCreatedSuccess", { name: newCampaign.name }),
-      life: 3000
     });
   };
 
@@ -417,6 +450,22 @@ const LapseManagement = () => {
           tooltip="Send Win-back"
           disabled={!rowData.reinstatementEligible || rowData.winBackStatus === 'Converted'}
         />
+        {rowData.status === 'In Grace Period' ? (
+          <Button
+            icon="pi pi-ban"
+            className="p-button-text p-button-danger"
+            onClick={() => openLapse(rowData)}
+            tooltip={t("renewal.lapsed")}
+          />
+        ) : (
+          <Button
+            icon="pi pi-replay"
+            className="p-button-text p-button-success"
+            onClick={() => handleReinstate(rowData)}
+            tooltip={t("renewal.reinstated")}
+            disabled={!rowData.reinstatementEligible}
+          />
+        )}
       </div>
     );
   };
@@ -595,7 +644,7 @@ const LapseManagement = () => {
                   </div>
 
                   <DataTable
-                    value={filteredPolicies.length > 0 ? filteredPolicies : lapsedPolicies}
+                    value={filteredPolicies}
                     className="lapse-table"
                     stripedRows
                     paginator
@@ -805,6 +854,32 @@ const LapseManagement = () => {
               </TabPanel>
             </TabView>
           )}
+        </Dialog>
+
+        <Dialog
+          header={t("renewal.lapsed")}
+          visible={lapseVisible}
+          onHide={() => setLapseVisible(false)}
+          style={{ width: '400px' }}
+          footer={
+            <div>
+              <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setLapseVisible(false)} />
+              <Button label={t("renewal.lapsed")} icon="pi pi-ban" className="p-button-danger"
+                onClick={handleLapseConfirm} disabled={lapseReason.trim().length < 3} />
+            </div>
+          }
+        >
+          <div className="form-field">
+            <label>{selectedPolicy?.policyNumber} - {selectedPolicy?.insuredName}</label>
+            <Dropdown
+              value={lapseReason}
+              options={reasonOptions.filter(o => o.value !== 'All')}
+              onChange={(e) => setLapseReason(e.value || '')}
+              editable
+              placeholder={t("renewal.allReasons")}
+              style={{ width: '100%' }}
+            />
+          </div>
         </Dialog>
 
         {/* Win-back Offer Dialog */}

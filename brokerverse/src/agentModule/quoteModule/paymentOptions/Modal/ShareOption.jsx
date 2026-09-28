@@ -9,9 +9,7 @@ import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
 const ShareOption = ({ modalVisible, setModalVisible }) => {
   const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(
-        "https://www.figma.com/file/STJkBwHGeOlCFmrkBBL"
-      );
+      await navigator.clipboard.writeText(window.location.href);
     } catch (err) {
       console.error(err);
     }
@@ -27,7 +25,7 @@ const ShareOption = ({ modalVisible, setModalVisible }) => {
     >
       <div className="grid m-0">
         <div className="col-12 submit__container">
-          <div>https://www.figma.com/file/STJkBwHGeOlCFmrkBBL</div>
+          <div>{window.location.href}</div>
           <Button onClick={handleCopyToClipboard}>Copy</Button>
         </div>
         <div className="share__option__area">

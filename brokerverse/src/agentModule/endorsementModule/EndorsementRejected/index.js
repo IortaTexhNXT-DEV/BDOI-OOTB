@@ -6,6 +6,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import "./index.scss";
 import CustomToast from "../../../components/Toast";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const EndorsementRejected = () => {
   const { t } = useTranslation();
@@ -59,11 +60,7 @@ const EndorsementRejected = () => {
       <Card className="mt-4 claimrequest__overall__card">
         <div className="mt-6">
           <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/V21pJZs/REJECTED-1.png"
-              className="claimtitle__img__container"
-              alt="Rejected"
-            />
+            <StatusIllustration variant="rejected" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>{t("endorsement.thisEndorsementRejected")}</div>

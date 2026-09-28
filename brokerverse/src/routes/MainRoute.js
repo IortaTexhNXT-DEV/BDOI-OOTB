@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 
 import ProtectedLayout from "./ProtectedRoute";
+import NotFound from "../components/NotFound";
 import CorrectionJV from "../module/CorrectionJV";
 import PolicyReceipts from "../module/Receipts/PolicyReceipts";
 import PolicyReceiptsView from "../module/Receipts/PolicyReceiptsView";
@@ -1929,11 +1930,8 @@ const Maincomponent = () => {
             element={<AgingReport />}
           />
 
-          {/* //Reports */}
-          {/* <Route
-              path="/reports/operationalreports"
-              element={<OperationalReports />}
-            /> */}
+          {/* Any other address inside the application */}
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </div>

@@ -8,6 +8,7 @@ import { ProgressBar } from "primereact/progressbar";
 import quotationService from "../../../services/quotationService";
 import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import "./index.scss";
+import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../component/bulkUploadTemplate";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const { t } = useTranslation();
@@ -21,12 +22,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     const file = e.files[0];
     if (file) {
       // Validate file type
-      const validTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel'
-      ];
-      
-      if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx')) {
+      if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
           summary: t('bulkUploadQuotations.invalidFile'),
@@ -137,10 +133,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   };
 
 
-  const handleDownloadTemplate = () => {
-    const templateUrl = 'https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/sample-xl/Quotations-Bulk-Upload.xlsx';
-    window.open(templateUrl, '_blank', 'noopener,noreferrer');
-  };
+  const handleDownloadTemplate = () => downloadBulkUploadTemplate("quotations");
 
 
   return (
@@ -180,7 +173,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 ref={fileUploadRef}
                 mode="basic"
                 name="file"
-                accept=".xlsx"
+                accept=".xlsx,.csv"
                 maxFileSize={10485760}
                 customUpload
                 auto={false}

@@ -12,14 +12,35 @@ import { useNavigate } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import authService from "../../../services/authService";
 import { BASE_URL } from "../../../utility/constant";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import "./index.scss";
+
+const pad = (n) => String(n).padStart(2, "0");
+const toIsoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const APPROVED_STATUSES = ["Approved", "Settled", "Closed"];
+
+/** Claims per reported month (submitted / approved-or-settled / rejected) from the detailed rows. */
+const buildTrend = (claims) => {
+  const months = [...new Set(claims.map((c) => String(c.reportedDate || "").slice(0, 7)))]
+    .filter(Boolean)
+    .sort();
+  const count = (month, match) =>
+    claims.filter((c) => String(c.reportedDate || "").startsWith(month) && match(c)).length;
+  return {
+    labels: months,
+    submitted: months.map((m) => count(m, () => true)),
+    approved: months.map((m) => count(m, (c) => APPROVED_STATUSES.includes(c.claimStatus))),
+    rejected: months.map((m) => count(m, (c) => c.claimStatus === "Rejected")),
+  };
+};
 
 const ClaimsDashboard = () => {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const toast = useRef(null);
   const [dateRange, setDateRange] = useState([
-    new Date(2025, 0, 1),
+    new Date(new Date().getFullYear(), 0, 1),
     new Date(),
   ]);
   const [loading, setLoading] = useState(false);
@@ -29,12 +50,8 @@ const ClaimsDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const startDate = dateRange[0]
-        ? dateRange[0].toISOString().split("T")[0]
-        : "2025-01-01";
-      const endDate = dateRange[1]
-        ? dateRange[1].toISOString().split("T")[0]
-        : "2025-12-31";
+      const startDate = dateRange?.[0] ? toIsoDate(dateRange[0]) : "";
+      const endDate = dateRange?.[1] ? toIsoDate(dateRange[1]) : "";
 
       const response = await fetch(
         `${BASE_URL}/claims/report?startDate=${startDate}&endDate=${endDate}&includeData=true`,
@@ -54,7 +71,6 @@ const ClaimsDashboard = () => {
       const result = await response.json();
       setDashboardData(result.data);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
       toast.current?.show({
         severity: "error",
         summary: t("claimsDashboard.error"),
@@ -71,12 +87,8 @@ const ClaimsDashboard = () => {
 
   const handleExportReport = async () => {
     try {
-      const startDate = dateRange[0]
-        ? dateRange[0].toISOString().split("T")[0]
-        : "2025-01-01";
-      const endDate = dateRange[1]
-        ? dateRange[1].toISOString().split("T")[0]
-        : "2025-12-31";
+      const startDate = dateRange?.[0] ? toIsoDate(dateRange[0]) : "";
+      const endDate = dateRange?.[1] ? toIsoDate(dateRange[1]) : "";
 
       const url = `${BASE_URL}/claims/report?startDate=${startDate}&endDate=${endDate}&includeData=true&format=excel`;
 
@@ -109,7 +121,6 @@ const ClaimsDashboard = () => {
         detail: t("claimsDashboard.excelDownloaded"),
       });
     } catch (error) {
-      console.error("Export error:", error);
       toast.current?.show({
         severity: "error",
         summary: t("claimsDashboard.error"),
@@ -128,7 +139,7 @@ const ClaimsDashboard = () => {
         highestClaimsPercentage: dashboardData.breakdown.byType[0]
           ? Math.round(
               (dashboardData.breakdown.byType[0].count /
-                dashboardData.summary.totalOpenClaims) *
+                (dashboardData.summary.totalClaims || 1)) *
                 100
             )
           : 0,
@@ -136,9 +147,6 @@ const ClaimsDashboard = () => {
           dashboardData.summary.maxClaimsByState?.state || "N/A",
         statePercentage:
           dashboardData.summary.maxClaimsByState?.percentage || 0,
-        avgProcessingTime: "4.2 days", // This would need a separate calculation
-        totalClaimsValue: "₱12,450,000", // This would need a separate calculation
-        approvalRate: "78%", // This would need a separate calculation
       }
     : {
         totalOpenClaims: 0,
@@ -148,9 +156,6 @@ const ClaimsDashboard = () => {
         highestClaimsPercentage: 0,
         maxClaimsByState: "N/A",
         statePercentage: 0,
-        avgProcessingTime: "0 days",
-        totalClaimsValue: "₱0",
-        approvalRate: "0%",
       };
 
   // Recent Claims Data from API
@@ -168,7 +173,7 @@ const ClaimsDashboard = () => {
       priority: claim.claimPriority?.toLowerCase() || "low",
       status: claim.claimStatus,
       amount: claim.estimatedClaimAmount
-        ? `₱${claim.estimatedClaimAmount.toLocaleString()}`
+        ? formatCurrency(claim.estimatedClaimAmount)
         : "N/A",
     })) || [];
 
@@ -199,39 +204,27 @@ const ClaimsDashboard = () => {
   };
 
   // Claims Trend Chart Data
+  const trend = buildTrend(dashboardData?.detailedClaims || []);
   const claimsTrendData = {
-    labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ],
+    labels: trend.labels,
     datasets: [
       {
         label: t("claimsDashboard.claimsSubmitted"),
-        data: [165, 159, 180, 181, 156, 195, 240, 218, 245, 234, 256, 278],
+        data: trend.submitted,
         borderColor: "#0066CC",
         backgroundColor: "rgba(0, 102, 204, 0.1)",
         tension: 0.4,
       },
       {
         label: t("claimsDashboard.claimsApproved"),
-        data: [128, 138, 145, 162, 140, 175, 198, 185, 210, 198, 220, 235],
+        data: trend.approved,
         borderColor: "#00C851",
         backgroundColor: "rgba(0, 200, 81, 0.1)",
         tension: 0.4,
       },
       {
         label: t("claimsDashboard.claimsRejected"),
-        data: [37, 21, 35, 19, 16, 20, 42, 33, 35, 36, 36, 43],
+        data: trend.rejected,
         borderColor: "#FF4444",
         backgroundColor: "rgba(255, 68, 68, 0.1)",
         tension: 0.4,
@@ -318,13 +311,13 @@ const ClaimsDashboard = () => {
           rounded
           text
           severity="info"
-          onClick={() => navigate(`/claims/view/${rowData.claimId}`)}
+          onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)}
         />
         <Button
           icon="pi pi-pencil"
           rounded
           text
-          onClick={() => navigate(`/claims/edit/${rowData.claimId}`)}
+          onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)}
         />
       </div>
     );

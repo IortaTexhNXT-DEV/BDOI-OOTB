@@ -6,6 +6,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import "./index.scss";
 import CustomToast from "../../../components/Toast";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const PaymentErrorEndorsment = () => {
   const { t } = useTranslation();
@@ -90,11 +91,7 @@ const PaymentErrorEndorsment = () => {
             {t("endorsement.waitingForUpdate")}
           </div>
           <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/4pbj1hp/waiting-for-approval.png"
-              className="claimtitle__img__container"
-              alt="Waiting"
-            />
+            <StatusIllustration variant="waiting" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>

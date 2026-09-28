@@ -1,0 +1,369 @@
+// Enterprise layer: one consistent standard for the shell, page headers, cards, tables, forms,
+// buttons and dialogs on every screen. Loaded last (from bdoi.scss).
+//
+// Why it is needed: ~70 rules in individual screen stylesheets are unscoped (for example a
+// ".p-datatable .p-datatable-tbody > tr > td { font-style: italic; text-align: center; padding: 2rem }"
+// written for one empty-state table), so they restyled every table and dialog in the app depending
+// on which screens had been opened. The selectors below are anchored on the application shell so they
+// out-rank those leaks; screen-specific layouts are left alone.
+@import "./tokens";
+
+$shell: ".protected__layout__container .main__content";
+$row-height: 44px;
+$cell-pad-y: 10px;
+$cell-pad-x: 14px;
+$page-gutter: 24px;
+$text-strong: #1f2937;
+
+// ---------------------------------------------------------------- shell
+
+.protected__layout__container {
+  .protected__layout__content__space .main__content {
+    padding: 0 $page-gutter $page-gutter;
+    scroll-padding-top: $header-height + 16px;
+  }
+
+  // Top bar spans the full content width and stays pinned while the page scrolls.
+  .protected__layout__header {
+    margin: 0 (-$page-gutter) 20px;
+
+    .Agentnavbar__container {
+      min-height: 64px;
+      padding: 8px $page-gutter !important;
+      margin: 0 !important;
+      width: auto !important;
+      border-radius: 0 !important;
+      box-shadow: 0 1px 0 $color-border;
+    }
+  }
+}
+
+// Sidebar: every level lines up on the same left edge and uses the same type scale; nested groups
+// (Petty Cash, Remittance, Incentive, Renewals...) no longer sit on a different indent from their siblings.
+.sidebar__overall__container {
+  .submunusidebar__container {
+    margin-left: 18px !important;
+    padding-left: 8px !important;
+
+    li > div,
+    .divcontent__sidebar_overall,
+    .divcontent__sidebardeactive__overall {
+      padding-left: 8px !important;
+      margin-left: 0 !important;
+      min-height: 32px;
+      border-radius: $radius-sm;
+    }
+
+    .singleitemname__container,
+    .singleitemname__container__active,
+    .itemname__container {
+      font-size: 14px !important;
+      font-weight: 600;
+      padding-left: 0 !important;
+      margin-left: 0 !important;
+    }
+  }
+
+  .itemname__container {
+    font-size: 15px !important;
+    font-weight: 700;
+  }
+}
+
+// ---------------------------------------------------------------- page structure
+
+#{$shell} {
+  color: $color-text;
+
+  h1,
+  h2,
+  .page-title {
+    color: $color-heading;
+  }
+
+  // Page titles: one size everywhere.
+  h1,
+  .page-title {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 800;
+    margin: 0 0 4px;
+  }
+
+  h2 {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 800;
+  }
+
+  h3 {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .p-breadcrumb {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin-bottom: 16px;
+    font-size: 13px;
+
+    .p-menuitem-text {
+      color: $color-text-muted;
+    }
+
+    li:last-child .p-menuitem-text {
+      color: $brand-navy;
+      font-weight: 600;
+    }
+  }
+
+  // Cards: white surface, hairline border, soft shadow, one radius, one padding.
+  .p-card {
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+
+    .p-card-body {
+      padding: 20px 24px;
+    }
+
+    .p-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: $color-heading;
+    }
+  }
+}
+
+// ---------------------------------------------------------------- tables
+
+#{$shell} .p-datatable {
+  font-size: 14px;
+  border-radius: $radius-md;
+
+  .p-datatable-wrapper {
+    overflow-x: auto;
+    border-radius: $radius-md $radius-md 0 0;
+  }
+
+  .p-datatable-thead > tr > th {
+    height: $row-height;
+    padding: $cell-pad-y $cell-pad-x !important;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-align: left !important;
+    white-space: nowrap;
+    vertical-align: middle;
+
+    .p-column-header-content {
+      justify-content: flex-start;
+    }
+  }
+
+  .p-datatable-tbody > tr {
+    height: $row-height;
+    background: $color-surface;
+
+    &:nth-child(even) {
+      background: #f5faff;
+    }
+
+    &:hover {
+      background: $brand-blue-050;
+    }
+
+    > td {
+      padding: $cell-pad-y $cell-pad-x !important;
+      font-style: normal !important;
+      color: $text-strong !important;
+      text-align: left !important;
+      vertical-align: middle;
+      line-height: 20px;
+      border-width: 0 0 1px;
+      border-color: $color-border;
+    }
+
+    // Numeric columns (marked by utility/tableNumericAlign.js): right-aligned, fixed-width digits.
+    > td.bv-num {
+      text-align: right !important;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    // "No records" row keeps its centred, muted look.
+    &.p-datatable-emptymessage > td {
+      text-align: center !important;
+      color: $color-text-muted !important;
+      padding: 32px $cell-pad-x !important;
+    }
+  }
+
+  .p-datatable-thead > tr > th.bv-num {
+    text-align: right !important;
+
+    .p-column-header-content {
+      justify-content: flex-end;
+    }
+  }
+
+  // Action icon cells stay compact.
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only {
+    width: 32px;
+    height: 32px;
+  }
+
+  .p-paginator {
+    border: 0;
+    border-top: 1px solid $color-border;
+    padding: 8px 12px;
+    justify-content: flex-end;
+    font-size: 13px;
+  }
+}
+
+// Plain HTML tables inside screens follow the same rhythm.
+#{$shell} table:not(.p-datatable-table) {
+  border-collapse: collapse;
+
+  td {
+    padding: $cell-pad-y $cell-pad-x;
+    font-style: normal;
+    color: $text-strong;
+  }
+}
+
+// ---------------------------------------------------------------- forms and buttons
+
+#{$shell} {
+  label,
+  .p-float-label label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  .p-inputtext,
+  .p-dropdown,
+  .p-multiselect,
+  .p-calendar,
+  .p-inputnumber {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .p-dropdown .p-dropdown-label,
+  .p-multiselect .p-multiselect-label {
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .p-inputtext:enabled:focus,
+  .p-dropdown:not(.p-disabled).p-focus,
+  .p-multiselect:not(.p-disabled).p-focus {
+    border-color: $brand-blue;
+    box-shadow: $focus-ring;
+  }
+
+  // Buttons: one height, one radius (no pill / square mix), consistent icon spacing.
+  .p-button:not(.p-button-icon-only):not(.p-button-link) {
+    min-height: 40px;
+    padding: 8px 18px;
+    border-radius: $radius-sm !important;
+    font-size: 14px;
+    font-weight: 700;
+    gap: 8px;
+
+    .p-button-icon-left {
+      margin-right: 0;
+    }
+  }
+
+  .p-button.p-button-sm:not(.p-button-icon-only) {
+    min-height: 32px;
+    padding: 4px 12px;
+    font-size: 13px;
+  }
+
+  .p-tag,
+  .p-badge {
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+  }
+}
+
+// ---------------------------------------------------------------- dialogs, toasts
+
+.p-dialog {
+  border-radius: $radius-md;
+  box-shadow: 0 16px 48px rgba(17, 24, 39, 0.18);
+
+  .p-dialog-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid $color-border;
+    border-radius: $radius-md $radius-md 0 0;
+
+    .p-dialog-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: $color-heading;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 20px 24px;
+  }
+
+  .p-dialog-footer {
+    padding: 14px 24px;
+    border-top: 1px solid $color-border;
+    border-radius: 0 0 $radius-md $radius-md;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    button {
+      margin: 0;
+    }
+  }
+}
+
+.p-toast .p-toast-message {
+  border-radius: $radius-sm;
+  box-shadow: $shadow-md;
+}
+
+// ---------------------------------------------------------------- accessibility
+
+:focus-visible {
+  outline: 2px solid $brand-blue;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+// ---------------------------------------------------------------- print (vouchers, receipts, reports)
+
+@media print {
+  .protected__layout__sidebar__container,
+  .protected__layout__header,
+  .mobile-nav-toggle,
+  .p-paginator {
+    display: none !important;
+  }
+
+  .protected__layout__container .main__content {
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}

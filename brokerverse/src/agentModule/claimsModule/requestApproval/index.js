@@ -9,6 +9,7 @@ import { useRef } from "react";
 import claimsService from "../../../services/claimsService";
 import { useSelector } from "react-redux";
 import "./index.scss";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const RequestApproval = ({ flow }) => {
   const { t } = useTranslation();
@@ -217,10 +218,7 @@ const RequestApproval = ({ flow }) => {
         <div>
           <div className="claim__title_txt mt-6">{t("claimRequestApproval.waitingForUpdate")}</div>
           <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/4pbj1hp/waiting-for-approval.png"
-              className="claimtitle__img__container"
-            />
+            <StatusIllustration variant="waiting" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>

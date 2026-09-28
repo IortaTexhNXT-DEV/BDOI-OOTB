@@ -1,1 +1,3 @@
-export { RecoveryDashboard as default } from '../ReinsuranceScreens';
+import { RecoveryDashboard } from "../ReinsuranceScreens";
+
+export default RecoveryDashboard;

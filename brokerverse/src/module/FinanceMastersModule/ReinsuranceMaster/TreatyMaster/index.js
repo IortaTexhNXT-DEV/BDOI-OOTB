@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -14,13 +15,64 @@ import { Card } from 'primereact/card';
 import { Tag } from 'primereact/tag';
 import { ProgressBar } from 'primereact/progressbar';
 import { MultiSelect } from 'primereact/multiselect';
-import reinsuranceMockService from '../../../../services/mockData/reinsuranceMockData';
+import reinsuranceService from '../../../../services/reinsuranceService';
+import mastersService from '../../../../services/mastersService';
 import './style.scss';
+
+const toIsoDate = (date) => (date instanceof Date ? date.toLocaleDateString('en-CA') : date);
+const toNumberOrUndefined = (value) => {
+  const n = parseFloat(value);
+  return Number.isFinite(n) ? n : undefined;
+};
+
+/** Maps the treaty form to the /reinsurance/treaties request body. */
+const toTreatyPayload = (form) => {
+  const payload = {
+    treatyNumber: form.treatyNumber || undefined,
+    name: form.name,
+    type: form.type,
+    lineOfBusiness: form.lineOfBusiness,
+    reinsurers: form.reinsurers,
+    effectiveDate: toIsoDate(form.effectiveDate),
+    expiryDate: toIsoDate(form.expiryDate),
+    retention: toNumberOrUndefined(form.retention),
+    cession: form.cession,
+    commission: { ...form.commission, rate: toNumberOrUndefined(form.commission?.rate) },
+  };
+  if (form.type === 'Surplus') payload.lines = form.lines;
+  if (form.type === 'Excess of Loss') {
+    const limit = toNumberOrUndefined(form.limit);
+    payload.capacity = limit;
+    payload.layers = [{ layer: 1, limit, excess: toNumberOrUndefined(form.excess), reinstatements: form.reinstatements }];
+  }
+  return payload;
+};
+
+/** Treaty from the API to the form fields (XoL first layer exposed as limit / excess / reinstatements). */
+const toTreatyForm = (treaty) => {
+  const layer = treaty.layers?.[0] || {};
+  return {
+    ...treaty,
+    retention: treaty.retention ?? '',
+    cession: treaty.cession || {},
+    commission: treaty.commission || {},
+    limit: layer.limit ?? treaty.capacity,
+    excess: layer.excess,
+    reinstatements: layer.reinstatements,
+    effectiveDate: new Date(treaty.effectiveDate),
+    expiryDate: new Date(treaty.expiryDate)
+  };
+};
 
 const TreatyMaster = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const dt = useRef(null);
   const [treaties, setTreaties] = useState([]);
   const [reinsurers, setReinsurers] = useState([]);
+  const [lobOptions, setLobOptions] = useState([]);
+  const [rejecting, setRejecting] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -47,47 +99,38 @@ const TreatyMaster = () => {
     { label: t('reinsuranceTreaty.nrcpMandatory'), value: 'NRCP Mandatory' }
   ];
 
-  const linesOfBusiness = [
-    { label: t('reinsuranceTreaty.motor'), value: 'Motor' },
-    { label: t('reinsuranceTreaty.fire'), value: 'Fire' },
-    { label: t('reinsuranceTreaty.property'), value: 'Property' },
-    { label: t('reinsuranceTreaty.marine'), value: 'Marine' },
-    { label: t('reinsuranceTreaty.personalAccident'), value: 'Personal Accident' },
-    { label: t('reinsuranceTreaty.health'), value: 'Health' },
-    { label: t('reinsuranceTreaty.engineering'), value: 'Engineering' },
-    { label: t('reinsuranceTreaty.catastrophe'), value: 'Catastrophe' },
-    { label: t('reinsuranceTreaty.allLines'), value: 'All Lines' }
-  ];
-
   const commissionTypes = [
     { label: t('reinsuranceTreaty.flatRate'), value: 'Flat' },
     { label: t('reinsuranceTreaty.slidingScale'), value: 'Sliding Scale' },
     { label: t('reinsuranceTreaty.profitCommission'), value: 'Profit Commission' }
   ];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [treatyData, reinsurerData] = await Promise.all([
-        reinsuranceMockService.getTreaties(),
-        reinsuranceMockService.getReinsurers()
+      const [treatyData, reinsurerData, lobData] = await Promise.all([
+        reinsuranceService.getTreaties(),
+        reinsuranceService.getReinsurers({ status: 'Active' }),
+        mastersService.options('line-of-business')
       ]);
+      const lobValues = [...new Set([...lobData.map(o => o.value), ...treatyData.map(tr => tr.lineOfBusiness)])];
       setTreaties(treatyData);
       setReinsurers(reinsurerData);
+      setLobOptions(lobValues.filter(Boolean).map(value => ({ label: value, value })));
     } catch (error) {
       toast.current?.show({
         severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load data'
+        summary: t('reinsuranceTreaty.error'),
+        detail: error?.message || 'Failed to load data'
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleAdd = () => {
     setFormData({
@@ -107,11 +150,7 @@ const TreatyMaster = () => {
   };
 
   const handleEdit = (treaty) => {
-    setFormData({
-      ...treaty,
-      effectiveDate: new Date(treaty.effectiveDate),
-      expiryDate: new Date(treaty.expiryDate)
-    });
+    setFormData(toTreatyForm(treaty));
     setSelectedTreaty(treaty);
     setEditMode(true);
     setShowDialog(true);
@@ -120,14 +159,14 @@ const TreatyMaster = () => {
   const handleSave = async () => {
     try {
       if (editMode) {
-        await reinsuranceMockService.updateTreaty(selectedTreaty.id, formData);
+        await reinsuranceService.updateTreaty(selectedTreaty.id, toTreatyPayload(formData));
         toast.current?.show({
           severity: 'success',
           summary: t('reinsuranceTreaty.success'),
           detail: t('reinsuranceTreaty.treatyUpdated')
         });
       } else {
-        await reinsuranceMockService.addTreaty(formData);
+        await reinsuranceService.createTreaty(toTreatyPayload(formData));
         toast.current?.show({
           severity: 'success',
           summary: t('reinsuranceTreaty.success'),
@@ -140,8 +179,24 @@ const TreatyMaster = () => {
       toast.current?.show({
         severity: 'error',
         summary: t('reinsuranceTreaty.error'),
-        detail: t('reinsuranceTreaty.failedToSave')
+        detail: error?.message || t('reinsuranceTreaty.failedToSave')
       });
+    }
+  };
+
+  const decide = async (action, treaty, reason) => {
+    try {
+      if (action === 'approve') await reinsuranceService.approveTreaty(treaty.id);
+      else await reinsuranceService.rejectTreaty(treaty.id, reason);
+      toast.current?.show({
+        severity: 'success',
+        summary: t('reinsuranceTreaty.success'),
+        detail: `${treaty.treatyNumber}: ${action === 'approve' ? t('common.approve', 'Approved') : t('common.reject', 'Rejected')}`
+      });
+      setRejecting(null);
+      loadData();
+    } catch (error) {
+      toast.current?.show({ severity: 'error', summary: t('reinsuranceTreaty.error'), detail: error?.message });
     }
   };
 
@@ -187,7 +242,27 @@ const TreatyMaster = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip={t('reinsuranceTreaty.viewDetails')}
+          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)}
         />
+        {rowData.status === 'Pending Approval' && (
+          <>
+            <Button
+              icon="pi pi-check"
+              className="p-button-rounded p-button-text p-button-success"
+              tooltip={t('common.approve', 'Approve')}
+              onClick={() => decide('approve', rowData)}
+            />
+            <Button
+              icon="pi pi-times"
+              className="p-button-rounded p-button-text p-button-danger"
+              tooltip={t('common.reject', 'Reject')}
+              onClick={() => {
+                setRejectReason('');
+                setRejecting(rowData);
+              }}
+            />
+          </>
+        )}
       </div>
     );
   };
@@ -254,7 +329,7 @@ const TreatyMaster = () => {
                 <div className="p-col-12 p-md-9">
                   <Dropdown
                     value={formData.lineOfBusiness}
-                    options={linesOfBusiness}
+                    options={lobOptions}
                     onChange={(e) => setFormData({...formData, lineOfBusiness: e.value})}
                     placeholder={t('reinsuranceTreaty.selectLineOfBusiness')}
                   />
@@ -267,8 +342,9 @@ const TreatyMaster = () => {
                   <MultiSelect
                     value={formData.reinsurers}
                     options={reinsurers.map(r => ({
-                      label: `${r.shortName} (${r.rating})`,
-                      value: r.id
+                      label: `${r.shortName || r.name} (${r.rating})`,
+                      value: r.id,
+                      disabled: !r.meetsMinimumRating
                     }))}
                     onChange={(e) => setFormData({...formData, reinsurers: e.value})}
                     placeholder={t('reinsuranceTreaty.selectReinsurers')}
@@ -424,7 +500,7 @@ const TreatyMaster = () => {
                       value={parseFloat(formData.commission?.rate) || 0}
                       onValueChange={(e) => setFormData({
                         ...formData,
-                        commission: {...formData.commission, rate: e.value + '%'}
+                        commission: {...formData.commission, rate: e.value}
                       })}
                       suffix="%"
                       min={0}
@@ -504,10 +580,12 @@ const TreatyMaster = () => {
             label="Export"
             icon="pi pi-download"
             className="p-button-secondary p-ml-2"
+            onClick={() => dt.current?.exportCSV()}
           />
         </div>
 
         <DataTable
+          ref={dt}
           value={treaties}
           loading={loading}
           paginator
@@ -540,6 +618,28 @@ const TreatyMaster = () => {
         footer={dialogFooter}
       >
         {renderTreatyForm()}
+      </Dialog>
+
+      <Dialog
+        visible={!!rejecting}
+        onHide={() => setRejecting(null)}
+        header={`${t('common.reject', 'Reject')} ${rejecting?.treatyNumber || ''}`}
+        style={{ width: '30rem' }}
+      >
+        <div className="p-fluid">
+          <InputText
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder={t('reinsurance.reason', 'Reason')}
+          />
+          <Button
+            className="mt-3"
+            label={t('common.submit')}
+            icon="pi pi-check"
+            disabled={!rejectReason.trim()}
+            onClick={() => decide('reject', rejecting, rejectReason.trim())}
+          />
+        </div>
       </Dialog>
     </div>
   );

@@ -4,30 +4,30 @@ import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import billingService from "../../../services/billingService";
 import InputTextField from "../../component/inputText";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 
 const ViewEndorsement = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  const endorsementId = state?.endorsementId || state?.id;
 
   const handleclickNavigation = () => {
-    navigate("/agent/endorsement/paymentconfirmation");
+    navigate(`/agent/endorsement/paymentconfirmation/${endorsementId || ""}`);
   };
   const handlePayLater = () => {
     navigate(-1);
   };
 
-  const handleEndorsement=()=>{
-    const pdfUrl = "https://zealeyeai-my.sharepoint.com/personal/infra_zealeye_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Finfra%5Fzealeye%5Fcom%2FDocuments%2FBroker%20Docs%2FEndorsement%20Schedule%2Epdf&parent=%2Fpersonal%2Finfra%5Fzealeye%5Fcom%2FDocuments%2FBroker%20Docs&ga=1";
-    const link = document.createElement("a");
-    link.href = pdfUrl;
-    link.download = "document.pdf"; // specify the filename
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+  const handleEndorsement = () => {
+    if (endorsementId) {
+      billingService.generateEndorsementBillingStatement(endorsementId, { useEndorsementId: true });
+    }
+  };
 
   return (
     <div className="view__endorsement__container">

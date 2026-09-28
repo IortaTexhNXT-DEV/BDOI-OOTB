@@ -1,7 +1,7 @@
 // Consolidated Product Configurator Screens Implementation
 // Comprehensive product management for insurance brokers
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { useNavigate, useParams } from "react-router-dom";
@@ -10,30 +10,112 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { TabView, TabPanel } from "primereact/tabview";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
-import { MultiSelect } from "primereact/multiselect";
 import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { Panel } from "primereact/panel";
 import { Accordion, AccordionTab } from "primereact/accordion";
-import { TreeTable } from "primereact/treetable";
 import { Chips } from "primereact/chips";
-import { Steps } from "primereact/steps";
 import { Timeline } from "primereact/timeline";
 import { ProgressBar } from "primereact/progressbar";
 import { Chart } from "primereact/chart";
-import productConfiguratorMockService from "../../services/mockData/productConfiguratorMockData";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import productConfiguratorService from "../../services/productConfiguratorService";
+import mastersService from "../../services/mastersService";
+import s3Service from "../../services/s3Service";
 import ProductConfiguratorTab from "./PoductConfiguratorTab/ProductConfiguratorTab";
 import { fetchProductTemplateByIdMiddleware } from "./store/productConfiguratorMiddleware";
 import { clearProductTemplate } from "./store/productConfiguratorSlice";
+
+/** Product templates as dropdown options for attaching a component to a product. */
+const useProductOptions = () => {
+  const [options, setOptions] = useState([]);
+  useEffect(() => {
+    productConfiguratorService
+      .getProductTemplates()
+      .then((rows) =>
+        setOptions(
+          rows
+            .filter((row) => row.status !== "Retired")
+            .map((row) => ({ label: `${row.templateCode} - ${row.name}`, value: row.id }))
+        )
+      )
+      .catch(() => setOptions([]));
+  }, []);
+  return options;
+};
+
+/** Loads the configuration components of one kind (coverages, rating-factors, ...). */
+const useComponentList = (kind, toast, errorSummary, errorDetail) => {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const messages = useRef({});
+  messages.current = { errorSummary, errorDetail };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setRows(await productConfiguratorService.listComponents(kind));
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: messages.current.errorSummary,
+        detail: error?.message || messages.current.errorDetail,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [kind, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { rows, loading, load };
+};
+
+/** Runs a save/delete call and shows the outcome on the screen's toast; resolves to true on success. */
+const persist = async (action, toast, { success, successDetail, error, errorDetail }) => {
+  try {
+    await action();
+    toast.current?.show({ severity: "success", summary: success, detail: successDetail });
+    return true;
+  } catch (err) {
+    toast.current?.show({ severity: "error", summary: error, detail: err?.message || errorDetail });
+    return false;
+  }
+};
+
+const ProductField = ({ value, options, onChange }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="field">
+      <label>{t("marketMapping.product")}</label>
+      <Dropdown
+        value={value}
+        options={options}
+        filter
+        placeholder={t("marketMapping.product")}
+        onChange={(e) => onChange(e.value)}
+      />
+    </div>
+  );
+};
+
+const confirmDelete = (t, name, onAccept) =>
+  confirmDialog({
+    message: t("productConfigurator.confirmDelete", "Delete {{name}}?", { name }),
+    header: t("common.confirm"),
+    icon: "pi pi-exclamation-triangle",
+    acceptClassName: "p-button-danger",
+    accept: onAccept,
+  });
 
 // PC-2: Product Template Management
 export const ProductTemplateManager = () => {
@@ -53,15 +135,7 @@ export const ProductTemplateManager = () => {
     error: templateError,
   } = useSelector((state) => state.productConfiguratorReducer || {});
 
-  const categoryOptions = [
-    { label: t("productTemplateManager.motor"), value: "Motor" },
-    { label: t("productTemplateManager.fireAndAlliedPerils"), value: "Fire and Allied Perils" },
-    { label: t("productTemplateManager.health"), value: "Health" },
-    { label: t("productTemplateManager.property"), value: "Property" },
-    { label: t("productTemplateManager.travel"), value: "Travel" },
-    { label: t("productTemplateManager.marine"), value: "Marine" },
-    { label: t("productTemplateManager.employeeBenefits"), value: "Employee Benefits" },
-  ];
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   const statusOptions = [
     { label: t("productTemplateManager.active"), value: "Active" },
@@ -71,6 +145,10 @@ export const ProductTemplateManager = () => {
 
   useEffect(() => {
     loadTemplates();
+    mastersService
+      .options("product-category")
+      .then((options) => setCategoryOptions(options.map((o) => ({ label: o.label, value: o.value }))))
+      .catch(() => setCategoryOptions([]));
 
     return () => {
       dispatch(clearProductTemplate());
@@ -121,6 +199,31 @@ export const ProductTemplateManager = () => {
     } finally {
       setTemplatesLoading(false);
     }
+  };
+
+  const setLifecycle = (template, action) => {
+    const retire = action === "retire";
+    confirmDialog({
+      message: `${retire ? t("productTemplateManager.retire", "Retire") : t("productTemplateManager.reactivate", "Reactivate")} ${template.templateCode}?`,
+      header: t("common.confirm"),
+      icon: "pi pi-exclamation-triangle",
+      accept: async () => {
+        const done = await persist(
+          () =>
+            retire
+              ? productConfiguratorService.retireProductTemplate(template.id)
+              : productConfiguratorService.reactivateProductTemplate(template.id),
+          toast,
+          {
+            success: t("productTemplateManager.success"),
+            successDetail: t("productTemplateManager.templateUpdated"),
+            error: t("productTemplateManager.error"),
+            errorDetail: t("productTemplateManager.failedToSaveTemplate"),
+          }
+        );
+        if (done) loadTemplates();
+      },
+    });
   };
 
   const saveTemplate = async () => {
@@ -228,6 +331,7 @@ export const ProductTemplateManager = () => {
   return (
     <div className="product-template-manager p-3">
       <Toast ref={toast} />
+      <ConfirmDialog />
       <Card title={t("productTemplateManager.cardTitle")}>
         {!id ? (
           <>
@@ -267,16 +371,33 @@ export const ProductTemplateManager = () => {
                 />
                 <Column
                   body={(rowData) => (
-                    <Button
-                      icon="pi pi-pencil"
-                      className="p-button-text"
-                      onClick={() => {
-                        navigate(
-                          `/product-configurator/template/${rowData.id}`
-                        );
-                        setSelectedTemplate(rowData);
-                      }}
-                    />
+                    <div className="flex gap-2">
+                      <Button
+                        icon="pi pi-pencil"
+                        className="p-button-text"
+                        onClick={() => {
+                          navigate(
+                            `/product-configurator/template/${rowData.id}`
+                          );
+                          setSelectedTemplate(rowData);
+                        }}
+                      />
+                      {rowData.status === "Retired" ? (
+                        <Button
+                          icon="pi pi-replay"
+                          className="p-button-text"
+                          tooltip={t("productTemplateManager.reactivate", "Reactivate")}
+                          onClick={() => setLifecycle(rowData, "reactivate")}
+                        />
+                      ) : (
+                        <Button
+                          icon="pi pi-ban"
+                          className="p-button-text p-button-danger"
+                          tooltip={t("productTemplateManager.retire", "Retire")}
+                          onClick={() => setLifecycle(rowData, "retire")}
+                        />
+                      )}
+                    </div>
                   )}
                 />
               </DataTable>
@@ -488,56 +609,54 @@ export const ProductTemplateManager = () => {
 export const CoverageBuilder = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
-  const [coverages, setCoverages] = useState([]);
   const [selectedCoverage, setSelectedCoverage] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: coverages, loading, load: loadCoverages } = useComponentList(
+    "coverages",
+    toast,
+    t("coverageBuilder.error"),
+    t("coverageBuilder.failedToLoad")
+  );
+  const messages = {
+    success: t("coverageBuilder.success"),
+    successDetail: t("coverageBuilder.saved"),
+    error: t("coverageBuilder.error"),
+    errorDetail: t("coverageBuilder.failedToSave"),
+  };
 
   const typeOptions = [
     { label: t("coverageBuilder.mandatory"), value: "Mandatory" },
     { label: t("coverageBuilder.optional"), value: "Optional" },
   ];
 
-  useEffect(() => {
-    loadCoverages();
-  }, []);
-
-  const loadCoverages = async () => {
-    setLoading(true);
-    try {
-      const data =
-        await productConfiguratorMockService.getCoverageConfigurations();
-      setCoverages(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("coverageBuilder.error"),
-        detail: t("coverageBuilder.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
+  const openCoverage = (coverage) => {
+    setSelectedCoverage(coverage);
+    setShowDialog(true);
   };
 
   const saveCoverage = async () => {
-    try {
-      await productConfiguratorMockService.createCoverage(selectedCoverage);
-      toast.current?.show({
-        severity: "success",
-        summary: t("coverageBuilder.success"),
-        detail: t("coverageBuilder.saved"),
-      });
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("coverages", selectedCoverage),
+      toast,
+      messages
+    );
+    if (saved) {
       setShowDialog(false);
       loadCoverages();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("coverageBuilder.error"),
-        detail: t("coverageBuilder.failedToSave"),
-      });
     }
   };
+
+  const deleteCoverage = (coverage) =>
+    confirmDelete(t, coverage.coverageName, async () => {
+      const deleted = await persist(
+        () => productConfiguratorService.deleteComponent("coverages", coverage.id),
+        toast,
+        messages
+      );
+      if (deleted) loadCoverages();
+    });
 
   const typeBodyTemplate = (rowData) => {
     const severity = rowData.type === "Mandatory" ? "danger" : "info";
@@ -548,16 +667,14 @@ export const CoverageBuilder = () => {
   return (
     <div className="coverage-builder p-3">
       <Toast ref={toast} />
+      <ConfirmDialog />
       <Card title={t("coverageBuilder.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("coverageBuilder.pageTitle")}</h3>
           <Button
             label={t("coverageBuilder.addCoverage")}
             icon="pi pi-plus"
-            onClick={() => {
-              setSelectedCoverage({ limits: [], exclusions: [] });
-              setShowDialog(true);
-            }}
+            onClick={() => openCoverage({ limits: [], exclusions: [] })}
           />
         </div>
 
@@ -576,11 +693,22 @@ export const CoverageBuilder = () => {
             header={t("coverageBuilder.actions")}
             body={(rowData) => (
               <div className="flex gap-2">
-                <Button icon="pi pi-pencil" className="p-button-text" />
-                <Button icon="pi pi-copy" className="p-button-text" />
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text"
+                  onClick={() => openCoverage(rowData)}
+                />
+                <Button
+                  icon="pi pi-copy"
+                  className="p-button-text"
+                  onClick={() =>
+                    openCoverage({ ...rowData, id: undefined, coverageCode: `${rowData.coverageCode}-COPY` })
+                  }
+                />
                 <Button
                   icon="pi pi-trash"
                   className="p-button-text p-button-danger"
+                  onClick={() => deleteCoverage(rowData)}
                 />
               </div>
             )}
@@ -595,6 +723,13 @@ export const CoverageBuilder = () => {
         onHide={() => setShowDialog(false)}
       >
         <div className="p-fluid">
+          {!selectedCoverage?.id && (
+            <ProductField
+              value={selectedCoverage?.productId}
+              options={productOptions}
+              onChange={(productId) => setSelectedCoverage({ ...selectedCoverage, productId })}
+            />
+          )}
           <div className="grid">
             <div className="col-6">
               <div className="field">
@@ -714,11 +849,17 @@ export const CoverageBuilder = () => {
 // PC-4: Rating Engine
 export const RatingEngine = () => {
   const { t } = useTranslation();
-  const [ratingFactors, setRatingFactors] = useState([]);
   const [selectedFactor, setSelectedFactor] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState(null);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: ratingFactors, loading, load: loadRatingFactors } = useComponentList(
+    "rating-factors",
+    toast,
+    t("ratingEngine.error"),
+    t("ratingEngine.failedToLoad")
+  );
 
   const typeOptions = [
     { label: t("ratingEngine.multiplicative"), value: "Multiplicative" },
@@ -726,42 +867,25 @@ export const RatingEngine = () => {
     { label: t("ratingEngine.discount"), value: "Discount" },
   ];
 
-  useEffect(() => {
-    loadRatingFactors();
-  }, []);
-
-  const loadRatingFactors = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getRatingFactors();
-      setRatingFactors(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("ratingEngine.error"),
-        detail: t("ratingEngine.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
+  const openFactor = (factor) => {
+    setSelectedFactor(factor);
+    setShowDialog(true);
   };
 
   const saveFactor = async () => {
-    try {
-      await productConfiguratorMockService.createRatingFactor(selectedFactor);
-      toast.current?.show({
-        severity: "success",
-        summary: t("ratingEngine.success"),
-        detail: t("ratingEngine.saved"),
-      });
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("rating-factors", selectedFactor),
+      toast,
+      {
+        success: t("ratingEngine.success"),
+        successDetail: t("ratingEngine.saved"),
+        error: t("ratingEngine.error"),
+        errorDetail: t("ratingEngine.failedToSave"),
+      }
+    );
+    if (saved) {
       setShowDialog(false);
       loadRatingFactors();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("ratingEngine.error"),
-        detail: t("ratingEngine.failedToSave"),
-      });
     }
   };
 
@@ -793,10 +917,7 @@ export const RatingEngine = () => {
             <Button
               label={t("ratingEngine.addFactor")}
               icon="pi pi-plus"
-              onClick={() => {
-                setSelectedFactor({ rules: [] });
-                setShowDialog(true);
-              }}
+              onClick={() => openFactor({ rules: [] })}
             />
           </div>
         </div>
@@ -806,7 +927,9 @@ export const RatingEngine = () => {
           loading={loading}
           paginator
           rows={10}
-          expandedRows={[]}
+          dataKey="id"
+          expandedRows={expandedRows}
+          onRowToggle={(e) => setExpandedRows(e.data)}
           rowExpansionTemplate={expandedRowTemplate}
         >
           <Column expander style={{ width: "3em" }} />
@@ -837,8 +960,18 @@ export const RatingEngine = () => {
             header={t("ratingEngine.actions")}
             body={(rowData) => (
               <div className="flex gap-2">
-                <Button icon="pi pi-pencil" className="p-button-text" />
-                <Button icon="pi pi-copy" className="p-button-text" />
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text"
+                  onClick={() => openFactor(rowData)}
+                />
+                <Button
+                  icon="pi pi-copy"
+                  className="p-button-text"
+                  onClick={() =>
+                    openFactor({ ...rowData, id: undefined, factorCode: `${rowData.factorCode}-COPY` })
+                  }
+                />
               </div>
             )}
           />
@@ -852,6 +985,13 @@ export const RatingEngine = () => {
         onHide={() => setShowDialog(false)}
       >
         <div className="p-fluid">
+          {!selectedFactor?.id && (
+            <ProductField
+              value={selectedFactor?.productId}
+              options={productOptions}
+              onChange={(productId) => setSelectedFactor({ ...selectedFactor, productId })}
+            />
+          )}
           <div className="field">
             <label>{t("ratingEngine.factorCode")}</label>
             <InputText
@@ -898,11 +1038,16 @@ export const RatingEngine = () => {
 // PC-5: Underwriting Rules
 export const UnderwritingRules = () => {
   const { t } = useTranslation();
-  const [rules, setRules] = useState([]);
   const [selectedRule, setSelectedRule] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: rules, loading, load: loadRules } = useComponentList(
+    "underwriting-rules",
+    toast,
+    t("underwritingRules.error"),
+    t("underwritingRules.failedToLoad")
+  );
 
   const typeOptions = [
     { label: t("underwritingRules.acceptance"), value: "Acceptance" },
@@ -916,42 +1061,20 @@ export const UnderwritingRules = () => {
     { label: t("underwritingRules.applyLoading"), value: "Apply Loading" },
   ];
 
-  useEffect(() => {
-    loadRules();
-  }, []);
-
-  const loadRules = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getUnderwritingRules();
-      setRules(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("underwritingRules.error"),
-        detail: t("underwritingRules.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const saveRule = async () => {
-    try {
-      await productConfiguratorMockService.createUnderwritingRule(selectedRule);
-      toast.current?.show({
-        severity: "success",
-        summary: t("underwritingRules.success"),
-        detail: t("underwritingRules.saved"),
-      });
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("underwriting-rules", selectedRule),
+      toast,
+      {
+        success: t("underwritingRules.success"),
+        successDetail: t("underwritingRules.saved"),
+        error: t("underwritingRules.error"),
+        errorDetail: t("underwritingRules.failedToSave"),
+      }
+    );
+    if (saved) {
       setShowDialog(false);
       loadRules();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("underwritingRules.error"),
-        detail: t("underwritingRules.failedToSave"),
-      });
     }
   };
 
@@ -991,6 +1114,10 @@ export const UnderwritingRules = () => {
             <DataTable
               value={rules.filter((r) => r.type === "Acceptance")}
               loading={loading}
+              onRowClick={(e) => {
+                setSelectedRule(e.data);
+                setShowDialog(true);
+              }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
@@ -1019,6 +1146,10 @@ export const UnderwritingRules = () => {
             <DataTable
               value={rules.filter((r) => r.type === "Validation")}
               loading={loading}
+              onRowClick={(e) => {
+                setSelectedRule(e.data);
+                setShowDialog(true);
+              }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
@@ -1035,6 +1166,10 @@ export const UnderwritingRules = () => {
             <DataTable
               value={rules.filter((r) => r.type === "Loading")}
               loading={loading}
+              onRowClick={(e) => {
+                setSelectedRule(e.data);
+                setShowDialog(true);
+              }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
@@ -1053,6 +1188,13 @@ export const UnderwritingRules = () => {
         onHide={() => setShowDialog(false)}
       >
         <div className="p-fluid">
+          {!selectedRule?.id && (
+            <ProductField
+              value={selectedRule?.productId}
+              options={productOptions}
+              onChange={(productId) => setSelectedRule({ ...selectedRule, productId })}
+            />
+          )}
           <div className="field">
             <label>{t("underwritingRules.ruleCode")}</label>
             <InputText
@@ -1115,32 +1257,53 @@ export const UnderwritingRules = () => {
 // PC-6: Approval Workflows
 export const ApprovalWorkflows = () => {
   const { t } = useTranslation();
-  const [workflows, setWorkflows] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const toast = useRef(null);
+  const { rows: workflows, load: loadWorkflows } = useComponentList(
+    "workflows",
+    toast,
+    t("approvalWorkflows.error"),
+    t("approvalWorkflows.failedToLoad")
+  );
 
-  useEffect(() => {
-    loadWorkflows();
-  }, []);
+  const typeOptions = [
+    { label: t("approvalWorkflows.sequential", "Sequential"), value: "Sequential" },
+    { label: t("approvalWorkflows.parallel", "Parallel"), value: "Parallel" },
+  ];
 
-  const loadWorkflows = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getApprovalWorkflows();
-      setWorkflows(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("approvalWorkflows.error"),
-        detail: t("approvalWorkflows.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
+  const updateStage = (index, field, value) => {
+    const stages = selectedWorkflow.stages.map((stage, i) =>
+      i === index ? { ...stage, [field]: value } : stage
+    );
+    setSelectedWorkflow({ ...selectedWorkflow, stages });
+  };
+
+  const addStage = () =>
+    setSelectedWorkflow({
+      ...selectedWorkflow,
+      stages: [...selectedWorkflow.stages, { level: selectedWorkflow.stages.length + 1, role: "", sla: "" }],
+    });
+
+  const saveWorkflow = async () => {
+    const stages = selectedWorkflow.stages.filter((stage) => stage.role.trim());
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("workflows", { ...selectedWorkflow, stages }),
+      toast,
+      {
+        success: t("common.success"),
+        successDetail: selectedWorkflow.workflowName,
+        error: t("approvalWorkflows.error"),
+        errorDetail: t("approvalWorkflows.failedToSave", "Failed to save workflow"),
+      }
+    );
+    if (saved) {
+      setSelectedWorkflow(null);
+      loadWorkflows();
     }
   };
 
   const workflowTemplate = (workflow) => {
-    const events = workflow.stages.map((stage) => ({
+    const events = (workflow.stages || []).map((stage) => ({
       status: stage.role,
       date: `SLA: ${stage.sla}`,
       icon: "pi pi-user",
@@ -1182,7 +1345,13 @@ export const ApprovalWorkflows = () => {
       <Card title={t("approvalWorkflows.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("approvalWorkflows.pageTitle")}</h3>
-          <Button label={t("approvalWorkflows.createWorkflow")} icon="pi pi-plus" />
+          <Button
+            label={t("approvalWorkflows.createWorkflow")}
+            icon="pi pi-plus"
+            onClick={() =>
+              setSelectedWorkflow({ type: "Sequential", triggers: [], stages: [{ level: 1, role: "", sla: "" }] })
+            }
+          />
         </div>
 
         {workflows.map((workflow) => (
@@ -1214,7 +1383,7 @@ export const ApprovalWorkflows = () => {
                   </div>
                   <div className="field">
                     <label>{t("approvalWorkflows.triggers")}:</label>
-                    {workflow.triggers.map((trigger) => (
+                    {(workflow.triggers || []).map((trigger) => (
                       <Tag
                         key={trigger}
                         value={trigger}
@@ -1222,12 +1391,82 @@ export const ApprovalWorkflows = () => {
                       />
                     ))}
                   </div>
+                  <Button
+                    icon="pi pi-pencil"
+                    className="p-button-text"
+                    onClick={() => setSelectedWorkflow({ ...workflow, triggers: workflow.triggers || [], stages: workflow.stages || [] })}
+                  />
                 </Card>
               </div>
             </div>
           </Panel>
         ))}
       </Card>
+
+      <Dialog
+        header={t("approvalWorkflows.createWorkflow")}
+        visible={!!selectedWorkflow}
+        style={{ width: "50vw" }}
+        onHide={() => setSelectedWorkflow(null)}
+      >
+        {selectedWorkflow && (
+          <div className="p-fluid">
+            <div className="field">
+              <label>{t("approvalWorkflows.code")}</label>
+              <InputText
+                value={selectedWorkflow.workflowCode || ""}
+                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, workflowCode: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>{t("approvalWorkflows.name", "Name")}</label>
+              <InputText
+                value={selectedWorkflow.workflowName || ""}
+                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, workflowName: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>{t("approvalWorkflows.type")}</label>
+              <Dropdown
+                value={selectedWorkflow.type}
+                options={typeOptions}
+                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, type: e.value })}
+              />
+            </div>
+            <div className="field">
+              <label>{t("approvalWorkflows.triggers")}</label>
+              <Chips
+                value={selectedWorkflow.triggers}
+                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, triggers: e.value })}
+              />
+            </div>
+            {selectedWorkflow.stages.map((stage, index) => (
+              <div className="formgrid grid" key={index}>
+                <div className="field col-8">
+                  <label>{t("approvalWorkflows.role", "Role")} {index + 1}</label>
+                  <InputText value={stage.role} onChange={(e) => updateStage(index, "role", e.target.value)} />
+                </div>
+                <div className="field col-4">
+                  <label>SLA</label>
+                  <InputText value={stage.sla} onChange={(e) => updateStage(index, "sla", e.target.value)} />
+                </div>
+              </div>
+            ))}
+            <Button
+              label={t("approvalWorkflows.addStage", "Add Stage")}
+              icon="pi pi-plus"
+              className="p-button-text mb-3"
+              onClick={addStage}
+            />
+            <Button
+              label={t("common.save")}
+              icon="pi pi-check"
+              onClick={saveWorkflow}
+              disabled={!selectedWorkflow.workflowCode || !selectedWorkflow.workflowName}
+            />
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
@@ -1236,32 +1475,43 @@ export const ApprovalWorkflows = () => {
 export const MarketMapping = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const [mappings, setMappings] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedMapping, setSelectedMapping] = useState(null);
+  const [insurerOptions, setInsurerOptions] = useState([]);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: mappings, loading, load: loadMappings } = useComponentList(
+    "market-mappings",
+    toast,
+    t("marketMapping.error"),
+    t("marketMapping.failedToLoad")
+  );
 
   useEffect(() => {
-    loadMappings();
+    mastersService
+      .options("insurance-company")
+      .then((options) => setInsurerOptions(options.map((o) => ({ label: o.label, value: o.label }))))
+      .catch(() => setInsurerOptions([]));
   }, []);
 
-  const loadMappings = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getMarketMapping();
-      setMappings(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("marketMapping.error"),
-        detail: t("marketMapping.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
+  const saveMapping = async () => {
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("market-mappings", selectedMapping),
+      toast,
+      {
+        success: t("common.success"),
+        successDetail: selectedMapping.insurerName,
+        error: t("marketMapping.error"),
+        errorDetail: t("marketMapping.failedToSave", "Failed to save mapping"),
+      }
+    );
+    if (saved) {
+      setSelectedMapping(null);
+      loadMappings();
     }
   };
 
   const progressBodyTemplate = (rowData) => {
-    const percentage = (rowData.ytdPremium / rowData.targetPremium) * 100;
+    const percentage = rowData.targetPremium ? (rowData.ytdPremium / rowData.targetPremium) * 100 : 0;
     return (
       <div>
         <ProgressBar
@@ -1274,36 +1524,57 @@ export const MarketMapping = () => {
     );
   };
 
+  const numberField = (field, label, props = {}) => (
+    <div className="field col-12 md:col-6">
+      <label>{label}</label>
+      <InputNumber
+        value={selectedMapping?.[field]}
+        onValueChange={(e) => setSelectedMapping({ ...selectedMapping, [field]: e.value })}
+        {...props}
+      />
+    </div>
+  );
+
   return (
     <div className="market-mapping p-3">
       <Toast ref={toast} />
       <Card title={t("marketMapping.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("marketMapping.pageTitle")}</h3>
-          <Button label={t("marketMapping.mapProduct")} icon="pi pi-plus" />
+          <Button
+            label={t("marketMapping.mapProduct")}
+            icon="pi pi-plus"
+            onClick={() => setSelectedMapping({ status: "Active" })}
+          />
         </div>
 
-        <DataTable value={mappings} loading={loading} paginator rows={10}>
-          <Column field="productId" header={t("marketMapping.product")} />
+        <DataTable
+          value={mappings}
+          loading={loading}
+          paginator
+          rows={10}
+          onRowClick={(e) => setSelectedMapping(e.data)}
+        >
+          <Column field="templateCode" header={t("marketMapping.product")} />
           <Column field="insurerName" header={t("marketMapping.insurer")} sortable />
           <Column field="productCode" header={t("marketMapping.insurerCode")} />
           <Column
             field="commissionRate"
             header={t("marketMapping.commissionPercent")}
             sortable
-            body={(rowData) => `${rowData.commissionRate}%`}
+            body={(rowData) => `${rowData.commissionRate ?? 0}%`}
           />
           <Column
             field="overrideRate"
             header={t("marketMapping.overridePercent")}
             sortable
-            body={(rowData) => `${rowData.overrideRate}%`}
+            body={(rowData) => `${rowData.overrideRate ?? 0}%`}
           />
           <Column
             field="targetPremium"
             header={t("marketMapping.target")}
             sortable
-            body={(rowData) => formatCurrency(rowData.targetPremium)}
+            body={(rowData) => formatCurrency(rowData.targetPremium ?? 0)}
           />
           <Column header={t("marketMapping.ytdPerformance")} body={progressBodyTemplate} />
           <Column
@@ -1315,6 +1586,53 @@ export const MarketMapping = () => {
           />
         </DataTable>
       </Card>
+
+      <Dialog
+        header={t("marketMapping.mapProduct")}
+        visible={!!selectedMapping}
+        style={{ width: "50vw" }}
+        onHide={() => setSelectedMapping(null)}
+      >
+        {selectedMapping && (
+          <div className="p-fluid">
+            {!selectedMapping.id && (
+              <ProductField
+                value={selectedMapping.productId}
+                options={productOptions}
+                onChange={(productId) => setSelectedMapping({ ...selectedMapping, productId })}
+              />
+            )}
+            <div className="field">
+              <label>{t("marketMapping.insurer")}</label>
+              <Dropdown
+                value={selectedMapping.insurerName}
+                options={insurerOptions}
+                filter
+                onChange={(e) => setSelectedMapping({ ...selectedMapping, insurerName: e.value })}
+              />
+            </div>
+            <div className="field">
+              <label>{t("marketMapping.insurerCode")}</label>
+              <InputText
+                value={selectedMapping.productCode || ""}
+                onChange={(e) => setSelectedMapping({ ...selectedMapping, productCode: e.target.value })}
+              />
+            </div>
+            <div className="formgrid grid">
+              {numberField("commissionRate", t("marketMapping.commissionPercent"), { suffix: "%", maxFractionDigits: 2 })}
+              {numberField("overrideRate", t("marketMapping.overridePercent"), { suffix: "%", maxFractionDigits: 2 })}
+              {numberField("targetPremium", t("marketMapping.target"), { maxFractionDigits: 2 })}
+              {numberField("ytdPremium", t("marketMapping.ytdPerformance"), { maxFractionDigits: 2 })}
+            </div>
+            <Button
+              label={t("common.save")}
+              icon="pi pi-check"
+              onClick={saveMapping}
+              disabled={!selectedMapping.insurerName || !selectedMapping.productCode}
+            />
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
@@ -1322,27 +1640,59 @@ export const MarketMapping = () => {
 // PC-8: Document Manager
 export const DocumentManager = () => {
   const { t } = useTranslation();
-  const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: documents, loading, load: loadDocuments } = useComponentList(
+    "documents",
+    toast,
+    t("documentManager.error"),
+    t("documentManager.failedToLoad")
+  );
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
+  const formatOptions = ["PDF", "Excel", "Word"];
 
-  const loadDocuments = async () => {
-    setLoading(true);
+  const uploadTemplateFile = async (file) => {
+    if (!file) return;
+    setUploading(true);
     try {
-      const data = await productConfiguratorMockService.getDocumentTemplates();
-      setDocuments(data);
+      const result = await s3Service.uploadFile(file, "product-documents");
+      if (!result?.url) throw new Error(result?.error || t("documentManager.uploadFailed", "Upload failed"));
+      setSelectedDocument((prev) => ({ ...prev, template: result.url }));
     } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("documentManager.error"),
-        detail: t("documentManager.failedToLoad"),
-      });
+      toast.current?.show({ severity: "error", summary: t("documentManager.error"), detail: error.message });
     } finally {
-      setLoading(false);
+      setUploading(false);
+    }
+  };
+
+  const saveDocument = async () => {
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("documents", selectedDocument),
+      toast,
+      {
+        success: t("common.success"),
+        successDetail: selectedDocument.documentName,
+        error: t("documentManager.error"),
+        errorDetail: t("documentManager.failedToSave", "Failed to save document"),
+      }
+    );
+    if (saved) {
+      setSelectedDocument(null);
+      loadDocuments();
+    }
+  };
+
+  const openTemplate = (rowData) => {
+    if (/^https?:\/\//.test(rowData.template || "")) {
+      window.open(rowData.template, "_blank", "noopener");
+    } else {
+      toast.current?.show({
+        severity: "info",
+        summary: rowData.documentName,
+        detail: t("documentManager.noFile", "No template file uploaded"),
+      });
     }
   };
 
@@ -1362,7 +1712,11 @@ export const DocumentManager = () => {
       <Card title={t("documentManager.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("documentManager.pageTitle")}</h3>
-          <Button label={t("documentManager.uploadTemplate")} icon="pi pi-upload" />
+          <Button
+            label={t("documentManager.uploadTemplate")}
+            icon="pi pi-upload"
+            onClick={() => setSelectedDocument({ format: "PDF", mandatory: false, variables: [] })}
+          />
         </div>
 
         <DataTable value={documents} loading={loading} paginator rows={10}>
@@ -1390,22 +1744,102 @@ export const DocumentManager = () => {
                   icon="pi pi-download"
                   className="p-button-text"
                   tooltip={t("documentManager.download")}
+                  onClick={() => openTemplate(rowData)}
                 />
                 <Button
                   icon="pi pi-pencil"
                   className="p-button-text"
                   tooltip={t("documentManager.edit")}
+                  onClick={() => setSelectedDocument(rowData)}
                 />
                 <Button
                   icon="pi pi-eye"
                   className="p-button-text"
                   tooltip={t("documentManager.preview")}
+                  onClick={() => openTemplate(rowData)}
                 />
               </div>
             )}
           />
         </DataTable>
       </Card>
+
+      <Dialog
+        header={t("documentManager.uploadTemplate")}
+        visible={!!selectedDocument}
+        style={{ width: "50vw" }}
+        onHide={() => setSelectedDocument(null)}
+      >
+        {selectedDocument && (
+          <div className="p-fluid">
+            {!selectedDocument.id && (
+              <ProductField
+                value={selectedDocument.productId}
+                options={productOptions}
+                onChange={(productId) => setSelectedDocument({ ...selectedDocument, productId })}
+              />
+            )}
+            <div className="formgrid grid">
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.documentCode")}</label>
+                <InputText
+                  value={selectedDocument.documentCode || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, documentCode: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.documentName")}</label>
+                <InputText
+                  value={selectedDocument.documentName || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, documentName: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.type")}</label>
+                <InputText
+                  value={selectedDocument.type || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, type: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.stage")}</label>
+                <InputText
+                  value={selectedDocument.stage || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, stage: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.format")}</label>
+                <Dropdown
+                  value={selectedDocument.format}
+                  options={formatOptions}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, format: e.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6 flex align-items-center gap-2">
+                <Checkbox
+                  inputId="documentMandatory"
+                  checked={!!selectedDocument.mandatory}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, mandatory: e.checked })}
+                />
+                <label htmlFor="documentMandatory">{t("documentManager.required")}</label>
+              </div>
+            </div>
+            <div className="field">
+              <label>{t("documentManager.uploadTemplate")}</label>
+              <input type="file" onChange={(e) => uploadTemplateFile(e.target.files?.[0])} />
+              {selectedDocument.template && <small className="block mt-1">{selectedDocument.template}</small>}
+            </div>
+            <Button
+              label={t("common.save")}
+              icon="pi pi-check"
+              loading={uploading}
+              onClick={saveDocument}
+              disabled={!selectedDocument.documentCode || !selectedDocument.documentName || !selectedDocument.type}
+            />
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
@@ -1415,28 +1849,20 @@ export const ProductAnalytics = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
-
-  const loadAnalytics = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getProductAnalytics();
-      setAnalytics(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("productAnalytics.error"),
-        detail: t("productAnalytics.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    productConfiguratorService
+      .getProductAnalytics()
+      .then(setAnalytics)
+      .catch((error) =>
+        toast.current?.show({
+          severity: "error",
+          summary: t("productAnalytics.error"),
+          detail: error?.message || t("productAnalytics.failedToLoad"),
+        })
+      );
+  }, [t]);
 
   const performanceChart = {
     labels: analytics?.performanceTrend?.map((tr) => tr.month) || [],
@@ -1524,7 +1950,10 @@ export const ProductAnalytics = () => {
               header={t("productAnalytics.profitMargin")}
               sortable
               body={(rowData) => (
-                <Tag value={`${rowData.profitMargin}%`} severity="success" />
+                <Tag
+                  value={`${rowData.profitMargin}%`}
+                  severity={rowData.profitMargin >= 0 ? "success" : "danger"}
+                />
               )}
             />
           </DataTable>
