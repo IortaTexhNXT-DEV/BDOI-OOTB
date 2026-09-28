@@ -203,6 +203,8 @@ const collectPaths = (items, out = []) => {
 
 const matches = (pathname, p) => {
   const base = p.replace(/\/+$/, "");
+  // the home route "/" matches only itself (it would otherwise prefix every address)
+  if (!base) return pathname === "/" || pathname === "";
   return pathname === base || pathname.startsWith(`${base}/`);
 };
 
