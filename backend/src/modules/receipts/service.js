@@ -84,8 +84,8 @@ async function linePolicy(db, l, header) {
   return (ref && await findPolicy(db, ref)) || (header.policy_id ? await findPolicy(db, header.policy_id) : null);
 }
 
-/** Apply what a line newly pays, or bill a pending line's policy when it has no receivable yet. */
-async function processLine(db, receipt, line, user) {
+/** Apply what a line newly pays, or bill a pending line's policy when it has no receivable yet. receivableId pins the payment to one bill. */
+async function processLine(db, receipt, line, user, receivableId = null) {
   const source = SOURCE_BY_TXN[String(receipt.transaction_code || '').toUpperCase()] || 'policy';
   if (line.status === 'Paid') {
     const delta = round2(Number(line.paid) - Number(line.applied_amount));
@@ -93,7 +93,7 @@ async function processLine(db, receipt, line, user) {
     if (delta === 0) return;
     if (!line.policy_id) throw badRequest(`Line ${line.line_no}: policy ${line.policy_number || ''} not found`);
     const policy = await requirePolicy(db, line.policy_id);
-    await applyToPolicy(db, { policy, amount: delta, billAmount: Number(line.lc_amount), breakdown: breakdownOf(line), source, receipt, lineId: line.id,
+    await applyToPolicy(db, { policy, amount: delta, billAmount: Number(line.lc_amount), breakdown: breakdownOf(line), source, receipt, lineId: line.id, receivableId,
       paymentMode: receipt.payment_mode, referenceNo: receipt.reference_no, date: receipt.received_date, user });
     await db.query('UPDATE receipt_lines SET applied_amount = paid, updated_at = now() WHERE id = $1', [line.id]);
   } else if (line.policy_id && Number(line.lc_amount) > 0) {
@@ -114,13 +114,23 @@ async function refreshHeader(db, id) {
 /** Normalise the two request shapes: the front-end receiptsList form, or a simple OR against a receivable / policy. */
 async function linesFromSimple(db, b) {
   if (b.receiptsList?.length) return b.receiptsList;
-  let policyRef = b.policyRefId || b.policyId || b.policyNumber;
+  const policyRef = b.policyRefId || b.policyId || b.policyNumber;
   if (b.receivableId) {
-    const rcv = (await db.query('SELECT * FROM receivables WHERE id = $1 OR bill_number = $1', [b.receivableId])).rows[0];
+    // Payment against one bill: lock it, then refuse zero, excess and payments for another customer / policy.
+    const rcv = (await db.query('SELECT * FROM receivables WHERE id = $1 OR bill_number = $1 FOR UPDATE', [b.receivableId])).rows[0];
     if (!rcv) throw notFound('Receivable not found');
-    if (Number(rcv.balance) <= 0) throw conflict(`Receivable ${rcv.bill_number} is already fully paid`);
-    if (num(b.amount) > Number(rcv.balance)) throw badRequest(`Amount exceeds the outstanding balance of ${rcv.balance}`);
-    policyRef = rcv.policy_id;
+    const amount = round2(num(b.amount));
+    if (!(amount > 0)) throw badRequest('Amount received must be greater than zero');
+    if (Number(rcv.balance) <= 0 || !['open', 'partial'].includes(rcv.status)) throw conflict(`Receivable ${rcv.bill_number} is already fully paid`);
+    if (amount > round2(rcv.balance)) throw badRequest(`Amount ${amount.toFixed(2)} exceeds the outstanding balance of bill ${rcv.bill_number} (${round2(rcv.balance).toFixed(2)})`);
+    const policy = await requirePolicy(db, rcv.policy_id);
+    const other = b.policyRefId || b.policyId || b.policyNumber;
+    if (other && other !== policy.id && other !== policy.policy_number) throw badRequest(`Bill ${rcv.bill_number} belongs to policy ${policy.policy_number}`);
+    const client = b.customerCode ? await findClient(db, b.customerCode) : null;
+    if (b.customerCode && (!client || client.id !== rcv.client_id)) throw badRequest(`Bill ${rcv.bill_number} does not belong to customer ${b.customerCode}`);
+    const balance = round2(rcv.balance);
+    return [{ policyId: policy.id, policies: policy.policy_number, receivableId: rcv.id, lcAmount: balance, netPremium: Number(rcv.net_premium) || balance,
+      paid: amount, unPaid: round2(balance - amount), status: 'Paid' }];
   }
   if (!policyRef) throw badRequest('Provide receiptsList, receivableId or policyId');
   if (!(num(b.amount) > 0)) throw badRequest('amount must be greater than zero');
@@ -133,7 +143,7 @@ async function linesFromSimple(db, b) {
 export async function createReceipt(db, b, user, { source = 'api' } = {}) {
   const lines = await linesFromSimple(db, b);
   let policy = await findPolicy(db, b.policyRefId || b.policyId || lines[0]?.policyId || (lines[0]?.policies !== 'N/A' ? lines[0]?.policies : null));
-  if (!policy && b.receivableId) policy = await findPolicy(db, (await db.query('SELECT policy_id FROM receivables WHERE id = $1 OR bill_number = $1', [b.receivableId])).rows[0]?.policy_id);
+  if (!policy && lines[0]?.receivableId) policy = await findPolicy(db, lines[0].policyId);
   const client = await findClient(db, b.customerCode) || (policy?.client_id ? await findClient(db, policy.client_id) : null);
   if (!client && !policy) throw badRequest('customerCode or policy is required');
   const number = await nextNo(db, 'receipt', 'numbering.receipt.prefix', 'OR');
@@ -149,7 +159,7 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
   for (const l of lines) {
     n += 1;
     const line = await insertLine(db, header, n, l, await linePolicy(db, l, header));
-    await processLine(db, header, line, user);
+    await processLine(db, header, line, user, l.receivableId || null);
   }
   await refreshHeader(db, header.id);
   return getReceipt(db, header.id);
@@ -214,4 +224,27 @@ export async function cancelReceipt(db, id, reason, user) {
   await db.query('UPDATE receipt_lines SET applied_amount = 0, updated_at = now() WHERE receipt_id = $1', [r.id]);
   await db.query(`UPDATE receipts SET receipt_status = 'Cancelled', status = 'cancelled', cancelled_by = $2, cancelled_at = now(), cancel_reason = $3, updated_at = now() WHERE id = $1`, [r.id, user.id, reason || null]);
   return { before, after: await getReceipt(db, r.id) };
+}
+
+/**
+ * Open (unpaid / partially paid) premium receivables for Accounts > Receipts > Add receipt: every customer with a bill
+ * to collect, the policies behind them and each bill's balance. Filters: customerCode (client code or id), policyNumber
+ * (number or id), search; scoped users see the bills of policies they may see.
+ */
+export async function listOpenReceivables(db, q = {}) {
+  const p = []; const where = ['r.balance > 0', 'r.status IN (\'open\',\'partial\')'];
+  if (q.customerCode) { p.push(String(q.customerCode)); where.push(`(c.client_code = $${p.length} OR c.id = $${p.length})`); }
+  if (q.policyNumber || q.policyId) { p.push(String(q.policyNumber || q.policyId)); where.push(`(p.policy_number = $${p.length} OR p.id = $${p.length})`); }
+  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'')) ILIKE '%' || $${p.length} || '%'`); }
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', p));
+  const limit = Math.min(Math.max(Number(q.limit) || 500, 1), 2000);
+  const rows = (await db.query(`SELECT r.*, p.policy_number, c.client_code, c.display_name, c.first_name, c.last_name
+    FROM receivables r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
+    WHERE ${where.join(' AND ')} ORDER BY c.client_code, p.policy_number, r.due_date, r.created_at LIMIT ${limit}`, p)).rows;
+  return rows.map((r) => ({
+    receivableId: r.id, billNumber: r.bill_number, source: r.source, reference: r.reference, customerCode: r.client_code || r.client_id, clientId: r.client_id,
+    customerName: r.display_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || null, policyId: r.policy_id, policyNumber: r.policy_number,
+    amount: Number(r.amount), paidAmount: round2(Number(r.amount) - Number(r.balance)), balance: Number(r.balance), dueDate: r.due_date,
+    status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency,
+  }));
 }

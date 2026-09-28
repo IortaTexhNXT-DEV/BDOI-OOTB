@@ -24,6 +24,7 @@ import {
 } from "../store/receiptsMiddleware";
 import { clearBulkPrintError } from "../store/receiptsReducers";
 import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Calendar } from "primereact/calendar";
@@ -568,6 +569,28 @@ const PolicyReceipts = () => {
     }
   };
 
+  // Real buttons (keyboard focus, Enter / Space) for the header actions; rendered for desktop and mobile layouts.
+  const headerActions = (
+    <>
+      <div className="filter_bulk_button_container">
+        <Button type="button" className="bulk_button_container" onClick={handleModal}>
+          <span className="addtext">{t("accounts.receipts.bulkPrint")}</span>
+        </Button>
+      </div>
+      <div className="filter_bulk_button_container">
+        <Button type="button" className="bulk_button_container" onClick={handleBulkUploadModal}>
+          <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
+        </Button>
+      </div>
+      <div className="filterbutton_container">
+        <Button type="button" className="addbutton_container" onClick={handlePolicy}>
+          <SvgAdd className="addicon" aria-hidden="true" />
+          <span className="addtext">{t("accounts.receipts.receipt")}</span>
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <div className="overall__policyreceipts__container mt-1">
       {/* Policy ID Filter Indicator */}
@@ -614,47 +637,11 @@ const PolicyReceipts = () => {
           />
         </div>
         <div className="bulk__texts">
-          <div className="filter_bulk_button_container">
-            <div className="bulk_button_container" onClick={handleModal}>
-              <p className="addtext">{t("accounts.receipts.bulkPrint")}</p>
-            </div>
-          </div>
-          <div className="filter_bulk_button_container">
-            <div
-              className="bulk_button_container"
-              onClick={handleBulkUploadModal}
-            >
-              <p className="addtext">{t("accounts.receipts.bulkUpload")}</p>
-            </div>
-          </div>
-          <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
-              <SvgAdd className="addicon" />
-              <p className="addtext">{t("accounts.receipts.receipt")}</p>
-            </div>
-          </div>
+          {headerActions}
         </div>
         {/* Mobile/Tablet Actions - moved below title */}
         <div className="mobile-header-actions">
-          <div className="filter_bulk_button_container">
-            <div className="bulk_button_container" onClick={handleModal}>
-              <p className="addtext">{t("accounts.receipts.bulkPrint")}</p>
-            </div>
-          </div>
-          <div className="filter_bulk_button_container">
-            <div
-              className="bulk_button_container"
-              onClick={handleBulkUploadModal}
-            >
-              <p className="addtext">{t("accounts.receipts.bulkUpload")}</p>
-            </div>
-          </div>
-          <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
-              <SvgAdd className="addicon" />
-              <p className="addtext">{t("accounts.receipts.receipt")}</p>
-            </div>
-          </div>
+          {headerActions}
         </div>
       </div>
 
@@ -752,7 +739,7 @@ const PolicyReceipts = () => {
                 field="name"
                 header={t("common.name")}
                 headerStyle={headerStyle1}
-                className="fieldvalue_container"
+                className="fieldvalue_container receipts_name_cell"
                 body={(rowData) => rowData.name?.toUpperCase()}
               ></Column>
               <Column
@@ -774,6 +761,7 @@ const PolicyReceipts = () => {
                 header={t("accounts.receipts.amount")}
                 headerStyle={headerStyle3}
                 className="fieldvalue_container"
+                body={(rowData) => formatCurrency(rowData.amount ?? 0)}
               ></Column>
               <Column
                 field="totalPaid"

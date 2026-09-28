@@ -57,6 +57,12 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/open-receivables', summary: 'Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)',
+  screen: `${SCREEN} > Add receipt`, middleware: read, query: { customerCode: 'CL-2026-00001', policyNumber: 'POL-2026-00001' },
+  response: { success: true, data: [{ receivableId: 'rcv_1', billNumber: 'INV-2026-00002', source: 'endorsement', customerCode: 'CL-2026-00001', customerName: 'Maria Santos', policyId: 'pol_1', policyNumber: 'POL-2026-00001', amount: 5010, paidAmount: 0, balance: 5010, dueDate: '2026-10-28', status: 'Open', currency: 'PHP' }] },
+  handler: async (req, res) => ok(res, await svc.listOpenReceivables(pool, await withScope(req))),
+});
+define({
   method: 'GET', path: '/printReceipt', summary: 'Print receipts (one receiptId, or customer-code and date range) to a PDF download URL', screen: `${SCREEN} > Bulk print / Print`, middleware: read,
   query: { customerCodeFrom: 'CL-2026-00001', customerCodeTo: 'CL-2026-00099', createdAtFrom: '2026-09-01', createdAtTo: '2026-09-30' },
   response: { success: true, message: 'Receipts exported', data: { url: 'http://host/api/upload/file/print/…pdf', filename: 'receipts.pdf', count: 2 } },
