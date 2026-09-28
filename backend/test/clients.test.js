@@ -65,6 +65,8 @@ describe('clients', () => {
     const codes = await finance('get', '/customers/codes');
     expect(codes.body.data.length).toBeGreaterThanOrEqual(10);
     expect((await finance('post', '/clients').send({ firstName: 'x' })).status).toBe(403);
-    expect((await agent('get', '/clients')).status).toBe(403);
+    // Agents see Clients in their menu: read allowed, create refused.
+    expect((await agent('get', '/clients')).status).toBe(200);
+    expect((await agent('post', '/clients').send({ firstName: 'x' })).status).toBe(403);
   });
 });
