@@ -9,7 +9,7 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('reports.email_subject', '"{{companyName}}: {{reportName}} ({{from}} to {{to}})"'::jsonb, 'reports', 'Scheduled report e-mail subject', 'string'),
  ('reports.email_body', '"<p>Good day,</p><p>The scheduled report <b>{{reportName}}</b> for {{from}} to {{to}} is ready ({{rows}} rows, {{format}}).</p><p><a href=\"{{downloadUrl}}\">Download {{fileName}}</a></p><p>{{companyName}}</p>"'::jsonb, 'reports', 'Scheduled report e-mail body (HTML)', 'string'),
  ('reports.claim_ageing_buckets', '[30,60,90,180]'::jsonb, 'reports', 'Claim ageing buckets (days)', 'json'),
- ('reports.claim_open_statuses', '["registered","in-review","approved"]'::jsonb, 'reports', 'Claim statuses counted as open in reports', 'json'),
+ ('reports.claim_open_statuses', '["registered","in-review","pending-approval","approved"]'::jsonb, 'reports', 'Claim statuses counted as open in reports', 'json'),
  ('reports.claim_settled_statuses', '["settled","closed"]'::jsonb, 'reports', 'Claim statuses counted as settled in reports', 'json'),
  ('reports.claim_rejected_statuses', '["rejected"]'::jsonb, 'reports', 'Claim statuses counted as rejected in reports', 'json'),
  ('reports.renewal_retained_statuses', '["renewed"]'::jsonb, 'reports', 'Renewal statuses counted as retained', 'json'),

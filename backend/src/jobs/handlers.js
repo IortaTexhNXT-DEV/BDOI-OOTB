@@ -60,3 +60,6 @@ export async function emailOutbox() {
 
 /** Scheduled report jobs created from Reports > Schedules (code report-<id>). */
 export const scheduledReport = async (p) => (await import('../modules/reports/service.js')).scheduledReport(p);
+
+/** Renewal batch notices queue and the daily renewal pipeline (enrol expiring policies, lapse overdue renewals). */
+export { processRenewalQueue, renewalPipeline } from '../modules/renewals/jobs.js';

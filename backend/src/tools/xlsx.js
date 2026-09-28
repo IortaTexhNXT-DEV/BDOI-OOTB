@@ -34,7 +34,7 @@ function excelDate(v) {
 }
 
 const safeSheetName = (name, used) => {
-  let base = String(name || 'Sheet').replace(/[[\]:*?/\\]/g, ' ').slice(0, 31) || 'Sheet';
+  const base = String(name || 'Sheet').replace(/[[\]:*?/\\]/g, ' ').slice(0, 31) || 'Sheet';
   let n = 2;
   let out = base;
   while (used.has(out.toLowerCase())) { out = `${base.slice(0, 28)} ${n}`; n += 1; }
