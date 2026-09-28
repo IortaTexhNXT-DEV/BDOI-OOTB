@@ -189,3 +189,131 @@ describe('renewals', () => {
     expect((await as('u.maker', 'get', '/renewals/queue')).status).toBe(200);
   });
 });
+
+describe('renewal quote wizard -> customer approval -> new policy term', () => {
+  const tokenOf = (url) => decodeURIComponent(new URL(url).searchParams.get('token'));
+  const balanced = async (jvId) => {
+    const s = await one('SELECT sum(debit)::numeric AS dr, sum(credit)::numeric AS cr, count(*)::int AS n FROM journal_lines WHERE jv_id = $1', [jvId]);
+    expect(s.n).toBeGreaterThanOrEqual(2);
+    expect(Number(s.dr)).toBe(Number(s.cr));
+    return Number(s.dr);
+  };
+
+  it('prefills the wizard from the expiring policy only (quotation data; blank accessories)', async () => {
+    const r = await ctx.api('get', '/policy-renewals/policies/pol_sls_01/prefill');
+    expect(r.status).toBe(200);
+    const p = r.body.data;
+    expect(p.source).toBe('quotation');
+    expect(Number(p.coverageDetails.lossAndDamageCoverage)).toBe(1450000);
+    expect(Number(p.coverageDetails.lossAndDamageCoverageRate)).toBe(1.6);
+    expect(p.vehicle.insuranceVehicleDetails[0]).toMatchObject({ vehicleBrand: 'Toyota', vehicleModel: 'Fortuner' });
+    expect(p.insuranceCompanyName).toMatch(/Malayan/i);
+    expect(p.clientCode).toBeTruthy();
+    expect(Object.values(p.accessories).every((v) => v === '')).toBe(true);
+  });
+
+  it('prefills a policy without a quotation from the policy row (sum insured, insurer, client)', async () => {
+    const r = await ctx.api('get', '/policy-renewals/policies/POL-2025-90021/prefill');
+    expect(r.status).toBe(200);
+    const p = r.body.data;
+    expect(p.quoteId).toBeNull();
+    expect(p.coverageDetails.lossAndDamageCoverage).toBe(1300000);
+    expect(p.coverageDetails.totalSumInsured).toBe(1300000);
+    expect(p.clientCode).toBe('CL-2026-90010');
+    expect(p.insuranceCompanyId).toBeTruthy();
+    expect(p.renewal.renewalNumber).toBe('RN-2026-90021');
+    expect(p.accessories.aircon).toBe('');
+  });
+
+  let quoteId;
+  let renewalId;
+  it('creates the renewal quotation linked to the expiring policy (insurer, client, lead, vehicle, product carried)', async () => {
+    const body = {
+      coverageDetails: { lossAndDamageCoverage: '1,450,000.00', lossAndDamageCoverageRate: '1.6', bodilyInjury: '100,000.00', propertyDamage: '100,000.00', totalSumInsured: '1,650,000.00' },
+      accessories: { aircon: '', stereo: '', magWheels: '', others: '', deductible: '', towing: '', repairLimit: '' },
+      orderSummary: { discount: '0.00', commissionDetails: { primary: { referrerId: 'direct' }, chain: [] } },
+    };
+    const c = await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send(body);
+    expect(c.status).toBe(201);
+    quoteId = c.body.data.quotationId;
+    renewalId = c.body.data.renewal.id;
+    expect(c.body.data.quotation.isRenewal).toBe(true);
+    expect(c.body.data.renewal.statusCode).toBe('quoted');
+    const policy = await one('SELECT * FROM policies WHERE id = \'pol_sls_01\'');
+    const q = await one('SELECT * FROM quotes WHERE id = $1', [quoteId]);
+    expect(q.insurance_company_id).toBe(policy.insurance_company_id);
+    expect(q.client_id).toBe(policy.client_id);
+    expect(q.lead_id).toBe(policy.lead_id);
+    expect(q.product_id).toBe(policy.product_id);
+    expect(q.vehicle).toMatchObject({ vehicleBrand: 'Toyota', vehicleModel: 'Fortuner', plateNumber: 'NBC 1452' });
+    expect(q.doc.renewal).toMatchObject({ policyId: 'pol_sls_01', policyNumber: policy.policy_number, renewalId });
+    expect(q.doc.aircon).toBe('');
+    expect(Number(q.premium_base)).toBeGreaterThan(23200);
+    expect(Number(q.vat)).toBeCloseTo(Number(q.premium_base) * 0.12, 1);
+    expect(c.body.data.quotation.taxRates).toMatchObject({ valueAddedTax: 0.12, documentaryStampTax: 0.125, localGovernmentTax: 0.0075 });
+    expect(Number(c.body.data.renewal.renewalPremium)).toBe(Number(q.premium_total));
+    // Saving again updates the same renewal quotation instead of creating another one.
+    const again = await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send(body);
+    expect(again.status).toBe(200);
+    expect(again.body.data.quotationId).toBe(quoteId);
+    const detail = await ctx.api('get', `/quotations/${quoteId}`);
+    expect(detail.body.insuranceCompanyName || detail.body.data?.insuranceCompanyName).toMatch(/Malayan/i);
+  });
+
+  it('issues the accepted renewal quotation as the new term: old policy renewed, receivable and balanced journal, commission', async () => {
+    const sent = await ctx.api('post', `/quotations/${quoteId}/send-for-approval`).send({});
+    expect(sent.status).toBe(200);
+    expect(sent.body.sentTo).toBe('miguel.aquino@example.ph');
+    const acc = await request(ctx.app).post('/api/quotations/approve-by-customer').send({ token: tokenOf(sent.body.approvalUrl) });
+    expect(acc.status).toBe(200);
+    expect(acc.body.quotationStatus).toBe('CustomerAccepted');
+    const old = await one('SELECT * FROM policies WHERE id = \'pol_sls_01\'');
+    const conv = await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { paymentStatus: 'Pending' } });
+    expect(conv.status).toBe(201);
+    const newId = conv.body.policyId;
+    expect(newId).not.toBe('pol_sls_01');
+    const oldAfter = await one('SELECT status, renewed_to FROM policies WHERE id = \'pol_sls_01\'');
+    expect(oldAfter).toMatchObject({ status: 'renewed', renewed_to: newId });
+    const np = await one('SELECT * FROM policies WHERE id = $1', [newId]);
+    expect(np.renewed_from).toBe('pol_sls_01');
+    expect(np.policy_number).not.toBe(old.policy_number);
+    expect(np.client_id).toBe(old.client_id);
+    expect(np.insurance_company_id).toBe(old.insurance_company_id);
+    const next = new Date(`${old.expiry_date}T00:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + 1);
+    expect(np.inception_date).toBe(next.toISOString().slice(0, 10));
+    expect(np.details.businessType).toBe('Renewal');
+    expect(conv.body.policy.renewedFrom).toBe('pol_sls_01');
+    const rcv = await one('SELECT * FROM receivables WHERE policy_id = $1', [newId]);
+    expect(rcv.source).toBe('renewal');
+    expect(Number(rcv.amount)).toBe(Number(np.premium_total));
+    expect(np.bill_number).toBe(rcv.bill_number);
+    expect(await balanced(rcv.booking_jv_id)).toBe(Number(np.premium_total));
+    expect(await one('SELECT 1 AS x FROM collection_items WHERE receivable_id = $1', [rcv.id])).toBeTruthy();
+    const com = await one('SELECT * FROM commissions WHERE policy_id = $1', [newId]);
+    expect(com).toBeTruthy();
+    expect(Number(com.amount)).toBeGreaterThan(0);
+    const rn = await one('SELECT status, new_policy_id FROM renewals WHERE id = $1', [renewalId]);
+    expect(rn).toMatchObject({ status: 'renewed', new_policy_id: newId });
+    // The expiring term can not be renewed twice.
+    expect((await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send({})).status).toBe(409);
+  });
+
+  it('renews a seeded policy without quotation or lead (client e-mail, client-based conversion)', async () => {
+    const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_21/quotation').send({ coverageDetails: { lossAndDamageCoverage: '1300000', lossAndDamageCoverageRate: '1.5' } });
+    expect(c.status).toBe(201);
+    const q = await one('SELECT * FROM quotes WHERE id = $1', [c.body.data.quotationId]);
+    expect(q.client_id).toBe('cl_crs_10');
+    expect(q.lead_id).toBeNull();
+    expect(q.insurance_company_id).toBeTruthy();
+    expect(Number(q.premium_base)).toBe(19500);
+    const sent = await ctx.api('post', `/quotations/${q.id}/send-for-approval`).send({});
+    expect(sent.status).toBe(200);
+    expect(sent.body.sentTo).toBe('patricia.garcia@example.ph');
+    expect((await request(ctx.app).post('/api/quotations/approve-by-customer').send({ token: tokenOf(sent.body.approvalUrl) })).status).toBe(200);
+    const conv = await ctx.api('post', `/quotations/${q.id}/convert-to-policy`).send({});
+    expect(conv.status).toBe(201);
+    expect((await one('SELECT status, renewed_to FROM policies WHERE id = \'pol_crs_21\'')).renewed_to).toBe(conv.body.policyId);
+    expect((await one('SELECT status FROM renewals WHERE id = \'rnw_crs_21\'')).status).toBe('renewed');
+  });
+});

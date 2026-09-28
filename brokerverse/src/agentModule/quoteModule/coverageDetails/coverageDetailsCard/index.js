@@ -18,7 +18,6 @@ import {
 } from "./mock";
 import {
   postcoverageDetailsMiddleware,
-  submitRenewalCoverageMiddleware,
 } from "../store/coverageDetailsMiddleware";
 import { setQuoteCoverageDetails } from "../../Store/quotationReducer";
 import {
@@ -27,6 +26,8 @@ import {
 } from "../../utils/premiumCalculations";
 import { APPATotalCoverageOptions } from "../../../endorsementModule/personalDetails/mock";
 import policyService from "../../../../services/policyService";
+import policyRenewalService from "../../../../services/policyRenewalService";
+import useTaxRates from "../../utils/useTaxRates";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 
 const CoverageDetailsCard = ({
@@ -326,6 +327,11 @@ const CoverageDetailsCard = ({
     };
   }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType]);
 
+  // Configured tax rates (app settings) so the gross shown here matches the order summary.
+  const settingsTaxRates = useTaxRates();
+  // Renewal prefill kept as the form's initial values so a later re-initialisation
+  // (enableReinitialize, e.g. when the product template loads) does not wipe it.
+  const [renewalValues, setRenewalValues] = useState(null);
   const [show, setshow] = useState(true);
   const [isOverRide, setOverRide] = useState(false);
   const [includeActsOfNature, setIncludeActsOfNature] = useState(
@@ -342,6 +348,8 @@ const CoverageDetailsCard = ({
     Boolean(initialFormikValues?.CtplCoverageRate)
   );
   useEffect(() => {
+    // The renewal flow sets these from the renewal prefill.
+    if (flow === "renewal") return;
     setIncludeActsOfNature(
       isEditMode && Boolean(existingCoverageDetails?.actsOfNatureRate)
     );
@@ -358,6 +366,7 @@ const CoverageDetailsCard = ({
     existingCoverageDetails?.roadsideAssistanceRate,
     existingCoverageDetails?.personalAccidentCoverRate,
     initialFormikValues?.CtplCoverageRate,
+    flow,
   ]);
   // Initialize renewalDataLoaded to true if it's a renewal flow to prevent auto-calculate
   const [renewalDataLoaded, setRenewalDataLoaded] = useState(
@@ -413,30 +422,15 @@ const CoverageDetailsCard = ({
       }),
     };
 
-    // Save to Redux state
-    dispatch(setQuoteCoverageDetails(coverageDetailsData));
-
-    // Also dispatch to old middleware for backward compatibility
-    dispatch(postcoverageDetailsMiddleware(values));
-
     if (flow === "renewal") {
-      console.log("=== PROCESSING RENEWAL ===");
-      console.log("formik.values:", formik.values);
-      const sanitizedValues = buildSanitizedCoverageValues(
-        formik.values,
-        includeActsOfNature,
-        includeRoadsideAssistance,
-        includePersonalAccident
-      );
-      console.log("sanitizedValues:", sanitizedValues);
-      return dispatch(
-        submitRenewalCoverageMiddleware({
-          policyId,
-          formValues: sanitizedValues,
-        })
-      )
-        .unwrap()
-        .then(() => {
+      // Save exactly what is on screen on the policy's open renewal (created when there is none).
+      return policyRenewalService
+        .saveRenewalWizard(policyId, { coverageDetails: coverageDetailsData })
+        .then((response) => {
+          if (!response.success) {
+            alert(`Could not save the renewal: ${response.error}`);
+            return;
+          }
           navigate(
             `/agent/renewalquote/accessories/accessorirsdetails/${policyId}`,
             {
@@ -448,15 +442,14 @@ const CoverageDetailsCard = ({
               },
             }
           );
-        })
-        .catch(() => {
-          // Intentionally left blank; navigation blocked when API fails
-        })
-        .finally(() => {
-          // align with Formik expectation; ensures the promise resolves
-          return;
         });
     }
+
+    // Save to Redux state
+    dispatch(setQuoteCoverageDetails(coverageDetailsData));
+
+    // Also dispatch to old middleware for backward compatibility
+    dispatch(postcoverageDetailsMiddleware(values));
 
     // Determine navigation path
     const currentPath = window.location.pathname;
@@ -524,7 +517,8 @@ const CoverageDetailsCard = ({
         ...computed,
         discount: formik.values.Discount || "0",
       },
-      productConfigurator
+      productConfigurator,
+      settingsTaxRates
     );
 
     // Validate gross premium vs sum insured
@@ -676,6 +670,9 @@ const CoverageDetailsCard = ({
   // }
   // Helper function to get form values from Redux state or empty
   const getFormValues = () => {
+    if (flow === "renewal" && renewalValues) {
+      return renewalValues;
+    }
     // Use existing coverage details from Redux if in edit mode
     if (isEditMode && existingCoverageDetails) {
       return {
@@ -794,67 +791,61 @@ const CoverageDetailsCard = ({
         return;
       }
 
-      let policyData = null;
-
-      if (policyId) {
-        console.log("Fetching FULL policy data from API for renewal...");
-        try {
-          const response = await policyService.getPolicyDetails(policyId);
-
-          if (!response.success || !response.data) {
-            console.error("Failed to fetch policy data:", response.error);
-            return;
-          }
-
-          policyData = response.data;
-          console.log("policyData", policyData);
-        } catch (error) {
-          console.error("Error fetching policy data for renewal:", error);
-          return;
-        }
-      } else {
+      if (!policyId) {
         console.error("No policy ID available for renewal");
         return;
       }
 
-      if (!policyData) {
-        console.warn("No policy data available for renewal");
+      // Prefill from this renewal's saved wizard data or, failing that, the expiring
+      // policy itself (its quotation, else sum insured / insurer / product of the policy row).
+      const response = await policyRenewalService.getRenewalPrefill(policyId);
+      if (!response.success || !response.data) {
+        console.error("Failed to load renewal prefill:", response.error);
         return;
       }
+      const coverage = response.data.coverageDetails || {};
+      const mapped = policyService.transformRenewalCoverage(coverage);
+      const formatAmount = (value) =>
+        value === "" || value === undefined || value === null
+          ? ""
+          : formatNumber(Number(String(value).replace(/,/g, "")), {
+              minimumFractionDigits: 2,
+            });
+      const coverageForRenewal = {
+        ...mapped,
+        LossandDamagecoverage: formatAmount(mapped.LossandDamagecoverage),
+        TotalSumInsured: formatAmount(mapped.TotalSumInsured),
+        LossandDamagecoverageRate:
+          mapped.LossandDamagecoverageRate ||
+          productConfigurator?.configuration?.premiumRates?.[vehicleType] ||
+          "",
+        CtplCoverageRate:
+          mapped.CtplCoverageRate ||
+          productConfigurator?.configuration?.ctplSetting?.[vehicleType] ||
+          "",
+        BodilyInjury: mapped.BodilyInjury
+          ? normalizeDropdownValue(mapped.BodilyInjury, BodilyInjuryOptions)
+          : "",
+        PropertyDamage: mapped.PropertyDamage
+          ? normalizeDropdownValue(mapped.PropertyDamage, PropertyDamageOptions)
+          : "",
+        AutopassengerpersonalAccident: mapped.AutopassengerpersonalAccident
+          ? normalizeDropdownValue(
+              mapped.AutopassengerpersonalAccident,
+              AutopassengerpersonalAccidentOptions
+            )
+          : "",
+      };
 
-      // Transform policy coverage data to form format
-      const coverageForRenewal =
-        policyService.transformPolicyCoverageForRenewal({
-          ...policyData,
-
-          ctplCoverageRate:
-            productConfigurator?.configuration?.ctplSetting?.[vehicleType] ||
-            "",
-        });
-      console.log("Transformed coverage for renewal:", coverageForRenewal);
-
-      // Pre-populate the form with policy coverage data
-      if (coverageForRenewal && Object.keys(coverageForRenewal).length > 0) {
-        formik.setValues(coverageForRenewal);
-
-        // Verify what was actually set after React updates
-        setTimeout(() => {
-          // Double-check if values didn't stick, set them again
-          if (
-            !formik.values.LossandDamagecoverage &&
-            coverageForRenewal.LossandDamagecoverage
-          ) {
-            console.warn("Values didn't stick, setting again...");
-            formik.setValues(coverageForRenewal);
-          }
-        }, 100);
-
-        setshow(false); // Hide calculate button since values are already populated
-        setRenewalDataLoaded(true); // Mark renewal data as loaded to prevent auto-calculate from overwriting
-        console.log("Form pre-populated with policy data - SUCCESS");
-      } else {
-        console.warn("No coverage data to pre-populate");
-      }
+      setRenewalValues(coverageForRenewal);
+      formik.setValues(coverageForRenewal);
+      setIncludeActsOfNature(Boolean(coverage.actsOfNatureRate));
+      setIncludeRoadsideAssistance(Boolean(coverage.roadsideAssistanceRate));
+      setIncludePersonalAccident(Boolean(coverage.personalAccidentCoverRate));
+      setIncludeCTPL(Boolean(coverageForRenewal.CtplCoverageRate));
+      // Premiums priced on the expiring term can be carried on; otherwise Calculate first.
+      setshow(!coverage.lossAndDamageCoveragePremium);
+      setRenewalDataLoaded(true);
     };
 
     fetchPolicyDataForRenewal();

@@ -11,12 +11,7 @@ import { useFormik } from "formik";
 import InputTextField from "../../component/inputText";
 import { postaccessoriesMiddleware } from "./store/accessoriesMiddleware";
 import { setQuoteAccessories } from "../Store/quotationReducer";
-import {
-  getPolicyRenewalCoverageMiddleware,
-  submitRenewalCoverageMiddleware,
-} from "../coverageDetails/store/coverageDetailsMiddleware";
-import { getpolicyDetailedMiddleware } from "../policyDetailedView/store/policyDetailedMiddleware";
-import policyService from "../../../services/policyService";
+import policyRenewalService from "../../../services/policyRenewalService";
 import leadService from "../../../services/leadService";
 
 const Accessories = ({ action, flow }) => {
@@ -28,15 +23,13 @@ const Accessories = ({ action, flow }) => {
   const { id: leadRefId } = useParams();
 
   // Redux selectors
-  const { currentQuoteCreation, policydetailedlist, renewalAccessoriesList } = useSelector(
-    ({ quotationReducers, policyDetailedViewMainReducers, coverageDetailsReducer }) => ({
-      currentQuoteCreation: quotationReducers?.currentQuoteCreation,
-      policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
-      renewalAccessoriesList: coverageDetailsReducer?.renewalAccessoriesList || [],
-    })
-  );
-  
-  const isEditMode = currentQuoteCreation?.isEditMode || false;
+  const { currentQuoteCreation } = useSelector(({ quotationReducers }) => ({
+    currentQuoteCreation: quotationReducers?.currentQuoteCreation,
+  }));
+
+  // The renewal flow never reuses a quote that is being created or edited elsewhere.
+  const isEditMode =
+    flow !== "renewal" && (currentQuoteCreation?.isEditMode || false);
   const existingAccessories = currentQuoteCreation?.accessories;
   
   // State for lead/client data
@@ -83,6 +76,21 @@ const Accessories = ({ action, flow }) => {
       towing: values.Towing,
       repairLimit: values.RepairLimit,
     };
+
+    if (flow === "renewal") {
+      // Accessories and limits of the renewal are saved on the policy's open renewal.
+      return policyRenewalService
+        .saveRenewalWizard(policyId, { accessories: accessoriesData })
+        .then((response) => {
+          if (!response.success) {
+            alert(`Could not save the renewal: ${response.error}`);
+            return;
+          }
+          navigate(`/agent/renewalquote/ordersummary/${policyId}`, {
+            state: { ...state, policyId, policyData: state?.policyData },
+          });
+        });
+    }
     
     // Save to Redux state
     dispatch(setQuoteAccessories(accessoriesData));
@@ -96,11 +104,7 @@ const Accessories = ({ action, flow }) => {
     const idParam = isEditMode ? currentQuoteCreation.quotationId : leadRefId;
     
     // Navigate to order summary
-    if (flow === "renewal") {
-      navigate(`/agent/renewalquote/ordersummary/${policyId}`, { 
-        state: { ...state, policyId, policyData: state?.policyData } 
-      });
-    } else if (action === "accessoriescreate") {
+    if (action === "accessoriescreate") {
       const basePath = isEditFlow ? '/agent/editquote' : '/agent/createquote';
       navigate(`${basePath}/ordersummary/${idParam}`, { 
         state: { ...state } 
@@ -148,67 +152,37 @@ const Accessories = ({ action, flow }) => {
     fetchLeadData();
   }, [flow, leadRefId]);
 
-  // Fetch policy accessories for renewal and pre-populate
+  // Renewal: prefill from this renewal's saved accessories, else the expiring policy's own
+  // quotation / policy data; fields the policy never had stay blank.
   useEffect(() => {
-    const fetchPolicyAccessoriesForRenewal = async () => {
-      // Only fetch if this is a renewal flow and we have a policyId
+    const fetchRenewalAccessories = async () => {
       if (flow !== "renewal" || !policyId || hasInitialized.current) {
         return;
       }
-
-      console.log("=== FETCHING POLICY ACCESSORIES FOR RENEWAL ===");
-      console.log("Policy ID:", policyId);
-
-      try {
-        // Fetch the policy details
-        const response = await policyService.getPolicyDetails(policyId);
-        
-        if (!response.success || !response.data) {
-          console.error("Failed to fetch policy data:", response.error);
-          return;
-        }
-
-        const policyData = response.data;
-        console.log("Policy data fetched for accessories:", policyData);
-
-        // Extract client data from policy
-        if (policyData.lead) {
-          console.log("Setting client data from policy:", policyData.lead);
-          setClientData(policyData.lead);
-        }
-
-        // Policy data has accessories at root level (flat structure)
-        // Pre-populate the form with policy accessories data
-        formik.setValues({
-          Aircon: policyData.aircon || "",
-          Stereo: policyData.stereo || "",
-          Magwheels: policyData.magWheels || "",
-          Others: policyData.others || "",
-          Deductible: policyData.deductible || "",
-          Towing: policyData.towing || "",
-          RepairLimit: policyData.repairLimit || "",
-        });
-        hasInitialized.current = true;
-        console.log("Form pre-populated with policy accessories from flat structure");
-      } catch (error) {
-        console.error("Error fetching policy accessories for renewal:", error);
+      const response = await policyRenewalService.getRenewalPrefill(policyId);
+      if (!response.success || !response.data) {
+        console.error("Failed to load renewal prefill:", response.error);
+        return;
       }
-    };
-
-    fetchPolicyAccessoriesForRenewal();
-  }, [flow, policyId]);
-
-  // Only update form values once when renewal data is loaded (legacy support)
-  useEffect(() => {
-    if (flow === "renewal" && renewalAccessoriesList.length > 0 && !hasInitialized.current) {
+      const prefill = response.data;
+      setClientData({ name: prefill.clientName, code: prefill.clientCode });
+      const a = prefill.accessories || {};
+      const text = (v) => (v === undefined || v === null ? "" : String(v));
       formik.setValues({
-        ...initialValue,
-        ...renewalAccessoriesList[0].accessories,
-        ...renewalAccessoriesList[0].policyLimits,
+        Aircon: text(a.aircon),
+        Stereo: text(a.stereo),
+        Magwheels: text(a.magWheels),
+        Others: text(a.others),
+        Deductible: text(a.deductible),
+        Towing: text(a.towing),
+        RepairLimit: text(a.repairLimit),
       });
       hasInitialized.current = true;
-    }
-  }, [renewalAccessoriesList, flow]);
+    };
+
+    fetchRenewalAccessories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, policyId]);
 
   const handleLeadNavigation = () => {
     navigate(-1);
@@ -218,11 +192,11 @@ const Accessories = ({ action, flow }) => {
     if (flow === "renewal") {
       if (clientData) {
         const parts = [];
-        if (clientData.firstName || clientData.lastName) {
-          parts.push(`${clientData.firstName || ""} ${clientData.lastName || ""}`.trim());
+        if (clientData.name) {
+          parts.push(clientData.name);
         }
-        if (clientData.generatedLeadId) {
-          parts.push(`Client ID : ${clientData.generatedLeadId}`);
+        if (clientData.code) {
+          parts.push(`Client ID : ${clientData.code}`);
         }
         return parts.join(" / ") || "Client";
       }

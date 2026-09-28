@@ -224,8 +224,11 @@ export async function issuePolicy(db, src, body, userId) {
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
     JSON.stringify({ ...(src.doc || {}), ...docOf(body) }), userId]);
   const policyId = r.rows[0].id;
-  const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: 'policy', user: { id: userId },
-    breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount } });
+  // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
+  const renewal = src.receivableSource === 'renewal';
+  const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId },
+    breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount,
+      ...(renewal ? { commissionAmount: src.commissionAmount } : {}) } });
   await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [policyId, receivable.bill_number]);
   const details = { commissionDetails: src.doc?.commissionDetails || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
   await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);

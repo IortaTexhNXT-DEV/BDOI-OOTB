@@ -26,10 +26,8 @@ import { calculatePremiumBreakdown } from "../utils/premiumCalculations";
 import useTaxRates from "../utils/useTaxRates";
 import quotationService from "../../../services/quotationService";
 import { transformToBackendFormat } from "../utils/quotationDataTransform";
-import policyService from "../../../services/policyService";
-import { BASE_URL } from "../../../utility/constant";
+import policyRenewalService from "../../../services/policyRenewalService";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
-import authService from "../../../services/authService";
 import leadService from "../../../services/leadService";
 import CommissionReferralSection, {
   defaultCommissionDetails,
@@ -115,64 +113,25 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
   };
   return transformed;
 };
-// Helper function to transform policy data to quotation format for renewal
-const transformPolicyToQuotationFormat = (policyData) => {
-  if (!policyData) {
+// Renewal: the wizard data saved on the renewal (coverage, accessories) or, when the
+// earlier steps saved nothing, the expiring policy's own data. Premiums are priced by the server.
+const transformRenewalPrefillToQuotationFormat = (prefill) => {
+  if (!prefill) {
     return null;
   }
-
-  console.log("=== TRANSFORM POLICY TO QUOTATION FORMAT ===");
-  console.log("Input policy data:", policyData);
-
-  // Extract all relevant fields from policy data
-  const transformed = {
-    // Coverage Details
-    lossAndDamageCoverage: policyData.lossAndDamageCoverage || "",
-    lossAndDamageCoverageRate: policyData.lossAndDamageCoverageRate || "",
-    lossAndDamageCoveragePremium: policyData.lossAndDamageCoveragePremium || "",
-    actsOfNatureRate: policyData.actsOfNatureRate || "",
-    actsOfNaturePremium: policyData.actsOfNaturePremium || "",
-    bodilyInjury: policyData.bodilyInjury || "",
-    bodilyInjuryCoveragePremium: policyData.bodilyInjuryCoveragePremium || "",
-    propertyDamage: policyData.propertyDamage || "",
-    propertyDamageCoveragePremium:
-      policyData.propertyDamageCoveragePremium || "",
-    autoPassengerPersonalAccident:
-      policyData.autoPassengerPersonalAccident || "",
-    APPAtotalCoverage: policyData.APPAtotalCoverage || "",
-    APPAcoveragePremium: policyData.APPAcoveragePremium || "",
-    totalSumInsured:
-      policyData.totalSumInsured || policyData.totalCoverage || "",
-
-    // Premium Breakdown (if available from policy)
-    netPremium: policyData.netPremium || "",
-    valueAddedTax: policyData.valueAddedTax || "",
-    accountPremiumOthers: policyData.accountPremiumOthers || "",
-    documentaryStampTax: policyData.documentaryStampTax || "",
-    localGovernmentTax:
-      policyData.localGovernmentTax || policyData.localGovtTax || "",
-    discount: policyData.discount || "0.00",
-    NCD: policyData.NCD || policyData.ncd || "0.00",
-    grossPremium: policyData.grossPremium || "",
-
-    // Accessories
-    aircon: policyData.aircon || "",
-    stereo: policyData.stereo || "",
-    magWheels: policyData.magWheels || "",
-    others: policyData.others || "",
-    deductible: policyData.deductible || "",
-    towing: policyData.towing || "",
-    repairLimit: policyData.repairLimit || "",
+  const order = prefill.orderSummary || {};
+  return {
+    ...(prefill.coverageDetails || {}),
+    ...(prefill.accessories || {}),
+    productType: prefill.productType,
+    lob: prefill.lob,
+    insuranceCompanyId: prefill.insuranceCompanyId,
+    insuranceCompanyName: prefill.insuranceCompanyName,
+    discount: order.discount || "0.00",
+    accountPremiumOthers: order.accountPremiumOthers || "",
+    authorizedSignature: order.authorizedSignature || "",
+    commissionDetails: order.commissionDetails || prefill.commissionDetails || undefined,
   };
-
-  console.log("Transformed policy data:", transformed);
-  console.log("Premium fields:", {
-    netPremium: transformed.netPremium,
-    valueAddedTax: transformed.valueAddedTax,
-    grossPremium: transformed.grossPremium,
-  });
-
-  return transformed;
 };
 
 // Helper function to get form values from quotation data
@@ -332,62 +291,18 @@ const OrderSummary = ({ action, flow }) => {
     const loadQuotationData = async () => {
       // RENEWAL FLOW: Fetch policy and transform to quotation format
       if (flow === "renewal" && policyId) {
-        console.log("=== LOADING RENEWAL DATA FOR ORDER SUMMARY ===");
-        console.log("Policy ID:", policyId);
         setIsLoadingRenewalData(true);
-
-        try {
-          // CRITICAL: Always fetch full policy data from API for renewals
-          // Navigation state only has basic info but doesn't include coverage/premium details
-          console.log("Fetching FULL policy data from API...");
-          const response = await policyService.getPolicyDetails(policyId);
-
-          if (!response.success) {
-            console.error("Failed to fetch policy data:", response.error);
-            alert("Failed to load policy data. Please try again.");
-            setIsLoadingRenewalData(false);
-            return;
-          }
-
-          const policyData = response.data;
-          console.log("=== ORDER SUMMARY: RAW POLICY DATA ===");
-          console.log("Full policy data:", policyData);
-          console.log(
-            "Policy lossAndDamageCoverage:",
-            policyData.lossAndDamageCoverage
-          );
-          console.log("Policy actsOfNatureRate:", policyData.actsOfNatureRate);
-          console.log("Policy netPremium:", policyData.netPremium);
-          console.log("Policy valueAddedTax:", policyData.valueAddedTax);
-          console.log("Policy totalCoverage:", policyData.totalCoverage);
-
-          // Extract client data from policy
-          if (policyData.lead) {
-            console.log("Setting client data from policy:", policyData.lead);
-            setClientData(policyData.lead);
-          }
-
-          // Transform policy data to quotation format
-          const transformedData = transformPolicyToQuotationFormat(policyData);
-          console.log("=== ORDER SUMMARY: TRANSFORMED DATA ===");
-          console.log("Transformed quotation data:", transformedData);
-          console.log("Number of fields:", Object.keys(transformedData).length);
-          console.log("Sample transformed values:", {
-            lossAndDamageCoverage: transformedData.lossAndDamageCoverage,
-            actsOfNatureRate: transformedData.actsOfNatureRate,
-            totalSumInsured: transformedData.totalSumInsured,
-            discount: transformedData.discount,
-          });
-
-          setQuotationData(transformedData);
-        } catch (error) {
-          console.error("Error loading renewal data:", error);
-          alert(
-            "An error occurred while loading policy data. Please try again."
-          );
-        } finally {
-          setIsLoadingRenewalData(false);
+        const response = await policyRenewalService.getRenewalPrefill(policyId);
+        setIsLoadingRenewalData(false);
+        if (!response.success || !response.data) {
+          alert(`Failed to load the renewal: ${response.error || "unknown error"}`);
+          return;
         }
+        setClientData({
+          name: response.data.clientName,
+          code: response.data.clientCode,
+        });
+        setQuotationData(transformRenewalPrefillToQuotationFormat(response.data));
       }
       // NORMAL/EDIT FLOW: Use Redux or navigation state
       else if (currentQuoteCreation && currentQuoteCreation.leadRefId) {
@@ -448,66 +363,12 @@ const OrderSummary = ({ action, flow }) => {
     );
   }, [quotationId, urlQuotationId, quotationData?.quotationId, isEditFlow]);
   const handleclick = async (values) => {
-    // Handle renewal flow separately
+    // Renewal: save the order summary on the renewal and create (or update) the renewal
+    // quotation linked to the expiring policy. It then follows the normal quotation workflow
+    // (send for customer approval, convert to policy = the new policy term).
     if (flow === "renewal" && policyId) {
-      try {
-        // Get policy details to extract coverage and accessories data
-        const policyResponse = await policyService.getPolicyDetails(policyId);
-        if (!policyResponse.success) {
-          alert("Failed to fetch policy details for renewal");
-          return;
-        }
-
-        const policyData = policyResponse.data;
-
-        // Extract coverage details directly from policy data (camelCase format from DB)
-        const coverageDetails = {
-          lossAndDamageCoverage: policyData.lossAndDamageCoverage || "",
-          lossAndDamageCoverageRate: policyData.lossAndDamageCoverageRate || "",
-          lossAndDamageCoveragePremium:
-            policyData.lossAndDamageCoveragePremium || "",
-          actsOfNatureRate: policyData.actsOfNatureRate || "",
-          actsOfNaturePremium: policyData.actsOfNaturePremium || "",
-          bodilyInjury: policyData.bodilyInjury || "",
-          bodilyInjuryCoveragePremium:
-            policyData.bodilyInjuryCoveragePremium || "",
-          propertyDamage: policyData.propertyDamage || "",
-          propertyDamageCoveragePremium:
-            policyData.propertyDamageCoveragePremium || "",
-          autoPassengerPersonalAccident:
-            policyData.autoPassengerPersonalAccident || "",
-          APPAtotalCoverage: policyData.APPAtotalCoverage || "",
-          APPAcoveragePremium: policyData.APPAcoveragePremium || "",
-          totalSumInsured:
-            policyData.totalSumInsured || policyData.totalCoverage || "",
-        };
-
-        // Extract accessories from policy (using camelCase as stored in DB)
-        const accessories = {
-          aircon: policyData.aircon || "",
-          stereo: policyData.stereo || "",
-          magWheels: policyData.magWheels || "",
-          others: policyData.others || "",
-          deductible: policyData.deductible || "",
-          towing: policyData.towing || "",
-          repairLimit: policyData.repairLimit || "",
-        };
-
-        // Remove empty string fields from coverageDetails
-        const cleanedCoverageDetails = Object.fromEntries(
-          Object.entries(coverageDetails).filter(([_, value]) => value !== "")
-        );
-
-        // Validate that we have required coverage data
-        if (!cleanedCoverageDetails.lossAndDamageCoverage) {
-          alert(
-            "Error: Missing coverage details from policy. Please try again."
-          );
-          return;
-        }
-
-        // Build order summary data
-        const orderSummaryData = {
+      const response = await policyRenewalService.createRenewalQuotation(policyId, {
+        orderSummary: {
           netPremium: values.netPremium,
           valueAddedTax: values.valueAddedTax,
           accountPremiumOthers: values.others,
@@ -517,184 +378,21 @@ const OrderSummary = ({ action, flow }) => {
           discount: values.discount,
           grossPremium: values.grossPremium,
           authorizedSignature: values.authorizedSignature,
-          commissionDetails:
-            values.commissionDetails || defaultCommissionDetails(),
-        };
-
-        // Create the renewal record with complete data
-        const renewalResponse = await policyService.createPolicyRenewal(
-          policyId,
-          {
-            coverageDetails: cleanedCoverageDetails,
-            accessories,
-            orderSummary: orderSummaryData,
-            effectiveDate: new Date(),
-            expiryDate: new Date(
-              new Date().setFullYear(new Date().getFullYear() + 1)
-            ),
-          }
-        );
-
-        if (!renewalResponse.success) {
-          alert(
-            "Failed to create renewal: " +
-              (renewalResponse.error || "Unknown error")
-          );
-          return;
-        }
-
-        const renewalId = renewalResponse.data?.id;
-
-        let createdQuotationId = null; // Declare outside try block for wider scope
-
-        try {
-          // Prepare quotation data from policy data and renewal details
-          const quotationPayload = {
-            // Lead/Client Info
-            leadRefId: policyData.leadId || policyData.lead?.id,
-
-            // Insurance Policy Info
-            insurancePolicyType: policyData.insurancePolicyType || "Motor",
-            accountCode: policyData.accountCode,
-            paymentType: policyData.paymentOptions || policyData.paymentType,
-            productType: policyData.product || "Motor",
-            isCoInsurance: policyData.isCoInsurance || false,
-            installmentType: policyData.installmentType || "",
-
-            // Coverage Details (from policy data)
-            lossAndDamageCoverage: cleanedCoverageDetails.lossAndDamageCoverage,
-            lossAndDamageCoverageRate:
-              cleanedCoverageDetails.lossAndDamageCoverageRate,
-            lossAndDamageCoveragePremium:
-              cleanedCoverageDetails.lossAndDamageCoveragePremium,
-            actsOfNatureRate: cleanedCoverageDetails.actsOfNatureRate,
-            actsOfNaturePremium: cleanedCoverageDetails.actsOfNaturePremium,
-            bodilyInjury: cleanedCoverageDetails.bodilyInjury,
-            bodilyInjuryCoveragePremium:
-              cleanedCoverageDetails.bodilyInjuryCoveragePremium,
-            propertyDamage: cleanedCoverageDetails.propertyDamage,
-            propertyDamageCoveragePremium:
-              cleanedCoverageDetails.propertyDamageCoveragePremium,
-            autoPassengerPersonalAccident:
-              cleanedCoverageDetails.autoPassengerPersonalAccident,
-            APPAtotalCoverage: cleanedCoverageDetails.APPAtotalCoverage,
-            APPAcoveragePremium: cleanedCoverageDetails.APPAcoveragePremium,
-            totalSumInsured: cleanedCoverageDetails.totalSumInsured,
-
-            // Accessories
-            aircon: accessories.aircon,
-            stereo: accessories.stereo,
-            magWheels: accessories.magWheels,
-            others: accessories.others,
-            deductible: accessories.deductible,
-            towing: accessories.towing,
-            repairLimit: accessories.repairLimit,
-
-            // Order Summary / Premium Breakdown
-            netPremium: orderSummaryData.netPremium,
-            valueAddedTax: orderSummaryData.valueAddedTax,
-            accountPremiumOthers: orderSummaryData.accountPremiumOthers,
-            documentaryStampTax: orderSummaryData.documentaryStampTax,
-            localGovernmentTax: orderSummaryData.localGovernmentTax,
-            NCD: orderSummaryData.NCD,
-            discount: orderSummaryData.discount,
-            grossPremium: orderSummaryData.grossPremium,
-            authorizedSignature: orderSummaryData.authorizedSignature,
-            commissionDetails: orderSummaryData.commissionDetails,
-
-            // Status
-            quotationStatus: "Draft", // Valid enum: Draft, PendingCustomer, CustomerAccepted, etc.
-            customerAccepted: null, // Must be String or Null, not boolean
-
-            // Audit fields
-            createdBy: localStorage.getItem("USERNAME") || undefined,
-
-            // Vehicle Details (from policy)
-            insuranceVehicleDetails: [
-              {
-                vehicleBrand: policyData.vehicleBrand,
-                vehicleType: policyData.vehicleType,
-                modelYear: policyData.modelYear,
-                vehicleModel: policyData.vehicleModel,
-                modelVariant: policyData.modelVariant,
-                vehicleColor: policyData.vehicleColor,
-                seatingCapacity: policyData.seatingCapacity,
-              },
-            ],
-            // .filter((v) => v.vehicleType), // Only include if vehicle data exists
-
-            // Participant Details (if co-insurance)
-            // Try to get from quotation first, then fallback to policy level
-            participantDetails: policyData.isCoInsurance
-              ? (
-                  policyData.quotation?.participantDetails ||
-                  policyData.participantDetails ||
-                  []
-                ).map((p) => ({
-                  insuranceCompanyName: p.insuranceCompanyName,
-                  participantName: p.participantName,
-                  sumInsuredCurrency: p.sumInsuredCurrency,
-                  premiumCurrency: p.premiumCurrency,
-                  sharePercentage: p.sharePercentage,
-                }))
-              : [],
-          };
-
-          // Call quotation creation API
-          const quotationResponse = await fetch(`${BASE_URL}/quotations`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...authService.getAuthHeader(),
-            },
-            body: JSON.stringify(quotationPayload),
-          });
-
-          const quotationResult = await quotationResponse.json();
-
-          if (quotationResponse.ok && quotationResult) {
-            createdQuotationId = quotationResult.quotationId;
-          } else {
-            console.error("❌ Failed to create quotation:", quotationResult);
-            // Don't block the renewal flow if quotation creation fails
-          }
-        } catch (quotationError) {
-          console.error(
-            "Error creating quotation for renewal:",
-            quotationError
-          );
-          // Don't block the renewal flow if quotation creation fails
-        }
-
-        // Show success message
-        setToastMessage("Renewal & Quotation Created Successfully");
-        toastRef.current.showToast();
-
-        // Navigate to quote detail view if quotation was created, otherwise go to renewal waiting screen
-        setTimeout(() => {
-          if (createdQuotationId) {
-            console.log("Navigating to quote detail view:", createdQuotationId);
-            navigate(`/agent/quotedetailview/${createdQuotationId}`);
-          } else {
-            console.log(
-              "Quotation creation failed, navigating to renewal waiting screen"
-            );
-            navigate(`/agent/renewal/waiting/${renewalId}`, {
-              state: {
-                renewalId,
-                policyId,
-                policyData,
-              },
-            });
-          }
-        }, 2000);
-
-        return;
-      } catch (error) {
-        console.error("Error processing renewal:", error);
-        alert("An error occurred while processing the renewal");
+          commissionDetails: values.commissionDetails,
+        },
+      });
+      if (!response.success || !response.data?.quotationId) {
+        alert(`Failed to create the renewal quotation: ${response.error || "unknown error"}`);
         return;
       }
+      setToastMessage(
+        `Renewal quotation ${response.data.quotationNumber} saved`
+      );
+      toastRef.current?.showToast();
+      setTimeout(() => {
+        navigate(`/agent/quotedetailview/${response.data.quotationId}`);
+      }, 1500);
+      return;
     }
 
     try {
@@ -1075,7 +773,9 @@ const OrderSummary = ({ action, flow }) => {
         <div className="order__summary__back__btn__title">
           {flow === "renewal"
             ? clientData
-              ? `${clientData.firstName || ""} ${clientData.lastName || ""}`
+              ? [clientData.name, clientData.code && `${t("agent.clientIdLabel")} ${clientData.code}`]
+                  .filter(Boolean)
+                  .join(" / ")
               : t("agent.loadingClientData")
             : leadData
             ? `${leadData.firstName || ""} ${

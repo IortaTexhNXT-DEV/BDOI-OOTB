@@ -369,18 +369,34 @@ const LeadListingAllTable = ({
       });
     }
 
-    menuItems.push(
-      {
+    // No endorsement on a policy that is no longer in force (a claim for a loss within the old
+    // period is still possible). The popup menu is shared, so judge the policy it was opened for.
+    const menuPolicy = selectedPolicy || rowData;
+    const menuStatus = String(menuPolicy?.status || "").toLowerCase();
+    const menuExpiry = menuPolicy?.PolicyExpiry || menuPolicy?.expiry;
+    const pastExpiry = (() => {
+      if (!menuExpiry) return false;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const expiry = new Date(menuExpiry);
+      expiry.setHours(0, 0, 0, 0);
+      return expiry < today;
+    })();
+    const inForce =
+      !["expired", "lapsed", "cancelled", "renewed"].includes(menuStatus) &&
+      !pastExpiry;
+    if (inForce) {
+      menuItems.push({
         label: t("policyDetail.endorsement"),
         command: () => handleMenuClick("endrosement"),
         disabled: disableOption,
-      },
-      {
-        label: "Reminder",
-        command: () => handleMenuClick("reminder"),
-        disabled: disableOption,
-      }
-    );
+      });
+    }
+    menuItems.push({
+      label: "Reminder",
+      command: () => handleMenuClick("reminder"),
+      disabled: disableOption,
+    });
 
     console.log(
       "Final menu items for policy:",
@@ -438,7 +454,14 @@ const LeadListingAllTable = ({
   };
   const renderClientId = (rowData) => {
     return (
-      <div className="category__text">{rowData.ClientId?.toUpperCase()}</div>
+      <div className="category__text">
+        {(
+          rowData.client?.clientCode ||
+          rowData.client?.generatedClientId ||
+          rowData.clientCode ||
+          rowData.ClientId
+        )?.toUpperCase()}
+      </div>
     );
   };
   const renderClientName = (rowData) => {

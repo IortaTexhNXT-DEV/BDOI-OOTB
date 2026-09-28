@@ -9,6 +9,7 @@ import * as svc from './service.js';
 import * as batches from './batches.js';
 import { getJob, queueStats } from './queue.js';
 import workspace from './workspace.js';
+import { toQuote } from '../quotations/shape.js';
 
 /**
  * Policy renewals used by the agent screens: client view renewals tab, renewal quote wizard (coverage -> order summary),
@@ -138,6 +139,24 @@ define({
     const r = await svc.captureRenewal(id, req.body);
     await audit(req, { entity: 'renewal', entityId: id, action: isNew ? 'create' : 'update', before: isNew ? null : svc.toApi(r.before, await svc.readContext()), after: r.after });
     res.status(isNew ? 201 : 200).json({ success: true, message: isNew ? 'Renewal created' : 'Renewal updated', data: r.after });
+  },
+});
+define({
+  method: 'GET', path: '/policies/:policyId/prefill', summary: 'Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)',
+  screen: 'Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)', middleware: [...read, ownRecord('policy', 'policyId')],
+  response: { success: true, data: { policyId: 'pol_1', policyNumber: 'POL-2025-00012', clientId: 'cl_1', clientCode: 'CL-2026-00001', insuranceCompanyName: 'MAPFRE Insurance Corporation', sumInsured: 850000, renewal: null, coverageDetails: { lossAndDamageCoverage: 850000, totalSumInsured: 850000 }, accessories: { aircon: '', stereo: '' }, vehicle: {}, source: 'policy' } },
+  handler: async (req, res) => ok(res, await svc.renewalPrefill(req.params.policyId)),
+});
+define({
+  method: 'POST', path: '/policies/:policyId/quotation', summary: 'Renewal wizard "Completed Quote": save the wizard data and create (or update) the renewal quotation linked to the expiring policy',
+  screen: 'Operations > Renewals > Renewal Policy > Renewal > Order summary', middleware: [...write, ownRecord('policy', 'policyId'), validate(captureSchema)],
+  request: { coverageDetails: { lossAndDamageCoverage: '850000', lossAndDamageCoverageRate: '1.6' }, accessories: { aircon: '', stereo: '' }, orderSummary: { discount: 0 } },
+  response: { success: true, message: 'Renewal quotation created', data: { quotationId: 'qt_1', quotationNumber: 'QT-2026-00002', quotation: { quotationId: 'qt_1', renewal: { policyId: 'pol_1' } }, renewal: renewalExample } },
+  handler: async (req, res) => {
+    const r = await svc.createRenewalQuote(req.params.policyId, req.body, req.user);
+    const quotation = toQuote(r.quoteRow);
+    await audit(req, { entity: 'quotation', entityId: quotation.id, action: r.created ? 'create' : 'update', after: { quotationNumber: quotation.quotationNumber, renewalId: r.renewal.id, policyId: r.renewal.policyId, grossPremium: quotation.grossPremium } });
+    res.status(r.created ? 201 : 200).json({ success: true, message: r.created ? 'Renewal quotation created' : 'Renewal quotation updated', data: { quotationId: quotation.id, quotationNumber: quotation.quotationNumber, quotation, renewal: r.renewal } });
   },
 });
 define({

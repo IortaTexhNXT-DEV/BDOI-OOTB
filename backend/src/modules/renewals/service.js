@@ -435,3 +435,113 @@ export async function refreshPipeline(user = null) {
   for (const s of stale) await lapseRenewal(s.id, user, `Not renewed within the ${grace}-day grace period`);
   return { created, lapsed: stale.length };
 }
+
+// ---------------------------------------------------------------- renewal quote wizard (coverage -> accessories -> order summary)
+/** Coverage fields of the motor quote wizard (camelCase, as stored in the quotation document). */
+export const COVERAGE_KEYS = ['lossAndDamageCoverage', 'lossAndDamageCoverageRate', 'lossAndDamageCoveragePremium', 'actsOfNatureRate', 'actsOfNaturePremium',
+  'ctplCoverageRate', 'roadsideAssistanceRate', 'roadsideAssistancePremium', 'personalAccidentCoverRate', 'personalAccidentCoverPremium', 'bodilyInjury',
+  'bodilyInjuryCoveragePremium', 'propertyDamage', 'propertyDamageCoveragePremium', 'autoPassengerPersonalAccident', 'APPAtotalCoverage', 'APPAcoveragePremium',
+  'totalSumInsured'];
+export const ACCESSORY_KEYS = ['aircon', 'stereo', 'magWheels', 'others', 'deductible', 'towing', 'repairLimit'];
+/** Risk / vehicle fields carried from the expiring term into the renewal quotation. */
+const CARRY_KEYS = ['insuranceVehicleDetails', 'plateNumber', 'chassisNumber', 'motorNumber', 'mvFileNumber', 'certNumber', 'authenCode', 'vehicleType',
+  'vehicleBrand', 'modelYear', 'vehicleModel', 'modelVariant', 'vehicleColor', 'seatingCapacity', 'mortgage', 'truckType', 'aluminum', 'airBag', 'TNVS',
+  'idCard', 'idCardNumber', 'insurancePolicyType', 'accountCode', 'paymentType', 'installmentType', 'isCoInsurance', 'participantDetails', 'authorizedSignature',
+  'fireRiskDetails', 'firePremiumDetails'];
+const present = (v) => v !== undefined && v !== null && v !== '';
+const pickPresent = (src, keys) => Object.fromEntries(keys.filter((k) => present(src?.[k])).map((k) => [k, src[k]]));
+const hasReferrers = (d) => Boolean(d && [d.primary, ...(d.chain || [])].some((e) => e && e.referrerId && e.referrerId !== 'direct'));
+
+async function expiringPolicy(ref) {
+  const p = await one(`SELECT p.*, c.client_code, c.display_name AS client_name, c.email AS client_email, ic.name AS insurer_name, pr.name AS product_name,
+      pr.line AS product_line, q.doc AS quote_doc
+    FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
+    LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN quotes q ON q.id = p.quote_id WHERE p.id = $1 OR p.policy_number = $1`, [String(ref)]);
+  if (!p) throw notFound(`Policy ${ref} not found`);
+  return p;
+}
+
+/**
+ * Prefill of the renewal wizard for a policy. Values come only from this renewal's saved wizard data, the expiring
+ * policy's own quotation / policy document, or the policy row (sum insured, insurer, product, client) when the policy
+ * has no quotation (seeded or imported policies). Nothing is defaulted: absent accessories stay blank.
+ */
+export async function renewalPrefill(policyRef) {
+  const p = await expiringPolicy(policyRef);
+  const open = await one('SELECT * FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1', [p.id, ['renewed', 'lapsed']]);
+  const source = { ...(p.quote_doc || {}), ...(p.doc || {}) };
+  const details = p.details || {};
+  const coverage = { ...pickPresent(details.coverageDetails, COVERAGE_KEYS), ...pickPresent(source, COVERAGE_KEYS) };
+  let from = p.quote_id ? 'quotation' : 'policy';
+  if (!present(coverage.lossAndDamageCoverage) && Number(p.sum_insured) > 0) coverage.lossAndDamageCoverage = Number(p.sum_insured);
+  if (!present(coverage.totalSumInsured) && Number(p.sum_insured) > 0) coverage.totalSumInsured = Number(p.sum_insured);
+  const captured = pickPresent(open?.coverage_details, COVERAGE_KEYS);
+  if (Object.keys(captured).length) from = 'renewal';
+  // Accessories saved on this renewal (even when cleared) win over the expiring term's own values.
+  const capturedObject = open?.accessories && typeof open.accessories === 'object' && !Array.isArray(open.accessories);
+  const accessorySource = capturedObject ? open.accessories : source;
+  const accessories = Object.fromEntries(ACCESSORY_KEYS.map((k) => [k, present(accessorySource[k]) ? accessorySource[k] : '']));
+  return {
+    policyId: p.id, policyNumber: p.policy_number, status: p.status, clientId: p.client_id, clientCode: p.client_code, clientName: p.client_name || p.insured_name,
+    clientEmail: p.client_email, leadId: p.lead_id, quoteId: p.quote_id, insuranceCompanyId: p.insurance_company_id, insuranceCompanyName: p.insurer_name,
+    productId: p.product_id, productType: p.product_type || source.productType || p.product_name, lob: p.lob || (p.product_line ? p.product_line.toUpperCase() : null),
+    sumInsured: Number(p.sum_insured), netPremium: Number(p.net_premium), grossPremium: Number(p.premium_total), inceptionDate: p.inception_date, expiryDate: p.expiry_date,
+    renewal: open ? { id: open.id, renewalNumber: open.renewal_number, status: open.status } : null,
+    coverageDetails: { ...coverage, ...captured }, accessories, vehicle: pickPresent(source, CARRY_KEYS),
+    orderSummary: open?.order_summary || null, commissionDetails: details.commissionDetails || source.commissionDetails || null, source: from,
+  };
+}
+
+/**
+ * Renewal wizard "Completed Quote": save the wizard data on the policy's open renewal and create (or update) the renewal
+ * quotation linked to it. The quotation carries the client, lead, insurer, product, vehicle and the link to the expiring
+ * policy (doc.renewal), follows the normal quotation workflow (customer approval link, convert to policy) and, when
+ * converted, becomes the new policy term (quotations/service.js#convertToPolicy).
+ */
+export async function createRenewalQuote(policyRef, input, user) {
+  const { createQuote, updateQuote, getQuoteRow } = await import('../quotations/service.js');
+  const policy = await resolvePolicy(policyRef);
+  const { id: renewalId } = await ensureRenewal(policy.id, user);
+  const capture = {};
+  for (const k of ['coverageDetails', 'accessories', 'orderSummary', 'effectiveDate', 'expiryDate', 'remarks']) if (input[k] !== undefined) capture[k] = input[k];
+  if (Object.keys(capture).length) await captureRenewal(renewalId, capture);
+  const pre = await renewalPrefill(policy.id);
+  const r = await loadRow(renewalId);
+  const order = input.orderSummary || {};
+  const commissionDetails = hasReferrers(order.commissionDetails) ? order.commissionDetails : (pre.commissionDetails || order.commissionDetails || null);
+  const vehicle = pre.vehicle;
+  const body = {
+    ...vehicle,
+    ...pre.coverageDetails,
+    ...pre.accessories,
+    participantDetails: vehicle.participantDetails?.length ? vehicle.participantDetails : (pre.insuranceCompanyName ? [{ insuranceCompanyName: pre.insuranceCompanyName, sharePercentage: 100 }] : []),
+    ...pickPresent(order, ['discount', 'accountPremiumOthers', 'NCD', 'authorizedSignature']),
+    commissionDetails,
+    productType: pre.productType || 'Motor', insuranceCompanyId: pre.insuranceCompanyId, insuranceCompanyName: pre.insuranceCompanyName,
+    clientId: pre.clientId, businessType: 'Renewal', isRenewal: true, renewedFromPolicyId: policy.id, renewedFromPolicyNumber: policy.policy_number,
+    renewal: { renewalId: r.id, renewalNumber: r.renewal_number, policyId: policy.id, policyNumber: policy.policy_number, previousExpiryDate: policy.expiry_date },
+    remarks: input.remarks || `Renewal of policy ${policy.policy_number}`,
+  };
+  if (pre.leadId) body.leadRefId = pre.leadId;
+  const existing = await one(`SELECT id, status FROM quotes WHERE doc->'renewal'->>'renewalId' = $1 AND deleted_at IS NULL AND status IN ('draft', 'sent')
+    ORDER BY created_at DESC LIMIT 1`, [r.id]);
+  let quoteId;
+  if (existing) {
+    await updateQuote(existing.id, body, user?.id ?? null);
+    // A changed quotation needs a fresh customer approval: the link already sent stops working.
+    if (existing.status === 'sent') await query("UPDATE quotes SET status = 'draft', approval_token_hash = NULL WHERE id = $1", [existing.id]);
+    quoteId = existing.id;
+  } else {
+    quoteId = (await createQuote(body, user?.id ?? null)).id;
+  }
+  const vehicleCol = { ...(vehicle.insuranceVehicleDetails?.[0] || {}), ...pickPresent(vehicle, ['plateNumber', 'chassisNumber', 'motorNumber', 'mvFileNumber']) };
+  await query(`UPDATE quotes SET client_id = $2, lead_id = COALESCE(lead_id, $3), product_id = COALESCE($4, product_id), policy_type_id = COALESCE($5, policy_type_id),
+      insurance_company_id = COALESCE(insurance_company_id, $6), vehicle = $7, coverage = $8, updated_at = now() WHERE id = $1`,
+  [quoteId, policy.client_id, policy.lead_id, policy.product_id, policy.policy_type_id, policy.insurance_company_id, JSON.stringify(vehicleCol), JSON.stringify(pre.coverageDetails)]);
+  const q = await getQuoteRow(quoteId);
+  await query(`UPDATE renewals SET premium_new = $2, status = CASE WHEN status = ANY($3) THEN 'quoted' ELSE status END, premium_breakdown = $4, updated_at = now() WHERE id = $1`,
+    [r.id, Number(q.premium_total), ['pipeline', ...NOTICE_STATUS, 'approved'], JSON.stringify({ netPremium: Number(q.premium_base), vat: Number(q.vat), dst: Number(q.dst),
+      lgt: Number(q.lgt), grossPremium: Number(q.premium_total), quoteId: q.id, quoteNumber: q.quote_number })]);
+  await activity(null, r.id, user, { type: 'Quote Generated', description: `Renewal quotation ${q.quote_number}: ${q.premium_total}`, details: { quoteId: q.id, quoteNumber: q.quote_number } });
+  return { created: !existing, quoteRow: q, renewal: await getRenewal(r.id) };
+}
