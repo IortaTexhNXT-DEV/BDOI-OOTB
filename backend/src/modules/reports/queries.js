@@ -64,6 +64,10 @@ const receivables = `SELECT rv.bill_number AS "billNumber", rv.created_at::date 
   LEFT JOIN branches b ON b.code = u.branch_code`;
 const receivableBuckets = setting('limits.receivable_ageing_buckets', [30, 60, 90, 120], 'int[]');
 
+// voucher payee types are stored as picked on screen (Insurer, Agent/Referrer, Customer / Client)
+const AGENT = "lower(d.payee_type) IN ('agent', 'agent/referrer', 'referrer')";
+const INSURER = "lower(d.payee_type) = 'insurer'";
+const CLIENT = "lower(d.payee_type) IN ('client', 'customer')";
 export const QUERIES = {
   production: {
     sql: production, filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA,
@@ -181,17 +185,17 @@ export const QUERIES = {
     sql: `SELECT d.voucher_number AS "voucherNumber", d.created_at::date AS "voucherDate", d.payee_type AS "payeeType", d.payee_name AS "payeeName",
         d.purpose, d.payment_mode AS "paymentMode", bk.name AS bank, d.reference_no AS "referenceNo", d.amount, d.status,
         d.approved_at::date AS "approvedDate", d.paid_at::date AS "paidDate",
-        CASE WHEN d.payee_type = 'agent' THEN d.payee_id END AS _agent_id, CASE WHEN d.payee_type = 'agent' THEN d.payee_name END AS agent,
-        CASE WHEN d.payee_type = 'agent' THEN au.username END AS _agent_username,
-        CASE WHEN d.payee_type = 'insurer' THEN d.payee_id END AS _insurer_id, CASE WHEN d.payee_type = 'insurer' THEN ic.code END AS _insurer_code,
-        CASE WHEN d.payee_type = 'insurer' THEN d.payee_name END AS insurer,
-        CASE WHEN d.payee_type = 'client' THEN d.payee_id END AS _client_id, CASE WHEN d.payee_type = 'client' THEN cl.client_code END AS _client_code,
-        CASE WHEN d.payee_type = 'client' THEN d.payee_name END AS client,
+        CASE WHEN ${AGENT} THEN COALESCE(d.referrer_id, d.payee_id) END AS _agent_id, CASE WHEN ${AGENT} THEN COALESCE(d.referrer_name, d.payee_name) END AS agent,
+        CASE WHEN ${AGENT} THEN au.username END AS _agent_username,
+        CASE WHEN ${INSURER} THEN COALESCE(d.insurance_company_id::text, d.payee_id) END AS _insurer_id, CASE WHEN ${INSURER} THEN ic.code END AS _insurer_code,
+        CASE WHEN ${INSURER} THEN COALESCE(d.insurer_name, ic.name, d.payee_name) END AS insurer,
+        CASE WHEN ${CLIENT} THEN COALESCE(d.client_id, d.payee_id) END AS _client_id, CASE WHEN ${CLIENT} THEN cl.client_code END AS _client_code,
+        CASE WHEN ${CLIENT} THEN d.payee_name END AS client,
         u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch, u.display_name AS "preparedBy"
       FROM disbursements d LEFT JOIN banks bk ON bk.id = d.bank_id
-      LEFT JOIN users au ON d.payee_type = 'agent' AND au.id = d.payee_id
-      LEFT JOIN insurance_companies ic ON d.payee_type = 'insurer' AND ic.id::text = d.payee_id
-      LEFT JOIN clients cl ON d.payee_type = 'client' AND cl.id = d.payee_id
+      LEFT JOIN users au ON ${AGENT} AND au.id = d.payee_id
+      LEFT JOIN insurance_companies ic ON ${INSURER} AND ic.id::text = COALESCE(d.insurance_company_id::text, d.payee_id)
+      LEFT JOIN clients cl ON ${CLIENT} AND cl.id = COALESCE(d.client_id, d.payee_id)
       ${creatorJoin('d.created_by')}
       WHERE d.created_at::date BETWEEN $1 AND $2`,
     filters: ['agent', 'insurer', 'branch', 'client', 'status'],

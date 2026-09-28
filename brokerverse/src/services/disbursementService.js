@@ -415,6 +415,22 @@ class DisbursementService {
     }
   }
 
+  async getInvoiceListByDisbursement(disbursementId) {
+    try {
+      const response = await fetch(
+        `${this.baseURL}/disbursements/invoice-list?page=1&pageSize=100&disbursementId=${encodeURIComponent(disbursementId)}`,
+        { method: "GET", headers: { "Content-Type": "application/json", ...authService.getAuthHeader() } }
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to load the voucher's invoices");
+      }
+      return { success: true, data: await response.json() };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
   async getInvoiceListByCustomerCode(customerCode) {
     try {
       const controller = new AbortController();

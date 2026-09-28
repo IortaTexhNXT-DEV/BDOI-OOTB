@@ -153,7 +153,9 @@ function SpecificVoucher() {
         // so the checker can open a pending agent payout.
         let payeeType = payeeTypeFromState;
         let referrerId = referrerIdFromState;
+        let voucherInvoicesOnly = false;
         if (!payeeType && !referrerId) {
+          voucherInvoicesOnly = true;
           const saved = await disbursementService.getDisbursementById(disbursementId);
           const voucher = saved.data?.data || saved.data;
           payeeType = voucher?.payeeType;
@@ -192,9 +194,10 @@ function SpecificVoucher() {
             console.error("Failed to fetch agent invoice lines:", result.error);
           }
         } else {
-          const customerCode = await resolveCustomerCode();
+          const insurerVoucher = voucherInvoicesOnly && payeeType === "Insurer";
+          const customerCode = insurerVoucher ? null : await resolveCustomerCode();
 
-          if (!customerCode) {
+          if (!insurerVoucher && !customerCode) {
             setInvoiceListData([]);
             toastRef.current?.showToast({
               severity: "error",
@@ -204,12 +207,22 @@ function SpecificVoucher() {
             return;
           }
 
-          const result = await disbursementService.getInvoiceListByCustomerCode(
-            customerCode
-          );
+          // an insurer voucher (e.g. raised by a remittance settlement) lists its own invoices
+          const result =
+            insurerVoucher
+              ? await disbursementService.getInvoiceListByDisbursement(disbursementId)
+              : await disbursementService.getInvoiceListByCustomerCode(customerCode);
           const { success, data } = result;
 
           if (success) {
+            // once the voucher's lines carry a live cheque, the next step is its approval on the detail view
+            const hasCheque = (data.data || []).some((inv) =>
+              (inv.checkbooks || []).some((c) => !["Cancelled"].includes(c.status))
+            );
+            if (insurerVoucher && hasCheque) {
+              Navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`, { replace: true });
+              return;
+            }
             setDisbursementData(data.data);
 
             if (data.data) {

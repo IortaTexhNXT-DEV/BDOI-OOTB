@@ -81,11 +81,13 @@ const Index = () => {
       payload: disbursementId,
     });
 
-    // An agent payout still awaiting approval opens its commission lines for the checker
-    const pendingAgentPayout =
-      (columnData?.payeeType === "Agent/Referrer" || columnData?.referrerId) &&
-      ["draft", "for-approval"].includes(String(columnData?.status || "").toLowerCase());
-    if (pendingAgentPayout) {
+    // A voucher still being prepared (agent payout lines, or an insurer voucher raised by a settlement)
+    // opens its invoice list so the cheque / payout can be raised and approved
+    const status = String(columnData?.status || "").toLowerCase();
+    const inPreparation =
+      ["draft", "for-approval"].includes(status) &&
+      (columnData?.payeeType === "Agent/Referrer" || columnData?.referrerId || columnData?.payeeType === "Insurer");
+    if (inPreparation) {
       navigate(`/accounts/paymentvoucher/invoicelist/${disbursementId}`);
       return;
     }

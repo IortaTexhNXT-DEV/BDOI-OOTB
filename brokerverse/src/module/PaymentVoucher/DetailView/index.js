@@ -278,6 +278,26 @@ function Detailview() {
   const hasPendingItems = useMemo(() => {
     return processedChequeBookData.some((item) => item.status === "Pending");
   }, [processedChequeBookData]);
+  const hasApprovedItems = useMemo(() => {
+    return processedChequeBookData.some((item) => item.status === "Approved");
+  }, [processedChequeBookData]);
+  const actionable = (row) => row?.status === "Pending" || row?.status === "Approved";
+
+  // Approved cheque -> Printed: the voucher becomes Paid and its print (PDF) opens
+  const handlePrint = async () => {
+    const checkbookId = selectedProducts?.rawData?.checkbookId;
+    if (!checkbookId || selectedProducts.status !== "Approved") return;
+    const result = await disbursementService.updateCheckbook(checkbookId, { status: "Printed" });
+    if (!result.success) {
+      toastRef.current?.showToast("error", t("common.error"), result.error || t("paymentVoucher.failedToUpdateDisbursement"));
+      return;
+    }
+    setActionToast("Printed");
+    setSelectedProducts(null);
+    dispatch(getDisbursementDetailsMiddleware(id));
+    const printed = await disbursementService.printDisbursement(id);
+    if (printed.success && printed.data?.url) window.open(printed.data.url, "_blank", "noopener");
+  };
 
   const handleApprove = async () => {
     if (!selectedProducts || !selectedProducts.rawData) {
@@ -645,7 +665,7 @@ function Detailview() {
           scrollHeight="40vh"
           rowClassName={(rowData) => {
             const baseClass = getStatusClassName(rowData.status);
-            if (hasPendingItems && rowData.status !== "Pending") {
+            if (!actionable(rowData)) {
               return baseClass
                 ? `${baseClass} non-selectable-row`
                 : "non-selectable-row";
@@ -654,16 +674,16 @@ function Detailview() {
           }}
           selection={selectedProducts}
           onSelectionChange={(e) => {
-            if (e.value && e.value.status === "Pending") {
+            if (e.value && actionable(e.value)) {
               setSelectedProducts(e.value);
             } else {
               setSelectedProducts(null);
             }
           }}
-          selectionMode={hasPendingItems ? "checkbox" : undefined}
+          selectionMode={hasPendingItems || hasApprovedItems ? "checkbox" : undefined}
           dataKey="id"
         >
-          {hasPendingItems && (
+          {(hasPendingItems || hasApprovedItems) && (
             <Column
               selectionMode="single"
               selectedItem
@@ -724,16 +744,26 @@ function Detailview() {
         </DataTable>
       </div>
 
-      {hasPendingItems && (
+      {(hasPendingItems || hasApprovedItems) && (
         <div className="next_container">
-          <Button
-            className="submit_button p-0"
-            label={t("paymentVoucher.approve")}
-            onClick={handleApprove}
-            disabled={
-              !selectedProducts || selectedProducts.status !== "Pending"
-            }
-          />
+          {hasApprovedItems && (
+            <Button
+              className="submit_button p-0 mr-2"
+              label={t("paymentVoucher.print")}
+              onClick={handlePrint}
+              disabled={!selectedProducts || selectedProducts.status !== "Approved"}
+            />
+          )}
+          {hasPendingItems && (
+            <Button
+              className="submit_button p-0"
+              label={t("paymentVoucher.approve")}
+              onClick={handleApprove}
+              disabled={
+                !selectedProducts || selectedProducts.status !== "Pending"
+              }
+            />
+          )}
         </div>
       )}
     </div>

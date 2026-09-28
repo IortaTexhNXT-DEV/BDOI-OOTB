@@ -52,8 +52,8 @@ async function seedSample() {
     ('rm_rpt1', 'RPT-RM-1', $1, '2025-03', 25000, 3750, 21250, 'settled', 'rpt.maker', '2025-04-30')`, [mapfre]);
   await query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net) VALUES ('rm_rpt1', 'pol_rpt1', 10000, 1500, 8500), ('rm_rpt1', 'pol_rpt3', 15000, 2250, 12750)`);
   await query(`INSERT INTO disbursements(voucher_number, payee_type, payee_id, payee_name, amount, status, purpose, created_by, created_at) VALUES
-    ('RPT-PV-1', 'insurer', $1::text, 'MAPFRE Insurance Corporation', 21250, 'paid', 'Premium remittance', 'usr_rpt_mk', '2025-05-02'),
-    ('RPT-PV-2', 'agent', 'usr_rpt_a1', 'Ramon Bautista', 1350, 'paid', 'Commission payout', 'usr_rpt_mk', '2025-05-03')`, [mapfre]);
+    ('RPT-PV-1', 'Insurer', $1::text, 'MAPFRE Insurance Corporation', 21250, 'paid', 'Premium remittance', 'usr_rpt_mk', '2025-05-02'),
+    ('RPT-PV-2', 'Agent/Referrer', 'usr_rpt_a1', 'Ramon Bautista', 1350, 'paid', 'Commission payout', 'usr_rpt_mk', '2025-05-03')`, [mapfre]);
   await query(`INSERT INTO journal_vouchers(id, jv_number, jv_date, description, status, total_debit, total_credit, created_by) VALUES
     ('jv_rpt1', 'RPT-JV-1', '2024-12-31', 'Opening capital', 'approved', 1000, 1000, 'rpt.maker'),
     ('jv_rpt2', 'RPT-JV-2', '2025-03-01', 'Premium collected', 'posted', 10000, 10000, 'rpt.maker'),
@@ -176,7 +176,9 @@ describe('running reports', () => {
     expect((await run('receipts-register', { ...Y, status: 'posted' })).data.totals.amount).toBe(18000);
     const pv = await run('disbursement-register', { ...Y, ReportCriteria: 'Payee Type' });
     expect(pv.data.totals.amount).toBe(22600);
-    expect(pv.data.groups.map((g) => g.group)).toEqual(['agent', 'insurer']);
+    // payee types as the voucher screen stores them
+    expect(pv.data.groups.map((g) => g.group)).toEqual(['Agent/Referrer', 'Insurer']);
+    expect(pv.data.rows.find((r) => r.voucherNumber === 'RPT-PV-1').insurer).toBe('MAPFRE Insurance Corporation');
     expect((await run('disbursement-register', { ...Y, Company: 'MAPFRE' })).data.totals.amount).toBe(21250);
   });
   it('journal register and a balanced trial balance from approved/posted vouchers only', async () => {
