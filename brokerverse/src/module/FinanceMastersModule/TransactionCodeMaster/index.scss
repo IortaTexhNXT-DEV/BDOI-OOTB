@@ -1,0 +1,169 @@
+.Transaction__Code__Master__container{
+    @layer primereact {
+        .p-card {
+          background: #ffffff;
+          color: #4b5563;
+          box-shadow: none !important;
+          // border-radius: 6px !important;
+          fill: #fff !important;
+          // stroke-width: 1px !important;
+          // stroke: #fff !important;
+          filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+        }
+      }
+      .Transaction__Code__Master__title{
+        color: #111927;
+        font-size: 30px;
+        font-style: normal;
+        font-weight: 600;
+        font-family: "Nunito", Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+      .p-datatable .p-datatable-tbody > tr > td {
+        text-align: left;
+        border: 1px solid #e5e7eb;
+        border-width: 0 0 1px 0;
+        padding: 1rem 0.4rem;
+      }
+      .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+        color: #b1b1b1 !important;
+      }
+      .breadCrums {
+        padding: 0;
+        border: none !important;
+        font-weight: 500;
+        color: #000;
+        font-size: 16px;
+      }
+      .p-breadcrumb {
+        background: #ffffff;
+        border: none !important;
+        border-radius: 6px;
+        padding: 0rem;
+        margin-top: 1rem;
+      }
+      .sidebar {
+        width: 100%;
+        color: #000;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+        color: #000;
+        font-size: 16px;
+        font-weight: 500;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+      .btn__container{
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+      }
+      .add__btn {
+        // color: #fff;
+        // font-size: 18px;
+        // font-weight: 500 !important;
+        // background-color: #0072d8;
+        // border-radius: 60px !important;
+        // padding-right: 1rem;
+        // padding-left: 1rem;
+        // padding-top: 0.5rem;
+        // padding-bottom: 0.5rem;
+        // margin: 10px;
+        // font-family: "Nunito", Arial, sans-serif;
+        // column-gap: 0.4rem;
+        // padding-top: 0.6rem;
+        // padding-bottom: 0.6rem;
+        background-color: #0072d8;
+        border-radius: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: #fff;
+        padding: 8px 20px;
+        font-size: 18px;
+        font-weight: 500;
+        gap: 8px;
+      }
+      .upload__btn{
+        // color:  #0072d8;
+        // font-size: 18px;
+        // font-weight: 500 !important;
+        // background-color: #fff;
+        // border-radius: 60px !important;
+        // padding-right: 1rem;
+        // padding-left: 1rem;
+        // padding-top: 0.5rem;
+        // padding-bottom: 0.5rem;
+        // margin: 10px;
+        // font-family: "Nunito", Arial, sans-serif;
+        // column-gap: 0.4rem;
+        // padding-top: 0.6rem;
+        // padding-bottom: 0.6rem;
+        // border-color: #0072d8;
+        border-radius: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: #fff;
+    color: #0072d8;
+    padding: 8px 20px;
+    font-size: 18px;
+    font-weight: 500;
+    gap: 8px;
+      }
+}
+
+
+@media screen and (min-width: 320px) {
+    .Transaction__Code__Master__title {
+      color: #111927;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+  
+  }
+  @media screen and (min-width: 767px) {
+    .Transaction__Code__Master__title {
+      color: #111927;
+      font-size: 25px;
+      font-style: normal;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+  }
+  @media screen and (min-width: 1024px) {
+    .input__view.lg-col-2-5 {
+      width: 19% !important;
+    }
+    .input__view__request.lg-col-2-5 {
+      width: 20% !important;
+    }
+    .Transaction__Code__Master__title {
+      color: #111927;
+      font-size: 30px;
+      font-style: normal;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+  }
+  @media screen and (min-width: 768px) {
+    .md\:col-5 {
+      flex: 0 0 auto;
+      padding: 0.5rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      width: 40.6667% !important;
+    }
+  }
+  .p-button-label {
+    font-weight: 500 !important;
+    font-size: 18px !important;
+  }

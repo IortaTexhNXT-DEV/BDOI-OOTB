@@ -1,0 +1,242 @@
+.notificaition__container {
+  .notificaition__container__titles {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .unread-count-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  .notificaition__container__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateX(-2px);
+    }
+
+    .notificaition__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+
+  .notificaition__title {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 21px;
+    color: #111927;
+  }
+
+  .p-card {
+    background: #ffffff;
+    color: #4b5563;
+    box-shadow: none !important;
+    fill: none !important;
+    filter: none !important;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    &.unread {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+      border-left: 4px solid #ffc107;
+      font-weight: 600;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: #ffc107;
+        border-radius: 0 2px 2px 0;
+      }
+    }
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .notification-icon {
+      font-size: 1.2rem;
+      color: #007bff;
+    }
+
+    .notification-title-text {
+      font-weight: 600;
+      color: #111927;
+    }
+
+    .new-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+  }
+
+  .notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .priority-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .delete-btn {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+  }
+
+  .p-card:hover .delete-btn {
+    opacity: 1;
+  }
+
+  .notificaition__dots {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .notificaition__sub__title {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 21px;
+    color: #6c737f;
+    margin: 0.5rem 0;
+  }
+
+  .notificaition__title__sub {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 21px;
+    color: #0072d8;
+  }
+
+  .notificaition__title__sub__1 {
+    font-size: 12px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 18px;
+    color: #6c737f;
+  }
+
+  .notification-type {
+    font-size: 12px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 18px;
+    color: #0072d8;
+    text-transform: capitalize;
+  }
+
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #6c757d;
+
+    p {
+      margin-top: 1rem;
+      font-size: 16px;
+    }
+  }
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #dc3545;
+
+    p {
+      margin-top: 1rem;
+      font-size: 16px;
+    }
+  }
+
+  .no-notifications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #6c757d;
+
+    p {
+      margin-top: 1rem;
+      font-size: 16px;
+    }
+  }
+}
+
+// Dark theme support
+.dark-theme {
+  .notificaition__container {
+    .notificaition__container__titles {
+      color: #ffffff;
+    }
+
+    .notificaition__container__back__btn__title {
+      color: #ffffff;
+    }
+
+    .notificaition__title {
+      color: #ffffff;
+    }
+
+    .p-card {
+      background: #343a40;
+      border-color: #495057;
+      color: #ffffff;
+
+      &.unread {
+        background: linear-gradient(135deg, #664d03 0%, #343a40 100%);
+      }
+
+      .notification-header .notification-title-text {
+        color: #ffffff;
+      }
+
+      .notificaition__sub__title {
+        color: #adb5bd;
+      }
+
+      .notificaition__title__sub__1 {
+        color: #6c757d;
+      }
+    }
+  }
+}

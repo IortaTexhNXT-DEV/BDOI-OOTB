@@ -1,0 +1,1 @@
+export { RecoveryDashboard as default } from '../ReinsuranceScreens';

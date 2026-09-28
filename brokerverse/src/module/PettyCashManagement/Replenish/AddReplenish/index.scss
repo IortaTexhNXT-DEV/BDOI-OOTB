@@ -1,0 +1,97 @@
+.add__replenish__container {
+  .label_header {
+
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 30px;
+    // font-style: normal;
+    font-weight: 600;
+    margin-left: 10px;
+    // line-height: normal;
+}
+    .breadCrums {
+      padding: 0;
+      border: none;
+      font-weight: 400;
+      color: #000;
+      font-size: 16px;
+    }
+    .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+      // color: #4b5563;
+      color: #000;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+    .pettycash__title {
+      color: #111927;
+      font-size: 30px;
+      font-style: normal;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .add__btn {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 500 !important;
+        background-color: #0072d8;
+        border-radius: 60px !important;
+        padding-right: 1rem;
+        padding-left: 1rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin: 10px;
+        font-family: "Nunito", Arial, sans-serif;
+        column-gap: 0.4rem;
+        padding-top: 0.6rem;
+        padding-bottom: 0.6rem;
+    }
+    .btn__container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .sub__request__title {
+      color: #111927;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+    }
+    .sub__container__title{
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding-left: 4%;
+    }
+    .p-card .p-card-content {
+      padding: 0rem 0; 
+  }
+    .input__block .p-inputtext {
+      font-family: var(--font-family);
+      font-feature-settings: var(--font-feature-settings, normal);
+      font-size: 1rem;
+      color: #4b5563;
+      background: #ffffff;
+      padding: 0.75rem 0.75rem;
+      border: 1px solid #d1d5db;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      border-radius: 6px;
+      margin-top: 0.5rem !important;
+      width: 100% !important;
+  }
+  .p-dropdown {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    border-radius: 6px;
+    margin-top: 0.5rem !important;
+    width: 100% !important;
+  }
+  }

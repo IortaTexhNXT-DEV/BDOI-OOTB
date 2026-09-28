@@ -1,0 +1,158 @@
+.remittance-approval {
+  padding: 1rem;
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: #495057;
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    .summary-card {
+      .p-card-body {
+        padding: 1rem;
+
+        .card-content {
+          display: flex;
+          align-items: center;
+
+          .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+
+            i {
+              font-size: 1.5rem;
+              color: white;
+            }
+
+            &.orange {
+              background: #ff9800;
+            }
+
+            &.blue {
+              background: #2196f3;
+            }
+
+            &.red {
+              background: #f44336;
+            }
+
+            &.green {
+              background: #4caf50;
+            }
+          }
+
+          .card-details {
+            .card-value {
+              font-size: 1.8rem;
+              font-weight: 600;
+              color: #495057;
+            }
+
+            .card-label {
+              font-size: 0.9rem;
+              color: #6c757d;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .filter-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .badge {
+    background: #f44336;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .bulk-actions {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .delegation-section {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h3 {
+        margin: 0;
+        color: #495057;
+      }
+    }
+  }
+
+  .approval-details {
+    .detail-section {
+      margin-bottom: 2rem;
+
+      h4 {
+        margin-bottom: 1rem;
+        color: #495057;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 0.5rem;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+
+        .detail-item {
+          label {
+            font-weight: 500;
+            color: #6c757d;
+            margin-right: 0.5rem;
+          }
+
+          span {
+            color: #495057;
+          }
+        }
+      }
+    }
+
+    .approval-action {
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+  }
+
+  .delegation-form {
+    .date-range {
+      display: flex;
+      gap: 0.5rem;
+
+      .p-calendar {
+        flex: 1;
+      }
+    }
+  }
+}

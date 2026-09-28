@@ -1,0 +1,120 @@
+.agency-bill-processing {
+  padding: 1rem;
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: #495057;
+  }
+
+  .header-section {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 1rem;
+  }
+
+  .filter-section {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+
+    .summary-card {
+      .p-card-body {
+        padding: 1rem;
+
+        .card-content {
+          display: flex;
+          align-items: center;
+
+          i {
+            font-size: 2rem;
+            margin-right: 1rem;
+            color: #6c757d;
+          }
+
+          .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #495057;
+          }
+
+          .label {
+            font-size: 0.875rem;
+            color: #6c757d;
+          }
+        }
+      }
+
+      &.highlight {
+        background: #fff3cd;
+        border-color: #ffc107;
+      }
+    }
+  }
+
+  .adjustment-form {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+
+    h4 {
+      margin-bottom: 1rem;
+      color: #495057;
+    }
+  }
+
+  .final-summary {
+    .summary-table {
+      width: 100%;
+      
+      td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .total-row {
+        td {
+          border-top: 2px solid #495057;
+          border-bottom: none;
+          padding-top: 1rem;
+          font-size: 1.1rem;
+        }
+      }
+    }
+
+    .processing-options {
+      h4 {
+        margin-bottom: 1rem;
+        color: #495057;
+      }
+
+      .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+  }
+
+  .action-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+  }
+}

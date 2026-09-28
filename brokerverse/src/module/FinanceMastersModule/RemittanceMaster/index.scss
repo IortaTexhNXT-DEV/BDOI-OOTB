@@ -1,0 +1,272 @@
+@import "../../../Color.scss";
+
+.container__remittance__master {
+  padding: 20px;
+  min-height: calc(100vh - 60px);
+
+  .top__container {
+    padding: 0 0 20px 0;
+  }
+
+  .remittance__master__title {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .breadCrums__view__reversal {
+    border: none;
+    padding: 1px 0;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1 !important;
+  }
+
+  .main__btn__action {
+    color: #fff;
+    background-color: #0072d8;
+    border-radius: 30px;
+    padding: 6px 10px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    border: none;
+
+    &:hover {
+      background-color: darken(#0072d8, 10%);
+    }
+  }
+
+  .filter-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 0;
+    margin-bottom: 20px;
+
+    .category-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+
+      .selector-label {
+        color: #111927;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: "Nunito", Arial, sans-serif;
+        white-space: nowrap;
+      }
+
+      .master-dropdown {
+        min-width: 250px;
+        max-width: 350px;
+
+        .p-dropdown {
+          width: 100%;
+          border: 1px solid #E5E7EB;
+          border-radius: 8px;
+          background: white;
+          font-family: "Nunito", Arial, sans-serif;
+
+          &:hover {
+            border-color: #0072d8;
+          }
+
+          &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 114, 216, 0.1);
+            border-color: #0072d8;
+          }
+        }
+
+        .p-dropdown-trigger {
+          color: #6B7280;
+        }
+
+        .p-dropdown-label {
+          padding: 8px 12px;
+          color: #111927;
+        }
+      }
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      .search-field {
+        width: 300px;
+
+        input {
+          padding: 8px 12px;
+          border: 1px solid $light-grey;
+          border-radius: 6px;
+          width: 100%;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-blue;
+          }
+        }
+      }
+
+      .filter-button {
+        background: white;
+        border: 1px solid $light-grey;
+        padding: 8px 12px;
+        border-radius: 6px;
+
+        &:hover {
+          background: $default-background-grey;
+        }
+      }
+    }
+  }
+
+  .table__container {
+    margin-top: 30px;
+
+    .p-card {
+      background: #fff;
+      filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08));
+      border-radius: 20px;
+      padding: 20px;
+      border: none;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+
+      .empty-table-icon {
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+
+      p {
+        color: $grey;
+        font-size: 16px;
+      }
+    }
+
+    .remittance-table {
+      .p-datatable-thead {
+        background: #F9FAFB;
+
+        th {
+          background: transparent;
+          border: none;
+          border-bottom: 2px solid #E5E7EB;
+          font-weight: 600;
+          color: #6B7280;
+          padding: 10px 8px;
+          font-family: "Nunito", Arial, sans-serif;
+          font-size: 13px;
+          text-transform: uppercase;
+        }
+      }
+
+      .p-datatable-tbody {
+        tr {
+          border-bottom: 1px solid #F3F4F6;
+
+          &:nth-child(even) {
+            background: #FAFBFC;
+          }
+
+          &:hover {
+            background: #F0F4FF !important;
+          }
+
+          td {
+            border: none;
+            padding: 8px;
+            color: #111927;
+            font-family: "Nunito", Arial, sans-serif;
+            font-size: 14px;
+          }
+        }
+      }
+
+      .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+
+        .view-eye-button,
+        .edit-button {
+          background: transparent;
+          border: 1px solid transparent;
+          padding: 4px;
+          border-radius: 4px;
+          transition: all 0.2s;
+          cursor: pointer;
+
+          &:hover {
+            background: white;
+            border-color: #E5E7EB;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          }
+
+          svg {
+            width: 16px;
+            height: 16px;
+            color: #6B7280;
+          }
+        }
+      }
+    }
+
+    .p-paginator {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid $light-grey;
+
+      .p-paginator-current {
+        color: $grey;
+      }
+
+      .pagedropdown_container {
+        .p-dropdown-trigger {
+          width: 28px;
+        }
+      }
+    }
+  }
+}
+
+// Status badge colors
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.active {
+    background: lighten($green, 40%);
+    color: $green;
+  }
+
+  &.inactive {
+    background: lighten($dark-red, 40%);
+    color: $dark-red;
+  }
+}

@@ -1,0 +1,266 @@
+.claim__request__upload__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .claim__request__upload__main__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+  .claim__request__upload__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .claim__request__upload__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .claim__request__upload__title {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 34px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+  .claim__request__upload__subtitle {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .co-insurance-participants-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: none;
+      border-bottom: 1px solid #e5e7eb;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 20px;
+      padding: 14px 16px;
+      text-align: left;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    th {
+      color: #111927;
+      font-weight: 600;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    td {
+      color: #374151;
+      font-weight: 400;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 45%;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 35%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3),
+    .share {
+      width: 20%;
+      text-align: right;
+    }
+  }
+
+  .uploaded-file-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-top: 8px;
+
+    .file-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .file-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #111927;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+
+      .file-size {
+        font-size: 12px;
+        color: #6c757d;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+    }
+
+    .remove-file-btn {
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #e9ecef;
+      }
+    }
+  }
+  .discount__dynamic__card {
+    border-radius: 10px;
+    background: #eeefff;
+    padding: 10px;
+    display: grid;
+    gap: 10px;
+    .discount__dynamic__card__title {
+      color: #111927;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    .discount__dynamic__card__subtitle {
+      color: #111927;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+    .discount__dynamic__card__bottom {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      .discount__reflection__text {
+        color: #004ea8;
+        text-align: center;
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+    }
+  }
+  .discount__action__container {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+  }
+  .back__next__btn__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 24px;
+  }
+  .back__btn__container {
+    .p-button {
+      color: #111927;
+      background: #ffffff;
+      border: 1px solid #ffffff;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400 !important;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .next__btn__container {
+    .p-button {
+      color: #ffffff;
+      background: #0072d8;
+      border: 1px solid #0072d8;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #ffffff;
+    }
+  }
+  .file_icon_selector {
+    position: relative;
+    width: 100%;
+    display: grid;
+    gap: 4px;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    .upload__caption {
+      color: #0072d8;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .icon_click_option {
+      text-align: center;
+      margin-top: -56px;
+      height: max-content;
+      width: max-content;
+      text-align: center;
+      justify-self: center;
+    }
+    .p-fileupload .p-icon {
+      display: none;
+    }
+    .p-fileupload .p-button-label {
+      display: none;
+    }
+    .p-fileupload {
+      z-index: 1;
+      text-align: center;
+    }
+    .p-fileupload-choose {
+      background-color: transparent;
+      height: 50px;
+      width: 50px;
+      border-radius: none !important;
+      border: white;
+      border-style: none !important;
+    }
+  }
+}

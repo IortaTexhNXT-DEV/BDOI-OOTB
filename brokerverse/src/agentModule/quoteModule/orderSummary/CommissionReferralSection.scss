@@ -1,0 +1,241 @@
+.commission-referral-section {
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 0.95rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fafbfc;
+  font-family: "Nunito", Arial, sans-serif;
+  align-self: start;
+
+  .cr-header {
+    margin-bottom: 0.85rem;
+  }
+
+  .cr-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.65rem;
+    margin-bottom: 0.35rem;
+
+    h3 {
+      margin: 0;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #0f172a;
+    }
+  }
+
+  .cr-badge {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #004ea8;
+    background: #eef8ff;
+    border-radius: 9999px;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .cr-help {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: #64748b;
+
+    strong {
+      color: #334155;
+      font-weight: 600;
+    }
+  }
+
+  .cr-row-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.85rem 0.95rem 0.75rem;
+    margin-bottom: 0.65rem;
+
+    &.is-direct {
+      background: #f8fafc;
+    }
+  }
+
+  .cr-tag {
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.12rem 0.45rem;
+    border-radius: 9999px;
+    margin-bottom: 0.55rem;
+
+    &.primary {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    &.chain {
+      background: #f3e8ff;
+      color: #7e22ce;
+    }
+  }
+
+  .cr-chain-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cr-remove {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.15rem;
+
+    &:hover {
+      color: #e11d48;
+    }
+  }
+
+  .cr-row-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+
+    .cr-referrer-dd {
+      flex: 1 1 220px;
+      min-width: 180px;
+    }
+
+    .cr-level-dd {
+      flex: 0 0 90px;
+    }
+
+    .p-dropdown {
+      width: 100%;
+    }
+  }
+
+  .cr-direct-line,
+  .cr-comsub-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.5rem;
+  }
+
+  .cr-direct-line {
+    em {
+      flex: 1 1 auto;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  }
+
+  .cr-comsub-label,
+  .cr-pct-label,
+  .cr-plus {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .cr-fixed-input,
+  .cr-pct-input {
+    width: 88px;
+
+    .p-inputnumber-input {
+      width: 100%;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .cr-amount {
+    margin-left: auto;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #e11d48;
+  }
+
+  .cr-add-chain {
+    margin-bottom: 0.85rem !important;
+    border-color: #0072d8 !important;
+    color: #005fb4 !important;
+    font-weight: 600 !important;
+    font-size: 0.8125rem !important;
+  }
+
+  .cr-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-bottom: 0.75rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .cr-metric {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.65rem 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .cr-metric-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .cr-metric-value {
+    font-size: 1rem;
+    font-weight: 700;
+
+    &.brokerage {
+      color: #16a34a;
+    }
+
+    &.comsub {
+      color: #e11d48;
+    }
+
+    &.discount {
+      color: #ea580c;
+    }
+
+    &.margin {
+      color: #1e3a8a;
+    }
+  }
+
+  .cr-metric-sub {
+    font-size: 0.6875rem;
+    color: #94a3b8;
+  }
+
+  .cr-footnote {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: #64748b;
+
+    strong {
+      color: #334155;
+      font-weight: 600;
+    }
+  }
+}

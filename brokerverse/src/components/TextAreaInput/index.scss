@@ -1,0 +1,20 @@
+@import "../../Color.scss";
+.sub__title {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: $grey;
+    margin-bottom: 8px;
+  
+  }
+  .formik__error {
+    color:$red;
+    font-size: 10px;
+    display: flex;
+    justify-content: flex-start;
+    margin-left: 12px;
+    margin-top: 5px;
+  }
+  

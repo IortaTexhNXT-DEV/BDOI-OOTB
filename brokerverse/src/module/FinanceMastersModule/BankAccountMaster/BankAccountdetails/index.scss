@@ -1,0 +1,198 @@
+.overall_bankaccountdetail_container {
+  
+    .label_header {
+      color: #111927;
+      font-size: 30px;
+      font-weight: 600;
+    }
+    .bankaccountedit_container{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .addbutton_container{
+        background-color: #0072d8;
+        border-radius: 60px;
+        width: 100px !important;
+        height: 38px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: #fff;
+        gap: 8px;
+      }
+      .addicon{
+        color: #FFF;
+
+      }
+      .addtext{
+        color: #FFF;
+
+font-family: "Nunito", Arial, sans-serif;
+font-size: 16px;
+font-weight: 500;
+
+    }
+
+    .p-breadcrumb {
+      border: 1px solid #fff !important;
+      border-radius: 6px;
+      padding: 2rem 0rem;
+    }
+    .exit_print_buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+   
+    .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            z-index: 1;
+        }
+     
+        .custom-modal {
+            background-color: #fff;
+            overflow-y: auto;
+            position: relative;
+            width: 24%;
+            border-radius: 20px;
+            height: 180px;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+    
+       .popup__icon{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+     
+        .popup__text {
+            color: #111927;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            font-family: "Nunito", Arial, sans-serif;
+            
+        }
+        .accountnum_text{
+            margin:0px 4px;
+            color: #29CE00;
+        }
+     
+        .modal-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-family: "Nunito", Arial, sans-serif;
+        }
+     
+        .modal-body {
+            color: #fff;
+        }
+    .print.p-button {
+      color: #ffffff;
+      background: #0072d8;
+      border: 1px solid #0072d8;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 30px;
+      margin-right: 10px;
+      width: 130px;
+      height: 38px;
+    }
+    .exit.p-button {
+      color: #0072d8;
+      background: #ffffff;
+      border: 1px solid #0072d8;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 30px;
+      margin-right: 10px;
+      width: 120px;
+      height: 38px;
+    }
+  
+    .label_payment {
+      color: #111927;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 20px; 
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+      margin-top: 50px;
+  
+      margin-bottom: 20px;
+    }
+  
+    .inputrows__container {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      margin-right: -0.5rem;
+      margin-left: -0.5rem;
+      margin-top: -0.5rem;
+      background-color: antiquewhite;
+    }
+    .field__container {
+      width: 100%;
+      height: 44px;
+      margin-top: 10px;
+      overflow: hidden;
+      text-wrap: nowrap;
+      border-radius: 12px;
+    }
+  
+    .lg-col-2-5 {
+      flex: 0 0 20%;
+      max-width: 20%;
+    }
+    .submit_button {
+      width: 173px;
+      height: 50px;
+      border-radius: 30px;
+      background: #0072d8;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    .next_container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      height:3rem
+    }
+    .dropdown__container{
+        width:100%;
+        height:44px;
+        border-radius: 12px;
+        overflow: hidden;
+        text-wrap: nowrap;
+        margin: 10px 0px;
+    }
+  }
+  @media (min-width: 576px) {
+    .md-col-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+  

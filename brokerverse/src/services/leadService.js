@@ -1,0 +1,595 @@
+import { BASE_URL } from "../utility/constant";
+import authService from "./authService";
+
+/**
+ * Lead Service
+ * Handles lead-related API calls
+ */
+class LeadService {
+  constructor() {
+    this.baseURL = BASE_URL;
+  }
+
+  /**
+   * Create a new lead
+   * @param {Object} leadData - Lead data to create
+   * @returns {Promise<Object>} API response
+   */
+  async createLead(leadData) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      console.log("Creating lead with data:", leadData);
+
+      const response = await fetch(`${this.baseURL}/leads`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        body: JSON.stringify(leadData),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || errorData.message || "Failed to create lead"
+        );
+      }
+
+      const data = await response.json();
+      console.log("Lead created successfully:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Create lead error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to create lead",
+      };
+    }
+  }
+
+  /**
+   * Get all leads with pagination and filters
+   * @param {Object} params - Query parameters (page, pageSize, leadCategory, country, province, city, query)
+   * @returns {Promise<Object>} API response with data, page, pageSize, total
+   */
+  async getAllLeads(params = {}) {
+    try {
+      const {
+        page = 1,
+        pageSize = 10,
+        leadCategory,
+        country,
+        province,
+        city,
+        query,
+        lob,
+      } = params;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      // Build query string
+      const queryParams = new URLSearchParams();
+      queryParams.append("page", page);
+      queryParams.append("pageSize", pageSize);
+      if (leadCategory) queryParams.append("leadCategory", leadCategory);
+      if (country) queryParams.append("country", country);
+      if (province) queryParams.append("province", province);
+      if (city) queryParams.append("city", city);
+      if (query) queryParams.append("query", query);
+      if (lob) queryParams.append("lob", lob);
+
+      const url = `${this.baseURL}/leads?${queryParams.toString()}`;
+
+      console.log("Fetching leads from:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch leads");
+      }
+
+      const data = await response.json();
+      console.log("Leads fetched successfully:", data);
+
+      return {
+        success: true,
+        data: data.data || [],
+        page: data.page || page,
+        pageSize: data.pageSize || pageSize,
+        total: data.total || 0,
+      };
+    } catch (error) {
+      console.error("Get leads error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to fetch leads",
+        data: [],
+        page: params.page || 1,
+        pageSize: params.pageSize || 10,
+        total: 0,
+      };
+    }
+  }
+
+  /**
+   * Update a lead
+   * @param {string} leadId - Lead ID to update
+   * @param {Object} leadData - Updated lead data
+   * @returns {Promise<Object>} API response
+   */
+  async updateLead(leadId, leadData) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      console.log("Updating lead:", leadId, "with data:", leadData);
+
+      const response = await fetch(`${this.baseURL}/leads/${leadId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        body: JSON.stringify(leadData),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || errorData.message || "Failed to update lead"
+        );
+      }
+
+      const data = await response.json();
+      console.log("Lead updated successfully:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Update lead error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to update lead",
+      };
+    }
+  }
+
+  /**
+   * Get lead by ID
+   * @param {string} leadId - Lead ID
+   * @returns {Promise<Object>} API response
+   */
+  async getLeadById(leadId) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      console.log("Fetching lead by ID:", leadId);
+
+      const response = await fetch(`${this.baseURL}/leads/${leadId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch lead");
+      }
+
+      const data = await response.json();
+      console.log("Lead fetched successfully:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Get lead by ID error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to fetch lead",
+      };
+    }
+  }
+
+  /**
+   * Search leads
+   * @param {Object} searchParams - Search parameters
+   * @returns {Promise<Object>} API response
+   */
+  async searchLeads(searchParams) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const queryString = new URLSearchParams(searchParams).toString();
+      const url = `${this.baseURL}/leads/search${
+        queryString ? `?${queryString}` : ""
+      }`;
+
+      console.log("Searching leads with:", searchParams);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to search leads");
+      }
+
+      const data = await response.json();
+      console.log("Lead search completed:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Search leads error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to search leads",
+      };
+    }
+  }
+
+  /**
+   * Bulk upload leads from Excel file
+   * @param {File} file - Excel file to upload
+   * @returns {Promise<Object>} API response with upload results
+   */
+  async bulkUploadLeads(file) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
+
+      console.log("Uploading leads file:", file.name);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${this.baseURL}/leads/bulk-upload`, {
+        method: "POST",
+        headers: {
+          ...authService.getAuthHeader(),
+          // Note: Don't set Content-Type for FormData, browser will set it with boundary
+        },
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload leads file");
+      }
+
+      const data = await response.json();
+      console.log("Leads bulk upload completed:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Bulk upload leads error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Upload timeout. Please try again."
+            : error.message || "Failed to upload leads file",
+      };
+    }
+  }
+
+  /**
+   * Delete a lead
+   * @param {string} leadId - Lead ID to delete
+   * @returns {Promise<Object>} API response
+   */
+  async deleteLead(leadId) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      console.log("Deleting lead:", leadId);
+
+      const response = await fetch(`${this.baseURL}/leads/${leadId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete lead");
+      }
+
+      const data = await response.json();
+      console.log("Lead deleted successfully:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Delete lead error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to delete lead",
+      };
+    }
+  }
+
+  /**
+   * Get lead statistics
+   * @param {Object} filters - Filter options (country, province, city, leadCategory)
+   * @returns {Promise<Object>} API response with statistics
+   */
+  async getLeadStats(filters = {}) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const queryParams = new URLSearchParams();
+      if (filters.country) queryParams.append("country", filters.country);
+      if (filters.province) queryParams.append("province", filters.province);
+      if (filters.city) queryParams.append("city", filters.city);
+      if (filters.leadCategory)
+        queryParams.append("leadCategory", filters.leadCategory);
+
+      const url = `${this.baseURL}/leads/stats${
+        queryParams.toString() ? `?${queryParams.toString()}` : ""
+      }`;
+
+      console.log("Fetching lead stats from:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch lead statistics");
+      }
+
+      const data = await response.json();
+      console.log("Lead stats fetched successfully:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Get lead stats error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to fetch lead statistics",
+        data: {
+          totalLeads: 0,
+          recentLeads: 0,
+          leadsByCategory: [],
+          leadsByCountry: [],
+        },
+      };
+    }
+  }
+
+  /**
+   * Create a Fire and Allied Perils lead (personal details only - page 1).
+   * Uses POST /leads with lob: "FIRE". Page 2+ (risk, premium) goes to Create Quotation.
+   * @param {Object} payload - Personal details only (firstName, lastName, email, etc.)
+   * @returns {Promise<Object>} API response with leadId
+   */
+  async createFireLead(payload) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      console.log("Creating Fire lead with data:", payload);
+
+      const response = await fetch(`${this.baseURL}/leads`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || errorData.message || "Failed to create Fire lead"
+        );
+      }
+
+      const data = await response.json();
+      console.log("Fire lead created successfully:", data);
+
+      return {
+        success: true,
+        data: data,
+      };
+    } catch (error) {
+      console.error("Create Fire lead error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to create Fire lead",
+      };
+    }
+  }
+
+  /**
+   * Generate lead report Excel file
+   * @param {string} category - Report category (Excel, Converted, Pending, Dropped/Declined, Revised/Reconstruct)
+   * @returns {Promise<Object>} API response with Excel file download
+   */
+  async generateLeadReport(category = null) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for report generation
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (category) {
+        params.append("category", category);
+      }
+
+      const url = `${this.baseURL}/leads/report${
+        params.toString() ? `?${params.toString()}` : ""
+      }`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          ...authService.getAuthHeader(),
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Try to parse error response
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message ||
+            errorData.error ||
+            `Failed to generate report (status ${response.status})`
+        );
+      }
+
+      // Handle Excel file response
+      const blob = await response.blob();
+      const url_blob = window.URL.createObjectURL(blob);
+
+      // Get filename from Content-Disposition header or create default
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = `lead-report-${category || "all"}-${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`;
+
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create download link
+      const link = document.createElement("a");
+      link.href = url_blob;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url_blob);
+
+      console.log("Lead report generated successfully:", filename);
+
+      return {
+        success: true,
+        data: {
+          blob: blob,
+          url: url_blob,
+          fileName: filename,
+        },
+      };
+    } catch (error) {
+      console.error("Generate lead report error:", error);
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Failed to generate lead report",
+      };
+    }
+  }
+}
+
+// Create and export a singleton instance
+const leadService = new LeadService();
+export default leadService;

@@ -1,0 +1,37 @@
+.success-icon {
+  color: #29ce00 !important;
+}
+.p-toast .p-toast-message.p-toast-message-success {
+  background: rgba(228, 248, 240, 0.7);
+  border: solid #29ce00;
+  border-width: 0 0 0 6px;
+  color: #29ce00 !important;
+}
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close {
+  color: #29ce00 !important;
+}
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close {
+  color: #29ce00 !important;
+}
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close {
+  color: #29ce00 !important;
+}
+
+/* Logout success message specific styling */
+.p-toast .p-toast-message.p-toast-message-success.logout-success {
+  background: rgba(40, 167, 69, 0.1);
+  border-left: 4px solid #28a745;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.p-toast .p-toast-message.p-toast-message-success.logout-success .p-toast-message-icon {
+  color: #28a745 !important;
+  font-size: 1.2em;
+}
+
+.p-toast .p-toast-message.p-toast-message-success.logout-success .p-toast-message-content {
+  font-weight: 500;
+}

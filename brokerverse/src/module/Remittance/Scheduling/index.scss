@@ -1,0 +1,55 @@
+.scheduling-dashboard {
+  padding: 1rem;
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: #495057;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .schedule-calendar {
+      .p-calendar {
+        width: 100%;
+      }
+    }
+
+    .upcoming-events {
+      .custom-timeline {
+        .timeline-card {
+          .p-card-body {
+            padding: 0.75rem;
+          }
+
+          .timeline-header {
+            margin-bottom: 0.5rem;
+          }
+
+          .timeline-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            i {
+              font-size: 1.2rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .toolbar {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+  }
+}

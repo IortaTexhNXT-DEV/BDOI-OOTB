@@ -1,0 +1,66 @@
+.container__account__category__master {
+  .correction__title__reversal {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .breadCrums__view__reversal {
+    border: none;
+    padding: 1px 0;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1 !important;
+  }
+  .correction__btn__reversal {
+    color: #fff;
+    background-color: #0072d8;
+    border-radius: 30px;
+    padding: 6px 20px;
+    font-family: "Nunito", Arial, sans-serif;
+    gap: 4px;
+    .p-button-label {
+      font-weight: 500 !important;
+      font-size: 18px !important;
+    }
+  }
+  @media only screen and (min-width: 768px) and (max-width: 991px) {
+    .correction__title__reversal {
+      font-size: 26px;
+    }
+    .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+      font-size: 12px;
+    }
+    .correction__btn__reversal {
+      .p-button-label {
+        font-weight: 500 !important;
+        font-size: 14px !important;
+      }
+    }
+  }
+
+  @media only screen and (min-width: 992px) and (max-width: 1440px) {
+    .correction__title__reversal {
+      font-size: 28px;
+    }
+    .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+      font-size: 14px;
+    }
+    .correction__btn__reversal {
+      .p-button-label {
+        font-weight: 500 !important;
+        font-size: 16px !important;
+      }
+    }
+  }
+}

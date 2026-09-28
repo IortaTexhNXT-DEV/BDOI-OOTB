@@ -1,0 +1,436 @@
+// BDOI theme for iNXT BrokerVerse: the application shell (sidebar, top bar, content area), the
+// sign-in page and the PrimeReact components, styled to the BDO Style Guide. Styling only: no
+// screen, route or behaviour changes. Loaded after the generated PrimeReact theme and index.scss.
+@import "./tokens";
+
+// ---------------------------------------------------------------- base
+
+body,
+.p-component {
+  font-family: $font-body;
+}
+
+body {
+  background-color: $color-bg !important;
+  color: $color-text;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $font-heading;
+}
+
+// ---------------------------------------------------------------- shell: sidebar
+
+.protected__layout__container {
+  .protected__layout__sidebar__container {
+    background-color: $color-surface !important;
+    background: $color-surface !important;
+    border-right: 1px solid $color-border;
+    box-shadow: none;
+
+    .sidebar-close-btn {
+      background: $color-bg;
+      color: $brand-navy;
+
+      &:hover {
+        background: $brand-blue-050;
+      }
+    }
+  }
+
+  .protected__layout__content__space .main__content {
+    background-color: $color-bg;
+  }
+}
+
+.sidebar__overall__container {
+  background-color: $color-surface;
+
+  // Brand lockup: the BDO Insure logo with the product name under it.
+  .bdoi-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px 24px;
+    text-decoration: none;
+
+    img {
+      height: 36px;
+      width: auto;
+    }
+
+    .bdoi-brand-product {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: $color-text-muted;
+    }
+  }
+
+  // Navigation text is Header Blue on white.
+  .list li div,
+  .itemname__container,
+  .itemname__container.collapsed,
+  .singleitemname__container,
+  .singleitemname__container__active,
+  .submunusidebar__container li div {
+    color: $brand-navy !important;
+    font-family: $font-body;
+  }
+
+  .list li div:hover {
+    color: $brand-navy !important;
+  }
+
+  // Group rows carry no fill; only the entry of the current page is tinted (SideBarItem).
+  .divcontent__sidebar_overall,
+  .divcontent__sidebardeactive__overall {
+    background-color: transparent;
+    color: $brand-navy !important;
+
+    &:hover {
+      background-color: $color-bg;
+      color: $brand-navy !important;
+    }
+  }
+
+  .submunusidebar__container {
+    border-left-color: $color-border;
+
+    li div:hover {
+      background-color: $color-bg;
+      color: $brand-navy !important;
+    }
+  }
+
+  // Menu icons take the text colour instead of their white / indigo fills.
+  li svg [fill]:not([fill="none"]) {
+    fill: currentColor;
+  }
+
+  li svg [stroke]:not([stroke="none"]) {
+    stroke: currentColor;
+  }
+
+  .itemarrow__container svg path {
+    fill: currentColor;
+  }
+
+  // Menu search
+  .menu-search-container {
+    .p-input-icon-left {
+      i {
+        color: $color-placeholder;
+      }
+
+      .menu-search-input {
+        background-color: $color-surface;
+        border: 1px solid $brand-field-blue;
+        border-radius: $radius-sm;
+        color: $color-text !important;
+        font-family: $font-body;
+
+        &::placeholder,
+        &::-webkit-input-placeholder,
+        &::-moz-placeholder,
+        &:-ms-input-placeholder {
+          color: $color-placeholder !important;
+        }
+
+        &:focus {
+          border-color: $brand-blue;
+          box-shadow: $focus-ring;
+          color: $color-text !important;
+        }
+      }
+    }
+
+    .search-results-dropdown {
+      background-color: $color-surface;
+      border-color: $color-border;
+      box-shadow: $shadow-md;
+
+      &::-webkit-scrollbar-track {
+        background: $color-surface;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: $color-border-strong;
+      }
+
+      .search-result-item {
+        color: $color-text;
+
+        &:hover {
+          background-color: $color-bg;
+          color: $brand-navy;
+        }
+
+        &.selected {
+          background-color: $brand-blue-050;
+          color: $brand-navy;
+        }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- shell: top bar
+
+.protected__layout__header .Agentnavbar__container {
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+  translate: 0 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+
+  // The vendor logo is shown on sign-in only; the brand lives in the sidebar.
+  .bdo-logo-section {
+    display: none;
+  }
+
+  .notification__title {
+    font-family: $font-heading;
+    color: $color-heading;
+  }
+
+  .notification-button-hover:hover {
+    color: $brand-blue;
+    background-color: $brand-blue-050;
+  }
+}
+
+// ---------------------------------------------------------------- PrimeReact components
+
+.p-button {
+  border-radius: $radius-sm;
+  font-family: $font-heading;
+  font-weight: 700;
+}
+
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-inputnumber-input,
+.p-inputtextarea,
+.p-password-input,
+.p-calendar .p-inputtext {
+  border-color: $brand-field-blue;
+  border-radius: $radius-sm;
+}
+
+.p-inputtext::placeholder {
+  color: $color-placeholder;
+}
+
+.p-card {
+  border-radius: $radius-md !important;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-sm;
+}
+
+.p-panel .p-panel-header,
+.p-panel .p-panel-content,
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-footer {
+  font-family: $font-body;
+}
+
+.p-dialog {
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+// Tables: Header Blue header row with white bold text, alternating white / Background Blue rows.
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: $brand-navy;
+    color: #ffffff;
+    font-family: $font-heading;
+    font-weight: 700;
+    border-color: rgba(255, 255, 255, 0.18);
+
+    .p-sortable-column-icon,
+    .p-column-title {
+      color: #ffffff;
+    }
+
+    &.p-highlight,
+    &.p-sortable-column:not(.p-highlight):hover {
+      background: $brand-navy;
+      color: #ffffff;
+
+      .p-sortable-column-icon {
+        color: #ffffff;
+      }
+    }
+  }
+
+  .p-datatable-tbody > tr {
+    color: $color-text;
+
+    > td {
+      border-color: $color-border;
+    }
+
+    &:nth-child(even) {
+      background: $brand-blue-050;
+    }
+  }
+}
+
+// Tabs: the active tab is white with a yellow top bar and CTA Blue text.
+.p-tabview .p-tabview-nav {
+  li .p-tabview-nav-link {
+    font-family: $font-heading;
+    color: $color-text-muted;
+  }
+
+  li.p-highlight .p-tabview-nav-link {
+    color: $brand-blue;
+    border-color: $brand-blue;
+    box-shadow: inset 0 4px 0 $brand-gold;
+  }
+}
+
+.p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
+  color: $brand-blue;
+  border-color: $brand-blue;
+  box-shadow: inset 0 4px 0 $brand-gold;
+}
+
+.p-paginator {
+  .p-paginator-pages .p-paginator-page.p-highlight {
+    background: $brand-blue-050;
+    color: $brand-navy;
+    border-color: $brand-blue-050;
+  }
+}
+
+.p-breadcrumb {
+  font-family: $font-body;
+}
+
+// ---------------------------------------------------------------- sign-in
+
+.agent__container__login {
+  .left__side__login.bdo-theme {
+    background: $brand-navy;
+    padding: 0;
+
+    .bdo-banner-container {
+      width: 100%;
+      max-width: none;
+      height: 100vh;
+      margin: 0;
+
+      .bdo-banner-image {
+        width: 100%;
+        height: 100vh;
+        object-fit: cover;
+        border-radius: 0;
+        box-shadow: none;
+        display: block;
+      }
+    }
+  }
+
+  .login__side__screen {
+    background: $color-surface;
+  }
+
+  .bdo-logo-container {
+    text-align: left;
+    margin-bottom: 16px;
+
+    .bdo-logo {
+      height: 44px;
+    }
+  }
+
+  .login__header {
+    font-family: $font-heading;
+    color: $color-heading;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 36px;
+  }
+
+  .login__subtitle {
+    font-family: $font-body;
+    color: $color-text-muted;
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+  }
+
+  .inputfield__container .input__field,
+  .inputfield__container__changed .input__field {
+    border: 1px solid $brand-field-blue !important;
+    border-radius: $radius-sm;
+    font-family: $font-body;
+    color: $color-heading;
+
+    &:focus {
+      border-color: $brand-blue !important;
+      box-shadow: $focus-ring;
+    }
+  }
+
+  .inputfield__container .label,
+  .inputfield__container__changed .label {
+    font-family: $font-body;
+    color: $color-text-muted;
+  }
+
+  .login__button.bdo-login-btn {
+    background: $brand-blue;
+    border-radius: $radius-sm;
+    height: $control-height;
+    font-family: $font-heading;
+    font-size: 15px;
+    box-shadow: none;
+
+    &:hover {
+      background: $brand-blue-600;
+      box-shadow: none;
+      transform: none;
+    }
+  }
+
+  .forget__text {
+    font-family: $font-body;
+    color: $brand-blue;
+
+    &:hover {
+      color: $brand-blue-600;
+    }
+  }
+
+  .tech-footer .tech-powered-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: $font-body;
+    color: $color-text-muted;
+    font-size: 12px;
+
+    img {
+      height: 22px;
+      width: auto;
+    }
+  }
+
+  .login-language-dropdown {
+    border-color: $brand-field-blue;
+  }
+}

@@ -1,0 +1,145 @@
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Dropdown } from "primereact/dropdown";
+import { useNavigate } from "react-router";
+import "./index.scss";
+import SvgTable from "../../../../../../assets/icons/SvgTable";
+import { useSelector } from "react-redux";
+
+const UserGroupAccessDetail = () => {
+  const { t } = useTranslation();
+  const {
+    TransactioncodeListsearch,
+    UserGroupAccessList,
+    loading,
+    getUserAccessData,
+  } = useSelector(({ transactionCodeMasterReducer }) => {
+    return {
+      loading: transactionCodeMasterReducer?.loading,
+      UserGroupAccessList: transactionCodeMasterReducer?.UserGroupAccessList,
+      // TransactioncodeListsearch: transactionCodeMasterReducer?.TransactioncodeListsearch,
+      getUserAccessData: transactionCodeMasterReducer?.getUserAccessData,
+    };
+  });
+  const [products, setProducts] = useState([]);
+  // const handleEdit = (columnData) => {
+  //   // setShowEdit(true)
+  //   dispatch(getUserEditData(columnData))
+  //   console.log(columnData, "columnData");
+  // }
+  const navigate = useNavigate();
+  const isEmpty = products.length === 0;
+
+  const emptyTableIcon = (
+    <div>
+      <div className="empty-table-icon">
+        <SvgTable />
+      </div>
+      <div className="no__data__found">{t("financeMasters.noDataEntered")}</div>
+    </div>
+  );
+
+  const template2 = {
+    layout:
+      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
+    RowsPerPageDropdown: (options) => {
+      const dropdownOptions = [
+        { label: 5, value: 5 },
+        { label: 10, value: 10 },
+        { label: 20, value: 20 },
+        { label: 120, value: 120 },
+      ];
+
+      return (
+        <div className="paginator__container">
+          <React.Fragment>
+            <span
+              className="mx-1"
+              style={{
+                color: "var(--text-color)",
+                userSelect: "none",
+                width: "127%",
+                textAlign: "center",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {t("financeMasters.rowCount")}{" "}
+            </span>
+            <Dropdown
+              value={options.value}
+              className="pagedropdown_container"
+              options={dropdownOptions}
+              onChange={options.onChange}
+            />
+          </React.Fragment>
+        </div>
+      );
+    },
+  };
+
+  const headerStyle = {
+    fontSize: 16,
+    fontFamily: "Nunito, Arial, sans-serif",
+    fontWeight: 500,
+    padding: 6,
+    color: "#000",
+    border: "none",
+  };
+  return (
+    <div className="transactioncode__master__table_UserGroupAccess">
+      {/* <Card className="mt-1"> */}
+      <div className="card">
+        <DataTable
+          value={UserGroupAccessList}
+          tableStyle={{
+            minWidth: "50rem",
+            color: "#2e2e2e",
+          }}
+          scrollable={true}
+          scrollHeight="40vh"
+          emptyMessage={isEmpty ? emptyTableIcon : null}
+        >
+          <Column
+            field="UserRole"
+            header="User Role"
+            headerStyle={headerStyle}
+            className="fieldvalue_container"
+          ></Column>
+          <Column
+            field="MinimumTransaction"
+            header="Minimum Transaction"
+            headerStyle={headerStyle}
+            className="fieldvalue_container"
+            //   sortable
+          ></Column>
+          <Column
+            field="MaximumTransaction"
+            header="Maximum Transaction"
+            headerStyle={headerStyle}
+            className="fieldvalue_container"
+            //   sortable
+          ></Column>
+          {/* <Column
+            field="Edit"
+            body={(columnData) => (
+              <div onClick={() => handleEdit(columnData)}  style={{ display: 'flex', justifyContent: 'space-between', cursor: "pointer" }}>
+
+
+                <SvgEditIcon  />
+              </div>
+            )}
+            header="Edit"
+            headerStyle={headerStyle}
+            className="fieldvalue_container"
+          ></Column> */}
+        </DataTable>
+      </div>
+      {/* </Card> */}
+    </div>
+  );
+};
+
+export default UserGroupAccessDetail;

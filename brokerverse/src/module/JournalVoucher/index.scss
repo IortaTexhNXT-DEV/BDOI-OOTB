@@ -1,0 +1,449 @@
+.container__Journal__Voture {
+  // @layer primereact {
+  //     .p-card {
+  //       background: #ffffff;
+  //       color: #4b5563;
+  //       box-shadow: none !important;
+  //       border-radius: 6px !important;
+  //       fill: #fff !important;
+  //       stroke-width: 1px !important;
+  //       stroke: #fff !important;
+  //       filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+  //     }
+  //   }
+
+  .add__icon__title__Journal__Voture {
+    color: #111927;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+  }
+  .sorbyfilter_container {
+    // flex-direction: row-reverse;
+    // gap:10px;
+    height: 46px;
+    border-color: #d1d5db;
+    // width: 85%;
+    // margin-left: 8px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    // padding: 10px;
+    font-weight: 500;
+    width: 100%;
+    color: #0072d8;
+    margin: 0px !important;
+  }
+
+  .breadCrums__view__reversal__Journal__Voture {
+    border: none;
+    padding: 0;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #111927;
+    font-size: 16px !important;
+    font-weight: 600;
+  }
+  .p-dropdown .p-dropdown-label.p-placeholder {
+    color: #0072d8;
+    text-align: center;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+
+    font-weight: 500;
+  }
+  .sorbyfilter_container {
+    // flex-direction: row-reverse;
+    // gap:10px;
+    height: 46px;
+    border-color: #d1d5db;
+    // width: 85%;
+    // margin-left: 8px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    // padding: 10px;
+    font-weight: 500;
+    width: 100%;
+    color: #0072d8;
+    border-radius: 10px;
+    margin: 0px !important;
+    border-radius: 10px;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1;
+  }
+
+  .item__color__Journal__Voture {
+    border: none;
+    padding: 0;
+    font-family: "Nunito", Arial, sans-serif;
+    color: red !important;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  .empty-table-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 2%;
+    padding-bottom: 2%;
+  }
+
+  .add__icon__alighn__Journal__Voture {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+
+    .add__icon__view__Journal__Voture {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      background-color: #0072d8;
+      height: 45px;
+      // width: 140px;
+      border-radius: 30px;
+      color: #fff;
+      font-family: "Nunito", Arial, sans-serif;
+      padding: 0 20px;
+      cursor: pointer;
+
+      .add__icon__Journal__Voture {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+
+      .add__text__Journal__Voture {
+        color: #fff !important;
+        font-size: 18px;
+        font-weight: 500;
+        background-color: transparent;
+        border-color: transparent;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+    }
+  }
+
+  .sub__container__Journal__Voture {
+    // box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    // border-radius: 10px;
+    background: #ffffff;
+    color: #4b5563;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+    // fill: #fff !important;
+    // stroke-width: 1px !important;
+    // stroke: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .sort__filter__view__Journal__Voture {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      border: 0.5px solid #d1d5db !important;
+      border-radius: 10px !important;
+      position: relative;
+      width: 100% !important;
+    }
+    .searchinput_left {
+      width: 100%;
+      border-radius: 10px;
+
+      font-family: "Nunito", Arial, sans-serif;
+      border: 1px solid #d1d5db;
+      height: 46px;
+    }
+    .searchinput_left::placeholder {
+      color: #4b5563;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .sort__by__text__Journal__Voture {
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: left;
+      color: #0072d8;
+      cursor: pointer;
+    }
+
+    .input__sub__account__Journal__Voture {
+      width: 100% !important;
+      position: relative;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .table__view__Journal__Voture {
+      color: #000;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sort__by__data {
+      box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+        rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+      border-radius: 10px;
+      margin: 10px 5px 0 5px;
+      padding: 15px;
+      z-index: 1000;
+      position: absolute;
+      top: 46%;
+      width: 140px;
+      cursor: pointer;
+    }
+  }
+
+  .main__tabel__title__Journal__Voture {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #000;
+  }
+
+  .addbutton_container__Journal__Voture {
+    background-color: #0072d8;
+    border-radius: 60px;
+    width: 100px !important;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+  }
+
+  .filterbutton_container__Journal__Voture {
+    display: flex;
+    // justify-content:center;
+    align-items: center;
+    margin: 16px 0px;
+    gap: 20px;
+  }
+
+  .overallfilter_container__Journal__Voture {
+    display: flex;
+    align-items: self-start;
+    justify-content: space-between;
+  }
+
+  .overallcard_container__Journal__Voture {
+    width: 1236px;
+    height: 700px;
+  }
+
+  .searchinput_left__Journal__Voture {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .searchiput_container__Journal__Voture {
+    // background-color: red;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .searchIcon__view__input__Journal__Voture {
+    display: flex;
+    // justify-content: center;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    height: 45px;
+  }
+
+  .p-inputtext {
+    border-color: transparent;
+    height: 40px;
+  }
+
+  .p-inputtext:enabled:focus {
+    outline: 0 none;
+    outline-offset: 0;
+    box-shadow: 0 0 0 0.2rem transparent;
+    border-color: #d1d5db;
+  }
+
+  .p-inputtext::placeholder {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
+    color: #b1b1b1;
+    margin-left: 10px;
+  }
+
+  .p-placeholder {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
+    color: #b1b1b1;
+    margin-left: 10px;
+  }
+
+  .sorbyfilter_container__Journal__Voture {
+    flex-direction: row-reverse;
+    // gap:10px;
+    height: 46px;
+    border-color: #d1d5db;
+    width: 85%;
+    margin-left: 8px;
+  }
+
+  .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+    background: #e2f6ef;
+    border: 1px solid #48c99e;
+  }
+
+  .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
+    background: #e2f6ef;
+  }
+
+  .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
+    background: #48c99e;
+  }
+
+  .p-inputswitch .p-inputswitch-slider:before {
+    background: #f36156;
+    width: 1.25rem;
+    height: 1.25rem;
+    left: 0.25rem;
+    margin-top: -0.625rem;
+    border-radius: 50%;
+    transition-duration: 0.2s;
+  }
+
+  .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
+    /* background: #b7bcc5; */
+  }
+
+  // .container__sub__account__master .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
+  //     background: #F2DEDC;
+  //     border: 1px solid #F36156 !important;
+  // }
+  .container__sub__account__master
+    .p-inputswitch:not(.p-disabled):hover
+    .p-inputswitch-slider {
+    background: #e2f6ef;
+    border: 1px solid #f36156 !important;
+  }
+
+  .pagedropdown_container {
+    margin-right: 30%;
+    border-style: hidden;
+    background-color: #fafafa;
+  }
+
+  .header_search_container__Journal__Voture {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .fieldvalue_container__Journal__Voture {
+    font-size: 14px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 400;
+  }
+
+  .p-paginator .p-paginator-first,
+  .p-paginator .p-paginator-prev,
+  .p-paginator .p-paginator-next,
+  .p-paginator .p-paginator-last {
+    background-color: transparent;
+    border: 0 none;
+    color: #2e2e2e;
+    min-width: 0.5rem;
+    height: 3rem;
+    margin: 0.143rem;
+    transition: box-shadow 0.2s;
+    border-radius: 50%;
+  }
+
+  paginator-bottom {
+    border-width: 0 0 1px 0;
+    border-radius: 0;
+    border-color: transparent;
+  }
+
+  .row__count__view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+  }
+  .menu-container {
+    position: fixed;
+    top: 0px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .searchIcon__view__Journal__Voture {
+    position: absolute;
+    top: 50%;
+    left: 28%;
+  }
+}
+
+@media screen and (min-width: 767px) {
+  .search__filter__view__Journal__Voture {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .sort__filter__view__Journal__Voture {
+    // height: 45px;
+    width: 100px;
+  }
+
+  .searchIcon__view__Journal__Voture {
+    position: absolute;
+    top: 34%;
+    left: 28%;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .sort__filter__view__Journal__Voture {
+    height: 45px;
+    width: 150px;
+  }
+
+  .searchIcon__view__Journal__Voture {
+    position: absolute;
+    top: 37%;
+    left: 22%;
+  }
+
+  .searchIcon__view__Journal__Voture {
+    position: absolute;
+    top: 37%;
+    left: 22%;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .sort__filter__view__Journal__Voture {
+    height: 45px;
+    width: 170px;
+  }
+
+  .searchIcon__view__Journal__Voture {
+    position: absolute;
+    top: 29%;
+    left: 21%;
+  }
+}

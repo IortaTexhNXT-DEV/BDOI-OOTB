@@ -1,0 +1,106 @@
+.policy__approval__container {
+  .policy__approval__container__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+
+  .policy__approval__back__btn__container {
+    .navigation-controller {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: max-content;
+    }
+
+    .policy__approval__back__btn__container__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .policy__approval__quote__container {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .policy__approval__card__container {
+    .policy__approval__card__title {
+      font-size: 34px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 51px;
+      color: #111927;
+      text-align: center;
+    }
+    .policy__approval__card__image__containe {
+      display: flex;
+      justify-content: center;
+    }
+    .policy__approval__card__sub__text__container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .policy__approval__card__sub__text {
+      font-size: 18px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 27px;
+      color: #111927;
+      text-align: center;
+      width: 50%;
+    }
+  }
+  .policy__approval__card__btn__container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+    .edit__btn__container {
+      .p-button {
+        color: #111927;
+        background: #ffffff;
+        border: 1px solid #ffffff;
+        padding: 8px 16px 8px 16px;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 400 !important;
+        font-family: "Nunito", Arial, sans-serif;
+        line-height: 24px;
+        color: #111927;
+      }
+    }
+    .recived__btn__container {
+      .p-button {
+        color: #ffffff;
+        background: #0072d8;
+        border: 1px solid #0072d8;
+        padding: 8px 16px 8px 16px;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 400;
+        font-family: "Nunito", Arial, sans-serif;
+        line-height: 24px;
+        color: #ffffff;
+      }
+    }
+  }
+  .p-card {
+    background: #ffffff;
+    color: #4b5563;
+    box-shadow: none !important;
+    fill: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    margin-top: 10px;
+    border-radius: 20px !important;
+  }
+}

@@ -1,0 +1,559 @@
+// Responsive mixins
+$mobile-sm: 480px;
+$tablet-sm: 768px;
+$tablet-md: 1024px;
+
+@mixin mobile-sm {
+  @media (max-width: #{$mobile-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-sm {
+  @media (max-width: #{$tablet-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-md {
+  @media (max-width: #{$tablet-md - 1px}) {
+    @content;
+  }
+}
+
+.lead-creation-container {
+  padding: 2rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+
+  @include tablet-sm {
+    padding: 1rem;
+  }
+
+  @include mobile-sm {
+    padding: 0.75rem;
+  }
+
+  .lead-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @include tablet-sm {
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @include mobile-sm {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .header-left {
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+
+        @include tablet-sm {
+          font-size: 1.5rem;
+        }
+
+        @include mobile-sm {
+          font-size: 1.25rem;
+          text-align: center;
+        }
+      }
+
+      .breadcrumb {
+        margin-top: 0.5rem;
+
+        @include mobile-sm {
+          text-align: center;
+        }
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      @include mobile-sm {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .p-button {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+
+        @include mobile-sm {
+          min-height: 48px;
+          padding: 0.875rem 1.25rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .lead-form-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @include tablet-sm {
+      padding: 1.5rem;
+    }
+
+    @include mobile-sm {
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+
+      @include mobile-sm {
+        margin-bottom: 1.5rem;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e9ecef;
+
+        @include mobile-sm {
+          margin-bottom: 1rem;
+          padding-bottom: 0.5rem;
+        }
+
+        .section-icon {
+          font-size: 1.25rem;
+          color: #0066cc;
+
+          @include mobile-sm {
+            font-size: 1.1rem;
+          }
+        }
+
+        h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1a1a1a;
+          margin: 0;
+
+          @include mobile-sm {
+            font-size: 1.1rem;
+          }
+        }
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+
+        @include tablet-sm {
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+
+        @include mobile-sm {
+          grid-template-columns: 1fr;
+          gap: 0.75rem;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+
+          @include mobile-sm {
+            gap: 0.375rem;
+          }
+
+          label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+
+            @include mobile-sm {
+              font-size: 0.85rem;
+            }
+
+            .required {
+              color: #dc3545;
+              margin-left: 0.25rem;
+            }
+          }
+
+          .p-inputtext,
+          .p-dropdown,
+          .p-calendar,
+          .p-inputnumber,
+          .p-textarea {
+            min-height: 44px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-size: 1rem;
+
+            @include mobile-sm {
+              min-height: 48px;
+              font-size: 16px; // Prevent zoom on iOS
+              border-radius: 8px;
+            }
+
+            &:focus {
+              border-color: #0066cc;
+              box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+            }
+          }
+
+          .p-textarea {
+            min-height: 80px;
+            resize: vertical;
+
+            @include mobile-sm {
+              min-height: 100px;
+            }
+          }
+
+          .form-error {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+
+            @include mobile-sm {
+              font-size: 0.75rem;
+            }
+          }
+        }
+
+        .form-group-full {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .radio-group {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+
+        @include mobile-sm {
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .radio-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          @include mobile-sm {
+            padding: 0.5rem;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: #f8f9fa;
+          }
+
+          .p-radiobutton {
+            @include mobile-sm {
+              transform: scale(1.2);
+            }
+          }
+
+          label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+
+            @include mobile-sm {
+              font-size: 0.85rem;
+            }
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e9ecef;
+
+      @include mobile-sm {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+      }
+
+      .p-button {
+        min-height: 44px;
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        border-radius: 6px;
+
+        @include mobile-sm {
+          min-height: 48px;
+          padding: 0.875rem 1.5rem;
+          font-size: 0.9rem;
+          width: 100%;
+        }
+
+        &.p-button-secondary {
+          background: #6c757d;
+          border-color: #6c757d;
+          color: white;
+
+          &:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+          }
+        }
+
+        &.p-button-primary {
+          background: #0066cc;
+          border-color: #0066cc;
+          color: white;
+
+          &:hover {
+            background: #0072d8;
+            border-color: #0072d8;
+          }
+        }
+      }
+    }
+  }
+
+  .form-progress {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @include tablet-sm {
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @include mobile-sm {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      @include mobile-sm {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+
+      h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+
+        @include mobile-sm {
+          font-size: 0.9rem;
+          text-align: center;
+        }
+      }
+
+      .progress-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+
+        @include mobile-sm {
+          font-size: 0.8rem;
+          text-align: center;
+        }
+      }
+    }
+
+    .p-progressbar {
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+
+      @include mobile-sm {
+        height: 6px;
+      }
+
+      .p-progressbar-value {
+        background: linear-gradient(90deg, #0066cc 0%, #00c851 100%);
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .form-validation-summary {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+
+    @include mobile-sm {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .validation-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+
+      .pi {
+        color: #721c24;
+        font-size: 1.1rem;
+      }
+
+      h4 {
+        color: #721c24;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+
+        @include mobile-sm {
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    .validation-list {
+      margin: 0;
+      padding-left: 1.5rem;
+
+      @include mobile-sm {
+        padding-left: 1rem;
+      }
+
+      li {
+        color: #721c24;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+
+        @include mobile-sm {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+
+    .loading-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      @include mobile-sm {
+        padding: 1.5rem;
+        margin: 1rem;
+        border-radius: 8px;
+      }
+
+      .p-progress-spinner {
+        width: 2rem;
+        height: 2rem;
+        margin-bottom: 1rem;
+
+        @include mobile-sm {
+          width: 1.5rem;
+          height: 1.5rem;
+          margin-bottom: 0.75rem;
+        }
+      }
+
+      h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+
+        @include mobile-sm {
+          font-size: 1rem;
+        }
+      }
+
+      p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin: 0;
+
+        @include mobile-sm {
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+}
+
+// Responsive utilities for lead creation
+.lead-form-mobile-hidden {
+  @include mobile-sm {
+    display: none !important;
+  }
+}
+
+.lead-form-mobile-visible {
+  display: none !important;
+
+  @include mobile-sm {
+    display: block !important;
+  }
+}
+
+.lead-form-tablet-hidden {
+  @include tablet-sm {
+    display: none !important;
+  }
+}
+
+.lead-form-tablet-visible {
+  display: none !important;
+
+  @include tablet-sm {
+    display: block !important;
+  }
+}

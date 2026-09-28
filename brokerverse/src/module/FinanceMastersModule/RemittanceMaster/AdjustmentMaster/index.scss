@@ -1,0 +1,213 @@
+.adjustment-master {
+  padding: 1rem;
+
+  .header-section {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  }
+
+  .adjustment-types-section {
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .adjustment-grid {
+      .p-datatable-thead > tr > th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .p-inputgroup {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .p-editable-column {
+        .p-cell-editing {
+          padding: 0.25rem;
+        }
+      }
+    }
+  }
+
+  .adjustment-rules-section {
+    .rules-container {
+      h3 {
+        color: #34495e;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .rule-builder {
+        .rule-card {
+          background: #f8f9fa;
+          border-left: 4px solid #007bff;
+          padding: 1rem;
+          margin-bottom: 1rem;
+          border-radius: 4px;
+
+          .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+
+            span {
+              font-weight: 600;
+              color: #2c3e50;
+            }
+          }
+
+          .rule-content {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.5;
+
+            strong {
+              color: #495057;
+            }
+          }
+        }
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #555;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .text-muted {
+        color: #6c757d;
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .approval-matrix-section {
+    h3 {
+      color: #34495e;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .matrix-table {
+      overflow-x: auto;
+
+      .approval-matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        thead {
+          tr {
+            th {
+              background-color: #f8f9fa;
+              padding: 0.75rem;
+              text-align: left;
+              font-weight: 600;
+              color: #495057;
+              border-bottom: 2px solid #dee2e6;
+              font-size: 0.9rem;
+            }
+          }
+        }
+
+        tbody {
+          tr {
+            &:hover {
+              background-color: #f0f7ff;
+            }
+
+            td {
+              padding: 0.75rem;
+              border-bottom: 1px solid #dee2e6;
+
+              &.role-name {
+                font-weight: 600;
+                color: #2c3e50;
+              }
+
+              .p-inputnumber {
+                width: 100%;
+                max-width: 150px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .matrix-note {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: #e8f5ff;
+      border-radius: 4px;
+      color: #0066cc;
+
+      i {
+        font-size: 1.1rem;
+      }
+
+      small {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .p-tabview {
+    .p-tabview-nav {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #e0e0e0;
+
+      .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+
+        &:not(.p-disabled):not(.p-highlight):hover {
+          background: #f8f9fa;
+          color: #495057;
+        }
+      }
+
+      .p-highlight .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #007bff;
+        color: #007bff;
+      }
+    }
+
+    .p-tabview-panels {
+      background: transparent;
+      padding: 1.5rem 0;
+    }
+  }
+}

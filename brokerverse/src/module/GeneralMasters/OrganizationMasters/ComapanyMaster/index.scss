@@ -1,0 +1,194 @@
+.overall__company__container{
+    // background-color: green;
+    .label_header{
+       
+color: #111927;
+ font-family: "Nunito", Arial, sans-serif;
+font-size: 30px;
+// font-style: normal;
+font-weight: 600;
+// line-height: normal;header_search_container
+    }
+    .p-paginator {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end !important;
+        flex-wrap: wrap;
+    }
+    .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+        color: #B1B1B1;
+    }
+    .addtext{
+        color: #FFF;
+
+font-family: "Nunito", Arial, sans-serif;
+font-size: 18px;
+font-weight: 500;
+gap:10px
+    }
+    .p-button.p-button-outlined:not(:disabled):hover {
+        background: #fff !important;
+        color: #0072d8;
+        border: 1px solid;
+        cursor: pointer;
+    }
+    .dropdown__container{
+        width:100%;
+        height:44px;
+        border-radius: 11px;
+        overflow: hidden;
+        text-wrap: nowrap;
+        margin: 10px 0px;
+    }
+    .headlist_lable{
+        color: #111927;
+
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 18px;
+        margin-bottom: 20px;
+        font-weight: 600;
+         
+    }
+    
+.breadcrumbs_container{
+    // margin-bottom: 60px;
+    
+    font-size: 18px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    border: 1px solid #fff !important; 
+    border-radius: 6px !important;
+    padding: 0rem !important;
+    margin: 20px 0px;
+}
+.p-datatable .p-datatable-tbody > tr.p-highlight {
+    background: #eef8ff;
+    color: #0072d8 !important;
+}
+.p-checkbox .p-checkbox-box.p-highlight {
+    border-color: #0072d8;
+    background: #0072d8 !important;
+}
+
+.addbutton_container{
+    background-color: #0072d8;
+    border-radius: 60px;
+    padding: 0px 22px;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+    gap: 4px;
+  }
+  .filterbutton_container{
+    display: flex;
+    // justify-content:center;
+    align-items: center;
+    margin: 16px 0px;
+    
+    padding: 8px 20px;
+}
+  .overallfilter_container{
+    display: flex;
+    align-items: self-start;
+    justify-content: space-between;
+}
+.no__data__found {
+    color: #b1b1b1;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+  }
+.overallcard_container{
+   width:1236px;
+   height:700px;
+}
+.searchinput_left{
+     width:100%;
+     border-radius: 10px !important;
+   }
+.searchiput_container{
+    // background-color: red;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.sorbyfilter_container{
+    flex-direction: row-reverse;
+    // gap:10px;
+    height: 46px;
+    border-color: #d1d5db;
+    // width: 85%;
+    // margin-left: 8px;
+    font-family: "Nunito", Arial, sans-serif;
+font-size: 16px;
+padding: 10px;
+font-weight: 500;
+    width:100%;
+    
+}
+// .pagedropdown_container{
+//     margin-right: 30%;
+//     border-style: hidden;
+//     background-color: #FAFAFA;
+// }
+.header_search_container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+   margin-bottom: 16px;
+
+}
+.p-card .p-card-content {
+    padding: 0rem;
+}
+.fieldvalue_container{
+    font-size: 16px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 400;
+    padding: 1rem !important;
+  cursor: pointer;
+}
+.p-card {
+    background: #ffffff;
+    color: #4b5563;
+    /* box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12); */
+    border-radius: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+}
+.container__account__category__master .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+}
+.action_icons{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap:10px
+}
+.p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    // color: #4b5563;
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+}
+.table__selector {
+    text-align: center;
+    flex: 1 0;
+    .pagedropdown_container {
+      border: none;
+      margin: 0 !important;
+      background-color: #FAFAFA;
+    }
+  }
+
+
+}

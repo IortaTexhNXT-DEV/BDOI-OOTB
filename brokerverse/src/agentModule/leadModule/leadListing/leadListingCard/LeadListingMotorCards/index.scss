@@ -1,0 +1,223 @@
+.lead-cards-container {
+  padding: 1rem 0;
+
+  .lead-cards-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .search-input-group {
+      flex: 1;
+      min-width: 250px;
+      max-width: 400px;
+
+      .search-input {
+        width: 100%;
+      }
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .selected-count {
+        font-weight: 600;
+        color: var(--primary-color);
+        padding: 0.5rem 1rem;
+        background: var(--primary-color-light, #e3f2fd);
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .filter-card {
+    margin-bottom: 1.5rem;
+
+    .filter-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #495057;
+    }
+  }
+
+@import "../../../../../Color.scss";
+
+  .select-all-container {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: $main-background;
+    border-radius: 4px;
+
+    label {
+      cursor: pointer;
+      user-select: none;
+    }
+  }
+
+  .lead-card {
+    height: 100%;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    &.lead-card-selected {
+      border-color: var(--primary-color);
+      background: var(--primary-color-light, #e3f2fd);
+    }
+
+    .lead-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .lead-card-checkbox {
+        display: flex;
+        align-items: center;
+      }
+
+      .lead-card-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: var(--primary-color-light, #e3f2fd);
+        border-radius: 50%;
+
+        svg {
+          width: 24px;
+          height: 24px;
+          fill: var(--primary-color, #2196f3);
+          color: var(--primary-color, #2196f3);
+
+          path {
+            fill: currentColor;
+          }
+        }
+      }
+    }
+
+    .lead-card-body {
+      margin-bottom: 1rem;
+
+      .lead-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .lead-detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e9ecef;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .lead-label {
+          font-weight: 500;
+          color: #6c757d;
+          font-size: 0.875rem;
+        }
+
+        .lead-value {
+          font-weight: 400;
+          color: #212529;
+          text-align: right;
+          font-size: 0.875rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 60%;
+
+          &.quotes-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+
+    .lead-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e9ecef;
+
+      .p-button {
+        flex: 1;
+      }
+    }
+  }
+
+  .lead-card-skeleton {
+    height: 100%;
+  }
+
+  .empty-state-card {
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+
+      i {
+        color: #adb5bd;
+        margin-bottom: 1rem;
+      }
+
+      h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #495057;
+      }
+
+      p {
+        font-size: 1rem;
+        color: #6c757d;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media screen and (max-width: 768px) {
+  .lead-cards-container {
+    .lead-cards-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+
+      .search-input-group {
+        max-width: 100%;
+      }
+
+      .filter-actions {
+        justify-content: space-between;
+      }
+    }
+  }
+}

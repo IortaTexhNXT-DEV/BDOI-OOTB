@@ -1,0 +1,97 @@
+.claim__detailssettlemenet__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    margin-top: 24px;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .claim__details__container__titles {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+  .next_but_container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: 10px;
+  }
+
+  .claim__details__container__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .claim__details__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+
+  .claim__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #111927 !important;
+  }
+  .claim__doc__title {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+  }
+  .policy__detail__view__box__title {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .policy__detail__view__box__sub__title {
+    color: #0072d8;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .policy__detail__view__box__container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .policy__detail__view__box {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    transition: all 0.3s ease;
+
+    &.loading {
+      background-color: #f8fafc;
+      border-color: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(.loading) {
+      border-color: #0072d8;
+      box-shadow: 0 2px 4px rgba(0, 114, 216, 0.1);
+    }
+  }
+  .listing__button {
+    align-items: flex-end !important;
+    justify-content: flex-end !important;
+    display: flex !important;
+  }
+}

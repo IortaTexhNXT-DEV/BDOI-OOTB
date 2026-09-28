@@ -1,0 +1,197 @@
+{
+  "feature_id": "H3",
+  "feature_name": "Renewal Quotes Generation",
+  "description": "Generate and manage renewal quotes for expiring policies with automated pricing and retention strategies",
+  "mvp_scope": {
+    "included": [
+      "Bulk renewal quote generation",
+      "Individual quote creation",
+      "Premium calculation with adjustments",
+      "Discount application",
+      "Quote comparison with expiring policy",
+      "Quote approval workflow",
+      "Quote delivery via email/SMS"
+    ],
+    "excluded": [
+      "AI-based pricing",
+      "Complex underwriting rules",
+      "Multi-year quotes",
+      "Package policy renewals"
+    ]
+  },
+  "screens": {
+    "renewal_queue": {
+      "name": "Renewal Queue Dashboard",
+      "purpose": "View and manage policies due for renewal",
+      "navigation": "/renewal/queue",
+      "components": {
+        "filter_section": {
+          "filters": [
+            {"field": "renewal_date_range", "type": "date_range", "default": "Next 90 days"},
+            {"field": "line_of_business", "type": "multiselect"},
+            {"field": "insurer", "type": "multiselect"},
+            {"field": "premium_range", "type": "range"},
+            {"field": "status", "type": "dropdown", "options": ["Pending", "Quote Sent", "Under Negotiation", "Renewed", "Lapsed"]}
+          ]
+        },
+        "summary_cards": {
+          "metrics": [
+            "Policies Expiring (30/60/90 days)",
+            "Total Premium at Risk",
+            "Quotes Generated",
+            "Pending Actions"
+          ]
+        },
+        "policies_grid": {
+          "columns": [
+            "Policy Number",
+            "Insured Name",
+            "Product",
+            "Expiry Date",
+            "Current Premium",
+            "Claims Ratio",
+            "Retention Risk",
+            "Status",
+            "Actions"
+          ],
+          "row_actions": [
+            "Generate Quote",
+            "View History",
+            "Contact Client",
+            "Mark for Special Handling"
+          ],
+          "bulk_actions": [
+            "Generate Bulk Quotes",
+            "Apply Retention Strategy",
+            "Send Reminders"
+          ]
+        }
+      }
+    },
+    "quote_generation": {
+      "name": "Renewal Quote Generator",
+      "purpose": "Create and customize renewal quotes",
+      "navigation": "/renewal/generate-quote/:policyId",
+      "components": {
+        "policy_summary": {
+          "displays": [
+            "Policy Details",
+            "Current Coverage",
+            "Claims History",
+            "Payment History",
+            "Previous Renewals"
+          ]
+        },
+        "quote_builder": {
+          "sections": [
+            {
+              "name": "Base Premium Calculation",
+              "fields": [
+                {"field": "base_premium", "type": "number", "calculated": true},
+                {"field": "claims_loading", "type": "percentage", "editable": true},
+                {"field": "loyalty_discount", "type": "percentage", "auto_apply": true},
+                {"field": "manual_adjustment", "type": "number", "requires_justification": true}
+              ]
+            },
+            {
+              "name": "Coverage Options",
+              "type": "comparison_table",
+              "columns": ["Current Coverage", "Recommended", "Premium Impact"],
+              "allow_customization": true
+            },
+            {
+              "name": "Retention Offers",
+              "options": [
+                {"type": "Multi-year Discount", "discount": "5%", "condition": "2-year commitment"},
+                {"type": "Bundle Discount", "discount": "10%", "condition": "Add another policy"},
+                {"type": "Early Renewal", "discount": "3%", "condition": "Renew 30 days early"},
+                {"type": "Loyalty Bonus", "discount": "Variable", "condition": "Based on tenure"}
+              ]
+            },
+            {
+              "name": "Payment Terms",
+              "fields": [
+                {"field": "payment_frequency", "type": "dropdown", "options": ["Annual", "Semi-Annual", "Quarterly", "Monthly"]},
+                {"field": "payment_method", "type": "dropdown", "options": ["Cash", "Check", "Credit Card", "Auto-Debit"]},
+                {"field": "installment_charge", "type": "percentage", "auto_calculate": true}
+              ]
+            }
+          ]
+        },
+        "quote_preview": {
+          "sections": [
+            "Premium Comparison (Current vs Renewal)",
+            "Coverage Changes Highlight",
+            "Terms and Conditions",
+            "Special Offers Applied"
+          ],
+          "actions": [
+            "Save Draft",
+            "Get Approval",
+            "Send to Client",
+            "Print Quote",
+            "Schedule Follow-up"
+          ]
+        }
+      }
+    },
+    "quote_approval": {
+      "name": "Renewal Quote Approval",
+      "purpose": "Review and approve renewal quotes requiring authorization",
+      "navigation": "/renewal/approvals",
+      "components": {
+        "approval_queue": {
+          "columns": [
+            "Quote Reference",
+            "Policy Number",
+            "Client Name",
+            "Original Premium",
+            "Quoted Premium",
+            "Variance %",
+            "Discount Applied",
+            "Submitted By",
+            "Priority"
+          ],
+          "approval_actions": [
+            "Approve",
+            "Reject with Reason",
+            "Request Modification",
+            "Escalate"
+          ]
+        }
+      }
+    }
+  },
+  "data_model": {
+    "renewal_quote": {
+      "quote_id": "string",
+      "policy_id": "string",
+      "quote_number": "string",
+      "expiry_date": "date",
+      "current_premium": "number",
+      "quoted_premium": "number",
+      "discounts_applied": "array",
+      "coverage_changes": "array",
+      "status": "enum",
+      "created_date": "timestamp",
+      "valid_until": "date",
+      "approval_status": "enum"
+    },
+    "retention_strategy": {
+      "strategy_id": "string",
+      "client_segment": "string",
+      "retention_score": "number",
+      "recommended_discount": "percentage",
+      "special_offers": "array",
+      "follow_up_schedule": "array"
+    }
+  },
+  "business_rules": [
+    "Quotes must be generated at least 60 days before policy expiry",
+    "Discounts exceeding 15% require manager approval",
+    "Premium increases over 20% require retention team review",
+    "High-value clients (>PHP 500K premium) get priority handling",
+    "Claims ratio >70% triggers underwriting review",
+    "Quotes are valid for 30 days from generation"
+  ]
+}

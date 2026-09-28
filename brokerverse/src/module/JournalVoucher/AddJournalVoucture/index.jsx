@@ -1,0 +1,560 @@
+import { BreadCrumb } from "primereact/breadcrumb";
+import React, { useEffect, useState, useRef } from "react";
+import NavBar from "../../../components/NavBar";
+import DropDowns from "../../../components/DropDowns";
+import SvgDropdown from "../../../assets/icons/SvgDropdown";
+import InputField from "../../../components/InputField";
+import { Calendar } from "primereact/calendar";
+import LabelWrapper from "../../../components/LabelWrapper";
+import SvgDatePicker from "../../../assets/icons/SvgDatePicker";
+import SvgDot from "../../../assets/icons/SvgDot";
+import "../AddJournalVoucture/index.scss";
+import ArrowLeftIcon from "../../../assets/icons/ArrowLeftIcon";
+import SvgAddBlue from "../../../assets/icons/SvgAddBlue";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import SvgArrow from "../../../assets/icons/SvgArrow";
+import { useNavigate } from "react-router-dom";
+import { Dropdown } from "primereact/dropdown";
+import { Button } from "primereact/button";
+import SvgDeleteIcon from "../../../assets/icons/SvgDeleteIcon";
+import SvgEditIcon from "../../../assets/icons/SvgEditicons";
+// import { Toast } from 'primereact/toast';
+import { useFormik } from "formik";
+import AddData from "./AddData/AddData";
+import SvgTable from "../../../assets/icons/SvgTable";
+import CustomToast from "../../../components/Toast";
+import SuccessIcon from "../../../assets/icons/SuccessIcon";
+import AddDataTabel from "./AddDataTabel";
+import EditData from "./EditData";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  postTCJournalVoucher,
+  postApproveJournalVoucher,
+} from "../store/journalVoucherMiddleware";
+import { clearJournalVoucherTableData } from "../store/journalVoucherReducer";
+import SvgBackicon from "../../../assets/icons/SvgBackicon";
+import { useTranslation } from "react-i18next";
+
+const AddJournalVocture = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [buttonshow, setButtonShow] = useState(0);
+  const [products, setProducts] = useState([]);
+  const [visibleSuccess, setVisibleSuccess] = useState(false);
+
+  const toastRef = useRef(null);
+  const printRef = useRef(null);
+
+  const [visiblePopup, setVisiblePopup] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [visibleEdit, setVisibleEdit] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const items = [
+    {
+      label: t("accounts.journalVoucher"),
+      command: () => navigate("/accounts/journalvoucher"),
+    },
+    {
+      label: t("accounts.addJournalVoucher"),
+      to: "/accounts/journalvoucher/addjournalvoucture",
+    },
+  ];
+  const home = { label: t("sidebar.Accounts") };
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setVisibleSuccess(false);
+    }, 2000);
+
+    return () => clearTimeout(timerId);
+  }, [visibleSuccess]);
+
+  const handleGoback = () => {
+    navigate("/accounts/journalvoucher");
+  };
+  const { loading, journalVoucherPostTabelData } = useSelector(
+    ({ journalVoucherMainReducers }) => {
+      return {
+        loading: journalVoucherMainReducers?.loading,
+        journalVoucherPostTabelData:
+          journalVoucherMainReducers?.journalVoucherPostTabelData,
+      };
+    }
+  );
+  console.log(
+    journalVoucherPostTabelData.entryType,
+    "journalVoucherPostTabelData"
+  );
+
+  const customValidation = (values) => {
+    const errors = {};
+
+    if (!values.transationCode) {
+      errors.transationCode = t("validation.transationCodeRequired");
+    }
+    if (!values.transationDescription) {
+      errors.transationDescription = t("validation.transationDescriptionRequired");
+    }
+    if (!values.totalCredit) {
+      errors.totalCredit = "TotalCredit is required";
+    }
+    if (!values.totalDebit) {
+      errors.totalDebit = t("validation.totalDebitRequired");
+    }
+    if (!values.net) {
+      errors.net = t("validation.netRequired");
+    }
+
+    return errors;
+  };
+  const [errors, setErrors] = useState("");
+
+  const dispatch = useDispatch();
+
+  // Clear table data when component mounts (when navigating to add page)
+  useEffect(() => {
+    dispatch(clearJournalVoucherTableData());
+  }, [dispatch]);
+  const handleSubmit = (values) => {
+    dispatch(postTCJournalVoucher(formik.values));
+  };
+
+  // useEffect(() => {
+  //     handleSubmit()
+  // }, [])
+
+  const formik = useFormik({
+    initialValues: {
+      transationCode: "",
+      transationDescription: "",
+      totalCredit: "",
+      totalDebit: "",
+      net: "",
+      date: new Date(),
+    },
+    validate: customValidation,
+    onSubmit: handleSubmit,
+  });
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setVisiblePopup(false);
+    }, 2000);
+
+    return () => clearTimeout(timerId);
+  }, [visiblePopup]);
+
+  const [creditTotal, setCreditTotal] = useState(500);
+  const [debitTotal, setDebitTotal] = useState(500);
+  const [netTotal, setNetTotal] = useState(100);
+  const [toastMessage, setToastMessage] = useState("");
+
+  const handleApproval = async () => {
+    try {
+      // Check if table data exists and is not empty
+      if (
+        !journalVoucherPostTabelData ||
+        !Array.isArray(journalVoucherPostTabelData) ||
+        journalVoucherPostTabelData.length === 0
+      ) {
+        setToastMessage(t("validation.addOneEntryBeforeApproving"));
+        toastRef.current.showToast();
+        return;
+      }
+
+      // Check if transaction code is selected
+      if (!formik.values.transationCode) {
+        setToastMessage(t("validation.selectTransactionCode"));
+        toastRef.current.showToast();
+        return;
+      }
+
+      // Format entries array from journalVoucherPostTabelData
+      const entries = journalVoucherPostTabelData.map((item) => ({
+        mainAccount: item.mainAccount,
+        mainAccountDescription: item.mainAccountDescription || "",
+        entryType: item.entryType,
+        subAccount: item.subAccount,
+        subAccountDescription: item.subAccountDescription || "",
+        branchCode: item.branchCode,
+        branchCodeDescription: item.branchCodeDescription || "",
+        departmentCode: item.departmentCode,
+        departmentDescription: item.departmentDescription || "",
+        currencyCode: item.currencyCode,
+        currencyDescription: item.currencyDescription || "",
+        foreignAmount: parseFloat(item.foreignAmount) || 0,
+        remarks: item.Remarks || item.remarks || "",
+      }));
+
+      // Prepare payload
+      const payload = {
+        transactionCode: formik.values.transationCode,
+        entries: entries,
+      };
+
+      // Call API
+      const result = await dispatch(postApproveJournalVoucher(payload));
+
+      if (postApproveJournalVoucher.fulfilled.match(result)) {
+        // Success - show success message with transaction number
+        const transactionNumber =
+          result.payload?.transactionNumber ||
+          result.payload?.data?.transactionNumber ||
+          result.payload?.transaction_number ||
+          result.payload?.data?.transaction_number ||
+          result.payload?.voucherNumber ||
+          result.payload?.data?.voucherNumber ||
+          result.payload?.id ||
+          result.payload?.data?.id;
+
+        let message;
+        if (transactionNumber) {
+          message = `Transaction Number ${transactionNumber} is created`;
+        } else {
+          message =
+            result.payload?.message ||
+            result.payload?.data?.message ||
+            "Journal voucher approved successfully";
+        }
+        setToastMessage(message);
+        toastRef.current.showToast();
+        setTimeout(() => {
+          setButtonShow(1);
+          // Navigate back to journal voucher list page after showing success message
+          navigate("/accounts/journalvoucher");
+        }, 3000);
+      } else {
+        // Error - show error message
+        const errorMessage =
+          result.payload || "Failed to approve journal voucher";
+        setToastMessage(errorMessage);
+        toastRef.current.showToast();
+      }
+    } catch (error) {
+      const errorMessage =
+        error?.message || "An error occurred while approving journal voucher";
+      setToastMessage(errorMessage);
+      toastRef.current.showToast();
+    }
+  };
+
+  const handleUpdate = () => {
+    setNetTotal(0);
+    setDebitTotal(2600);
+  };
+  const [newDataTable, setnewDataTable] = useState([]);
+  const handleEdit = () => {
+    console.log("handleEdit success");
+    setVisible(true);
+  };
+
+  // Transaction code data
+  const transactionCodesData = [
+    { code: "RCPT", description: "Receipt JV" },
+    { code: "PMT", description: "Payment JV" },
+    { code: "COMM", description: "Commission JV" },
+    { code: "SETT", description: "Insurer Settlement JV" },
+    { code: "ADJ", description: "Adjustment JV" },
+    { code: "REF", description: "Refund JV" },
+  ];
+
+  // Format transaction code options for dropdown
+  const transactionCodeOptions = transactionCodesData.map((transaction) => ({
+    label: `${transaction.code} - ${transaction.description}`,
+    value: transaction.code,
+    description: transaction.description,
+  }));
+
+  // Helper function to get transaction description
+  const getTransactionDescription = (code) => {
+    const transaction = transactionCodesData.find((t) => t.code === code);
+    return transaction ? transaction.description : "";
+  };
+
+  // Handle transaction code change - update description
+  const handleTransactionCodeChange = (e) => {
+    formik.setFieldValue("transationCode", e.value);
+    formik.setFieldValue(
+      "transationDescription",
+      getTransactionDescription(e.value)
+    );
+  };
+  const totalForeignAmount = journalVoucherPostTabelData.reduce(
+    (total, item) => {
+      if (item.entryType === "Credit") {
+        const localAmount = parseFloat(item.localAmount || item.foreignAmount);
+        return !isNaN(localAmount) ? total + localAmount : total;
+      }
+      return total; // Important: Return the total for each iteration.
+    },
+    0
+  );
+
+  const totalLocalAmount = journalVoucherPostTabelData.reduce((total, item) => {
+    if (item.entryType === "Debit") {
+      const localAmount = parseFloat(item.localAmount || item.foreignAmount);
+      return !isNaN(localAmount) ? total + localAmount : total;
+    }
+    return total;
+  }, 0);
+
+  // const totalLocalAmount = journalVoucherPostTabelData.reduce((total, item) => {
+  //     const localAmount = parseFloat(item.localAmount);
+  //     return !isNaN(localAmount) ? total + localAmount : total;
+  // }, 0);
+
+  const handlePrint = () => {
+    printRef.current.showToast();
+    setVisibleSuccess(true);
+    handleSubmit();
+    navigate("/accounts/journalvoucher");
+  };
+
+  return (
+    <div className="grid add__JV__container">
+      {/* {buttonshow === 0 ? (
+        <CustomToast
+          ref={toastRef}
+          message="Transaction Number 1234 is created"
+        />
+      ) : (
+        <CustomToast ref={toastRef} message="Successfully Printed" />
+      )} */}
+      <CustomToast ref={toastRef} message={toastMessage} />
+      <CustomToast ref={printRef} message="Successfully Printed" />
+      <div className="col-12"></div>
+      <div className="col-12 mb-2">
+        {/* <div className="add__sub__title__JV" onClick={handleGoback}>
+          <span className="mr-2">
+            <ArrowLeftIcon />
+          </span>{" "}
+          Add Journal Voucheraaaa
+        </div> */}
+        <div>
+          <span onClick={handleGoback}>
+            <SvgBackicon />
+          </span>
+          <label className="label_header">Add Journal Voucher</label>
+        </div>
+        <div className="mt-4">
+          <BreadCrumb
+            home={home}
+            className="breadCrums__view__add__screen__JV"
+            model={items}
+            separatorIcon={<SvgDot color={"#000"} />}
+          />
+        </div>
+      </div>
+      <div className="col-12 m-0 ">
+        <div className="grid add__journal__vocture__add__JV p-3">
+          <div class="sm-col-12  md:col-3 lg-col-4 ">
+            <DropDowns
+              className="dropdown__add__sub__JV"
+              label="Transaction Code"
+              classNames="label__sub__add__JV"
+              value={formik.values.transationCode}
+              onChange={handleTransactionCodeChange}
+              options={transactionCodeOptions}
+              optionLabel="label"
+              placeholder={"Select"}
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+            />
+
+            {formik.touched.transationCode && formik.errors.transationCode && (
+              <div
+                style={{ fontSize: 12, color: "red" }}
+                className="formik__errror__JV"
+              >
+                {formik.errors.transationCode}
+              </div>
+            )}
+          </div>
+          <div className="col-12 md:col-6 lg:col-6">
+            <InputField
+              label="Transaction Description"
+              classNames="dropdown__add__sub__JV"
+              className="label__sub__add__JV"
+              value={formik.values.transationDescription || ""}
+              disabled={true}
+              onChange={(e) =>
+                formik.setFieldValue("transactionDescription", e.target.value)
+              }
+            />
+
+            {formik.touched.transationDescription &&
+              formik.errors.transationDescription && (
+                <div
+                  style={{ fontSize: 12, color: "red" }}
+                  className="formik__errror__JV"
+                >
+                  {formik.errors.transationDescription}
+                </div>
+              )}
+          </div>
+          <div className="col-12 md:col-3 lg-col-3 input__view__reversal__JV">
+            <div class="calender_container_claim__JV p-0">
+              <LabelWrapper
+                label="Date"
+                textSize={"16px"}
+                textColor={"#000"}
+                textWeight={"300"}
+                classNames="label__sub__add__JV"
+              >
+                <Calendar
+                  disabled={true}
+                  value={
+                    formik.values.date ? new Date(formik.values.date) : null
+                  }
+                  onChange={(e) => {
+                    formik.handleChange("date")(
+                      e.value.toISOString().split("T")[0]
+                    );
+                  }}
+                  dateFormat="yy-mm-dd"
+                  showIcon
+                  className="calender_field_claim__JV"
+                />
+                <div className="calender_icon_claim__JV">
+                  <SvgDatePicker />
+                </div>
+              </LabelWrapper>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="col-12 m-0">
+        <div className="sub__account__sub__container__JV">
+          <div
+            className="col-12 md:col-12 lg-col-12"
+            style={{ maxWidth: "100%", padding: 0 }}
+          >
+            <div className="card">
+              <AddDataTabel
+                setVisibleEdit={setVisibleEdit}
+                handleEdit={handleEdit}
+                newDataTable={newDataTable}
+                visible={visible}
+                journalVoucherPostTabelData={journalVoucherPostTabelData}
+              />
+            </div>
+          </div>
+          <div className="col-12 add__icon__alighn__Journal__Voture__JV pb-3">
+            <div
+              className="add__icon__view__Journal__Voture__JV"
+              onClick={() => setVisible(true)}
+            >
+              <div className="add__icon__Journal__Voture__JV">
+                <SvgAddBlue />
+              </div>
+              <div className="add__text__Journal__Voture__JV">Add Data</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-12 m-0 ">
+          <div className="grid add__journal__vocture__add__JV p-3">
+            <div class="sm-col-12  md:col-3 lg-col-4 ">
+              <InputField
+                label="Total credit"
+                classNames="dropdown__add__sub__JV"
+                className="label__sub__add__JV"
+                placeholder="Enter"
+                value={totalForeignAmount}
+              />
+              {formik.touched.totalCredit && formik.errors.totalCredit && (
+                <div
+                  style={{ fontSize: 12, color: "red" }}
+                  className="formik__errror__JV"
+                >
+                  {formik.errors.totalCredit}
+                </div>
+              )}
+            </div>
+            <div className="col-12 md:col-3 lg:col-3">
+              <InputField
+                label="Total Debit"
+                classNames="dropdown__add__sub__JV"
+                className="label__sub__add__JV"
+                placeholder="Enter"
+                value={totalLocalAmount}
+              />
+              {formik.touched.totalDebit && formik.errors.totalDebit && (
+                <div
+                  style={{ fontSize: 12, color: "red" }}
+                  className="formik__errror__JV"
+                >
+                  {formik.errors.totalDebit}
+                </div>
+              )}
+            </div>
+            <div className="col-12 md:col-3 lg-col-3 input__view__reversal__JV">
+              <InputField
+                label="Net"
+                classNames="dropdown__add__sub__JV"
+                className="label__sub__add__JV"
+                placeholder="Enter"
+                value={totalForeignAmount - totalLocalAmount}
+              />
+              {formik.touched.net && formik.errors.net && (
+                <div
+                  style={{ fontSize: 12, color: "red" }}
+                  className="formik__errror__JV"
+                >
+                  {formik.errors.net}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      {buttonshow === 0 && (
+        <div className="col-12 btn__view__Add__JV mt-2">
+          <Button
+            label="Approve"
+            className="save__add__btn__JV"
+            onClick={handleApproval}
+            disabled={
+              !formik.values.transationCode ||
+              !journalVoucherPostTabelData ||
+              !Array.isArray(journalVoucherPostTabelData) ||
+              journalVoucherPostTabelData.length === 0 ||
+              Math.abs(totalForeignAmount - totalLocalAmount) > 0.01
+            }
+          />
+        </div>
+      )}
+
+      {buttonshow === 1 && (
+        <div className="col-12 btn__view__Add__JV mt-2">
+          <Button
+            label="Print"
+            className="save__add__btn__print"
+            onClick={handlePrint}
+          />
+        </div>
+      )}
+      <div className="col-12">
+        <AddData
+          visible={visible}
+          setVisible={setVisible}
+          handleUpdate={handleUpdate}
+          setCreditTotal={setCreditTotal}
+          setDebitTotal={setCreditTotal}
+          setNetTotal={setNetTotal}
+        />
+      </div>
+      <div className="col-12">
+        <EditData
+          visibleEdit={visibleEdit}
+          setVisibleEdit={setVisibleEdit}
+          handleUpdate={handleUpdate}
+          setCreditTotal={setCreditTotal}
+          setDebitTotal={setCreditTotal}
+          setNetTotal={setNetTotal}
+        />
+      </div>
+    </div>
+  );
+};
+export default AddJournalVocture;
