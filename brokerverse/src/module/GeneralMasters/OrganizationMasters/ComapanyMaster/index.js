@@ -13,15 +13,17 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { useDispatch, useSelector } from "react-redux";
-import ToggleButton from "../../../../components/ToggleButton";
 import SvgEditicons from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import {
   getCompanyEditData,
   getCompanyViewMiddleWare,
   getSearchCompanyMiddleware,
+  getCompanyListMiddleware,
 } from "./store/companyMiddleware";
 import { useFormik } from "formik";
+import MasterStatusToggle from "../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -35,8 +37,14 @@ const Index = () => {
       };
     }
   );
-  console.log(companyTableList, "companyTableList");
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getCompanyListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getCompanyListMiddleware());
+  }, [dispatch]);
   const handleView = (columnData) => {
     dispatch(getCompanyViewMiddleWare(columnData));
     navigate(
@@ -53,7 +61,6 @@ const Index = () => {
     navigate(`/master/generals/organization/companymaster/add/${123}`);
   };
 
-  console.log("first", companyTableList);
 
   const isEmpty = companyTableList.length === 0;
 
@@ -107,13 +114,6 @@ const Index = () => {
     },
   ];
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const headerStyle = {
     width: "26%",
@@ -148,7 +148,6 @@ const Index = () => {
   };
 
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchCompanyMiddleware");
     dispatch(getSearchCompanyMiddleware({ textSearch: values.search }));
   };
   const formik = useFormik({
@@ -165,6 +164,7 @@ const Index = () => {
 
   return (
     <div className="overall__company__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("generalMasters.companyMaster")}</label>
@@ -258,7 +258,7 @@ const Index = () => {
             ></Column>
 
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="company" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
               className="fieldvalue_container"
               headerStyle={headerStyle}

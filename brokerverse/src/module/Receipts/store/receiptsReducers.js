@@ -141,8 +141,7 @@ const receiptsReducer = createSlice({
     });
     builder.addCase(postAddReceiptsMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      const newItem2 = { ...action.payload, id: nextId++ };
-      state.receiptsTableList = [...state.receiptsTableList, newItem2];
+      state.receiptsTableList = [action.payload, ...state.receiptsTableList];
     });
     builder.addCase(postAddReceiptsMiddleware.rejected, (state, action) => {
       state.loading = false;

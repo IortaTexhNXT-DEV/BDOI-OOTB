@@ -64,7 +64,6 @@ const BulkDisburse = () => {
       const result = await disbursementService.bulkAgentDisburse({
         referrerIds: selected.map((a) => a.id),
         transactionCode: "COMSUB",
-        instrumentCurrency: "PHP",
       });
       if (!result.success) {
         throw new Error(result.error || "Bulk disburse failed");

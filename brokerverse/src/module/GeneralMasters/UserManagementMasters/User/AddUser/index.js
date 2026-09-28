@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -17,13 +17,13 @@ import {
   postAddUserMiddleware,
 } from "../store/userMiddleware";
 import moment from "moment";
+import userService from "../../../../../services/userService";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
 import { unwrapResult } from "@reduxjs/toolkit";
 
 const AddUser = ({ action }) => {
   const { t } = useTranslation();
   const { id } = useParams();
-  console.log(id, "find id");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
@@ -44,30 +44,30 @@ const AddUser = ({ action }) => {
     roles: [],
     permissions: [],
   };
-  const { userDetailList, userViewData, userEditData } = useSelector(
+  const { userDetailList, userEditData } = useSelector(
     ({ userReducers }) => {
       return {
         userDetailList: userReducers?.userDetailList,
-        userViewData: userReducers?.userViewData,
         userEditData: userReducers?.userEditData,
       };
     }
   );
-  console.log(userViewData, "userViewData");
-  console.log(userDetailList, "userDetailList");
-  // Define role options
-  const roleOptions = [
-    { name: "roles", label: "Sales", value: "sales" },
-    { name: "roles", label: "Underwriting", value: "underwriting" },
-    { name: "roles", label: "Customer Services", value: "customer-services" },
-    { name: "roles", label: "Claims", value: "claims" },
-    { name: "roles", label: "Finance", value: "finance" },
-    { name: "roles", label: "IT Admin", value: "it-admin" },
-    { name: "roles", label: "BA", value: "ba" },
-  ];
+  // Role options come from GET /roles (active roles; the value is the role code)
+  const [roleOptions, setRoleOptions] = useState([]);
+  useEffect(() => {
+    userService
+      .getRoles()
+      .then((roles) =>
+        setRoleOptions(
+          roles
+            .filter((role) => role.status !== "inactive")
+            .map((role) => ({ name: "roles", label: role.name, value: role.code }))
+        )
+      )
+      .catch((error) => toastRef.current?.showToast({ severity: "error", detail: error.message }));
+  }, []);
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
 
     if (!values.username) {
       errors.username = "Username is required";
@@ -106,12 +106,7 @@ const AddUser = ({ action }) => {
     const { setSubmitting } = formikHelpers || {};
     try {
       if (action === "edit") {
-        const userData =
-          userEditData?.fullUserData || userEditData || userDetailList;
-        const updatePayload = {
-          ...value,
-          id: userData?.id,
-        };
+        const updatePayload = { ...value, id };
         await dispatch(patchUserEditMiddleware(updatePayload)).unwrap();
         toastRef.current.showToast({
           severity: "success",
@@ -169,11 +164,12 @@ const AddUser = ({ action }) => {
 
   // Set form values when user data is loaded (for edit/view)
   const setFormikValues = () => {
-    console.log(userEditData || userDetailList, "user details");
 
-    // Try userEditData first, then userDetailList
+    // The record loaded for this route first, then the row picked in the list
     const userData =
-      userEditData?.fullUserData || userEditData || userDetailList;
+      userDetailList?.userId === id
+        ? userDetailList
+        : userEditData?.fullUserData || userEditData || userDetailList;
 
     const rolesArray = Array.isArray(userData?.roles)
       ? userData.roles
@@ -184,7 +180,7 @@ const AddUser = ({ action }) => {
       : [];
 
     const updatedValues = {
-      id: userData?.id,
+      id: userData?.userId ?? userData?.id,
       username: userData?.username,
       email: userData?.email,
       displayName: userData?.displayName,
@@ -272,7 +268,7 @@ const AddUser = ({ action }) => {
                   ? formik.values.username
                   : action === "edit"
                   ? formik.values.username
-                  : userViewData?.username
+                  : formik.values.username
               }
               onChange={formik.handleChange("username")}
               label={t("generalMasters.username")}
@@ -291,7 +287,7 @@ const AddUser = ({ action }) => {
                   ? formik.values.email
                   : action === "edit"
                   ? formik.values.email
-                  : userViewData?.email
+                  : formik.values.email
               }
               onChange={formik.handleChange("email")}
               label={t("generalMasters.eMail")}
@@ -310,7 +306,7 @@ const AddUser = ({ action }) => {
                   ? formik.values.displayName
                   : action === "edit"
                   ? formik.values.displayName
-                  : userViewData?.displayName
+                  : formik.values.displayName
               }
               onChange={formik.handleChange("displayName")}
               label={t("generalMasters.displayName")}

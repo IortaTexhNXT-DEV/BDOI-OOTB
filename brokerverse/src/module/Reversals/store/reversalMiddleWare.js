@@ -1,43 +1,43 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getRequest } from "../../../utility/commonServices";
-import { APIROUTES } from "../../../routes/apiRoutes";
-
+import journalVoucherService, {
+  apiErrorMessage,
+} from "../../../services/journalVoucherService";
 import { GET_REVERSAL_JV_LIST, POST_REVERSAL_JV } from "../../../redux/actionTypes";
 
-export const getReversalTabelData = createAsyncThunk(
-    GET_REVERSAL_JV_LIST,
-    async (payload, { rejectWithValue, getState }) => {
-        const { reversalMainReducers } = getState();
-        console.log(reversalMainReducers, "data");
-        const { reversalJVGetDataList } = reversalMainReducers;
-        const filteredData = reversalJVGetDataList.filter((item) => item.id === 1);
+const OPPOSITE = { Debit: "Credit", Credit: "Debit" };
 
-        try {
-            // Simulate an API call if needed
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return filteredData[0];
-        } catch (error) {
-            return rejectWithValue(error?.response?.data?.error?.message);
-        }
+/** The reversal preview: the original voucher's lines with Debit / Credit swapped. */
+const toReversalRow = (entry) => ({
+  id: entry.lineId || entry.id,
+  mainAccount: entry.mainAccount,
+  subAccount: entry.subAccount,
+  branchCode: entry.branchCode,
+  departmentCode: entry.departmentCode,
+  remarks: entry.remarks,
+  currencyCode: entry.currencyCode,
+  localAmount: entry.localAmount,
+  entryType: OPPOSITE[entry.entryType] || entry.entryType,
+});
+
+export const getReversalTabelData = createAsyncThunk(
+  GET_REVERSAL_JV_LIST,
+  async (transactionNumber, { rejectWithValue }) => {
+    try {
+      const voucher = await journalVoucherService.getVoucher(transactionNumber);
+      return { voucher, rows: (voucher?.entries || []).map(toReversalRow) };
+    } catch (error) {
+      return rejectWithValue(apiErrorMessage(error, "Journal voucher not found"));
     }
+  }
 );
 
 export const postReversalJVData = createAsyncThunk(
-    POST_REVERSAL_JV,
-    async (payload, { rejectWithValue, getState }) => {
-        console.log(payload, "payload");
-
-        // let bodyTableData = {
-        //     reversalJVTransactionCode: payload?.reversalJVTransactionCode,
-        //     transactionNumber: payload?.transactionNumber,
-        //     transactionCode: payload?.transactionCode,
-        // };
-        try {
-            // console.log(bodyTableData, "find middleware");
-
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response?.data?.error?.message);
-        }
+  POST_REVERSAL_JV,
+  async (payload, { rejectWithValue }) => {
+    try {
+      return await journalVoucherService.createReversal(payload);
+    } catch (error) {
+      return rejectWithValue(apiErrorMessage(error));
     }
+  }
 );

@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "./mastersService";
 
 /**
  * User Service
@@ -49,7 +50,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch users");
       }
 
@@ -93,7 +94,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch user");
       }
 
@@ -136,8 +137,8 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create user");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(apiErrorMessage(errorData, response.status));
       }
 
       const data = await response.json();
@@ -179,8 +180,8 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update user");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(apiErrorMessage(errorData, response.status));
       }
 
       const data = await response.json();
@@ -220,7 +221,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to delete user");
       }
 
@@ -263,7 +264,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to update password");
       }
 
@@ -303,7 +304,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch user stats");
       }
 
@@ -321,6 +322,52 @@ class UserService {
         data: {},
       };
     }
+  }
+
+  /** JSON request that throws the API error message on failure (roles endpoints). */
+  async request(path, { method = "GET", body } = {}) {
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...authService.getAuthHeader(),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || json.success === false) throw new Error(apiErrorMessage(json, response.status));
+    return json.data;
+  }
+
+  /** Roles with their permission codes and user counts (GET /roles). */
+  getRoles() {
+    return this.request("/roles");
+  }
+
+  /** All permission codes grouped by module (GET /roles/permissions). */
+  getPermissions() {
+    return this.request("/roles/permissions");
+  }
+
+  /** Create a role: { code, name, description, permissions[], status }. */
+  createRole(role) {
+    return this.request("/roles", { method: "POST", body: role });
+  }
+
+  /** Update a role (partial): { name, description, permissions[], status }. */
+  updateRole(id, role) {
+    return this.request(`/roles/${encodeURIComponent(id)}`, { method: "PUT", body: role });
+  }
+
+  /** Delete a non-system role that has no users. */
+  deleteRole(id) {
+    return this.request(`/roles/${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  /** Activate / deactivate / unlock a user (PATCH /users/:id/status). */
+  setUserStatus(userId, status) {
+    return this.request(`/users/${encodeURIComponent(userId)}/status`, { method: "PATCH", body: { status } });
   }
 }
 

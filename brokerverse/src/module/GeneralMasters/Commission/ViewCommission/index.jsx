@@ -13,7 +13,7 @@ import LabelWrapper from "../../../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
 import SvgDatePicker from "../../../../assets/icons/SvgDatePicker";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
@@ -21,13 +21,19 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import { SelectButton } from "primereact/selectbutton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getCommissionView } from "../store/commissionMiddleWare";
 // import AddCommissionPopup from './AddCommissionPopup';
 import { Card } from "primereact/card";
 import { useTranslation } from "react-i18next";
 
 const ViewCommission = () => {
   const { t } = useTranslation();
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (id) dispatch(getCommissionView(id));
+  }, [id, dispatch]);
   const { commissionView, loading, addLevelCommissionSharing } = useSelector(
     ({ commissionMianReducers }) => {
       return {
@@ -38,7 +44,6 @@ const ViewCommission = () => {
       };
     }
   );
-  console.log(commissionView.selectCover, "commissionView");
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [date, setDate] = useState(new Date());
   const selectSwitchoptions = ["Yes", "No"];
@@ -96,7 +101,6 @@ const ViewCommission = () => {
     { label: commissionView.selectCover, value: commissionView.selectCover },
   ];
   const handleSubmit = (values) => {
-    console.log(values, "find values");
   };
   const formik = useFormik({
     initialValues: {
@@ -325,7 +329,7 @@ const ViewCommission = () => {
                 classNames="label__sub__add"
               >
                 <Calendar
-                  value={new Date(commissionView.effectiveFrom)}
+                  value={commissionView.effectiveFrom ? new Date(commissionView.effectiveFrom) : null}
                   onChange={(e) => setDate(e.value)}
                   showIcon
                   className="calender_field_claim"
@@ -348,7 +352,7 @@ const ViewCommission = () => {
                 classNames="label__sub__add"
               >
                 <Calendar
-                  value={new Date(commissionView.effectiveTo)}
+                  value={commissionView.effectiveTo ? new Date(commissionView.effectiveTo) : null}
                   onChange={(e) => setDate(e.value)}
                   showIcon
                   className="calender_field_claim"

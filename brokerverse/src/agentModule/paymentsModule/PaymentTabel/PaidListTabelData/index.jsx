@@ -204,8 +204,8 @@ const PaidListTabelData = () => {
     return <div className="status__text">{rowData.status?.toUpperCase()}</div>;
   };
 
-  const handleView = () => {
-    navigate(`/agent/policydetailedviewonly`);
+  const handleView = (rowData) => {
+    navigate(`/agent/policydetail/${rowData.policyId}`);
   };
 
   const handleEdit = () => {

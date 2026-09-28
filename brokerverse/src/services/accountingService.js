@@ -1,6 +1,13 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 
+const toQueryString = (params = {}) =>
+  new URLSearchParams(
+    Object.entries(params).filter(
+      ([, value]) => value !== undefined && value !== null && value !== ""
+    )
+  ).toString();
+
 /**
  * Accounting Service
  * Handles accounting and client ledger API calls
@@ -648,17 +655,35 @@ class AccountingService {
     }
   }
 
+  async getAccounts(filters = {}) {
+    try {
+      const query = toQueryString(filters);
+      const response = await fetch(
+        `${this.baseURL}/accounting/accounts${query ? `?${query}` : ""}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...authService.getAuthHeader(),
+          },
+        }
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to get accounts");
+      }
+      return { success: true, data: data.data || [] };
+    } catch (error) {
+      return { success: false, error: error.message, data: [] };
+    }
+  }
+
   async getUnmatchedEntries(filters = {}) {
     try {
+      const query = toQueryString({ ...filters, page: 1, pageSize: 100 });
       const response = await fetch(
-        `${this.baseURL}/accounting/entries/unmatched`,
+        `${this.baseURL}/accounting/entries/unmatched?${query}`,
         {
-          params: {
-            ...filters,
-            debitCredit: filters.debitCredit,
-            page: 1,
-            pageSize: 100,
-          },
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -723,10 +748,10 @@ class AccountingService {
   }
   async getMatchedEntries(filters = {}) {
     try {
+      const query = toQueryString(filters);
       const response = await fetch(
-        `${this.baseURL}/accounting/entries/matched`,
+        `${this.baseURL}/accounting/entries/matched${query ? `?${query}` : ""}`,
         {
-          params: { ...filters },
           method: "GET",
           headers: {
             "Content-Type": "application/json",

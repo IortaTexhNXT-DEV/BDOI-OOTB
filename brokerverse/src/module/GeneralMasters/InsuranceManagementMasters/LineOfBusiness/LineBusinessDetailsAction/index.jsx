@@ -21,13 +21,12 @@ import {
   patchInsurancelineOfBusinessMiddleWare,
   postInsurancelineOfBusinessMiddleWare,
 } from "../store/insuranceLineOfBusinessMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const LineBusinessDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
   const { InsuranceLineOfBusinessList, loading } = useSelector(
@@ -41,15 +40,13 @@ const LineBusinessDetailsAction = ({ action }) => {
   );
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceLineOfBusinessList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("line-of-business", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -80,34 +77,23 @@ const LineBusinessDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceLineOfBusinessList?.length + 1,
-      };
-      dispatch(postInsurancelineOfBusinessMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/lineofbusiness");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsurancelineOfBusinessMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/lineofbusiness");
-    } else {
-      navigation("/master/generals/insurancemanagement/lineofbusiness");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsurancelineOfBusinessMiddleWare : patchInsurancelineOfBusinessMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/lineofbusiness");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find data in setFormikValues");
     const lineofBusinessCode = data[0]?.businessCode;
     const LOBName = data[0]?.LOBName;
     const LOBDescription = data[0]?.description;
@@ -115,11 +101,11 @@ const LineBusinessDetailsAction = ({ action }) => {
     const modifiedOn = "12/12/23";
 
     const updatedValues = {
-      lineofBusinessCode: `${lineofBusinessCode}`,
-      LOBName: `${LOBName}`,
-      LOBDescription: `${LOBDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
+      lineofBusinessCode: lineofBusinessCode ?? "",
+      LOBName: LOBName ?? "",
+      LOBDescription: LOBDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };

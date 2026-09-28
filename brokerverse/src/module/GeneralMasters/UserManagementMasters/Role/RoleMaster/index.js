@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
@@ -14,14 +14,16 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPatchRoleEditMiddleware,
   getSearchRoleMiddleware,
   getViewRoleEditMiddleware,
+  getRoleListMiddleware,
 } from "../store/roleMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import userService from "../../../../../services/userService";
 
 const RoleMaster = () => {
   const { t } = useTranslation();
@@ -34,10 +36,18 @@ const RoleMaster = () => {
       };
     }
   );
-  console.log(roleTableList, "find1243");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getRoleListMiddleware());
+  const toggleRoleStatus = (role, active) =>
+    userService.updateRole(role.id, { status: active ? "active" : "inactive" });
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getRoleListMiddleware());
+  }, [dispatch]);
   const handleNavigate = () => {
     navigate("/master/generals/usermanagement/role/add/1");
   };
@@ -112,13 +122,6 @@ const RoleMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const template2 = {
     layout:
@@ -151,6 +154,7 @@ const RoleMaster = () => {
   };
   return (
     <div className="grid overall__role__master__container">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">Role Master</div>
         <div className="mt-3">
@@ -243,7 +247,7 @@ const RoleMaster = () => {
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="role" record={columnData} onToggle={toggleRoleStatus} onChanged={reloadList} onError={showStatusError} />}
                   header="Status"
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

@@ -12,69 +12,9 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./OpenEntryMatching.scss";
-import axios from "axios";
-import { BASE_URL } from "../../../utility/constant";
 import accountingService from "../../../services/accountingService";
+import useOpenItemAccounts from "./useOpenItemAccounts";
 
-export const subAccountOptions = [
-  {
-    label: "Gross Written Premium - Motor (3101001001)",
-    value: "3101001001",
-  },
-  { label: "Gross Written Premium - Fire (3101001002)", value: "3101001002" },
-  {
-    label: "Gross Written Premium - Marine (3101001003)",
-    value: "3101001003",
-  },
-  {
-    label: "Gross Written Premium - Engineering (3101001004)",
-    value: "3101001004",
-  },
-  {
-    label: "Gross Written Premium - General Accident (3101001005)",
-    value: "3101001005",
-  },
-  { label: "Gross Claims Paid - Motor (4101001001)", value: "4101001001" },
-  { label: "Gross Claims Paid - Fire (4101001002)", value: "4101001002" },
-  { label: "Gross Claims Paid - Marine (4101001003)", value: "4101001003" },
-  {
-    label: "Gross Claims Paid - Engineering (4101001004)",
-    value: "4101001004",
-  },
-  {
-    label: "Gross Claims Paid - General Accident (4101001005)",
-    value: "4101001005",
-  },
-  {
-    label: "Gross Claims Paid - Liaibility (4101001006)",
-    value: "4101001006",
-  },
-  { label: "Gross Claims Paid - Bonds (4101001007)", value: "4101001007" },
-  { label: "Gross Claims Paid - Aviation (4101001008)", value: "4101001008" },
-  {
-    label: "Gross Claims Paid - Oil and Gas (4101001009)",
-    value: "4101001009",
-  },
-  { label: "Audit Fees Statutory (4401003001)", value: "4401003001" },
-  { label: "Audit Fees Other (4401003002)", value: "4401003002" },
-  { label: "Internal Audit (4401003003)", value: "4401003003" },
-  { label: "Tax Advisory Fees (4401003004)", value: "4401003004" },
-  { label: "Office Rent (4401005001)", value: "4401005001" },
-  { label: "Office Cleaning (4401005002)", value: "4401005002" },
-  { label: "Office Water & Electricity (4401005003)", value: "4401005003" },
-  { label: "Office Security (4401005004)", value: "4401005004" },
-  {
-    label: "Office Repairs and Maintenance (4401005005)",
-    value: "4401005005",
-  },
-  { label: "Consultancy Fees (4401006001)", value: "4401006001" },
-  { label: "Legal Fees (4401006002)", value: "4401006002" },
-  { label: "Company Secretarial Fees (4401006003)", value: "4401006003" },
-  {
-    label: "Technical & Administrative Fees (4401006004)",
-    value: "4401006004",
-  },
-];
 const OpenEntryMatching = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -104,6 +44,7 @@ const OpenEntryMatching = () => {
     net: "",
   });
   const [loading, setLoading] = useState(false);
+  const subAccountOptions = useOpenItemAccounts();
 
   const items = [
     {
@@ -117,8 +58,13 @@ const OpenEntryMatching = () => {
   const handlePull = async () => {
     setLoading(true);
     try {
-      const response = await accountingService.getUnmatchedEntries(filters);
-      if (response.success) {
+      const response = await accountingService.getUnmatchedEntries({
+        accountCode: filters.subAccountCode,
+        currency: filters.currencyCode,
+      });
+      if (!response.success) {
+        alert(response.error || "Failed to fetch unmatched entries");
+      } else {
         const entries = response.data || [];
         const debitEntries = entries.filter(
           (entry) => entry.debitCredit === "DEBIT"
@@ -130,7 +76,6 @@ const OpenEntryMatching = () => {
         setCreditEntries(creditEntries);
       }
     } catch (error) {
-      console.error("Error fetching unmatched entries:", error);
       alert("Failed to fetch unmatched entries");
     } finally {
       setLoading(false);
@@ -169,15 +114,16 @@ const OpenEntryMatching = () => {
         writeOffAmount: footerData.writeOffAmount,
       });
 
-      if (response.success) {
+      if (!response.success) {
+        alert(response.error || "Failed to match entries");
+      } else {
         alert(`Successfully matched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
         setSelectedCredits([]);
         handlePull();
       }
     } catch (error) {
-      console.error("Error matching entries:", error);
-      alert(error.response?.data?.error || "Failed to match entries");
+      alert(error.message || "Failed to match entries");
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -10,14 +10,22 @@ import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { InputSwitch } from "primereact/inputswitch";
-import ToggleButton from "../../../../../components/ToggleButton";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
-import { getSearchInsurancePolicyTypeMiddleware } from "../store/insurancePolicyTypeMiddleware";
+import { getSearchInsurancePolicyTypeMiddleware, getInsurancePolicyTypeMiddleWare } from "../store/insurancePolicyTypeMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getInsurancePolicyTypeMiddleWare());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getInsurancePolicyTypeMiddleWare());
+  }, [dispatch]);
   const { InsurancePolicyType, loading, SearchTableList } = useSelector(
     ({ insurancePolicyTypeReducers }) => {
       return {
@@ -106,6 +114,7 @@ const TableData = ({ navigate }) => {
   }, [formik.values.search]);
   return (
     <div className="policy__type__table__container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -167,7 +176,7 @@ const TableData = ({ navigate }) => {
           field="status"
           header="status"
           className="fieldvalue_container"
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="policy-type" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
           style={{

@@ -25,9 +25,9 @@ const mapUserData = (user) => {
 
   return {
     ...user,
-    id: user.id,
+    id: user.userId ?? user.id,
     userName: user.username || "",
-    employeeCode: user.agentProfile?.employeeCode || "N/A",
+    employeeCode: user.employeeCode || user.agentProfile?.employeeCode || "N/A",
     assignedRole:
       Array.isArray(user.roles) && user.roles.length > 0
         ? user.roles.join(", ")
@@ -36,7 +36,7 @@ const mapUserData = (user) => {
     phoneNumber: user.agentProfile?.mobile || "",
     modifiedBy: user.updatedBy || "System",
     modifiedOn: formatDate(user.updatedAt || user.createdAt),
-    status: "",
+    status: user.status || "",
     action: "",
     // Store full user data for view/edit
     fullUserData: user,

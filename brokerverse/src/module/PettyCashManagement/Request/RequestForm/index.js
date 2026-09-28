@@ -13,9 +13,9 @@ import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import CustomToast from "../../../../components/Toast";
 import { TriStateCheckbox } from "primereact/tristatecheckbox";
-import { PettyCashCode, Name, Branchcode, Departcode } from "../../mock";
+import usePettyCashOptions from "../../usePettyCashOptions";
 import { useDispatch, useSelector } from "react-redux";
-import { postAddRequestMiddleware } from "../store/pettyCashRequestMiddleware";
+import { setRequestDraft } from "../store/pettyCashRequestReducer";
 import { Calendar } from "primereact/calendar";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { DataTable } from "primereact/datatable";
@@ -30,6 +30,7 @@ const initialValue = {
   TransactionNumber: "",
   RequestDate: new Date(),
   RequesterName: "",
+  PettyCashCode: "",
 };
 const RequestForm = ({ action }) => {
   const { t } = useTranslation();
@@ -37,31 +38,13 @@ const RequestForm = ({ action }) => {
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log("first", action);
   const [checked, setChecked] = useState(false);
 
-  const { RequestList, loading } = useSelector(
-    ({ pettyCashRequestReducer }) => {
-      return {
-        loading: pettyCashRequestReducer?.loading,
-        RequestList: pettyCashRequestReducer?.RequestList,
-      };
-    }
-  );
-
-  const handleSubmit = (value) => {
-    const valueWithId = {
-      ...value,
-      id: RequestList?.length + 1,
-    };
-    console.log("first7", valueWithId)
-    dispatch(postAddRequestMiddleware(valueWithId));
-    // toastRef.current.showToast();
-    // setTimeout(() => {
+  const { funds, requesters } = usePettyCashOptions();
+  const handleSubmit = (values) => {
+    dispatch(setRequestDraft(values));
     navigate("/accounts/pettycash/addrequesttable");
-    // }, 3000);
   };
-
   const validate = (values) => {
     let errors = {};
 
@@ -71,6 +54,9 @@ const RequestForm = ({ action }) => {
 
     if (!values.RequesterName) {
       errors.RequesterName = t("pettyCash.transactionNumberRequired");
+    }
+    if (!values.PettyCashCode) {
+      errors.PettyCashCode = t("pettyCash.pettyCashCodeRequiredMsg");
     }
 
     // if (!values.BranchCode) {
@@ -121,92 +107,6 @@ const RequestForm = ({ action }) => {
     },
   });
 
-  // const handlePettyCashDescribtion = (value) => {
-  //   formik.setFieldValue("PettyCashCode", value);
-
-  //   let description = "";
-  //   let Requestnumber = "";
-  //   switch (value.pettycashcode) {
-  //     case "PC001":
-  //       description = "PC-1";
-  //       break;
-  //     case "PC002":
-  //       description = "PC-2";
-  //       break;
-  //     case "PC003":
-  //       description = "PC-3";
-  //       break;
-  //     // case "PC0131":
-  //     //   description = "PC-4";
-  //     //   break;
-  //     default:
-  //       description = "Unknown";
-  //       break;
-  //   }
-
-  //   switch (value.pettycashcode) {
-  //     case "PC001":
-  //       Requestnumber = "29292";
-  //       break;
-  //     case "PC002":
-  //       Requestnumber = "20202";
-  //       break;
-  //     case "PC003":
-  //       Requestnumber = "29292";
-  //       break;
-  //     // case "PC0131":
-  //     //   Requestnumber = "19292";
-  //     //   break;
-  //     default:
-  //       Requestnumber = "Unknown";
-  //       break;
-  //   }
-  //   formik.setFieldValue("Requestnumber", Requestnumber);
-  //   formik.setFieldValue("PettyCashdescription", description);
-  // };
-
-  // const handleBranch = (value) => {
-  //   let Branch = "";
-  //   switch (value) {
-  //     case "THB001":
-  //       Branch = "Branch-1";
-  //       break;
-  //     case "THB002":
-  //       Branch = "Branch-2";
-  //       break;
-  //     case "THB003":
-  //       Branch = "Branch-3";
-  //       break;
-  //     // case "Branch00123":
-  //     //   Branch = "Branch-4";
-  //     //   break;
-  //     default:
-  //       Branch = "Unknown";
-  //       break;
-  //   }
-  //   formik.setFieldValue("Branchdescription", Branch);
-  // };
-  // const handleDepart = (value) => {
-  //   let Depart = "";
-  //   switch (value) {
-  //     case "FIN":
-  //       Depart = "Depart-1";
-  //       break;
-  //     case "MKT":
-  //       Depart = "Depart-2";
-  //       break;
-  //     case "IT":
-  //       Depart = "Depart-3";
-  //       break;
-  //     case "SLS":
-  //       Depart = "Depart-4";
-  //       break;
-  //     default:
-  //       Depart = "Unknown";
-  //       break;
-  //   }
-  //   formik.setFieldValue("Departmentdescription", Depart);
-  // };
 
   return (
     <div className="request__form">
@@ -316,14 +216,33 @@ const RequestForm = ({ action }) => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.RequesterName}
-                options={Name}
+                options={requesters}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("RequesterName", e.value);
                 }}
-                optionLabel="Name"
+                optionLabel="label"
                 error={
                   formik.touched.RequesterName && formik.errors.RequesterName
+                }
+              />
+            </div>
+            <div className="col-12 md:col-3 lg-col-3 input__view">
+              <DropDowns
+                className="input__filed"
+                label={t("pettyCash.pettyCashCode")}
+                placeholder={t("pettyCash.select")}
+                textColor={"#111927"}
+                textSize={"16"}
+                textWeight={500}
+                dropdownIcon={<SvgDropdown color={"#000"} />}
+                value={formik.values.PettyCashCode}
+                options={funds}
+                onChange={(e) => {
+                  formik.setFieldValue("PettyCashCode", e.value);
+                }}
+                optionLabel="label"
+                error={
+                  formik.touched.PettyCashCode && formik.errors.PettyCashCode
                 }
               />
             </div>

@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 import SvgBack from "../../../../assets/icons/SvgBack";
 import { useDispatch, useSelector } from "react-redux";
 import { patchTaxationEdit } from "../store/taxationMiddleWare";
+import useTaxRateOptions from "../useTaxRateOptions";
+import CustomToast from "../../../../components/Toast";
 
 const AddTaxation = () => {
   const { t } = useTranslation();
@@ -26,7 +28,6 @@ const AddTaxation = () => {
       };
     }
   );
-  console.log(getTaxationEdit, "getTaxationEdit");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState("30%");
@@ -47,10 +48,9 @@ const AddTaxation = () => {
   const home = { label: t("financeMasters.master") };
 
   const item = [{ name: "30%" }, { name: "40%" }, { name: "70%" }];
-  const [isocode, setISOcodeData] = useState([]);
+  const isocode = useTaxRateOptions();
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.taxCode) {
       errors.taxCode = t("validation.fieldRequired");
     }
@@ -67,20 +67,24 @@ const AddTaxation = () => {
       errors.effectiveFrom = t("validation.fieldRequired");
     }
     if (!values.effectiveTo) {
-      errors.customerCode = t("validation.fieldRequired");
+      errors.effectiveTo = t("validation.fieldRequired");
     }
 
     return errors;
   };
-  const handleSubmit = (value) => {
-    console.log(value, "value");
-    dispatch(patchTaxationEdit(value));
-    navigate("/master/finance/taxation");
+  const toastRef = useRef(null);
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchTaxationEdit(value)).unwrap();
+      navigate("/master/finance/taxation");
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = () => {
     const taxRatee = getTaxationEdit?.taxRate;
     const updatedValues = {
-      id: getTaxationEdit.id,
+      id: getTaxationEdit?.id,
       taxCode: getTaxationEdit?.taxCode,
       taxName: getTaxationEdit?.taxName,
       remarks: getTaxationEdit?.remarks,
@@ -90,11 +94,6 @@ const AddTaxation = () => {
       effectiveFrom: new Date(getTaxationEdit?.effectiveFrom),
       effectiveTo: new Date(getTaxationEdit?.effectiveTo),
     };
-    console.log(getTaxationEdit?.effectiveTo, "getTaxationEdit?.effectiveTo");
-    if (taxRatee) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setISOcodeData([{ label: taxRatee, value: taxRatee }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -115,13 +114,13 @@ const AddTaxation = () => {
     },
   });
 
-  console.log(formik.values.id, "idleo");
   useEffect(() => {
     setFormikValues();
   }, [getTaxationEdit]);
 
   return (
     <div className="grid sub__add__container">
+      <CustomToast ref={toastRef} />
       <div className="col-12"></div>
       <div>
         <span onClick={() => navigate(-1)}>

@@ -17,7 +17,8 @@ import SvgArrow from "../../../assets/icons/SvgArrow";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
-import { data } from "./data";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 import { useFormik } from "formik";
 import ViewDataTabel from "./ViewDataTabel";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +26,11 @@ import {
   getJournalVoucherViewData,
   getJournalVoucherDetails,
 } from "../store/journalVoucherMiddleware";
+import journalVoucherService, {
+  apiErrorMessage,
+} from "../../../services/journalVoucherService";
+
+const AWAITING_APPROVAL = "for-approval";
 
 const DetailsJournalVocture = () => {
   const { t } = useTranslation();
@@ -57,7 +63,6 @@ const DetailsJournalVocture = () => {
         },
     };
   });
-  console.log(journalVoucherView, "journalVoucherView");
 
   const totalCredit = journalVoucherPostTabelData.reduce((total, item) => {
     if (item.entryType === "Credit") {
@@ -155,6 +160,60 @@ const DetailsJournalVocture = () => {
     },
   ];
   const toast = useRef(null);
+  const [voucherStatus, setVoucherStatus] = useState("");
+  const [rejectVisible, setRejectVisible] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const loadVoucherStatus = async () => {
+    try {
+      const voucher = await journalVoucherService.getVoucher(id);
+      setVoucherStatus(voucher?.status || "");
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.error"),
+        detail: apiErrorMessage(error),
+        life: 3000,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (id) loadVoucherStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const runVoucherAction = async (action) => {
+    setActionLoading(true);
+    try {
+      const result = await action();
+      toast.current?.show({
+        severity: "success",
+        summary: t("accounts.journalVoucherDetails.success"),
+        detail: result?.message,
+        life: 3000,
+      });
+      setRejectVisible(false);
+      setRejectReason("");
+      await loadVoucherStatus();
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: t("common.error"),
+        detail: apiErrorMessage(error),
+        life: 4000,
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleApprove = () =>
+    runVoucherAction(() => journalVoucherService.approve(id));
+
+  const handleReject = () =>
+    runVoucherAction(() => journalVoucherService.reject(id, rejectReason.trim()));
   const [newDataTable, setnewDataTable] = useState([]);
   const [visible, setVisible] = useState(false);
   const handleEdit = () => {
@@ -503,6 +562,44 @@ const DetailsJournalVocture = () => {
           </div>
         </div>
       </form>
+      {voucherStatus === AWAITING_APPROVAL && (
+        <div className="col-12 btn__view__details__JV mt-2">
+          <Button
+            label={t("common.reject")}
+            className="save__add__btn__JV"
+            onClick={() => setRejectVisible(true)}
+            disabled={actionLoading}
+          />
+          <Button
+            label={t("common.approve")}
+            className="save__add__btn__JV"
+            onClick={handleApprove}
+            disabled={actionLoading}
+          />
+        </div>
+      )}
+      <Dialog
+        header={t("common.reject")}
+        visible={rejectVisible}
+        onHide={() => setRejectVisible(false)}
+        style={{ width: "30rem" }}
+      >
+        <InputField
+          label={t("accounts.journalVoucherDetails.rejectReason", "Reason")}
+          classNames="dropdown__add__sub"
+          className="label__sub__add"
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+        />
+        <div className="btn__view__details__JV mt-3">
+          <Button
+            label={t("common.reject")}
+            className="save__add__btn__JV"
+            onClick={handleReject}
+            disabled={actionLoading || rejectReason.trim().length < 3}
+          />
+        </div>
+      </Dialog>
     </div>
   );
 };

@@ -16,128 +16,7 @@ const initialState = {
   taxationView: {},
   taxationEdit: {},
   getTaxationEdit: {},
-  taxationList: [
-    {
-      id: "1",
-      taxCode: "Tax0123",
-      taxName: "DOC. STAMPS",
-      taxRate: "30%",
-      basis: "basic",
-      remarks: "remarks",
-      taxationDescription: "hh",
-      effectiveFrom: "1/24/2023",
-      effectiveTo: "1/23/2023",
-      action: <SvgIconeye />,
-    },
-    {
-      id: "2",
-      taxCode: "Tax0456",
-      taxName: "Sales Tax",
-      taxRate: "15%",
-      basis: "sales",
-      remarks: "additional remarks",
-      taxationDescription: "xyz",
-      effectiveFrom: "2/24/2023",
-      effectiveTo: "2/23/2023",
-      action: <SvgIconeye />,
-    },
-    {
-      id: "3",
-      taxCode: "Tax0789",
-      taxName: "Property Tax",
-      taxRate: "5%",
-      basis: "property",
-      remarks: "property remarks",
-      taxationDescription: "abc",
-      effectiveFrom: "3/24/2023",
-      effectiveTo: "3/23/2023",
-      action: <SvgIconeye />,
-    },
-    {
-      id: "4",
-      taxCode: "Tax1012",
-      taxName: "Excise Tax",
-      taxRate: "12%",
-      basis: "excise",
-      remarks: "excise remarks",
-      taxationDescription: "def",
-      effectiveFrom: "4/24/2023",
-      effectiveTo: "4/23/2023",
-      action: <SvgIconeye />,
-    },
-    // {
-    //     id: "5",
-    //     taxCode: "Tax1315",
-    //     taxName: "Value Added Tax",
-    //     taxRate: "18%",
-    //     basis: "VAT",
-    //     remarks: "VAT remarks",
-    //     taxationDescription: "ghi",
-    //     effectiveFrom: '5/24/2023',
-    //     effectiveTo: '5/23/2023',
-    //     action: <SvgIconeye />
-    // },
-    // {
-    //     id: "6",
-    //     taxCode: "Tax1618",
-    //     taxName: "Customs Duty",
-    //     taxRate: "8%",
-    //     basis: "customs",
-    //     remarks: "customs remarks",
-    //     taxationDescription: "jkl",
-    //     effectiveFrom: '6/24/2023',
-    //     effectiveTo: '6/23/2023',
-    //     action: <SvgIconeye />
-    // },
-    // {
-    //     id: "7",
-    //     taxCode: "Tax1921",
-    //     taxName: "Service Tax",
-    //     taxRate: "25%",
-    //     basis: "service",
-    //     remarks: "service remarks",
-    //     taxationDescription: "mno",
-    //     effectiveFrom: '7/24/2023',
-    //     effectiveTo: '7/23/2023',
-    //     action: <SvgIconeye />
-    // },
-    // {
-    //     id: "8",
-    //     taxCode: "Tax2224",
-    //     taxName: "Estate Tax",
-    //     taxRate: "20%",
-    //     basis: "estate",
-    //     remarks: "estate remarks",
-    //     taxationDescription: "pqr",
-    //     effectiveFrom: '8/24/2023',
-    //     effectiveTo: '8/23/2023',
-    //     action: <SvgIconeye />
-    // },
-    // {
-    //     id: "9",
-    //     taxCode: "Tax2527",
-    //     taxName: "Environmental Tax",
-    //     taxRate: "3%",
-    //     basis: "environmental",
-    //     remarks: "environmental remarks",
-    //     taxationDescription: "stu",
-    //     effectiveFrom: '9/24/2023',
-    //     effectiveTo: '9/23/2023',
-    //     action: <SvgIconeye />
-    // },
-    // {
-    //     id: "10",
-    //     taxCode: "Tax2830",
-    //     taxName: "Luxury Tax",
-    //     taxRate: "10%",
-    //     basis: "luxury",
-    //     remarks: "luxury remarks",
-    //     taxationDescription: "vwx",
-    //     effectiveFrom: '10/24/2023',
-    //     effectiveTo: '10/23/2023',
-    //     action: <SvgIconeye />
-    // }
-  ],
+  taxationList: [],
 };
 // let nextId = 3
 const taxationReducers = createSlice({
@@ -150,12 +29,11 @@ const taxationReducers = createSlice({
     });
     builder.addCase(getTaxationData.fulfilled, (state, action) => {
       state.loading = false;
-      state.taxationList = [action.payload];
-      console.log(state.taxationList, "taxt");
+      state.taxationList = action.payload;
     });
     builder.addCase(getTaxationData.rejected, (state, action) => {
       state.loading = false;
-      state.taxationList = {};
+      state.taxationList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -165,12 +43,11 @@ const taxationReducers = createSlice({
     });
     // builder.addCase(postAddTaxationMiddileware.fulfilled, (state, action) => {
     //     state.loading = false;
-    //     const newItem2 = { ...action.payload, id: nextId++ };
+    //     const newItem2 = action.payload;
     //     state.taxationList = [...state.taxationList, newItem2];
     //     console.log(state.taxationList, "taxationListtaxationList")
     // });
     builder.addCase(postAddTaxationMiddileware.fulfilled, (state, action) => {
-      console.log(action.payload, "find action.payload");
       state.loading = false;
       state.taxationList = [...state.taxationList, action.payload];
     });
@@ -192,7 +69,7 @@ const taxationReducers = createSlice({
     builder.addCase(getTaxationSearchList.rejected, (state, action) => {
       state.loading = false;
 
-      state.taxationSearchList = {};
+      state.taxationSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 

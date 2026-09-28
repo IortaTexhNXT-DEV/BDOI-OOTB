@@ -24,7 +24,7 @@ import {
   patchCityEditMiddleware,
   postAddCityMiddleware,
 } from "../store/cityMiddleware";
-import countriesData from "./data";
+import useMasterOptions from "../../../common/useMasterOptions";
 
 const initialValues = {
   CityCode: "",
@@ -37,10 +37,8 @@ const initialValues = {
 
 function AddCity({ action }) {
   const { t } = useTranslation();
-  console.log(action, "action");
   const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const [statedata, setstatedata] = useState([]);
   const Navigate = useNavigate();
   const { id } = useParams();
 
@@ -54,7 +52,6 @@ function AddCity({ action }) {
     }
   );
 
-  console.log(cityTableList?.Modifiedby, statedata, "CityListById");
   const home = { label: t("generalMasters.master") };
   const items = [
     { label: t("generalMasters.location"), url: "/master/generals/location/city" },
@@ -65,17 +62,12 @@ function AddCity({ action }) {
 
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const [stateOptionData, setStateOptionData] = useState([])
-  const State = countriesData.state.map(state => ({
-    label: action === "add" ? state : CityListById?.State,
-    value: action === "add" ? state : CityListById?.State,
-  }));
-  console.log(statedata, "statedata");
+  const State = useMasterOptions("state");
   const setFormikValues = () => {
     const statedatas = CityListById?.State;
     const updatedValues = {
       id: CityListById?.id,
-      CityCode: CityListById?.Citycode || "",
+      CityCode: CityListById?.CityCode || "",
       CityName: CityListById?.CityName || "",
       Description: CityListById?.Description || "",
       State: statedatas || "",
@@ -83,16 +75,13 @@ function AddCity({ action }) {
       ModifiedOn: CityListById?.ModifiedOn || "",
     };
     if (action === "view") {
-      console.log(statedatas, "statedata");
       if (statedatas) {
         formik.setValues({ ...formik.values, ...updatedValues });
         formik.setFieldValue("statedatas", statedatas);
-        setStateOptionData([{ label: statedatas, value: statedatas }]);
       }
     } else {
       if (statedatas) {
         formik.setValues({ ...formik.values, ...updatedValues });
-        setStateOptionData([{ label: statedatas, value: statedatas }]);
       }
     }
 
@@ -100,55 +89,33 @@ function AddCity({ action }) {
 
 
 
-    console.log(updatedValues, "updatedValues");
-    console.log(statedata, "statedata");
   };
 
-  console.log(action, "action");
 
   useEffect(() => {
     if (action === "view" || action === "edit") {
       setFormikValues();
-      console.log(formik.values.CityCode, " formik.values.CountryName");
     }
   }, [CityListById]);
 
-  const handleSubmitAdd = (values) => {
-
-    const valueWithId = {
-      ...values,
-      id: cityTableList?.length + 1,
-    };
-    dispatch(postAddCityMiddleware(valueWithId));
-
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      Navigate("/master/generals/location/city");
-    }, 3000);
+  const saveAndReturn = async (thunk, values, message) => {
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(message ? { detail: message } : undefined);
+      setTimeout(() => {
+        Navigate("/master/generals/location/city");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
-  const handleSubmitEdit = (values) => {
-    console.log(values, "valuesvalues");
-    const data = {
-      id: values?.id,
-      Citycode: values?.CityCode || "",
-      CityName: values?.CityName || "",
-      Description: "Description",
-      State: values.State || "",
-      Modifiedby: values?.Modifiedby || "",
-      ModifiedOn: values?.ModifiedOn || "",
-    };
+  const handleSubmitAdd = (values) => saveAndReturn(postAddCityMiddleware, values);
 
-    dispatch(patchCityEditMiddleware(data));
-    console.log("Handle Edit Submission", values);
-    setTimeout(() => {
-      Navigate("/master/generals/location/city");
-    }, 100);
-  };
+  const handleSubmitEdit = (values) =>
+    saveAndReturn(patchCityEditMiddleware, values, t("financeMasters.saveSuccessfully"));
 
   const handleSubmit = (values) => {
-    console.log(values,"values");
 
     if (action === "add") {
       handleSubmitAdd(values);
@@ -172,13 +139,7 @@ function AddCity({ action }) {
     if (!values.State) {
       errors.State = t("validation.fieldRequired");
     }
-    if (!values.Modifiedby) {
-      errors.Modifiedby = t("validation.fieldRequired");
-    }
 
-    if (!values.ModifiedOn) {
-      errors.ModifiedOn = t("validation.fieldRequired");
-    }
 
     return errors;
   };
@@ -294,7 +255,7 @@ function AddCity({ action }) {
                 // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.State}
                 onChange={(e) => formik.setFieldValue("State", e.value)}
-                options={action === "add" ? State : action === "edit" ? stateOptionData : State}
+                options={State}
                 optionLabel="label"
                 optionValue="label"
                 placeholder={t("generalMasters.select")}

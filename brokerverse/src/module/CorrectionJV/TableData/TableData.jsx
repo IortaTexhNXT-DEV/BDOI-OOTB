@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import SvgEditIcon from "../../../assets/icons/SvgEditicons";
 import { Button } from "primereact/button";
@@ -17,6 +16,12 @@ import {
   getPatchCorrectionJVEdit,
   patchCorrectionJVEdit,
 } from "../store/correctionJVMiddleWare";
+import useJvMasterData from "../../JournalVoucher/useJvMasterData";
+
+const ENTRY_TYPES = [
+  { label: "Debit", value: "Debit" },
+  { label: "Credit", value: "Credit" },
+];
 
 const TableData = ({ newDataTable, editID }) => {
   const { correctionJVList, getCorrectionJVEdit, loading } = useSelector(
@@ -28,9 +33,7 @@ const TableData = ({ newDataTable, editID }) => {
       };
     }
   );
-  console.log(getCorrectionJVEdit.departmentCode, "getCorrectionJVEdit");
   // const editId = editID;
-  console.log(correctionJVList);
 
   const template2 = {
     layout:
@@ -65,7 +68,6 @@ const TableData = ({ newDataTable, editID }) => {
   //   setVisible(true)
   // }
   const renderEditButton = (rowData) => {
-    console.log(rowData.id, "rowData");
     return (
       <div className="action__icon">
         <div onClick={() => handleEdit(rowData)} className="action__button">
@@ -78,39 +80,22 @@ const TableData = ({ newDataTable, editID }) => {
     // textAlign: "end",
   };
 
-  const codeOptions = [
-    { label: "Option 1", value: "00123" },
-    { label: "Option 2", value: "00124" },
-  ];
-  const codeOptionsMain = [
-    { label: "Option 1", value: "MAC001" },
-    { label: "Option 2", value: "MAC002" },
-    { label: "Option 3", value: "MAC003" },
-  ];
-  const codeOptionsSub = [
-    { label: "Option 1", value: "SAC001" },
-    { label: "Option 2", value: "SAC002" },
-  ];
-  const codeOptionsDept = [
-    { label: "Option 1", value: "FIN" },
-    { label: "Option 2", value: "MKT" },
-    { label: "Option 1", value: "IT" },
-    { label: "Option 2", value: "SLS" },
-  ];
-  const codeOptionsBranch = [
-    { label: "Option 1", value: "THB001" },
-    { label: "Option 2", value: "THB002" },
-  ];
-
-  const codeOptionsType = [
-    { label: "Option 1", value: "Credit" },
-    { label: "Option 2", value: "Debit" },
-  ];
-  const codeCurrencyType = [
-    { label: "PHP", value: "PHP" },
-    { label: "THB", value: "THB" },
-    { label: "USD", value: "USD" },
-  ];
+  const {
+    mainAccountsData,
+    subAccountsData,
+    branchCodesData,
+    departmentCodesData,
+    currencyCodesData,
+  } = useJvMasterData();
+  const toOptions = (rows) =>
+    rows.map((row) => ({ label: row.description, value: row.code }));
+  const mainAccountC = toOptions(mainAccountsData);
+  const branchCodeData = toOptions(branchCodesData);
+  const deptData = toOptions(departmentCodesData);
+  const currencyCodeData = toOptions(currencyCodesData);
+  const entryT = ENTRY_TYPES;
+  const describe = (rows, code) =>
+    rows.find((row) => row.code === code)?.description || "";
 
   const customValidation = (values) => {
     const errors = {};
@@ -122,7 +107,10 @@ const TableData = ({ newDataTable, editID }) => {
     if (!values.entryType) {
       errors.entryType = "This field is required";
     }
-    if (!values.subAccount) {
+    const hasSubAccounts = subAccountsData.some(
+      (sub) => sub.mainAccount === values.mainAccount
+    );
+    if (hasSubAccounts && !values.subAccount) {
       errors.subAccount = "This field is required";
     }
 
@@ -147,13 +135,11 @@ const TableData = ({ newDataTable, editID }) => {
   const dispatch = useDispatch();
   const [EditID, setEditID] = useState(null);
   const handleEdit = (rowData) => {
-    console.log(rowData.id, "rowDatarowData");
     dispatch(getPatchCorrectionJVEdit(rowData));
     setEditID(rowData.id);
     setVisible(true);
   };
   const handleSubmit = (value) => {
-    console.log(value, "find values in formik");
     // const valueWithId = {
     //   ...values,
     //   id: EditID,
@@ -186,66 +172,28 @@ const TableData = ({ newDataTable, editID }) => {
     },
   });
 
-  const [currencyCodeData, setCurrencyCodeData] = useState([]);
-  const [mainAccountC, setMainAccountcodeData] = useState([]);
-  const [subAccountData, setSubAccountData] = useState([]);
-  const [branchCodeData, setBranchCodeData] = useState([]);
-  const [deptData, setDeptData] = useState([]);
-  const [entryT, setEntryTData] = useState([]);
+  const subAccountData = toOptions(
+    subAccountsData.filter((sub) => sub.mainAccount === formik.values.mainAccount)
+  );
 
   const setFormikValues = () => {
-    // const getCorrectionJVEdit = correctionJVList.find((item) => item.id === EditID);
-    console.log(getCorrectionJVEdit, "find data");
-    const MainAccountData = getCorrectionJVEdit?.mainAccount;
-    const subAccountData = getCorrectionJVEdit?.subAccount;
-    const branchCodeData = getCorrectionJVEdit?.branchCode;
-    const deptData = getCorrectionJVEdit.departmentCode;
-    const currencyCodeData = getCorrectionJVEdit?.currencyCode;
-    const entryT = getCorrectionJVEdit?.entryType;
-    const updatedValues = {
-      id: getCorrectionJVEdit?.id,
-      mainAccount: MainAccountData || "",
-      mainAccountDescription: getCorrectionJVEdit?.mainAccountDescription || "",
-      entryType: entryT || "",
-      subAccount: subAccountData || "",
-      subAccountDescription: getCorrectionJVEdit?.subAccountDescription || "",
-      branchCode: branchCodeData || "",
-      branchCodeDescription: getCorrectionJVEdit?.branchCodeDescription || "",
-      departmentCode: deptData || "",
-      departmentDescription: getCorrectionJVEdit?.departmentDescription || "",
-      currencyCode: currencyCodeData || "",
-      currencyDescription: getCorrectionJVEdit?.currencyDescription || "",
-      foreignAmount: getCorrectionJVEdit?.foreignAmount || "",
-    };
-    if (MainAccountData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setMainAccountcodeData([
-        { label: MainAccountData, value: MainAccountData },
-      ]);
-    }
-    if (subAccountData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setSubAccountData([{ label: subAccountData, value: subAccountData }]);
-    }
-    if (branchCodeData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setBranchCodeData([{ label: branchCodeData, value: branchCodeData }]);
-    }
-    if (deptData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setDeptData([{ label: deptData, value: deptData }]);
-    }
-    if (currencyCodeData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCurrencyCodeData([
-        { label: currencyCodeData, value: currencyCodeData },
-      ]);
-    }
-    if (entryT) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setEntryTData([{ label: entryT, value: entryT }]);
-    }
-    formik.setValues({ ...formik.values, ...updatedValues });
+    const row = getCorrectionJVEdit || {};
+    formik.setValues({
+      ...formik.values,
+      id: row.id,
+      mainAccount: row.mainAccount || "",
+      mainAccountDescription: row.mainAccountDescription || "",
+      entryType: row.entryType || "",
+      subAccount: row.subAccount || "",
+      subAccountDescription: row.subAccountDescription || "",
+      branchCode: row.branchCode || "",
+      branchCodeDescription: row.branchCodeDescription || "",
+      departmentCode: row.departmentCode || "",
+      departmentDescription: row.departmentDescription || "",
+      currencyCode: row.currencyCode || "",
+      currencyDescription: row.currencyDescription || "",
+      foreignAmount: row.foreignAmount || "",
+    });
   };
 
   useEffect(() => {
@@ -345,11 +293,7 @@ const TableData = ({ newDataTable, editID }) => {
                 disabled={true}
                 className="input__label__corrections"
                 label="Main Account Description"
-                value={
-                  formik.values.mainAccount
-                    ? `Main Account Description ${formik.values.mainAccount}`
-                    : ""
-                }
+                value={describe(mainAccountsData, formik.values.mainAccount)}
               />
             </div>
 
@@ -406,11 +350,7 @@ const TableData = ({ newDataTable, editID }) => {
                 disabled={true}
                 className="input__label__corrections"
                 label="Sub Account Description"
-                value={
-                  formik.values.subAccount
-                    ? `Sub Account Description ${formik.values.subAccount}`
-                    : ""
-                }
+                value={describe(subAccountsData, formik.values.subAccount)}
               />
             </div>
           </div>
@@ -445,11 +385,7 @@ const TableData = ({ newDataTable, editID }) => {
                 disabled={true}
                 className="input__label__corrections"
                 label="Branch Code Description"
-                value={
-                  formik.values.branchCode
-                    ? `Branch Code Description ${formik.values.branchCode}`
-                    : ""
-                }
+                value={describe(branchCodesData, formik.values.branchCode)}
               />
               {formik.touched.branchCodeDescription &&
                 formik.errors.branchCodeDescription && (
@@ -496,11 +432,7 @@ const TableData = ({ newDataTable, editID }) => {
                 disabled={true}
                 className="input__label__corrections"
                 label="Department Description"
-                value={
-                  formik.values.departmentCode
-                    ? `Department Description ${formik.values.departmentCode}`
-                    : ""
-                }
+                value={describe(departmentCodesData, formik.values.departmentCode)}
               />
               {formik.touched.departmentDescription &&
                 formik.errors.departmentDescription && (
@@ -544,11 +476,7 @@ const TableData = ({ newDataTable, editID }) => {
                 disabled={true}
                 className="input__label__corrections"
                 label="Currency Description"
-                value={
-                  formik.values.currencyCode
-                    ? `Currency Description ${formik.values.currencyCode}`
-                    : ""
-                }
+                value={describe(currencyCodesData, formik.values.currencyCode)}
               />
               {formik.touched.currencyDescription &&
                 formik.errors.currencyDescription && (

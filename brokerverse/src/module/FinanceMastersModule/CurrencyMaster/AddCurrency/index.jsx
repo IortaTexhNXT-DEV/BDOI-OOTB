@@ -14,6 +14,7 @@ import SvgBack from '../../../../assets/icons/SvgBack';
 import NavBar from '../../../../components/NavBar';
 import { postAddCurrency } from "../store/currencyMasterMiddlewar";
 import { useDispatch, useSelector } from 'react-redux';
+import { useCurrencyCodeOptions } from "../../../GeneralMasters/common/useMasterOptions";
 
 const initialValues = {
   CurrencyCode: "",
@@ -46,26 +47,21 @@ const AddCurrency = () => {
 
   ];
 
-  const ISOcode = [
-    { name: "PHP", code: "PHP" },
-    { name: "THB", code: "THB" },
-    { name: "USD", code: "USD" },
-    { name: "AUD", code: "AUD" },
-  ];
+  const ISOcode = useCurrencyCodeOptions();
 
 
   const home = { label: t("financeMasters.master") };
 
-  const handleSubmit = (value) => {
-    const valueWithId = {
-      ...value,
-      id: CurrencyList?.length + 1,
-    };
-    dispatch(postAddCurrency(valueWithId));
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/master/finance/currency");
-    }, 2000);
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(postAddCurrency(value)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate("/master/finance/currency");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
   const customValidation = (values) => {
@@ -163,6 +159,7 @@ const AddCurrency = () => {
               }
               options={ISOcode}
               optionLabel="name"
+              optionValue="code"
             />
             {formik.touched.ISOcode && formik.errors.ISOcode && (
               <div

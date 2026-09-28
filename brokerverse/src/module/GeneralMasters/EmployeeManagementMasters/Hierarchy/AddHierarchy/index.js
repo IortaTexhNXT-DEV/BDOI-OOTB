@@ -12,7 +12,8 @@ import CustomToast from "../../../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getHirarchyListByIdMiddleware,
+  getHierarchyPatchMiddleWare,
+  getHierarchyViewMiddleWare,
   patchHirarchyEditMiddleware,
   postAddHirarchyMiddleware,
 } from "../store/hierarchyMiddleware";
@@ -21,7 +22,6 @@ import moment from "moment";
 const AddHierarchy = ({ action }) => {
   const { t } = useTranslation();
   const { id } = useParams();
-  console.log(id, "find actions");
 
   const { hierarchyListDetails, loading, total, getViewData, getPatchData } =
     useSelector(({ hierarchyTableReducers }) => {
@@ -33,18 +33,15 @@ const AddHierarchy = ({ action }) => {
         getPatchData: hierarchyTableReducers?.getPatchData,
       };
     });
-  console.log(getViewData, "find getViewData");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState("");
   const dispatch = useDispatch();
-  // useEffect(() => {
-  //   if (action === "edit") {
-  //     dispatch(getHirarchyListByIdMiddleware(id)).then(() => {
-  //       setFormikValues();
-  //     });
-  //   }
-  // }, [action, id]);
+  useEffect(() => {
+    if (!id) return;
+    if (action === "edit") dispatch(getHierarchyPatchMiddleWare(id));
+    if (action === "view") dispatch(getHierarchyViewMiddleWare(id));
+  }, [action, id, dispatch]);
 
   const items = [
     { label: t("generalMasters.employeeManagement") },
@@ -64,7 +61,6 @@ const AddHierarchy = ({ action }) => {
   };
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.rankCode) {
       errors.rankCode = "Rank Code is required";
     }
@@ -81,21 +77,18 @@ const AddHierarchy = ({ action }) => {
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
-  const handleSubmit = (values) => {
-    console.log(values, "asddd");
-    if (action == "add") {
-      dispatch(postAddHirarchyMiddleware(values));
-    } else {
-      dispatch(patchHirarchyEditMiddleware(values));
+  const handleSubmit = async (values) => {
+    const thunk = action === "add" ? postAddHirarchyMiddleware : patchHirarchyEditMiddleware;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "add" ? undefined : { detail: t("financeMasters.saveSuccessfully") });
+      setTimeout(() => {
+        navigate("/master/generals/employeemanagement/hierarchy");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      setVisiblePopup(false);
-    }, 3000);
-    navigate("/master/generals/employeemanagement/hierarchy");
   };
-  console.log(hierarchyListDetails, "hierarcy details");
   const setFormikValues = () => {
     const updatedValues = {
       id: getPatchData?.id,
@@ -268,7 +261,7 @@ const AddHierarchy = ({ action }) => {
           </Button>
         )}
       </div>
-      <CustomToast ref={toastRef} message="Hierarchy H1234 is added" />
+      <CustomToast ref={toastRef} message={`Hierarchy ${formik.values.rankCode} is added`} />
     </div>
   );
 };

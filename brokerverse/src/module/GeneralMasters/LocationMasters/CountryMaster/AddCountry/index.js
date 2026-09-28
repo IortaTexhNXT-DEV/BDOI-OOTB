@@ -38,7 +38,6 @@ function AddExchange({ action }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { id } = useParams();
-  console.log("first", id, action);
   const toastRef = useRef(null);
   const [date, setDate] = useState(null);
   const Navigate = useNavigate();
@@ -52,7 +51,6 @@ function AddExchange({ action }) {
       };
     }
   );
-  console.log(countryDetailList, "countryDetailList");
 
   const home = { label: t("generalMasters.master") };
   const items = [
@@ -72,15 +70,12 @@ function AddExchange({ action }) {
       Modifiedby: countryDetailList?.Modifiedby,
       ModifiedOn: countryDetailList?.ModifiedOn,
     };
-    console.log(updatedValues, "updatedValues");
     formik.setValues({ ...formik.values, ...updatedValues });
   };
-  console.log(action, "action");
 
   useEffect(() => {
     if (action === "view" || action === "edit") {
       setFormikValues();
-      console.log(formik.values.CountryName, " formik.values.CountryName");
     }
   }, [countryDetailList]);
 
@@ -92,29 +87,22 @@ function AddExchange({ action }) {
   //     Navigate("/master/finance/exchangerate")
   // }
 
-  // const toastRef = useRef(null);
-  const handleSubmitAdd = (values) => {
-    const valueWithId = {
-      ...values,
-      id: countryTableList?.length + 1,
-    };
-    dispatch(postAddCountryMiddleware(valueWithId));
-
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      Navigate("/master/generals/location/country");
-    }, 3000);
+  const saveAndReturn = async (thunk, values, message) => {
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(message ? { detail: message } : undefined);
+      setTimeout(() => {
+        Navigate("/master/generals/location/country");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
-  const handleSubmitEdit = (values) => {
+  const handleSubmitAdd = (values) => saveAndReturn(postAddCountryMiddleware, values);
 
-    dispatch(patchCountryEditMiddleware(values));
-    console.log("Handle Edit Submission", values);
-    setTimeout(() => {
-      Navigate("/master/generals/location/country");
-    }, 3000);
-  };
+  const handleSubmitEdit = (values) =>
+    saveAndReturn(patchCountryEditMiddleware, values, t("financeMasters.saveSuccessfully"));
 
   const handleSubmit = (values) => {
     if (action === "add") {
@@ -141,13 +129,7 @@ function AddExchange({ action }) {
     // if (!values.PhoneCode) {
     //     errors.PhoneCode = "This field is required";
     // }
-    if (!values.Modifiedby) {
-      errors.Modifiedby = t("validation.fieldRequired");
-    }
 
-    if (!values.ModifiedOn) {
-      errors.ModifiedOn = t("validation.fieldRequired");
-    }
 
     return errors;
   };

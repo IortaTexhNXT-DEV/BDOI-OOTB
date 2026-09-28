@@ -11,7 +11,7 @@ import { TieredMenu } from "primereact/tieredmenu";
 import CommissionTabel from "./CommissionTabel";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
-import { getCommissionSearchList } from "./store/commissionMiddleWare";
+import { getCommission, getCommissionSearchList } from "./store/commissionMiddleWare";
 import { useTranslation } from "react-i18next";
 
 const Commission = () => {
@@ -29,7 +29,6 @@ const Commission = () => {
   };
 
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
   const handlePolicy = () => {
@@ -43,8 +42,10 @@ const Commission = () => {
     { label: t("accounts.voucherNumber") },
   ];
   const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getCommission());
+  }, [dispatch]);
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchPolicyList");
     dispatch(getCommissionSearchList({ textSearch: values.search }));
   };
   const formik = useFormik({
@@ -67,7 +68,6 @@ const Commission = () => {
         getCommissionEdit: commissionMianReducers?.getCommissionEdit,
       };
     });
-  console.log(commissionList, "commissionList");
   return (
     <div className="grid  container__commission">
       <div className="col-12 md:col-6 lg:col-6 mb-1">

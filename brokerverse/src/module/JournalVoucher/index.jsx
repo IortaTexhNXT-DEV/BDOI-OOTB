@@ -9,7 +9,6 @@ import SvgFilters from "../../assets/icons/SvgFilters";
 import { InputText } from "primereact/inputtext";
 import SvgSearchIcon from "../../assets/icons/SvgSearchIcon";
 import { Dropdown } from "primereact/dropdown";
-import { dataa } from "./data";
 import { TieredMenu } from "primereact/tieredmenu";
 import SvgTable from "../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,7 +19,6 @@ import {
   getJournalVoucherHistory,
 } from "./store/journalVoucherMiddleware";
 import { useFormik } from "formik";
-import { data } from "./DetailsJournalVocture/data";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import { useTranslation } from "react-i18next";
@@ -168,7 +166,6 @@ const JournalVoucher = () => {
 
   // const dispatch=useDispatch();
   //   useEffect(()=>{
-  // dispatch(journalVoucherMiddleware(data))
   //   },[])
 
   return (

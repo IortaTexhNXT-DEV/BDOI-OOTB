@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -22,7 +22,10 @@ import { useDispatch, useSelector } from "react-redux";
 import UpcommingEventCard from "./UpcommingEventCard";
 import { useFormik } from "formik";
 import moment from "moment";
-import { postOpenItemsListMiddleware } from "../store/openItemsMiddleware";
+import {
+  getOpenItemsListMiddleware,
+  postOpenItemsListMiddleware,
+} from "../store/openItemsMiddleware";
 import SvgBackArrow from "../../../assets/icons/SvgBackArrow";
 import Notification from "../upcomingEvents";
 
@@ -47,16 +50,18 @@ const OpenItems = () => {
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleSubmit = (value) => {
-    if (value) {
-      dispatch(postOpenItemsListMiddleware(value));
-      handleclickClose();
-      console.log(value, "out Value");
+  useEffect(() => {
+    dispatch(getOpenItemsListMiddleware());
+  }, [dispatch]);
+
+  const handleSubmit = async (value) => {
+    const result = await dispatch(postOpenItemsListMiddleware(value));
+    if (postOpenItemsListMiddleware.rejected.match(result)) {
+      toastRef.current?.showToast({ severity: "error", detail: result.payload });
+      return;
     }
-    // toastRef.current.showToast();
-    // setTimeout(() => {
-    //   setVisible(false);
-    // }, 2000);
+    toastRef.current?.showToast();
+    handleclickClose();
   };
   const formik = useFormik({
     initialValues: initialValues,
@@ -99,7 +104,7 @@ const OpenItems = () => {
 
   const { upcommingList } = useSelector(({ openitemsReducers }) => {
     return {
-      upcommingList: openitemsReducers?.upcommingEventsList,
+      upcommingList: openitemsReducers?.upcommingEventsList || [],
     };
   });
   // const handlesubmit = () => {

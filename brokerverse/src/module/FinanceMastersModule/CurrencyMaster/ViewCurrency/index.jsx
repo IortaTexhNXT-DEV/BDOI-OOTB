@@ -58,7 +58,7 @@ const ViewCurrency = () => {
                             className='label__sub__add'
                             placeholder={t("financeMasters.enter")}
                             disabled={true}
-                            value={CurrencyDetailView?.Currencycode}
+                            value={CurrencyDetailView?.CurrencyCode}
                         />
                     </div>
                     <div className='col-12 md:col-3 lg:col-3'>

@@ -20,6 +20,7 @@ import { Toast } from "primereact/toast";
 import CustomToast from "../../../../components/Toast";
 import { postExchangeStatus } from "../store/exchangeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
 const initialValues = {
   EffectiveFrom: new Date(),
@@ -54,16 +55,8 @@ function AddExchange() {
   const [selectinstrumentcurrency, setSelectInstrumentCurrency] =
     useState(null);
 
-  const currencyCode = [
-    { label: "PHP", value: "PHP" },
-    { label: "THB", value: "THB" },
-    { label: "USD", value: "USD" },
-  ];
-  const ToCurrencyCode = [
-    { label: "PHP", value: "PHP" },
-    { label: "THB", value: "THB" },
-    { label: "USD", value: "USD" },
-  ];
+  const currencyCode = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const ToCurrencyCode = currencyCode;
 
   const home = { label: t("financeMasters.master") };
   const items = [
@@ -84,22 +77,17 @@ function AddExchange() {
 
   // const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    const valueWithId = {
-      ...values,
-      id: ExchangeList?.length + 1,
-    };
-    // Handle form submission
-    console.log(values, "find values");
-    dispatch(postExchangeStatus(valueWithId));
-    toastRef.current.showToast();
-    // {
-    setTimeout(() => {
-      Navigate("/master/finance/exchangerate");
-    }, 3000);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postExchangeStatus(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        Navigate("/master/finance/exchangerate");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-
-  // };
 
   const customValidation = (values) => {
     const errors = {};

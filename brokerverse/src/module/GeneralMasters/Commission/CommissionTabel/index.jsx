@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "../CommissionTabel/index.scss";
 import { DataTable } from "primereact/datatable";
@@ -7,31 +7,28 @@ import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
-import data from "./data";
 import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../components/ToggleButton";
+import MasterStatusToggle from "../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { useDispatch } from "react-redux";
-import { getCommissionView, getPatchCommissionEditMiddleware } from "../store/commissionMiddleWare"
+import { getCommission, getCommissionView, getPatchCommissionEditMiddleware } from "../store/commissionMiddleWare";
 import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 
 const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissionEdit }) => {
     const { t } = useTranslation();
-    console.log(commissionList.selectCover, "commissionList")
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const [first, setFirst] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const handleNavigateView = (columnData) => {
-        console.log(columnData, "columnData")
         // navigate(`/master/generals/commission/viewcommission`)
         dispatch(getCommissionView(columnData))
 
         navigate(`/master/generals/commission/viewcommission/${columnData.id}`)
     }
     const handleEditNavigate = (columnData) => {
-        console.log(columnData, "columnData")
         dispatch(getPatchCommissionEditMiddleware(columnData))
         navigate(`/master/generals/commission/editcommission`)
     }
@@ -126,17 +123,20 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
         );
     };
 
-    const renderToggleButton = () => {
-        return (
-            <div>
-                <ToggleButton />
-            </div>
-        );
-    };
+    const statusToast = useRef(null);
+    const renderToggleButton = (rowData) => (
+        <MasterStatusToggle
+            type="commission"
+            record={rowData}
+            onChanged={() => dispatch(getCommission())}
+            onError={(error) => statusToast.current?.show({ severity: "error", detail: error.message })}
+        />
+    );
 
 
     return (
         <div className="petty__cash__table__container">
+            <Toast ref={statusToast} />
             <DataTable
                 value={commissionList}
                 style={{ overflowY: 'auto', maxWidth: '100%' }}

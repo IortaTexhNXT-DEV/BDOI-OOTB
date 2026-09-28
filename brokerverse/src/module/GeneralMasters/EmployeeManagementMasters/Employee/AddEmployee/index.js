@@ -11,7 +11,7 @@ import CustomToast from "../../../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import countriesData from "./data";
+import useMasterOptions, { useFieldOptions, useMasterRecordOptions } from "../../../common/useMasterOptions";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getEmployeEditMiddleWare,
@@ -21,7 +21,6 @@ import {
 
 const AddEmployee = ({ action }) => {
   const { t } = useTranslation();
-  console.log(action, "find action");
   const { employeeEditData, loading, total, employeeViewData } = useSelector(
     ({ employeeReducers }) => {
       return {
@@ -32,12 +31,14 @@ const AddEmployee = ({ action }) => {
       };
     }
   );
-  console.log(employeeEditData, "find employeeEditData");
   const { id } = useParams();
-  console.log(id, "find id");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState("");
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (id && (action === "edit" || action === "view")) dispatch(getEmployeEditMiddleWare(id));
+  }, [action, id, dispatch]);
   useEffect(() => {
     if (action === "view") {
       setFormikValues();
@@ -67,109 +68,18 @@ const AddEmployee = ({ action }) => {
   ];
   const home = { label: "Master" };
 
-  const item = [
-    {
-      label: action === "add" ? "Em0012" : employeeEditData?.employeeType,
-      label: action === "add" ? "Em0012" : employeeEditData?.employeeType,
-    },
-    {
-      label: action === "add" ? "Em0013" : employeeEditData?.employeeType,
-      label: action === "add" ? "Em0013" : employeeEditData?.employeeType,
-    },
-    {
-      label: action === "add" ? "Em0014" : employeeEditData?.employeeType,
-      label: action === "add" ? "Em0014" : employeeEditData?.employeeType,
-    },
-  ];
-  const item1 = [
-    {
-      label: action === "add" ? "Level 1 Agent" : employeeEditData?.designation,
-      label: action === "add" ? "Level 1 Agent" : employeeEditData?.designation,
-    },
-    {
-      label: action === "add" ? "Level 2 Agent" : employeeEditData?.designation,
-      label: action === "add" ? "Level 2 Agent" : employeeEditData?.designation,
-    },
-    {
-      label: action === "add" ? "Level 3 Agent" : employeeEditData?.designation,
-      label: action === "add" ? "Level 3 Agent" : employeeEditData?.designation,
-    },
-  ];
-
-  const item2 = [
-    {
-      label: action === "add" ? "John Doe" : employeeEditData?.reportingTo,
-      label: action === "add" ? "John Doe" : employeeEditData?.reportingTo,
-    },
-    {
-      label: action === "add" ? "Sudarshan" : employeeEditData?.reportingTo,
-      label: action === "add" ? "Sudarshan" : employeeEditData?.reportingTo,
-    },
-    {
-      label: action === "add" ? "Uttam" : employeeEditData?.reportingTo,
-      label: action === "add" ? "Uttam" : employeeEditData?.reportingTo,
-    },
-  ];
-  const item3 = [
-    {
-      label: action === "add" ? "Branch0123" : employeeEditData?.branchCode,
-      label: action === "add" ? "Branch0123" : employeeEditData?.branchCode,
-    },
-    {
-      label: action === "add" ? "Branch0128" : employeeEditData?.branchCode,
-      label: action === "add" ? "Branch0128" : employeeEditData?.branchCode,
-    },
-    {
-      label: action === "add" ? "Branch0148" : employeeEditData?.branchCode,
-      label: action === "add" ? "Branch0148" : employeeEditData?.branchCode,
-    },
-  ];
-  const item4 = [
-    {
-      label: action === "add" ? "Depart123" : employeeEditData?.departmentCode,
-      label: action === "add" ? "Depart123" : employeeEditData?.departmentCode,
-    },
-    {
-      label: action === "add" ? "Depart163" : employeeEditData?.departmentCode,
-      label: action === "add" ? "Depart163" : employeeEditData?.departmentCode,
-    },
-    {
-      label: action === "add" ? "Depart190" : employeeEditData?.departmentCode,
-      label: action === "add" ? "Depart190" : employeeEditData?.departmentCode,
-    },
-  ];
-
-  const item5 = [
-    {
-      label:
-        action === "add" ? "Driving License" : employeeEditData?.idProofType,
-      label:
-        action === "add" ? "Driving License" : employeeEditData?.idProofType,
-    },
-    {
-      label: action === "add" ? "Aadhar" : employeeEditData?.idProofType,
-      label: action === "add" ? "Aadhar" : employeeEditData?.idProofType,
-    },
-    {
-      label: action === "add" ? "Pan" : employeeEditData?.idProofType,
-      label: action === "add" ? "Pan" : employeeEditData?.idProofType,
-    },
-  ];
-
-  const City = countriesData.city.map((city) => ({
-    label: action === "add" ? city : employeeEditData.city,
-    value: action === "add" ? city : employeeEditData.city,
+  const item = useFieldOptions("employee", "employeeType");
+  const item1 = useMasterOptions("designation");
+  const item2 = useMasterRecordOptions("employee", (row) => ({
+    label: [row.firstName, row.lastName].filter(Boolean).join(" "),
+    value: row.employeeCode,
   }));
-
-  const State = countriesData.state.map((state) => ({
-    label: action === "add" ? state : employeeEditData.state,
-    value: action === "add" ? state : employeeEditData.state,
-  }));
-
-  const Country = countriesData.countries.map((country) => ({
-    label: action === "add" ? country : employeeEditData.country,
-    value: action === "add" ? country : employeeEditData.country,
-  }));
+  const item3 = useMasterOptions("branch", { valueKey: "code" });
+  const item4 = useMasterOptions("department", { valueKey: "code" });
+  const item5 = useFieldOptions("employee", "idProofType");
+  const City = useMasterOptions("city");
+  const State = useMasterOptions("state");
+  const Country = useMasterOptions("country");
 
   const initialValue = {
     employeeCode: "",
@@ -194,7 +104,6 @@ const AddEmployee = ({ action }) => {
   };
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.employeeCode) {
       errors.employeeCode = "Employee Code is required";
     }
@@ -245,35 +154,19 @@ const AddEmployee = ({ action }) => {
   };
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    console.log(values, "values");
-
-    if (action === "add") {
-      dispatch(postAddEmployeeMiddleware(formik.values));
-    }
-    if (action === "edit") {
-      dispatch(patchEmployeeEditMiddleware(values));
-    }
-    if (action === "add") {
-      toastRef.current.showToast();
+  const handleSubmit = async (values) => {
+    const thunk = action === "add" ? postAddEmployeeMiddleware : patchEmployeeEditMiddleware;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "add" ? undefined : { detail: t("financeMasters.saveSuccessfully") });
       setTimeout(() => {
-        setVisiblePopup(false);
         navigate("/master/generals/employeemanagement/employee");
-        dispatch(getEmployeEditMiddleWare({}));
         formik.resetForm();
       }, 3000);
-    } else {
-      navigate("/master/generals/employeemanagement/employee");
-      dispatch(getEmployeEditMiddleWare({}));
-      formik.resetForm();
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
   };
-
-  const [cityDataOption, setCityDataOption] = useState([]);
-  const [stateDataOption, setStateDataOption] = useState([]);
-  const [countryDataOption, setCountryDataOption] = useState([]);
-  console.log(cityDataOption, "cityDataOption");
 
   const setFormikValues = () => {
     const cityData = employeeEditData?.city;
@@ -302,18 +195,6 @@ const AddEmployee = ({ action }) => {
       modifiedBy: employeeEditData?.modifiedBy,
       modifiedOn: employeeEditData?.modifiedOn,
     };
-    console.log(updatedValues, "updatedValues");
-    if (cityData) {
-      setCityDataOption([{ label: cityData, value: cityData }]);
-    }
-    if (stateData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setStateDataOption([{ label: stateData, value: stateData }]);
-    }
-    if (countryData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCountryDataOption([{ label: countryData, value: countryData }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -486,7 +367,7 @@ const AddEmployee = ({ action }) => {
               classNames="label__sub__add"
               placeholder={t("generalMasters.select")}
               options={item2}
-              optionValue={"label"}
+              optionValue={"value"}
               optionLabel="label"
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
@@ -507,7 +388,7 @@ const AddEmployee = ({ action }) => {
               classNames="label__sub__add"
               placeholder={t("generalMasters.select")}
               options={item3}
-              optionValue={"label"}
+              optionValue={"value"}
               optionLabel="label"
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
@@ -528,7 +409,7 @@ const AddEmployee = ({ action }) => {
               classNames="label__sub__add"
               placeholder={t("generalMasters.select")}
               options={item4}
-              optionValue={"label"}
+              optionValue={"value"}
               optionLabel="label"
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
@@ -636,13 +517,7 @@ const AddEmployee = ({ action }) => {
               label={t("generalMasters.city")}
               classNames="label__sub__add"
               placeholder={t("generalMasters.select")}
-              options={
-                action == "add"
-                  ? City
-                  : action == "edit"
-                  ? cityDataOption
-                  : City
-              }
+              options={City}
               optionValue={"label"}
               optionLabel="label"
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -664,13 +539,7 @@ const AddEmployee = ({ action }) => {
               label={t("generalMasters.state")}
               classNames="label__sub__add"
               placeholder={t("generalMasters.select")}
-              options={
-                action == "add"
-                  ? State
-                  : action == "edit"
-                  ? stateDataOption
-                  : State
-              }
+              options={State}
               optionValue={"label"}
               optionLabel="label"
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -691,13 +560,7 @@ const AddEmployee = ({ action }) => {
               className="dropdown__add__sub"
               classNames="label__sub__add"
               placeholder={t("generalMasters.select")}
-              options={
-                action == "add"
-                  ? Country
-                  : action == "edit"
-                  ? countryDataOption
-                  : Country
-              }
+              options={Country}
               optionValue={"label"}
               optionLabel="label"
               dropdownIcon={<SvgDropdown color={"#000"} />}

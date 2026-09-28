@@ -14,6 +14,7 @@ import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getReplenishListMiddleware,
   getReplenishSearchMiddleware,
   getViewReplenishMiddleware,
 } from "../store/pettyCashReplenishMiddleware";
@@ -44,7 +45,11 @@ const PettyCashReplenishTable = () => {
     { name: "Date", code: "Date" },
   ];
 
-  const isEmpty = ReplenishList.length === 0;
+  useEffect(() => {
+    dispatch(getReplenishListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !ReplenishList?.length;
 
   const emptyTableIcon = (
     <div className="empty-table-icon">

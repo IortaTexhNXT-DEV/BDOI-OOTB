@@ -12,88 +12,7 @@ const initialState = {
   loading: false,
   error: "",
 
-  AccountCategoryList: [
-    {
-      id: 1,
-      accountCategoryCode: "AC00123",
-      accountCategoryName: "Debtor",
-      description:"description",
-      status: 0,
-      action: 1,
-    },
-    {
-      id: 2,
-      accountCategoryCode: "AC00234",
-      accountCategoryName: "Creditor",
-      description:"description",
-      status: 1,
-      action: 2,
-    },
-    {
-      id: 3,
-      accountCategoryCode: "AC00345",
-      accountCategoryName: "Supplier",
-      description:"description",
-      status: 0,
-      action: 1,
-    },
-    {
-      id: 4,
-      accountCategoryCode: "AC00456",
-      accountCategoryName: "Customer",
-      description:"description",
-      status: 1,
-      action: 2,
-    },
-    {
-      id: 5,
-      accountCategoryCode: "AC00567",
-      accountCategoryName: "Vendor",
-      description:"description",
-      status: 0,
-      action: 1,
-    },
-    {
-      id: 6,
-      accountCategoryCode: "AC00678",
-      accountCategoryName: "Investor",
-      description:"description",
-      status: 1,
-      action: 2,
-    },
-    {
-      id: 7,
-      accountCategoryCode: "AC00789",
-      accountCategoryName: "Lender",
-      description:"description",
-      status: 0,
-      action: 1,
-    },
-    {
-      id: 8,
-      accountCategoryCode: "AC00890",
-      accountCategoryName: "Borrower",
-      description:"description",
-      status: 1,
-      action: 2,
-    },
-    {
-      id: 9,
-      accountCategoryCode: "AC00901",
-      accountCategoryName: "Partner",
-      description:"description",
-      status: 0,
-      action: 1,
-    },
-    {
-      id: 10,
-      accountCategoryCode: "AC01012",
-      accountCategoryName: "Shareholder",
-      description:"description",
-      status: 1,
-      action: 2,
-    }
-  ],
+  AccountCategoryList: [],
   AccountCategorySearchList: [],
   AccountCategoryStatus: {},
   AddAccountCategory: {},
@@ -117,7 +36,7 @@ const accountCategoryMasterReducer = createSlice({
     builder.addCase(getAccountCategoryList.rejected, (state, action) => {
       state.loading = false;
 
-      state.AccountCategoryList = {};
+      state.AccountCategoryList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -133,7 +52,7 @@ const accountCategoryMasterReducer = createSlice({
     builder.addCase(getAccountCategorySearchList.rejected, (state, action) => {
       state.loading = false;
 
-      state.AccountCategorySearchList = {};
+      state.AccountCategorySearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -235,18 +154,9 @@ const accountCategoryMasterReducer = createSlice({
       patchAccountCategoryDetailEditMiddleWare.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(action.payload, "find red");
-        state.AccountCategoryList = state.AccountCategoryList?.map((item) => {
-          if (item.id === parseInt(action.payload?.id)) {
-            return {
-              ...item,
-              accountCategoryCode: action.payload?.categoryCode,
-              accountCategoryName: action.payload?.categoryName,
-            };
-          }
-          return item;
-        });
-        // state.AccountCategoryDetailView = action.payload;
+        state.AccountCategoryList = state.AccountCategoryList?.map((item) =>
+          item.id === action.payload?.id ? action.payload : item
+        );
       }
     );
     builder.addCase(

@@ -110,19 +110,22 @@ function SpecificVoucher() {
     }
 
     const createCheckbookData = await disbursementService.createCheckbook({
+      disbursementId,
       customerCode: disbursementDataFromState?.CustomerCode?.code,
       customerName: disbursementDataFromState?.CustomerName?.name,
-      mainAccount: "ACC-001",
-      instrumentBookId: "BOOK-001",
-      instrumentNo: "CHK-1001",
-      instrumentDate: "2025-10-12",
       totaleAmount: selectedProducts
         .reduce((acc, curr) => acc + parseFloat(curr.rawData.totalAmount), 0)
         .toString(),
-      status: "Pending",
       invoiceListRefId: selectedProducts.map((item) => item.id)[0],
     });
-    console.log(createCheckbookData, "createCheckbookData");
+    if (!createCheckbookData.success) {
+      toastRef.current?.showToast({
+        severity: "error",
+        summary: t("common.error"),
+        detail: createCheckbookData.error,
+      });
+      return;
+    }
     if (createCheckbookData.success) {
       Navigate("/accounts/paymentvoucher/bankdetailselection", {
         state: {

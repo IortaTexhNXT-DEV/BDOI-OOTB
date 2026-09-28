@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
@@ -14,15 +14,16 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
   getDesignationPatchData,
   getDesignationViewData,
   getSearchDesignationMiddleware,
+  getDesignationListByIdMiddleware,
 } from "../store/designationMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const DesignationMaster = () => {
   const { t } = useTranslation();
@@ -36,7 +37,6 @@ const DesignationMaster = () => {
       };
     }
   );
-  console.log(designationDetailList, "list of master");
   const handleNavigate = () => {
     navigate("/master/generals/employeemanagement/designation/add/1");
   };
@@ -80,6 +80,13 @@ const DesignationMaster = () => {
     justifyContent: "center",
   };
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getDesignationListByIdMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getDesignationListByIdMiddleware());
+  }, [dispatch]);
 
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -91,7 +98,6 @@ const DesignationMaster = () => {
   const [search, setSearch] = useState();
 
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchDesignationMiddleware");
     dispatch(getSearchDesignationMiddleware({ textSearch: values.search }));
   };
   const formik = useFormik({
@@ -124,13 +130,6 @@ const DesignationMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const template2 = {
     layout:
@@ -161,6 +160,7 @@ const DesignationMaster = () => {
 
   return (
     <div className="grid overall__designation__master__container">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">Designation</div>
         <div style={{ margin: "20px 0px" }}>
@@ -265,7 +265,7 @@ const DesignationMaster = () => {
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="designation" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header="Status"
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

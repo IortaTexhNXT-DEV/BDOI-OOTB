@@ -31,7 +31,6 @@ const EditPettyCash = () => {
   );
 
   const { id } = useParams();
-  console.log(id, "idd");
   const [EditID, setEditID] = useState(id);
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
@@ -65,8 +64,8 @@ const EditPettyCash = () => {
     if (!values.pettycashsize) {
       errors.pettycashsize = "This field is required";
     }
-    if (!values.availabelCash) {
-      errors.availabelCash = "This field is required";
+    if (!values.avilabelcash) {
+      errors.avilabelcash = "This field is required";
     }
     if (!values.minicashbox) {
       errors.minicashbox = "This field is required";
@@ -83,11 +82,13 @@ const EditPettyCash = () => {
     navigate("/master/finance/pettycash");
   };
 
-  console.log(getPettyCashEdit, "getPettyCashEdit");
-  const handleSubmit = (value) => {
-    console.log(value, "value");
-    dispatch(patchPettyCashEdit(value));
-    navigate("/master/finance/pettycash");
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchPettyCashEdit(value)).unwrap();
+      navigate("/master/finance/pettycash");
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = () => {
     const updatedValues = {
@@ -95,7 +96,7 @@ const EditPettyCash = () => {
       pettycashcode: getPettyCashEdit?.pettycashcode,
       pettycashname: getPettyCashEdit?.pettycashname,
       pettycashsize: getPettyCashEdit?.pettycashsize,
-      availabelCash: getPettyCashEdit?.availabelCash,
+      avilabelcash: getPettyCashEdit?.avilabelcash,
       minicashbox: getPettyCashEdit?.minicashbox,
       transactionlimit: getPettyCashEdit?.transactionlimit,
     };
@@ -106,7 +107,7 @@ const EditPettyCash = () => {
       pettycashcode: "",
       pettycashname: "",
       pettycashsize: "",
-      availabelCash: "",
+      avilabelcash: "",
       minicashbox: "",
       transactionlimit: "",
     },
@@ -115,7 +116,6 @@ const EditPettyCash = () => {
     },
   });
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     setFormikValues();
   }, [getPettyCashEdit]);
@@ -220,14 +220,14 @@ const EditPettyCash = () => {
             }
             label="Available Cash"
             placeholder="Enter"
-            value={formik.values.availabelCash}
+            value={formik.values.avilabelcash}
             onChange={(e) =>
-              formik.setFieldValue("availabelCash", e.target.value)
+              formik.setFieldValue("avilabelcash", e.target.value)
             }
           />
-          {formik.touched.availabelCash && formik.errors.availabelCash && (
+          {formik.touched.avilabelcash && formik.errors.avilabelcash && (
             <div style={{ fontSize: 12, color: "red" }}>
-              {formik.errors.availabelCash}
+              {formik.errors.avilabelcash}
             </div>
           )}
         </div>

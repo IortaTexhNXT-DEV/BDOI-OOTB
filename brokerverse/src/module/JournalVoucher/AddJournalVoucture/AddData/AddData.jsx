@@ -8,329 +8,19 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { postAddJournalVoucher } from "../../store/journalVoucherMiddleware";
 import { useDispatch, useSelector } from "react-redux";
-
-// Account data
-const mainAccountsData = [
-  {
-    code: "1202001",
-    name: "Asset",
-    description: "Premiums Receivable - Direct Clients",
-  },
-  {
-    code: "1202002",
-    name: "Asset",
-    description: "Premiums Receivable - Corporate Customers",
-  },
-  {
-    code: "1202003",
-    name: "Asset",
-    description: "Premiums Receivable - Agents",
-  },
-  {
-    code: "1202004",
-    name: "Asset",
-    description: "Premiums Receivable - Broker - Local",
-  },
-  {
-    code: "1202005",
-    name: "Asset",
-    description: "Premiums Receivable - Broker - International",
-  },
-  {
-    code: "1202006",
-    name: "Asset",
-    description: "Premiums Receivable - Banks",
-  },
-  {
-    code: "1202007",
-    name: "Asset",
-    description: "Premiums Receivable - Insurance Co - Local",
-  },
-  {
-    code: "1202008",
-    name: "Asset",
-    description: "Premiums Receivable - Insurance Co - International",
-  },
-  { code: "1202020", name: "Asset", description: "Provision for Bad Debt" },
-  {
-    code: "2203001",
-    name: "Liability",
-    description: "Commission Accrued - Agents",
-  },
-  {
-    code: "2203002",
-    name: "Liability",
-    description: "Commission Accrued - Banks",
-  },
-  {
-    code: "2203003",
-    name: "Liability",
-    description: "Commission Accrued - Broker - Local",
-  },
-  {
-    code: "2203004",
-    name: "Liability",
-    description: "Commission Accrued - Broker - International",
-  },
-  {
-    code: "2203005",
-    name: "Liability",
-    description: "Commission Accrued - Insurance Co - Local",
-  },
-  {
-    code: "2203006",
-    name: "Liability",
-    description: "Commission Accrued - Insurance Co - International",
-  },
-  { code: "3101001", name: "Income", description: "Gross Written Premium" },
-  { code: "4101001", name: "Expense", description: "Gross Claims Paid" },
-  { code: "4401001", name: "Expense", description: "Administrative Cost" },
-  { code: "4401002", name: "Expense", description: "Advertising" },
-  { code: "4401003", name: "Expense", description: "Audit Fees" },
-  { code: "4401004", name: "Expense", description: "Bank Charges" },
-  { code: "4401005", name: "Expense", description: "Building Cost Expense" },
-  { code: "4401006", name: "Expense", description: "Consultancy Fees" },
-];
-
-const subAccountsData = [
-  {
-    code: "3101001001",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Motor",
-  },
-  {
-    code: "3101001002",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Fire",
-  },
-  {
-    code: "3101001003",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Marine",
-  },
-  {
-    code: "3101001004",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Engineering",
-  },
-  {
-    code: "3101001005",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - General Accident",
-  },
-  {
-    code: "4101001001",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Motor",
-  },
-  {
-    code: "4101001002",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Fire",
-  },
-  {
-    code: "4101001003",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Marine",
-  },
-  {
-    code: "4101001004",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Engineering",
-  },
-  {
-    code: "4101001005",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - General Accident",
-  },
-  {
-    code: "4101001006",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Liaibility",
-  },
-  {
-    code: "4101001007",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Bonds",
-  },
-  {
-    code: "4101001008",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Aviation",
-  },
-  {
-    code: "4101001009",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Oil and Gas",
-  },
-  {
-    code: "4401003001",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Audit Fees Statutory",
-  },
-  {
-    code: "4401003002",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Audit Fees Other",
-  },
-  {
-    code: "4401003003",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Internal Audit",
-  },
-  {
-    code: "4401003004",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Tax Advisory Fees",
-  },
-  {
-    code: "4401005001",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Rent",
-  },
-  {
-    code: "4401005002",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Cleaning",
-  },
-  {
-    code: "4401005003",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Water & Electricity",
-  },
-  {
-    code: "4401005004",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Security",
-  },
-  {
-    code: "4401005005",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Repairs and Maintenance",
-  },
-  {
-    code: "4401006001",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Consultancy Fees",
-  },
-  {
-    code: "4401006002",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Legal Fees",
-  },
-  {
-    code: "4401006003",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Company Secretarial Fees",
-  },
-  {
-    code: "4401006004",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Technical & Administrative Fees",
-  },
-];
-
-const branchCodesData = [
-  {
-    code: "MKT",
-    name: "Makati Branch",
-    description: "Head office – Makati CBD",
-  },
-  {
-    code: "QC",
-    name: "Quezon City Branch",
-    description: "North Metro Manila operations",
-  },
-  { code: "CEB", name: "Cebu Branch", description: "Visayas regional office" },
-  {
-    code: "DVO",
-    name: "Davao Branch",
-    description: "Mindanao regional office",
-  },
-];
-
-const departmentCodesData = [
-  {
-    code: "ACCT",
-    name: "Accounting Department",
-    description: "Handles financial reporting and JVs",
-  },
-  {
-    code: "OPS",
-    name: "Operations Department",
-    description: "Policy processing & servicing",
-  },
-  {
-    code: "SALES",
-    name: "Sales Department",
-    description: "Manages agents and new business",
-  },
-  {
-    code: "CLAIMS",
-    name: "Claims Department",
-    description: "Handles customer claims and insurer coordination",
-  },
-  {
-    code: "IT",
-    name: "IT Department",
-    description: "System administration and support",
-  },
-];
-
-const currencyCodesData = [
-  { code: "PHP", description: "Philippine Peso" },
-  { code: "THB", description: "Thai Baht" },
-  { code: "USD", description: "US Dollar" },
-  { code: "INR", description: "Indian Rupee" },
-  { code: "EUR", description: "Euro" },
-];
-
-const EXCHANGE_RATES = {
-  PHP: 1.0,
-  USD: 58.86,
-  EUR: 67.99,
-  EURO: 67.99, // Alias for EUR
-  INR: 0.665,
-  THB: 1.0,
-};
+import useJvMasterData from "../../useJvMasterData";
 
 const AddData = ({ visible, setVisible, handleUpdate }) => {
-  // Get unique main account codes that have sub accounts
-  const mainAccountsWithSubAccounts = useMemo(() => {
-    const mainAccountCodes = new Set(
-      subAccountsData.map((sub) => sub.mainAccount)
-    );
-    return mainAccountsData.filter((account) =>
-      mainAccountCodes.has(account.code)
-    );
-  }, []);
+  const {
+    mainAccountsData,
+    subAccountsData,
+    branchCodesData,
+    departmentCodesData,
+    currencyCodesData,
+    exchangeRates,
+  } = useJvMasterData();
+
+  const mainAccountsWithSubAccounts = mainAccountsData;
 
   // Format options for dropdowns - only include main accounts with sub accounts
   const codeOptionsMain = mainAccountsWithSubAccounts.map((account) => ({
@@ -372,7 +62,10 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
     if (!values.entryType) {
       errors.entryType = "This field is required";
     }
-    if (!values.subAccount) {
+    const hasSubAccounts = subAccountsData.some(
+      (sub) => sub.mainAccount === values.mainAccount
+    );
+    if (hasSubAccounts && !values.subAccount) {
       errors.subAccount = "This field is required";
     }
 
@@ -448,7 +141,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       return "";
     }
 
-    const exchangeRate = EXCHANGE_RATES[currencyCode] || EXCHANGE_RATES.THB;
+    const exchangeRate = exchangeRates[currencyCode] || 1;
     const localAmount = foreignAmountNum * exchangeRate;
     return localAmount.toFixed(2);
   };
@@ -497,7 +190,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         value: sub.code,
         description: sub.description,
       }));
-  }, [formik.values.mainAccount]);
+  }, [formik.values.mainAccount, subAccountsData]);
 
   // Handle main account change - reset sub account and update description
   const handleMainAccountChange = (e) => {

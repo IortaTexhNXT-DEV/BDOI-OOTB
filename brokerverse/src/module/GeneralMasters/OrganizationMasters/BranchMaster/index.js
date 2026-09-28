@@ -10,10 +10,8 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import ToggleButton from "../../../../components/ToggleButton";
 import SvgEditicons from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,8 +19,11 @@ import {
   getOrganizationBranchView,
   getPatchBranchData,
   getSearchBranchMiddleware,
+  getBranchListMiddleware,
 } from "./store/branchMiddleware";
 import { useFormik } from "formik";
+import MasterStatusToggle from "../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -37,14 +38,19 @@ const Index = () => {
       };
     }
   );
-  console.log(branchTableList, "branchTableList");
 
   const handlePolicy = (id) => {
     navigate(`/master/generals/organization/branchmaster/add/${123}`);
   };
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getBranchListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getBranchListMiddleware());
+  }, [dispatch]);
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchBranchMiddleware");
     dispatch(getSearchBranchMiddleware({ textSearch: values.search }));
   };
   const formik = useFormik({
@@ -58,20 +64,18 @@ const Index = () => {
   }, [formik.values.search]);
   const handleView = (columnData) => {
     dispatch(getOrganizationBranchView(columnData));
-    console.log(columnData, "columnData");
     navigate(
       `/master/generals/organization/branchmaster/view/${columnData.id}`
     );
   };
   const handleEdit = (columnData) => {
     dispatch(getPatchBranchData(columnData));
-    console.log(columnData, "columnData");
     navigate(
       `/master/generals/organization/branchmaster/edit/${columnData.id}`
     );
   };
 
-  const isEmpty = Productdata.length === 0;
+  const isEmpty = !branchTableList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -122,13 +126,6 @@ const Index = () => {
     },
   ];
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const headerStyle = {
     fontSize: 16,
@@ -173,6 +170,7 @@ const Index = () => {
 
   return (
     <div className="overall__branch__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("generalMasters.branch")}</label>
@@ -252,7 +250,7 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="branch" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

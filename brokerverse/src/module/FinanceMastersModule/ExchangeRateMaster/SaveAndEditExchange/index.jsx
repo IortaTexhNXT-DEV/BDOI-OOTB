@@ -20,6 +20,7 @@ import { Toast } from "primereact/toast";
 import CustomToast from "../../../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { patchExchangeDetailEdit } from "../store/exchangeMasterMiddleware";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
 const initialValues = {
   EffectiveFrom: "",
@@ -86,33 +87,23 @@ function EditExchange() {
       };
     }
   );
-  console.log(getExchangeEdit, "exchangeDetailEdit");
-  const handleSubmit = (value) => {
-    console.log(value, "value");
-    dispatch(patchExchangeDetailEdit(value));
-    Navigate("/master/finance/exchangerate");
-
-    // toastRef.current.showToast();
-    // setTimeout(() => {
-    //   Navigate("/master/finance/exchangerate")
-    // }, 2000)
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchExchangeDetailEdit(value)).unwrap();
+      toastRef.current.showToast({ detail: t("financeMasters.saveSuccessfully") });
+      setTimeout(() => {
+        Navigate("/master/finance/exchangerate");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-  const currencyCode = [
-    {
-      label: getExchangeEdit?.CurrencyCode,
-      value: getExchangeEdit?.CurrencyCode,
-    },
-  ];
-  const ToCurrencyCode = [
-    {
-      label: getExchangeEdit?.ToCurrencyCode,
-      value: getExchangeEdit?.ToCurrencyCode,
-    },
-  ];
+  const currencyCode = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const ToCurrencyCode = currencyCode;
   const setFormikValues = () => {
     const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
-      id: getExchangeEdit.id,
+      id: getExchangeEdit?.id,
       EffectiveFrom: new Date(getExchangeEdit?.EffectiveFrom),
       EffectiveTo: new Date(getExchangeEdit?.EffectiveTo),
       CurrencyCode: getExchangeEdit?.CurrencyCode,
@@ -132,7 +123,6 @@ function EditExchange() {
     },
   });
 
-  console.log(formik.values.id, "idleo");
   useEffect(() => {
     setFormikValues();
   }, [getExchangeEdit]);
@@ -145,10 +135,7 @@ function EditExchange() {
 
   return (
     <div className="overall__editexchange__container">
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
+      <CustomToast ref={toastRef} />
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon />

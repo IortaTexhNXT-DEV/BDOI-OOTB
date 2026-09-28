@@ -1,163 +1,34 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-// import { getRequest } from "../../../utility/commonServices";
-// import { APIROUTES } from "../../../routes/apiRoutes";
+import mastersService, { searchText } from "../../../../../services/mastersService";
+import masterThunk from "../../../common/masterThunk";
 import {
-  GET_EMPLOYEE_DETAILS,
+  GET_EDIT_EMPLOYEE,
   GET_EMPLOYEE_BY_ID,
-  POST_ADD_EMPLOYEE,
-  PATCH_EMPLOYEE_EDIT,
+  GET_EMPLOYEE_DETAILS,
   GET_SERACH_EMPLOYEE,
   GET_VIEW_EMPLOYEE,
-  GET_EDIT_EMPLOYEE,
+  PATCH_EMPLOYEE_EDIT,
+  POST_ADD_EMPLOYEE,
 } from "../../../../../redux/actionTypes";
 
-export const getEmployeeListMiddleware = createAsyncThunk(
-  GET_EMPLOYEE_DETAILS,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const getEmployeeListByIdMiddleware = createAsyncThunk(
-  GET_EMPLOYEE_BY_ID,
-  async (payload, { rejectWithValue }) => {
-    
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const postAddEmployeeMiddleware = createAsyncThunk(
-  POST_ADD_EMPLOYEE,
-  async (payload, { rejectWithValue }) => {
-    
-    const data = {
-      id:payload?.id,
-      employeeCode: payload?.employeeCode,
-      firstName: payload?.firstName,
-      middleName: payload?.middleName,
-      lastName: payload?.lastName,
-      employeeType: payload?.employeeType,
-      designation: payload?.designation,
-      reportingTo: payload?.reportingTo,
-      branchCode: payload?.branchCode,
-      departmentCode: payload?.departmentCode,
-      idProofType: payload?.idProofType,
-      idNumber: payload?.idNumber,
-      addressLine1: payload?.addressLine1,
-      addressLine2: payload?.addressLine2,
-      addressLine3: payload?.addressLine3,
-      city: payload?.city,
-      state: payload?.state,
-      country: payload?.country,
-      modifiedBy: payload?.modifiedBy,
-      modifiedOn: payload?.modifiedOn,
-    }
-    
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const patchEmployeeEditMiddleware = createAsyncThunk(
-  PATCH_EMPLOYEE_EDIT,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"find payloadddd")
-    const data = {
-      id:payload?.id,
-      employeeCode: payload?.employeeCode,
-      firstName: payload?.firstName,
-      middleName: payload?.middleName,
-      lastName: payload?.lastName,
-      employeeType: payload?.employeeType,
-      designation: payload?.designation,
-      reportingTo: payload?.reportingTo,
-      branchCode: payload?.branchCode,
-      departmentCode: payload?.departmentCode,
-      idProofType: payload?.idProofType,
-      idNumber: payload?.idNumber,
-      addressLine1: payload?.addressLine1,
-      addressLine2: payload?.addressLine2,
-      addressLine3: payload?.addressLine3,
-      city: payload?.city,
-      state: payload?.state,
-      country: payload?.country,
-      modifiedBy: payload?.modifiedBy,
-      modifiedOn: payload?.modifiedOn,
-    }
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
+const TYPE = "employee";
 
-export const getSearchEmployeeMiddleware = createAsyncThunk(
-  GET_SERACH_EMPLOYEE,
-  async (payload, { rejectWithValue, getState }) => {
-    const textSearch = payload;
-    console.log(textSearch, "textSearch")
-    const { employeeReducers } = getState();
+export const getEmployeeListMiddleware = masterThunk(GET_EMPLOYEE_DETAILS, (params) =>
+  mastersService.list(TYPE, params));
 
-    const { employeeTableList } = employeeReducers;
+export const getEmployeeListByIdMiddleware = masterThunk(GET_EMPLOYEE_BY_ID, (params) =>
+  mastersService.list(TYPE, params));
 
-    try {
-      const searchResults = employeeTableList.filter(item => {
-        return item.employeeCode.toLowerCase().includes(textSearch.toLowerCase());
-      });
-      console.log(searchResults, "searchResults")
-      return searchResults;
+export const postAddEmployeeMiddleware = masterThunk(POST_ADD_EMPLOYEE, (values) =>
+  mastersService.create(TYPE, values));
 
+export const patchEmployeeEditMiddleware = masterThunk(PATCH_EMPLOYEE_EDIT, (values) =>
+  mastersService.update(TYPE, values.id, values));
 
-    }
-    // try {
-    //   const { userReducers } = getState();
-    //   const { employeeTableList } = userReducers;
-    //   // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-    //   return payload;
-    // } 
-    catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
+export const getSearchEmployeeMiddleware = masterThunk(GET_SERACH_EMPLOYEE, (query) =>
+  mastersService.list(TYPE, { search: searchText(query) }));
 
-export const getEmployeViewMiddleWare = createAsyncThunk(
-  GET_VIEW_EMPLOYEE,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
+export const getEmployeViewMiddleWare = masterThunk(GET_VIEW_EMPLOYEE, (row) =>
+  mastersService.get(TYPE, row?.id ?? row));
 
-
-export const getEmployeEditMiddleWare = createAsyncThunk(
-  GET_EDIT_EMPLOYEE,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"find edit payload");
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-
-
+export const getEmployeEditMiddleWare = masterThunk(GET_EDIT_EMPLOYEE, (row) =>
+  mastersService.get(TYPE, row?.id ?? row));

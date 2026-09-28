@@ -20,10 +20,21 @@ import { getPaymentDetails } from "../store/receiptsMiddleware";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import documentTemplateService from "../../../services/documentTemplateService";
+import mastersService from "../../../services/mastersService";
 import {
   showSuccessMessage,
   showErrorMessage,
 } from "../../../utility/toastUtils";
+
+/** Receipt payment modes accepted by the receipts API. */
+const PAYMENT_MODES = [
+  { label: "Cash", value: "cash" },
+  { label: "Check", value: "check" },
+  { label: "Bank Transfer", value: "bank-transfer" },
+  { label: "Card", value: "card" },
+  { label: "GCash", value: "gcash" },
+  { label: "Online", value: "online" },
+];
 
 function PolicyReceipts() {
   const { t } = useTranslation();
@@ -172,18 +183,26 @@ function PolicyReceipts() {
   //   { label:paymentDetails[0].paymentType, value: paymentDetails[0].paymentType },
 
   // ];
-  const dataa = [
-    { label: "bank123", value: "bank123" },
-    { label: "bank7844", value: "bank7844" },
-  ];
-  const data1 = [
-    { label: "ICIC", value: "ICIC" },
-    { label: "SBI", value: "SBI" },
-  ];
-  const data2 = [
-    { label: "Credit Card", value: "Credit Card" },
-    { label: "Debit Card", value: "Debit Card" },
-  ];
+  const [banks, setBanks] = useState([]);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  useEffect(() => {
+    Promise.all([
+      mastersService.options("bank"),
+      mastersService.list("bank-account", { status: "Active" }),
+    ])
+      .then(([bankRows, accountRows]) => {
+        setBanks(bankRows);
+        setBankAccounts(accountRows);
+      })
+      .catch((error) => showErrorMessage(error.message, t("common.error")));
+  }, [t]);
+  const dataa = banks.map((bank) => ({ label: bank.label, value: bank.code }));
+  const data1 = bankAccounts
+    .filter((account) => account.bankCode === formik.values.bankcode)
+    .map((account) => ({ label: account.accountName, value: account.accountNumber }));
+  const data2 = PAYMENT_MODES;
+  const labelOf = (options, value) =>
+    options.find((option) => option.value === value)?.label || "";
 
   // const setFormikValues = (totalFC) => {
 
@@ -259,6 +278,7 @@ function PolicyReceipts() {
                 label="Bank code"
                 options={dataa}
                 optionLabel="value"
+                optionValue="value"
                 placeholder={"Select"}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
@@ -272,11 +292,7 @@ function PolicyReceipts() {
           <div class="col-4 md:col-4 lg-col-4">
             <div>
               <InputField
-                value={
-                  formik.values.bankcode
-                    ? `${formik.values.bankcode}`
-                    : ""
-                }
+                value={labelOf(dataa, formik.values.bankcode)}
                 // onChange={formik.handleChange("bankName")}
                 error={formik.errors.bankName}
                 classNames="field__policy "
@@ -309,6 +325,7 @@ function PolicyReceipts() {
                 label="Bank Account"
                 options={data1}
                 optionLabel="value"
+                optionValue="value"
                 placeholder={"Select"}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
@@ -322,11 +339,7 @@ function PolicyReceipts() {
           <div class="col-4 md:col-4 lg-col-4">
             <div>
               <InputField
-                value={
-                  formik.values.bankAccount
-                    ? `bankAccount ${formik.values.bankAccount}`
-                    : ""
-                }
+                value={labelOf(data1, formik.values.bankAccount)}
                 // value={
                 //   formik.values.bankAccount
                 //     ? `654${formik.values.bankAccount}`
@@ -354,7 +367,8 @@ function PolicyReceipts() {
                 className="dropdown__container"
                 label="Payment Type"
                 options={data2}
-                optionLabel="value"
+                optionLabel="label"
+                optionValue="value"
                 placeholder={"Select"}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />

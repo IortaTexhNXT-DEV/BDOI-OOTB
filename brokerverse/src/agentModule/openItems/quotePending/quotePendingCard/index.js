@@ -16,7 +16,7 @@ import SvgDots from "../../../../assets/agentIcon/SvgDot";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { useSelector, useDispatch } from "react-redux";
-import { getQuotependingSearchDataMiddleWare } from "../quotePendingCard/store/quotePendingMiddleware";
+import { getquotependingtableMiddleware, getQuotependingSearchDataMiddleWare } from "../quotePendingCard/store/quotePendingMiddleware";
 import { Avatar } from "primereact/avatar";
 
 const QuotePendingCard = () => {
@@ -108,6 +108,10 @@ const QuotePendingCard = () => {
     //   // </div>
     // );
   };
+
+  useEffect(() => {
+    dispatch(getquotependingtableMiddleware());
+  }, [dispatch]);
 
   useEffect(() => {
     if (globalFilter && search) {

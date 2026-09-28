@@ -18,7 +18,6 @@ import { InputText } from "primereact/inputtext";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
-import ToggleButton from "../../../components/ToggleButton";
 import SvgEditicon from "../../../assets/icons/SvgEdit";
 // import { useNavigation } from '';
 import { TieredMenu } from "primereact/tieredmenu";
@@ -27,13 +26,23 @@ import {
   getCurrencyDetailEdit,
   getCurrencyDetailView,
   getCurrencySearchList,
+  getCurrencyList,
 } from "./store/currencyMasterMiddlewar";
 import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { useTranslation } from "react-i18next";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const CurrencyMaster = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getCurrencyList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getCurrencyList());
+  }, [dispatch]);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
@@ -106,13 +115,6 @@ const CurrencyMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const handleView = (rowData) => {
     dispatch(getCurrencyDetailView(rowData));
@@ -160,6 +162,7 @@ const CurrencyMaster = () => {
 
   return (
     <div className="grid  container__currency">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title">{t("financeMasters.currencyMaster")}</div>
         <div className="mt-3">
@@ -241,12 +244,12 @@ const CurrencyMaster = () => {
                 emptyMessage={isEmpty ? emptyTableIcon : null}
               >
                 <Column
-                  field="Currencycode"
+                  field="CurrencyCode"
                   header={t("financeMasters.currencyCode")}
                   sortable
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.Currencycode?.toUpperCase()}
+                  body={(rowData) => rowData.CurrencyCode?.toUpperCase()}
                 ></Column>
                 <Column
                   field="CurrencyName"
@@ -287,7 +290,7 @@ const CurrencyMaster = () => {
                   body={(rowData) => rowData.UnitDescription?.toUpperCase()}
                 ></Column>
                 <Column
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="currency" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header={t("financeMasters.status")}
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

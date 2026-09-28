@@ -12,28 +12,34 @@ import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { TabView, TabPanel } from "primereact/tabview";
-import { MultiSelect } from "primereact/multiselect";
-import { ProgressBar } from "primereact/progressbar";
 import { Steps } from "primereact/steps";
 import { RadioButton } from "primereact/radiobutton";
-import { Checkbox } from "primereact/checkbox";
-import { useNavigate } from "react-router-dom";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../components/InputField";
-import { incentiveMockData, incentiveCrudOperations } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { isoDate, showError, showSuccess } from "../../Remittance/shared";
 import "./index.scss";
+
+/** Report parameters keyed the way the API reads them (period, program, topN, from / to). */
+const toApiParameters = (params) => Object.fromEntries(Object.entries(params).flatMap(([key, value]) => {
+  if (value === "" || value === null || value === undefined) return [];
+  const name = key.toLowerCase();
+  if (Array.isArray(value)) return [[`${name.replace(/\s+/g, "")}From`, isoDate(value[0])], [`${name.replace(/\s+/g, "")}To`, isoDate(value[1])]];
+  if (value instanceof Date) return [[name.replace(/\s+/g, ""), isoDate(value)]];
+  if (name === "top n") return [["topN", value]];
+  return [[name.replace(/\s+/g, ""), value]];
+}));
 
 const Reports = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const toast = useRef(null);
 
   // State management
-  const [reports, setReports] = useState([]);
-  const [reportTemplates, setReportTemplates] = useState(incentiveMockData.reportTemplates);
+  const [reportTemplates, setReportTemplates] = useState([]);
+  const [programOptions, setProgramOptions] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [loading, setLoading] = useState(false);
@@ -44,68 +50,14 @@ const Reports = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [reportParameters, setReportParameters] = useState({});
   const [reportFormat, setReportFormat] = useState("PDF");
-  const [reportSchedule, setReportSchedule] = useState({
-    isScheduled: false,
-    frequency: "",
-    time: null,
-    recipients: []
-  });
 
   // Generated reports history
-  const [generatedReports, setGeneratedReports] = useState([
-    {
-      id: 1,
-      reportName: "Monthly Payout Summary - January 2025",
-      template: "Monthly Payout Summary",
-      generatedDate: "2025-02-01",
-      generatedBy: "System Admin",
-      format: "PDF",
-      status: "Completed",
-      fileSize: "2.5 MB",
-      downloadCount: 15
-    },
-    {
-      id: 2,
-      reportName: "Agent Payout Details - Q4 2024",
-      template: "Agent Payout Details",
-      generatedDate: "2025-01-15",
-      generatedBy: "Finance Manager",
-      format: "Excel",
-      status: "Completed",
-      fileSize: "8.7 MB",
-      downloadCount: 8
-    },
-    {
-      id: 3,
-      reportName: "Target Achievement Report - December 2024",
-      template: "Target Achievement Report",
-      generatedDate: "2025-01-05",
-      generatedBy: "System Admin",
-      format: "PDF",
-      status: "Completed",
-      fileSize: "1.2 MB",
-      downloadCount: 23
-    }
-  ]);
+  const [generatedReports, setGeneratedReports] = useState([]);
 
   // Options
   const categoryOptions = [
     { label: "All Categories", value: "All" },
-    { label: "Payout Reports", value: "Payout Reports" },
-    { label: "Performance Reports", value: "Performance Reports" },
-    { label: "Program Analysis", value: "Program Analysis" }
-  ];
-
-  const formatOptions = [
-    { label: "PDF", value: "PDF" },
-    { label: "Excel", value: "Excel" }
-  ];
-
-  const frequencyOptions = [
-    { label: "Daily", value: "Daily" },
-    { label: "Weekly", value: "Weekly" },
-    { label: "Monthly", value: "Monthly" },
-    { label: "Quarterly", value: "Quarterly" }
+    ...[...new Set(reportTemplates.map((tpl) => tpl.category).filter(Boolean))].map((c) => ({ label: c, value: c }))
   ];
 
   // Breadcrumb items
@@ -120,34 +72,37 @@ const Reports = () => {
   const generationSteps = [
     { label: "Select Template" },
     { label: "Configure Parameters" },
-    { label: "Format & Schedule" },
+    { label: "Format" },
     { label: "Review & Generate" }
   ];
 
   // Initialize data
   useEffect(() => {
     loadReports();
+    incentiveService.reportTemplates().then(setReportTemplates).catch((error) => showError(toast, error));
+    incentiveService.listPrograms()
+      .then((rows) => setProgramOptions(rows.map((p) => ({ label: p.programName, value: p.programCode }))))
+      .catch((error) => showError(toast, error));
   }, []);
 
   const loadReports = async () => {
     setLoading(true);
     try {
-      // In a real application, this would fetch from API
-      setReports(generatedReports);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Data Loaded',
-        detail: 'Report templates and history loaded successfully',
-        life: 3000
-      });
+      const rows = await incentiveService.listReports();
+      setGeneratedReports((rows || []).map((r) => ({
+        id: r.reportId,
+        reportName: `${r.reportType} - ${new Date(r.generatedDate).toLocaleDateString()}`,
+        template: r.reportType,
+        generatedDate: r.generatedDate,
+        generatedBy: r.generatedBy,
+        format: "CSV",
+        status: r.status === "done" ? "Completed" : r.status,
+        fileSize: `${r.rowCount} rows`,
+        downloadCount: "-",
+        fileUrl: r.fileUrl
+      })));
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load report data',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to load report data');
     } finally {
       setLoading(false);
     }
@@ -156,7 +111,7 @@ const Reports = () => {
   // Filter data
   const filteredTemplates = reportTemplates.filter((template) => {
     const matchesSearch = template.name.toLowerCase().includes(search.toLowerCase()) ||
-                         template.description.toLowerCase().includes(search.toLowerCase());
+                         String(template.description || "").toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === "All" || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -167,12 +122,6 @@ const Reports = () => {
     setSelectedTemplate(null);
     setReportParameters({});
     setReportFormat("PDF");
-    setReportSchedule({
-      isScheduled: false,
-      frequency: "",
-      time: null,
-      recipients: []
-    });
     setShowGenerateDialog(true);
   };
 
@@ -181,10 +130,11 @@ const Reports = () => {
 
     // Initialize parameters based on template
     const initialParams = {};
-    template.parameters.forEach(param => {
+    (template.parameters || []).forEach(param => {
       initialParams[param] = "";
     });
     setReportParameters(initialParams);
+    setReportFormat((template.formats || [])[0] || "CSV");
 
     handleNextStep();
   };
@@ -204,58 +154,17 @@ const Reports = () => {
   const handleGenerateSubmit = async () => {
     setLoading(true);
     try {
-      const result = await incentiveCrudOperations.generateReport(
-        selectedTemplate.id,
-        {
-          parameters: reportParameters,
-          format: reportFormat,
-          schedule: reportSchedule
-        }
-      );
-
-      const newReport = {
-        id: Date.now(),
-        reportName: `${selectedTemplate.name} - ${new Date().toLocaleDateString()}`,
-        template: selectedTemplate.name,
-        generatedDate: new Date().toISOString().split('T')[0],
-        generatedBy: "Current User",
-        format: reportFormat,
-        status: "Generating",
-        fileSize: "Processing...",
-        downloadCount: 0
-      };
-
-      setGeneratedReports([newReport, ...generatedReports]);
+      const result = await incentiveService.generateReport({
+        templateId: selectedTemplate.id,
+        parameters: toApiParameters(reportParameters),
+        format: reportFormat
+      });
       setShowGenerateDialog(false);
-
-      toast.current.show({
-        severity: "success",
-        summary: "Report Generation Started",
-        detail: `Report "${selectedTemplate.name}" is being generated`,
-        life: 5000
-      });
-
-      // Simulate report completion
-      setTimeout(() => {
-        setGeneratedReports(prev => prev.map(r =>
-          r.id === newReport.id
-            ? { ...r, status: "Completed", fileSize: "1.5 MB" }
-            : r
-        ));
-        toast.current.show({
-          severity: "success",
-          summary: "Report Ready",
-          detail: `Report "${selectedTemplate.name}" is ready for download`,
-          life: 3000
-        });
-      }, 3000);
+      showSuccess(toast, `${result.reportType}: ${result.rowCount} row(s)`, "Report Ready");
+      window.open(result.fileUrl, "_blank", "noopener");
+      await loadReports();
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to generate report",
-        life: 3000
-      });
+      showError(toast, error, "Failed to generate report");
     } finally {
       setLoading(false);
     }
@@ -263,29 +172,13 @@ const Reports = () => {
 
   // Handle download
   const handleDownload = (report) => {
-    toast.current.show({
-      severity: "info",
-      summary: "Download Started",
-      detail: `Downloading ${report.reportName}...`,
-      life: 3000
-    });
-
-    // Update download count
-    setGeneratedReports(prev => prev.map(r =>
-      r.id === report.id ? { ...r, downloadCount: r.downloadCount + 1 } : r
-    ));
+    window.open(report.fileUrl, "_blank", "noopener");
   };
 
   // Handle view
   const handleViewReport = (report) => {
-    toast.current.show({
-      severity: "info",
-      summary: "Opening Report",
-      detail: `Opening ${report.reportName} in new tab...`,
-      life: 3000
-    });
+    window.open(report.fileUrl, "_blank", "noopener");
   };
-
   // Template functions
   const statusBodyTemplate = (rowData) => {
     const getSeverity = (status) => {
@@ -574,15 +467,15 @@ const Reports = () => {
                           selectionMode={param.toLowerCase().includes('range') ? 'range' : 'single'}
                         />
                       ) : param.toLowerCase().includes('program') ? (
-                        <MultiSelect
+                        <Dropdown
                           value={reportParameters[param]}
-                          options={incentiveMockData.programs.map(p => ({ label: p.programName, value: p.programCode }))}
+                          options={programOptions}
                           onChange={(e) => setReportParameters({
                             ...reportParameters,
                             [param]: e.value
                           })}
-                          placeholder="Select programs"
-                          display="chip"
+                          placeholder="All programs"
+                          showClear
                         />
                       ) : (
                         <InputText
@@ -602,12 +495,12 @@ const Reports = () => {
 
             {generationStep === 2 && (
               <div className="step-panel">
-                <h3>Format & Schedule</h3>
+                <h3>Format</h3>
                 <div className="format-schedule-form">
                   <div className="format-section">
                     <h4>Output Format</h4>
                     <div className="format-options">
-                      {selectedTemplate?.formats.map((format) => (
+                      {(selectedTemplate?.formats || []).map((format) => (
                         <div key={format} className="format-option">
                           <RadioButton
                             inputId={format}
@@ -622,49 +515,6 @@ const Reports = () => {
                     </div>
                   </div>
 
-                  <div className="schedule-section">
-                    <h4>Schedule Options</h4>
-                    <div className="schedule-option">
-                      <Checkbox
-                        inputId="scheduled"
-                        checked={reportSchedule.isScheduled}
-                        onChange={(e) => setReportSchedule({
-                          ...reportSchedule,
-                          isScheduled: e.checked
-                        })}
-                      />
-                      <label htmlFor="scheduled">Schedule recurring generation</label>
-                    </div>
-
-                    {reportSchedule.isScheduled && (
-                      <div className="schedule-details">
-                        <div className="schedule-field">
-                          <label>Frequency:</label>
-                          <Dropdown
-                            value={reportSchedule.frequency}
-                            options={frequencyOptions}
-                            onChange={(e) => setReportSchedule({
-                              ...reportSchedule,
-                              frequency: e.value
-                            })}
-                            placeholder="Select frequency"
-                          />
-                        </div>
-                        <div className="schedule-field">
-                          <label>Time:</label>
-                          <Calendar
-                            value={reportSchedule.time}
-                            onChange={(e) => setReportSchedule({
-                              ...reportSchedule,
-                              time: e.value
-                            })}
-                            timeOnly
-                            placeholder="Select time"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             )}
@@ -686,17 +536,11 @@ const Reports = () => {
                     <div className="parameters-review">
                       {Object.entries(reportParameters).map(([key, value]) => (
                         <div key={key} className="param-review">
-                          <strong>{key}:</strong> {value?.toString() || "Not specified"}
+                          <strong>{key}:</strong> {(Array.isArray(value) ? value.map((v) => isoDate(v)).join(" - ") : value instanceof Date ? isoDate(value) : value?.toString()) || "Not specified"}
                         </div>
                       ))}
                     </div>
                   </div>
-                  {reportSchedule.isScheduled && (
-                    <div className="review-item">
-                      <label>Schedule:</label>
-                      <span>{reportSchedule.frequency} at {reportSchedule.time?.toLocaleTimeString()}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="generation-note">
                   <i className="pi pi-info-circle"></i>

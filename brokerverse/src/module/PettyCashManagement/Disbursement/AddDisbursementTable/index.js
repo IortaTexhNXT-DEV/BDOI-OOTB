@@ -16,7 +16,7 @@ import SvgEditIcon from "../../../../assets/icons/SvgEditicons";
 import { Card } from "primereact/card";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../../components/DropDowns";
-import { Maincode, SubAccount } from "../../mock";
+import usePettyCashOptions from "../../usePettyCashOptions";
 import { useDispatch, useSelector } from "react-redux";
 import { getPatchDisbursementData, postDisbursementData, postEditDisbursmentMiddleware, postPatchDisbursementData } from "../store/pettyCashDisbursementMiddleware";
 import { Dropdown } from "primereact/dropdown";
@@ -53,7 +53,6 @@ const AddDisbursementTable = () => {
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
-  console.log(selectedRows, "selectedRows");
   const { AddDisbursmentTable, loading, getPatchDisbursment } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
@@ -64,27 +63,29 @@ const AddDisbursementTable = () => {
     }
   );
 
-  const isEmpty = AddDisbursmentTable.length === 0;
+  const isEmpty = !AddDisbursmentTable?.length;
 
   const [amountData, setAmountData] = useState()
   const [totalNetAmount, setTotalNetAmount] = useState(0);
   useEffect(() => {
     const newTotalNetAmount = selectedRows.reduce((total, item) => {
-      const netAmount = parseFloat(item.Amount) + parseFloat(item.VAT) - parseFloat(item.WHT);
+      const netAmount = parseFloat(item.Amount) - (parseFloat(item.WHT) || 0);
       return !isNaN(netAmount) ? total + netAmount : total;
     }, 0);
 
     setTotalNetAmount(newTotalNetAmount);
   }, [selectedRows]);
-  console.log(totalNetAmount, "totalNetAmount");
-  const handleNext = () => {
-
-    toastRef.current.showToast();
-    {
-      setTimeout(() => {
-        navigate("/accounts/pettycash/disbursement");
-      }, 2000);
+  const handleNext = async () => {
+    const lines = selectedRows.length ? selectedRows : AddDisbursmentTable;
+    const result = await dispatch(postEditDisbursmentMiddleware(lines));
+    if (postEditDisbursmentMiddleware.rejected.match(result)) {
+      toastRef.current.showToast({ severity: "error", detail: result.payload });
+      return;
     }
+    toastRef.current.showToast();
+    setTimeout(() => {
+      navigate("/accounts/pettycash/disbursement");
+    }, 2000);
   };
 
 
@@ -207,63 +208,20 @@ const AddDisbursementTable = () => {
     onSubmit: handleSubmit
   });
 
-  const handlePettyCashSubAccountCodedecription = (value) => {
-    let description = "";
-    switch (value.SubAccount) {
-      case "Sub1929920":
-        description = "SUB-1";
-        break;
-      case "Sub8299201":
-        description = "SUB-2";
-        break;
-      case "Sub9920010":
-        description = "SUB-3";
-        break;
-      case "Sub1818811":
-        description = "SUB-4";
-        break;
-      default:
-        description = "Unknown";
-        break;
-    }
-    formik.setFieldValue("SubAccountDescription", description);
-  };
-
-  const handlePettyCashMainAccountDescribtion = (value) => {
-    let description = "";
-    switch (value.Maincode) {
-      case "192992":
-        description = "Main-1";
-        break;
-      case "199191":
-        description = "Main-2";
-        break;
-      case "101019":
-        description = "Main-3";
-        break;
-      case "181929":
-        description = "Main-4";
-        break;
-      default:
-        description = "Unknown";
-        break;
-    }
-    formik.setFieldValue("MainAccountDescription", description);
-  };
 
 
-  const item = [
-    { label: "PC001", value: "PC001" },
-    { label: "PC002", value: "PC002" },
-  ]
-  const item1 = [
-    { label: "123", value: "123" },
-    { label: "995", value: "145" }
-  ]
-  const item2 = [
-    { label: "123", value: "123" },
-    { label: "954", value: "111" }
-  ]
+
+  const { expenseAccounts, subAccounts } = usePettyCashOptions();
+  const AddDisbursmentRequestTable = useSelector(
+    ({ pettyCashDisbursementReducers }) =>
+      pettyCashDisbursementReducers?.AddDisbursmentRequestTable || []
+  );
+  const toOption = (account) => ({ label: account.label, value: account.code });
+  const item = AddDisbursmentRequestTable;
+  const item1 = expenseAccounts.map(toOption);
+  const item2 = subAccounts
+    .filter((a) => a.parentCode === (formik.values.ExpenseCode?.value || formik.values.ExpenseCode))
+    .map(toOption);
   const [RequestNumberOptionData, setRequestNumberOptionData] = useState([]);
   const [SubAcOptionData, setSubAcOptionData] = useState([]);
   const [ExpenseCodeOptionData, setExpenseCodeOptionData] = useState([]);
@@ -315,7 +273,6 @@ if(formAction === "Edit" ){
 
   }, [getPatchDisbursment]);
 
-  console.log(AddDisbursmentTable, "RequestList");
 
 
   const template2 = {

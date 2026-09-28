@@ -43,7 +43,7 @@ const ModalViewData = ({
               className="input__label__corrections"
               label="Account Category Code"
               placeholder="enter"
-              value={AccountCategoryDetailView?.accountCategoryCode}
+              value={AccountCategoryDetailView?.categoryCode}
             />
           </div>
           <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
@@ -53,7 +53,7 @@ const ModalViewData = ({
               className="input__label__corrections"
               label="Account Category Name"
               placeholder="enter"
-              value={AccountCategoryDetailView?.accountCategoryName}
+              value={AccountCategoryDetailView?.categoryName}
             />
           </div>
           <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
@@ -63,7 +63,7 @@ const ModalViewData = ({
               className="input__label__corrections"
               label="Description"
               placeholder="enter"
-              value="Account Category description"
+              value={AccountCategoryDetailView?.description}
             />
           </div>
 

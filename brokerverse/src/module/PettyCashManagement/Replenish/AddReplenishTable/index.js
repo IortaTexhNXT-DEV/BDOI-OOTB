@@ -12,7 +12,8 @@ import { Column } from "primereact/column";
 import InputField from "../../../../components/InputField";
 import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { postAddReplenishMiddleware } from "../store/pettyCashReplenishMiddleware";
 
 const AddReplenishTable = () => {
   const [visible, setVisible] = useState(false);
@@ -21,29 +22,32 @@ const AddReplenishTable = () => {
   const navigate = useNavigate();
 
   const [selectedRows, setSelectedRows] = useState([]);
-  const { AddReplenishTable, loading } = useSelector(
+  const dispatch = useDispatch();
+  const { AddReplenishTable, loading, ReplenishFund } = useSelector(
     ({ pettyCashReplenishReducer }) => {
       return {
         loading: pettyCashReplenishReducer?.loading,
-        AddReplenishTable: pettyCashReplenishReducer?.AddReplenishTable,
+        AddReplenishTable: pettyCashReplenishReducer?.AddReplenishTable || [],
+        ReplenishFund: pettyCashReplenishReducer?.ReplenishFund || {},
       };
     }
   );
 
-  const isEmpty = AddReplenishTable.length === 0;
-  console.log(AddReplenishTable.Transactioncode, "AddReceiptTable");
+  const isEmpty = !AddReplenishTable.length;
   const totalAmount = selectedRows.reduce((total, item) => {
     const Amount = parseFloat(item.Amount);
     return !isNaN(Amount) ? total + Amount : total;
   }, 0);
-  console.log(totalAmount, "totalAmount");
-  const handleSubmit = () => {
-    toastRef.current.showToast();
-    {
-      setTimeout(() => {
-        navigate("/accounts/pettycash/replenish");
-      }, 2000);
+  const handleSubmit = async () => {
+    const result = await dispatch(postAddReplenishMiddleware(totalAmount));
+    if (postAddReplenishMiddleware.rejected.match(result)) {
+      toastRef.current.showToast({ severity: "error", detail: result.payload });
+      return;
     }
+    toastRef.current.showToast();
+    setTimeout(() => {
+      navigate("/accounts/pettycash/replenish");
+    }, 2000);
   };
   const [selectedProducts, setSelectedProducts] = useState([]);
   const emptyTableIcon = (
@@ -241,7 +245,7 @@ const AddReplenishTable = () => {
             textColor={"#111927"}
             textSize={"16"}
             textWeight={500}
-            value={"1000"}
+            value={ReplenishFund.availableCash ?? ""}
           />
         </div>
       </div>

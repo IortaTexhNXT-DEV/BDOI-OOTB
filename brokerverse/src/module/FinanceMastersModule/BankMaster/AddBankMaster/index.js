@@ -182,8 +182,8 @@ function AddBankMaster() {
 
     if (!values.mobile) {
       errors.mobile = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.mobile)) {
-      errors.mobile = "Invalid phone number (10 digits)";
+    } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.mobile)) {
+      errors.mobile = "Invalid phone number";
     }
     if (!values.Fax) {
       errors.Fax = "This field is required";

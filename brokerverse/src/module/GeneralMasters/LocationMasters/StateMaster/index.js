@@ -11,7 +11,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { ProductService } from "./mock";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgUpload from "../../../../assets/icons/SvgUpload";
@@ -19,7 +18,6 @@ import SvgMenudots from "../../../../assets/icons/SvgMenudots";
 import { TieredMenu } from "primereact/tieredmenu";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../components/InputField";
-import ToggleButton from "../../../../components/ToggleButton";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import SvgEditicon from "../../../../assets/icons/SvgEdit";
@@ -27,14 +25,24 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchStateMiddleware,
   getStateListByIdMiddleware,
+  getStateMiddleware,
 } from "./store/stateMiddleware";
 import { useFormik } from "formik";
 import SvgEditicons from "../../../../assets/icons/SvgEditicons";
+import MasterStatusToggle from "../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const State = () => {
   const { t } = useTranslation();
   const menu = useRef(null);
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getStateMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getStateMiddleware());
+  }, [dispatch]);
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [visibleview, setVisibleview] = useState(false);
@@ -49,7 +57,6 @@ const State = () => {
     }
   );
 
-  console.log(stateTableList, "stateTableList");
 
   // const [products, setProducts] = useState([]);
   // useEffect(() => {
@@ -71,7 +78,6 @@ const State = () => {
   };
 
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchStateMiddleware");
     dispatch(getSearchStateMiddleware({ textSearch: values.search }));
   };
   const formik = useFormik({
@@ -147,18 +153,12 @@ const State = () => {
   };
 
   const items = [{ label: t("generalMasters.location") }, { label: t("generalMasters.state") }];
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const home = { label: t("generalMasters.master") };
 
   return (
     <div className="overall__state__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("generalMasters.state")}</label>
@@ -265,7 +265,7 @@ const State = () => {
             ></Column>
             {/* <Column field="name" header="Phone" headerStyle={headerStyle}  className='fieldvalue_container'></Column> */}
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="state" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

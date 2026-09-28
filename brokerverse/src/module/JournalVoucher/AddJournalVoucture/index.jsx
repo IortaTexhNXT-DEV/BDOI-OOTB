@@ -9,6 +9,7 @@ import LabelWrapper from "../../../components/LabelWrapper";
 import SvgDatePicker from "../../../assets/icons/SvgDatePicker";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../AddJournalVoucture/index.scss";
+import useJvMasterData from "../useJvMasterData";
 import ArrowLeftIcon from "../../../assets/icons/ArrowLeftIcon";
 import SvgAddBlue from "../../../assets/icons/SvgAddBlue";
 import { DataTable } from "primereact/datatable";
@@ -35,6 +36,12 @@ import {
 import { clearJournalVoucherTableData } from "../store/journalVoucherReducer";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
+
+const toIsoDate = (value) => {
+  if (!(value instanceof Date) || Number.isNaN(value.getTime())) return undefined;
+  const local = new Date(value.getTime() - value.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+};
 
 const AddJournalVocture = () => {
   const { t } = useTranslation();
@@ -190,6 +197,8 @@ const AddJournalVocture = () => {
       // Prepare payload
       const payload = {
         transactionCode: formik.values.transationCode,
+        transactionDescription: formik.values.transationDescription,
+        date: toIsoDate(formik.values.date),
         entries: entries,
       };
 
@@ -250,14 +259,7 @@ const AddJournalVocture = () => {
   };
 
   // Transaction code data
-  const transactionCodesData = [
-    { code: "RCPT", description: "Receipt JV" },
-    { code: "PMT", description: "Payment JV" },
-    { code: "COMM", description: "Commission JV" },
-    { code: "SETT", description: "Insurer Settlement JV" },
-    { code: "ADJ", description: "Adjustment JV" },
-    { code: "REF", description: "Refund JV" },
-  ];
+  const { transactionCodesData } = useJvMasterData();
 
   // Format transaction code options for dropdown
   const transactionCodeOptions = transactionCodesData.map((transaction) => ({

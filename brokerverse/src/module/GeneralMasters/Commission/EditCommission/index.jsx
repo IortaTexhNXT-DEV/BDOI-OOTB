@@ -22,7 +22,8 @@ import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import EditCommissionPopup from "./EditCommissionPopup";
 import CustomToast from "../../../../components/Toast";
 import { SelectButton } from "primereact/selectbutton";
-import data from "./data";
+import useMasterOptions from "../../common/useMasterOptions";
+import { agentOptions } from "../../../../services/mastersService";
 import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -49,7 +50,6 @@ const EditCommission = () => {
         commissionMianReducers?.addLevelCommissionSharing,
     };
   });
-  console.log(getCommissionEdit, "getCommissionEdit");
 
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
@@ -112,17 +112,28 @@ const EditCommission = () => {
     { label: "Option 1", value: "Trans00123" },
     { label: "Option 2", value: "Trans00124" },
   ];
-  const handleSubmit = (value) => {
-    console.log(value, "value");
-    dispatch(patchCommissionEdit(value));
-    navigate("/master/generals/commission");
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchCommissionEdit(value)).unwrap();
+      setStep(1);
+      toastRef.current.showToast({ detail: t("financeMasters.saveSuccessfully") });
+      setTimeout(() => {
+        navigate("/master/generals/commission");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-  const [insuranceCompanyOptionData, setinsuranceCompanyOptionData] = useState([]);
-  const [productOptionData, setProductOptionData] = useState([]);
-  const [selectedCoverOption, setSelectedCoverOption] = useState([]);
+  const insuranceCompanyOptionData = useMasterOptions("insurance-company");
+  const productOptionData = useMasterOptions("product");
+  const selectedCoverOption = useMasterOptions("cover");
   const [selectAgentDataOption, setSelectAgentDataOption] = useState([]);
+  useEffect(() => {
+    agentOptions()
+      .then(setSelectAgentDataOption)
+      .catch(() => setSelectAgentDataOption([]));
+  }, []);
   const setFormikValues = () => {
-     const insuranceCompanyData = getCommissionEdit?.insuranceCompany;
     const productData = getCommissionEdit?.product;
     const selectCoversData = getCommissionEdit?.selectCover;
     const selectAgentData = getCommissionEdit?.selectAgent;
@@ -138,26 +149,6 @@ const EditCommission = () => {
       maxRate: getCommissionEdit?.maxRate,
       selectAgent: selectAgentData,
     };
-        if (insuranceCompanyData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setinsuranceCompanyOptionData([{ label: insuranceCompanyData, value: insuranceCompanyData }]);
-    }
-    if (productData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setProductOptionData([{ label: productData, value: productData }]);
-    }
-    if (selectCoversData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setSelectedCoverOption([
-        { label: selectCoversData, value: selectCoversData },
-      ]);
-    }
-    if (selectAgentData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setSelectAgentDataOption([
-        { label: selectAgentData, value: selectAgentData },
-      ]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -176,11 +167,9 @@ const EditCommission = () => {
     validate: customValidation,
     onSubmit: (values) => {
       handleSubmit(values);
-      setStep(1);
     },
   });
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     setFormikValues();
   }, [getCommissionEdit]);
@@ -216,7 +205,6 @@ const EditCommission = () => {
   const handlePolicy = () => {
     setVisible(true);
   };
-  const [products, setProducts] = useState(data);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -227,7 +215,7 @@ const EditCommission = () => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
   };
-  const isEmpty = products.length === 0;
+  const isEmpty = !addLevelCommissionSharing?.length;
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -481,7 +469,7 @@ const EditCommission = () => {
                   }
                   onChange={(e) => {
                     formik.handleChange("effectiveFrom")(
-                      e.value.toISOString().split("T")[0]
+                      e.value ? e.value.toLocaleDateString("en-CA") : ""
                     );
                   }}
                   dateFormat="yy-mm-dd"
@@ -516,7 +504,7 @@ const EditCommission = () => {
                   }
                   onChange={(e) => {
                     formik.handleChange("effectiveTo")(
-                      e.value.toISOString().split("T")[0]
+                      e.value ? e.value.toLocaleDateString("en-CA") : ""
                     );
                   }}
                   dateFormat="yy-mm-dd"

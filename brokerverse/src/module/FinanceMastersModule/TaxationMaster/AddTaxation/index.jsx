@@ -16,6 +16,7 @@ import CustomToast from "../../../../components/Toast";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { postAddTaxationMiddileware } from "../store/taxationMiddleWare";
+import useTaxRateOptions from "../useTaxRateOptions";
 const AddTaxation = () => {
   const { t } = useTranslation();
   const [errors, setErrors] = useState("");
@@ -38,11 +39,7 @@ const AddTaxation = () => {
   ];
   const home = { label: t("financeMasters.master") };
 
-  const item = [
-    { label: "DST", value: "DST" },
-    { label: "VAT", value: "VAT" },
-    { label: "LGT", value: "LGT" },
-  ];
+  const item = useTaxRateOptions();
   const initialValue = {
     taxCode: "",
     taxName: "",
@@ -55,7 +52,6 @@ const AddTaxation = () => {
   };
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.taxCode) {
       errors.taxCode = t("financeMasters.taxCodeRequired");
     }
@@ -72,7 +68,7 @@ const AddTaxation = () => {
       errors.effectiveFrom = t("financeMasters.effectiveFromRequired");
     }
     if (!values.effectiveTo) {
-      errors.customerCode = t("financeMasters.effectiveToRequired");
+      errors.effectiveTo = t("financeMasters.effectiveToRequired");
     }
 
     return errors;
@@ -80,21 +76,17 @@ const AddTaxation = () => {
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
-  const handleSubmit = (values) => {
-    // const formErrors = validate(formik.values);
-    // setErrors(formErrors);
-    // console.log(formErrors, "iiiii");
-
-    const valueWithId = {
-      ...values,
-      id: taxationList?.length + 1,
-    };
-    console.log(valueWithId, 'find valueWithId')
-
-    dispatch(postAddTaxationMiddileware(valueWithId));
-    navigate("/master/finance/taxation");
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddTaxationMiddileware(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate("/master/finance/taxation");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-
   const formik = useFormik({
     initialValues: initialValue,
     validate,
@@ -260,7 +252,7 @@ const AddTaxation = () => {
           disabled={!formik.isValid}
         />
       </div>
-      <CustomToast ref={toastRef} message={t("financeMasters.taxCodeAdded", { code: "T1234" })} />
+      <CustomToast ref={toastRef} message={t("financeMasters.taxCodeAdded", { code: formik.values.taxCode })} />
     </div>
   );
 };

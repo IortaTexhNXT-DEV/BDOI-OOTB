@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./index.scss";
 import NavBar from "../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -15,6 +15,9 @@ import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { useDispatch, useSelector } from "react-redux";
 import { patchMainAccountDetailEdit } from "../store/mainAccoutMiddleware";
+import useMainAccountOptions from "../useMainAccountOptions";
+import { useTranslation } from "react-i18next";
+import CustomToast from "../../../../components/Toast";
 
 const EditMainAccount = () => {
   const initialValues = {
@@ -27,6 +30,8 @@ const EditMainAccount = () => {
     currencyCode: [],
     openEntryType: [],
   };
+  const { t } = useTranslation();
+  const toastRef = useRef(null);
   const dispatch = useDispatch();
   const navigation = useNavigate();
   const items = [
@@ -48,20 +53,17 @@ const EditMainAccount = () => {
       };
     }
   );
-  console.log(getMainAccountDetailEdit, "getMainAccountDetailEdit");
-  const handleSubmit = (value) => {
-    const openEntry = selectSwitch === "No" ? "Yes" : "No";
-    const updatedValues = { ...value, openEntry };
-    console.log(value, "value");
-    dispatch(patchMainAccountDetailEdit(updatedValues));
-    navigation("/master/finance/mainaccount");
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(patchMainAccountDetailEdit({ ...values, openEntry: selectSwitch })).unwrap();
+      toastRef.current.showToast({ detail: t("financeMasters.saveSuccessfully") });
+      setTimeout(() => {
+        navigation("/master/finance/mainaccount");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-
-  const [accType, setAccType] = useState([]);
-  const [openEType, setOpenEType] = useState([]);
-  const [accCaletgoryC, setAccCaletgoryC] = useState([]);
-  const [companyCodeOption, setcompanyCodeOption] = useState([]);
-  const [currencyCodeOption, setcurrencyCodeOption] = useState([]);
   const setFormikValues = () => {
     const accountTypeData = getMainAccountDetailEdit?.accountType;
     const openEntryTypeData = getMainAccountDetailEdit?.openEntryType;
@@ -80,33 +82,7 @@ const EditMainAccount = () => {
       currencyCode: currencyCodeData,
       openEntryType: openEntryTypeData,
     };
-    // console.log(updatedValues.accountType, "uu");
-    if (accountTypeData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setAccType([{ label: accountTypeData, value: accountTypeData }]);
-    }
-    if (openEntryTypeData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setOpenEType([{ label: openEntryTypeData, value: openEntryTypeData }]);
-    }
-    if (accountCategoryCodeData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setAccCaletgoryC([
-        { label: accountCategoryCodeData, value: accountCategoryCodeData },
-      ]);
-    }
-    if (companyCodeData) {
-      setcompanyCodeOption([
-        { label: companyCodeData, value: companyCodeData },
-      ]);
-      formik.setValues({ ...formik.values, ...updatedValues });
-    }
-    if (currencyCodeData) {
-      setcurrencyCodeOption([
-        { label: currencyCodeData, value: currencyCodeData },
-      ]);
-      formik.setValues({ ...formik.values, ...updatedValues });
-    }
+    if (getMainAccountDetailEdit?.openEntry) setselectSwitch(getMainAccountDetailEdit.openEntry);
     formik.setValues({ ...formik.values, ...updatedValues });
   };
   const formik = useFormik({
@@ -116,7 +92,6 @@ const EditMainAccount = () => {
     },
   });
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     setFormikValues();
   }, [getMainAccountDetailEdit]);
@@ -125,26 +100,11 @@ const EditMainAccount = () => {
   const EntrySwitchoptions = ["Yes", "No"];
   const [entrySwitch, setentrySwitch] = useState(EntrySwitchoptions[0]);
 
-  const codeOptionsType = [
-    { label: "Option 1", value: "Income" },
-    { label: "Option 2", value: "Expense" },
-    { label: "Option 3", value: "Asset" },
-    { label: "Option 4", value: "Liability" },
-  ];
-  const categoryOptionsCode = [
-    { label: "Option 1", value: "Debtor" },
-    { label: "Option 2", value: "Debtor" },
-  ];
-  const companyCodeDatas = [
-    { name: "Option 1", value: "Comp00123" },
-    { name: "Option 2", value: "Comp00124" },
-    { name: "Option 3", value: "Comp00125" },
-  ];
-  const currencyCodeDatas = [
-    { name: "PHP - Philippine Peso", value: "PHP" },
-    { name: "THB - Thai Baht", value: "THB" },
-    { name: "USD - US Dollar", value: "USD" },
-  ];
+  const mainAccountOptions = useMainAccountOptions();
+  const codeOptionsType = mainAccountOptions.accountTypes;
+  const categoryOptionsCode = mainAccountOptions.categories;
+  const companyCodeDatas = mainAccountOptions.companies;
+  const currencyCodeDatas = mainAccountOptions.currencies;
 
   const home = { label: "Master" };
   const customValidation = (values) => {
@@ -177,6 +137,7 @@ const EditMainAccount = () => {
   // });
   return (
     <div className="add__main__container">
+      <CustomToast ref={toastRef} />
       <div className="grid m-0 top-container">
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
@@ -263,7 +224,7 @@ const EditMainAccount = () => {
               label="Account Type"
               value={formik.values.accountType}
               onChange={(e) => formik.setFieldValue("accountType", e.value)}
-              options={accType}
+              options={codeOptionsType}
             />
             {formik.touched.accountType && formik.errors.accountType && (
               <div
@@ -303,7 +264,7 @@ const EditMainAccount = () => {
               label="Open Entry type"
               value={formik.values.openEntryType}
               onChange={(e) => formik.setFieldValue("openEntryType", e.value)}
-              options={openEType}
+              options={codeOptionsType}
             />
           </div>
           <div className="col-12 md:col-4 lg:col-3 xl:col-3">
@@ -332,7 +293,7 @@ const EditMainAccount = () => {
               onChange={(e) =>
                 formik.setFieldValue("accountCategoryCode", e.value)
               }
-              options={accCaletgoryC}
+              options={categoryOptionsCode}
             />
             {formik.touched.accountCategoryCode &&
               formik.errors.accountCategoryCode && (
@@ -368,7 +329,7 @@ const EditMainAccount = () => {
               className="input__field__corrections mt-2"
               value={[formik.values.companyCode]}
               onChange={(e) => formik.setFieldValue("companyCode", e.value)}
-              options={companyCodeOption}
+              options={companyCodeDatas}
               optionLabel="value"
               display="chip"
               placeholder="Select"
@@ -398,7 +359,7 @@ const EditMainAccount = () => {
                 className="input__field__corrections mt-2"
                 value={[formik.values.currencyCode]}
                 onChange={(e) => formik.setFieldValue("currencyCode", e.value)}
-                options={currencyCodeOption}
+                options={currencyCodeDatas}
                 optionLabel="value"
                 display="chip"
                 placeholder="Select"

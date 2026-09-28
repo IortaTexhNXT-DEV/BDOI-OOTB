@@ -21,6 +21,7 @@ import {
   patchInsurancePolicyTypeMiddleWare,
   postInsurancePolicyTypeMiddleWare,
 } from "../store/insurancePolicyTypeMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const PolicyTypeDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -33,22 +34,18 @@ const PolicyTypeDetailsAction = ({ action }) => {
       };
     }
   );
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsurancePolicyType.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("policy-type", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -82,34 +79,23 @@ const PolicyTypeDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsurancePolicyType?.length + 1,
-      };
-      dispatch(postInsurancePolicyTypeMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/policytype");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsurancePolicyTypeMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/policytype");
-    } else {
-      navigation("/master/generals/insurancemanagement/policytype");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsurancePolicyTypeMiddleWare : patchInsurancePolicyTypeMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/policytype");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find setFormikValues");
     const policyTypeCode = data[0]?.policytypeCode;
     const policyTypeName = data[0]?.policyTypeName;
     const policyTypeDescription = data[0]?.policyTypeDescription;
@@ -118,12 +104,12 @@ const PolicyTypeDetailsAction = ({ action }) => {
     const Product = data[0]?.product;
 
     const updatedValues = {
-      policyTypeCode: `${policyTypeCode}`,
-      policyTypeName: `${policyTypeName}`,
-      policyTypeDescription: `${policyTypeDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
-      Product: `${Product}`,
+      policyTypeCode: policyTypeCode ?? "",
+      policyTypeName: policyTypeName ?? "",
+      policyTypeDescription: policyTypeDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
+      Product: Product ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
+import { Toast } from "primereact/toast";
 import "./index.scss";
 import { useFormik } from "formik";
 import DropDowns from "../../../../components/DropDowns";
@@ -43,14 +44,17 @@ const ModalAddData = ({
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    console.log(values, "find values");
-    const valueWithId = {
-      ...values,
-      id: AccountCategoryList?.length + 1,
-    };
-    dispatch(getAddAccountCategoryMiddleWare(valueWithId));
+  const toastRef = useRef(null);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(getAddAccountCategoryMiddleWare(values)).unwrap();
+      formik.resetForm();
+      handleSave(values);
+      handleEdit(values);
+      setVisible(false);
+    } catch (error) {
+      toastRef.current?.show({ severity: "error", detail: error });
+    }
   };
   const formik = useFormik({
     initialValues: {
@@ -59,13 +63,7 @@ const ModalAddData = ({
       description: "",
     },
     validate: customValidation,
-    onSubmit: (values) => {
-      handleSubmit(values);
-      formik.resetForm();
-      handleSave(values);
-      handleEdit(values);
-      setVisible(false);
-    },
+    onSubmit: handleSubmit,
   });
   return (
     <Dialog
@@ -76,6 +74,7 @@ const ModalAddData = ({
       dismissableMask={true}
       style={{ boxShadow: "none" }} 
     >
+      <Toast ref={toastRef} />
       <div className="form__container">
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-12 lg:col-4 xl:col-4 ">

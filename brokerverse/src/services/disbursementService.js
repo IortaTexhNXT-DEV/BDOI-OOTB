@@ -547,14 +547,11 @@ class DisbursementService {
       const today = new Date().toISOString().split('T')[0];
       const disbursementData = {
         voucherDate: today,
-        departmentCode: "DEPT-001",
-        branchCode: "BR-001",
         payeeType: "Client",
         criteria: "Policy Cancellation Refund",
         customerCode: customerCode,
-        transactionCode: `TXN-CANCEL-${Date.now()}`,
+        transactionCode: "REFUND",
         transactionDescription: `Cancellation refund for ${policyNumber || 'policy'}`,
-        instrumentCurrency: "PHP",
         remarks: `Refund disbursement for policy cancellation ${policyNumber || ''}`,
         amount: "0.00", // Will be updated when invoice list is created
         createdBy: createdBy
@@ -634,6 +631,33 @@ class DisbursementService {
           error.name === "AbortError"
             ? "Request timeout. Please try again."
             : error.message || "Failed to fetch disbursement",
+      };
+    }
+  }
+
+  /** Voucher print (PDF) for one disbursement; resolves to { url, filename }. */
+  async printDisbursement(disbursementId) {
+    try {
+      const query = new URLSearchParams({ disbursementId });
+      const response = await fetch(
+        `${this.baseURL}/disbursements/printDisbursement?${query}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...authService.getAuthHeader(),
+          },
+        }
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) {
+        throw new Error(data.message || "Failed to print disbursement");
+      }
+      return { success: true, data: data.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || "Failed to print disbursement",
       };
     }
   }

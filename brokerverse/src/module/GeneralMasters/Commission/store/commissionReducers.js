@@ -13,7 +13,6 @@ import {
   postAddCommission,
   postAddLevelShareRatingCommission,
 } from "./commissionMiddleWare";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",
@@ -23,90 +22,10 @@ const initialState = {
   popupEditData: {},
   CommissionEdit: {},
   getCommissionEdit: {},
-  commissionList: [
-    {
-      id: 1,
-      commissionCode: "COMM001 ",
-      insuranceCompany: "PIONEER INSURANCE AND SURETY CORP (PISC)",
-      desc: "decriptionCommission0123",
-      maxRate: "123",
-      selectCover: "CTPL",
-      selectAgent: "822",
-      product: "MOTOR ",
-      // selectCovers: "Cus01123",
-      effectiveFrom: "01-01-2024",
-      effectiveTo: "31-12-2024",
-      status: "true",
-      // Amount: "500.00",
-      action: <SvgIconeye />,
-    },
-    {
-      id: 2,
-      commissionCode: "COMM002",
-      insuranceCompany: "MALAYAN INSURANCE COMPANY,INC",
-      desc: "decriptionCommission0123",
-      maxRate: "123",
-      selectCover: "COMPREHENSIVE",
-      selectAgent: "822",
-      product: "MOTOR ",
-      // selectCovers: "Cus01123",
-      effectiveFrom: "01-01-2024",
-      effectiveTo: "31-12-2024",
-      status: "true",
-      // Amount: "500.00",
-      action: <SvgIconeye />,
-    },
-    {
-      id: 3,
-      commissionCode: "COMM003",
-      insuranceCompany: "COOPERATIVE INSURANCE SYSTEM OF THE PJILLIPINES LIFE",
-      desc: "decriptionCommission0123",
-      maxRate: "123",
-      selectCover: "EXCESS BIPD ",
-      selectAgent: "822",
-      product: "MOTOR ",
-      // selectCovers: "Cus01123",
-      effectiveFrom: "01-01-2024",
-      effectiveTo: "31-12-2024",
-      status: "true",
-      // Amount: "500.00",
-      action: <SvgIconeye />,
-    },
-    {
-      id: 4,
-      commissionCode: "COMM004",
-      insuranceCompany: "PIONEER INSURANCE AND SURETY CORP (PISC)",
-      desc: "decriptionCommission0123",
-      maxRate: "123",
-      selectCover: "OD AND THEFT",
-      selectAgent: "822",
-      product: " MOTOR ",
-      // selectCovers: "Cus01123",
-      effectiveFrom: "01-01-2024",
-      effectiveTo: "31-12-2024",
-      status: "true",
-      // Amount: "500.00",
-      action: <SvgIconeye />,
-    },
-  ],
-  addLevelCommissionSharing: [
-    {
-      id: 1,
-      level: "11",
-      commissionCode: "CC123",
-      sharingRate: "10",
-    },
-    {
-      id: 2,
-      level: "11",
-      commissionCode: "CC123",
-      sharingRate: "15",
-    },
-  ],
+  commissionList: [],
+  addLevelCommissionSharing: [],
   commissionPopupView: {},
 };
-let nextId = 2;
-let nextIdd = 3;
 const commissionReducers = createSlice({
   name: "commission",
   initialState,
@@ -117,12 +36,12 @@ const commissionReducers = createSlice({
     });
     builder.addCase(getCommission.fulfilled, (state, action) => {
       state.loading = false;
-      state.commissionList = [action.payload];
+      state.commissionList = action.payload;
     });
     builder.addCase(getCommission.rejected, (state, action) => {
       state.loading = false;
 
-      state.commissionList = {};
+      state.commissionList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -132,7 +51,7 @@ const commissionReducers = createSlice({
     });
     builder.addCase(postAddCommission.fulfilled, (state, action) => {
       state.loading = false;
-      // const newItem = { ...action.payload, id: nextId++ };
+      // const newItem = action.payload;
       state.commissionList = [...state.commissionList, action.payload];
     });
     builder.addCase(postAddCommission.rejected, (state, action) => {
@@ -151,7 +70,7 @@ const commissionReducers = createSlice({
     builder.addCase(getCommissionSearchList.rejected, (state, action) => {
       state.loading = false;
 
-      state.commissionSearchList = {};
+      state.commissionSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -160,11 +79,11 @@ const commissionReducers = createSlice({
     });
     builder.addCase(getLevelCommissionSharing.fulfilled, (state, action) => {
       state.loading = false;
-      state.addLevelCommissionSharing = [action.payload];
+      state.addLevelCommissionSharing = action.payload;
     });
     builder.addCase(getLevelCommissionSharing.rejected, (state, action) => {
       state.loading = false;
-      state.addLevelCommissionSharing = {};
+      state.addLevelCommissionSharing = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -175,10 +94,9 @@ const commissionReducers = createSlice({
       postAddLevelShareRatingCommission.fulfilled,
       (state, action) => {
         state.loading = false;
-        const newItem = { ...action.payload, id: nextIdd++ };
         state.addLevelCommissionSharing = [
           ...state.addLevelCommissionSharing,
-          newItem,
+          action.payload,
         ];
       }
     );
@@ -200,6 +118,10 @@ const commissionReducers = createSlice({
       (state, action) => {
         state.loading = false;
         state.getCommissionEdit = action.payload;
+        state.addLevelCommissionSharing = (action.payload?.sharing || []).map((row, index) => ({
+          ...row,
+          id: `saved-${index + 1}`,
+        }));
       }
     );
     builder.addCase(
@@ -243,6 +165,10 @@ const commissionReducers = createSlice({
     builder.addCase(getCommissionView.fulfilled, (state, action) => {
       state.loading = false;
       state.commissionView = action.payload;
+      state.addLevelCommissionSharing = (action.payload?.sharing || []).map((row, index) => ({
+        ...row,
+        id: `saved-${index + 1}`,
+      }));
     });
     builder.addCase(getCommissionView.rejected, (state, action) => {
       state.loading = false;
@@ -273,13 +199,12 @@ const commissionReducers = createSlice({
       const updatedIndex = state.addLevelCommissionSharing.findIndex(
         (item) => item.id === action.payload.id
       );
-      console.log(updatedIndex, "updatedIndex");
       if (updatedIndex !== -1) {
         const updatedCurrencyList = [...state.addLevelCommissionSharing];
         updatedCurrencyList[updatedIndex] = action.payload;
         state.addLevelCommissionSharing = updatedCurrencyList;
       } else {
-        state.pettyCashList = [
+        state.addLevelCommissionSharing = [
           ...state.addLevelCommissionSharing,
           action.payload,
         ];

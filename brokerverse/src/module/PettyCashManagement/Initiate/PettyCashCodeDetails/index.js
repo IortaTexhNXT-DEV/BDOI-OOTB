@@ -13,6 +13,8 @@ import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useSelector } from "react-redux";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
+import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
 
 const initialValue = {
@@ -36,79 +38,27 @@ const initialValue = {
 
 const PettyCashCodeDetails = () => {
   const { t } = useTranslation();
-  const [selectedBankCode, setSelectedBankCode] = useState({});
-  const [selectedSubAccountCode, setSelectedSubAccountCode] = useState({});
-  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState({});
-
-  console.log(
-    selectedBankCode.value,
-    selectedSubAccountCode,
-    "selectedSubAccountCode"
-  );
-  const { InitiateDetails, loading } = useSelector(
-    ({ pettyCashInitiateReducer }) => {
-      return {
-        loading: pettyCashInitiateReducer?.loading,
-        InitiateDetails: pettyCashInitiateReducer?.InitiateDetails,
-      };
-    }
-  );
-
-  console.log(InitiateDetails, "InitiateList");
-
-  const pettycashcodeOptions = [
-    {
-      label: InitiateDetails?.Pettycashcode,
-      value: InitiateDetails?.Pettycashcode,
-    },
-  ];
-
-  const transcodeOptions = [
-    {
-      label: InitiateDetails?.TransactionNumber,
-      value: InitiateDetails?.TransactionNumber,
-    },
-  ];
-
+  const { InitiateDetails } = useSelector(({ pettyCashInitiateReducer }) => ({
+    InitiateDetails: pettyCashInitiateReducer?.InitiateDetails || {},
+  }));
+  const { currencies, branches, departments } = usePettyCashOptions();
   const branchcodeOptions = [
     {
       label: InitiateDetails?.Branchcode,
       value: InitiateDetails?.Branchcode,
     },
   ];
-
   const departcodeOptions = [
     {
       label: InitiateDetails?.Departmentcode,
       value: InitiateDetails?.Departmentcode,
     },
   ];
-
-  const bankcode = [{ label: "BANK001", value: "BANK001" }];
-  const subAccountCode = [{ label: "SubCode001", value: "SubCode001" }];
-  const currency = [{ label: "1000", value: "1000" }];
-
-  useEffect(() => {
-    if (bankcode.length > 0) {
-      setSelectedBankCode({
-        label: bankcode[0].label,
-        value: bankcode[0].value,
-      });
-    }
-    if (subAccountCode.length > 0) {
-      setSelectedSubAccountCode({
-        label: subAccountCode[0].label,
-        value: subAccountCode[0].value,
-      });
-    }
-    if (currency.length > 0) {
-      setSelectedCurrencyCode({
-        label: currency[0].label,
-        value: currency[0].value,
-      });
-    }
-  }, []);
-
+  const currency = [
+    { label: InitiateDetails?.Currency, value: InitiateDetails?.Currency },
+  ];
+  const selectedCurrencyCode = currency[0];
+  const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const items = [
     { label: t("pettyCash.pettyCashLabel"), command: () => navigate("/accounts/pettycash/pettycashcodeinitiate") },
@@ -174,7 +124,7 @@ const PettyCashCodeDetails = () => {
               classNames="field__container"
               label={t("pettyCash.transactionCode")}
               // placeholder={"Enter"}
-               value={"Trans001"}
+               value={InitiateDetails?.TransactionCode}
 
             />
 
@@ -226,7 +176,7 @@ const PettyCashCodeDetails = () => {
               label={t("pettyCash.pettyCashDescription")}
               // placeholder="Enter"
               disabled={true}
-              value="PC-2"
+              value={InitiateDetails?.PettyCashdescription}
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
@@ -255,7 +205,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="Bank012"
+              value={InitiateDetails?.BankCode}
             />
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view">
@@ -267,7 +217,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="27348856"
+              value={InitiateDetails?.BankAccountCode}
             />
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view">
@@ -279,7 +229,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="main231"
+              value={InitiateDetails?.MainAccountCode}
             />
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view">
@@ -291,7 +241,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="Sub4345"
+              value={InitiateDetails?.SubAccountCode}
             />
           </div>
         </div>
@@ -321,7 +271,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="United states Currency"
+              value={describe(currencies, InitiateDetails?.Currency)}
             />
           </div>
         </div>
@@ -351,7 +301,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="Branch-1"
+              value={describe(branches, InitiateDetails?.Branchcode)}
             />
           </div>
         </div>
@@ -381,7 +331,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="Depart-1"
+              value={describe(departments, InitiateDetails?.Departmentcode)}
             />
           </div>
         </div>
@@ -395,7 +345,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="10,000"
+              value={formatCurrency(InitiateDetails?.AvailableCash)}
             />
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view">
@@ -407,7 +357,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="10,000"
+              value={formatCurrency(InitiateDetails?.MaxLimit)}
             />
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view">
@@ -419,7 +369,7 @@ const PettyCashCodeDetails = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="10,000"
+              value={formatCurrency(InitiateDetails?.MinimumCashbox)}
             />
           </div>
         </div>

@@ -16,7 +16,7 @@ import SvgDots from "../../../../assets/agentIcon/SvgDot";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { useSelector, useDispatch } from "react-redux";
-import { getrenewalrequestSearchDataMiddleWare } from "../renewalRequestCard/store/renewalRequestMiddleware";
+import { getrenewalrequesttableMiddleware, getrenewalrequestSearchDataMiddleWare } from "../renewalRequestCard/store/renewalRequestMiddleware";
 import { Avatar } from "primereact/avatar";
 
 const RenewalRequestCard = () => {
@@ -109,6 +109,10 @@ const RenewalRequestCard = () => {
     //   // </div>
     // );
   };
+
+  useEffect(() => {
+    dispatch(getrenewalrequesttableMiddleware());
+  }, [dispatch]);
 
   useEffect(() => {
     if (globalFilter && search) {

@@ -21,6 +21,7 @@ import {
   patchInsuranceProductMiddleWare,
   postInsuranceProductMiddleWare,
 } from "../store/insuranceProductMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const ProductMatserDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -33,22 +34,18 @@ const ProductMatserDetailsAction = ({ action }) => {
       };
     }
   );
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceProductList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("product", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: "Insurance Management",
@@ -88,48 +85,37 @@ const ProductMatserDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceProductList?.length + 1,
-      };
-      dispatch(postInsuranceProductMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/productmaster");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsuranceProductMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/productmaster");
-    } else {
-      navigation("/master/generals/insurancemanagement/productmaster");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsuranceProductMiddleWare : patchInsuranceProductMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/productmaster");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find data in formik");
     const productCode = data[0]?.productCode;
     const productName = data[0]?.productName;
     const productDescription = data[0]?.description;
-    const modifiedBy = data[0]?.modifiedby;
+    const modifiedBy = data[0]?.modifiedBy;
     const modifiedOn = data[0]?.modifiedOn;
     const lineofBusiness = data[0]?.lineofBusiness;
 
     const updatedValues = {
-      productCode: `${productCode}`,
-      productName: `${productName}`,
-      productDescription: `${productDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
-      lineofBusiness: `${lineofBusiness}`,
+      productCode: productCode ?? "",
+      productName: productName ?? "",
+      productDescription: productDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
+      lineofBusiness: lineofBusiness ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };

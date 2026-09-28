@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getReceiptSearchMiddleware,
   getViewReceiptMiddleware,
+  getReceiptListMiddleware,
 } from "../store/pettyCashReceiptsMiddleware";
 
 const PettyCashReceiptsTable = () => {
@@ -46,7 +47,11 @@ const PettyCashReceiptsTable = () => {
     { name: "Date", code: "Date" },
   ];
 
-  const isEmpty = ReceiptList?.length === 0;
+  useEffect(() => {
+    dispatch(getReceiptListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !ReceiptList?.length;
 
   const emptyTableIcon = (
     <div className="empty-table-icon">

@@ -3,48 +3,7 @@ import { getDesignationListByIdMiddleware, postAddDesignationMiddleware, patchDe
 const initialState = {
   loading: false,
   error: "",
-  designationDetailList: [
-    {
-      id: 1,
-      designationCode: "DS001",
-      designationName: "SALES AGENTS ",
-      designationDescription: "designationDescription",
-      departmentCode: "DEP001",
-      reportingtoLevel:"REPORTING LEVEL",
-      level:"level",
-      ModifiedBy: "JHONSON",
-      modifiedOn: "12/12/23",
-      status: "",
-      action: ""
-    },
-    {
-      id: 2,
-      designationCode: "DS002",
-      designationName: "ACCOUNTS EXECUTIVE",
-      designationDescription: "designationDescription",
-      departmentCode: "DEP002",
-      reportingtoLevel:"REPORTING LEVEL",
-      level:"level",
-      ModifiedBy: "JHONSON",
-      modifiedOn: "12/12/23",
-      status: "",
-      action: ""
-    },
-    {
-      id: 3,
-      designationCode: "DS003",
-      designationName: "CASHIER",
-      designationDescription: "designationDescription",
-      departmentCode: "DEP003",
-      reportingtoLevel:"REPORTING LEVEL",
-      level:"level",
-      ModifiedBy: "JHONSON",
-      modifiedOn: "12/12/23",
-      status: "",
-      action: ""
-    },
-   
-  ],
+  designationDetailList: [],
   designationSearchList: [],
   getEditData: {},
   getViewData: {}
@@ -65,7 +24,7 @@ const receiptsReducer = createSlice({
     builder.addCase(getDesignationListByIdMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.designationDetailList = {};
+      state.designationDetailList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -78,7 +37,7 @@ const receiptsReducer = createSlice({
     });
     builder.addCase(getSearchDesignationMiddleware.rejected, (state, action) => {
       state.loading = false;
-      state.designationSearchList = {};
+      state.designationSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -90,9 +49,8 @@ const receiptsReducer = createSlice({
     builder.addCase(
       postAddDesignationMiddleware.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId1++ };
+        const newItem2 = action.payload;
         state.designationDetailList = [...state.designationDetailList, newItem2];
-        console.log(state.designationDetailList, "departmentList")
       }
     );
     builder.addCase(postAddDesignationMiddleware.rejected, (state, action) => {
@@ -113,7 +71,6 @@ const receiptsReducer = createSlice({
         const updatedIndex = state.designationDetailList.findIndex(
           (item) => item.id === action.payload.id
         );
-        console.log(updatedIndex,"updatedIndex");
         if (updatedIndex !== -1) {
           const updatedCurrencyList = [...state.designationDetailList];
           updatedCurrencyList[updatedIndex] = action.payload;

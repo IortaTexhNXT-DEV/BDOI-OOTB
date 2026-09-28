@@ -4,7 +4,6 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import SvgArrow from "../../assets/agentIcon/SvgArrow";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import Carddata from "./mock";
 import { useSelector } from "react-redux";
 
 const PaymentCard = ({  dataSearch, status,setStatus }) => {

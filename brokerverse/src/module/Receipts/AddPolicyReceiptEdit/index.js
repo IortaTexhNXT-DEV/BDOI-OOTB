@@ -50,6 +50,9 @@ function PolicyReceipts() {
   const customerData = location.state?.customerData || {};
   const passedReceivableList = location.state?.receivableTableList || [];
 
+  const paymentDetails = useSelector(
+    ({ receiptsTableReducers }) => receiptsTableReducers?.paymentDetails
+  );
   const { receivableTableList: reduxReceivableList, loading } = useSelector(
     ({ receiptsTableReducers }) => ({
       loading: receiptsTableReducers?.loading,
@@ -321,16 +324,14 @@ function PolicyReceipts() {
     // Prepare the receipt data for update API
     // Task 3: Ensure all numeric fields are strings for consistency
     const receiptData = {
-      receiptNumber: customerData.receiptNumber || `RCP-${Date.now()}`,
-      receiptType: customerData.receiptType || "Payment",
+      receiptType: customerData.receiptType || undefined,
       receiptDate: new Date().toISOString(),
       branchCode: customerData.branchCode || null,
       departmentCode: customerData.departmentCode || null,
       customerCode: customerData.customerCode,
-      currencyCode: customerData.currencyCode || "PHP",
-      transactionCode: customerData.transactionCode || "PAYMENT",
-      remarks: customerData.remarks || "Payment for motor insurance premium",
-      transactionNumber: customerData.transactionNumber || `TXN-${Date.now()}`,
+      currencyCode: customerData.currencyCode || undefined,
+      transactionCode: customerData.transactionCode || undefined,
+      remarks: customerData.remarks || undefined,
       policyNumber: customerData.policyNumber,
       name: customerData.customerName,
       policyRefId: customerData.policyRefId,
@@ -358,16 +359,11 @@ function PolicyReceipts() {
 
         const itemUnpaid = Math.max(0, itemGrossPremium - cumulativePaid);
 
-        console.log(`[UNPAID CALC] Item ${index + 1}:`, {
-          policies: item.policies,
-          netPremium: item.netPremium,
-          grossPremium: itemGrossPremium,
-          thisPaid: itemPaid,
-          cumulativePaid,
-          calculatedUnpaid: itemUnpaid,
-        });
 
+        const isSavedLine =
+          item.receiptListId && !String(item.receiptListId).startsWith("payment-");
         return {
+          receiptListId: isSavedLine ? item.receiptListId : undefined,
           policies: item.policies,
           netPremium: String(item.netPremium || "0.00"),
           paid: String(itemPaid.toFixed(2)), // Use edited paid value
@@ -449,7 +445,7 @@ function PolicyReceipts() {
           vat: selectedTotals.totalVat.toFixed(2), // VAT amount
           wht: "0.00", // Withholding tax (if applicable)
           totalAmount: selectedTotals.totalLcAmount > 0 ? selectedTotals.totalLcAmount.toFixed(2) : selectedTotals.totalPaid.toFixed(2), // Total payment amount
-          bankCode: "BDO", // Default bank code, can be made configurable
+          bankCode: paymentDetails?.bankcode || undefined,
           bankAmount: totalAmount.toFixed(2), // Bank amount
           isInvoicePaid: true, // Payment completed
           createdBy: currentUser?.id,

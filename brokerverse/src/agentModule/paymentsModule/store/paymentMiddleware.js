@@ -1,187 +1,88 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { POST_PAYMENT_DATA, GET_PAYMENTTABLE_DATA, GET_PAYMENT_SEARCH, GET_PAYMENT_PAID_SEARCH, GET_PAYMENT_PENDING_SEARCH, GET_PAYMENTTABLE_PENDING_DATA, GET_PAYMENTTABLE_REWING_DATA } from "../../../redux/actionTypes";
-
-
-
-
-export const getpaymenttableMiddleware = createAsyncThunk(
+import {
+  POST_PAYMENT_DATA,
   GET_PAYMENTTABLE_DATA,
-  async (payload, { rejectWithValue }) => {
-
-    try {
-      // Simulate an API call if needed
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      // return filteredData[0];
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  }
-);
-export const getpaymentPendingtableMiddleware = createAsyncThunk(
+  GET_PAYMENT_SEARCH,
+  GET_PAYMENT_PAID_SEARCH,
+  GET_PAYMENT_PENDING_SEARCH,
   GET_PAYMENTTABLE_PENDING_DATA,
-  async (payload, { rejectWithValue }) => {
-
-    try {
-      // Simulate an API call if needed
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      // return filteredData[0];
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  }
-);
-
-export const getpaymentRewivingtableMiddleware = createAsyncThunk(
   GET_PAYMENTTABLE_REWING_DATA,
-  async (payload, { rejectWithValue }) => {
+} from "../../../redux/actionTypes";
+import paymentsService from "../../../services/paymentsService";
 
+const errorMessage = (error) => error?.message || "Something went wrong";
+const money = (value) =>
+  Number(value || 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+const SOURCE_LABEL = { policy: "Policy", renewal: "Renewal Policy", endorsement: "Endorsement" };
+
+/** A premium bill as a row of the Payments tables. */
+export const toPaymentRow = (p) => ({
+  id: p.id,
+  policyId: p.policyId,
+  type: SOURCE_LABEL[p.source] || p.source || "",
+  name: p.clientName || "",
+  clintid: p.clientId || "",
+  policyNo: p.policyNumber || "",
+  grosspremium: money(p.grossPremium),
+  outstanding: p.outstanding,
+  commission: p.commission,
+  policyIssued: p.date || "",
+  policyExpird: p.dueDate || "",
+  status: p.status,
+});
+
+/** Policy number filters on its own column; anything else uses the free-text search. */
+const searchParams = (field, value) =>
+  field === "PolicyNumber" ? { policyNumber: value } : { search: value };
+
+const loadPayments = (status, params = {}) =>
+  paymentsService.getPayments({ status, ...params });
+
+const listThunk = (type, status) =>
+  createAsyncThunk(type, async (params, { rejectWithValue }) => {
     try {
-      // Simulate an API call if needed
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      // return filteredData[0];
+      const result = await loadPayments(status, params || {});
+      return (result.data || []).map(toPaymentRow);
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
+      return rejectWithValue(errorMessage(error));
     }
-  }
-);
+  });
 
+const searchThunk = (type, status) =>
+  createAsyncThunk(type, async ({ field, value }, { rejectWithValue }) => {
+    try {
+      const result = await loadPayments(status, searchParams(field, value));
+      return (result.data || []).map(toPaymentRow);
+    } catch (error) {
+      return rejectWithValue(errorMessage(error));
+    }
+  });
 
+export const getpaymenttableMiddleware = listThunk(GET_PAYMENTTABLE_DATA, "PAID");
+export const getpaymentPendingtableMiddleware = listThunk(GET_PAYMENTTABLE_PENDING_DATA, "PENDING");
+export const getpaymentRewivingtableMiddleware = listThunk(GET_PAYMENTTABLE_REWING_DATA, "REVIEWING");
+
+export const getPaymentSearchDataMiddleWare = searchThunk(GET_PAYMENT_SEARCH, "REVIEWING");
+export const getPaymentPaidSearchDataMiddleWare = searchThunk(GET_PAYMENT_PAID_SEARCH, "PAID");
+export const getPaymentPendingSearchDataMiddleWare = searchThunk(GET_PAYMENT_PENDING_SEARCH, "PENDING");
+
+/** Summary cards: gross premium, collected, receivables and commission earned on paid bills. */
 export const postpaymentdataMiddleWare = createAsyncThunk(
   POST_PAYMENT_DATA,
-  async (payload, { rejectWithValue, getState }) => {
-    const bodyTableData = {
-      // id: payload?.id,
-      policyNumber: 'Policy0123',
-      production: '12/12/2013',
-      issuedDate: '12/12/2012',
-      inception: '12/12/2023',
-      expiry: '12/12/2023',
-      action: 1,
-      action: payload?.id,
-    };
-    console.log(bodyTableData, "find add datas in midd");
-
+  async (_, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      // return bodyTableData;
+      const paid = await loadPayments("PAID", { pageSize: 500 });
+      const summary = paid.summary || {};
+      const buckets = ["paid", "pending", "reviewing"].map((k) => summary[k] || {});
+      const gross = buckets.reduce((sum, b) => sum + (b.grossPremium || 0), 0);
+      const receivables = buckets.reduce((sum, b) => sum + (b.outstanding || 0), 0);
+      const commission = (paid.data || []).reduce((sum, p) => sum + (Number(p.commission) || 0), 0);
+      return { gross, collected: gross - receivables, receivables, commission };
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
-
-
-
-
-export const getPaymentSearchDataMiddleWare = createAsyncThunk(
-  GET_PAYMENT_SEARCH,
-  async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "kkkk");
-    const { agentPaymentMainReducers } = getState();
-    const { paymenttabledata } = agentPaymentMainReducers;
-    function filterPaymentsByField(data, field, value) {
-      const lowercasedValue = value.toLowerCase();
-      const outputData = data.filter(item => {
-        if (field === "PolicyNumber") {
-
-          return item?.policyNo.toLowerCase().includes(lowercasedValue);
-        }
-        if (field === "ClientId") {
-          return item.clintid.toLowerCase().includes(lowercasedValue);
-        }
-        return (
-          (item?.policyNo.toLowerCase().includes(lowercasedValue)
-            ||
-            item.clintid.toLowerCase().includes(lowercasedValue))
-        );
-
-
-      });
-      return outputData
-    }
-    try {
-      const filteredPayments = filterPaymentsByField(paymenttabledata, field, value);
-      console.log(filteredPayments, "filteredPayments");
-      return filteredPayments;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  }
-);
-
-
-export const getPaymentPaidSearchDataMiddleWare = createAsyncThunk(
-  GET_PAYMENT_PAID_SEARCH,
-  async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "pppp");
-    const { agentPaymentMainReducers } = getState();
-    const { paymenttabledata } = agentPaymentMainReducers;
-    console.log(paymenttabledata, "paymenttabledata");
-    function filterPaymentsByField(data, field, value) {
-      const lowercasedValue = value.toLowerCase();
-      const outputData = data.filter(item => {
-        if (field === "PolicyNumber") {
-          return item?.policyNo.toLowerCase().includes(lowercasedValue);
-        }
-        if (field === "ClientId") {
-          return item.clintid.toLowerCase().includes(lowercasedValue);
-        }
-        return (
-          (item?.policyNo.toLowerCase().includes(lowercasedValue)
-            ||
-            item.clintid.toLowerCase().includes(lowercasedValue)
-          )
-        );
-      });
-      return outputData
-    }
-    try {
-      const filteredPayments = filterPaymentsByField(paymenttabledata, field, value);
-      console.log(filteredPayments, "filteredPayments");
-      return filteredPayments;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  }
-);
-
-
-export const getPaymentPendingSearchDataMiddleWare = createAsyncThunk(
-  GET_PAYMENT_PENDING_SEARCH,
-  async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "lll");
-    const { agentPaymentMainReducers } = getState();
-    const { paymentPendingtabledata } = agentPaymentMainReducers;
-    console.log(paymentPendingtabledata, "paymentPendingtabledata");
-    function filterPaymentsByField(data, field, value) {
-      const lowercasedValue = value.toLowerCase();
-      const outputData = data.filter(item => {
-        if (field === "PolicyNumber") {
-          return item?.policyNo.toLowerCase().includes(lowercasedValue);
-        }
-        if (field === "ClientId") {
-          return item.clintid.toLowerCase().includes(lowercasedValue);
-        }
-        return (
-          (item?.policyNo.toLowerCase().includes(lowercasedValue)
-            ||
-            item.clintid.toLowerCase().includes(lowercasedValue)
-          )
-        );
-      });
-      return outputData
-    }
-    try {
-      const filteredPayments = filterPaymentsByField(paymentPendingtabledata, field, value);
-      console.log(filteredPayments, "filteredPayments");
-      return filteredPayments;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  }
-);
-
-
-
-
-

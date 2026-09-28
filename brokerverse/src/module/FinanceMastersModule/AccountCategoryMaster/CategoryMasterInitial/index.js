@@ -142,13 +142,13 @@ const Index = () => {
             scrollHeight="40vh"
           >
             <Column
-              field="accountCategoryCode"
+              field="categoryCode"
               header="Account Category Code"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="accountCategoryName"
+              field="categoryName"
               header="Account Category Name"
               headerStyle={headerStyle}
               className="fieldvalue_container"

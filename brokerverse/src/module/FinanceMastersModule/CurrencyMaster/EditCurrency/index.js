@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import SvgBack from "../../../../assets/icons/SvgBack";
 import { useDispatch, useSelector } from "react-redux";
 import { patchCurrencyDetailEdit } from "../store/currencyMasterMiddlewar";
+import { useCurrencyCodeOptions } from "../../../GeneralMasters/common/useMasterOptions";
 
 const initialValues = {
   id: "",
@@ -31,7 +32,7 @@ const EditCurrency = () => {
   const toastRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isocode, setISOcodeData] = useState([]);
+  const isocode = useCurrencyCodeOptions();
   const [ID, setID] = useState("");
   const { CurrencyDetailEdit, loading } = useSelector(
     ({ currencyMasterReducer }) => {
@@ -49,7 +50,7 @@ const EditCurrency = () => {
   const setFormikValues = () => {
     const IsoCode = CurrencyDetailEdit?.ISOcode;
     const updatedValues = {
-      CurrencyCode: CurrencyDetailEdit?.Currencycode,
+      CurrencyCode: CurrencyDetailEdit?.CurrencyCode,
       ISOcode: IsoCode,
       SmallestUnit: CurrencyDetailEdit?.SmallestUnit,
       UnitDescription: CurrencyDetailEdit?.UnitDescription,
@@ -57,23 +58,23 @@ const EditCurrency = () => {
       Description: CurrencyDetailEdit?.Description,
       CurrencyFormat: CurrencyDetailEdit?.CurrencyFormat,
       NumberofDecimals: CurrencyDetailEdit?.NumberofDecimals,
-      id: CurrencyDetailEdit.id 
+      id: CurrencyDetailEdit?.id,
     };
 
-    if (IsoCode) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setISOcodeData([{ label: IsoCode, value: IsoCode }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
   const home = { label: t("financeMasters.master") };
 
-  const handleSubmit = (value) => {
-    dispatch(patchCurrencyDetailEdit(value));
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/master/finance/currency");
-    }, 2000);
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchCurrencyDetailEdit(value)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate("/master/finance/currency");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
   const formik = useFormik({
@@ -83,7 +84,6 @@ const EditCurrency = () => {
     },
   });
 
-  console.log(formik.values.id, "idleo");
   useEffect(() => {
     setFormikValues();
   }, [CurrencyDetailEdit]);
@@ -132,6 +132,7 @@ const EditCurrency = () => {
                   formik.setFieldValue("ISOcode", e.value);
                 }}
                 optionLabel="value"
+                optionValue="value"
               />
             </div>
             <div className="col-12 md:col-3 lg:col-3">

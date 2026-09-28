@@ -15,6 +15,7 @@ import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getRequestListMiddleware,
   getRequestSearchMiddleware,
   geteditrequestMiddleware,
 } from "../store/pettyCashRequestMiddleware";
@@ -37,7 +38,10 @@ const RequestTable = () => {
       };
     }
   );
-  console.log("first9", RequestList);
+
+  useEffect(() => {
+    dispatch(getRequestListMiddleware());
+  }, [dispatch]);
   const searchs = [
     { name: t("pettyCash.receiptNo"), code: "ReceiptNo" },
     { name: t("pettyCash.requestNumber"), code: "RequestNumber" },
@@ -48,7 +52,7 @@ const RequestTable = () => {
     { name: t("pettyCash.date"), code: "Date" },
   ];
 
-  const isEmpty = RequestList.length === 0;
+  const isEmpty = !RequestList?.length;
 
   const handleViewer = (columnData) => {
     console.log("columnData", columnData);
@@ -141,7 +145,6 @@ const RequestTable = () => {
   };
 
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(

@@ -32,6 +32,8 @@ import { Toast } from "primereact/toast";
 import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
 
+const CONVERTED = "Converted";
+
 const PolicyReceipts = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
@@ -117,21 +119,13 @@ const PolicyReceipts = () => {
       bulkPrintError: receiptsTableReducers?.error,
     };
   });
-  // Filter to only show Converted (fully paid) receipts
-  const convertedReceipts = Array.isArray(receiptsTableList)
-    ? receiptsTableList.filter(
-        (receipt) => receipt.receiptStatus === "Converted"
-      )
+  // The history lists Converted (fully paid) receipts only; the server filters them.
+  const safeReceiptsList = Array.isArray(receiptsTableList)
+    ? receiptsTableList
     : [];
-
-  // Filter search results to only show Converted receipts
   const convertedFilteredReceipts = Array.isArray(receiptsFilterTable)
-    ? receiptsFilterTable.filter(
-        (receipt) => receipt.receiptStatus === "Converted"
-      )
+    ? receiptsFilterTable
     : [];
-
-  const safeReceiptsList = convertedReceipts;
 
   // Transform clients data to dropdown options for Customer Code (for bulk print modal)
   const getCustomerCodeOptions = () => {
@@ -226,7 +220,7 @@ const PolicyReceipts = () => {
 
   // Load receipts data on component mount
   useEffect(() => {
-    const filters = { page: currentPage, pageSize: rows };
+    const filters = { page: currentPage, pageSize: rows, receiptStatus: CONVERTED };
 
     // Add policyId filter if provided in URL
     if (policyId) {
@@ -347,6 +341,7 @@ const PolicyReceipts = () => {
             value: searches,
             page: currentPage,
             pageSize: rows,
+            receiptStatus: CONVERTED,
           })
         );
       }
@@ -367,10 +362,11 @@ const PolicyReceipts = () => {
           value: searches,
           page: newPage,
           pageSize: event.rows,
+          receiptStatus: CONVERTED,
         })
       );
     } else {
-      const filters = { page: newPage, pageSize: event.rows };
+      const filters = { page: newPage, pageSize: event.rows, receiptStatus: CONVERTED };
 
       // Add policyId filter if provided in URL
       if (policyId) {
@@ -403,7 +399,7 @@ const PolicyReceipts = () => {
 
   const handleBulkUploadSuccess = () => {
     // Refresh the receipts list after successful upload
-    const filters = { page: currentPage, pageSize: rows };
+    const filters = { page: currentPage, pageSize: rows, receiptStatus: CONVERTED };
     if (policyId) {
       filters.policyId = policyId;
     }
@@ -713,12 +709,9 @@ const PolicyReceipts = () => {
               scrollable={true}
               scrollHeight="40vh"
               paginator
+              lazy
               rows={rows}
-              totalRecords={
-                searches && globalFilter
-                  ? convertedFilteredReceipts.length
-                  : safeReceiptsList.length
-              }
+              totalRecords={pagination?.total ?? safeReceiptsList.length}
               first={first}
               onPage={onPageChange}
               rowsPerPageOptions={[5, 10, 25, 50]}

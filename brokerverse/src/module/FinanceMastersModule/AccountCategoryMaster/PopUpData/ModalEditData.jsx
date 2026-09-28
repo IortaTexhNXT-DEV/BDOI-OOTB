@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Dialog } from "primereact/dialog";
+import { Toast } from "primereact/toast";
 import "./index.scss";
 import { useFormik } from "formik";
 import DropDowns from "../../../../components/DropDowns";
@@ -29,23 +30,30 @@ const ModalEditData = ({
   useEffect(() => {
     setFormikValues();
   }, [AccountCategoryDetailEdit]);
-  console.log(AccountCategoryDetailEdit, "find AccountCategoryDetailEdit");
 
-  const handleSubmit = (values) => {
-    // Handle form submission
-    dispatch(patchAccountCategoryDetailEditMiddleWare(values));
+  const toastRef = useRef(null);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(patchAccountCategoryDetailEditMiddleWare(values)).unwrap();
+      formik.resetForm();
+      handleSave(values);
+      handleEdit(values);
+      setVisible(false);
+    } catch (error) {
+      toastRef.current?.show({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = () => {
-    const categoryCode = AccountCategoryDetailEdit?.accountCategoryCode;
-    const categoryName = AccountCategoryDetailEdit?.accountCategoryName;
+    const categoryCode = AccountCategoryDetailEdit?.categoryCode;
+    const categoryName = AccountCategoryDetailEdit?.categoryName;
     const description = AccountCategoryDetailEdit?.description;
     const id = AccountCategoryDetailEdit?.id;
 
     const updatedValues = {
-      categoryCode: `${categoryCode}`,
-      categoryName: `${categoryName}`,
-      description: `${description}`,
-      id: `${id}`,
+      categoryCode: categoryCode ?? "",
+      categoryName: categoryName ?? "",
+      description: description ?? "",
+      id: id ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -56,13 +64,7 @@ const ModalEditData = ({
       categoryName: "",
       description: "",
     },
-    onSubmit: (values) => {
-      handleSubmit(values);
-      formik.resetForm();
-      handleSave(values);
-      handleEdit(values);
-      setVisible(false);
-    },
+    onSubmit: handleSubmit,
   });
   return (
     <Dialog
@@ -73,6 +75,7 @@ const ModalEditData = ({
       dismissableMask={true}
       style={{ boxShadow: "none" }} 
     >
+      <Toast ref={toastRef} />
       <div className="form__container">
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-12 lg:col-4 xl:col-4 ">

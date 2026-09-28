@@ -4,53 +4,7 @@ import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",
-  hierarchTableList: [
-    {
-      id: 1,
-      rankCode: "RK001 ",
-      rankName: "RANK 1 ",
-      levelNumber: "L4",
-      description: "TEST PURPOSE",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "12/12/23",
-      status: "",
-      action: ""
-    },
-    {
-      id: 2,
-      rankCode: "RK002 ",
-      rankName: "RANK 2 ",
-      levelNumber: "L3",
-      description: "TEST PURPOSE",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "2/1/24",
-      status: "",
-      action: ""
-    }, 
-    {
-      id: 3,
-      rankCode: "RK003 ",
-      rankName: "RANK 3 ",
-      description: "TEST PURPOSE",
-      levelNumber: "L2",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "2/1/24",
-      status: "",
-      action: ""
-    }, 
-    {
-      id: 4,
-      rankCode: "RK004",
-      rankName: "RANK 4 ",
-      levelNumber: "L2",
-      description: "TEST PURPOSE",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "2/1/24",
-      status: "",
-      action: ""
-    }, 
-  ]
-  ,
+  hierarchTableList: [],
   hierarchSeachList: [],
   hierarchListDetails: {},
   getViewData: {},
@@ -72,7 +26,7 @@ const receiptsReducer = createSlice({
     builder.addCase(getHirarchyListMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.hierarchTableList = {};
+      state.hierarchTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
     builder.addCase(getHirarchyListByIdMiddleware.pending, (state) => {
@@ -99,7 +53,7 @@ const receiptsReducer = createSlice({
     builder.addCase(getSearchHirarchyMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.hierarchSeachList = {};
+      state.hierarchSeachList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -109,7 +63,6 @@ const receiptsReducer = createSlice({
       state.loading = true;
     });
     builder.addCase(postAddHirarchyMiddleware.fulfilled, (state, action) => {
-      console.log(action.payload, 'find action.payload')
       state.loading = false;
       state.hierarchTableList = [...state.hierarchTableList, action.payload];
     });
@@ -131,7 +84,6 @@ const receiptsReducer = createSlice({
         const updatedIndex = state.hierarchTableList.findIndex(
           (item) => item.id === action.payload.id
         );
-        console.log(updatedIndex, "updatedIndex");
         if (updatedIndex !== -1) {
           const updatedCurrencyList = [...state.hierarchTableList];
           updatedCurrencyList[updatedIndex] = action.payload;

@@ -21,8 +21,8 @@ import {
   postInsuranceCompanyMiddleWare,
 } from "../store/insuranceCompanyMiddleware";
 import { useSelector, useDispatch } from "react-redux";
-import countriesData from "./data";
 import { act } from "react-dom/test-utils";
+import useMasterOptions from "../../../common/useMasterOptions";
 
 const InsuranceDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -41,9 +41,7 @@ const InsuranceDetailsAction = ({ action }) => {
       getInsurancePatchData: insuranceCompanyReducers?.getInsurancePatchData,
     };
   });
-  console.log(getInsuranceView, "find getInsuranceView");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
@@ -74,11 +72,7 @@ const InsuranceDetailsAction = ({ action }) => {
   ];
   const home = { label: t("generalMasters.master") };
 
-  const City = countriesData.city.map((city) => ({
-    label: action === "add" ? city : getInsuranceView?.city,
-    value: action === "add" ? city : getInsuranceView?.city,
-  }));
-  console.log(dropdownData, "find main");
+  const City = useMasterOptions("city");
 
   // const City=action === "add"? countriesData.city.map(city => ({
   //   label:city,
@@ -87,15 +81,9 @@ const InsuranceDetailsAction = ({ action }) => {
   // })):{ label:dropdownData[0].city,
   //   value:  dropdownData[0].city}
 
-  const State = countriesData.state.map((state) => ({
-    label: action === "add" ? state : getInsuranceView.state,
-    value: action === "add" ? state : getInsuranceView.state,
-  }));
+  const State = useMasterOptions("state");
 
-  const Country = countriesData.countries.map((country) => ({
-    label: action === "add" ? country : getInsuranceView.country,
-    value: action === "add" ? country : getInsuranceView.country,
-  }));
+  const Country = useMasterOptions("country");
 
   const customValidation = (values) => {
     const errors = {};
@@ -127,40 +115,28 @@ const InsuranceDetailsAction = ({ action }) => {
     }
     if (!values.phoneNumber) {
       errors.phoneNumber = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.phoneNumber)) {
-      errors.phoneNumber = "Invalid phone number (10 digits)";
+    } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.phoneNumber)) {
+      errors.phoneNumber = "Invalid phone number";
     }
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceCompanyList?.length + 1,
-      };
-      dispatch(postInsuranceCompanyMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/insurancecompany");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      console.log(values, "find edit values");
-      dispatch(patchInsuranceCompanyMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/insurancecompany");
-    } else {
-      navigation("/master/generals/insurancemanagement/insurancecompany");
+      return;
+    }
+    const thunk = action === "add" ? postInsuranceCompanyMiddleWare : patchInsuranceCompanyMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/insurancecompany");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
   };
-  const [cityDataOption, setCityDataOption] = useState([]);
-  const [stateDataOption, setStateDataOption] = useState([]);
-  const [countryDataOption, setCountryDataOption] = useState([]);
   const setFormikValues = () => {
     const cityData = getInsurancePatchData?.city;
     const stateData = getInsurancePatchData?.state;
@@ -180,21 +156,9 @@ const InsuranceDetailsAction = ({ action }) => {
       country: countryData,
       email: getInsurancePatchData?.email,
       phoneNumber: getInsurancePatchData?.phoneNumber,
-      modifiedBy: getInsurancePatchData?.modifiedby,
+      modifiedBy: getInsurancePatchData?.modifiedBy,
       modifiedOn: getInsurancePatchData?.modifiedOn,
     };
-    if (cityData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCityDataOption([{ label: cityData, value: cityData }]);
-    }
-    if (stateData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setStateDataOption([{ label: stateData, value: stateData }]);
-    }
-    if (countryData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCountryDataOption([{ label: countryData, value: countryData }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
   useEffect(() => {
@@ -230,8 +194,7 @@ const InsuranceDetailsAction = ({ action }) => {
       <div className="grid m-0 top-container">
         <CustomToast
           ref={toastRef}
-          message="Insurance Company Code CC1234 
-          is added"
+          message={`Insurance Company Code ${formik.values.insuranceCompanyCode} is added`}
         />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
@@ -434,13 +397,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
              
               onChange={(e) => formik.setFieldValue("city", e.value)}
-              options={
-                action == "add"
-                  ? City
-                  : action == "edit"
-                  ? cityDataOption
-                  : City
-              }
+              options={City}
             />
             {formik.touched.city && formik.errors.city && (
               <div
@@ -471,13 +428,7 @@ const InsuranceDetailsAction = ({ action }) => {
              
               onChange={(e) => formik.setFieldValue("state", e.value)}
               // options={State}
-              options={
-                action == "add"
-                  ? State
-                  : action == "edit"
-                  ? stateDataOption
-                  : State
-              }
+              options={State}
             />
             {formik.touched.state && formik.errors.state && (
               <div
@@ -507,13 +458,7 @@ const InsuranceDetailsAction = ({ action }) => {
               
               onChange={(e) => formik.setFieldValue("country", e.value)}
               // options={Country}
-              options={
-                action == "add"
-                  ? Country
-                  : action == "edit"
-                  ? countryDataOption
-                  : Country
-              }
+              options={Country}
             />
             {formik.touched.country && formik.errors.country && (
               <div

@@ -14,6 +14,7 @@ import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getDisbursmentListMiddleware,
   getDisbursmentSearchMiddleware,
   getDisbursmentViewMiddleware,
   getViewDisbursmentMiddleware,
@@ -53,7 +54,11 @@ const DisbursementTable = () => {
     }
   }, [search]);
 
-  const isEmpty = DisbursmentList.length === 0;
+  useEffect(() => {
+    dispatch(getDisbursmentListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !DisbursmentList?.length;
 
   const emptyTableIcon = (
     <div className="empty-table-icon">

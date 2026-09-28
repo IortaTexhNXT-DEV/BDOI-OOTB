@@ -17,7 +17,7 @@ import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { useSelector, useDispatch } from "react-redux";
 import ClientListing from "../../../quoteModule/clientListing";
-import { getExpiringSearchDataMiddleWare } from "../expiringPolicyCard/store/expiringMiddleware";
+import { getexpiringtableMiddleware, getExpiringSearchDataMiddleWare } from "../expiringPolicyCard/store/expiringMiddleware";
 import { collectFromHash } from "@fullcalendar/core/internal";
 import { Avatar } from "primereact/avatar";
 
@@ -92,6 +92,10 @@ const ExpiringPolicyCard = () => {
       // </div>
     );
   };
+
+  useEffect(() => {
+    dispatch(getexpiringtableMiddleware());
+  }, [dispatch]);
 
   useEffect(() => {
     if (globalFilter && search) {

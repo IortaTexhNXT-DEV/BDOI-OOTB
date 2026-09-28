@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
@@ -14,10 +14,10 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
-import { getEmployeEditMiddleWare, getEmployeViewMiddleWare, getSearchEmployeeMiddleware } from "../store/employeeMiddleware";
+import { getEmployeEditMiddleWare, getEmployeViewMiddleWare, getSearchEmployeeMiddleware, getEmployeeListMiddleware } from "../store/employeeMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const EmployeeMaster = () => {
   const { t } = useTranslation();
@@ -40,10 +40,16 @@ const EmployeeMaster = () => {
     }
   );
   const [search, setSearch] = useState("")
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getEmployeeListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getEmployeeListMiddleware());
+  }, [dispatch]);
 
   const handleView = (rowData) => {
-    console.log(rowData, "rowData");
     // dispatch(getEmployeViewMiddleWare(rowData))
     dispatch(getEmployeEditMiddleWare(rowData))
     navigate(`/master/generals/employeemanagement/employee/view/${123}`);
@@ -111,13 +117,6 @@ const EmployeeMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const template2 = {
     layout:
@@ -150,6 +149,7 @@ const EmployeeMaster = () => {
   };
   return (
     <div className="grid overall__employee__master__container">
+      <Toast ref={statusToast} />
 
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">Employee</div>
@@ -258,7 +258,7 @@ const EmployeeMaster = () => {
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="employee" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header="Status"
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

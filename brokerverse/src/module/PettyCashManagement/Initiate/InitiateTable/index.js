@@ -15,6 +15,7 @@ import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getInitiateDetailsMiddleware,
+  getInitiateListMiddleware,
   getInitiateListSearchMiddleware,
 } from "../store/pettyCashInitiateMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
@@ -37,7 +38,6 @@ const InitiateTable = () => {
     }
   );
 
-  console.log("first11", InitiateList);
   const searchs = [
     { name: t("pettyCash.pettyCashCode"), code: "Pettycashcode" },
     { name: t("pettyCash.transactionNumber"), code: "TransactionNumber" },
@@ -45,7 +45,11 @@ const InitiateTable = () => {
     { name: t("pettyCash.departmentCode"), code: "Departmentcode" },
   ];
 
-  const isEmpty = InitiateList.length === 0;
+  useEffect(() => {
+    dispatch(getInitiateListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !InitiateList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -125,7 +129,6 @@ const InitiateTable = () => {
     display: "flex",
   };
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(

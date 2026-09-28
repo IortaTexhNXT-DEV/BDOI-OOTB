@@ -15,6 +15,7 @@ import {
   patchInsuranceVehicleMiddleWare,
   postInsuranceVehicleMiddleWare,
 } from "../store/insuranceVehicleMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const VehicleDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -27,22 +28,18 @@ const VehicleDetailsAction = ({ action }) => {
       };
     }
   );
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceVehicleList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("vehicle", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -84,31 +81,21 @@ const VehicleDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceVehicleList?.length + 1,
-      };
-      console.log(valueWithId, "find valueWithId");
-      dispatch(postInsuranceVehicleMiddleWare(valueWithId));
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/vehicle");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsuranceVehicleMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/vehicle");
-    } else {
-      navigation("/master/generals/insurancemanagement/vehicle");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsuranceVehicleMiddleWare : patchInsuranceVehicleMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/vehicle");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
     const vehicleCode = data[0]?.vehicleCode;
@@ -120,12 +107,12 @@ const VehicleDetailsAction = ({ action }) => {
 
     const updatedValues = {
       id: id,
-      vehicleCode: `${vehicleCode}`,
-      vehicleName: `${vehicleName}`,
-      vehicleVariant: `${vehicleVariant}`,
-      vehicleModel: `${vehicleModel}`,
-      vehicleBrand: `${vehicleBrand}`,
-      seatingCapacity: `${seatingCapacity}`,
+      vehicleCode: vehicleCode ?? "",
+      vehicleName: vehicleName ?? "",
+      vehicleVariant: vehicleVariant ?? "",
+      vehicleModel: vehicleModel ?? "",
+      vehicleBrand: vehicleBrand ?? "",
+      seatingCapacity: seatingCapacity ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };

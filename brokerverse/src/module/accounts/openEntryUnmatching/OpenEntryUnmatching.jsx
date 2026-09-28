@@ -12,7 +12,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import "../openEntryMatching/OpenEntryMatching.scss";
 import accountingService from "../../../services/accountingService";
 import { Dropdown } from "primereact/dropdown";
-import { subAccountOptions } from "../openEntryMatching/OpenEntryMatching";
+import useOpenItemAccounts from "../openEntryMatching/useOpenItemAccounts";
 
 const OpenEntryUnmatching = () => {
   const { t } = useTranslation();
@@ -43,6 +43,7 @@ const OpenEntryUnmatching = () => {
     net: "",
   });
   const [loading, setLoading] = useState(false);
+  const subAccountOptions = useOpenItemAccounts();
 
   const items = [
     {
@@ -63,7 +64,9 @@ const OpenEntryUnmatching = () => {
         pageSize: 100,
       });
 
-      if (response.success) {
+      if (!response.success) {
+        alert(response.error || "Failed to fetch matched entries");
+      } else {
         const matches = response.data || [];
         // Transform matched entries into separate debit and credit entries
         const debitEntriesList = matches.map((match) => ({
@@ -82,7 +85,6 @@ const OpenEntryUnmatching = () => {
         setCreditEntries(creditEntriesList);
       }
     } catch (error) {
-      console.error("Error fetching matched entries:", error);
       alert("Failed to fetch matched entries");
     } finally {
       setLoading(false);
@@ -112,15 +114,16 @@ const OpenEntryUnmatching = () => {
 
       const response = await accountingService.unmatchEntries(matchingIds);
 
-      if (response.success) {
+      if (!response.success) {
+        alert(response.error || t("openEntryUnmatching.failedToUnmatchEntries"));
+      } else {
         alert(`Successfully unmatched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
         setSelectedCredits([]);
         handlePull();
       }
     } catch (error) {
-      console.error("Error unmatching entries:", error);
-      alert(error.response?.data?.error || t("openEntryUnmatching.failedToUnmatchEntries"));
+      alert(error.message || t("openEntryUnmatching.failedToUnmatchEntries"));
     } finally {
       setLoading(false);
     }

@@ -21,6 +21,7 @@ import {
   patchInsuranceCoverMiddleWare,
   postInsuranceCoverMiddleWare,
 } from "../store/insuranceCoverMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const CoverDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -34,22 +35,18 @@ const CoverDetailsAction = ({ action }) => {
     }
   );
 
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceCoverList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("cover", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -80,45 +77,35 @@ const CoverDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceCoverList?.length + 1,
-      };
-      dispatch(postInsuranceCoverMiddleWare(valueWithId));
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/cover");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsuranceCoverMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/cover");
-    } else {
-      navigation("/master/generals/insurancemanagement/cover");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsuranceCoverMiddleWare : patchInsuranceCoverMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/cover");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find setFormikValues");
     const coverCode = data[0]?.coverCode;
     const coverName = data[0]?.coverName;
     const coverDescription = data[0]?.coverDescription;
-    const modifiedBy = data[0].modifiedby;
-    const modifiedOn = data[0].modifiedOn;
+    const modifiedBy = data[0]?.modifiedBy;
+    const modifiedOn = data[0]?.modifiedOn;
 
     const updatedValues = {
-      coverCode: `${coverCode}`,
-      coverName: `${coverName}`,
-      coverDescription: `${coverDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
+      coverCode: coverCode ?? "",
+      coverName: coverName ?? "",
+      coverDescription: coverDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };

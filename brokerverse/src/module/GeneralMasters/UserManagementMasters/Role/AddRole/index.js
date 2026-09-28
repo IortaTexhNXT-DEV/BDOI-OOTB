@@ -14,7 +14,14 @@ import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Card } from "primereact/card";
 import { useDispatch, useSelector } from "react-redux";
-import { patchRoleEditMiddleware, postAddRoleMiddleware } from "../store/roleMiddleware";
+import {
+  getPatchRoleEditMiddleware,
+  getViewRoleEditMiddleware,
+  patchRoleEditMiddleware,
+  postAddRoleMiddleware,
+} from "../store/roleMiddleware";
+import userService from "../../../../../services/userService";
+import { accessOptions } from "../store/roleMapping";
 
 const AddRole = ({ action }) => {
   const { t } = useTranslation();
@@ -26,7 +33,6 @@ const AddRole = ({ action }) => {
     };
   });
   const { id } = useParams();
-  console.log(id, action, "--find id");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState("");
@@ -44,50 +50,16 @@ const AddRole = ({ action }) => {
     },
   ];
 
-  const item = [{
-    label: action === "add" ? "Accounts" : roleViewData?.menuAccess,
-    value: action === "add" ? "Accounts" : roleViewData?.menuAccess
-  },
-  {
-    label: action === "add" ? "Master" : roleViewData?.menuAccess,
-    value: action === "add" ? "Master" : roleViewData?.menuAccess
-  },
-  {
-    label: action === "add" ? "Broker" : roleViewData?.menuAccess,
-    value: action === "add" ? "Broker" : roleViewData?.menuAccess
-  },
-  {
-    label: action === "add" ? "Reports" : roleViewData?.menuAccess,
-    value: action === "add" ? "Reports" : roleViewData?.menuAccess
-  }
-  ]
-  const item1 = [{
-    label: action === "add" ? "Receipts" : roleViewData?.subMenuAccess,
-    value: action === "add" ? "Receipts" : roleViewData?.subMenuAccess
-  },
-  {
-    label: action === "add" ? "Generals" : roleViewData?.subMenuAccess,
-    value: action === "add" ? "Generals" : roleViewData?.subMenuAccess
-  },
-  {
-    label: action === "add" ? "Finance" : roleViewData?.subMenuAccess,
-    value: action === "add" ? "Finance" : roleViewData?.subMenuAccess
-  },
-  {
-    label: action === "add" ? "Petty Cash" : roleViewData?.subMenuAccess,
-    value: action === "add" ? "Petty Cash" : roleViewData?.subMenuAccess
-  },
-  ]
-  const item2 = [
-    {
-      label: action === "add" ? "Read" : roleViewData?.permissions,
-      value: action === "add" ? "Read" : roleViewData?.permissions
-    },
-    {
-      label: action === "add" ? "Write" : roleViewData?.permissions,
-      value: action === "add" ? "Write" : roleViewData?.permissions
-    }
-  ]
+  const [access, setAccess] = useState({ modules: [], levels: [] });
+  useEffect(() => {
+    userService
+      .getPermissions()
+      .then((permissionList) => setAccess(accessOptions(permissionList)))
+      .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
+  }, []);
+  const item = access.modules;
+  const item1 = access.modules;
+  const item2 = access.levels;
   const home = { label: "Master" };
 
   const initialValue = {
@@ -102,7 +74,6 @@ const AddRole = ({ action }) => {
   };
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.roleCode) {
       errors.roleCode = "Role Code is required";
     }
@@ -123,38 +94,30 @@ const AddRole = ({ action }) => {
     return errors;
   };
   const dispatch = useDispatch()
+  useEffect(() => {
+    if (!id) return;
+    if (action === "edit") dispatch(getPatchRoleEditMiddleware(id));
+    if (action === "view") dispatch(getViewRoleEditMiddleware(id));
+  }, [action, id, dispatch]);
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
-  const handleSubmit = () => {
-    console.log(formik.values, "payload");
-    if (action === "add") {
-      dispatch(postAddRoleMiddleware(formik.values))
-      toastRef.current.showToast();
-
+  const handleSubmit = async (values) => {
+    const thunk = action === "add" ? postAddRoleMiddleware : patchRoleEditMiddleware;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "add" ? undefined : { detail: t("financeMasters.saveSuccessfully") });
       setTimeout(() => {
-        navigate("/master/generals/usermanagement/role")
-        setVisiblePopup(false);
+        navigate("/master/generals/usermanagement/role");
       }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
-    if (action === "edit") {
-      dispatch(patchRoleEditMiddleware(formik.values))
-      toastRef.current.showToast();
-      setTimeout(() => {
-        navigate("/master/generals/usermanagement/role")
-        setVisiblePopup(false);
-      }, 3000);
-    }
-
   };
-  const [menuAccessDataOption, setMenuAccessDataOption] = useState([])
-  const [subMenuDataOption, setSubMenuDataOption] = useState([])
-  const [permissionDataOption, setPermissionDataOption] = useState([])
   const setFormikValues = () => {
     const menuData = roleEditData?.menuAccess;
     const subMenuData = roleEditData?.subMenuAccess;
     const permissionData = roleEditData?.permissions
-    console.log(menuData, "menuData");
     const updatedValues = {
       id: roleEditData?.id,
       roleCode: roleEditData?.roleCode,
@@ -166,22 +129,6 @@ const AddRole = ({ action }) => {
       modifiedBy: roleEditData?.modifiedBy,
       modifiedOn: roleEditData?.modifiedOn,
     };
-    if (menuData) {
-      setMenuAccessDataOption([
-        { label: menuData, value: menuData }
-      ])
-      formik.setValues({ ...formik.values, ...updatedValues });
-    }
-    if (subMenuData) {
-      setSubMenuDataOption([
-        { label: subMenuData, value: subMenuData }
-      ])
-    }
-    if (permissionData) {
-      setPermissionDataOption([
-        { label: permissionData, value: permissionData }
-      ])
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -232,7 +179,7 @@ const AddRole = ({ action }) => {
           <div className="grid add__account__sub__container ">
             <div className="col-12 md:col-3 lg:col-3">
               <InputField
-                disabled={action === "view" ? true : false}
+                disabled={action !== "add"}
                 value={action === "view" ? roleViewData.roleCode : formik.values.roleCode}
                 
                 onChange={formik.handleChange("roleCode")}
@@ -280,7 +227,7 @@ const AddRole = ({ action }) => {
                 label={t("generalMasters.menuAccess")}
                 classNames="label__sub__add"
                 placeholder={t("generalMasters.select")}
-                options={action === "edit" ? menuAccessDataOption : item}
+                options={item}
                 optionLabel="label"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
@@ -295,7 +242,7 @@ const AddRole = ({ action }) => {
                 label={t("generalMasters.subMenuAccess")}
                 classNames="label__sub__add"
                 placeholder={t("generalMasters.select")}
-                options={action === "edit" ? subMenuDataOption : item1}
+                options={item1}
                 optionLabel="label"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
@@ -310,7 +257,7 @@ const AddRole = ({ action }) => {
                 label={t("generalMasters.permissions")}
                 classNames="label__sub__add"
                 placeholder={t("generalMasters.select")}
-                options={action === "edit" ? permissionDataOption : item2}
+                options={item2}
                 optionLabel="label"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />

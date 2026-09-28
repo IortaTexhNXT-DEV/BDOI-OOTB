@@ -21,6 +21,7 @@ import {
   patchInsuranceSignatoriesMiddleWare,
   postInsuranceSignatoriesMiddleWare,
 } from "../store/insuranceSignatoriesMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const SignatoriesDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -34,22 +35,18 @@ const SignatoriesDetailsAction = ({ action }) => {
       };
     }
   );
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceSignatoriesList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("signatory", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -80,46 +77,35 @@ const SignatoriesDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceSignatoriesList?.length + 1,
-      };
-      console.log(valueWithId, "find valueWithId");
-      dispatch(postInsuranceSignatoriesMiddleWare(valueWithId));
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/signatories");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsuranceSignatoriesMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/signatories");
-    } else {
-      navigation("/master/generals/insurancemanagement/signatories");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsuranceSignatoriesMiddleWare : patchInsuranceSignatoriesMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/signatories");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find setFormikValues ");
     const signatoryCode = data[0]?.signatoriesCode;
     const signatoryName = data[0]?.signatoryName;
     const signatoryDescription = data[0]?.signatoryDescription;
-    const modifiedBy = data[0]?.modifiedby;
+    const modifiedBy = data[0]?.modifiedBy;
     const modifiedOn = data[0]?.modifiedOn;
 
     const updatedValues = {
-      signatoryCode: `${signatoryCode}`,
-      signatoryName: `${signatoryName}`,
-      signatoryDescription: `${signatoryDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
+      signatoryCode: signatoryCode ?? "",
+      signatoryName: signatoryName ?? "",
+      signatoryDescription: signatoryDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };

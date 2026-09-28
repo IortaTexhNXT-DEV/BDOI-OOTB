@@ -20,7 +20,7 @@ import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from 'react-redux';
-import countriesData from "./data";
+import useMasterOptions from "../../../common/useMasterOptions";
 import { patchStateEditMiddleware, postAddStateMiddleware } from '../store/stateMiddleware';
 
 
@@ -39,7 +39,6 @@ function AddState({ action }) {
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const { id } = useParams();
-  const [country, setCountry] = useState([]);
   const Navigate = useNavigate()
   const [departmentcode, setDepartmentCode] = useState(null);
   const [branchcode, setBranchCode] = useState(null);
@@ -59,11 +58,7 @@ function AddState({ action }) {
       };
     }
   );
-  console.log(getStateListById?.Country, "getStateListById");
-  const Country = countriesData.countries.map(country => ({
-    label: action === "add" ? country : getStateListById?.Country,
-    value: action === "add" ? country : getStateListById?.Country,
-  }));
+  const Country = useMasterOptions("country");
 
 
   const home = { label: t("generalMasters.master") };
@@ -90,21 +85,17 @@ function AddState({ action }) {
       if (Country) {
         formik.setValues({ ...formik.values, ...updatedValues });
         formik.setFieldValue("Country", Country);
-        setCountry([{ label: Country, value: Country }]);
       }
     } else {
       if (Country) {
         formik.setValues({ ...formik.values, ...updatedValues });
-        setCountry([{ label: Country, value: Country }]);
       }
     }
   };
-  console.log(action, "action");
 
   useEffect(() => {
     if (action === "view" || action === "edit") {
       setFormikValues()
-      console.log(formik.values.CountryName, " formik.values.CountryName");
     }
   }, [getStateListById])
 
@@ -119,27 +110,22 @@ function AddState({ action }) {
   // const toastRef = useRef(null);
 
 
-  const handleSubmitAdd = (values) => {
-    const valueWithId = {
-      ...values,
-      id: stateTableList?.length + 1,
-    };
-    dispatch(postAddStateMiddleware(valueWithId));
-
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      Navigate("/master/generals/location/state");
-    }, 3000);
+  const saveAndReturn = async (thunk, values, message) => {
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(message ? { detail: message } : undefined);
+      setTimeout(() => {
+        Navigate("/master/generals/location/state");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
-  const handleSubmitEdit = (values) => {
-    dispatch(patchStateEditMiddleware(values));
-    console.log("Handle Edit Submission", values);
-    setTimeout(() => {
-      Navigate("/master/generals/location/state");
-    }, 1000);
-  };
+  const handleSubmitAdd = (values) => saveAndReturn(postAddStateMiddleware, values);
+
+  const handleSubmitEdit = (values) =>
+    saveAndReturn(patchStateEditMiddleware, values, t("financeMasters.saveSuccessfully"));
 
   const handleSubmit = (values) => {
     if (action === "add") {
@@ -170,9 +156,6 @@ function AddState({ action }) {
     //   errors.Modifiedby = "This field is required";
     // }
 
-    if (!values.ModifiedOn) {
-      errors.ModifiedOn = "This field is required";
-    }
 
     return errors;
   };
@@ -317,7 +300,7 @@ function AddState({ action }) {
                 onChange={(e) =>
                   formik.setFieldValue("Country", e.value)
                 }
-                options={action === "add" ? Country : action === "edit" ? country : Country}
+                options={Country}
                 optionLabel="label"
                 placeholder={t("generalMasters.select")}
                 dropdownIcon={<SvgDropdown color={"#000"} />}

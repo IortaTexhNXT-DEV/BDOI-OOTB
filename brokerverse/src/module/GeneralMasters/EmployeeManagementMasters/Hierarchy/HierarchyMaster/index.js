@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
@@ -14,18 +14,18 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getHierarchyPatchMiddleWare,
   getHierarchyViewMiddleWare,
   getSearchHirarchyMiddleware,
+  getHirarchyListMiddleware,
 } from "../store/hierarchyMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const HierarchyMaster = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const navigate = useNavigate();
   const handleNavigate = () => {
     navigate("/master/generals/employeemanagement/hierarchy/add");
@@ -33,9 +33,13 @@ const HierarchyMaster = () => {
   const [rowList, setRowList] = useState(5);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getHirarchyListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
   useEffect(() => {
-    setProducts();
-  }, []);
+    dispatch(getHirarchyListMiddleware());
+  }, [dispatch]);
   useEffect(() => {
     if (search.length > 0) {
       dispatch(getSearchHirarchyMiddleware(search));
@@ -52,12 +56,10 @@ const HierarchyMaster = () => {
       };
     }
   );
-  console.log(hierarchTableList, "list of master");
   const handleNavigateedit = () => {
     // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const handleView = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getHierarchyViewMiddleWare(rowData));
     navigate(
       `/master/generals/employeemanagement/hierarchy/view/${rowData.id}`
@@ -107,7 +109,6 @@ const HierarchyMaster = () => {
   };
 
   const renderViewButton = (rowData) => {
-    console.log(rowData, "row data");
     return (
       <div className="center-content">
         <Button
@@ -124,13 +125,6 @@ const HierarchyMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const template2 = {
     layout:
@@ -163,6 +157,7 @@ const HierarchyMaster = () => {
   };
   return (
     <div className="grid overall__hierarchy__master__container">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">Hierarchy Master</div>
         <div style={{ margin: "20px 0px" }}>
@@ -261,7 +256,7 @@ const HierarchyMaster = () => {
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="hierarchy" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header="Status"
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

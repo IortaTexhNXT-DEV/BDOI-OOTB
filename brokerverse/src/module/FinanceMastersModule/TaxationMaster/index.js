@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/icons/SvgAdd";
@@ -15,15 +15,16 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import ToggleButton from "../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getTaxationSearchList,
   getTaxationView,
   getpatchTaxationEdit,
+  getTaxationData,
 } from "./store/taxationMiddleWare";
 import SvgTable from "../../../assets/icons/SvgTable";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TaxationMaster = () => {
   const { t } = useTranslation();
@@ -84,7 +85,6 @@ const TaxationMaster = () => {
       };
     }
   );
-  console.log(taxationList, "taxationList");
 
   const rows = [
     {
@@ -114,22 +114,19 @@ const TaxationMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getTaxationData());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getTaxationData());
+  }, [dispatch]);
   const handleView = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getTaxationView(rowData));
-    console.log("View clicked:", rowData);
     navigate("/master/finance/taxation/taxationdetails");
   };
   const handlEdit = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getpatchTaxationEdit(rowData));
     navigate("/master/finance/taxation/taxationedit");
   };
@@ -174,6 +171,7 @@ const TaxationMaster = () => {
   }, [search]);
   return (
     <div className="grid  container__taxation">
+      <Toast ref={statusToast} />
       <div className="col-12"></div>
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__taxation">Taxation Master</div>
@@ -272,7 +270,7 @@ const TaxationMaster = () => {
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="taxation" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header={t("financeMasters.status")}
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

@@ -18,8 +18,7 @@ const mapLogoPresets = (presets) => {
 
 const applyPayloadToState = (state, payload) => {
   if (!payload) return;
-  // Branding is pinned to BDO in code, so any persisted logoUrl is ignored.
-  state.logoUrl = DEFAULT_SYSTEM_SETTINGS.logoUrl;
+  state.logoUrl = payload.logoUrl || state.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl;
   state.logoPresets = mapLogoPresets(payload.logoPresets);
   state.displayCurrency = payload.displayCurrency ?? state.displayCurrency;
   state.primaryColor = payload.primaryColor ?? state.primaryColor;

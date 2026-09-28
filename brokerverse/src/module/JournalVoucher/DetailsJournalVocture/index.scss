@@ -318,3 +318,18 @@
 
 
 }
+.btn__view__details__JV {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .save__add__btn__JV {
+        height: 45px;
+        padding: 0 30px;
+        background-color: #0072d8;
+        border-radius: 30px;
+        font-size: 18px;
+        color: #fff;
+        cursor: pointer;
+    }
+}

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
@@ -9,62 +9,57 @@ import { ProgressBar } from "primereact/progressbar";
 import { Card } from "primereact/card";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Toast } from "primereact/toast";
-import { Tag } from "primereact/tag";
 import { BreadCrumb } from "primereact/breadcrumb";
-import { reconciliationData, mockCrudOperations } from "../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../services/remittanceService";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { downloadCsv, isoDate, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { useNavigate } from "react-router-dom";
 import "./index.scss";
+
+const emptyRecon = { bankTransactions: [], systemTransactions: [], exceptions: [], summary: { total: 0, matched: 0, unmatched: 0, partial: 0, successRate: 0 } };
+
+/** Parses a bank statement CSV (header row with transDate/date, reference, amount, description). */
+const parseBankCsv = (text) => {
+  const [head, ...lines] = text.split(/\r?\n/).filter((l) => l.trim());
+  const cols = (head || "").split(",").map((c) => c.trim().toLowerCase());
+  const at = (names) => cols.findIndex((c) => names.includes(c));
+  const idx = { transDate: at(["transdate", "date", "transaction date"]), reference: at(["reference", "ref"]), amount: at(["amount"]), description: at(["description", "narration"]) };
+  return lines.map((line) => {
+    const cells = line.split(",").map((c) => c.trim());
+    return { transDate: cells[idx.transDate], reference: cells[idx.reference], amount: Number(cells[idx.amount]), description: idx.description >= 0 ? cells[idx.description] : "" };
+  });
+};
 
 const ReconciliationProcess = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
+  const fileInput = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedBank, setSelectedBank] = useState([]);
   const [selectedSystem, setSelectedSystem] = useState([]);
   const [matchCriteria, setMatchCriteria] = useState("Exact");
   const [tolerance, setTolerance] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [unmatchedOnly, setUnmatchedOnly] = useState(false);
+  const [rules, setRules] = useState([]);
+  const [recon, setRecon] = useState(emptyRecon);
 
-  // Load data from mock service
-  const [rules, setRules] = useState(reconciliationData.rules);
-  const [reconciliationStatus, setReconciliationStatus] = useState(reconciliationData.reconciliationSummary);
-
-  // Mock settings based on reconciliation rules
   const currentRule = rules[0] || {};
+  const { bankTransactions, exceptions } = recon;
+  const systemTransactions = unmatchedOnly ? recon.systemTransactions.filter((s) => s.status === "unmatched") : recon.systemTransactions;
+  const reconciliationStatus = {
+    totalRecords: recon.summary.total,
+    matched: recon.summary.matched,
+    unmatched: recon.summary.unmatched,
+    partialMatch: recon.summary.partial,
+    successRate: recon.summary.successRate
+  };
 
-  const bankTransactions = [
-    { id: 1, transDate: "2025-09-20", reference: "REF001", amount: 5000.00, status: "matched" },
-    { id: 2, transDate: "2025-09-21", reference: "REF002", amount: 7500.00, status: "unmatched" },
-    { id: 3, transDate: "2025-09-22", reference: "REF003", amount: 3200.00, status: "matched" },
-    { id: 4, transDate: "2025-09-23", reference: "REF004", amount: 9800.00, status: "partial" },
-    { id: 5, transDate: "2025-09-24", reference: "REF005", amount: 4500.00, status: "unmatched" },
-  ];
-
-  const systemTransactions = [
-    { id: 1, policyNo: "POL001", premium: 5000.00, transDate: "2025-09-20", reference: "SYS001", status: "matched" },
-    { id: 2, policyNo: "POL002", premium: 3200.00, transDate: "2025-09-22", reference: "SYS002", status: "matched" },
-    { id: 3, policyNo: "POL003", premium: 6700.00, transDate: "2025-09-23", reference: "SYS003", status: "unmatched" },
-    { id: 4, policyNo: "POL004", premium: 4500.00, transDate: "2025-09-24", reference: "SYS004", status: "unmatched" },
-    { id: 5, policyNo: "POL005", premium: 8900.00, transDate: "2025-09-25", reference: "SYS005", status: "unmatched" },
-  ];
-
-  const exceptions = [
-    { id: 1, type: "Amount Mismatch", bankRef: "REF002", sysRef: "SYS003", difference: 800.00, action: "Review" },
-    { id: 2, type: "Missing Policy", bankRef: "REF004", sysRef: "-", difference: 9800.00, action: "Hold" },
-    { id: 3, type: "Date Mismatch", bankRef: "REF005", sysRef: "SYS004", difference: 0, action: "Auto-Resolve" },
-  ];
-
-  const matchCriteriaOptions = currentRule.matchingCriteria ?
-    currentRule.matchingCriteria.map(criteria => ({
-      label: criteria.matchType,
-      value: criteria.matchType
-    })) : [
-    { label: "Exact", value: "Exact" },
-    { label: "Within Tolerance", value: "Within Tolerance" },
-    { label: "Within Range", value: "Within Range" }
-  ];
+  const matchCriteriaOptions = (currentRule.matchingCriteria || []).map(criteria => ({
+    label: criteria.matchType,
+    value: criteria.matchType
+  }));
 
   const items = [
     { label: t("remittance.finance"), url: "#" },
@@ -74,50 +69,58 @@ const ReconciliationProcess = () => {
 
   const home = { icon: <SvgDot />, url: "#" };
 
-  const handleAutoMatch = async () => {
+  const loadReconciliation = async () => {
     setLoading(true);
     try {
-      // Use mock CRUD operation for auto-matching
-      const matchResult = await mockCrudOperations.create('auto_match', {
-        criteria: matchCriteria,
-        tolerance: tolerance,
-        ruleCode: currentRule.code,
-        timestamp: new Date().toISOString()
-      });
-
-      // Update reconciliation status
-      const newMatched = reconciliationStatus.matched + selectedBank.length;
-      const newUnmatched = reconciliationStatus.unmatched - selectedBank.length;
-
-      setReconciliationStatus(prev => ({
-        ...prev,
-        matched: newMatched,
-        unmatched: newUnmatched,
-        successRate: ((newMatched / (newMatched + newUnmatched)) * 100).toFixed(1)
-      }));
-
-      toast.current.show({
-        severity: 'success',
-        summary: t("remittance.autoMatchComplete"),
-        detail: t("remittance.autoMatchDetail", { count: selectedBank.length, criteria: matchCriteria }),
-        life: 3000
-      });
-
+      setRecon(await remittanceService.reconciliation());
       setSelectedBank([]);
       setSelectedSystem([]);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Auto Match Failed',
-        detail: error.message || 'Failed to perform auto matching',
-        life: 3000
-      });
+      showError(toast, error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleMatchSelected = async () => {
+  useEffect(() => {
+    loadReconciliation();
+    masterService.list("remittance-reconciliation-rule", { status: "Active" })
+      .then((rows) => {
+        setRules(rows || []);
+        const tol = (rows?.[0]?.matchingCriteria || []).find((c) => c.tolerance !== undefined);
+        if (tol) setTolerance(Number(tol.tolerance));
+      })
+      .catch((e) => showError(toast, e));
+  }, []);
+
+  const toleranceFor = () => {
+    if (matchCriteria === "Exact") return 0;
+    if (matchCriteria === "Within Tolerance") return tolerance;
+    return undefined;
+  };
+
+  const run = async (action, summary, detail) => {
+    setLoading(true);
+    try {
+      const result = await action();
+      showSuccess(toast, typeof detail === "function" ? detail(result) : detail, summary);
+      await loadReconciliation();
+    } catch (error) {
+      showError(toast, error, summary);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAutoMatch = () => run(
+    () => remittanceService.autoMatch(toleranceFor()),
+    t("remittance.autoMatchComplete"),
+    (r) => t("remittance.autoMatchDetail", { count: r.matched, criteria: matchCriteria })
+  );
+
+  const pairs = () => selectedBank.slice(0, selectedSystem.length).map((b, i) => [b, selectedSystem[i]]);
+
+  const handleMatchSelected = () => {
     if (selectedBank.length === 0 || selectedSystem.length === 0) {
       toast.current.show({
         severity: 'warn',
@@ -127,83 +130,67 @@ const ReconciliationProcess = () => {
       });
       return;
     }
-
-    setLoading(true);
-    try {
-      const matchRecord = {
-        bankTransactions: selectedBank,
-        systemTransactions: selectedSystem,
-        matchType: 'manual',
-        matchedBy: 'Current User',
-        matchedAt: new Date().toISOString()
-      };
-
-      await mockCrudOperations.create('manual_match', matchRecord);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Match Successful',
-        detail: `Manually matched ${selectedBank.length} bank and ${selectedSystem.length} system transactions`,
-        life: 3000
-      });
-
-      setSelectedBank([]);
-      setSelectedSystem([]);
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Match Failed',
-        detail: error.message || 'Failed to match selected transactions',
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+    run(
+      () => Promise.all(pairs().map(([b, s]) => remittanceService.match(b.id, s.id))),
+      'Match Successful',
+      (results) => `Matched ${results.length} pair(s): ${results.map((r) => r.status).join(", ")}`
+    );
   };
 
   const handleForceMatch = () => {
-    if (window.confirm("Are you sure you want to force match with differences?")) {
-      console.log("Force matching");
-    }
+    if (!window.confirm("Are you sure you want to force match with differences?")) return;
+    run(
+      () => Promise.all(pairs().map(([b, s]) => remittanceService.match(b.id, s.id))),
+      'Force Match',
+      (results) => `Matched ${results.length} pair(s); differences were logged as exceptions`
+    );
   };
 
   const handleResolveException = (exception) => {
-    console.log("Resolving exception:", exception);
+    const resolution = window.prompt(`Resolution for ${exception.bankRef}`, "");
+    if (!resolution) return;
+    run(() => remittanceService.resolveException(exception.id, resolution), 'Exception Resolved', `${exception.type} resolved`);
   };
 
-  const handleGenerateReport = async () => {
-    setLoading(true);
-    try {
-      const reportData = {
-        period: new Date().toISOString().split('T')[0],
-        totalTransactions: reconciliationStatus.totalRecords,
-        matchRate: reconciliationStatus.successRate,
-        matched: reconciliationStatus.matched,
-        unmatched: reconciliationStatus.unmatched,
-        partialMatch: reconciliationStatus.partialMatch,
-        generatedAt: new Date().toISOString(),
-        generatedBy: 'Current User'
-      };
-
-      const result = await mockCrudOperations.create('reconciliation_report', reportData);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Report Generated',
-        detail: `Reconciliation report generated with ID: ${result.id}`,
-        life: 3000
-      });
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Report Generation Failed',
-        detail: error.message || 'Failed to generate reconciliation report',
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleResolveAll = () => {
+    if (!exceptions.length) return;
+    const resolution = window.prompt(`Resolution for ${exceptions.length} exception(s)`, "");
+    if (!resolution) return;
+    run(() => Promise.all(exceptions.map((e) => remittanceService.resolveException(e.id, resolution))), 'Exceptions Resolved', `${exceptions.length} exception(s) resolved`);
   };
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const transactions = parseBankCsv(await file.text());
+    run(() => remittanceService.importBankTransactions(transactions), 'Import Complete', (rows) => `${rows.length} bank transaction(s) imported`);
+  };
+
+  const handleExportExceptions = () => {
+    downloadCsv(`reconciliation_exceptions_${isoDate(new Date())}.csv`, exceptions, [
+      { field: "type", header: "Exception Type" },
+      { field: "bankRef", header: "Bank Reference" },
+      { field: "sysRef", header: "System Reference" },
+      { field: "difference", header: "Difference" },
+      { field: "action", header: "Suggested Action" },
+      { field: "status", header: "Status" }
+    ]);
+  };
+
+  const handleGenerateReport = () => {
+    downloadCsv(`reconciliation_${isoDate(new Date())}.csv`, bankTransactions, [
+      { field: "transDate", header: "Date" },
+      { field: "reference", header: "Bank Reference" },
+      { field: "description", header: "Description" },
+      { field: "amount", header: "Amount" },
+      { field: "status", header: "Status" },
+      { field: "difference", header: "Difference" }
+    ]);
+    showSuccess(toast, `Match rate ${reconciliationStatus.successRate}%`, 'Report Generated');
+  };
+
+  const selectionDifference = selectedBank.reduce((s, b) => s + Number(b.amount || 0), 0) - selectedSystem.reduce((s, r) => s + Number(r.premium || 0), 0);
 
   const statusBodyTemplate = (rowData) => {
     const statusColors = {
@@ -231,6 +218,7 @@ const ReconciliationProcess = () => {
   return (
     <div className="reconciliation-process">
       <Toast ref={toast} />
+      <input type="file" accept=".csv" ref={fileInput} style={{ display: "none" }} onChange={handleImport} />
       <div className="header-section">
         <h1 className="page__title">{t("remittance.remittance")} {t("remittance.reconciliationTitle")}</h1>
         <BreadCrumb model={items} home={home} />
@@ -266,12 +254,13 @@ const ReconciliationProcess = () => {
               <div className="panel-header">
                 <h4>Bank Transactions</h4>
                 <div className="panel-actions">
-                  <Button icon="pi pi-upload" className="p-button-sm" label="Import" />
-                  <Button icon="pi pi-refresh" className="p-button-sm" />
+                  <Button icon="pi pi-upload" className="p-button-sm" label="Import" onClick={() => fileInput.current?.click()} />
+                  <Button icon="pi pi-refresh" className="p-button-sm" onClick={loadReconciliation} />
                 </div>
               </div>
               <DataTable
                 value={bankTransactions}
+                loading={loading}
                 selection={selectedBank}
                 onSelectionChange={(e) => setSelectedBank(e.value)}
                 dataKey="id"
@@ -280,7 +269,7 @@ const ReconciliationProcess = () => {
                 <Column selectionMode="multiple" style={{ width: '3em' }} />
                 <Column field="transDate" header="Date" />
                 <Column field="reference" header="Reference" />
-                <Column field="amount" header="Amount" body={(data) => `\u20B1${data.amount.toFixed(2)}`} />
+                <Column field="amount" header="Amount" body={(data) => formatCurrency(data.amount)} />
                 <Column field="status" header="" body={statusBodyTemplate} style={{ width: '3em' }} />
               </DataTable>
             </div>
@@ -297,15 +286,14 @@ const ReconciliationProcess = () => {
                     className="w-full"
                   />
                 </div>
-                {matchCriteria === 'Fuzzy' && (
+                {matchCriteria === 'Within Tolerance' && (
                   <div className="control-field">
-                    <label>Tolerance (%)</label>
+                    <label>Tolerance</label>
                     <InputNumber
                       value={tolerance}
                       onValueChange={(e) => setTolerance(e.value)}
                       min={0}
-                      max={10}
-                      suffix="%"
+                      minFractionDigits={2}
                       className="w-full"
                     />
                   </div>
@@ -315,11 +303,12 @@ const ReconciliationProcess = () => {
                   icon="pi pi-sparkles"
                   className="p-button-primary w-full"
                   onClick={handleAutoMatch}
+                  loading={loading}
                 />
                 <div className="selection-info">
                   <div>Selected Bank: {selectedBank.length}</div>
                   <div>Selected System: {selectedSystem.length}</div>
-                  <div className="difference">Difference: {"\u20B1"}234.50</div>
+                  <div className="difference">Difference: {formatCurrency(selectionDifference)}</div>
                 </div>
                 <Button
                   label="Match Selected"
@@ -342,12 +331,13 @@ const ReconciliationProcess = () => {
               <div className="panel-header">
                 <h4>System Transactions</h4>
                 <div className="panel-actions">
-                  <Button icon="pi pi-database" className="p-button-sm" label="Load" />
-                  <Button icon="pi pi-filter" className="p-button-sm" />
+                  <Button icon="pi pi-database" className="p-button-sm" label="Load" onClick={loadReconciliation} />
+                  <Button icon="pi pi-filter" className={`p-button-sm ${unmatchedOnly ? "" : "p-button-outlined"}`} onClick={() => setUnmatchedOnly(!unmatchedOnly)} />
                 </div>
               </div>
               <DataTable
                 value={systemTransactions}
+                loading={loading}
                 selection={selectedSystem}
                 onSelectionChange={(e) => setSelectedSystem(e.value)}
                 dataKey="id"
@@ -355,7 +345,7 @@ const ReconciliationProcess = () => {
               >
                 <Column selectionMode="multiple" style={{ width: '3em' }} />
                 <Column field="policyNo" header="Policy" />
-                <Column field="premium" header="Premium" body={(data) => `\u20B1${data.premium.toFixed(2)}`} />
+                <Column field="premium" header="Premium" body={(data) => formatCurrency(data.premium)} />
                 <Column field="transDate" header="Date" />
                 <Column field="status" header="" body={statusBodyTemplate} style={{ width: '3em' }} />
               </DataTable>
@@ -366,14 +356,14 @@ const ReconciliationProcess = () => {
         <TabPanel header="Exceptions">
           <div className="exceptions-section">
             <div className="toolbar mb-3">
-              <Button label="Export Exceptions" icon="pi pi-download" className="p-button-sm" />
-              <Button label="Resolve All" icon="pi pi-check" className="p-button-sm p-button-success" />
+              <Button label="Export Exceptions" icon="pi pi-download" className="p-button-sm" onClick={handleExportExceptions} />
+              <Button label="Resolve All" icon="pi pi-check" className="p-button-sm p-button-success" onClick={handleResolveAll} disabled={!exceptions.length} />
             </div>
             <DataTable value={exceptions} stripedRows>
               <Column field="type" header="Exception Type" />
               <Column field="bankRef" header="Bank Reference" />
               <Column field="sysRef" header="System Reference" />
-              <Column field="difference" header="Difference" body={(data) => data.difference ? `\u20B1${data.difference.toFixed(2)}` : '-'} />
+              <Column field="difference" header="Difference" body={(data) => data.difference ? formatCurrency(data.difference) : '-'} />
               <Column field="action" header="Suggested Action" />
               <Column body={actionBodyTemplate} header="Actions" style={{ width: '10rem' }} />
             </DataTable>

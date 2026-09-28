@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
 
+import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 const ReplenishtDetailView = () => {
   const navigate = useNavigate();
 
@@ -25,7 +26,7 @@ const ReplenishtDetailView = () => {
     }
   );
 
-  console.log(ViewReplenish, "ViewReplenish");
+  const { funds, banks, subAccounts } = usePettyCashOptions();
 
   //   const toastRef = useRef(null);
   const items = [
@@ -79,7 +80,7 @@ const ReplenishtDetailView = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="24/01/2024"
+              value={ViewReplenish.Date}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-3 input__view">
@@ -91,7 +92,7 @@ const ReplenishtDetailView = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="Trans0012"
+              value={ViewReplenish.Transactioncode}
             />
           </div>
           <div className="col-12 md:col-3 lg:col-3 input__view">
@@ -103,7 +104,7 @@ const ReplenishtDetailView = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value="Trans0012"
+              value={ViewReplenish.TransactionNumber}
             />
           </div>
         </div>
@@ -129,7 +130,7 @@ const ReplenishtDetailView = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value={"Pettycash-0018"}
+              value={describe(funds, ViewReplenish.Pettycashcode)}
             />
           </div>
         </div>
@@ -155,7 +156,7 @@ const ReplenishtDetailView = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value={"Bank-01"}
+              value={describe(banks, ViewReplenish.BankCode)}
             />
           </div>
         </div>
@@ -181,7 +182,7 @@ const ReplenishtDetailView = () => {
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              value={"SubAC-01"}
+              value={describe(subAccounts, ViewReplenish.SubAccount)}
             />
           </div>
         </div>
@@ -195,7 +196,7 @@ const ReplenishtDetailView = () => {
               showIcon
               placeholder="Select"
               className="calendar_container"
-              value={new Date()}
+              value={ViewReplenish.dateValue ? new Date(ViewReplenish.dateValue) : null}
               dateFormat="yy-mm-dd"
             />
           </div>
@@ -208,7 +209,7 @@ const ReplenishtDetailView = () => {
               showIcon
               placeholder="Select"
               className="calendar_container"
-              value={new Date()}
+              value={ViewReplenish.dateValue ? new Date(ViewReplenish.dateValue) : null}
               dateFormat="yy-mm-dd"
             />
           </div>

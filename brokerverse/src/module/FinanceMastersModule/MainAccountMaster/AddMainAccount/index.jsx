@@ -18,6 +18,7 @@ import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { postMainAccountStatus } from "../store/mainAccoutMiddleware";
 import { useDispatch, useSelector } from "react-redux";
+import useMainAccountOptions from "../useMainAccountOptions";
 
 const AddMainAccount = () => {
   const { t } = useTranslation();
@@ -40,27 +41,11 @@ const AddMainAccount = () => {
   const EntrySwitchoptions = ["Yes", "No"];
   const [entrySwitch, setentrySwitch] = useState(EntrySwitchoptions[0]);
 
-  const codeOptionsType = [
-    { label: "Option 1", value: "Liability" },
-    { label: "Option 2", value: "Asset" },
-    { label: "Option 2", value: "Income" },
-  ];
-  const categoryOptionsCode = [
-    { label: "Option 1", value: "AC001" },
-    { label: "Option 2", value: "AC002"},
-    { label: "Option 2", value: "AC003"},
-    
-  ];
-  const companyCodeDatas = [
-    { name: "Option 1", value: "001" },
-    { name: "Option 2", value: "002" },
-    { name: "Option 3", value: "003" },
-  ];
-  const currencyCodeDatas = [
-    { name: "PHP - Philippine Peso", value: "PHP" },
-    { name: "THB - Thai Baht", value: "THB" },
-    { name: "USD - US Dollar", value: "USD" },
-  ];
+  const mainAccountOptions = useMainAccountOptions();
+  const codeOptionsType = mainAccountOptions.accountTypes;
+  const categoryOptionsCode = mainAccountOptions.categories;
+  const companyCodeDatas = mainAccountOptions.companies;
+  const currencyCodeDatas = mainAccountOptions.currencies;
 
   const home = { label: t("financeMasters.master") };
   const customValidation = (values) => {
@@ -93,56 +78,16 @@ const AddMainAccount = () => {
     return errors;
   };
   const dispatch = useDispatch();
-  // const handleSubmit = (values) => {
-  //   // Handle form submission
-  //   // toastRef.current.showToast();
-  //   // {
-  //   //   setTimeout(() => {
-  //   //     navigation("/master/finance/mainaccount", {
-  //   //       state: { tableView: true },
-  //   //     });
-  //   //   }, 3000);
-  //   // }
-  //   dispatch(postMainAccountStatus(formik.values))
-  //     .then(() => {
-  //       toastRef.current.showToast();
-  //       setTimeout(() => {
-  //         navigation("/master/finance/mainaccount")
-  //       }, 2000);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //     });
-
-  //   console.log(values, "find values");
-  // };
-  const handleSubmit = (values) => {
-    const openEntry = selectSwitch === "No" ? "Yes" : "No";
-    const updatedValues = { ...values, openEntry };
-    const valueWithId = {
-      ...values,
-      openEntry,
-      id: MainAccountList?.length + 1,
-      
-    };
-    dispatch(postMainAccountStatus(valueWithId));
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigation("/master/finance/mainaccount");
-    }, 2000);
-    // dispatch(postMainAccountStatus(updatedValues))
-    //   .then(() => {
-    //     alert("hii")
-    //     toastRef.current.showToast();
-    //     setTimeout(() => {
-    //       navigation("/master/finance/mainaccount");
-    //     }, 2000);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error:", error);
-    //   });
-
-    console.log(updatedValues, "find values");
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postMainAccountStatus({ ...values, openEntry: selectSwitch })).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigation("/master/finance/mainaccount");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
   const formik = useFormik({

@@ -11,7 +11,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import Productdata from "./mock";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { TieredMenu } from "primereact/tieredmenu";
@@ -21,15 +20,17 @@ import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import SvgEditicon from "../../../assets/icons/SvgEdit";
 import SvgEdit from "../../../assets/icons/SvgEdits";
-import ToggleButton from "../../../components/ToggleButton";
 // import SvgEditicons from "../../../assets/icons/SvgEdit";
 import SvgTable from "../../../assets/icons/SvgTable";
 import {
   getExchangeDetailEdit,
   getExchangeDetailView,
   getExchangeSearchList,
+  getExchangeList,
 } from "./store/exchangeMasterMiddleware";
 import SvgEditicons from "../../../assets/icons/SvgEditicons";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -45,8 +46,14 @@ const Index = () => {
       };
     }
   );
-  console.log(ExchangeList, "ExchangeList");
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getExchangeList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getExchangeList());
+  }, [dispatch]);
 
   const handleView = (columnData) => {
     dispatch(getExchangeDetailView(columnData));
@@ -54,7 +61,6 @@ const Index = () => {
   };
 
   const handleEdit = (columnData) => {
-    console.log(columnData, "columnData");
     dispatch(getExchangeDetailEdit(columnData));
     navigate("/master/finance/exchangerate/saveandeditexchange");
   };
@@ -113,13 +119,6 @@ const Index = () => {
     },
   ];
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
   const headeraction = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -175,6 +174,7 @@ const Index = () => {
 
   return (
     <div className="overall__exchangerate__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("financeMasters.exchangeRateMaster")}</label>
@@ -259,7 +259,7 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="exchange-rate" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("financeMasters.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

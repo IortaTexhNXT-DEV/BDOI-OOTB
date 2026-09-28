@@ -24,7 +24,7 @@ import SvgReceivable from "../../assets/agentIcon/SvgReceivable";
 import SvgCommission from "../../assets/agentIcon/SvgCommission";
 import SvgReceivables from "../../assets/agentIcon/SvgReceivables";
 import { useDispatch, useSelector } from "react-redux";
-import { getPaymentSearchDataMiddleWare } from "./store/paymentMiddleware";
+import { postpaymentdataMiddleWare } from "./store/paymentMiddleware";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import SvgDownArrow from "../../assets/agentIcon/SvgDownArrow";
 import PyamentTabelCard from "./PaymentTabel";
@@ -137,6 +137,12 @@ const Payments = () => {
     );
   };
   const dispatch = useDispatch();
+  const totals = useSelector(
+    ({ agentPaymentMainReducers }) => agentPaymentMainReducers?.postpaymentdata || {}
+  );
+  useEffect(() => {
+    dispatch(postpaymentdataMiddleWare());
+  }, [dispatch]);
   // const [globalFilter, setGlobalFilter] = useState("Name");
   // const cities = [
   //   { name: "Name", code: "Name" },
@@ -194,7 +200,7 @@ const Payments = () => {
           <div class="col-12 md:col-6 lg:col-3">
             <Card className="paymentcard_eachcontainer">
               <SvgGross />
-              <div className="price__listing">{formatCurrency(174050)}</div>
+              <div className="price__listing">{formatCurrency(totals.gross || 0)}</div>
               <div>Gross Premium</div>
             </Card>
           </div>
@@ -202,7 +208,7 @@ const Payments = () => {
           <div class="col-12 md:col-6 lg:col-3">
             <Card className="paymentcard_eachcontainer">
               <SvgCollected />
-              <div className="price__listing">{formatCurrency(8400)}</div>
+              <div className="price__listing">{formatCurrency(totals.collected || 0)}</div>
               <div>Collected Premium</div>
             </Card>
           </div>
@@ -210,7 +216,7 @@ const Payments = () => {
           <div class="col-12 md:col-6 lg:col-3">
             <Card className="paymentcard_eachcontainer">
               <SvgReceivables />
-              <div className="price__listing">{formatCurrency(8400)}</div>
+              <div className="price__listing">{formatCurrency(totals.receivables || 0)}</div>
               <div>Receivables</div>
             </Card>
           </div>
@@ -219,7 +225,7 @@ const Payments = () => {
               <div className="mt-3">
                 <SvgCommission />
               </div>
-              <div className="price__listing">{formatCurrency(13920)}</div>
+              <div className="price__listing">{formatCurrency(totals.commission || 0)}</div>
               <div>Earned Commission</div>
             </Card>
           </div>

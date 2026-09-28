@@ -6,41 +6,43 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Chart } from "primereact/chart";
 import { Dropdown } from "primereact/dropdown";
 import { Badge } from "primereact/badge";
 import { Divider } from "primereact/divider";
-import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { incentiveMockData } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { downloadCsv, showError } from "../../Remittance/shared";
 import "./index.scss";
+
+const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, programBreakdown: [], monthlyTrend: [] };
+
+/** Last 12 calendar months as { label: "September 2026", value: "2026-09" }. */
+const recentMonths = () => {
+  const now = new Date();
+  return Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return { label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }), value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` };
+  });
+};
 
 const Statement = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
+  const periodOptions = recentMonths();
 
   // State management
-  const [statementData, setStatementData] = useState(incentiveMockData.statementData);
-  const [selectedPeriod, setSelectedPeriod] = useState("January 2025");
+  const [statementData, setStatementData] = useState(emptyStatement);
+  const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0].value);
+  const [agentId, setAgentId] = useState(null);
+  const [agentOptions, setAgentOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Chart data
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
-
-  // Period options
-  const periodOptions = [
-    { label: "January 2025", value: "January 2025" },
-    { label: "December 2024", value: "December 2024" },
-    { label: "November 2024", value: "November 2024" },
-    { label: "October 2024", value: "October 2024" },
-    { label: "September 2024", value: "September 2024" },
-    { label: "August 2024", value: "August 2024" }
-  ];
 
   // Breadcrumb items
   const items = [
@@ -50,47 +52,51 @@ const Statement = () => {
 
   const home = { label: "Dashboard" };
 
-  // Initialize data and charts
-  useEffect(() => {
-    loadStatement();
-    initializeChart();
-  }, [selectedPeriod]);
+  // Users who are not agents (managers) pick an agent; agents see their own statement.
+  const loadAgentChoices = async () => {
+    const agents = await incentiveService.agents();
+    setAgentOptions(agents.map((a) => ({ label: `${a.name} (${a.code})`, value: a.id })));
+    return agents[0]?.id || null;
+  };
 
   const loadStatement = async () => {
     setLoading(true);
     try {
-      // Simulate loading statement data for selected period
-      // In real application, this would fetch from API based on selectedPeriod
-      setTimeout(() => {
-        toast.current.show({
-          severity: 'success',
-          summary: t('incentive.statementLoaded'),
-          detail: t('incentive.statementLoadedSuccess', { period: selectedPeriod }),
-          life: 3000
-        });
-        setLoading(false);
-      }, 500);
+      let data;
+      try {
+        data = await incentiveService.statement({ agentId: agentId || undefined, period: selectedPeriod });
+      } catch (error) {
+        if (agentId) throw error;
+        const firstAgent = await loadAgentChoices();
+        if (!firstAgent) throw error;
+        setAgentId(firstAgent);
+        return;
+      }
+      setStatementData(data);
+      initializeChart(data);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t('common.error', 'Error'),
-        detail: t('incentive.failedToLoadStatement'),
-        life: 3000
-      });
+      showError(toast, error, t('incentive.failedToLoadStatement'));
+    } finally {
       setLoading(false);
     }
   };
 
-  const initializeChart = () => {
+  // Initialize data and charts
+  useEffect(() => {
+    loadStatement();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod, agentId]);
+
+  const initializeChart = (statement) => {
     const documentStyle = getComputedStyle(document.documentElement);
 
     // Monthly trend chart
     const data = {
-      labels: statementData.monthlyTrend.map(item => item.month),
+      labels: statement.monthlyTrend.map(item => item.month),
       datasets: [
         {
           label: 'Monthly Earnings',
-          data: statementData.monthlyTrend.map(item => item.earnings),
+          data: statement.monthlyTrend.map(item => item.earnings),
           fill: true,
           backgroundColor: 'rgba(102, 126, 234, 0.1)',
           borderColor: documentStyle.getPropertyValue('--primary-color') || '#0072d8',
@@ -144,22 +150,22 @@ const Statement = () => {
 
   // Handle print statement
   const handlePrintStatement = () => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Print Statement',
-      detail: 'Statement is being prepared for printing...',
-      life: 3000
-    });
+    window.print();
   };
 
   // Handle export statement
   const handleExportStatement = () => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Export Statement',
-      detail: 'Statement is being exported to PDF...',
-      life: 3000
-    });
+    downloadCsv(`incentive_statement_${statementData.agentCode}_${selectedPeriod}.csv`, statementData.programBreakdown, [
+      { field: () => statementData.agentName, header: "Agent" },
+      { field: () => statementData.period, header: "Period" },
+      { field: "program", header: "Program" },
+      { field: "target", header: "Target" },
+      { field: "achievement", header: "Achievement" },
+      { field: "achievementPercent", header: "Achievement %" },
+      { field: "rate", header: "Tier" },
+      { field: "earnedAmount", header: "Earned Amount" },
+      { field: "status", header: "Status" }
+    ]);
   };
 
   // Template functions
@@ -189,6 +195,15 @@ const Statement = () => {
       <div className="top__container">
         <div className="page__title">{t("incentive.incentiveStatement")}</div>
         <div className="header-actions">
+          {agentOptions.length > 0 && (
+            <Dropdown
+              value={agentId}
+              options={agentOptions}
+              onChange={(e) => setAgentId(e.value)}
+              filter
+              className="period-selector"
+            />
+          )}
           <Dropdown
             value={selectedPeriod}
             options={periodOptions}
@@ -227,7 +242,7 @@ const Statement = () => {
             </div>
             <div className="period-info">
               <h3>{statementData.period}</h3>
-              <p className="statement-date">Statement Date: {new Date(statementData.statementDate).toLocaleDateString()}</p>
+              <p className="statement-date">Statement Date: {statementData.statementDate ? new Date(statementData.statementDate).toLocaleDateString() : "-"}</p>
             </div>
           </div>
         </Card>
@@ -287,7 +302,7 @@ const Statement = () => {
                   <span className="card-value">
                     {formatCurrency(statementData.lastPayment)}
                   </span>
-                  <span className="card-date">{new Date(statementData.lastPaymentDate).toLocaleDateString()}</span>
+                  <span className="card-date">{statementData.lastPaymentDate ? new Date(statementData.lastPaymentDate).toLocaleDateString() : "-"}</span>
                 </div>
               </div>
             </Card>
@@ -370,7 +385,7 @@ const Statement = () => {
             <div className="payment-history">
               <div className="payment-item">
                 <div className="payment-date">
-                  <span className="date">{new Date(statementData.lastPaymentDate).toLocaleDateString()}</span>
+                  <span className="date">{statementData.lastPaymentDate ? new Date(statementData.lastPaymentDate).toLocaleDateString() : "-"}</span>
                   <span className="status paid">Paid</span>
                 </div>
                 <div className="payment-details">

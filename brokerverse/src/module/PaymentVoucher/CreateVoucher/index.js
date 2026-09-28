@@ -9,7 +9,6 @@ import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SUPPORTED_CURRENCIES_NAME_CODE } from "../../../utility/currencyOptions";
 import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
@@ -24,7 +23,7 @@ import {
   postpaymentVocherCreateDataMiddleware,
   paymentVocherMiddleware,
 } from "../store/paymentVocherMiddleware";
-import { InsuranceCompanyOptions } from "../../../agentModule/quoteModule/policyDetails/mock";
+import mastersService from "../../../services/mastersService";
 import clientService from "../../../services/clientService";
 import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
@@ -46,14 +45,12 @@ const initialValues = {
   Remarks: "",
 };
 
-const mockInsurerOptions = InsuranceCompanyOptions.map((item) => ({
-  name: item.label,
-  code: item.value,
-}));
+/** Master options as { name, code } for the dropdowns of this form. */
+const toNameCode = (option) => ({ name: option.label, code: option.code });
 
-const getInsurerOptionsForPolicy = (selectedPolicy) => {
+const getInsurerOptionsForPolicy = (selectedPolicy, allInsurers) => {
   if (!selectedPolicy) {
-    return mockInsurerOptions;
+    return allInsurers;
   }
 
   const names = [];
@@ -216,16 +213,22 @@ function Createvoucher() {
     };
   }, []);
 
-  const DepartmentCode = [
-    { name: "FIN", code: "FI" },
-    { name: "MKT", code: "MK" },
-    { name: "IT", code: "IT" },
-    { name: "SLS", code: "SL" },
-  ];
-  const BranchCode = [
-    { name: "PHP001", code: "PHP" },
-    { name: "PHP002", code: "PHP2" },
-  ];
+  const [masterOptions, setMasterOptions] = useState({
+    departments: [],
+    branches: [],
+    insurers: [],
+    currencies: [],
+  });
+  useEffect(() => {
+    const load = (type) =>
+      mastersService.options(type).then((rows) => rows.map(toNameCode)).catch(() => []);
+    Promise.all(["department", "branch", "insurance-company", "currency"].map(load)).then(
+      ([departments, branches, insurers, currencies]) =>
+        setMasterOptions({ departments, branches, insurers, currencies })
+    );
+  }, []);
+  const DepartmentCode = masterOptions.departments;
+  const BranchCode = masterOptions.branches;
   const PayeeType = [
     { name: "Customer", code: "Customer" },
     { name: "Insurer", code: "Insurer" },
@@ -254,7 +257,7 @@ function Createvoucher() {
       { name: "REMT", code: "REMT" },
     ],
   };
-  const SelectInstrumentCurrency = SUPPORTED_CURRENCIES_NAME_CODE;
+  const SelectInstrumentCurrency = masterOptions.currencies;
   const navigate = useNavigate();
   const home = { label: t("paymentVoucher.accounts") };
   const items = [
@@ -515,8 +518,12 @@ function Createvoucher() {
       formik.values.Criteria?.name === "Payall");
 
   const insurerOptions = useMemo(
-    () => getInsurerOptionsForPolicy(formik.values.PolicyNumber || null),
-    [formik.values.PolicyNumber]
+    () =>
+      getInsurerOptionsForPolicy(
+        formik.values.PolicyNumber || null,
+        masterOptions.insurers
+      ),
+    [formik.values.PolicyNumber, masterOptions.insurers]
   );
 
   const handlePolicyNumberChange = (e) => {

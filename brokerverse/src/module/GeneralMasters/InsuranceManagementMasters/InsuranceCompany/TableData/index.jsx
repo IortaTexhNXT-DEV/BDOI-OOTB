@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -10,18 +10,27 @@ import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { InputSwitch } from "primereact/inputswitch";
-import ToggleButton from "../../../../../components/ToggleButton";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import {
   getInsurancePatchData,
   getInsuranceViewMiddleWare,
   getSearchInsuranceCompanyMiddleware,
+  getInsuranceCompanyListMiddleWare,
 } from "../store/insuranceCompanyMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getInsuranceCompanyListMiddleWare());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getInsuranceCompanyListMiddleWare());
+  }, [dispatch]);
   const { InsuranceCompanyList, loading, SearchTableList } = useSelector(
     ({ insuranceCompanyReducers }) => {
       return {
@@ -31,7 +40,6 @@ const TableData = ({ navigate }) => {
       };
     }
   );
-  console.log(InsuranceCompanyList, "InsuranceCompanyList");
   const headeraction = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -89,7 +97,6 @@ const TableData = ({ navigate }) => {
     },
   };
   const renderActionButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div className="action__button__container">
         <Button
@@ -107,14 +114,12 @@ const TableData = ({ navigate }) => {
   };
 
   const handleView = (rowData) => {
-    console.log(rowData, "find");
     dispatch(getInsuranceViewMiddleWare(rowData));
     navigate(
       `/master/generals/insurancemanagement/insurancecompany/view/${rowData?.id}`
     );
   };
   const handleEdit = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getInsurancePatchData(rowData));
     navigate(
       `/master/generals/insurancemanagement/insurancecompany/edit/${rowData?.id}`
@@ -140,6 +145,7 @@ const TableData = ({ navigate }) => {
   }, [formik.values.search]);
   return (
     <div className="insurance__company__table__container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -214,7 +220,7 @@ const TableData = ({ navigate }) => {
           header={t("common.status")}
           className="fieldvalue_container"
           headerStyle={headerstyle}
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="insurance-company" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
           // style={{

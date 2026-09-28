@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
@@ -12,13 +11,15 @@ import SvgEdit from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { InputSwitch } from "primereact/inputswitch";
 import { useLocation, useNavigate } from "react-router-dom";
-import ToggleButton from "../../../../components/ToggleButton";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getMainAccountDetailView,
   getMainAccountSearchList,
   getPatchMainAccountDetailEdit,
+  getMainAccountList,
 } from "../store/mainAccoutMiddleware";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TableData = ({ MainAccountList }) => {
   const { t } = useTranslation();
@@ -26,7 +27,6 @@ const TableData = ({ MainAccountList }) => {
   const [search, setSearch] = useState("");
   const location = useLocation();
   const tableView = location.state?.tableView || false;
-  console.log(MainAccountList, "MainAccountListMainAccountList");
 
   const { MainAccountSearchList, loading } = useSelector(
     ({ mainAccoutReducers }) => {
@@ -79,8 +79,14 @@ const TableData = ({ MainAccountList }) => {
   };
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getMainAccountList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getMainAccountList());
+  }, [dispatch]);
   const handleview = (rowData) => {
-    console.log(rowData, "rowData");
     if (rowData) {
       dispatch(getMainAccountDetailView(rowData));
       navigate("/master/finance/mainaccount/viewmainaccount");
@@ -90,7 +96,6 @@ const TableData = ({ MainAccountList }) => {
   };
 
   const handleEdit = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     if (rowData) {
       dispatch(getPatchMainAccountDetailEdit(rowData));
       navigate("/master/finance/mainaccount/editmainaccount");
@@ -115,7 +120,6 @@ const TableData = ({ MainAccountList }) => {
     );
   };
   const renderStatusButton = (rowData) => {
-    console.log(rowData.status, "find status");
     return (
       <div className="action__switch__container">
         <InputSwitch
@@ -129,13 +133,6 @@ const TableData = ({ MainAccountList }) => {
       </div>
     );
   };
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   useEffect(() => {
     if (search?.length > 0) {
@@ -145,6 +142,7 @@ const TableData = ({ MainAccountList }) => {
 
   return (
     <div className="master__main__table__container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -210,7 +208,7 @@ const TableData = ({ MainAccountList }) => {
           field="status"
           header="status"
           className="fieldvalue_container"
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="main-account" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
           headerStyle={headeraction}

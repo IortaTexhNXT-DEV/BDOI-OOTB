@@ -16,6 +16,8 @@ import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { patchSubAccountEdit } from "../store/subAccountMiddleWare";
+import useSubAccountOptions from "../useSubAccountOptions";
+import CustomToast from "../../../../components/Toast";
 
 const SubAdd = () => {
   const { t } = useTranslation();
@@ -53,20 +55,6 @@ const SubAdd = () => {
       };
     }
   );
-  console.log(loading, "loading");
-
-  const item = [
-    { name: "Main00123 - Main Account Description" },
-    { name: "Main00125 - Main Account Description" },
-    { name: "Main00128 - Main Account Description" },
-  ];
-  const item1 = [
-    {
-      name: "THB - Thai Baht",
-      name: "EUR-Euro",
-      name: "HKD-Hong Kong Dollar",
-    },
-  ];
 
   const items = [
     { label: "Sub Account", url: "/master/finance/subaccount" },
@@ -78,22 +66,26 @@ const SubAdd = () => {
   const home = { label: "Master" };
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const handleSubmit = (value) => {
-    dispatch(patchSubAccountEdit(value));
-    navigate("/master/finance/subaccount");
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchSubAccountEdit(value)).unwrap();
+      navigate("/master/finance/subaccount");
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
     // toastRef.current.showToast();
     // setTimeout(() => {
     //     navigate("/master/finance/subaccount");
     // }, 2000);
   };
-  const [isoCode, setIsoCode] = useState([]);
-  const [currencyOption, setCurrencyOption] = useState([]);
+  const subAccountOptions = useSubAccountOptions();
+  const isoCode = subAccountOptions.mainAccounts;
+  const currencyOption = subAccountOptions.currencies;
   const setFormikValues = () => {
     const mainData = getSubDetailEdit?.mainAccount;
     const currencyData = getSubDetailEdit?.currencyCode;
-    console.log(mainData, "mainData");
     const updatedValues = {
-      id: getSubDetailEdit.id,
+      id: getSubDetailEdit?.id,
       subAccountCode: getSubDetailEdit?.subAccountCode,
       description: getSubDetailEdit?.description,
       subAccountName: getSubDetailEdit?.subAccountName,
@@ -103,11 +95,9 @@ const SubAdd = () => {
 
     if (mainData) {
       // if (mainData) {
-      setIsoCode([{ label: mainData, value: mainData }]);
       formik.setValues({ ...formik.values, ...updatedValues });
     }
     if (currencyData) {
-      setCurrencyOption([{ label: currencyData, value: currencyData }]);
       formik.setValues({ ...formik.values, ...updatedValues });
     }
 
@@ -123,15 +113,14 @@ const SubAdd = () => {
     },
   });
 
-  console.log(formik.values.id, "idleo");
   useEffect(() => {
     setFormikValues();
   }, [getSubDetailEdit]);
 
-  console.log(formik.values.id, "iii");
 
   return (
     <div className="grid sub__details_edit">
+      <CustomToast ref={toastRef} />
       <div className="col-12"></div>
       <div className="col-12 mb-2">
         <div className="svgback_container">

@@ -1,39 +1,260 @@
 [
-  {"key":"general.company_name","value":"BrokerVerse","group":"general","label":"Company name"},
-  {"key":"general.system_name","value":"BIBS - BDOI Broker System","group":"general","label":"System name"},
-  {"key":"general.timezone","value":"Asia/Manila","group":"general","label":"Time zone"},
-  {"key":"general.date_format","value":"DD/MM/YYYY","group":"general","label":"Date format"},
-  {"key":"branding.logo_url","value":"","group":"branding","label":"Logo","type":"image"},
-  {"key":"branding.primary_color","value":"#0072d8","group":"branding","label":"Primary colour","type":"color"},
-  {"key":"branding.secondary_color","value":"#004ea8","group":"branding","label":"Secondary colour","type":"color"},
-  {"key":"currency.default","value":"PHP","group":"currency","label":"Default currency"},
-  {"key":"currency.symbol","value":"₱","group":"currency","label":"Currency symbol"},
-  {"key":"currency.decimals","value":2,"group":"currency","label":"Decimal places","type":"number"},
-  {"key":"tax.vat_rate","value":0.12,"group":"tax","label":"VAT rate","type":"number"},
-  {"key":"tax.dst_rate","value":0.125,"group":"tax","label":"Documentary stamp tax rate","type":"number"},
-  {"key":"tax.lgt_rate","value":0.0075,"group":"tax","label":"Local government tax rate","type":"number"},
-  {"key":"tax.fst_rate","value":0.02,"group":"tax","label":"Fire service tax rate","type":"number"},
-  {"key":"tax.withholding_rate","value":0.05,"group":"tax","label":"Withholding tax on commission","type":"number"},
-  {"key":"numbering.lead.prefix","value":"LD","group":"numbering","label":"Lead number prefix"},
-  {"key":"numbering.quote.prefix","value":"QT","group":"numbering","label":"Quotation number prefix"},
-  {"key":"numbering.policy.prefix","value":"POL","group":"numbering","label":"Policy number prefix"},
-  {"key":"numbering.endorsement.prefix","value":"END","group":"numbering","label":"Endorsement number prefix"},
-  {"key":"numbering.claim.prefix","value":"CLM","group":"numbering","label":"Claim number prefix"},
-  {"key":"numbering.receipt.prefix","value":"OR","group":"numbering","label":"Official receipt prefix"},
-  {"key":"numbering.invoice.prefix","value":"INV","group":"numbering","label":"Invoice / bill prefix"},
-  {"key":"numbering.voucher.prefix","value":"PV","group":"numbering","label":"Payment voucher prefix"},
-  {"key":"numbering.journal.prefix","value":"JV","group":"numbering","label":"Journal voucher prefix"},
-  {"key":"numbering.client.prefix","value":"CL","group":"numbering","label":"Client code prefix"},
-  {"key":"limits.quote_validity_days","value":30,"group":"limits","label":"Quotation validity (days)","type":"number"},
-  {"key":"limits.renewal_notice_days","value":[60,30,15],"group":"limits","label":"Renewal notice days before expiry","type":"json"},
-  {"key":"limits.receivable_ageing_buckets","value":[30,60,90,120],"group":"limits","label":"Receivable ageing buckets (days)","type":"json"},
-  {"key":"limits.max_login_attempts","value":5,"group":"limits","label":"Maximum failed logins before lock","type":"number"},
-  {"key":"limits.password_min_length","value":8,"group":"limits","label":"Minimum password length","type":"number"},
-  {"key":"commission.default_rate","value":0.15,"group":"commission","label":"Default commission rate","type":"number"},
-  {"key":"notification.email_enabled","value":false,"group":"notification","label":"Send e-mails","type":"boolean"},
-  {"key":"notification.from_address","value":"no-reply@brokerverse.local","group":"notification","label":"E-mail sender"},
-  {"key":"notification.renewal_reminder","value":true,"group":"notification","label":"Renewal reminders","type":"boolean"},
-  {"key":"notification.claim_status","value":true,"group":"notification","label":"Claim status updates","type":"boolean"},
-  {"key":"notification.approval_requests","value":true,"group":"notification","label":"Approval requests","type":"boolean"},
-  {"key":"reports.retention_days","value":90,"group":"reports","label":"Generated report retention (days)","type":"number"}
+  {
+    "key": "general.company_name",
+    "value": "BrokerVerse",
+    "group": "general",
+    "label": "Company name"
+  },
+  {
+    "key": "general.system_name",
+    "value": "BIBS - BDOI Broker System",
+    "group": "general",
+    "label": "System name"
+  },
+  {
+    "key": "general.timezone",
+    "value": "Asia/Manila",
+    "group": "general",
+    "label": "Time zone"
+  },
+  {
+    "key": "general.date_format",
+    "value": "DD/MM/YYYY",
+    "group": "general",
+    "label": "Date format"
+  },
+  {
+    "key": "branding.logo_url",
+    "value": "",
+    "group": "branding",
+    "label": "Logo",
+    "type": "image"
+  },
+  {
+    "key": "branding.primary_color",
+    "value": "#0072d8",
+    "group": "branding",
+    "label": "Primary colour",
+    "type": "color"
+  },
+  {
+    "key": "branding.secondary_color",
+    "value": "#004ea8",
+    "group": "branding",
+    "label": "Secondary colour",
+    "type": "color"
+  },
+  {
+    "key": "currency.default",
+    "value": "PHP",
+    "group": "currency",
+    "label": "Default currency"
+  },
+  {
+    "key": "currency.symbol",
+    "value": "₱",
+    "group": "currency",
+    "label": "Currency symbol"
+  },
+  {
+    "key": "currency.decimals",
+    "value": 2,
+    "group": "currency",
+    "label": "Decimal places",
+    "type": "number"
+  },
+  {
+    "key": "tax.vat_rate",
+    "value": 0.12,
+    "group": "tax",
+    "label": "VAT rate",
+    "type": "number"
+  },
+  {
+    "key": "tax.dst_rate",
+    "value": 0.125,
+    "group": "tax",
+    "label": "Documentary stamp tax rate",
+    "type": "number"
+  },
+  {
+    "key": "tax.lgt_rate",
+    "value": 0.0075,
+    "group": "tax",
+    "label": "Local government tax rate",
+    "type": "number"
+  },
+  {
+    "key": "tax.fst_rate",
+    "value": 0.02,
+    "group": "tax",
+    "label": "Fire service tax rate",
+    "type": "number"
+  },
+  {
+    "key": "tax.withholding_rate",
+    "value": 0.05,
+    "group": "tax",
+    "label": "Withholding tax on commission",
+    "type": "number"
+  },
+  {
+    "key": "numbering.lead.prefix",
+    "value": "LD",
+    "group": "numbering",
+    "label": "Lead number prefix"
+  },
+  {
+    "key": "numbering.quote.prefix",
+    "value": "QT",
+    "group": "numbering",
+    "label": "Quotation number prefix"
+  },
+  {
+    "key": "numbering.policy.prefix",
+    "value": "POL",
+    "group": "numbering",
+    "label": "Policy number prefix"
+  },
+  {
+    "key": "numbering.endorsement.prefix",
+    "value": "END",
+    "group": "numbering",
+    "label": "Endorsement number prefix"
+  },
+  {
+    "key": "numbering.claim.prefix",
+    "value": "CLM",
+    "group": "numbering",
+    "label": "Claim number prefix"
+  },
+  {
+    "key": "numbering.receipt.prefix",
+    "value": "OR",
+    "group": "numbering",
+    "label": "Official receipt prefix"
+  },
+  {
+    "key": "numbering.invoice.prefix",
+    "value": "INV",
+    "group": "numbering",
+    "label": "Invoice / bill prefix"
+  },
+  {
+    "key": "numbering.voucher.prefix",
+    "value": "PV",
+    "group": "numbering",
+    "label": "Payment voucher prefix"
+  },
+  {
+    "key": "numbering.journal.prefix",
+    "value": "JV",
+    "group": "numbering",
+    "label": "Journal voucher prefix"
+  },
+  {
+    "key": "numbering.client.prefix",
+    "value": "CL",
+    "group": "numbering",
+    "label": "Client code prefix"
+  },
+  {
+    "key": "limits.quote_validity_days",
+    "value": 30,
+    "group": "limits",
+    "label": "Quotation validity (days)",
+    "type": "number"
+  },
+  {
+    "key": "limits.renewal_notice_days",
+    "value": [
+      60,
+      30,
+      15
+    ],
+    "group": "limits",
+    "label": "Renewal notice days before expiry",
+    "type": "json"
+  },
+  {
+    "key": "limits.receivable_ageing_buckets",
+    "value": [
+      30,
+      60,
+      90,
+      120
+    ],
+    "group": "limits",
+    "label": "Receivable ageing buckets (days)",
+    "type": "json"
+  },
+  {
+    "key": "limits.max_login_attempts",
+    "value": 5,
+    "group": "limits",
+    "label": "Maximum failed logins before lock",
+    "type": "number"
+  },
+  {
+    "key": "limits.session_idle_minutes",
+    "value": 30,
+    "group": "limits",
+    "label": "Sign out after inactivity (minutes)",
+    "type": "number"
+  },
+  {
+    "key": "limits.password_min_length",
+    "value": 8,
+    "group": "limits",
+    "label": "Minimum password length",
+    "type": "number"
+  },
+  {
+    "key": "commission.default_rate",
+    "value": 0.15,
+    "group": "commission",
+    "label": "Default commission rate",
+    "type": "number"
+  },
+  {
+    "key": "notification.email_enabled",
+    "value": false,
+    "group": "notification",
+    "label": "Send e-mails",
+    "type": "boolean"
+  },
+  {
+    "key": "notification.from_address",
+    "value": "no-reply@brokerverse.local",
+    "group": "notification",
+    "label": "E-mail sender"
+  },
+  {
+    "key": "notification.renewal_reminder",
+    "value": true,
+    "group": "notification",
+    "label": "Renewal reminders",
+    "type": "boolean"
+  },
+  {
+    "key": "notification.claim_status",
+    "value": true,
+    "group": "notification",
+    "label": "Claim status updates",
+    "type": "boolean"
+  },
+  {
+    "key": "notification.approval_requests",
+    "value": true,
+    "group": "notification",
+    "label": "Approval requests",
+    "type": "boolean"
+  },
+  {
+    "key": "reports.retention_days",
+    "value": 90,
+    "group": "reports",
+    "label": "Generated report retention (days)",
+    "type": "number"
+  }
 ]

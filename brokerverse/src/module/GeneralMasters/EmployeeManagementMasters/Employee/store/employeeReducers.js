@@ -4,87 +4,11 @@ import { getEmployeeListMiddleware, getEmployeeListByIdMiddleware, postAddEmploy
 const initialState = {
   loading: false,
   error: "",
-  employeeTableList: [
-    {
-      id: 1,
-      employeeCode: "100021 ",
-      firstName: "CARLOS",
-      middleName: "PETERSON",
-      lastName: "WATSON",
-      employeeType: "AGENT",
-      designation: "SALES AGENT",
-      reportingTo: "JOHN Doe",
-      branchCode: "BRANCH0123",
-      departmentCode: "DEPART123",
-      idProofType: "DRIVING LICENCE",
-      idNumber: "12345678",
-      addressLine1: "",
-      addressLine2: "",
-      addressLine3: "",
-      city: "MATI",
-      state: "DAVAO ORIENTAL",
-      country: "PHILIPPINES",
-      modifiedBy: "JOHN",
-      modifiedOn: "12/12/2023",
-
-    },
-    {
-      id: 2,
-      employeeCode: "100022 ",
-      firstName: "RINA BAUTISTA",
-      middleName: "PETERSON",
-      lastName: "WATSON",
-      employeeType: "AGENT",
-      designation: "SALES AGENT",
-      reportingTo: "JOHN Doe",
-      branchCode: "Branch0123",
-      departmentCode: "Depart123",
-      idProofType: "DRIVING LICENCE",
-      idNumber: "12345678",
-      addressLine1: "",
-      addressLine2: "",
-      addressLine3: "",
-      city: "DON SALVADOR BENEDICTO",
-      state: "NEGROS OCCIDENTAL",
-      country: "PHILIPPINES",
-      modifiedBy: "JOHN",
-      modifiedOn: "12/12/2023",
-
-    },
-    {
-      id: 3,
-      employeeCode: "100023",
-      firstName: "NOEL TOLETE ",
-      middleName: "PETERSON",
-      lastName: "WATSON",
-      employeeType: "AGENT",
-      designation: "SALES AGENT",
-      reportingTo: "JOHN Doe",
-      branchCode: "BRANCH0123",
-      departmentCode: "Depart123",
-      idProofType: "DRIVING LICENCE",
-      idNumber: "12345678",
-      addressLine1: "",
-      addressLine2: "",
-      addressLine3: "",
-      city: "SANTA TERESITA",
-      state: "QUEZON CITY",
-      country: "PHILIPPINES",
-      modifiedBy: "JOHN",
-      modifiedOn: "12/12/2023",
-
-    },
-
-
-
-
-
-  ],
+  employeeTableList: [],
   employeeEditData: {},
   employeeSeachDetailList: [],
   employeeViewData: {}
 };
-let nextId1 = 4
 const employeeReducer = createSlice({
   name: "employee",
   initialState,
@@ -100,7 +24,7 @@ const employeeReducer = createSlice({
     builder.addCase(getEmployeeListMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.employeeTableList = {};
+      state.employeeTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
     builder.addCase(getEmployeeListByIdMiddleware.pending, (state) => {
@@ -113,7 +37,7 @@ const employeeReducer = createSlice({
     builder.addCase(getEmployeeListByIdMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.employeeTableList = {};
+      state.employeeTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -127,7 +51,7 @@ const employeeReducer = createSlice({
     builder.addCase(getSearchEmployeeMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.employeeSeachDetailList = {};
+      state.employeeSeachDetailList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -139,9 +63,8 @@ const employeeReducer = createSlice({
     builder.addCase(
       postAddEmployeeMiddleware.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId1++ };
+        const newItem2 = action.payload;
         state.employeeTableList = [...state.employeeTableList, newItem2];
-        console.log(state.employeeTableList, "departmentList")
       }
     );
     builder.addCase(postAddEmployeeMiddleware.rejected, (state, action) => {

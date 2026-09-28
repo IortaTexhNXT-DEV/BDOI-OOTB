@@ -5,93 +5,84 @@ import {
   POST_PETTY_CASH_VOUCHER_INITIAT,
   GET_PETTY_CASH_VOUCHER_INITIAT_VIEW,
 } from "../../../../redux/actionTypes";
-import { getRequest } from "../../../../utility/commonServices";
-import { APIROUTES } from "../../../../routes/apiRoutes";
+import pettyCashService from "../../../../services/pettyCashService";
+import { formatDisplayDate, optionCode } from "../../pettyCashFormat";
+
+/** A petty cash fund as a row of the Initiate screens. */
+export const toFundRow = (fund) => ({
+  id: fund.id,
+  Pettycashcode: fund.code,
+  PettyCashdescription: fund.description || "",
+  Pettycashsize: String(fund.fundSize ?? ""),
+  TransactionNumber: fund.transactionNumber,
+  TransactionCode: fund.transactionCode || "",
+  TransactionDate: formatDisplayDate(fund.transactionDate),
+  BankCode: fund.bankCode || "",
+  BankAccountCode: fund.bankAccountCode || "",
+  MainAccountCode: fund.mainAccountCode || "",
+  SubAccountCode: fund.subAccountCode || "",
+  Currency: fund.currency || "",
+  Branchcode: fund.branchCode || "",
+  Departmentcode: fund.departmentCode || "",
+  AvailableCash: fund.availableCash,
+  MaxLimit: fund.maxLimit,
+  MinimumCashbox: fund.minimumCashbox,
+  status: fund.status,
+});
+
+const errorMessage = (error) => error?.message || "Something went wrong";
 
 export const getInitiateListMiddleware = createAsyncThunk(
   GET_PETTY_CASH_VOUCHER_INITIAT_TABLE,
-  async (payload, { rejectWithValue }) => {
+  async (params, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
+      const { data } = await pettyCashService.list("funds", params || {});
+      return (data || []).map(toFundRow);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
+
 export const getInitiateListSearchMiddleware = createAsyncThunk(
   GET_PETTY_CASH_VOUCHER_INITIAT_SEARCH,
-  async ({ field, value }, { rejectWithValue, getState }) => {
-    const { pettyCashInitiateReducer } = getState();
-    const { InitiateList } = pettyCashInitiateReducer;
-    function filterReceiptsByField(receipts, field, value) {
-      const lowercasedValue = value.toLowerCase();
-      return receipts.filter(receipt => receipt[field].toLowerCase().startsWith(lowercasedValue));
-    }
-
-    // Example usage:
-
-    // const filteredData = paymentVocherList.filter((item) => item.id === 1);
+  async ({ value }, { rejectWithValue }) => {
     try {
-      const filteredReceipts = filterReceiptsByField(InitiateList, field, value);
-
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return filteredReceipts;
+      const { data } = await pettyCashService.list("funds", { search: value });
+      return (data || []).map(toFundRow);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
+
+/** Establishes a petty cash fund (posts Dr Petty Cash / Cr Cash in Bank). */
 export const postInitiateMiddleware = createAsyncThunk(
   POST_PETTY_CASH_VOUCHER_INITIAT,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "leomaxvj");
-    const currentDate = new Date(); // Get current date
-    const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
-    const TableData = {
-      id: payload?.id,
-      TransactionDate:formattedDate,
-      TransactionCode: "",
-      TransactionNumber: "Trans001",
-      Pettycashcode: payload?.PettyCashCodes?.PettyCashCodes,
-      PettyCashdescription: "",
-      Pettycashsize: payload?.PettyCashSize,
-      BankCode: "",
-  BankAccountCode:"",
-  MainAccountCode: "",
-  SubAccountCode: "",
-  Currency: "",
-  Currencydescription: "",
-  Branchcode: payload?.BranchCode?.Branchcode,
-  Branchdescription: "",
-  Departmentcode: payload?.DepartmentCode?.Departcode,
-  Departmentdescription: "",
-  AvailableCash: "",
-  MaxLimit: payload?.MaxLimit,
-  MinimumCashbox: "",
-    
-      // Date: formattedDate,
-    };
-
+  async (values, { rejectWithValue }) => {
     try {
-      console.log(TableData, "TableData");
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return TableData;
+      const fund = await pettyCashService.create("funds", {
+        code: optionCode(values.PettyCashCodes),
+        description: values.PettyCashdescription || undefined,
+        fundSize: values.PettyCashSize,
+        maxLimit: values.MaxLimit || undefined,
+        minimumCashbox: values.MinimumCashbox || undefined,
+        bankCode: optionCode(values.BankCode),
+        bankAccountCode: optionCode(values.BankAccountCode),
+        mainAccountCode: optionCode(values.MainAccountCode),
+        subAccountCode: optionCode(values.SubAccountCode),
+        currency: optionCode(values.Currency),
+        branchCode: optionCode(values.BranchCode),
+        departmentCode: optionCode(values.DepartmentCode),
+      });
+      return toFundRow(fund);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
 
 export const getInitiateDetailsMiddleware = createAsyncThunk(
   GET_PETTY_CASH_VOUCHER_INITIAT_VIEW,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      console.log("first1",payload)
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (row) => row
 );

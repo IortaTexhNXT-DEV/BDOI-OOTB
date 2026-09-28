@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
@@ -9,27 +9,35 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { InputNumber } from "primereact/inputnumber";
-import { InputTextarea } from "primereact/inputtextarea";
 import { TabView, TabPanel } from "primereact/tabview";
 import { MultiSelect } from "primereact/multiselect";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
+import { Toast } from "primereact/toast";
+import remittanceService, { masterService } from "../../../services/remittanceService";
+import { isoDate, isoMonth, loadInsurerOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const DirectBillProcessing = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
+  const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [billRunNo] = useState("DBR-2025-00001");
+  const [generatedBill, setGeneratedBill] = useState(null);
   const [billPeriod, setBillPeriod] = useState(new Date());
   const [billDate, setBillDate] = useState(new Date());
-  const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
-  const [status] = useState("Draft");
+  const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * DAY_MS));
+  const [saving, setSaving] = useState(false);
 
   // Selection criteria
   const [selectedInsurer, setSelectedInsurer] = useState(null);
   const [selectedProductLines, setSelectedProductLines] = useState([]);
   const [policyStatus, setPolicyStatus] = useState("Active");
+  const [insurerOptions, setInsurerOptions] = useState([]);
+  const [productLineOptions, setProductLineOptions] = useState([]);
+  const [billConfig, setBillConfig] = useState(null);
 
   // Policies data
   const [policies, setPolicies] = useState([]);
@@ -45,19 +53,20 @@ const DirectBillProcessing = () => {
   const [includeStatement, setIncludeStatement] = useState(true);
   const [createGLEntries, setCreateGLEntries] = useState(true);
 
-  const insurerOptions = [
-    { label: "ABC Insurance Co", value: "ABC001" },
-    { label: "XYZ Life Insurance", value: "XYZ002" },
-    { label: "Global Health Insurance", value: "GHI003" },
-    { label: "National General Insurance", value: "NGI004" }
-  ];
-
-  const productLineOptions = [
-    { label: "Motor", value: "Motor" },
-    { label: "Health", value: "Health" },
-    { label: "Life", value: "Life" },
-    { label: "Property", value: "Property" }
-  ];
+  useEffect(() => {
+    loadInsurerOptions().then(setInsurerOptions).catch((e) => showError(toast, e));
+    masterService.options("line-of-business")
+      .then((rows) => setProductLineOptions(rows.map((r) => ({ label: r.label, value: r.label }))))
+      .catch((e) => showError(toast, e));
+    masterService.list("remittance-direct-bill", { status: "Active" })
+      .then((rows) => {
+        const cfg = (rows || [])[0] || null;
+        setBillConfig(cfg);
+        if (cfg?.dueDays) setDueDate(new Date(Date.now() + Number(cfg.dueDays) * DAY_MS));
+        if (cfg?.lateFee?.type) setLateChargeMethod(cfg.lateFee.type);
+      })
+      .catch((e) => showError(toast, e));
+  }, []);
 
   const policyStatusOptions = [
     { label: "Active", value: "Active" },
@@ -65,71 +74,21 @@ const DirectBillProcessing = () => {
     { label: "All", value: "All" }
   ];
 
-  const loadPolicies = () => {
-    // Mock policy data
-    const mockPolicies = [
-      {
-        id: 1,
-        selected: false,
-        policyNo: "POL-2025-001",
-        insuredName: "John Smith",
-        product: "Motor",
-        effectiveDate: "2025-01-01",
-        premium: 1500,
-        outstandingAmount: 1500,
-        lastPaymentDate: "2024-12-01",
-        billAmount: 1500
-      },
-      {
-        id: 2,
-        selected: false,
-        policyNo: "POL-2025-002",
-        insuredName: "Sarah Johnson",
-        product: "Health",
-        effectiveDate: "2025-01-15",
-        premium: 800,
-        outstandingAmount: 800,
-        lastPaymentDate: "2024-12-15",
-        billAmount: 800
-      },
-      {
-        id: 3,
-        selected: false,
-        policyNo: "POL-2025-003",
-        insuredName: "Michael Brown",
-        product: "Life",
-        effectiveDate: "2025-02-01",
-        premium: 2000,
-        outstandingAmount: 4000,
-        lastPaymentDate: "2024-11-01",
-        billAmount: 2000
-      },
-      {
-        id: 4,
-        selected: false,
-        policyNo: "POL-2025-004",
-        insuredName: "Emily Davis",
-        product: "Property",
-        effectiveDate: "2025-01-20",
-        premium: 1200,
-        outstandingAmount: 1200,
-        lastPaymentDate: "2024-12-20",
-        billAmount: 1200
-      },
-      {
-        id: 5,
-        selected: false,
-        policyNo: "POL-2025-005",
-        insuredName: "Robert Wilson",
-        product: "Motor",
-        effectiveDate: "2025-03-01",
-        premium: 1800,
-        outstandingAmount: 3600,
-        lastPaymentDate: "2024-10-01",
-        billAmount: 1800
-      }
-    ];
-    setPolicies(mockPolicies);
+  const loadPolicies = async () => {
+    if (!selectedInsurer) {
+      toast.current.show({ severity: "warn", summary: "Insurer required", detail: "Select an insurer first", life: 3000 });
+      return;
+    }
+    try {
+      const rows = await remittanceService.directBillPolicies({ insurerCode: selectedInsurer, policyStatus });
+      const wanted = selectedProductLines.map((p) => p.toLowerCase());
+      const filtered = wanted.length ? rows.filter((p) => wanted.includes(String(p.product).toLowerCase())) : rows;
+      setPolicies(filtered.map((p) => ({ ...p, selected: false })));
+      setSelectedPolicies([]);
+      if (!filtered.length) toast.current.show({ severity: "info", summary: "No policies", detail: "No billable policies found for the selected criteria", life: 3000 });
+    } catch (e) {
+      showError(toast, e);
+    }
   };
 
   const onPolicySelect = (e) => {
@@ -147,11 +106,11 @@ const DirectBillProcessing = () => {
   };
 
   const getTotalAmount = () => {
-    return selectedPolicies.reduce((sum, policy) => sum + policy.billAmount, 0);
+    return selectedPolicies.reduce((sum, policy) => sum + Number(policy.billAmount || 0), 0);
   };
 
   const getPreviousBalance = () => {
-    return selectedPolicies.reduce((sum, policy) => sum + (policy.outstandingAmount - policy.premium), 0);
+    return selectedPolicies.reduce((sum, policy) => sum + Math.max(0, policy.outstandingAmount - policy.premium), 0);
   };
 
   const checkboxTemplate = (rowData) => {
@@ -175,7 +134,8 @@ const DirectBillProcessing = () => {
   };
 
   const statusBodyTemplate = () => {
-    return <Tag value={status} severity="info" />;
+    const status = generatedBill?.status || "Draft";
+    return <Tag value={status} severity={statusSeverity(generatedBill?.statusCode || status)} />;
   };
 
   const progressBarTemplate = () => {
@@ -200,8 +160,8 @@ const DirectBillProcessing = () => {
       if (!grouped[policy.insuredName]) {
         grouped[policy.insuredName] = {
           insuredName: policy.insuredName,
-          insuredCode: `INS-${policy.id}`,
-          email: `${policy.insuredName.toLowerCase().replace(' ', '.')}@example.com`,
+          insuredCode: policy.policyNo,
+          email: policy.insuredEmail || "",
           policies: [],
           currentPremium: 0,
           previousDue: 0,
@@ -209,31 +169,69 @@ const DirectBillProcessing = () => {
         };
       }
       grouped[policy.insuredName].policies.push(policy);
-      grouped[policy.insuredName].currentPremium += policy.premium;
-      grouped[policy.insuredName].previousDue += policy.outstandingAmount - policy.premium;
-      grouped[policy.insuredName].totalDue += policy.billAmount;
+      grouped[policy.insuredName].currentPremium += Number(policy.premium || 0);
+      grouped[policy.insuredName].previousDue += Math.max(0, policy.outstandingAmount - policy.premium);
+      grouped[policy.insuredName].totalDue += Number(policy.billAmount || 0);
     });
     return Object.values(grouped);
   };
 
+  const lateFee = billConfig?.lateFee || {};
   const getOverduePolicies = () => {
-    return selectedPolicies.filter(policy => {
-      const lastPayment = new Date(policy.lastPaymentDate);
-      const daysDiff = Math.floor((new Date() - lastPayment) / (1000 * 60 * 60 * 24));
-      return daysDiff > 30;
-    }).map(policy => ({
-      ...policy,
-      overdueDays: Math.floor((new Date() - new Date(policy.lastPaymentDate)) / (1000 * 60 * 60 * 24)) - 30,
-      overdueAmount: policy.outstandingAmount - policy.premium,
-      lateChargeRate: 2.5,
-      lateCharge: ((policy.outstandingAmount - policy.premium) * 0.025),
-      waive: false,
-      remarks: ""
-    }));
+    const grace = Number(lateFee.gracePeriod || 0);
+    const rate = Number(lateFee.rate || 0);
+    return selectedPolicies.filter(policy => policy.lastPaymentDate && Math.floor((new Date() - new Date(policy.lastPaymentDate)) / DAY_MS) > grace)
+      .map(policy => {
+        const overdueAmount = Math.max(0, policy.outstandingAmount - policy.premium);
+        return {
+          ...policy,
+          overdueDays: Math.floor((new Date() - new Date(policy.lastPaymentDate)) / DAY_MS) - grace,
+          overdueAmount,
+          lateChargeRate: rate,
+          lateCharge: lateChargeMethod === "Percentage" ? overdueAmount * rate / 100 : rate,
+          waive: false,
+          remarks: ""
+        };
+      });
+  };
+
+  const createBill = async ({ send }) => {
+    if (!selectedInsurer || !selectedPolicies.length) {
+      toast.current.show({ severity: "warn", summary: "Nothing to bill", detail: "Select an insurer and at least one policy", life: 3000 });
+      return;
+    }
+    setSaving(true);
+    try {
+      const bill = await remittanceService.createDirectBill({
+        insurerCode: selectedInsurer,
+        billingPeriod: isoMonth(billPeriod),
+        billDate: isoDate(billDate),
+        dueDate: isoDate(dueDate),
+        policyIds: selectedPolicies.map((p) => p.id),
+        deliveryMethod,
+        remarks: `${billFormat} bill${includeStatement ? " with statement" : ""}`
+      });
+      setGeneratedBill(bill);
+      if (send && deliveryMethod.includes("email")) await remittanceService.sendBill(bill.id, { deliveryMethod });
+      showSuccess(toast, `${bill.billNo || bill.remittanceNo} ${send ? "generated" : "saved as draft"}`);
+      await loadPolicies();
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setPolicies([]);
+    setSelectedPolicies([]);
+    setGeneratedBill(null);
+    setActiveIndex(0);
   };
 
   return (
     <div className="direct-bill-processing">
+      <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.directBillProcessing")}</h2>
       </div>
@@ -242,7 +240,7 @@ const DirectBillProcessing = () => {
         <div className="grid">
           <div className="col-12 md:col-2">
             <label>Bill Run No</label>
-            <div className="value-field">{billRunNo}</div>
+            <div className="value-field">{generatedBill?.billNo || generatedBill?.remittanceNo || "-"}</div>
           </div>
           <div className="col-12 md:col-2">
             <label>Bill Period</label>
@@ -327,7 +325,7 @@ const DirectBillProcessing = () => {
               </div>
             </div>
 
-            <DataTable value={policies} className="policy-grid">
+            <DataTable value={policies} className="policy-grid" dataKey="id">
               <Column
                 header={
                   <Checkbox
@@ -407,13 +405,6 @@ const DirectBillProcessing = () => {
                 body={(rowData) => formatCurrency(rowData.previousDue)} />
               <Column field="totalDue" header="Total Due" style={{ width: "13%" }}
                 body={(rowData) => <strong>{formatCurrency(rowData.totalDue)}</strong>} />
-              <Column header="Actions" style={{ width: "10%" }}
-                body={() => (
-                  <div>
-                    <Button icon="pi pi-pencil" className="p-button-text p-button-sm mr-1" />
-                    <Button icon="pi pi-eye" className="p-button-text p-button-sm" />
-                  </div>
-                )} />
             </DataTable>
           </TabPanel>
 
@@ -640,6 +631,8 @@ const DirectBillProcessing = () => {
             label="Save Draft"
             icon="pi pi-save"
             className="p-button-secondary mr-2"
+            onClick={() => createBill({ send: false })}
+            disabled={saving || selectedPolicies.length === 0}
           />
           {activeIndex === 3 && (
             <Button
@@ -647,12 +640,15 @@ const DirectBillProcessing = () => {
               icon="pi pi-check"
               className="p-button-success mr-2"
               disabled={selectedPolicies.length === 0}
+              loading={saving}
+              onClick={() => createBill({ send: true })}
             />
           )}
           <Button
             label="Cancel"
             icon="pi pi-times"
             className="p-button-text"
+            onClick={handleCancel}
           />
         </div>
       </Card>

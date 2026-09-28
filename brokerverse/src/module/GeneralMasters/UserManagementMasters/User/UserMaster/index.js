@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
@@ -14,7 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import userService from "../../../../../services/userService";
+import { Toast } from "primereact/toast";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchUserMiddleware,
@@ -44,6 +46,11 @@ const UserMaster = () => {
   const dispatch = useDispatch();
 
   // Fetch users on component mount
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getUserMiddleware({ page: 1, limit: 100 }));
+  const toggleUserStatus = (user, active) => userService.setUserStatus(user.id, active ? "active" : "inactive");
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
   useEffect(() => {
     dispatch(getUserMiddleware({ page: 1, limit: 100 }));
   }, [dispatch]);
@@ -55,7 +62,6 @@ const UserMaster = () => {
   }, [search, dispatch]);
 
   const handleView = (rowData) => {
-    console.log(rowData, "rowData");
     // Use fullUserData if available, otherwise use rowData
     const userData = rowData.fullUserData || rowData;
     dispatch(getUserViewDataMiddleWare(userData));
@@ -63,7 +69,6 @@ const UserMaster = () => {
   };
 
   const handlEdit = (rowData) => {
-    console.log(rowData, "gg");
     // Use fullUserData if available, otherwise use rowData
     const userData = rowData.fullUserData || rowData;
     dispatch(getUserEditDataMiddleWare(userData));
@@ -110,7 +115,6 @@ const UserMaster = () => {
   };
 
   const renderViewButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div className="center__content__but">
         <Button
@@ -158,6 +162,7 @@ const UserMaster = () => {
   };
   return (
     <div className="grid overall__user__master__container">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">User</div>
         <div className="mt-3">
@@ -251,7 +256,15 @@ const UserMaster = () => {
 
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => (
+                    <MasterStatusToggle
+                      type="user"
+                      record={columnData}
+                      onToggle={toggleUserStatus}
+                      onChanged={reloadList}
+                      onError={showStatusError}
+                    />
+                  )}
                   header="Status"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"

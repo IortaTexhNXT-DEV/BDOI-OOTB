@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { TabView, TabPanel } from "primereact/tabview";
@@ -14,11 +14,29 @@ import { RadioButton } from "primereact/radiobutton";
 import { Calendar } from "primereact/calendar";
 import { MultiSelect } from "primereact/multiselect";
 import { InputNumber } from "primereact/inputnumber";
+import { Toast } from "primereact/toast";
+import remittanceService, { apiRequest } from "../../../services/remittanceService";
+import authService from "../../../services/authService";
+import { isoDate, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+
+const emptyDelegation = {
+  delegateTo: "",
+  fromDate: null,
+  toDate: null,
+  transTypes: ["All"],
+  amountLimit: null,
+  reason: ""
+};
+const AGE_LIMITS = { "1": [0, 24], "3": [24, 72], "7": [72, 168], "7+": [168, Infinity] };
+const ageHours = (row) => (Date.now() - new Date(String(row.submissionDate).replace(" ", "T")).getTime()) / 3600000;
+const toOptions = (values) => [{ label: "All", value: "All" }, ...values.map((v) => ({ label: v, value: v }))];
 
 const RemittanceApproval = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
+  const toast = useRef(null);
+  const currentUserId = authService.getUser()?.userId || localStorage.getItem("USER_ID");
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
@@ -26,132 +44,85 @@ const RemittanceApproval = () => {
   const [approvalAction, setApprovalAction] = useState("");
   const [comments, setComments] = useState("");
   const [showDelegationDialog, setShowDelegationDialog] = useState(false);
-  const [delegationData, setDelegationData] = useState({
-    delegateTo: "",
-    fromDate: null,
-    toDate: null,
-    transTypes: ["All"],
-    amountLimit: null,
-    reason: ""
+  const [delegateSelected, setDelegateSelected] = useState(false);
+  const [delegationData, setDelegationData] = useState(emptyDelegation);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [approvalHistory, setApprovalHistory] = useState([]);
+  const [activeDelegations, setActiveDelegations] = useState([]);
+  const [userOptions, setUserOptions] = useState([]);
+  const [priorities, setPriorities] = useState([]);
+  const [filters, setFilters] = useState({ transactionType: "All", priority: "All", age: "All" });
+  const [historyFilters, setHistoryFilters] = useState({ range: null, action: "All" });
+  const [loading, setLoading] = useState(false);
+
+  const loadAll = async (f = filters) => {
+    setLoading(true);
+    try {
+      const [queue, history, delegations] = await Promise.all([
+        remittanceService.listApprovals({
+          transactionType: f.transactionType === "All" ? undefined : f.transactionType,
+          priority: f.priority === "All" ? undefined : f.priority
+        }),
+        remittanceService.approvalHistory(),
+        remittanceService.listDelegations()
+      ]);
+      const limits = AGE_LIMITS[f.age];
+      setPendingApprovals(limits ? queue.filter((r) => ageHours(r) >= limits[0] && ageHours(r) < limits[1]) : queue);
+      setApprovalHistory(history || []);
+      setActiveDelegations(delegations || []);
+      setSelectedRows([]);
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAll();
+    loadSettings().then((s) => setPriorities(Object.keys(s["remittance.priority_sla_hours"] || {}))).catch((e) => showError(toast, e));
+    apiRequest("GET", "/users", { params: { perPage: 500, status: "active" } })
+      .then((res) => setUserOptions((res.data || []).filter((u) => u.userId !== currentUserId).map((u) => ({ label: u.displayName || u.username, value: u.username }))))
+      .catch(() => setUserOptions([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const transactionTypes = [...new Set([...pendingApprovals, ...approvalHistory].map((r) => r.transactionType).filter(Boolean))];
+  const transactionTypeOptions = toOptions(transactionTypes);
+  const priorityOptions = toOptions(priorities);
+  const today = isoDate(new Date());
+  const summary = {
+    mine: pendingApprovals.filter((r) => r.initiatorId !== currentUserId).length,
+    total: pendingApprovals.length,
+    overdue: pendingApprovals.filter((r) => r.slaRemaining < 0).length,
+    approvedToday: approvalHistory.filter((r) => r.action === "Approved" && String(r.actionDate).startsWith(today)).length
+  };
+  const visibleHistory = approvalHistory.filter((r) => {
+    if (historyFilters.action !== "All" && r.action !== historyFilters.action) return false;
+    const [from, to] = historyFilters.range || [];
+    const day = String(r.actionDate).slice(0, 10);
+    return (!from || day >= isoDate(from)) && (!to || day <= isoDate(to));
   });
 
-  const pendingApprovals = [
-    {
-      id: 1,
-      priority: "Urgent",
-      referenceNo: "TRF20250926001",
-      transactionType: "Electronic Transfer",
-      initiator: "John Smith",
-      submissionDate: "2025-09-26 10:30",
-      amount: 125000,
-      description: "Monthly premium settlement to ABC Insurance",
-      slaHours: 4,
-      currentLevel: 2
-    },
-    {
-      id: 2,
-      priority: "High",
-      referenceNo: "BLK20250926002",
-      transactionType: "Bulk Processing",
-      initiator: "Sarah Johnson",
-      submissionDate: "2025-09-26 09:15",
-      amount: 87500,
-      description: "Batch commission processing - September 2025",
-      slaHours: 12,
-      currentLevel: 1
-    },
-    {
-      id: 3,
-      priority: "Normal",
-      referenceNo: "SET20250925003",
-      transactionType: "Settlement",
-      initiator: "Mike Wilson",
-      submissionDate: "2025-09-25 14:45",
-      amount: 45300,
-      description: "Quarterly settlement adjustment",
-      slaHours: 24,
-      currentLevel: 1
-    },
-    {
-      id: 4,
-      priority: "Low",
-      referenceNo: "ADJ20250925004",
-      transactionType: "Adjustment",
-      initiator: "Emily Brown",
-      submissionDate: "2025-09-25 11:20",
-      amount: 12750,
-      description: "Commission adjustment for policy corrections",
-      slaHours: 48,
-      currentLevel: 1
+  const run = async (action, message) => {
+    try {
+      await action();
+      showSuccess(toast, message);
+      await loadAll();
+      return true;
+    } catch (e) {
+      showError(toast, e);
+      return false;
     }
-  ];
+  };
 
-  const approvalHistory = [
-    {
-      referenceNo: "TRF20250920001",
-      transactionType: "Electronic Transfer",
-      amount: 156000,
-      action: "Approved",
-      actionDate: "2025-09-20 15:30",
-      remarks: "Verified and approved as per guidelines"
-    },
-    {
-      referenceNo: "SET20250919002",
-      transactionType: "Settlement",
-      amount: 67800,
-      action: "Rejected",
-      actionDate: "2025-09-19 10:15",
-      remarks: "Missing supporting documents"
-    },
-    {
-      referenceNo: "BLK20250918003",
-      transactionType: "Bulk Processing",
-      amount: 234500,
-      action: "Delegated",
-      actionDate: "2025-09-18 16:45",
-      remarks: "Delegated to Finance Head for review"
-    }
-  ];
+  const approveRows = (rows, note) => run(() => Promise.all(rows.map((r) => remittanceService.approve(r.id, note))), `${rows.length} approval(s) recorded`);
 
-  const activeDelegations = [
-    {
-      delegatedTo: "Robert Chen",
-      fromDate: "2025-09-25",
-      toDate: "2025-09-30",
-      scope: "All Transactions",
-      status: "Active"
-    },
-    {
-      delegatedTo: "Lisa Anderson",
-      fromDate: "2025-09-20",
-      toDate: "2025-09-24",
-      scope: "Settlements Only",
-      status: "Expired"
-    }
-  ];
-
-  const transactionTypeOptions = [
-    { label: "All", value: "All" },
-    { label: "Settlement", value: "Settlement" },
-    { label: "Electronic Transfer", value: "Electronic Transfer" },
-    { label: "Bulk Processing", value: "Bulk Processing" },
-    { label: "Adjustment", value: "Adjustment" }
-  ];
-
-  const priorityOptions = [
-    { label: "All", value: "All" },
-    { label: "Urgent", value: "Urgent" },
-    { label: "High", value: "High" },
-    { label: "Normal", value: "Normal" },
-    { label: "Low", value: "Low" }
-  ];
-
-  const userOptions = [
-    { label: "Robert Chen", value: "Robert Chen" },
-    { label: "Lisa Anderson", value: "Lisa Anderson" },
-    { label: "David Miller", value: "David Miller" },
-    { label: "Jennifer Davis", value: "Jennifer Davis" }
-  ];
+  const rejectRows = (rows, note) => {
+    const reason = note || window.prompt(t("remittance.comments"), "");
+    if (!reason) return Promise.resolve(false);
+    return run(() => Promise.all(rows.map((r) => remittanceService.reject(r.id, reason))), `${rows.length} transaction(s) rejected`);
+  };
 
   const priorityBodyTemplate = (rowData) => {
     const getSeverity = (priority) => {
@@ -167,20 +138,13 @@ const RemittanceApproval = () => {
   };
 
   const slaBodyTemplate = (rowData) => {
-    const severity = rowData.slaHours < 8 ? 'danger' : rowData.slaHours < 24 ? 'warning' : 'success';
-    return <Tag value={`${rowData.slaHours}h remaining`} severity={severity} />;
+    const remaining = rowData.slaRemaining ?? rowData.slaHours;
+    const severity = remaining < 8 ? 'danger' : remaining < 24 ? 'warning' : 'success';
+    return <Tag value={remaining < 0 ? `${Math.abs(remaining)}h overdue` : `${remaining}h remaining`} severity={severity} />;
   };
 
   const actionBodyTemplate = (rowData) => {
-    const getSeverity = (action) => {
-      switch (action) {
-        case 'Approved': return 'success';
-        case 'Rejected': return 'danger';
-        case 'Delegated': return 'info';
-        default: return null;
-      }
-    };
-    return <Tag value={rowData.action} severity={getSeverity(rowData.action)} />;
+    return <Tag value={rowData.action} severity={statusSeverity(rowData.action)} />;
   };
 
   const statusBodyTemplate = (rowData) => {
@@ -199,6 +163,8 @@ const RemittanceApproval = () => {
           tooltip={t("remittance.view")}
           onClick={() => {
             setSelectedTransaction(rowData);
+            setApprovalAction("");
+            setComments("");
             setShowDetailDialog(true);
           }}
         />
@@ -206,41 +172,59 @@ const RemittanceApproval = () => {
           icon="pi pi-check"
           className="p-button-rounded p-button-success p-button-text"
           tooltip={t("remittance.approve")}
+          onClick={() => approveRows([rowData])}
         />
         <Button
           icon="pi pi-times"
           className="p-button-rounded p-button-danger p-button-text"
           tooltip={t("common.reject")}
+          onClick={() => rejectRows([rowData])}
         />
       </div>
     );
   };
 
-  const delegationActionsTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button label={t("remittance.revoke")} className="p-button-text p-button-danger p-button-sm" />
-        <Button label={t("remittance.extend")} className="p-button-text p-button-sm" />
-      </div>
-    );
+  const handleSubmitDecision = async () => {
+    if (!approvalAction) return;
+    const done = approvalAction === "approve"
+      ? await approveRows([selectedTransaction], comments || undefined)
+      : await rejectRows([selectedTransaction], comments);
+    if (done) setShowDetailDialog(false);
+  };
+
+  const openDelegation = (forSelection) => {
+    setDelegateSelected(forSelection);
+    setDelegationData(emptyDelegation);
+    setShowDelegationDialog(true);
+  };
+
+  const handleDelegation = async () => {
+    const d = delegationData;
+    const done = delegateSelected
+      ? await run(() => Promise.all(selectedRows.map((r) => remittanceService.delegate(r.id, d.delegateTo, d.reason))), `${selectedRows.length} approval(s) delegated`)
+      : await run(() => remittanceService.createDelegation({ ...d, fromDate: isoDate(d.fromDate), toDate: isoDate(d.toDate) }), t("remittance.addDelegation"));
+    if (done) setShowDelegationDialog(false);
   };
 
   const detailDialogFooter = (
     <div>
       <Button label={t("common.cancel")} icon="pi pi-times" onClick={() => setShowDetailDialog(false)} className="p-button-text" />
-      <Button label={t("remittance.submit")} icon="pi pi-check" onClick={() => setShowDetailDialog(false)} autoFocus />
+      <Button label={t("remittance.submit")} icon="pi pi-check" onClick={handleSubmitDecision} autoFocus
+        disabled={!approvalAction || (approvalAction === 'reject' && !comments)} />
     </div>
   );
 
   const delegationDialogFooter = (
     <div>
       <Button label={t("common.cancel")} icon="pi pi-times" onClick={() => setShowDelegationDialog(false)} className="p-button-text" />
-      <Button label={t("remittance.addDelegation")} icon="pi pi-check" onClick={() => setShowDelegationDialog(false)} autoFocus />
+      <Button label={delegateSelected ? t("remittance.delegate") : t("remittance.addDelegation")} icon="pi pi-check" onClick={handleDelegation} autoFocus
+        disabled={!delegationData.delegateTo || !delegationData.reason} />
     </div>
   );
 
   return (
     <div className="remittance-approval">
+      <Toast ref={toast} />
       <h2>{t("remittance.approvalWorkflow")}</h2>
 
       <div className="summary-cards">
@@ -250,7 +234,7 @@ const RemittanceApproval = () => {
               <i className="pi pi-clock" />
             </div>
             <div className="card-details">
-              <div className="card-value">8</div>
+              <div className="card-value">{summary.mine}</div>
               <div className="card-label">{t("remittance.pendingMyApproval")}</div>
             </div>
           </div>
@@ -261,7 +245,7 @@ const RemittanceApproval = () => {
               <i className="pi pi-hourglass" />
             </div>
             <div className="card-details">
-              <div className="card-value">15</div>
+              <div className="card-value">{summary.total}</div>
               <div className="card-label">{t("remittance.totalPending")}</div>
             </div>
           </div>
@@ -272,7 +256,7 @@ const RemittanceApproval = () => {
               <i className="pi pi-exclamation-triangle" />
             </div>
             <div className="card-details">
-              <div className="card-value">3</div>
+              <div className="card-value">{summary.overdue}</div>
               <div className="card-label">{t("remittance.overdue")}</div>
             </div>
           </div>
@@ -283,7 +267,7 @@ const RemittanceApproval = () => {
               <i className="pi pi-check" />
             </div>
             <div className="card-details">
-              <div className="card-value">12</div>
+              <div className="card-value">{summary.approvedToday}</div>
               <div className="card-label">{t("remittance.approvedToday")}</div>
             </div>
           </div>
@@ -292,23 +276,30 @@ const RemittanceApproval = () => {
 
       <Card className="mt-4">
         <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-          <TabPanel header={<span>{t("remittance.pendingApprovals")} <span className="badge">8</span></span>}>
+          <TabPanel header={<span>{t("remittance.pendingApprovals")} <span className="badge">{pendingApprovals.length}</span></span>}>
             <div className="filter-section mb-3">
-              <Dropdown placeholder={t("remittance.transactionType")} options={transactionTypeOptions} className="mr-2" />
-              <Dropdown placeholder={t("remittance.priority")} options={priorityOptions} className="mr-2" />
-              <Dropdown placeholder={t("remittance.age")} options={[
+              <Dropdown placeholder={t("remittance.transactionType")} options={transactionTypeOptions} className="mr-2"
+                value={filters.transactionType} onChange={(e) => setFilters({ ...filters, transactionType: e.value })} />
+              <Dropdown placeholder={t("remittance.priority")} options={priorityOptions} className="mr-2"
+                value={filters.priority} onChange={(e) => setFilters({ ...filters, priority: e.value })} />
+              <Dropdown placeholder={t("remittance.age")} value={filters.age} onChange={(e) => setFilters({ ...filters, age: e.value })} options={[
                 { label: "All", value: "All" },
                 { label: "< 1 Day", value: "1" },
                 { label: "1-3 Days", value: "3" },
                 { label: "3-7 Days", value: "7" },
                 { label: "> 7 Days", value: "7+" }
               ]} className="mr-2" />
-              <Button label={t("remittance.filter")} icon="pi pi-filter" className="p-button-primary mr-2" />
-              <Button label={t("remittance.clear")} icon="pi pi-times" className="p-button-secondary" />
+              <Button label={t("remittance.filter")} icon="pi pi-filter" className="p-button-primary mr-2" onClick={() => loadAll()} />
+              <Button label={t("remittance.clear")} icon="pi pi-times" className="p-button-secondary" onClick={() => {
+                const cleared = { transactionType: "All", priority: "All", age: "All" };
+                setFilters(cleared);
+                loadAll(cleared);
+              }} />
             </div>
 
             <DataTable
               value={pendingApprovals}
+              loading={loading}
               selection={selectedRows}
               onSelectionChange={(e) => setSelectedRows(e.value)}
               dataKey="id"
@@ -329,26 +320,28 @@ const RemittanceApproval = () => {
 
             {selectedRows.length > 0 && (
               <div className="bulk-actions mt-3">
-                <Button label={t("remittance.bulkApprove")} icon="pi pi-check" className="p-button-success mr-2" />
-                <Button label={t("remittance.bulkReject")} icon="pi pi-times" className="p-button-danger mr-2" />
-                <Button label={t("remittance.delegate")} icon="pi pi-forward" className="p-button-secondary" />
+                <Button label={t("remittance.bulkApprove")} icon="pi pi-check" className="p-button-success mr-2" onClick={() => approveRows(selectedRows)} />
+                <Button label={t("remittance.bulkReject")} icon="pi pi-times" className="p-button-danger mr-2" onClick={() => rejectRows(selectedRows)} />
+                <Button label={t("remittance.delegate")} icon="pi pi-forward" className="p-button-secondary" onClick={() => openDelegation(true)} />
               </div>
             )}
           </TabPanel>
 
           <TabPanel header={t("remittance.approvalHistory")}>
             <div className="filter-section mb-3">
-              <Calendar placeholder={t("remittance.dateRange")} selectionMode="range" className="mr-2" />
-              <Dropdown placeholder={t("remittance.action")} options={[
+              <Calendar placeholder={t("remittance.dateRange")} selectionMode="range" className="mr-2"
+                value={historyFilters.range} onChange={(e) => setHistoryFilters({ ...historyFilters, range: e.value })} />
+              <Dropdown placeholder={t("remittance.action")} value={historyFilters.action}
+                onChange={(e) => setHistoryFilters({ ...historyFilters, action: e.value })} options={[
                 { label: "All", value: "All" },
                 { label: "Approved", value: "Approved" },
                 { label: "Rejected", value: "Rejected" },
                 { label: "Delegated", value: "Delegated" }
               ]} className="mr-2" />
-              <Button label={t("remittance.search")} icon="pi pi-search" />
+              <Button label={t("remittance.search")} icon="pi pi-search" onClick={() => loadAll()} />
             </div>
 
-            <DataTable value={approvalHistory} stripedRows>
+            <DataTable value={visibleHistory} stripedRows loading={loading}>
               <Column field="referenceNo" header={t("remittance.referenceNo")} />
               <Column field="transactionType" header={t("remittance.type")} />
               <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(data.amount)} />
@@ -365,7 +358,7 @@ const RemittanceApproval = () => {
                 <Button
                   label={t("remittance.addNewDelegation")}
                   icon="pi pi-plus"
-                  onClick={() => setShowDelegationDialog(true)}
+                  onClick={() => openDelegation(false)}
                 />
               </div>
 
@@ -373,9 +366,8 @@ const RemittanceApproval = () => {
                 <Column field="delegatedTo" header={t("remittance.delegatedTo")} />
                 <Column field="fromDate" header={t("remittance.fromDate")} />
                 <Column field="toDate" header={t("remittance.toDate")} />
-                <Column field="scope" header={t("remittance.scope")} />
+                <Column field="transTypes" header={t("remittance.scope")} body={(d) => (d.transTypes || []).join(", ")} />
                 <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
-                <Column header={t("remittance.actions")} body={delegationActionsTemplate} />
               </DataTable>
             </div>
           </TabPanel>
@@ -434,20 +426,11 @@ const RemittanceApproval = () => {
                   />
                   <label htmlFor="reject" className="ml-2">{t("common.reject")}</label>
                 </div>
-                <div className="p-field-radiobutton">
-                  <RadioButton
-                    inputId="hold"
-                    value="hold"
-                    onChange={(e) => setApprovalAction(e.value)}
-                    checked={approvalAction === 'hold'}
-                  />
-                  <label htmlFor="hold" className="ml-2">{t("remittance.holdForReview")}</label>
-                </div>
               </div>
 
-              {(approvalAction === 'reject' || approvalAction === 'hold') && (
+              {approvalAction && (
                 <div className="mt-3">
-                  <label>{t("remittance.comments")} *</label>
+                  <label>{t("remittance.comments")}{approvalAction === 'reject' ? " *" : ""}</label>
                   <InputTextarea
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
@@ -462,7 +445,7 @@ const RemittanceApproval = () => {
       </Dialog>
 
       <Dialog
-        header={t("remittance.addNewDelegation")}
+        header={delegateSelected ? t("remittance.delegate") : t("remittance.addNewDelegation")}
         visible={showDelegationDialog}
         style={{ width: '50vw' }}
         footer={delegationDialogFooter}
@@ -475,6 +458,7 @@ const RemittanceApproval = () => {
               <Dropdown
                 value={delegationData.delegateTo}
                 options={userOptions}
+                editable
                 onChange={(e) => setDelegationData({ ...delegationData, delegateTo: e.value })}
                 placeholder={t("remittance.selectUser")}
               />

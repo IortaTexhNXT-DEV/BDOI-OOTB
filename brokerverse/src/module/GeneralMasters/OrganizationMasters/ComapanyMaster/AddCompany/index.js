@@ -27,12 +27,11 @@ import {
   patchCompanyEditMiddleware,
   postAddCompanyMiddleware,
 } from "../store/companyMiddleware";
+import useMasterOptions from "../../../common/useMasterOptions";
 
-import countriesData from "./data";
 
 function AddCompany({ action }) {
   const { t } = useTranslation();
-  console.log(action, "find action");
   const { companyView, getcompanyEdit, loading } = useSelector(
     ({ organizationCompanyMainReducers }) => {
       return {
@@ -42,7 +41,6 @@ function AddCompany({ action }) {
       };
     }
   );
-  console.log(companyView, "companyView");
   const dispatch = useDispatch();
   const toastRef = useRef(null);
   const { id } = useParams();
@@ -56,24 +54,12 @@ function AddCompany({ action }) {
     },
   ];
 
-  const City = countriesData.city.map(city => ({
-    label: action === "add" ? city : companyView?.City,
-    value: action === "add" ? city : companyView?.City,
+  const City = useMasterOptions("city");
 
-  }));
-
-  const State = countriesData.state.map(state => ({
-    label: action === "add" ? state : companyView?.State,
-    value: action === "add" ? state : companyView?.State,
-
-  }));
+  const State = useMasterOptions("state");
 
 
-  const Country = countriesData.countries.map(country => ({
-    label: action === "add" ? country : companyView?.Country,
-    value: action === "add" ? country : companyView?.Country,
-
-  }));
+  const Country = useMasterOptions("country");
 
 
   const home = { label: t("generalMasters.master") };
@@ -160,20 +146,21 @@ function AddCompany({ action }) {
     PhoneNumber: "",
     Fax: "",
   };
-  const handleSubmit = (values) => {
-    if (action === "add") {
-      console.log(values, "find values");
-      dispatch(postAddCompanyMiddleware(formik.values));
-      toastRef.current.showToast();
-
+  const saveAndReturn = async (thunk, values, message) => {
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(message ? { detail: message } : undefined);
       setTimeout(() => {
         Navigate("/master/generals/organization/companymaster");
       }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
-    if (action === "edit") {
-      dispatch(patchCompanyEditMiddleware(values));
-      Navigate("/master/generals/organization/companymaster");
-    }
+  };
+
+  const handleSubmit = (values) => {
+    if (action === "add") saveAndReturn(postAddCompanyMiddleware, values);
+    if (action === "edit") saveAndReturn(patchCompanyEditMiddleware, values, t("financeMasters.saveSuccessfully"));
   };
 
   const customValidation = (values) => {
@@ -218,8 +205,8 @@ function AddCompany({ action }) {
 
     if (!values.PhoneNumber) {
       errors.PhoneNumber = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.PhoneNumber)) {
-      errors.PhoneNumber = "Invalid phone number (10 digits)";
+    } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.PhoneNumber)) {
+      errors.PhoneNumber = "Invalid phone number";
     }
     if (!values.Fax) {
       errors.Fax = "This field is required";
@@ -233,12 +220,7 @@ function AddCompany({ action }) {
     validate: customValidation,
     onSubmit: handleSubmit,
   });
-  const [companyNameOptionData, setCompanyNameOptionData] = useState([]);
-  const [cityDataOption, setCityDataOption] = useState([]);
-  const [stateDataOption, setStateDataOption] = useState([]);
-  const [countryDataOption, setCountryDataOption] = useState([]);
   const setFormikValues = () => {
-    const companyNameData = getcompanyEdit?.CompanyName;
     const cityData = getcompanyEdit?.City;
     const stateData = getcompanyEdit?.State;
     const countryData = getcompanyEdit?.Country;
@@ -263,36 +245,17 @@ function AddCompany({ action }) {
         Fax: getcompanyEdit?.Fax,
       };
 
-      if (companyNameData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setCompanyNameOptionData([
-          { label: companyNameData, value: companyNameData },
-        ]);
-      }
-      if (cityData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setCityDataOption([{ label: cityData, value: cityData }]);
-      }
-      if (stateData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setStateDataOption([{ label: stateData, value: stateData }]);
-      }
-      if (countryData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setCountryDataOption([{ label: countryData, value: countryData }]);
-      }
       formik.setValues({ ...formik.values, ...updatedValues });
     }
   };
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     setFormikValues();
   }, [getcompanyEdit]);
 
   return (
     <div className="overall__addcompany__container">
-      <CustomToast ref={toastRef} message="Company code CC1234 added" />
+      <CustomToast ref={toastRef} message={`Company code ${formik.values.CompanyCode} added`} />
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon />
@@ -594,13 +557,7 @@ function AddCompany({ action }) {
               }
               onChange={(e) => formik.setFieldValue("City", e.value)}
               // options={City}
-              options={
-                action == "add"
-                  ? City
-                  : action == "edit"
-                    ? cityDataOption
-                    : City
-              }
+              options={City}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -625,13 +582,7 @@ function AddCompany({ action }) {
               }
               onChange={(e) => formik.setFieldValue("State", e.value)}
               // options={State}
-              options={
-                action == "add"
-                  ? State
-                  : action == "edit"
-                    ? stateDataOption
-                    : State
-              }
+              options={State}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -656,13 +607,7 @@ function AddCompany({ action }) {
               }
               onChange={(e) => formik.setFieldValue("Country", e.value)}
 
-              options={
-                action == "add"
-                  ? Country
-                  : action == "edit"
-                    ? countryDataOption
-                    : Country
-              }
+              options={Country}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}

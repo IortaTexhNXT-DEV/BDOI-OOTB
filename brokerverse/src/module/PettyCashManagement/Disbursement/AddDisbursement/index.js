@@ -12,16 +12,13 @@ import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
-import {
-  PettyCashCodessingle,
-  Criteria,
-  VATMainAccount,
-  WHTSubAccount,
-  WHTMainAccount,
-  VATSubAccount,
-} from "../../mock";
+import usePettyCashOptions from "../../usePettyCashOptions";
 import { useDispatch, useSelector } from "react-redux";
-import { postAddDisbursmentMiddleware } from "../store/pettyCashDisbursementMiddleware";
+import {
+  getAddDisbursmentRequestListTableMiddleware,
+  getAddDisbursmentTableMiddleware,
+  postAddDisbursmentMiddleware,
+} from "../store/pettyCashDisbursementMiddleware";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Column } from "primereact/column";
@@ -29,6 +26,12 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import { optionCode } from "../../pettyCashFormat";
+
+const CRITERIA = [
+  { label: "Request", value: "Request" },
+  { label: "Direct", value: "Direct" },
+];
 
 const initialValue = {
   PettyCashCode: "",
@@ -76,19 +79,20 @@ const AddDisbursement = () => {
     navigate("/accounts/pettycash/disbursement");
   };
   const toastRef = useRef(null);
-  const handleSubmit = (value) => {
-    // const valueWithId = {
-    //   ...value,
-    //   id: AddDisbursment?.length + 1,
-    // };
-    dispatch(postAddDisbursmentMiddleware(formik.values));
-    // toastRef.current.showToast();
-    // {
-    //   setTimeout(() => {
+  const { funds, mainAccounts, subAccounts } = usePettyCashOptions();
+  const Criteria = CRITERIA;
+  const handleSubmit = async (values) => {
+    await dispatch(postAddDisbursmentMiddleware(values));
+    if (optionCode(values.Criteria) === "Request") {
+      await dispatch(getAddDisbursmentTableMiddleware(selectedRows));
+    }
     navigate("/accounts/pettycash/adddisbursementtable");
-    //   }, 2000);
-    // }
-  }
+  };
+  const handleFundChange = (fund) => {
+    formik.setFieldValue("PettyCashCode", fund);
+    setSelectedRows([]);
+    dispatch(getAddDisbursmentRequestListTableMiddleware(fund?.code));
+  };
 
   const validate = (values) => {
     const errors = {};
@@ -129,27 +133,6 @@ const AddDisbursement = () => {
     },
   });
 
-  const handlePettyCashDescribtion = (value) => {
-    let description = "";
-    switch (value.pettycashcode) {
-      case "PC001":
-        description = "PC-1";
-        break;
-      case "PC002":
-        description = "PC-2";
-        break;
-      case "PC003":
-        description = "PC-3";
-        break;
-      case "PC004":
-        description = "PC-4";
-        break;
-      default:
-        description = "Unknown";
-        break;
-    }
-    formik.setFieldValue("PettyCashdescription", description);
-  };
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -316,8 +299,8 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.PettyCashCode}
-                options={PettyCashCodessingle}
-                onChange={(e) => formik.setFieldValue("PettyCashCode", e.value)}
+                options={funds}
+                onChange={(e) => handleFundChange(e.value)}
                 optionLabel="label"
                 error={
                   formik.touched.PettyCashCode && formik.errors.PettyCashCode
@@ -350,7 +333,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.VATMainAccount}
-                options={VATMainAccount}
+                options={mainAccounts}
                 onChange={(e) =>
                   formik.setFieldValue("VATMainAccount", e.value)
                 }
@@ -370,7 +353,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.VATSubAccount}
-                options={VATSubAccount}
+                options={subAccounts.filter((a) => a.parentCode === formik.values.VATMainAccount?.code)}
                 onChange={(e) => formik.setFieldValue("VATSubAccount", e.value)}
                 optionLabel="label"
                 error={
@@ -388,7 +371,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.WHTMainAccount}
-                options={WHTMainAccount}
+                options={mainAccounts}
                 onChange={(e) =>
                   formik.setFieldValue("WHTMainAccount", e.value)
                 }
@@ -408,7 +391,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.WHTSubAccount}
-                options={WHTSubAccount}
+                options={subAccounts.filter((a) => a.parentCode === formik.values.WHTMainAccount?.code)}
                 onChange={(e) => formik.setFieldValue("WHTSubAccount", e.value)}
                 optionLabel="label"
                 error={
@@ -432,7 +415,7 @@ const AddDisbursement = () => {
           </div>
         </Card>
       </div>
-      {formik.values.Criteria === "Request" ?
+      {optionCode(formik.values.Criteria) === "Request" ?
         <Card className="mt-4">
           <div className="sub__container grid ">
             <div className="sub__container__title col-12">
@@ -492,7 +475,7 @@ const AddDisbursement = () => {
               onClick={() => {
                 formik.handleSubmit();
               }}
-              disabled={selectedRows.length === 0 && formik.values.Criteria === "Request"}
+              disabled={selectedRows.length === 0 && optionCode(formik.values.Criteria) === "Request"}
             />
           </div>
         </div>

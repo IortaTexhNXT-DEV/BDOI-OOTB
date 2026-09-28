@@ -18,15 +18,14 @@ import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import { isDisabled } from "@testing-library/user-event/dist/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { patchpaymentStatusByIdMiddleware } from "../store/paymentVocherMiddleware";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
+import mastersService from "../../../services/mastersService";
 
 function Bankdetailselection() {
   const { t } = useTranslation();
@@ -36,7 +35,6 @@ function Bankdetailselection() {
   const dispatch = useDispatch();
   const [selectedProducts, setSelectedProducts] = useState(null);
   const [visible, setVisible] = useState(false);
-  console.log("first", selectedProducts);
   const Navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState(null);
   const [bankaccountitem, setBankaccount] = useState(null);
@@ -200,15 +198,39 @@ function Bankdetailselection() {
     color: "#000",
     border: "none",
   };
-  const status = [
-    { name: "Bk001", code: "bk1" },
-    { name: "Bk002", code: "bk2" },
-    { name: "Bk003", code: "bk3" },
-  ];
-  const bankaccount = [
-    { name: "678882222256", code: "NY" },
-    { name: "678882222279", code: "RM" },
-  ];
+  const [status, setBankOptions] = useState([]);
+  const [bankaccount, setBankAccountOptions] = useState([]);
+
+  useEffect(() => {
+    mastersService
+      .options("bank")
+      .then((banks) =>
+        setBankOptions(banks.map((b) => ({ name: b.label, code: b.code })))
+      )
+      .catch((error) =>
+        toastRef.current?.showToast({
+          severity: "error",
+          summary: t("common.error"),
+          detail: error.message,
+        })
+      );
+  }, [t]);
+
+  useEffect(() => {
+    setBankaccount(null);
+    if (!selectedItem?.code) {
+      setBankAccountOptions([]);
+      return;
+    }
+    mastersService
+      .list("bank-account", { bankCode: selectedItem.code, status: "Active" })
+      .then((accounts) =>
+        setBankAccountOptions(
+          accounts.map((a) => ({ name: a.accountNumber, code: a.accountCode }))
+        )
+      )
+      .catch(() => setBankAccountOptions([]));
+  }, [selectedItem]);
 
   const home = { label: t("paymentVoucher.accounts") };
 
@@ -247,6 +269,20 @@ function Bankdetailselection() {
       }
     }
   }, [actionToast]);
+
+  const openVoucherPrint = async (printDisbursementId) => {
+    const id = printDisbursementId || currentDisbursementId || agentDisbursementId;
+    const result = await disbursementService.printDisbursement(id);
+    if (result.success && result.data?.url) {
+      window.open(result.data.url, "_blank", "noopener");
+      return;
+    }
+    toastRef.current?.showToast({
+      severity: "error",
+      summary: t("common.error"),
+      detail: result.error,
+    });
+  };
 
   const handlePatchAction = async () => {
     // Agent/Referrer: approve marks commission lines Paid with voucher number (net of WHT)
@@ -357,6 +393,21 @@ function Bankdetailselection() {
           return;
         }
 
+        if (bankaccountitem?.code) {
+          const detailsResult = await disbursementService.updateCheckbook(
+            checkbookId,
+            { mainAccount: bankaccountitem.code, totaleAmount: effectiveAmount }
+          );
+          if (!detailsResult.success) {
+            toastRef.current?.showToast({
+              severity: "error",
+              summary: t("common.error"),
+              detail: detailsResult.error,
+            });
+            return;
+          }
+        }
+
         const result = await disbursementService.updateCheckbook(checkbookId, {
           status: newStatus,
           totaleAmount: effectiveAmount,
@@ -383,32 +434,26 @@ function Bankdetailselection() {
         status: newStatus,
       });
       if (result.success) {
-        console.log("Checkbook updated successfully:", result.data);
         setactionToast(newStatus);
         setSelectedProducts(null);
         setTotalAmount("");
         await fetchCheckbookDetails();
         if (newStatus === "Printed") {
-          const pdfUrl =
-            "https://drive.google.com/file/d/1xW048fNszD5YJeQNmWAmhqQy8Ey2KG0M/view?usp=sharing";
-          const openInNewTab = () => {
-            const newTab = window.open(pdfUrl, "_blank");
-            if (newTab) {
-              const link = newTab.document.createElement("a");
-              link.href = pdfUrl;
-              link.download = "document.pdf";
-              newTab.document.body.appendChild(link);
-              link.click();
-              newTab.document.body.removeChild(link);
-            }
-          };
-          openInNewTab();
+          await openVoucherPrint(checkbookData.disbursementId);
         }
       } else {
-        console.error("Failed to update checkbook:", result.error);
+        toastRef.current?.showToast({
+          severity: "error",
+          summary: t("common.error"),
+          detail: result.error || t("paymentVoucher.failedToUpdateDisbursement"),
+        });
       }
     } catch (error) {
-      console.error("Error updating checkbook:", error);
+      toastRef.current?.showToast({
+        severity: "error",
+        summary: t("common.error"),
+        detail: error.message || t("paymentVoucher.unexpectedError"),
+      });
     }
   };
   const getStatusClassName = (status) => {

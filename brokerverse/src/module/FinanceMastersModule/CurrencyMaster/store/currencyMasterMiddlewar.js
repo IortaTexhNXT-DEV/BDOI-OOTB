@@ -1,128 +1,34 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getRequest } from "../../../../utility/commonServices";
-import { APIROUTES } from "../../../../routes/apiRoutes";
-import {  GET_CURRENCY_LIST,GET_CURRENCY_SEARCH_LIST, POST_CURRENCY_STATUS ,GET_CURRENCY_DETAIL_VIEW, POST_ADD_CURRENCY,PATCH_CURRENCY_DETAIL_EDIT, GET_CURRENCY_DETAIL_EDIT } from "../../../../redux/actionTypes";
+import mastersService, { searchText } from "../../../../services/mastersService";
+import masterThunk from "../../../GeneralMasters/common/masterThunk";
+import {
+  GET_CURRENCY_DETAIL_EDIT,
+  GET_CURRENCY_DETAIL_VIEW,
+  GET_CURRENCY_LIST,
+  GET_CURRENCY_SEARCH_LIST,
+  PATCH_CURRENCY_DETAIL_EDIT,
+  POST_ADD_CURRENCY,
+  POST_CURRENCY_STATUS,
+} from "../../../../redux/actionTypes";
 
+const TYPE = "currency";
 
-export const getCurrencyList = createAsyncThunk(
-    GET_CURRENCY_LIST,
-    async (payload, { rejectWithValue }) => {
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const getCurrencyList = masterThunk(GET_CURRENCY_LIST, (params) =>
+  mastersService.list(TYPE, params));
 
+export const getCurrencySearchList = masterThunk(GET_CURRENCY_SEARCH_LIST, (query) =>
+  mastersService.list(TYPE, { search: searchText(query) }));
 
-export const getCurrencySearchList = createAsyncThunk(
-    GET_CURRENCY_SEARCH_LIST,
-    async (payload, { rejectWithValue,getState }) => {
-        const textSearch = payload;
-        console.log(textSearch, "textSearch")
-        const { currencyMasterReducer } = getState();
+export const postCurrencyStatus = masterThunk(POST_CURRENCY_STATUS, ({ id, active }) =>
+  mastersService.setStatus(TYPE, id, active));
 
-        const { CurrencyList } = currencyMasterReducer;
-        console.log(CurrencyList, "1234")
-        try {
-            const searchResults = CurrencyList.filter(item => {
-                return item.Currencycode.toLowerCase().includes(textSearch.toLowerCase());
-            });
-            console.log(searchResults, "searchResults")
-            return searchResults;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const postAddCurrency = masterThunk(POST_ADD_CURRENCY, (values) =>
+  mastersService.create(TYPE, values));
 
-export const postCurrencyStatus = createAsyncThunk(
-    POST_CURRENCY_STATUS,
-    async (payload, { rejectWithValue }) => {
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const getCurrencyDetailEdit = masterThunk(GET_CURRENCY_DETAIL_EDIT, (row) =>
+  mastersService.get(TYPE, row?.id ?? row));
 
+export const patchCurrencyDetailEdit = masterThunk(PATCH_CURRENCY_DETAIL_EDIT, (values) =>
+  mastersService.update(TYPE, values.id, values));
 
-export const postAddCurrency = createAsyncThunk(
-    POST_ADD_CURRENCY,
-    async (payload, { rejectWithValue }) => {
-        console.log(payload,"payload")
-
-        const Tabledata = {
-            "id": payload?.id,
-            "Currencycode": payload?.CurrencyCode,
-            "ISOcode": payload?.ISOcode.name,
-            "CurrencyFormat": payload?.CurrencyFormat,
-            "SmallestUnit": payload?.SmallestUnit,
-            "UnitDescription": payload?.UnitDescription,
-            "CurrencyName": payload?.CurrencyName,
-            Description:payload?.Description,
-            NumberofDecimals:payload?.NumberofDecimals
-        }
-        try {
-            // const { data } = await postRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return Tabledata;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
-
-export const getCurrencyDetailEdit = createAsyncThunk(
-    GET_CURRENCY_DETAIL_EDIT,
-    async (payload, { rejectWithValue }) => {
-        console.log(payload,"getCurrencyDetailEdit")
-        try {
-            // const { data } = await patchRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
-
-export const patchCurrencyDetailEdit = createAsyncThunk(
-    PATCH_CURRENCY_DETAIL_EDIT,
-    async (payload, { rejectWithValue }) => {
-        console.log(payload,"patchCurrencyDetailEdit")
-        const Tabledata ={
-            "id": payload.id,
-            "Currencycode": payload?.CurrencyCode,
-            "ISOcode": payload?.ISOcode,
-            "CurrencyFormat": payload?.CurrencyFormat,
-            "SmallestUnit": payload?.SmallestUnit,
-            "UnitDescription": payload?.UnitDescription,
-            "CurrencyName": payload?.CurrencyName,
-            Description:payload?.Description,
-            NumberofDecimals:payload?.NumberofDecimals
-        }
-        try {
-            // const { data } = await patchRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return Tabledata;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
-
-
-export const getCurrencyDetailView = createAsyncThunk(
-    GET_CURRENCY_DETAIL_VIEW,
-    async (payload, { rejectWithValue }) => {
-        console.log(payload,"payload")
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const getCurrencyDetailView = masterThunk(GET_CURRENCY_DETAIL_VIEW, (row) =>
+  mastersService.get(TYPE, row?.id ?? row));

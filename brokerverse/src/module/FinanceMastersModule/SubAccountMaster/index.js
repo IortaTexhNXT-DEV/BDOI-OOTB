@@ -15,8 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import ToggleButton from "../../../components/ToggleButton";
-import Productdata from "./mock";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../components/InputField";
@@ -33,6 +31,9 @@ import {
   getSubAccountView,
   postSubAccount,
 } from "./store/subAccountMiddleWare";
+import useSubAccountOptions from "./useSubAccountOptions";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const SubAccountMaster = () => {
   const { t } = useTranslation();
@@ -60,7 +61,6 @@ const SubAccountMaster = () => {
       };
     }
   );
-  console.log(subAccountList, "subAccountList");
 
   const items = [{ label: t("financeMasters.subAccount"), url: "/master/finance/subaccount" }];
   const home = { label: t("financeMasters.master") };
@@ -101,25 +101,9 @@ const SubAccountMaster = () => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
   };
-  const item = [
-    {
-      label: "1101001 -FIXED ASSETS - LAND AND BUILDING",
-      value: "1101001 - FIXED ASSETS - LAND AND BUILDING",
-    },
-    {
-      label: "1101002 - FIXED ASSETS - LEASE HOLD ",
-      value: "1101002 - FIXED ASSETS - LEASE HOLD ",
-    },
-    {
-      label: "1101003 - FIXED ASSETS - MOTOR CARS",
-      value: "1101003 - FIXED ASSETS - MOTOR CARS",
-    },
-  ];
-  const item1 = [
-    { label: "THB - Thai Baht", value: "THB - Thai Baht" },
-    { label: "EUR-Euro", value: "EUR-Euro" },
-    { label: "HKD-Hong Kong Dollar", value: "HKD-Hong Kong Dollar" },
-  ];
+  const subAccountOptions = useSubAccountOptions();
+  const item = subAccountOptions.mainAccounts;
+  const item1 = subAccountOptions.currencies;
   const toastRef = useRef(null);
   const renderViewButton = (rowData) => {
     return (
@@ -138,16 +122,8 @@ const SubAccountMaster = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     setVisiblePopup(true);
   };
 
@@ -162,13 +138,11 @@ const SubAccountMaster = () => {
   //   }, 3000);
   // }
   const handlEdit = (rowData) => {
-    console.log(rowData, "rowData");
 
     dispatch(getSubAccountEdit(rowData));
     navigate("/master/finance/subaccount/subaccountedit");
   };
   const handleDetail = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getSubAccountView(rowData));
     navigate("/master/finance/subaccount/subaccountdetails");
   };
@@ -181,7 +155,7 @@ const SubAccountMaster = () => {
       <div className="no__data__found">{t("financeMasters.noDataEntered")}</div>
     </div>
   );
-  const isEmpty = Productdata.length === 0;
+  const isEmpty = !subAccountList?.length;
 
   // const emptyTableIcon = (
   //   <div className="empty-table-icon">
@@ -218,23 +192,23 @@ const SubAccountMaster = () => {
   };
 
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    const valueWithId = {
-      ...values,
-      id: subAccountList?.length + 1,
-    };
-    console.log(values, "values");
-    dispatch(postSubAccount(valueWithId))
-      .then(() => {
-        toastRef.current.showToast();
-        setTimeout(() => {
-          setVisiblePopup(false);
-          // formik.resetForm()
-        }, 2000);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getSubAccount());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getSubAccount());
+  }, [dispatch]);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postSubAccount(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        setVisiblePopup(false);
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const customValidation = (values) => {
     const errors = {};
@@ -279,6 +253,7 @@ const SubAccountMaster = () => {
 
   return (
     <div className="grid  container__subaccount">
+      <Toast ref={statusToast} />
       <div className="col-12"></div>
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__taxation">{t("financeMasters.subAccountMaster")}</div>
@@ -370,7 +345,7 @@ const SubAccountMaster = () => {
 
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="sub-account" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header={t("financeMasters.status")}
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

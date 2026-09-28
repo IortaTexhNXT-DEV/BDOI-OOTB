@@ -1,41 +1,100 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
-import { InputText } from "primereact/inputtext";
 import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { ProgressBar } from "primereact/progressbar";
 import { Knob } from "primereact/knob";
 import { Tag } from "primereact/tag";
-import { Timeline } from "primereact/timeline";
 import { Badge } from "primereact/badge";
 import { Dialog } from "primereact/dialog";
 import { MultiSelect } from "primereact/multiselect";
+import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
+import remittanceService from "../../../services/remittanceService";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { downloadCsv, isoDate, showError } from "../shared";
 import "./index.scss";
+
+const CHART_COLORS = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d'];
+const DAY_MS = 86400000;
+
+/** Date range for a period option. */
+const periodRange = (period, custom) => {
+  const now = new Date();
+  const to = isoDate(now);
+  if (period === "Custom Range") return { from: isoDate(custom?.[0]), to: isoDate(custom?.[1]) || to };
+  if (period === "Last 7 Days") return { from: isoDate(new Date(now - 7 * DAY_MS)), to };
+  if (period === "This Month") return { from: isoDate(new Date(now.getFullYear(), now.getMonth(), 1)), to };
+  if (period === "Last 3 Months") return { from: isoDate(new Date(now.getFullYear(), now.getMonth() - 2, 1)), to };
+  return { from: isoDate(new Date(now.getFullYear(), 0, 1)), to };
+};
+
+const pctChange = (current, previous) => (previous ? ((current - previous) / previous) * 100 : 0);
 
 const RemittanceAnalytics = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { formatCurrency } = useFormatCurrency();
+  const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [dateRange, setDateRange] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("This Month");
   const [selectedMetrics, setSelectedMetrics] = useState(["Volume", "Value", "Success Rate"]);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedChart, setSelectedChart] = useState(null);
+  const [analytics, setAnalytics] = useState({ kpiData: [], topClients: [], monthlyTrend: [], statusDistribution: {} });
+  const [topAgents, setTopAgents] = useState([]);
+
+  const loadAnalytics = async () => {
+    const range = periodRange(selectedPeriod, dateRange);
+    try {
+      const [data, agents] = await Promise.all([
+        remittanceService.analytics(range),
+        remittanceService.agencies()
+      ]);
+      setAnalytics(data);
+      const maxCommission = Math.max(1, ...agents.map((a) => Number(a.commission || 0)));
+      setTopAgents(agents.filter((a) => a.policyCount > 0).sort((a, b) => b.commission - a.commission).slice(0, 10).map((a) => ({
+        agentName: a.agencyName,
+        clientCount: a.policyCount,
+        totalCommission: a.commission,
+        avgSettlementTime: "-",
+        performanceScore: Math.round((Number(a.commission || 0) / maxCommission) * 100)
+      })));
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedPeriod !== "Custom Range" || (dateRange?.[0] && dateRange?.[1])) loadAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod, dateRange]);
+
+  const { kpiData, topClients, monthlyTrend, statusDistribution } = analytics;
+  const kpi = (name) => kpiData.find((k) => k.name === name) || {};
+  const months = monthlyTrend.map((m) => m.month);
+  const last = monthlyTrend[monthlyTrend.length - 1] || { count: 0, value: 0 };
+  const prev = monthlyTrend[monthlyTrend.length - 2] || { count: 0, value: 0 };
+  const totalCount = monthlyTrend.reduce((s, m) => s + m.count, 0);
+  const totalValue = monthlyTrend.reduce((s, m) => s + Number(m.value || 0), 0);
+  const peak = monthlyTrend.reduce((best, m) => (m.count > (best?.count ?? -1) ? m : best), null);
+  const bestValue = monthlyTrend.reduce((best, m) => (m.value > (best?.value ?? -1) ? m : best), null);
+  const statusTotal = Object.values(statusDistribution).reduce((s, n) => s + n, 0);
 
   // Chart data
   const volumeChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+    labels: months,
     datasets: [
       {
         label: 'Transactions',
-        data: [45000, 52000, 48000, 61000, 55000, 67000, 72000, 69000, 74000],
+        data: monthlyTrend.map((m) => m.count),
         borderColor: '#007bff',
         backgroundColor: 'rgba(0, 123, 255, 0.1)',
         tension: 0.4,
@@ -45,191 +104,48 @@ const RemittanceAnalytics = () => {
   };
 
   const revenueChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+    labels: months,
     datasets: [
       {
-        label: 'Revenue ($M)',
-        data: [2.4, 2.8, 2.6, 3.2, 2.9, 3.5, 3.8, 3.6, 3.9],
-        backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d'],
+        label: 'Value',
+        data: monthlyTrend.map((m) => m.value),
+        backgroundColor: CHART_COLORS,
         borderWidth: 2
       }
     ]
   };
 
   const settlementStatusData = {
-    labels: ['Completed', 'Processing', 'Pending', 'Failed'],
+    labels: Object.keys(statusDistribution),
     datasets: [
       {
-        data: [85, 10, 3, 2],
-        backgroundColor: ['#28a745', '#007bff', '#ffc107', '#dc3545'],
+        data: Object.values(statusDistribution),
+        backgroundColor: CHART_COLORS,
         borderWidth: 0
       }
     ]
   };
 
-  // KPI data
-  const kpiData = [
-    {
-      id: 1,
-      name: "Settlement Efficiency",
-      value: 92,
-      target: 95,
-      trend: 2.1,
-      status: "warning",
-      unit: "%",
-      description: "Average settlement completion rate"
-    },
-    {
-      id: 2,
-      name: "Payment Success Rate",
-      value: 97,
-      target: 95,
-      trend: 1.5,
-      status: "success",
-      unit: "%",
-      description: "Successful payment processing rate"
-    },
-    {
-      id: 3,
-      name: "Average Processing Time",
-      value: 18,
-      target: 24,
-      trend: -12.3,
-      status: "success",
-      unit: "hours",
-      description: "Time from initiation to completion"
-    },
-    {
-      id: 4,
-      name: "Exception Rate",
-      value: 3.2,
-      target: 5,
-      trend: -0.8,
-      status: "success",
-      unit: "%",
-      description: "Transactions requiring manual intervention"
-    }
-  ];
-
-  // Top performers data
-  const topClients = [
-    {
-      clientName: "ABC Insurance Co",
-      transactionCount: 1250,
-      totalValue: 15600000,
-      avgProcessingTime: 16,
-      successRate: 98.5
-    },
-    {
-      clientName: "XYZ Corp",
-      transactionCount: 890,
-      totalValue: 12400000,
-      avgProcessingTime: 14,
-      successRate: 99.1
-    },
-    {
-      clientName: "DEF Ltd",
-      transactionCount: 670,
-      totalValue: 8900000,
-      avgProcessingTime: 18,
-      successRate: 97.3
-    },
-    {
-      clientName: "GHI Group",
-      transactionCount: 445,
-      totalValue: 6700000,
-      avgProcessingTime: 20,
-      successRate: 96.8
-    }
-  ];
-
-  const topAgents = [
-    {
-      agentName: "John Smith",
-      clientCount: 45,
-      totalCommission: 125000,
-      avgSettlementTime: 12,
-      performanceScore: 94
-    },
-    {
-      agentName: "Sarah Johnson",
-      clientCount: 38,
-      totalCommission: 110000,
-      avgSettlementTime: 15,
-      performanceScore: 91
-    },
-    {
-      agentName: "Mike Wilson",
-      clientCount: 32,
-      totalCommission: 89000,
-      avgSettlementTime: 14,
-      performanceScore: 89
-    }
-  ];
-
-  // Trends data
+  const avgValue = (m) => (m.count ? Number(m.value) / m.count : 0);
+  const trendRow = (id, metric, current, previous, isValue) => ({
+    id, metric, current, previous, change: pctChange(current, previous), forecast: Math.max(0, current + (current - previous)), isValue
+  });
+  const processing = kpi("Average Processing Time");
   const trendsData = [
-    {
-      id: 1,
-      metric: "Transaction Volume",
-      current: 74000,
-      previous: 69000,
-      change: 7.2,
-      forecast: 78000
-    },
-    {
-      id: 2,
-      metric: "Average Transaction Value",
-      current: 52750,
-      previous: 49200,
-      change: 7.2,
-      forecast: 55200
-    },
-    {
-      id: 3,
-      metric: "Processing Time",
-      current: 18,
-      previous: 22,
-      change: -18.2,
-      forecast: 16
-    },
-    {
-      id: 4,
-      metric: "Customer Satisfaction",
-      current: 4.6,
-      previous: 4.3,
-      change: 7.0,
-      forecast: 4.7
-    }
+    trendRow(1, "Transaction Volume", last.count, prev.count, false),
+    trendRow(2, "Average Transaction Value", avgValue(last), avgValue(prev), true),
+    trendRow(3, "Total Value", Number(last.value || 0), Number(prev.value || 0), true),
+    { id: 4, metric: "Processing Time (hours)", current: processing.value || 0, previous: processing.trend ? processing.value / (1 + processing.trend / 100) : processing.value || 0, change: processing.trend || 0, forecast: processing.value || 0 }
   ];
 
-  // Recent alerts
-  const recentAlerts = [
-    {
-      id: 1,
-      type: "Performance",
-      message: "Settlement efficiency dropped below target (92% vs 95%)",
-      severity: "warning",
-      timestamp: "2025-09-26 14:30",
-      affected: "All regions"
-    },
-    {
-      id: 2,
-      type: "Volume",
-      message: "Unusual spike in transaction volume detected (+25%)",
-      severity: "info",
-      timestamp: "2025-09-26 10:15",
-      affected: "North region"
-    },
-    {
-      id: 3,
-      type: "Exception",
-      message: "High exception rate detected for client ABC Corp (8.5%)",
-      severity: "warning",
-      timestamp: "2025-09-26 09:45",
-      affected: "ABC Corp"
-    }
-  ];
+  const recentAlerts = kpiData.filter((k) => k.status !== "success").map((k) => ({
+    id: k.id,
+    type: "Performance",
+    message: `${k.name} is off target (${k.value} ${k.unit} vs ${k.target} ${k.unit})`,
+    severity: "warning",
+    timestamp: `${analytics.from || ""} - ${analytics.to || ""}`,
+    affected: "All insurers"
+  }));
 
   const periodOptions = [
     { label: "Last 7 Days", value: "Last 7 Days" },
@@ -280,14 +196,6 @@ const RemittanceAnalytics = () => {
     }
   };
 
-  const getKpiStatus = (value, target, isReverse = false) => {
-    const percentage = (value / target) * 100;
-    if (isReverse) {
-      return percentage <= 80 ? 'success' : percentage <= 100 ? 'warning' : 'danger';
-    }
-    return percentage >= 100 ? 'success' : percentage >= 80 ? 'warning' : 'danger';
-  };
-
   const getKpiColor = (status) => {
     switch (status) {
       case 'success': return '#28a745';
@@ -297,18 +205,12 @@ const RemittanceAnalytics = () => {
     }
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-PH', {
-      style: 'currency',
-      currency: 'PHP',
-      minimumFractionDigits: 0
-    }).format(value);
-  };
-
   const formatPercent = (value) => {
     const sign = value >= 0 ? '+' : '';
-    return `${sign}${value.toFixed(1)}%`;
+    return `${sign}${Number(value || 0).toFixed(1)}%`;
   };
+
+  const formatMetric = (data, field) => (data.isValue ? formatCurrency(data[field]) : Number(data[field] || 0).toLocaleString(undefined, { maximumFractionDigits: 1 }));
 
   const trendBodyTemplate = (rowData) => {
     const isPositive = rowData.change >= 0;
@@ -321,17 +223,8 @@ const RemittanceAnalytics = () => {
   };
 
   const severityBodyTemplate = (rowData) => {
-    const getSeverity = (severity) => {
-      switch (severity) {
-        case 'info': return 'info';
-        case 'warning': return 'warning';
-        case 'danger': return 'danger';
-        default: return null;
-      }
-    };
-    return <Tag value={rowData.severity.toUpperCase()} severity={getSeverity(rowData.severity)} />;
+    return <Tag value={rowData.severity.toUpperCase()} severity={rowData.severity} />;
   };
-
   const performanceBodyTemplate = (rowData) => {
     return <ProgressBar value={rowData.performanceScore} className="performance-bar" />;
   };
@@ -350,12 +243,44 @@ const RemittanceAnalytics = () => {
   };
 
   const handleExportData = () => {
-    console.log("Exporting analytics data");
+    downloadCsv(`remittance_analytics_${isoDate(new Date())}.csv`, [
+      ...kpiData.map((k) => ({ section: "KPI", name: k.name, value: k.value, target: k.target, trend: k.trend })),
+      ...monthlyTrend.map((m) => ({ section: "Monthly", name: m.period, value: m.value, target: m.count, trend: m.settled }))
+    ], [
+      { field: "section", header: "Section" },
+      { field: "name", header: "Name / Period" },
+      { field: "value", header: "Value" },
+      { field: "target", header: "Target / Count" },
+      { field: "trend", header: "Trend / Settled" }
+    ]);
   };
 
   const handleRefreshData = () => {
-    console.log("Refreshing analytics data");
+    loadAnalytics();
   };
+
+  const chartInsights = {
+    volume: [
+      `Latest month (${last.month || "-"}): ${last.count} remittances, ${formatPercent(pctChange(last.count, prev.count))} vs previous month`,
+      `Peak volume: ${peak?.count ?? 0} remittances in ${peak?.month || "-"}`,
+      `Total remittances in the last ${monthlyTrend.length} months: ${totalCount}`
+    ],
+    revenue: [
+      `Latest month value: ${formatCurrency(last.value)} (${formatPercent(pctChange(last.value, prev.value))} vs previous month)`,
+      `Best month: ${bestValue?.month || "-"} with ${formatCurrency(bestValue?.value || 0)}`,
+      `Average monthly value: ${formatCurrency(monthlyTrend.length ? totalValue / monthlyTrend.length : 0)}`
+    ],
+    settlement: Object.entries(statusDistribution).map(([status, n]) => `${status}: ${n} (${statusTotal ? Math.round((n / statusTotal) * 100) : 0}%)`)
+  };
+
+  const insightList = (key) => (
+    <div className="chart-insights">
+      <h4>Key Insights:</h4>
+      <ul>
+        {chartInsights[key].map((line) => <li key={line}>{line}</li>)}
+      </ul>
+    </div>
+  );
 
   const detailDialogFooter = (
     <div>
@@ -363,6 +288,7 @@ const RemittanceAnalytics = () => {
         label="Export Chart"
         icon="pi pi-download"
         className="p-button-secondary mr-2"
+        onClick={handleExportData}
       />
       <Button
         label="Close"
@@ -375,6 +301,7 @@ const RemittanceAnalytics = () => {
 
   return (
     <div className="remittance-analytics">
+      <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.analyticsDashboard")}</h2>
         <div className="header-actions">
@@ -527,19 +454,19 @@ const RemittanceAnalytics = () => {
                 <div className="stats-list">
                   <div className="stat-item">
                     <span className="stat-label">Total Transactions</span>
-                    <span className="stat-value">74,000</span>
+                    <span className="stat-value">{totalCount.toLocaleString()}</span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Total Value</span>
-                    <span className="stat-value">₱3.9M</span>
+                    <span className="stat-value">{formatCurrency(totalValue)}</span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Avg Processing Time</span>
-                    <span className="stat-value">18 hours</span>
+                    <span className="stat-value">{processing.value ?? 0} hours</span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Success Rate</span>
-                    <span className="stat-value">97%</span>
+                    <span className="stat-value">{kpi("Payment Success Rate").value ?? 0}%</span>
                   </div>
                 </div>
               </Card>
@@ -609,22 +536,12 @@ const RemittanceAnalytics = () => {
                   <Column
                     field="current"
                     header="Current"
-                    body={(data) => {
-                      if (data.metric.includes('Value') || data.metric.includes('Commission')) {
-                        return formatCurrency(data.current);
-                      }
-                      return data.current.toLocaleString();
-                    }}
+                    body={(data) => formatMetric(data, 'current')}
                   />
                   <Column
                     field="previous"
                     header="Previous"
-                    body={(data) => {
-                      if (data.metric.includes('Value') || data.metric.includes('Commission')) {
-                        return formatCurrency(data.previous);
-                      }
-                      return data.previous.toLocaleString();
-                    }}
+                    body={(data) => formatMetric(data, 'previous')}
                   />
                   <Column
                     field="change"
@@ -634,12 +551,7 @@ const RemittanceAnalytics = () => {
                   <Column
                     field="forecast"
                     header="Forecast"
-                    body={(data) => {
-                      if (data.metric.includes('Value') || data.metric.includes('Commission')) {
-                        return formatCurrency(data.forecast);
-                      }
-                      return data.forecast.toLocaleString();
-                    }}
+                    body={(data) => formatMetric(data, 'forecast')}
                   />
                 </DataTable>
               </Card>
@@ -663,33 +575,17 @@ const RemittanceAnalytics = () => {
                 <Card className="insights-card">
                   <h4>AI Insights</h4>
                   <div className="insights-list">
-                    <div className="insight-item">
-                      <div className="insight-icon success">
-                        <i className="pi pi-thumbs-up" />
+                    {kpiData.map((k) => (
+                      <div className="insight-item" key={k.id}>
+                        <div className={`insight-icon ${k.status}`}>
+                          <i className={`pi ${k.status === 'success' ? 'pi-thumbs-up' : 'pi-exclamation-triangle'}`} />
+                        </div>
+                        <div className="insight-content">
+                          <strong>{k.name}</strong>
+                          <p>{k.value} {k.unit} against a target of {k.target} {k.unit} ({formatPercent(k.trend)} vs previous period).</p>
+                        </div>
                       </div>
-                      <div className="insight-content">
-                        <strong>Performance Improvement</strong>
-                        <p>Settlement efficiency has improved by 5% this quarter compared to last quarter.</p>
-                      </div>
-                    </div>
-                    <div className="insight-item">
-                      <div className="insight-icon warning">
-                        <i className="pi pi-exclamation-triangle" />
-                      </div>
-                      <div className="insight-content">
-                        <strong>Potential Risk</strong>
-                        <p>Predicted 15% increase in transaction volume next month. Consider capacity planning.</p>
-                      </div>
-                    </div>
-                    <div className="insight-item">
-                      <div className="insight-icon info">
-                        <i className="pi pi-info-circle" />
-                      </div>
-                      <div className="insight-content">
-                        <strong>Optimization Opportunity</strong>
-                        <p>Automating exception handling could reduce processing time by 20%.</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </Card>
               </div>
@@ -726,15 +622,7 @@ const RemittanceAnalytics = () => {
                   }}
                 />
               </div>
-              <div className="chart-insights">
-                <h4>Key Insights:</h4>
-                <ul>
-                  <li>Steady growth trend with 7.2% increase from August to September</li>
-                  <li>Peak volume of 74,000 transactions in September</li>
-                  <li>Consistent month-over-month growth since June</li>
-                  <li>Projected to reach 78,000 transactions in October</li>
-                </ul>
-              </div>
+              {insightList('volume')}
             </div>
           )}
           {selectedChart === 'revenue' && (
@@ -756,15 +644,7 @@ const RemittanceAnalytics = () => {
                   }}
                 />
               </div>
-              <div className="chart-insights">
-                <h4>Key Insights:</h4>
-                <ul>
-                  <li>Revenue increased 8.3% from August to September (₱3.6M to ₱3.9M)</li>
-                  <li>Best performing month: September with ₱3.9M revenue</li>
-                  <li>Average monthly revenue: ₱3.1M</li>
-                  <li>Revenue per transaction has increased 1.1% month-over-month</li>
-                </ul>
-              </div>
+              {insightList('revenue')}
             </div>
           )}
           {selectedChart === 'settlement' && (
@@ -786,15 +666,7 @@ const RemittanceAnalytics = () => {
                   }}
                 />
               </div>
-              <div className="chart-insights">
-                <h4>Key Insights:</h4>
-                <ul>
-                  <li>85% of settlements are completed successfully</li>
-                  <li>10% are currently in processing</li>
-                  <li>Only 3% are pending action</li>
-                  <li>Failure rate maintained at low 2%</li>
-                </ul>
-              </div>
+              {insightList('settlement')}
             </div>
           )}
         </div>

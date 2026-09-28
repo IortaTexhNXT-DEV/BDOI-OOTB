@@ -12,7 +12,9 @@ import { Column } from "primereact/column";
 import InputField from "../../../../components/InputField";
 import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { postAddReceiptMiddleware } from "../store/pettyCashReceiptsMiddleware";
+import usePettyCashOptions from "../../usePettyCashOptions";
 
 const AddReceiptsTable = () => {
   const [visible, setVisible] = useState(false);
@@ -20,15 +22,19 @@ const AddReceiptsTable = () => {
 
   const toastRef = useRef(null);
   const navigate = useNavigate();
-  const handleSubmit = () => {
-    toastRef.current.showToast();
-    {
-      setTimeout(() => {
-        navigate("/accounts/pettycash/receipts");
-      }, 2000);
+  const dispatch = useDispatch();
+  const { funds } = usePettyCashOptions();
+  const handleSubmit = async () => {
+    const result = await dispatch(postAddReceiptMiddleware(selectedRows));
+    if (postAddReceiptMiddleware.rejected.match(result)) {
+      toastRef.current.showToast({ severity: "error", detail: result.payload });
+      return;
     }
+    toastRef.current.showToast();
+    setTimeout(() => {
+      navigate("/accounts/pettycash/receipts");
+    }, 2000);
   };
-
   const headaction = {
     justifyContent: "center",
     // textalign: center,
@@ -49,14 +55,15 @@ const AddReceiptsTable = () => {
       };
     }
   );
-  console.log(AddReceiptTable.Amount, "AddReceiptTable");
   const totalAmount = selectedRows.reduce((total, item) => {
     const Amount = parseFloat(item.Amount);
     return !isNaN(Amount) ? total + Amount : total;
   }, 0);
-  console.log(totalAmount, "totalAmount");
 
-  const isEmpty = AddReceiptTable?.length === 0;
+  const isEmpty = !AddReceiptTable?.length;
+  const selectedFund = funds.find(
+    (fund) => fund.code === selectedRows[0]?.PettyCashCode
+  );
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -260,7 +267,7 @@ const AddReceiptsTable = () => {
             textColor={"#111927"}
             textSize={"16"}
             textWeight={500}
-            value={1000}
+            value={selectedFund?.availableCash ?? ""}
           />
         </div>
       </div>

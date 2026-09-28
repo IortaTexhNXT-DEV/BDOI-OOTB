@@ -18,10 +18,14 @@ import { Dialog } from "primereact/dialog";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { ProgressBar } from "primereact/progressbar";
 import { Message } from "primereact/message";
-import mockRemittanceService from "../../../services/mockRemittanceService";
-import { statementTemplateData, commonData, mockCrudOperations } from "../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../services/remittanceService";
+import { isoMonth, loadInsurerOptions, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
+
+const EMAIL_PATTERN = /^[\w.-]+@([\w-]+\.)+[\w-]{2,}$/;
+const splitEmails = (text) => String(text || "").split(",").map((e) => e.trim()).filter(Boolean);
+const sum = (rows, field) => rows.reduce((s, r) => s + Number(r[field] || 0), 0);
 
 const StatementGeneration = () => {
   const { t } = useTranslation();
@@ -33,7 +37,7 @@ const StatementGeneration = () => {
   const [selectedInsurers, setSelectedInsurers] = useState([]);
   const [outputFormats, setOutputFormats] = useState({ pdf: true, excel: false, xml: false });
   const [deliveryOptions, setDeliveryOptions] = useState({ download: true, email: false, archive: false });
-  const [emailTemplate, setEmailTemplate] = useState('default_statement');
+  const [emailTemplate, setEmailTemplate] = useState(null);
   const [additionalRecipients, setAdditionalRecipients] = useState('');
   const [generating, setGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
@@ -42,6 +46,8 @@ const StatementGeneration = () => {
   const [validationErrors, setValidationErrors] = useState([]);
   const [previewData, setPreviewData] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [insurerOptions, setInsurerOptions] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const toast = useRef(null);
 
   const steps = [
@@ -50,9 +56,10 @@ const StatementGeneration = () => {
     { label: t("remittance.generate") }
   ];
 
-  // Load data from mock data service
-  const [templates, setTemplates] = useState(statementTemplateData.templates);
-  const [sampleData, setSampleData] = useState(statementTemplateData.sampleData);
+  useEffect(() => {
+    loadInsurerOptions().then(setInsurerOptions).catch((e) => showError(toast, e));
+    masterService.options("remittance-statement-template").then(setTemplates).catch((e) => showError(toast, e));
+  }, []);
 
   const statementTypes = [
     { label: t("remittance.accountStatement"), value: "Account Statement" },
@@ -63,13 +70,8 @@ const StatementGeneration = () => {
     { label: t("remittance.customStatement"), value: "custom" }
   ];
 
-  const insurerOptions = commonData.insurers.map(insurer => ({
-    label: insurer.name,
-    value: insurer.code
-  }));
-
   const emailTemplates = templates.map(template => ({
-    label: template.name,
+    label: template.label,
     value: template.code
   }));
 
@@ -78,53 +80,37 @@ const StatementGeneration = () => {
     if (activeStep === 1) {
       loadPreviewData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStep]);
+
+  const insurerFilter = () => (selectionType === 'all' ? [] : selectedInsurers);
 
   const loadPreviewData = async () => {
     setLoadingPreview(true);
     try {
-      // Use mock sample data and expand it
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const expandedPolicies = [];
-      const baseCount = selectionType === 'all' ? 10 : selectedInsurers.length * 3;
-
-      // Use sample data as template and create variations
-      for (let i = 0; i < baseCount; i++) {
-        const sampleTemplate = sampleData[i % sampleData.length];
-        expandedPolicies.push({
-          ...sampleTemplate,
-          policyNumber: `POL-2025-${String(i + 1).padStart(3, '0')}`,
-          transactionDate: new Date().toISOString().split('T')[0],
-          insuredName: sampleTemplate.insuredName || ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams', 'Charlie Brown'][i % 5],
-          net: sampleTemplate.netAmount || (sampleTemplate.premium - sampleTemplate.commission)
-        });
-      }
-
+      const preview = await remittanceService.previewStatement({ period: isoMonth(period), insurers: insurerFilter() });
+      const rows = (preview.rows || []).map((r) => ({ ...r, net: r.netAmount }));
+      const totalTax = sum(rows, "tax");
+      const totals = preview.totals || {};
       setPreviewData({
-        policies: expandedPolicies,
+        policies: rows,
         summary: {
-          totalPolicies: expandedPolicies.length,
-          totalPremium: expandedPolicies.reduce((sum, p) => sum + p.premium, 0),
-          totalCommission: expandedPolicies.reduce((sum, p) => sum + p.commission, 0),
-          totalTax: expandedPolicies.reduce((sum, p) => sum + (p.tax || 0), 0),
-          netAmount: expandedPolicies.reduce((sum, p) => sum + p.netAmount, 0)
+          totalPolicies: preview.totalRows,
+          totalPremium: totals.premium ?? sum(rows, "premium"),
+          totalCommission: (totals.premium ?? sum(rows, "premium")) - (totals.netAmount ?? sum(rows, "netAmount")) - totalTax,
+          totalTax,
+          netAmount: totals.netAmount ?? sum(rows, "netAmount")
         }
       });
 
       toast.current.show({
         severity: 'success',
         summary: t("remittance.previewLoaded"),
-        detail: t("remittance.loadedPoliciesForPreview", { count: expandedPolicies.length }),
+        detail: t("remittance.loadedPoliciesForPreview", { count: preview.totalRows }),
         life: 2000
       });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Preview Failed',
-        detail: 'Failed to load preview data',
-        life: 3000
-      });
+      showError(toast, error, 'Preview Failed');
     } finally {
       setLoadingPreview(false);
     }
@@ -154,9 +140,9 @@ const StatementGeneration = () => {
       if (!hasFormat) errors.push('Please select at least one output format');
       if (!hasDelivery) errors.push('Please select at least one delivery option');
 
-      if (deliveryOptions.email && additionalRecipients) {
-        const emails = additionalRecipients.split(',').map(e => e.trim());
-        const invalidEmails = emails.filter(e => !e.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$/));
+      if (deliveryOptions.email) {
+        const invalidEmails = splitEmails(additionalRecipients).filter(e => !EMAIL_PATTERN.test(e));
+        if (!splitEmails(additionalRecipients).length) errors.push('Please enter at least one recipient');
         if (invalidEmails.length > 0) {
           errors.push(`Invalid email addresses: ${invalidEmails.join(', ')}`);
         }
@@ -164,27 +150,15 @@ const StatementGeneration = () => {
     }
 
     setValidationErrors(errors);
+    if (errors.length) {
+      toast.current.show({ severity: 'error', summary: 'Validation Failed', detail: errors[0], life: 3000 });
+    }
     return errors.length === 0;
   };
 
   const handleNext = () => {
-    if (validateStep(activeStep)) {
-      if (activeStep < 2) {
-        setActiveStep(activeStep + 1);
-        toast.current.show({
-          severity: 'info',
-          summary: 'Step Complete',
-          detail: `Moving to ${steps[activeStep + 1].label}`,
-          life: 2000
-        });
-      }
-    } else {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Validation Failed',
-        detail: validationErrors[0],
-        life: 3000
-      });
+    if (validateStep(activeStep) && activeStep < 2) {
+      setActiveStep(activeStep + 1);
     }
   };
 
@@ -196,15 +170,7 @@ const StatementGeneration = () => {
   };
 
   const handleGenerate = async () => {
-    if (!validateStep(2)) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Validation Failed',
-        detail: validationErrors[0],
-        life: 3000
-      });
-      return;
-    }
+    if (!validateStep(2)) return;
 
     confirmDialog({
       message: (
@@ -225,89 +191,49 @@ const StatementGeneration = () => {
 
   const generateStatement = async () => {
     setGenerating(true);
-    setGenerateProgress(0);
-
+    setGenerateProgress(30);
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setGenerateProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 300);
-
-      // Use mock CRUD operations to create a new statement record
-      const statementRecord = {
+      const result = await remittanceService.generateStatement({
+        period: isoMonth(period),
         statementType,
-        period: period.toISOString(),
         selectionType,
-        selectedInsurers,
-        outputFormats,
-        deliveryOptions,
-        generatedAt: new Date().toISOString(),
-        status: 'Generated',
-        fileName: `Statement_${period.toLocaleDateString('en-CA')}_${statementType}.pdf`,
-        fileSize: '2.3 MB',
-        recordCount: previewData?.summary.totalPolicies || 0,
-        totalAmount: previewData?.summary.netAmount || 0
-      };
-
-      const result = await mockCrudOperations.create('statement', statementRecord);
-
-      clearInterval(progressInterval);
+        insurers: insurerFilter(),
+        templateCode: emailTemplate || undefined,
+        format: Object.keys(outputFormats).filter((k) => outputFormats[k]).join(","),
+        emailTo: deliveryOptions.email ? splitEmails(additionalRecipients) : []
+      });
       setGenerateProgress(100);
-
-      setGeneratedFile({
-        fileName: result.fileName,
-        fileSize: result.fileSize,
-        generatedAt: result.createdAt
-      });
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Statement Generated',
-        detail: `Statement generated successfully with ${result.recordCount} policies`,
-        life: 3000
-      });
-
-      setTimeout(() => {
-        setSuccessDialog(true);
-        setGenerating(false);
-        setGenerateProgress(0);
-      }, 500);
-
+      setGeneratedFile(result);
+      showSuccess(toast, `${result.statementId}: ${result.rowCount} line(s)`, 'Statement Generated');
+      if (deliveryOptions.download) window.open(result.downloadUrl, "_blank", "noopener");
+      setSuccessDialog(true);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Generation Failed',
-        detail: error.message || 'Failed to generate statement',
-        life: 3000
-      });
+      showError(toast, error, 'Generation Failed');
+    } finally {
       setGenerating(false);
       setGenerateProgress(0);
     }
   };
 
   const handleDownload = () => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Download Started',
-      detail: `Downloading ${generatedFile?.fileName}`,
-      life: 3000
-    });
+    if (generatedFile?.downloadUrl) window.open(generatedFile.downloadUrl, "_blank", "noopener");
     setSuccessDialog(false);
   };
 
-  const handleEmail = () => {
-    toast.current.show({
-      severity: 'success',
-      summary: 'Email Sent',
-      detail: 'Statement has been emailed to recipients',
-      life: 3000
-    });
+  const handleEmail = async () => {
+    try {
+      await remittanceService.sendNotification({
+        type: "Statement",
+        subject: `Remittance statement ${generatedFile.period}`,
+        content: `Your remittance statement is available: ${generatedFile.downloadUrl}`,
+        recipients: splitEmails(additionalRecipients),
+        channel: "Email",
+        templateCode: emailTemplate || undefined
+      });
+      showSuccess(toast, 'Statement has been emailed to recipients', 'Email Sent');
+    } catch (error) {
+      showError(toast, error);
+    }
   };
 
   const handleReset = () => {
@@ -321,12 +247,6 @@ const StatementGeneration = () => {
     setValidationErrors([]);
     setPreviewData(null);
     setSuccessDialog(false);
-    toast.current.show({
-      severity: 'info',
-      summary: 'Form Reset',
-      detail: 'Statement generation form has been reset',
-      life: 2000
-    });
   };
 
   const amountBodyTemplate = (rowData, field) => {

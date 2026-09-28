@@ -7,27 +7,25 @@ import { Column } from "primereact/column";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Badge } from "primereact/badge";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
-import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../components/InputField";
-import { incentiveMockData, incentiveCrudOperations } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { isoDate, loadSettings, showError, showSuccess } from "../../Remittance/shared";
 import "./index.scss";
+
+const PRIORITY_LABEL = { Urgent: "High", High: "High", Normal: "Medium", Low: "Low" };
 
 const Approvals = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
 
   // State management
@@ -36,6 +34,7 @@ const Approvals = () => {
   const [selectedStatus, setSelectedStatus] = useState("Pending Approval");
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [priorityRules, setPriorityRules] = useState([]);
 
   // Detail view state
   const [selectedApproval, setSelectedApproval] = useState(null);
@@ -55,15 +54,11 @@ const Approvals = () => {
     { label: "Pending Approval", value: "Pending Approval" },
     { label: "Approved", value: "Approved" },
     { label: "Rejected", value: "Rejected" },
+    { label: "Paid", value: "Paid" },
     { label: "All", value: "All" }
   ];
 
-  const periodOptions = [
-    { label: "January 2025", value: "January 2025" },
-    { label: "December 2024", value: "December 2024" },
-    { label: "November 2024", value: "November 2024" },
-    { label: "October 2024", value: "October 2024" }
-  ];
+  const periodOptions = [...new Set(approvals.map((a) => a.period))].map((p) => ({ label: p, value: p }));
 
   // Breadcrumb items
   const items = [
@@ -76,69 +71,39 @@ const Approvals = () => {
   // Initialize data
   useEffect(() => {
     loadApprovals();
+    loadSettings()
+      .then((s) => setPriorityRules([...(s["remittance.priority_thresholds"] || [])].sort((a, b) => b.min - a.min)))
+      .catch((error) => showError(toast, error));
   }, []);
+
+  const priorityOf = (amount) => PRIORITY_LABEL[priorityRules.find((r) => Math.abs(amount) >= r.min)?.priority] || "Low";
 
   const loadApprovals = async () => {
     setLoading(true);
     try {
-      // Filter calculation batches that need approval or have been processed
-      const approvalData = incentiveMockData.calculationBatches.map(batch => ({
-        ...batch,
-        priority: batch.totalAmount > 300000 ? "High" : batch.totalAmount > 150000 ? "Medium" : "Low",
-        daysWaiting: Math.floor((new Date() - new Date(batch.submittedDate)) / (1000 * 60 * 60 * 24))
-      }));
-
-      setApprovals(approvalData);
-
-      // Calculate dashboard metrics
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const pending = approvalData.filter(a => a.status === "Pending Approval");
-      const approvedToday = approvalData.filter(a => {
-        if (a.status !== "Approved" || !a.approvalDate) return false;
-        const approvalDate = new Date(a.approvalDate);
-        approvalDate.setHours(0, 0, 0, 0);
-        return approvalDate.getTime() === today.getTime();
-      });
-      const rejectedToday = approvalData.filter(a => {
-        if (a.status !== "Rejected" || !a.rejectionDate) return false;
-        const rejectionDate = new Date(a.rejectionDate);
-        rejectionDate.setHours(0, 0, 0, 0);
-        return rejectionDate.getTime() === today.getTime();
-      });
-
+      const board = await incentiveService.approvals();
+      setApprovals(board.approvals || []);
       setDashboardData({
-        pendingCount: pending.length,
-        pendingAmount: pending.reduce((sum, a) => sum + a.totalAmount, 0),
-        approvedToday: approvedToday.length,
-        rejectedToday: rejectedToday.length
-      });
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Data Loaded',
-        detail: 'Approval queue loaded successfully',
-        life: 3000
+        pendingCount: board.summary?.pending || 0,
+        pendingAmount: board.summary?.pendingAmount || 0,
+        approvedToday: board.summary?.approvedToday || 0,
+        rejectedToday: board.summary?.rejectedToday || 0
       });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load approval data',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to load approval data');
     } finally {
       setLoading(false);
     }
   };
 
+  const approvalRows = approvals.map((a) => ({ ...a, priority: priorityOf(Number(a.totalAmount || 0)), rejectionComment: a.rejectionReason }));
+
   // Filter data
-  const filteredApprovals = approvals.filter((approval) => {
+  const filteredApprovals = approvalRows.filter((approval) => {
     const matchesSearch =
       approval.batchId.toLowerCase().includes(search.toLowerCase()) ||
       approval.period.toLowerCase().includes(search.toLowerCase()) ||
-      approval.submittedBy.toLowerCase().includes(search.toLowerCase());
+      String(approval.submittedBy || "").toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus = selectedStatus === "All" || approval.status === selectedStatus;
     const matchesPeriod = !selectedPeriod || approval.period === selectedPeriod;
@@ -153,46 +118,26 @@ const Approvals = () => {
     setDetailsVisible(true);
   };
 
-  // Handle approve
-  const handleApprove = async (approval, comment = "") => {
+  const runAction = async (action, summary, detail) => {
     setLoading(true);
     try {
-      await incentiveCrudOperations.approveCalculation(approval.batchId);
-
-      setApprovals(approvals.map(a =>
-        a.batchId === approval.batchId
-          ? {
-              ...a,
-              status: "Approved",
-              approvedBy: "Current User",
-              approvalDate: new Date().toISOString(),
-              approvalComment: comment
-            }
-          : a
-      ));
-
+      await action();
       setDetailsVisible(false);
-
-      toast.current.show({
-        severity: "success",
-        summary: "Approved",
-        detail: `Calculation batch ${approval.batchId} has been approved`,
-        life: 3000
-      });
-
-      // Refresh dashboard data
-      loadApprovals();
+      showSuccess(toast, detail, summary);
+      await loadApprovals();
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to approve calculation",
-        life: 3000
-      });
+      showError(toast, error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Handle approve (the backend refuses approvals by the batch creator or submitter)
+  const handleApprove = (approval, comment = "") => runAction(
+    () => incentiveService.approveCalculation(approval.batchId, comment || undefined),
+    "Approved",
+    `Calculation batch ${approval.batchId} has been approved`
+  );
 
   // Handle reject
   const handleReject = async (approval, comment = "") => {
@@ -205,42 +150,17 @@ const Approvals = () => {
       });
       return;
     }
+    runAction(() => incentiveService.rejectCalculation(approval.batchId, comment), "Rejected", `Calculation batch ${approval.batchId} has been rejected`);
+  };
 
-    setLoading(true);
-    try {
-      setApprovals(approvals.map(a =>
-        a.batchId === approval.batchId
-          ? {
-              ...a,
-              status: "Rejected",
-              rejectedBy: "Current User",
-              rejectionDate: new Date().toISOString(),
-              rejectionComment: comment
-            }
-          : a
-      ));
-
-      setDetailsVisible(false);
-
-      toast.current.show({
-        severity: "warn",
-        summary: "Rejected",
-        detail: `Calculation batch ${approval.batchId} has been rejected`,
-        life: 3000
-      });
-
-      // Refresh dashboard data
-      loadApprovals();
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to reject calculation",
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handlePay = (approval) => {
+    const paymentReference = window.prompt(`Payment reference for ${approval.batchId}`, "");
+    if (paymentReference === null) return;
+    runAction(
+      () => incentiveService.payCalculation(approval.batchId, { paymentDate: isoDate(new Date()), paymentReference }),
+      "Paid",
+      `Calculation batch ${approval.batchId} marked as paid`
+    );
   };
 
   // Bulk approval
@@ -251,43 +171,11 @@ const Approvals = () => {
       message: `Approve ${pendingApprovals.length} pending calculation batches?`,
       header: "Bulk Approval",
       icon: "pi pi-check",
-      accept: async () => {
-        setLoading(true);
-        try {
-          for (const approval of pendingApprovals) {
-            await incentiveCrudOperations.approveCalculation(approval.batchId);
-          }
-
-          setApprovals(approvals.map(a =>
-            pendingApprovals.some(pa => pa.batchId === a.batchId)
-              ? {
-                  ...a,
-                  status: "Approved",
-                  approvedBy: "Current User",
-                  approvalDate: new Date().toISOString()
-                }
-              : a
-          ));
-
-          toast.current.show({
-            severity: "success",
-            summary: "Bulk Approval Complete",
-            detail: `${pendingApprovals.length} calculation batches approved`,
-            life: 3000
-          });
-
-          loadApprovals();
-        } catch (error) {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to complete bulk approval",
-            life: 3000
-          });
-        } finally {
-          setLoading(false);
-        }
-      }
+      accept: () => runAction(
+        () => Promise.all(pendingApprovals.map((a) => incentiveService.approveCalculation(a.batchId))),
+        "Bulk Approval Complete",
+        `${pendingApprovals.length} calculation batches approved`
+      )
     });
   };
 
@@ -366,6 +254,14 @@ const Approvals = () => {
               tooltip="Review & Reject"
             />
           </>
+        )}
+        {rowData.status === "Approved" && (
+          <Button
+            icon="pi pi-wallet"
+            className="approve-button"
+            onClick={() => handlePay(rowData)}
+            tooltip="Mark as Paid"
+          />
         )}
       </div>
     );

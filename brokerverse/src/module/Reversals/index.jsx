@@ -12,23 +12,29 @@ import { useFormik } from "formik";
 import ArrowLeftIcon from "../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
-import { postReversalJVData } from "./store/reversalMiddleWare";
+import {
+  getReversalTabelData,
+  postReversalJVData,
+} from "./store/reversalMiddleWare";
+import { resetReversalJV } from "./store/reversalReducers";
+import useJvMasterData from "../JournalVoucher/useJvMasterData";
 import SvgBackicon from "../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
 
 const Reversals = () => {
   const { t } = useTranslation();
   const toastRef = useRef(null);
-  const handleApproval = () => {
-    setStep(2);
-    toastRef.current.showToast();
-    {
-      setTimeout(() => {
-        setStep(2);
-      }, 1000);
-    }
-  };
+  const dispatch = useDispatch();
   const [step, setStep] = useState(0);
+  const [toastMessage, setToastMessage] = useState("");
+  const { transactionCodesData } = useJvMasterData();
+  const { reversalJVList, loading, reversalJVGetDataList } = useSelector(
+    ({ reversalMainReducers }) => ({
+      loading: reversalMainReducers?.loading,
+      reversalJVList: reversalMainReducers?.reversalJVList,
+      reversalJVGetDataList: reversalMainReducers?.reversalJVGetDataList || [],
+    })
+  );
   const items = [
     { label: t("sidebar.Reversal JV"), to: "/accounts/reversaljv/reversaljvdetails" },
     {
@@ -37,11 +43,18 @@ const Reversals = () => {
     },
   ];
   const home = { label: t("sidebar.Accounts") };
-  const codeOptions = [
-    { label: t("accounts.option1"), value: "PRM" },
-    { label: t("accounts.option2"), value: "COMM" },
-    { label: t("accounts.option2"), value: "REMT" },
-  ];
+  const codeOptions = transactionCodesData.map((code) => ({
+    label: code.description,
+    value: code.code,
+  }));
+  const describeCode = (code) =>
+    transactionCodesData.find((row) => row.code === code)?.description || "";
+
+  const showToast = (message, severity = "success") => {
+    setToastMessage(message);
+    toastRef.current?.showToast({ severity, detail: message });
+  };
+
   const customValidation = (values) => {
     const errors = {};
 
@@ -58,27 +71,16 @@ const Reversals = () => {
 
     return errors;
   };
-  // const handleSubmit = (values) => {
-  //   // Handle form submission
-  //   console.log(values, "find values");
-  // };
-  const dispatch = useDispatch();
-  const [errors, setErrors] = useState("");
-  const { reversalJVList, loading, reversalJVGetDataList } = useSelector(
-    ({ reversalMainReducers }) => {
-      return {
-        loading: reversalMainReducers?.loading,
-        reversalJVList: reversalMainReducers?.reversalJVList,
-        reversalJVGetDataList: reversalMainReducers?.reversalJVGetDataList,
-      };
-    }
-  );
-  // const reversalJVList = useSelector(state => state.reversalJVList);
-  console.log(reversalJVGetDataList, "reversalJVGetDataList");
-  const handleSubmit = (values) => {
-    dispatch(postReversalJVData(formik.values));
 
-    // navigate("/accounts/receipts");
+  const loadOriginalVoucher = async (values) => {
+    const result = await dispatch(
+      getReversalTabelData(values.transactionNumber.trim())
+    );
+    if (getReversalTabelData.rejected.match(result)) {
+      showToast(result.payload, "error");
+      return;
+    }
+    setStep(1);
   };
 
   const formik = useFormik({
@@ -88,28 +90,33 @@ const Reversals = () => {
       reversalJVTransactionCode: "",
     },
     validate: customValidation,
-    onSubmit: (values) => {
-      // Handle form submission
-      handleSubmit(values);
-      setStep(1);
-    },
-    // onSubmit: handleSubmit
+    onSubmit: loadOriginalVoucher,
   });
+
+  const handleApproval = async () => {
+    const result = await dispatch(
+      postReversalJVData({
+        transactionNumber: formik.values.transactionNumber.trim(),
+        reversalJVTransactionCode: formik.values.reversalJVTransactionCode,
+        description: describeCode(formik.values.reversalJVTransactionCode),
+      })
+    );
+    if (postReversalJVData.rejected.match(result)) {
+      showToast(result.payload, "error");
+      return;
+    }
+    showToast(result.payload?.message);
+    setStep(2);
+  };
+
   const handlePrint = () => {
-    toastRef.current.showToast();
     formik.resetForm();
+    dispatch(resetReversalJV());
     setStep(0);
   };
   return (
     <div className="container__reversal">
-      {step === 1 ? (
-        <CustomToast
-          ref={toastRef}
-          message="Transaction Number 1234 is created"
-        />
-      ) : (
-        <CustomToast ref={toastRef} message="Successfully Printed" />
-      )}
+      <CustomToast ref={toastRef} message={toastMessage} />
 
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
@@ -181,11 +188,7 @@ const Reversals = () => {
                 : "input__label__reversal__inactive"
             }
             label="Transaction Description"
-            value={
-              formik.values.transactionCode
-                ? `Transaction Description ${formik.values.transactionCode}`
-                : ""
-            }
+            value={describeCode(formik.values.transactionCode)}
           />
         </div>
         <div className="col-12 md:col-12 lg:col-3 xl:col-3  input__view__reversal">
@@ -259,11 +262,7 @@ const Reversals = () => {
                 : "input__label__reversal__inactive"
             }
             label="Reversal Description"
-            value={
-              formik.values.reversalJVTransactionCode
-                ? `Reversal Description ${formik.values.reversalJVTransactionCode}`
-                : ""
-            }
+            value={describeCode(formik.values.reversalJVTransactionCode)}
           />
         </div>
       </div>
@@ -285,8 +284,7 @@ const Reversals = () => {
             <Button
               label="Next"
               className="correction__btn__reversal"
-              disabled={!formik.isValid}
-              // onClick={formik.handleSubmit}
+              disabled={!formik.isValid || loading}
               onClick={formik.handleSubmit}
             />
           )}
@@ -296,6 +294,7 @@ const Reversals = () => {
               label="Approve"
               className="correction__btn__reversal"
               onClick={handleApproval}
+              disabled={loading || reversalJVGetDataList.length === 0}
             />
           )}
 

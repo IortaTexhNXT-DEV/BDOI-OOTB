@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "../PettyDataTabel/index.scss";
 import { DataTable } from "primereact/datatable";
@@ -7,8 +7,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
-import data from "./data";
-import ToggleButton from "../../../../components/ToggleButton";
 import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
@@ -16,8 +14,11 @@ import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import {
   getPatchPettyCashEdit,
   getPettyCashView,
+  pettyCashMaster,
 } from "../store/pettyCashMasterMiddleWare";
 import SvgEditicons from "../../../../assets/icons/SvgEditicons";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
   const { t } = useTranslation();
   const { getPettyCashEdit, loading } = useSelector(
@@ -28,7 +29,6 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
       };
     }
   );
-  console.log(getPettyCashEdit, "getPettyCashEdit");
   const navigate = useNavigate();
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -43,13 +43,6 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
       <SvgTable />
     </div>
   );
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -88,13 +81,18 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
   };
 
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(pettyCashMaster());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(pettyCashMaster());
+  }, [dispatch]);
   const handleView = (columnData) => {
-    console.log(columnData.id, "columnData");
     dispatch(getPettyCashView(columnData));
     navigate(`/master/finance/pettycash/pettycashdetail/${columnData.id}`);
   };
   const handleEdit = (columnData) => {
-    console.log(columnData, "columnData");
     dispatch(getPatchPettyCashEdit(columnData));
     // alert(columnData.id, "hiii")
     navigate(`/master/finance/pettycash/editpettycash/${columnData.id}`);
@@ -102,6 +100,7 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
 
   return (
     <div className="petty__cash__table__container">
+      <Toast ref={statusToast} />
       <DataTable
         value={pettyCashList}
         paginator
@@ -118,26 +117,26 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
           field="pettycashcode"
           header="Petty Cash Code"
           className="fieldvalue_container"
-          body={(rowData) => rowData.pettycashcode?.toUpperCase()}
+          body={(rowData) => String(rowData.pettycashcode ?? "").toUpperCase()}
         ></Column>
         <Column
           field="pettycashname"
           header="Petty Cash Name"
           className="fieldvalue_container"
-          body={(rowData) => rowData.pettycashname?.toUpperCase()}
+          body={(rowData) => String(rowData.pettycashname ?? "").toUpperCase()}
         ></Column>
 
         <Column
           field="pettycashsize"
           header="Petty Cash Size"
           className="fieldvalue_container"
-          body={(rowData) => rowData.pettycashsize?.toUpperCase()}
+          body={(rowData) => String(rowData.pettycashsize ?? "").toUpperCase()}
         ></Column>
         <Column
           field="minicashbox"
           header="Minimum Cash Box"
           className="fieldvalue_container"
-          body={(rowData) => rowData.minicashbox?.toUpperCase()}
+          body={(rowData) => String(rowData.minicashbox ?? "").toUpperCase()}
         ></Column>
         <Column
           field="transactionlimit"
@@ -146,7 +145,7 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
         ></Column>
         <Column
           field="status"
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="petty-cash" record={columnData} onChanged={reloadList} onError={showStatusError} />}
           header="Status"
           headerStyle={{ textAlign: "center", ...headerStyle }}
           className="fieldvalue_container"

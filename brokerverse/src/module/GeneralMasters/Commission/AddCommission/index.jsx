@@ -23,11 +23,13 @@ import AddCommissionPopup from "./AddCommissionPopup";
 import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../../../components/Toast";
 import { SelectButton } from "primereact/selectbutton";
-import data from "./data";
+import useMasterOptions from "../../common/useMasterOptions";
+import { agentOptions } from "../../../../services/mastersService";
 import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
 import {
   getCommissionPopupView,
   getEditCommissionPopup,
+  getLevelCommissionSharing,
   postAddCommission,
 } from "../store/commissionMiddleWare";
 import { useDispatch, useSelector } from "react-redux";
@@ -55,7 +57,6 @@ const AddCommission = () => {
       commissionSearchList: commissionMianReducers?.commissionSearchList,
     };
   });
-  console.log(addLevelCommissionSharing, "addLevelCommissionSharing");
 
   const items = [
     { label: t("generalMasters.commission"), url: "/master/generals/commission" },
@@ -108,41 +109,30 @@ const AddCommission = () => {
 
     return errors;
   };
-  const productOption = [
-    { label: "Motor", value: "Motor" },
-    { label: "Fire and Allied Perils", value: "Fire and Allied Perils" },
-    { label: "Industrial All Risks", value: "Industrial All Risks" },
-  ];
-  const insuranceCompany= [
-    { label: "Option 1", value: "PIONEER INSURANCE AND SURETY CORP (PISC)" },
-    { label: "Option 2", value: "MALAYAN INSURANCE COMPANY,INC" },
-     { label: "Option 3", value: "COOPERATIVE INSURANCE SYSTEM OF THE PJILLIPINES LIFE" },
-  
-  ];
-  const selectCover = [
-    { label: "Option 1", value: "CTPL" },
-    { label: "Option 2", value: "Comprehensive" },
-  ];
-  const selectAgent = [
-    { label: "Option 1", value: "Juan" },
-    { label: "Option 2", value: "Marquez" },
-    { label: "Option 3", value: "Nicole" },
-    { label: "Option 4", value: "Cortez" },
-  ];
-
+  const productOption = useMasterOptions("product");
+  const insuranceCompany = useMasterOptions("insurance-company");
+  const selectCover = useMasterOptions("cover");
+  const [selectAgent, setSelectAgent] = useState([]);
+  useEffect(() => {
+    agentOptions()
+      .then(setSelectAgent)
+      .catch(() => setSelectAgent([]));
+  }, []);
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    const data = {
-      ...values,
-      id: commissionList?.length + 1,
-    };
-    console.log(data, "data");
-    dispatch(postAddCommission(data));
-    navigate("/master/generals/commission");
-    // toastRef.current.showToast();
-    // setTimeout(() => {
-    //   navigate("/master/generals/commission");
-    // }, 2000);
+  useEffect(() => {
+    dispatch(getLevelCommissionSharing([]));
+  }, [dispatch]);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddCommission(values)).unwrap();
+      setStep(1);
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate("/master/generals/commission");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const handleGoBack = () => {
     navigate("/master/generals/commission");
@@ -164,14 +154,12 @@ const AddCommission = () => {
 
     onSubmit: (values) => {
       handleSubmit(values);
-      setStep(1);
     },
   });
   const navigate = useNavigate();
   const handlePolicy = () => {
     setVisible(true);
   };
-  const [products, setProducts] = useState(data);
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const handleNavigate = () => {
@@ -181,7 +169,7 @@ const AddCommission = () => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
   };
-  const isEmpty = products.length === 0;
+  const isEmpty = !addLevelCommissionSharing?.length;
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -240,7 +228,6 @@ const AddCommission = () => {
   };
 
   const handleEditNavigate = (rowData) => {
-    console.log(rowData, "popupEditData");
     dispatch(getEditCommissionPopup(rowData));
     setShowEditPopup(true);
     // navigate("/master/generals/commission/editcommission/editcommissionpopup")

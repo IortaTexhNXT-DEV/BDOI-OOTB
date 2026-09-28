@@ -1,6 +1,4 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getRequest } from "../../../utility/commonServices";
-import { APIROUTES } from "../../../routes/apiRoutes";
 import { receiptsService } from "../../../services/receiptsService";
 import {
   GET_RECEIPT_DETAILS,
@@ -17,40 +15,42 @@ import {
   UPDATE_RECEIPT,
 } from "../../../redux/actionTypes";
 
+const toReceiptRow = (receipt) => ({
+  id: receipt.receiptId,
+  receiptNumber: receipt.receiptNumber,
+  transactionCode: receipt.transactionCode,
+  transactionNumber: receipt.transactionNumber,
+  policyNumber: receipt.policyNumber,
+  name: receipt.name,
+  customerCode: receipt.customerCode,
+  date: new Date(receipt.receiptDate).toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  }),
+  amount: receipt.receiptsList
+    ?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0)
+    .toFixed(2),
+  action: "Action",
+  receiptType: receipt.receiptType,
+  branchCode: receipt.branchCode,
+  departmentCode: receipt.departmentCode,
+  currencyCode: receipt.currencyCode,
+  remarks: receipt.remarks,
+  policyRefId: receipt.policyRefId,
+  policy: receipt.policy,
+  receiptsList: receipt.receiptsList,
+  receiptStatus: receipt.receiptStatus,
+});
+
 export const getReceiptsListMiddleware = createAsyncThunk(
   GET_RECEIPT_DETAILS,
   async (payload, { rejectWithValue }) => {
     try {
-      const { page = 1, pageSize = 10 } = payload || {};
-      const response = await receiptsService.getReceipts(page, pageSize);
+      const response = await receiptsService.filterReceipts(payload || {});
       
       // Transform API response to match the expected format - show ALL receipts (Draft + Converted)
-      const transformedData = response.data
-        .map(receipt => ({
-          id: receipt.receiptId,
-          receiptNumber: receipt.receiptNumber,
-          transactionCode: receipt.transactionCode,
-          transactionNumber: receipt.transactionNumber,
-          policyNumber: receipt.policyNumber,
-          name: receipt.name,
-          customerCode: receipt.customerCode,
-          date: new Date(receipt.receiptDate).toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          amount: receipt.receiptsList?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0).toFixed(2),
-          action: "Action",
-          receiptType: receipt.receiptType,
-          branchCode: receipt.branchCode,
-          departmentCode: receipt.departmentCode,
-          currencyCode: receipt.currencyCode,
-          remarks: receipt.remarks,
-          policyRefId: receipt.policyRefId,
-          policy: receipt.policy,
-          receiptsList: receipt.receiptsList,
-          receiptStatus: receipt.receiptStatus // Include receiptStatus in transformed data
-        }));
+      const transformedData = response.data.map(toReceiptRow);
 
       return {
         data: transformedData,
@@ -74,7 +74,6 @@ export const getPaymentDetails = createAsyncThunk(
       cardNumber: payload?.cardNumber,
     }
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return data;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -94,32 +93,7 @@ export const getReceiptsListBySearchMiddleware = createAsyncThunk(
       const response = await receiptsService.searchReceipts(searchParams);
       
       // Transform API response to match the expected format - show ALL receipts (Draft + Converted)
-      const transformedData = response.data
-        .map(receipt => ({
-          id: receipt.receiptId,
-          receiptNumber: receipt.receiptNumber,
-          transactionCode: receipt.transactionCode,
-          transactionNumber: receipt.transactionNumber,
-          policyNumber: receipt.policyNumber,
-          name: receipt.name,
-          customerCode: receipt.customerCode,
-          date: new Date(receipt.receiptDate).toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          amount: receipt.receiptsList?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0).toFixed(2),
-          action: "Action",
-          receiptType: receipt.receiptType,
-          branchCode: receipt.branchCode,
-          departmentCode: receipt.departmentCode,
-          currencyCode: receipt.currencyCode,
-          remarks: receipt.remarks,
-          policyRefId: receipt.policyRefId,
-          policy: receipt.policy,
-          receiptsList: receipt.receiptsList,
-          receiptStatus: receipt.receiptStatus // Include receiptStatus in transformed data
-        }));
+      const transformedData = response.data.map(toReceiptRow);
 
       return transformedData;
     } catch (error) {
@@ -130,9 +104,10 @@ export const getReceiptsListBySearchMiddleware = createAsyncThunk(
 
 export const getReceiptsListByFilterMiddleware = createAsyncThunk(
   GET_RECEIPT_FILTER,
-  async ({ field, value, page = 1, pageSize = 10 }, { rejectWithValue }) => {
+  async ({ field, value, page = 1, pageSize = 10, ...filters }, { rejectWithValue }) => {
     try {
       const filterParams = {
+        ...filters,
         page,
         pageSize
       };
@@ -145,32 +120,7 @@ export const getReceiptsListByFilterMiddleware = createAsyncThunk(
       const response = await receiptsService.filterReceipts(filterParams);
       
       // Transform API response to match the expected format - show ALL receipts (Draft + Converted)
-      const transformedData = response.data
-        .map(receipt => ({
-          id: receipt.receiptId,
-          receiptNumber: receipt.receiptNumber,
-          transactionCode: receipt.transactionCode,
-          transactionNumber: receipt.transactionNumber,
-          policyNumber: receipt.policyNumber,
-          name: receipt.name,
-          customerCode: receipt.customerCode,
-          date: new Date(receipt.receiptDate).toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          amount: receipt.receiptsList?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0).toFixed(2),
-          action: "Action",
-          receiptType: receipt.receiptType,
-          branchCode: receipt.branchCode,
-          departmentCode: receipt.departmentCode,
-          currencyCode: receipt.currencyCode,
-          remarks: receipt.remarks,
-          policyRefId: receipt.policyRefId,
-          policy: receipt.policy,
-          receiptsList: receipt.receiptsList,
-          receiptStatus: receipt.receiptStatus // Include receiptStatus in transformed data
-        }));
+      const transformedData = response.data.map(toReceiptRow);
 
       return {
         data: transformedData,
@@ -280,63 +230,37 @@ export const getReceiptsReceivableMiddleware = createAsyncThunk(
     const { receivableTableList } = receivableTableReducers;
     const filteredData = receivableTableList.filter((item) => item.id === 1);
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return filteredData[0];
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
     }
   }
 );
+const optionCode = (value) => value?.code ?? value ?? undefined;
+
+const toIsoDate = (value) =>
+  value instanceof Date ? value.toISOString() : value || undefined;
+
 export const postAddReceiptsMiddleware = createAsyncThunk(
   POST_ADD_RECEIPTS,
-  async (payload, { rejectWithValue, getState }) => {
-
-    const generateRandomName = () => {
-      const names = ['Ayesha', 'Sindhu', 'John', 'Doe', 'Alice', 'Bob'];
-      const randomIndex = Math.floor(Math.random() * names.length);
-      return names[randomIndex];
-    };
-
-
-    const generateRandomTransaction = () => {
-      const randomCode = Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit code
-      return { code: randomCode.toString() };
-    };
-
-    const generateRandomTransactionCode = () => {
-      const randomCode = Math.floor(10000 + Math.random() * 90000); // Generates a 6-digit code
-      return { code: randomCode.toString() };
-    };
-    const generateRandomTransactionnum = () => {
-      const transactions = ['02Rep012303', '03Rep012302', '02Rep0103'];
-      const randomIndex = Math.floor(Math.random() * transactions.length);
-      return { name: transactions[randomIndex] };
-    };
-
-    const generateRandomAmount = () => {
-      return (Math.random() * 1000).toFixed(2);
-    };
-    let bodyTableData = {
-      id: payload.id,
-      receiptNumber: generateRandomTransactionnum().name,
-      transactionCode: generateRandomTransactionCode().code,
-      customerCode: payload?.customerCode.code,
-      date: payload?.receiptDate.toLocaleDateString("en-US", {
-        month: "numeric",
-        day: "2-digit",
-        year: "numeric",
-      }),
-      transactionNumber: generateRandomTransaction().code,
-      name: generateRandomName(),
-      amount: generateRandomAmount(),
-      action: 8,
-    };
+  async (payload, { rejectWithValue }) => {
     try {
-
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return bodyTableData;
+      const response = await receiptsService.createReceipt({
+        customerCode: optionCode(payload?.customerCode),
+        receiptDate: toIsoDate(payload?.receiptDate),
+        receiptType: optionCode(payload?.receiptType),
+        transactionCode: optionCode(payload?.transactionCode),
+        remarks: payload?.remarks,
+        policyRefId: optionCode(payload?.policyRefId),
+        receiptsList: payload?.receiptsList,
+      });
+      return toReceiptRow(response.data);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(
+        error?.response?.data?.error?.message ||
+          error?.response?.data?.message ||
+          error.message
+      );
     }
   }
 );
@@ -344,7 +268,6 @@ export const postPaymentDetailsMiddleware = createAsyncThunk(
   POST_PAYMENT_DETAILS,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);

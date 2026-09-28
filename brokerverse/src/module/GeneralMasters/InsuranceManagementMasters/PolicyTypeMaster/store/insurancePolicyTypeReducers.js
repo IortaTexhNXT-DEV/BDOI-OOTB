@@ -8,118 +8,7 @@ import {
 const initialState = {
   loading: false,
   error: "",
-  InsurancePolicyType: [
-    {
-      id: 1,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 0,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 1,
-    },
-    {
-      id: 2,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 1,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 2,
-    },
-    {
-      id: 3,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 0,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 3,
-    },
-    {
-      id: 4,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 1,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 4,
-    },
-    {
-      id: 5,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 0,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 5,
-    },
-    {
-      id: 6,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 1,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 6,
-    },
-    {
-      id: 7,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 0,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 7,
-    },
-    {
-      id: 8,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 1,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 8,
-    },
-    {
-      id: 9,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 0,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 9,
-    },
-    {
-      id: 10,
-      modifiedby: "Name",
-      modifiedOn: "12/12/2023",
-      Status: 0,
-      policytypeCode: "Policy0123",
-      policyTypeName: "Motor Comprehensive",
-      product: "Motor",
-      policyTypeDescription: "policyTypeDescription",
-      action: 10,
-    },
-  ],
+  InsurancePolicyType: [],
   SearchTableList: [],
 };
 const insuranceManagementPolicyTypeMasterReducer = createSlice({
@@ -142,7 +31,7 @@ const insuranceManagementPolicyTypeMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.InsurancePolicyType = {};
+        state.InsurancePolicyType = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -206,7 +95,7 @@ const insuranceManagementPolicyTypeMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.SearchTableList = {};
+        state.SearchTableList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );

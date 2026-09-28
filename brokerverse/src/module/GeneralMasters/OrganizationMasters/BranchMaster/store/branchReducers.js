@@ -4,87 +4,15 @@ import { getBranchListMiddleware, getBranchListByIdMiddleware, postAddBranchMidd
 const initialState = {
   loading: false,
   error: "",
-  branchTableList: [
-    {
-      id: "1",
-      BranchCode: "101",
-      BranchName: "ALPHA INSURACE",
-      CompanyName: "BRANCH 1",
-      EmailID: "contactus@broker.com",
-      Description: "TEST PURPOSE",
-      AddressLine1: "",
-      AddressLine2: "",
-      AddressLine3: " ",
-      City: "SANTA TERESITA",
-      State: "QUEZON CITY",
-      Country: "PHILIPPINES",
-      PhoneNumber: "8296571254",
-      Fax: "99",
-    },
-    {
-      id: "2",
-      BranchCode: "102",
-      BranchName: "Nandanum",
-      CompanyName: "BRANCH  2",
-      EmailID: "contactus@broker.com",
-      Description: "TEST PURPOSE",
-      AddressLine1: "",
-      AddressLine2: "",
-      AddressLine3: " ",
-      City: "SANTA TERESITA",
-      State: "QUEZON CITY",
-      Country: "PHILIPPINES",
-      PhoneNumber: "8296571254",
-      Fax: "99",
-    },
-
-  ],
+  branchTableList: [],
   branchTabelSearchList: [],
   organizationBranchView: {},
-  departmentList: [
-    {
-      id: "1",
-      DepartmentCode: "001",
-      DepartmentName: "Motor",
-      Status: "CREDIT",
-      Description: "TEST PURPOSE",
-    },
-    {
-      id: "2",
-      DepartmentCode: "002",
-      DepartmentName: "Non-Life Retail (NLR)",
-      Status: "CREDIT",
-      Description: "TEST PURPOSE",
-    },
-    // {
-    //   id: "3",
-    //   DepartmentCode: "003",
-    //   DepartmentName: "Accident and Health",
-    //   Status: "CREDIT",
-    //   Description: "TEST PURPOSE",
-    // },
-    // {
-    //   id: "4",
-    //   DepartmentCode: "004",
-    //   DepartmentName: "NLR Operations",
-    //   Status: "CREDIT",
-    //   Description: "TEST PURPOSE",
-    // },
-    // {
-    //   id: "5",
-    //   DepartmentCode: "005",
-    //   DepartmentName: "Finance",
-    //   Status: "CREDIT",
-    //   Description: "TEST PURPOSE",
-    // }
-  ],
+  departmentList: [],
   depatmentView: {},
   getBranchPatch: {},
   getDepartmentPatch: {},
   postAddDepartmentData: {}
 };
-let nextId = 3
-let nextId2 = 3
 const organizationBranchReducers = createSlice({
   name: "employee",
   initialState,
@@ -95,11 +23,11 @@ const organizationBranchReducers = createSlice({
     });
     builder.addCase(getBranchListMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      state.branchTableList = [action.payload];
+      state.branchTableList = action.payload;
     });
     builder.addCase(getBranchListMiddleware.rejected, (state, action) => {
       state.loading = false;
-      state.branchTableList = {};
+      state.branchTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -133,7 +61,7 @@ const organizationBranchReducers = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.branchTabelSearchList = {};
+        state.branchTabelSearchList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -146,9 +74,7 @@ const organizationBranchReducers = createSlice({
     builder.addCase(
       postAddBranchMiddleware.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId++ };
-        state.branchTableList = [...state.branchTableList, newItem2];
-        console.log(state.branchTableList, "branchTableList")
+        state.branchTableList = [...state.branchTableList, action.payload];
       }
     );
     builder.addCase(postAddBranchMiddleware.rejected, (state, action) => {
@@ -182,11 +108,11 @@ const organizationBranchReducers = createSlice({
     });
     builder.addCase(getDepartmentListMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      state.departmentList = [action.payload];
+      state.departmentList = action.payload;
     });
     builder.addCase(getDepartmentListMiddleware.rejected, (state, action) => {
       state.loading = false;
-      state.departmentList = {};
+      state.departmentList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -197,9 +123,7 @@ const organizationBranchReducers = createSlice({
     builder.addCase(
       postAddDepartment.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId2++ };
-        state.departmentList = [...state.departmentList, newItem2];
-        console.log(state.departmentList, "departmentList")
+        state.departmentList = [...state.departmentList, action.payload];
       }
     );
     builder.addCase(postAddDepartment.rejected, (state, action) => {
@@ -239,7 +163,6 @@ const organizationBranchReducers = createSlice({
         const updatedIndex = state.branchTableList.findIndex(
           (item) => item.id === action.payload.id
         );
-        console.log(updatedIndex, "updatedIndex");
         if (updatedIndex !== -1) {
           const updatedCurrencyList = [...state.branchTableList];
           updatedCurrencyList[updatedIndex] = action.payload;
@@ -310,7 +233,6 @@ const organizationBranchReducers = createSlice({
         const updatedIndex = state.departmentList.findIndex(
           (item) => item.id === action.payload.id
         );
-        console.log(updatedIndex, "updatedIndex");
         if (updatedIndex !== -1) {
           const updatedCurrencyList = [...state.departmentList];
           updatedCurrencyList[updatedIndex] = action.payload;

@@ -17,7 +17,8 @@ import { Badge } from "primereact/badge";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
-import { incentiveMockData } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { showError } from "../../Remittance/shared";
 import "./index.scss";
 
 const MyPrograms = () => {
@@ -53,21 +54,32 @@ const MyPrograms = () => {
   // Initialize data
   useEffect(() => {
     loadMyPrograms();
-    initializeCharts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Signed-in agent's programs; users who are not agents (managers) see the first eligible agent.
+  const fetchAgentData = async () => {
+    const mine = await incentiveService.myPrograms();
+    if (mine.eligible !== false) return mine;
+    const all = await incentiveService.agentPrograms();
+    if (all.length) {
+      toast.current.show({ severity: 'info', summary: t("incentive.myPrograms"), detail: all[0].agentName, life: 3000 });
+    }
+    return all[0] || mine;
+  };
 
   const loadMyPrograms = async () => {
     setLoading(true);
     try {
-      // Simulate loading current user's data (using first agent from mock data)
-      const currentAgentData = incentiveMockData.agentPrograms[0];
+      const currentAgentData = await fetchAgentData();
+      const programs = currentAgentData.assignedPrograms || [];
       setAgentData(currentAgentData);
+      initializeCharts(programs);
 
-      // Calculate dashboard metrics
-      const totalPrograms = currentAgentData.assignedPrograms.length;
-      const activePrograms = currentAgentData.assignedPrograms.filter(p => p.daysRemaining > 0).length;
-      const totalPotentialEarning = currentAgentData.assignedPrograms.reduce((sum, p) => sum + p.potentialEarning, 0);
-      const avgAchievement = currentAgentData.assignedPrograms.reduce((sum, p) => sum + p.achievementPercent, 0) / totalPrograms;
+      const totalPrograms = programs.length;
+      const activePrograms = programs.filter(p => p.daysRemaining > 0).length;
+      const totalPotentialEarning = programs.reduce((sum, p) => sum + Number(p.potentialEarning || 0), 0);
+      const avgAchievement = totalPrograms ? programs.reduce((sum, p) => sum + Number(p.achievementPercent || 0), 0) / totalPrograms : 0;
 
       setDashboardData({
         totalPrograms,
@@ -75,35 +87,23 @@ const MyPrograms = () => {
         totalPotentialEarning,
         avgAchievement: Math.round(avgAchievement)
       });
-
-      toast.current.show({
-        severity: 'success',
-        summary: t("incentive.dataLoaded"),
-        detail: t("incentive.programsLoadedSuccess"),
-        life: 3000
-      });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("incentive.failedToLoadProgramData"),
-        life: 3000
-      });
+      showError(toast, error, t("incentive.failedToLoadProgramData"));
     } finally {
       setLoading(false);
     }
   };
 
-  const initializeCharts = () => {
+  const initializeCharts = (programs) => {
     const documentStyle = getComputedStyle(document.documentElement);
 
     // Achievement chart data
     const data = {
-      labels: ['Q1 Premium Achievers', 'New Business Champion', 'Renewal Excellence'],
+      labels: programs.map((p) => p.programName),
       datasets: [
         {
           label: 'Achievement %',
-          data: [85, 90, 103.5],
+          data: programs.map((p) => p.achievementPercent),
           backgroundColor: [
             documentStyle.getPropertyValue('--blue-500'),
             documentStyle.getPropertyValue('--green-500'),
@@ -372,7 +372,7 @@ const MyPrograms = () => {
                   <div className="activity-content">
                     <div className="activity-title">{activity.activity}</div>
                     <div className="activity-details">
-                      <span className="impact">{activity.impact}</span>
+                      <span className="impact">+{formatCurrency(activity.impact)}</span>
                       <span className="points">+{activity.points} points</span>
                     </div>
                   </div>

@@ -168,13 +168,8 @@ export const postpaymentVocherCreateDataMiddleware = createAsyncThunk(
           payload.SelectInstrumentCurrency?.code ||
           payload.SelectInstrumentCurrency,
         remarks: payload.Remarks,
-        amount:
-          (payload.PayeeType?.code || payload.PayeeType) === "Agent/Referrer"
-            ? "0.00"
-            : "350000.00",
+        amount: payload.Amount ? String(payload.Amount) : "0.00",
       };
-
-      console.log("Creating disbursement with data:", disbursementData);
 
       // Call the disbursement service
       const result = await disbursementService.createDisbursement(

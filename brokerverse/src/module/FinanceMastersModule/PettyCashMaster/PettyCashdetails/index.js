@@ -32,7 +32,6 @@ const PettyCashDetail = () => {
     }
   );
 
-  console.log(pettyCashView, "pettyCashView");
   const handleGoBack = () => {
     navigate("/master/finance/pettycash");
   };
@@ -49,8 +48,8 @@ const PettyCashDetail = () => {
   const customValidation = (values) => {
     const errors = {};
 
-    if (!values.prttycashcode) {
-      errors.prttycashcode = "This field Code is required";
+    if (!values.pettycashcode) {
+      errors.pettycashcode = "This field Code is required";
     }
 
     if (!values.pettycashname) {
@@ -62,8 +61,8 @@ const PettyCashDetail = () => {
     if (!values.avilabelcash) {
       errors.avilabelcash = "This field is required";
     }
-    if (!values.mincashback) {
-      errors.mincashback = "This field is required";
+    if (!values.minicashbox) {
+      errors.minicashbox = "This field is required";
     }
     if (!values.transactionlimit) {
       errors.transactionlimit = "This field is required";
@@ -73,7 +72,6 @@ const PettyCashDetail = () => {
   };
   // const [view, setView]=useState({})
   const handleSubmit = (values) => {
-    console.log(values, "find values");
   };
   // const viewData=pettyCashList.map((val)=>{
   //   return val
@@ -81,11 +79,11 @@ const PettyCashDetail = () => {
 
   const formik = useFormik({
     initialValues: {
-      prttycashcode: pettyCashView.pettycashcode || "",
+      pettycashcode: pettyCashView.pettycashcode || "",
       pettycashname: pettyCashView.pettycashname || "",
       pettycashsize: pettyCashView.pettycashsize || "",
       avilabelcash: pettyCashView.avilabelcash || "",
-      mincashback: pettyCashView.minicashbox || "",
+      minicashbox: pettyCashView.minicashbox || "",
       transactionlimit: pettyCashView.transactionlimit || "",
     },
     validate: customValidation,
@@ -128,7 +126,7 @@ const PettyCashDetail = () => {
             value={pettyCashView.pettycashcode}
             disabled={true}
             // onChange={(e) =>
-            //   formik.setFieldValue("prttycashcode", e.target.value)
+            //   formik.setFieldValue("pettycashcode", e.target.value)
             // }
           />
         </div>
@@ -196,7 +194,7 @@ const PettyCashDetail = () => {
             value={pettyCashView.minicashbox}
             disabled={true}
             // onChange={(e) =>
-            //   formik.setFieldValue("mincashback", e.target.value)
+            //   formik.setFieldValue("minicashbox", e.target.value)
             // }
           />
         </div>

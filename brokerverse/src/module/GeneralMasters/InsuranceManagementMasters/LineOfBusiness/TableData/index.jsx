@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -9,14 +9,22 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import ToggleButton from "../../../../../components/ToggleButton";
 import { useFormik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
-import { getSearchInsurancelineOfBusinessMiddleware } from "../store/insuranceLineOfBusinessMiddleware";
+import { getSearchInsurancelineOfBusinessMiddleware, getInsurancelineOfBusinessListMiddleWare } from "../store/insuranceLineOfBusinessMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getInsurancelineOfBusinessListMiddleWare());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getInsurancelineOfBusinessListMiddleWare());
+  }, [dispatch]);
   const { InsuranceLineOfBusinessList, loading, SearchTableList } = useSelector(
     ({ insuranceLineOfBusinessReducers }) => {
       return {
@@ -107,6 +115,7 @@ const TableData = ({ navigate }) => {
   }, [formik.values.search]);
   return (
     <div className="line__business__compnay_container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -168,7 +177,7 @@ const TableData = ({ navigate }) => {
           field="status"
           header="status"
           className="fieldvalue_container"
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="line-of-business" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
           field="id"

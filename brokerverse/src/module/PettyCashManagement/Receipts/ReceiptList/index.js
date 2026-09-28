@@ -18,12 +18,11 @@ const ReceiptList = () => {
       return {
         loading: pettyCashReceiptsReducer?.loading,
         ViewReceipt: pettyCashReceiptsReducer?.ViewReceipt,
-        AddReceiptTable:pettyCashReceiptsReducer?.AddReceiptTable
+        AddReceiptTable: pettyCashReceiptsReducer?.ViewReceiptTable || []
       };
     }
   );
 
-  console.log(ViewReceipt,"ViewReceipt")
 
   const items = [
     { label: "Petty Cash", command: () => navigate( "/accounts/pettycash/receipts") },

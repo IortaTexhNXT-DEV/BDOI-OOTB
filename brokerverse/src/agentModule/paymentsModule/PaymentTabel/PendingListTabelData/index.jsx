@@ -161,8 +161,8 @@ const PendingListTabelData = () => {
     );
   };
 
-  const handleView = () => {
-    navigate(`/agent/policydetailedview`);
+  const handleView = (rowData) => {
+    navigate(`/agent/policydetail/${rowData.policyId}`);
   };
 
   const handleEdit = () => {

@@ -30,7 +30,6 @@ const AddPettyCash = () => {
       };
     }
   );
-  console.log(pettyCashList, "pettyCashList");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
@@ -77,21 +76,16 @@ const AddPettyCash = () => {
     return errors;
   };
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    const valueWithId = {
-      ...values,
-      id: pettyCashList?.length + 1,
-    };
-    dispatch(postAddPettyCash(valueWithId))
-      .then(() => {
-        toastRef.current.showToast();
-        setTimeout(() => {
-          navigate(`/master/finance/pettycash`);
-        }, 2000);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddPettyCash(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate(`/master/finance/pettycash`);
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
   const formik = useFormik({

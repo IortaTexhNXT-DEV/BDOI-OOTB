@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -21,6 +21,7 @@ import {
   postAddRequestMiddleware,
   postEditRequestMiddleware,
 } from "../store/pettyCashRequestMiddleware";
+import { removeRequestLine } from "../store/pettyCashRequestReducer";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 
 const initialValue = {
@@ -36,7 +37,6 @@ const AddRequestTable = () => {
   const toastRef = useRef(null);
   const toastRefApprove = useRef(null);
   const navigate = useNavigate();
-  const [toastMessage, setToastMessage] = useState("");
 
   const { AddRequestTable, loading } = useSelector(
     ({ pettyCashRequestReducer }) => {
@@ -47,35 +47,30 @@ const AddRequestTable = () => {
     }
   );
 
-  const isEmpty = AddRequestTable.length === 0;
+  const isEmpty = !AddRequestTable?.length;
 
-  useEffect(() => {
-    if (toastMessage != null) {
+
+  const handleapprove = async (actionName) => {
+    const result = await dispatch(
+      postAddRequestMiddleware({ submit: actionName === "approve" })
+    );
+    if (postAddRequestMiddleware.rejected.match(result)) {
+      toastRef.current.showToast({ severity: "error", detail: result.payload });
+      return;
     }
-  }, [toastMessage]);
-
-  const handleapprove = (actionName) => {
-    console.log("first6", totalAmount)
-    dispatch(postAddRequestMiddleware(totalAmount));
     if (actionName === "save") {
       toastRef.current.showToast();
-      // setToastMessage("Successfully saved");
-    } else if (actionName === "approve") {
-      toastRefApprove.current.showToast();
-      // dispatch(postAddRequestMiddleware(valueWithId));
-      // setToastMessage("Transaction Number 1234 is created");
-      setTimeout(() => {
-        navigate("/accounts/pettycash/request");
-      }, 2000);
+    } else {
+      toastRefApprove.current.showToast({
+        detail: t("pettyCash.transactionCreated", {
+          number: result.payload.RequestNumber,
+        }),
+      });
     }
-    // toastRef.current.showToast();
-    // {
-    //   setTimeout(() => {
-    //     navigate("/accounts/pettycash/request");
-    //   }, 2000);
-    // }
+    setTimeout(() => {
+      navigate("/accounts/pettycash/pettycashrequest");
+    }, 2000);
   };
-
   const emptyTableIcon = (
     <div>
       <div className="empty-table-icon">
@@ -150,17 +145,17 @@ const AddRequestTable = () => {
   });
 
   const totalAmount = AddRequestTable.reduce(
-    (total, item) => total + parseInt(item.Amount),
+    (total, item) => total + (parseFloat(item.Amount) || 0),
     0
   );
 
-  const handleDelete = (id) => { };
+  const handleDelete = (id) => dispatch(removeRequestLine(id));
 
   return (
     <div className="add__request__table">
 
       <CustomToast ref={toastRef} message={t("pettyCash.successfullySaved")} />
-      <CustomToast ref={toastRefApprove} message={t("pettyCash.transactionCreated", { number: "1234" })} />
+      <CustomToast ref={toastRefApprove} />
 
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">

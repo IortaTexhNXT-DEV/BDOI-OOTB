@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "../../../ComapanyMaster/mock";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
@@ -13,6 +13,7 @@ import InputField from "../../../../../../components/InputField";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
+  getDepartmentListMiddleware,
   getDepatmentEditData,
   getDepatmentView,
   postAddDepartment,
@@ -21,8 +22,7 @@ import {
 import SvgIconeye from "../../../../../../assets/icons/SvgIconeye";
 import SvgEditicons from "../../../../../../assets/icons/SvgEditicons";
 
-const DepartMentList = ({ action }) => {
-  console.log(action, "action");
+const DepartMentList = ({ action, branchCode }) => {
   const { departmentList, loading, depatmentView, getDepartmentPatch } =
     useSelector(({ organizationBranchMainReducers }) => {
       return {
@@ -32,11 +32,11 @@ const DepartMentList = ({ action }) => {
         getDepartmentPatch: organizationBranchMainReducers?.getDepartmentPatch,
       };
     });
-  console.log(departmentList, "departmentList");
+  const toastRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [visibleView, setVisibleView] = useState(false);
   const [visibleedit, setVisibleEdit] = useState(false);
-  const isEmpty = Productdata.length === 0;
+  const isEmpty = !departmentList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -104,19 +104,24 @@ const DepartMentList = ({ action }) => {
     alignItem: "center",
   };
   const dispatch = useDispatch();
+  const loadDepartments = () => {
+    if (branchCode) dispatch(getDepartmentListMiddleware({ BranchCode: branchCode }));
+  };
+  useEffect(loadDepartments, [dispatch, branchCode]); // eslint-disable-line react-hooks/exhaustive-deps
   const initialValues = {
     DepartmentCode: "",
     DepartmentName: "",
     Description: "",
   };
-  const handleSubmit = (value) => {
-    if (value) {
-      dispatch(postPatchDepatmentEdit(value));
+  const handleSubmit = async (values) => {
+    const thunk = values?.id ? postPatchDepatmentEdit : postAddDepartment;
+    try {
+      await dispatch(thunk({ ...values, BranchCode: branchCode })).unwrap();
       setVisible(false);
       setVisibleEdit(false);
-    } else {
-      dispatch(postAddDepartment(formik.values));
-      setVisible(false);
+      loadDepartments();
+    } catch (error) {
+      toastRef.current?.show({ severity: "error", detail: error });
     }
   };
   const customValidation = (values) => {
@@ -148,9 +153,7 @@ const DepartMentList = ({ action }) => {
       DepartmentCode: DepartmentCodeData,
       DepartmentName: getDepartmentPatch?.DepartmentName,
       Description: getDepartmentPatch?.Description,
-      Status: getDepartmentPatch?.Status,
     };
-    console.log(updatedValues.id, "updatedValues");
     // if(DepartmentCodeData){
     //   setDepartmentCodeDataOption([{label:DepartmentCodeData,value:DepartmentCodeData}])
     // }
@@ -164,6 +167,7 @@ const DepartMentList = ({ action }) => {
 
   return (
     <div className="overall_list">
+      <Toast ref={toastRef} />
       <div className="cardlist_container">
         <div className="subhead_list">
           <label className="head_lable">Department List</label>
@@ -174,7 +178,10 @@ const DepartMentList = ({ action }) => {
             <Button
               label="Add"
               icon={<SvgAdd />}
-              onClick={() => setVisible(true)}
+              onClick={() => {
+                formik.resetForm();
+                setVisible(true);
+              }}
             />
           )}
         </div>
@@ -205,8 +212,8 @@ const DepartMentList = ({ action }) => {
             headerStyle={headerStyle}
           ></Column>
           <Column
-            field="Status"
-            body={(rowData) => rowData.Status?.toUpperCase()}
+            field="status"
+            body={(rowData) => rowData.status?.toUpperCase()}
             header="Status"
             headerStyle={headerStyle}
           ></Column>

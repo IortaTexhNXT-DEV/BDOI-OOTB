@@ -109,27 +109,16 @@ export const receiptsService = {
     }
   },
 
-  // Filter receipts with new API endpoint
-  filterReceipts: async (filterParams) => {
-    try {
-      const { customerCode, name, transactionNumber, transactionCode, page = 1, pageSize = 10 } = filterParams;
-      
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', page);
-      queryParams.append('pageSize', pageSize);
-      
-      // Add filter parameters if they exist
-      if (customerCode) queryParams.append('customerCode', customerCode);
-      if (name) queryParams.append('name', name);
-      if (transactionNumber) queryParams.append('transactionNumber', transactionNumber);
-      if (transactionCode) queryParams.append('transactionCode', transactionCode);
-      
-      const response = await getRequest(`receipts?${queryParams.toString()}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+  // List receipts with any server-side filters (customerCode, name, receiptStatus, policyId, ...)
+  filterReceipts: async ({ page = 1, pageSize = 10, ...filters } = {}) => {
+    const queryParams = new URLSearchParams({ page, pageSize });
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, value);
+      }
+    });
+    const response = await getRequest(`receipts?${queryParams.toString()}`);
+    return response.data;
   },
 
   // Bulk print receipts
