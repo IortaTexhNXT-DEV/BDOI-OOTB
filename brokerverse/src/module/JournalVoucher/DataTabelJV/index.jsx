@@ -148,10 +148,19 @@ const DataTabelJV = ({
         ></Column>
         <Column
           field="transationDescription"
-          header="Date"
+          header="Description"
           className="fieldvalue_container"
-          hidden
           headerStyle={headerStyle}
+        ></Column>
+        <Column
+          field="status"
+          header="Status"
+          className="fieldvalue_container"
+          headerStyle={headerStyle}
+          body={(r) => {
+            const labels = { draft: "Draft", "for-approval": "Awaiting approval", approved: "Approved", posted: "Posted", rejected: "Rejected", reversed: "Reversed" };
+            return labels[r.status] || r.status || "-";
+          }}
         ></Column>
 
         <Column

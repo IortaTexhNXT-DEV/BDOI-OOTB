@@ -12,6 +12,36 @@ import adminService from "../../services/adminService";
 import "./index.scss";
 
 import { numberLocale } from "../../utility/currencyConverter";
+
+// Plain-language schedule for the common cron shapes; anything else is shown as written.
+const pad = (n) => String(n).padStart(2, "0");
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const describeCron = (cron) => {
+  const parts = String(cron || "").trim().split(/\s+/);
+  if (parts.length !== 5) return cron || "-";
+  const [min, hour, dom, mon, dow] = parts;
+  const num = (v) => /^\d+$/.test(v);
+  if (min === "*" && hour === "*" && dom === "*" && mon === "*" && dow === "*") return "Every minute";
+  if (/^\*\/\d+$/.test(min) && hour === "*" && dom === "*" && mon === "*" && dow === "*") return `Every ${min.slice(2)} minutes`;
+  if (num(min) && hour === "*" && dom === "*" && mon === "*" && dow === "*") return `Hourly at :${pad(min)}`;
+  if (num(min) && num(hour) && mon === "*") {
+    const at = `${pad(hour)}:${pad(min)}`;
+    if (dom === "*" && dow === "*") return `Daily at ${at}`;
+    if (dom === "*" && dow === "1-5") return `Weekdays at ${at}`;
+    if (dom === "*" && num(dow)) return `Every ${DAYS[Number(dow) % 7]} at ${at}`;
+    if (num(dom) && dow === "*") return `Monthly on day ${dom} at ${at}`;
+  }
+  return cron;
+};
+// Job results as short sentences: {"updated":5} -> "Updated: 5"
+export const describeOutput = (out) => {
+  if (out == null) return "";
+  if (typeof out !== "object") return String(out);
+  const words = (k) => k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase());
+  return Object.entries(out)
+    .map(([k, v]) => `${words(k)}: ${Array.isArray(v) ? v.length : typeof v === "object" && v ? JSON.stringify(v) : v}`)
+    .join(", ") || "Done";
+};
 const fmt = (d) => (d ? new Date(d).toLocaleString(numberLocale()) : "-");
 const statusTag = (s) => (s ? <Tag value={s} severity={s === "success" ? "success" : s === "failed" ? "danger" : "info"} /> : "-");
 
@@ -33,7 +63,7 @@ const Schedules = () => {
     setBusy(job.code);
     try {
       const r = await adminService.runSchedule(job.code);
-      toast.current?.show({ severity: r.status === "success" ? "success" : "error", summary: job.name, detail: r.status === "success" ? JSON.stringify(r.output) : r.error });
+      toast.current?.show({ severity: r.status === "success" ? "success" : "error", summary: job.name, detail: r.status === "success" ? describeOutput(r.output) : r.error });
       load();
     } catch (e) {
       toast.current?.show({ severity: "error", summary: job.name, detail: e.message });
@@ -76,13 +106,13 @@ const Schedules = () => {
       <div className="admin__header">
         <div>
           <h2>Schedules</h2>
-          <p>Jobs run automatically on the timetable below (cron format, server time). Run a job now to test it.</p>
+          <p>Jobs run automatically on the timetable below (server time). Run a job now to test it.</p>
         </div>
       </div>
       <DataTable value={jobs} dataKey="code" stripedRows size="small">
         <Column field="name" header="Job" />
         <Column field="description" header="What it does" />
-        <Column field="cron" header="Schedule" />
+        <Column header="Schedule" body={(j) => <span title={j.cron}>{describeCron(j.cron)}</span>} />
         <Column header="Enabled" body={(j) => (j.enabled ? "Yes" : "No")} />
         <Column header="Last run" body={(j) => fmt(j.lastRunAt)} />
         <Column header="Last status" body={(j) => statusTag(j.lastStatus)} />
@@ -95,7 +125,7 @@ const Schedules = () => {
           <Column header="Finished" body={(r) => fmt(r.finishedAt)} />
           <Column header="Status" body={(r) => statusTag(r.status)} />
           <Column field="triggeredBy" header="Triggered by" />
-          <Column header="Result" body={(r) => r.error || JSON.stringify(r.output)} />
+          <Column header="Result" body={(r) => r.error || describeOutput(r.output)} />
         </DataTable>
       </Dialog>
 
@@ -106,6 +136,7 @@ const Schedules = () => {
             <div className="admin__field">
               <label htmlFor="cron">Schedule (cron)</label>
               <InputText id="cron" value={edit.cron} onChange={(e) => setEdit({ ...edit, cron: e.target.value })} />
+              <small className="block mt-1">{describeCron(edit.cron)}</small>
               <small>minute hour day month weekday, for example 0 6 * * * runs daily at 06:00</small>
             </div>
             <div className="admin__field admin__field--inline">

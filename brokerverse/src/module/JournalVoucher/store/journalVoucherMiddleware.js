@@ -282,6 +282,7 @@ export const getJournalVoucherHistory = createAsyncThunk(
           totalCredit: item.totalCredit,
           transationDescription: item.transactionDescription || item.description || "",
           date: formattedDate,
+          status: item.status || "",
         };
       });
 

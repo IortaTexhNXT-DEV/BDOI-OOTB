@@ -192,7 +192,11 @@ const JournalVoucher = () => {
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture mb-3">
         <div
           className="add__icon__view__Journal__Voture"
+          role="button"
+          tabIndex={0}
+          aria-label={t("accounts.voucher")}
           onClick={handleNavigate}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleNavigate()}
         >
           <div className="add__icon__Journal__Voture">
             <SvgAdd color={"#fff"} />
