@@ -24,7 +24,9 @@ const ROLE_PERMS = {
   'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'receipts:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   finance: ['profile', 'clients:read', 'policies:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
-  agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'notifications'],
+  // Agents work their own book (record scoping: security.scoped_roles): endorsements and first notice of loss on their own
+  // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
+  agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'endorsements', 'claims', 'notifications'],
 };
 
 export async function seed({ log = console.log } = {}) {

@@ -13,6 +13,7 @@ import { clientFromLead } from '../clients/service.js';
 import { issuePolicy, insurerId, getPolicyRow, updatePolicy } from '../policies/service.js';
 import { createLead } from '../leads/service.js';
 import { premiumBreakdown } from './premium.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { toQuote, stripReserved, QUOTE_SELECT } from './shape.js';
 
 export async function getQuoteRow(id, db = null) {
@@ -229,6 +230,7 @@ function listWhere(q) {
   if (q.status || q.quotationStatus) add('q.status = ?', quoteStatusIn(q.status || q.quotationStatus) || '-');
   if (q.lob) add('q.lob = ?', lobOf(q.lob));
   if (q.productType) add("(q.product_type ILIKE '%' || ? || '%' OR q.lob = upper(?))", q.productType);
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'quote', 'q', params));
   const search = q.search || q.query;
   if (search) add("(q.quote_number ILIKE '%' || ? || '%' OR l.display_name ILIKE '%' || ? || '%' OR q.product_type ILIKE '%' || ? || '%')", search);
   return { where: where.join(' AND '), params };

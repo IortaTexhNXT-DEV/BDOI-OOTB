@@ -1,5 +1,6 @@
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 
 /** Dashboard KPIs: Executive, Sales, Underwriting, Claims and the agent home (legacy APIROUTES.DASHBOARD.GET_DETAILS). */
@@ -12,7 +13,8 @@ define({
   middleware: [requireAuth, requirePermission('read:leads', 'read:quotations', 'read:policies')], query: { scope: 'mine' },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8 }, premiumThisMonth: 125000, renewalsDueIn60Days: 3, recentQuotations: [], expiringPolicies: [] } },
   handler: async (req, res) => {
-    const all = req.query.scope === 'all' && (isAdmin(req.user) || req.user.permissions.includes('read:reports'));
+    const scoped = await scopeOf(req);
+    const all = !scoped && req.query.scope === 'all' && (isAdmin(req.user) || req.user.permissions.includes('read:reports'));
     send(res, all ? await svc.sales(null) : await svc.agentHome(req.user.id));
   },
 });
@@ -23,10 +25,10 @@ define({
   handler: async (req, res) => send(res, await svc.executive(req.query.period)),
 });
 define({
-  method: 'GET', path: '/dashboard/sales', summary: 'Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month', screen: 'Dashboard > Sales',
+  method: 'GET', path: '/dashboard/sales', summary: 'Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)', screen: 'Dashboard > Sales',
   middleware: [requireAuth, requirePermission('read:leads', 'read:quotations')], query: { scope: 'mine' },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8, leadToPolicyRate: 50 }, leadsByStatus: [{ status: 'New', count: 4 }] } },
-  handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' ? req.user.id : null)),
+  handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' || (await scopeOf(req)) ? req.user.id : null)),
 });
 define({
   method: 'GET', path: '/dashboard/underwriting', summary: 'Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB', screen: 'Dashboard > Underwriting Dashboard',

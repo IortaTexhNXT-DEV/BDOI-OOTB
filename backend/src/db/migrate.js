@@ -6,6 +6,14 @@ import { pool } from './pool.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const dir = path.join(here, 'migrations');
 
+/** Migration files not yet applied (the whole list when schema_migrations does not exist yet). */
+export async function pendingMigrations() {
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
+  const exists = (await pool.query("SELECT to_regclass('public.schema_migrations') AS t")).rows[0].t;
+  const done = exists ? new Set((await pool.query('SELECT name FROM schema_migrations')).rows.map((r) => r.name)) : new Set();
+  return files.filter((f) => !done.has(f));
+}
+
 export async function migrate({ reset = false, log = console.log } = {}) {
   const client = await pool.connect();
   try {

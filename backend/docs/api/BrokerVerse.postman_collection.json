@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (532 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (543 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -49,7 +49,7 @@
             "login"
           ]
         },
-        "description": "Sign in with username and password\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
+        "description": "Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
         "auth": {
           "type": "noauth"
         },
@@ -84,7 +84,7 @@
                 "login"
               ]
             },
-            "description": "Sign in with username and password\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
+            "description": "Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             },
@@ -108,7 +108,7 @@
             }
           ],
           "cookie": [],
-          "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 86400,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ]\n  }\n}"
+          "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 86400,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
         }
       ],
       "event": [
@@ -2196,7 +2196,267 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Change own password",
+          "name": "Turn two-factor off with a current code (refused while a role requires it)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/2fa/disable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "2fa",
+                "disable"
+              ]
+            },
+            "description": "Turn two-factor off with a current code (refused while a role requires it)\n\nFront-end touchpoint: Profile > Security\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/disable",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "2fa",
+                    "disable"
+                  ]
+                },
+                "description": "Turn two-factor off with a current code (refused while a role requires it)\n\nFront-end touchpoint: Profile > Security\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Two-factor authentication disabled\",\n  \"data\": {\n    \"enabled\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm enrolment with a code from the authenticator app; after a forced enrolment the normal token payload is returned",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/2fa/enable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "2fa",
+                "enable"
+              ]
+            },
+            "description": "Confirm enrolment with a code from the authenticator app; after a forced enrolment the normal token payload is returned\n\nFront-end touchpoint: Profile > Security > Set up two-factor\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/enable",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "2fa",
+                    "enable"
+                  ]
+                },
+                "description": "Confirm enrolment with a code from the authenticator app; after a forced enrolment the normal token payload is returned\n\nFront-end touchpoint: Profile > Security > Set up two-factor\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Two-factor authentication enabled\",\n  \"data\": {\n    \"enabled\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start two-factor enrolment: returns a new base32 secret and the otpauth:// URL for the QR code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/2fa/setup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "2fa",
+                "setup"
+              ]
+            },
+            "description": "Start two-factor enrolment: returns a new base32 secret and the otpauth:// URL for the QR code\n\nFront-end touchpoint: Profile > Security > Set up two-factor\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/setup",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "2fa",
+                    "setup"
+                  ]
+                },
+                "description": "Start two-factor enrolment: returns a new base32 secret and the otpauth:// URL for the QR code\n\nFront-end touchpoint: Profile > Security > Set up two-factor\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"secret\": \"JBSWY3DPEHPK3PXP...\",\n    \"otpauthUrl\": \"otpauth://totp/BrokerVerse:BrokerVerse?secret=...&issuer=BrokerVerse\",\n    \"issuer\": \"BrokerVerse\",\n    \"account\": \"BrokerVerse\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Own two-factor status (enabled, required by role)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/2fa/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "2fa",
+                "status"
+              ]
+            },
+            "description": "Own two-factor status (enabled, required by role)\n\nFront-end touchpoint: Profile > Security\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "2fa",
+                    "status"
+                  ]
+                },
+                "description": "Own two-factor status (enabled, required by role)\n\nFront-end touchpoint: Profile > Security\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"enabled\": false,\n    \"required\": false,\n    \"enabledAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change own password (password policy and history from settings group \"security\")",
           "request": {
             "method": "POST",
             "header": [
@@ -2215,10 +2475,10 @@
                 "change-password"
               ]
             },
-            "description": "Change own password\n\nFront-end touchpoint: Profile > Change password\n\nAccess: Any authenticated user",
+            "description": "Change own password (password policy and history from settings group \"security\")\n\nFront-end touchpoint: Profile > Change password\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"old\",\n  \"newPassword\": \"new\"\n}",
+              "raw": "{\n  \"currentPassword\": \"Old@Pass1\",\n  \"newPassword\": \"New@Pass2\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2247,10 +2507,10 @@
                     "change-password"
                   ]
                 },
-                "description": "Change own password\n\nFront-end touchpoint: Profile > Change password\n\nAccess: Any authenticated user",
+                "description": "Change own password (password policy and history from settings group \"security\")\n\nFront-end touchpoint: Profile > Change password\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"currentPassword\": \"old\",\n  \"newPassword\": \"new\"\n}",
+                  "raw": "{\n  \"currentPassword\": \"Old@Pass1\",\n  \"newPassword\": \"New@Pass2\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2273,7 +2533,7 @@
           ]
         },
         {
-          "name": "Request a password reset code (queued to the e-mail outbox)",
+          "name": "Request a password reset code (queued to the e-mail outbox; rate limited per IP and username)",
           "request": {
             "method": "POST",
             "header": [
@@ -2292,7 +2552,7 @@
                 "forgot-password"
               ]
             },
-            "description": "Request a password reset code (queued to the e-mail outbox)\n\nFront-end touchpoint: Forgot password\n\nAccess: Public",
+            "description": "Request a password reset code (queued to the e-mail outbox; rate limited per IP and username)\n\nFront-end touchpoint: Forgot password\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             },
@@ -2327,7 +2587,7 @@
                     "forgot-password"
                   ]
                 },
-                "description": "Request a password reset code (queued to the e-mail outbox)\n\nFront-end touchpoint: Forgot password\n\nAccess: Public",
+                "description": "Request a password reset code (queued to the e-mail outbox; rate limited per IP and username)\n\nFront-end touchpoint: Forgot password\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 },
@@ -2356,7 +2616,7 @@
           ]
         },
         {
-          "name": "Sign in with username and password",
+          "name": "Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)",
           "request": {
             "method": "POST",
             "header": [
@@ -2375,7 +2635,7 @@
                 "login"
               ]
             },
-            "description": "Sign in with username and password\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
+            "description": "Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             },
@@ -2410,7 +2670,7 @@
                     "login"
                   ]
                 },
-                "description": "Sign in with username and password\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
+                "description": "Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 },
@@ -2434,7 +2694,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 86400,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ]\n  }\n}"
+              "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 86400,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
             }
           ],
           "event": [
@@ -2449,6 +2709,168 @@
                   "if (token) { pm.collectionVariables.set('token', token); if (pm.environment) pm.environment.set('token', token); }"
                 ]
               }
+            }
+          ]
+        },
+        {
+          "name": "Own sign-in history (success, from, to; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login-history?page=1&perPage=20&success=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login-history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "20"
+                },
+                {
+                  "key": "success",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Own sign-in history (success, from, to; paging)\n\nFront-end touchpoint: Profile > Sign-in history\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login-history?page=1&perPage=20&success=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login-history"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "20"
+                    },
+                    {
+                      "key": "success",
+                      "value": "false"
+                    }
+                  ]
+                },
+                "description": "Own sign-in history (success, from, to; paging)\n\nFront-end touchpoint: Profile > Sign-in history\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"at\": \"2026-09-28T01:00:00Z\",\n      \"username\": \"BrokerVerse\",\n      \"ip\": \"10.0.0.5\",\n      \"userAgent\": \"Mozilla/5.0\",\n      \"success\": true,\n      \"reason\": \"ok\",\n      \"method\": \"password\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login/2fa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login",
+                "2fa"
+              ]
+            },
+            "description": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload\n\nFront-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeToken\": \"<jwt from /auth/login>\",\n  \"code\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login/2fa",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login",
+                    "2fa"
+                  ]
+                },
+                "description": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload\n\nFront-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"challengeToken\": \"<jwt from /auth/login>\",\n  \"code\": \"123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 86400,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"twoFactorEnabled\": true\n  }\n}"
             }
           ]
         },
@@ -2532,6 +2954,61 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Password rules from settings (for the change / reset password forms)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/password-policy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "password-policy"
+              ]
+            },
+            "description": "Password rules from settings (for the change / reset password forms)\n\nFront-end touchpoint: Profile > Change password; Reset password\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/password-policy",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "password-policy"
+                  ]
+                },
+                "description": "Password rules from settings (for the change / reset password forms)\n\nFront-end touchpoint: Profile > Change password; Reset password\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"minLength\": 8,\n    \"requireUpper\": true,\n    \"requireLower\": true,\n    \"requireDigit\": true,\n    \"requireSymbol\": true,\n    \"historyCount\": 5,\n    \"maxAgeDays\": 90\n  }\n}"
             }
           ]
         },
@@ -2745,7 +3222,7 @@
           ]
         },
         {
-          "name": "Reset the password with the emailed code",
+          "name": "Reset the password with the emailed code (password policy applies; wrong codes are rate limited)",
           "request": {
             "method": "POST",
             "header": [
@@ -2764,13 +3241,13 @@
                 "reset-password"
               ]
             },
-            "description": "Reset the password with the emailed code\n\nFront-end touchpoint: Verify code / Reset password\n\nAccess: Public",
+            "description": "Reset the password with the emailed code (password policy applies; wrong codes are rate limited)\n\nFront-end touchpoint: Verify code / Reset password\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"juan.santos\",\n  \"code\": \"123456\",\n  \"newPassword\": \"new\"\n}",
+              "raw": "{\n  \"username\": \"juan.santos\",\n  \"code\": \"123456\",\n  \"newPassword\": \"New@Pass2\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2799,13 +3276,13 @@
                     "reset-password"
                   ]
                 },
-                "description": "Reset the password with the emailed code\n\nFront-end touchpoint: Verify code / Reset password\n\nAccess: Public",
+                "description": "Reset the password with the emailed code (password policy applies; wrong codes are rate limited)\n\nFront-end touchpoint: Verify code / Reset password\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"username\": \"juan.santos\",\n  \"code\": \"123456\",\n  \"newPassword\": \"new\"\n}",
+                  "raw": "{\n  \"username\": \"juan.santos\",\n  \"code\": \"123456\",\n  \"newPassword\": \"New@Pass2\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -7194,7 +7671,7 @@
           ]
         },
         {
-          "name": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month",
+          "name": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",
           "request": {
             "method": "GET",
             "header": [],
@@ -7214,7 +7691,7 @@
                 }
               ]
             },
-            "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: Any authenticated user"
+            "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -7238,7 +7715,7 @@
                     }
                   ]
                 },
-                "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: Any authenticated user"
+                "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -16725,12 +17202,12 @@
       "name": "Policies",
       "item": [
         {
-          "name": "List policies (paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",
+          "name": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policies?page=1&pageSize=10&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026",
+              "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -16745,6 +17222,10 @@
                 {
                   "key": "pageSize",
                   "value": "10"
+                },
+                {
+                  "key": "mine",
+                  "value": "true"
                 },
                 {
                   "key": "paymentStatus",
@@ -16764,7 +17245,7 @@
                 }
               ]
             },
-            "description": "List policies (paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: Any authenticated user"
+            "description": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -16773,7 +17254,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policies?page=1&pageSize=10&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026",
+                  "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -16788,6 +17269,10 @@
                     {
                       "key": "pageSize",
                       "value": "10"
+                    },
+                    {
+                      "key": "mine",
+                      "value": "true"
                     },
                     {
                       "key": "paymentStatus",
@@ -16807,7 +17292,7 @@
                     }
                   ]
                 },
-                "description": "List policies (paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: Any authenticated user"
+                "description": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -38076,6 +38561,144 @@
       ]
     },
     {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Global search across leads, clients, quotations, policies, claims and endorsements (number, name, e-mail, phone, plate / chassis); scoped users only find their own book",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?q=NQQ 2025&limit=20&types=policy,claim",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "NQQ 2025"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "types",
+                  "value": "policy,claim"
+                }
+              ]
+            },
+            "description": "Global search across leads, clients, quotations, policies, claims and endorsements (number, name, e-mail, phone, plate / chassis); scoped users only find their own book\n\nFront-end touchpoint: Header > Global search\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/search?q=NQQ 2025&limit=20&types=policy,claim",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "NQQ 2025"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "types",
+                      "value": "policy,claim"
+                    }
+                  ]
+                },
+                "description": "Global search across leads, clients, quotations, policies, claims and endorsements (number, name, e-mail, phone, plate / chassis); scoped users only find their own book\n\nFront-end touchpoint: Header > Global search\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"type\": \"policy\",\n      \"id\": \"pol_1\",\n      \"title\": \"POL-2026-00001\",\n      \"subtitle\": \"Juan Dela Cruz · Motor · NQQ 2025\",\n      \"status\": \"Active\",\n      \"link\": \"/agent/policydetail/pol_1\"\n    }\n  ],\n  \"total\": 1,\n  \"query\": \"NQQ 2025\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Build and runtime information: name, version, git commit (GIT_COMMIT), start time, Node version, database reachability, pending migrations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/version",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "version"
+              ]
+            },
+            "description": "Build and runtime information: name, version, git commit (GIT_COMMIT), start time, Node version, database reachability, pending migrations\n\nFront-end touchpoint: Operations / monitoring\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/version",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "version"
+                  ]
+                },
+                "description": "Build and runtime information: name, version, git commit (GIT_COMMIT), start time, Node version, database reachability, pending migrations\n\nFront-end touchpoint: Operations / monitoring\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"name\": \"brokerverse-backend\",\n  \"version\": \"1.0.0\",\n  \"commit\": \"a1b2c3d\",\n  \"startedAt\": \"2026-09-28T00:00:00.000Z\",\n  \"uptimeSeconds\": 3600,\n  \"node\": \"v20.18.0\",\n  \"database\": {\n    \"reachable\": true,\n    \"latencyMs\": 2\n  },\n  \"pendingMigrations\": 0\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "System Settings",
       "item": [
         {
@@ -39234,7 +39857,183 @@
           ]
         },
         {
-          "name": "Set a user password (administrator)",
+          "name": "Administrator turns off a user's two-factor authentication (lost device); the user enrols again",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/2fa/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "2fa",
+                "reset"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Administrator turns off a user's two-factor authentication (lost device); the user enrols again\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/:id/2fa/reset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    ":id",
+                    "2fa",
+                    "reset"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Administrator turns off a user's two-factor authentication (lost device); the user enrols again\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"twoFactorEnabled\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sign-in history of a user (success, from, to; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/login-history?page=1&perPage=20&success=false&from=2026-09-01&to=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "login-history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "20"
+                },
+                {
+                  "key": "success",
+                  "value": "false"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Sign-in history of a user (success, from, to; paging)\n\nFront-end touchpoint: Master > User Management > User > View > Sign-in history\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/:id/login-history?page=1&perPage=20&success=false&from=2026-09-01&to=2026-09-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    ":id",
+                    "login-history"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "20"
+                    },
+                    {
+                      "key": "success",
+                      "value": "false"
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-09-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Sign-in history of a user (success, from, to; paging)\n\nFront-end touchpoint: Master > User Management > User > View > Sign-in history\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"at\": \"2026-09-28T01:00:00Z\",\n      \"userId\": \"usr_1\",\n      \"username\": \"juan.santos\",\n      \"ip\": \"10.0.0.5\",\n      \"userAgent\": \"Mozilla/5.0\",\n      \"success\": false,\n      \"reason\": \"bad-password\",\n      \"method\": \"password\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set a user password (administrator; password policy and history apply)",
           "request": {
             "method": "POST",
             "header": [
@@ -39261,7 +40060,7 @@
                 }
               ]
             },
-            "description": "Set a user password (administrator)\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user",
+            "description": "Set a user password (administrator; password policy and history apply)\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"password\": \"Welcome@123\"\n}",
@@ -39301,7 +40100,7 @@
                     }
                   ]
                 },
-                "description": "Set a user password (administrator)\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user",
+                "description": "Set a user password (administrator; password policy and history apply)\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"password\": \"Welcome@123\"\n}",

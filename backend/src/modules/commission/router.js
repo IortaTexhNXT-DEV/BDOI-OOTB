@@ -1,5 +1,6 @@
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { ownRecord, scopeOf } from '../../lib/scope.js';
 import { validate, z } from '../../lib/validate.js';
 import { withTransaction, pool } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
@@ -17,17 +18,17 @@ const accountExample = { referrer: { id: 'ref-dcruz', name: 'Juan Dela Cruz', ty
 define({
   method: 'GET', path: '/dashboard', summary: 'Commission KPIs, comsub by referrer / product, brokerage by insurer, payable funnel, trend', screen: 'Commission > Commission Dashboard', middleware: read,
   response: { success: true, data: { kpis: { brokerageIncome: 448530, comsubGross: 221706, netMargin: 226824, marginPct: 50.6, outstandingPayable: 150146, whtWithheldPaid: 1228 }, linesByStatus: [{ status: 'Accrued', count: 9 }] } },
-  handler: async (_req, res) => ok(res, await svc.dashboard(pool), 'Commission dashboard retrieved'),
+  handler: async (req, res) => ok(res, await svc.dashboard(pool, await scopeOf(req)), 'Commission dashboard retrieved'),
 });
 define({
   method: 'GET', path: '/agents-ready-to-pay', summary: 'Referrers with Approved lines not yet on a payout voucher', screen: 'Accounts > Disbursement > Bulk Disburse', middleware: read,
   response: { success: true, data: { agents: [{ id: 'ref-dcruz', name: 'Juan Dela Cruz', approvedLineCount: 2, comsubGross: 2400, netPayable: 2280 }], summary: { agentCount: 1, totalComsubGross: 2400, totalNet: 2280 } } },
-  handler: async (_req, res) => ok(res, await svc.agentsReadyToPay(pool)),
+  handler: async (req, res) => ok(res, await svc.agentsReadyToPay(pool, await scopeOf(req))),
 });
 define({
   method: 'GET', path: '/referrer-accounts', summary: 'Referrer accounts with net payable this cycle', screen: `${SCREEN}; Quote > Order summary > Commission referral`, middleware: read,
   response: { success: true, data: { summary: { cycleLabel: 'Sep 2026', dueThisCycle: 1140, readyToPay: 0 }, referrers: [{ id: 'ref-dcruz', name: 'Juan Dela Cruz', type: 'Agent', level: 'L1', policies: 1, netPayable: 1140, whtType: 'Individual 5%', whtApplicable: true, bankAccount: 'BDO ***4521', status: 'Active' }] } },
-  handler: async (_req, res) => ok(res, await svc.listReferrers(pool), 'Referrer accounts retrieved'),
+  handler: async (req, res) => ok(res, await svc.listReferrers(pool, await scopeOf(req)), 'Referrer accounts retrieved'),
 });
 const referrerSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/).optional(), name: z.string().min(2), type: z.enum(['Agent', 'Sub-agent', 'External']).optional(), level: z.enum(['L1', 'L2']).nullable().optional(),
@@ -57,12 +58,12 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/referrer-accounts/:id', summary: 'Referrer account: current cycle, future cycles, past lines and available actions', screen: SCREEN, middleware: read,
+  method: 'GET', path: '/referrer-accounts/:id', summary: 'Referrer account: current cycle, future cycles, past lines and available actions', screen: SCREEN, middleware: [...read, ownRecord('referrer')],
   response: { success: true, data: accountExample },
   handler: async (req, res) => ok(res, await svc.buildAccount(pool, req.params.id), 'Referrer account retrieved'),
 });
 define({
-  method: 'GET', path: '/referrer-accounts/:id/approved-lines', summary: 'Approved lines not yet on a voucher', screen: SCREEN, middleware: read,
+  method: 'GET', path: '/referrer-accounts/:id/approved-lines', summary: 'Approved lines not yet on a voucher', screen: SCREEN, middleware: [...read, ownRecord('referrer')],
   response: { success: true, data: { lines: [lineExample], totalNet: 1140 } },
   handler: async (req, res) => {
     const lines = await Promise.all((await svc.approvedLines(pool, req.params.id)).map(svc.lineView));
@@ -118,7 +119,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/referrer-accounts/:id/lines/:lineId', summary: 'One commission line', screen: `${SCREEN} > Line drawer`, middleware: read,
+  method: 'GET', path: '/referrer-accounts/:id/lines/:lineId', summary: 'One commission line', screen: `${SCREEN} > Line drawer`, middleware: [...read, ownRecord('referrer')],
   response: { success: true, data: lineExample },
   handler: async (req, res) => {
     const acct = await svc.buildAccount(pool, req.params.id);
@@ -148,7 +149,7 @@ for (const [action, summary] of Object.entries(LINE_ACTIONS)) {
 }
 define({
   method: 'POST', path: '/accrue', summary: 'Accrue commission lines for a policy from its commission details (primary + chain)', screen: 'Agent > Quote > Payment confirmation',
-  middleware: [requireAuth, requirePermission('write:commission', 'write:policies'), validate(z.object({ policyId: z.string(), commissionDetails: z.any().optional() }))],
+  middleware: [requireAuth, requirePermission('write:commission', 'write:policies'), validate(z.object({ policyId: z.string(), commissionDetails: z.any().optional() })), ownRecord('policy', (req) => req.body.policyId)],
   request: { policyId: 'pol_1', commissionDetails: { brokeragePct: 18, primary: { referrerId: 'ref-dcruz', level: 'L1', comsubPct: 8, comsubFixed: 0 }, chain: [] } },
   response: { success: true, data: { created: ['cm_1'] } },
   handler: async (req, res) => {

@@ -17,6 +17,7 @@ export function errorHandler(err, req, res, _next) {
   const body = { success: false, message: err.message || 'Internal server error' };
   if (err.name === 'ZodError') body.errors = err.issues?.map((i) => ({ path: i.path.join('.'), message: i.message }));
   if (err.details) body.errors = err.details;
-  if (status >= 500) req.log?.error({ err }, 'unhandled error');
+  if (req.id) body.requestId = req.id;
+  if (status >= 500) req.log?.error({ err, requestId: req.id }, 'unhandled error');
   res.status(status).json(body);
 }

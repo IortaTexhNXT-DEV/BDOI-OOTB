@@ -8,6 +8,7 @@ import { toClient } from '../clients/service.js';
 import { toLead } from '../leads/service.js';
 import { pick } from '../documents/tabular.js';
 import { publicUrl } from '../uploads/storage.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
@@ -65,6 +66,10 @@ function listWhere(q) {
   const where = ['TRUE'];
   const params = [];
   const add = (sql, v) => { params.push(v); where.push(sql.replaceAll('?', `$${params.length}`)); };
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', params));
+  else if (['true', '1', 'yes'].includes(String(q.mine ?? q.own ?? '').toLowerCase()) && q.currentUserId) {
+    where.push(scopeSql({ ids: [q.currentUserId] }, 'policy', 'p', params));
+  }
   if (q.paymentStatus) add('lower(p.payment_status) = lower(?)', q.paymentStatus);
   if (q.quoteRefId) add('p.quote_id = ?', q.quoteRefId);
   if (q.clientId) add('p.client_id = ?', q.clientId);

@@ -4,6 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { sendSheet } from '../claims/docs.js';
+import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as batches from './batches.js';
 import { getJob, queueStats } from './queue.js';
@@ -129,7 +130,7 @@ define({
 // ---------------------------------------------------------------- renewals of a policy
 define({
   method: 'POST', path: '/policies/:policyId/renewals', summary: 'Create (or update the open) renewal of a policy with the wizard data', screen: 'Operations > Policy > Renew (coverage details, order summary)',
-  middleware: [...write, validate(captureSchema)],
+  middleware: [...write, ownRecord('policy', 'policyId'), validate(captureSchema)],
   request: { coverageDetails: { lossAndDamageCoverage: '850000', bodilyInjury: '200000' }, accessories: [], orderSummary: { netPremium: 17800, grossPremium: 21450.5 }, effectiveDate: '2026-10-31', expiryDate: '2027-10-30' },
   response: { success: true, message: 'Renewal saved', data: renewalExample },
   handler: async (req, res) => {
@@ -142,16 +143,16 @@ define({
 define({
   method: 'GET', path: '/', summary: 'Renewals (clientId, policyId, status, search, page, limit)', screen: 'Clients > Renewals tab; renewal quote wizard', middleware: read,
   query: { clientId: 'cl_1', page: 1, limit: 50 }, response: { success: true, data: [renewalExample], pagination: { page: 1, limit: 50, total: 1, totalPages: 1 } },
-  handler: async (req, res) => { const pg = paging(req.query, { page: 1, perPage: 50 }); const { total, items } = await svc.listRenewals(req.query, pg); listMeta(res, items, total, pg, 'renewals'); },
+  handler: async (req, res) => { const pg = paging(req.query, { page: 1, perPage: 50 }); const { total, items } = await svc.listRenewals(await withScope(req), pg); listMeta(res, items, total, pg, 'renewals'); },
 });
 define({
-  method: 'GET', path: '/:renewalId', summary: 'Renewal with quotes, notices and activity timeline', screen: 'Operations > Renewals', middleware: read,
+  method: 'GET', path: '/:renewalId', summary: 'Renewal with quotes, notices and activity timeline', screen: 'Operations > Renewals', middleware: [...read, ownRecord('renewal', 'renewalId')],
   response: { success: true, data: { ...renewalExample, quotes: [], notices: [], activities: [] } },
   handler: async (req, res) => ok(res, await svc.getRenewal(req.params.renewalId)),
 });
 define({
   method: 'PUT', path: '/:renewalId', summary: 'Update the renewal wizard data (coverage, accessories, order summary, dates)', screen: 'Operations > Policy > Renew (coverage details)',
-  middleware: [...write, validate(captureSchema)], request: { coverageDetails: { lossAndDamageCoverage: '900000' }, orderSummary: { grossPremium: 22800 } },
+  middleware: [...write, ownRecord('renewal', 'renewalId'), validate(captureSchema)], request: { coverageDetails: { lossAndDamageCoverage: '900000' }, orderSummary: { grossPremium: 22800 } },
   response: { success: true, message: 'Renewal updated', data: renewalExample },
   handler: async (req, res) => {
     const r = await svc.captureRenewal(req.params.renewalId, req.body);

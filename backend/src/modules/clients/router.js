@@ -4,6 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { ok, paging } from '../../lib/respond.js';
 import { sendEntity, actor } from '../documents/common.js';
+import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Clients', '/clients');
@@ -26,13 +27,13 @@ define({
   response: { success: true, data: { clients: [example], pagination: { page: 1, pageSize: 10, totalCount: 1, totalPages: 1 } } },
   handler: async (req, res) => {
     const pg = paging(req.query);
-    const { total, rows } = await svc.listClients(req.query, pg);
+    const { total, rows } = await svc.listClients(await withScope(req), pg);
     const pagination = { page: pg.page, pageSize: pg.perPage, totalCount: total, totalPages: Math.ceil(total / pg.perPage) };
     res.json({ success: true, data: { clients: rows.map((r) => svc.toClient(r)), pagination }, total, page: pg.page, pageSize: pg.perPage });
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one client with its policies (by id or client code)', screen: `${SCREEN} > Client view / Payment options`, middleware: canRead,
+  method: 'GET', path: '/:id', summary: 'Get one client with its policies (by id or client code)', screen: `${SCREEN} > Client view / Payment options`, middleware: [...canRead, ownRecord('client')],
   response: { ...example, success: true, data: example },
   handler: async (req, res) => sendEntity(res, svc.toClient(await svc.getClient(req.params.id))),
 });
@@ -46,7 +47,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Update a client', screen: `${SCREEN} > Edit`, middleware: [...canWrite, validate(clientBody)],
+  method: 'PUT', path: '/:id', summary: 'Update a client', screen: `${SCREEN} > Edit`, middleware: [...canWrite, ownRecord('client'), validate(clientBody)],
   request: { contactNumber: '09179998888' }, response: { ...example, success: true },
   handler: async (req, res) => {
     const { before, after } = await svc.updateClient(req.params.id, req.body, actor(req));
@@ -57,7 +58,7 @@ define({
 });
 define({
   method: 'POST', path: '/from-lead/:leadId', summary: 'Convert a lead into a client (returns the existing client when already converted)', screen: 'Operations > Quotation > Convert to policy',
-  middleware: canWrite, request: { contactNumber: '09171234567' }, response: { ...example, success: true },
+  middleware: [...canWrite, ownRecord('lead', 'leadId')], request: { contactNumber: '09171234567' }, response: { ...example, success: true },
   handler: async (req, res) => {
     const client = svc.toClient(await svc.convertLead(req.params.leadId, req.body || {}, actor(req)));
     await audit(req, { entity: 'client', entityId: client.id, action: 'convert-lead', after: { leadId: req.params.leadId, clientId: client.id } });
@@ -68,7 +69,7 @@ define({
 customers.define({
   method: 'GET', path: '/codes', summary: 'Customer codes for dropdowns', screen: 'Accounts > Disbursement / Receipts', middleware: canRead,
   response: { success: true, data: [{ clientId: 'cl_1', customerCode: 'CL-2026-00001', name: 'Juan Dela Cruz' }] },
-  handler: async (_req, res) => ok(res, await svc.customerCodes()),
+  handler: async (req, res) => ok(res, await svc.customerCodes(await scopeOf(req))),
 });
 
 export default router;

@@ -3,11 +3,37 @@ import { config } from './config.js';
 import { createApp, logger } from './app.js';
 import { migrate } from './db/migrate.js';
 import { seed } from './db/seed.js';
-import { startScheduler } from './jobs/scheduler.js';
+import { pool } from './db/pool.js';
+import { startScheduler, stopScheduler } from './jobs/scheduler.js';
 
 fs.mkdirSync(config.uploadDir, { recursive: true });
 await migrate({ log: (m) => logger.info(m) });
 await seed({ log: (m) => logger.info(m) });
 const app = await createApp();
-app.listen(config.port, () => logger.info(`BrokerVerse API listening on :${config.port}`));
+const server = app.listen(config.port, () => logger.info(`BrokerVerse API listening on :${config.port}`));
 await startScheduler(logger);
+
+/** Graceful shutdown: stop the scheduler, stop accepting connections and drain in-flight requests, then close the pool. */
+let stopping = false;
+async function shutdown(signal) {
+  if (stopping) return;
+  stopping = true;
+  logger.info({ signal }, 'shutting down');
+  const force = setTimeout(() => { logger.error('shutdown timed out; exiting'); process.exit(1); }, Number(process.env.SHUTDOWN_TIMEOUT_MS || 25000));
+  force.unref();
+  try {
+    stopScheduler();
+    await new Promise((resolve) => {
+      server.close(resolve);
+      server.closeIdleConnections?.();
+    });
+    await pool.end();
+    logger.info('shutdown complete');
+    process.exit(0);
+  } catch (e) {
+    logger.error({ err: e }, 'shutdown failed');
+    process.exit(1);
+  }
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

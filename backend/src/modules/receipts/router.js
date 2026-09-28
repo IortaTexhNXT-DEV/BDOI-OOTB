@@ -5,11 +5,12 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { badRequest } from '../../lib/errors.js';
+import { badRequest, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { isoDate, pageParams, sendList, sendNoData } from '../accounting/lib/http.js';
 import { makePdf, padRow, storeFile } from '../accounting/lib/files.js';
 import { excelDate, readSheet } from '../accounting/lib/sheet.js';
+import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as billing from './billing.js';
 
@@ -42,7 +43,7 @@ define({
   response: { success: true, data: [example], pagination: { page: 1, pageSize: 10, total: 1, totalPages: 1 } },
   handler: async (req, res) => {
     const pg = pageParams(req.query);
-    const { rows, total } = await svc.listReceipts(pool, req.query, pg);
+    const { rows, total } = await svc.listReceipts(pool, await withScope(req), pg);
     sendList(res, rows, total, pg);
   },
 });
@@ -51,7 +52,7 @@ define({
   middleware: read, query: { name: 'Santos', page: 1, pageSize: 10 }, response: { success: true, data: [example] },
   handler: async (req, res) => {
     const pg = pageParams(req.query);
-    const { rows, total } = await svc.listReceipts(pool, req.query, pg);
+    const { rows, total } = await svc.listReceipts(pool, await withScope(req), pg);
     sendList(res, rows, total, pg);
   },
 });
@@ -62,9 +63,11 @@ define({
   handler: async (req, res) => {
     const q = req.query;
     const from = q.customerCodeFrom || q.customerCode || null;
-    const rows = (await pool.query(`SELECT * FROM receipts WHERE receipt_status <> 'Cancelled' AND ($1::text IS NULL OR id = $1 OR receipt_number = $1)
+    const params = [q.receiptId || null, from, q.customerCodeTo || from, isoDate(q.createdAtFrom), isoDate(q.createdAtTo)];
+    const own = scopeSql(await scopeOf(req), 'receipt', 'r', params);
+    const rows = (await pool.query(`SELECT * FROM receipts r WHERE receipt_status <> 'Cancelled' AND ($1::text IS NULL OR id = $1 OR receipt_number = $1)
       AND ($2::text IS NULL OR customer_code >= $2) AND ($3::text IS NULL OR customer_code <= $3) AND ($4::date IS NULL OR received_date >= $4) AND ($5::date IS NULL OR received_date <= $5)
-      ORDER BY customer_code, received_date`, [q.receiptId || null, from, q.customerCodeTo || from, isoDate(q.createdAtFrom), isoDate(q.createdAtTo)])).rows;
+      AND ${own} ORDER BY customer_code, received_date`, params)).rows;
     if (!rows.length) { sendNoData(res, 'No receipts found for the selected filters'); return; }
     const w = [16, 14, 11, 26, 16, 13, 10];
     const lines = [padRow(['Receipt', 'Customer', 'Date', 'Received from', 'Policy', 'Amount', 'Status'], w), '-'.repeat(112),
@@ -111,13 +114,13 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'One receipt (by id or receipt number) with receiptsList', screen: `${SCREEN} > Add receipt edit / View`, middleware: read,
+  method: 'GET', path: '/:id', summary: 'One receipt (by id or receipt number) with receiptsList', screen: `${SCREEN} > Add receipt edit / View`, middleware: [...read, ownRecord('receipt')],
   response: { success: true, data: example },
   handler: async (req, res) => ok(res, await svc.getReceipt(pool, req.params.id)),
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Update a receipt; lines newly marked Paid (or with a higher paid amount) are applied and journalised; status is recalculated', screen: `${SCREEN} > Add receipt edit > Approve`,
-  middleware: [...write, validate(receiptSchema)], request: { receiptsList: [{ ...line, receiptListId: undefined }] }, response: { success: true, data: example },
+  middleware: [...write, ownRecord('receipt'), validate(receiptSchema)], request: { receiptsList: [{ ...line, receiptListId: undefined }] }, response: { success: true, data: example },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.updateReceipt(db, req.params.id, req.body, req.user));
     await audit(req, { entity: 'receipt', entityId: r.after.receiptId, action: 'update', before: r.before, after: r.after });
@@ -126,7 +129,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/add-payment', summary: 'Add a payment line to an existing receipt', screen: `${SCREEN} > Add receipt edit`,
-  middleware: [...write, validate(z.object({ amount: z.union([z.string(), z.number()]).optional(), paid: z.union([z.string(), z.number()]).optional(), paymentMode: z.string().optional(), referenceNo: z.string().optional() }).passthrough())],
+  middleware: [...write, ownRecord('receipt'), validate(z.object({ amount: z.union([z.string(), z.number()]).optional(), paid: z.union([z.string(), z.number()]).optional(), paymentMode: z.string().optional(), referenceNo: z.string().optional() }).passthrough())],
   request: { amount: 5000, paymentMode: 'gcash', referenceNo: 'GC-0001' }, response: { success: true, data: example },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.addPayment(db, req.params.id, req.body, req.user));
@@ -136,7 +139,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/cancel', summary: 'Cancel a receipt: reverses its payment journals and restores receivable balances', screen: `${SCREEN} > View`,
-  middleware: [...write, validate(z.object({ reason: z.string().min(3) }))], request: { reason: 'Cheque bounced' }, response: { success: true, data: { ...example, receiptStatus: 'Cancelled' } },
+  middleware: [...write, ownRecord('receipt'), validate(z.object({ reason: z.string().min(3) }))], request: { reason: 'Cheque bounced' }, response: { success: true, data: { ...example, receiptStatus: 'Cancelled' } },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.cancelReceipt(db, req.params.id, req.body.reason, req.user));
     await audit(req, { entity: 'receipt', entityId: r.after.receiptId, action: 'cancel', before: r.before, after: r.after });
@@ -147,15 +150,21 @@ define({
 // Billing statements (PDF) used by Policy detail > Generate invoice
 const b = moduleRouter('Billing statements', '/billing-statement');
 const bRead = [requireAuth, requirePermission('read:policies', 'read:receipts')];
+const ownPolicy = ownRecord('policy', 'policyId');
+/** The endorsement statements accept an endorsement or a policy id. */
+const ownEndorsementOrPolicy = (req, _res, next) => (async () => {
+  const scope = await scopeOf(req);
+  if (scope && !(await canSee(scope, 'endorsement', req.params.id)) && !(await canSee(scope, 'policy', req.params.id))) throw notFound('Endorsement not found');
+})().then(() => next(), next);
 const sendPdf = (res, { fileName, pdf }) => { res.setHeader('Content-Type', 'application/pdf'); res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`); res.send(pdf); };
-b.define({ method: 'GET', path: '/policy/:policyId/generate', summary: 'Policy billing statement (PDF)', screen: 'Agent > Policy detail > Generate invoice (policy)', middleware: bRead, response: '(application/pdf)',
+b.define({ method: 'GET', path: '/policy/:policyId/generate', summary: 'Policy billing statement (PDF)', screen: 'Agent > Policy detail > Generate invoice (policy)', middleware: [...bRead, ownPolicy], response: '(application/pdf)',
   handler: async (req, res) => sendPdf(res, await billing.policyStatement(pool, req.params.policyId)) });
-b.define({ method: 'GET', path: '/endorsement/:id/preview', summary: 'Endorsement billing preview (JSON); id = endorsement or policy id', screen: 'Agent > Endorsement', middleware: bRead,
+b.define({ method: 'GET', path: '/endorsement/:id/preview', summary: 'Endorsement billing preview (JSON); id = endorsement or policy id', screen: 'Agent > Endorsement', middleware: [...bRead, ownEndorsementOrPolicy],
   response: { success: true, data: { policyNumber: 'POL-2026-00001', endorsement: { endorsementNumber: 'END-2026-00001', premiumDelta: 1500 }, bills: [], totalDue: 0 } },
   handler: async (req, res) => ok(res, await billing.endorsementPreview(pool, req.params.id)) });
-b.define({ method: 'GET', path: '/endorsement/:id/generate', summary: 'Endorsement billing statement (PDF); id = endorsement or policy id', screen: 'Agent > Policy detail > Generate invoice (endorsement)', middleware: bRead, response: '(application/pdf)',
+b.define({ method: 'GET', path: '/endorsement/:id/generate', summary: 'Endorsement billing statement (PDF); id = endorsement or policy id', screen: 'Agent > Policy detail > Generate invoice (endorsement)', middleware: [...bRead, ownEndorsementOrPolicy], response: '(application/pdf)',
   handler: async (req, res) => sendPdf(res, await billing.endorsementStatement(pool, req.params.id)) });
-b.define({ method: 'GET', path: '/renewal/:policyId/generate', summary: 'Renewal billing statement (PDF)', screen: 'Agent > Policy detail > Generate invoice (renewal)', middleware: bRead, response: '(application/pdf)',
+b.define({ method: 'GET', path: '/renewal/:policyId/generate', summary: 'Renewal billing statement (PDF)', screen: 'Agent > Policy detail > Generate invoice (renewal)', middleware: [...bRead, ownPolicy], response: '(application/pdf)',
   handler: async (req, res) => sendPdf(res, await billing.renewalStatement(pool, req.params.policyId)) });
 
 export default router;

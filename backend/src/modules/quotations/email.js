@@ -11,6 +11,7 @@ import { many } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate, emailTemplate, num } from '../documents/common.js';
 import { getQuoteRow } from './service.js';
+import { ownRecord } from '../../lib/scope.js';
 
 const { router, define } = moduleRouter('E-mail', '/email');
 const SCREEN = 'Operations > Quotation > Quote detail > Share';
@@ -43,7 +44,7 @@ define({
 });
 define({
   method: 'POST', path: '/send', summary: 'Send an e-mail composed in the Share dialog', screen: SCREEN,
-  middleware: [...canSend, validate(z.object({ to: z.string().email(), subject: z.string().min(1).max(300), html: z.string().optional(), text: z.string().optional(), cc: z.string().optional(), quotationId: z.string().optional() }).passthrough())],
+  middleware: [...canSend, validate(z.object({ to: z.string().email(), subject: z.string().min(1).max(300), html: z.string().optional(), text: z.string().optional(), cc: z.string().optional(), quotationId: z.string().optional() }).passthrough()), ownRecord('quote', (req) => req.body.quotationId)],
   request: { to: 'juan@example.com', subject: 'Your quotation', html: '<p>Hello</p>' }, response: { success: true, message: 'E-mail queued', data: { emailId: 1 } },
   handler: async (req, res) => {
     const { to, cc, subject, html, text, quotationId } = req.body;
@@ -54,7 +55,8 @@ define({
 });
 define({
   method: 'POST', path: '/share-quote', summary: 'E-mail a quotation to a recipient with the standard template', screen: SCREEN,
-  middleware: [...canSend, validate(z.object({ to: z.string().email(), quotationData: z.object({ quotationId: z.string().optional() }).passthrough(), message: z.string().optional() }))],
+  middleware: [...canSend, validate(z.object({ to: z.string().email(), quotationData: z.object({ quotationId: z.string().optional() }).passthrough(), message: z.string().optional() })),
+    ownRecord('quote', (req) => req.body.quotationData.quotationId || req.body.quotationData.id || req.body.quotationData.quotationNumber)],
   request: { to: 'juan@example.com', quotationData: { quotationId: 'qt_1' }, message: 'Please review' }, response: { success: true, message: 'Quote shared', data: { emailId: 1 } },
   handler: async (req, res) => {
     const q = await getQuoteRow(req.body.quotationData.quotationId || req.body.quotationData.id || req.body.quotationData.quotationNumber);
@@ -67,7 +69,7 @@ define({
 });
 define({
   method: 'POST', path: '/share-quote-to-insurers', summary: 'Send the quotation to selected insurers (contact e-mail from the insurance company master)', screen: `${SCREEN} > Send to insurer`,
-  middleware: [...canSend, validate(z.object({ quotationId: z.string().min(1), insuranceCompanies: z.array(z.union([z.string(), z.number()])).min(1) }).passthrough())],
+  middleware: [...canSend, validate(z.object({ quotationId: z.string().min(1), insuranceCompanies: z.array(z.union([z.string(), z.number()])).min(1) }).passthrough()), ownRecord('quote', (req) => req.body.quotationId)],
   request: { quotationId: 'qt_1', insuranceCompanies: ['Malayan Insurance Co., Inc.', 'SecureGuard Insurance'] },
   response: { success: true, data: { sent: [{ insurer: 'Malayan Insurance Co., Inc.', email: 'uw@malayan.example' }], failed: [] } },
   handler: async (req, res) => {

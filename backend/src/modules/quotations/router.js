@@ -12,6 +12,7 @@ import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { getClient, toClient } from '../clients/service.js';
 import { toQuote } from './shape.js';
 import { premiumBreakdown } from './premium.js';
+import { ownRecord, withScope, assertVisible } from '../../lib/scope.js';
 import * as svc from './service.js';
 import mastersRouter from './masters.js';
 import emailRouter from './email.js';
@@ -31,7 +32,7 @@ const out = (r) => toQuote(r);
 
 async function listHandler(req, res) {
   const pg = paging(req.query);
-  const { total, rows } = await svc.listQuotes({ ...req.query, status: req.params.status || req.query.status }, pg);
+  const { total, rows } = await svc.listQuotes(await withScope(req, { ...req.query, status: req.params.status || req.query.status }), pg);
   res.json({ success: true, data: rows.map(out), page: pg.page, pageSize: pg.perPage, total, totalPages: Math.ceil(total / pg.perPage) });
 }
 
@@ -42,13 +43,15 @@ define({
 define({
   method: 'GET', path: '/stats', summary: 'Quotation KPIs (optionally for one lead)', screen: `${SCREEN} (stats cards)`, middleware: canRead, query: { leadRefId: 'ld_1' },
   response: { totalQuotations: 14, convertedToPolicyCount: 8, activeQuotationsCount: 5, conversionRate: 57.1, quotationsByStatus: [{ status: 'Draft', count: 2 }] },
-  handler: async (req, res) => { const s = await svc.quoteStats(req.query); res.json({ success: true, ...s, data: s }); },
+  handler: async (req, res) => { const s = await svc.quoteStats(await withScope(req)); res.json({ success: true, ...s, data: s }); },
 });
 define({
   method: 'GET', path: '/compare', summary: 'Compare two quotations side by side with rule-based insights', screen: `${SCREEN} > Compare`, middleware: canRead,
   query: { quotationId1: 'qt_1', quotationId2: 'qt_2' }, response: { success: true, quotation1: example, quotation2: example, aiInsights: { summary: '...', keyDifferences: [], pricingAnalysis: {}, recommendation: {} } },
   handler: async (req, res) => {
     if (!req.query.quotationId1 || !req.query.quotationId2) throw badRequest('quotationId1 and quotationId2 are required');
+    await assertVisible(req, 'quote', req.query.quotationId1);
+    await assertVisible(req, 'quote', req.query.quotationId2);
     const q1 = await svc.quoteById(req.query.quotationId1);
     const q2 = await svc.quoteById(req.query.quotationId2);
     const data = { quotation1: q1, quotation2: q2, aiInsights: svc.compareInsights(q1, q2) };
@@ -60,7 +63,7 @@ define({
   response: { success: true, data: [example], total: 1 }, handler: listHandler,
 });
 define({
-  method: 'GET', path: '/audit-trail/:id', summary: 'Audit trail of a quotation (one row per changed field)', screen: `${SCREEN} > Audit trail`, middleware: canRead, query: { sort: 'desc' },
+  method: 'GET', path: '/audit-trail/:id', summary: 'Audit trail of a quotation (one row per changed field)', screen: `${SCREEN} > Audit trail`, middleware: [...canRead, ownRecord('quote')], query: { sort: 'desc' },
   response: { success: true, data: [{ action: 'update', field: 'discount', oldValue: '0', newValue: '500', createdAt: '2026-09-01T02:00:00Z', user: { displayName: 'Maria Santos' } }] },
   handler: async (req, res) => res.json({ success: true, data: await svc.auditTrail(req.params.id, req.query.sort) }),
 });
@@ -104,7 +107,7 @@ define({
 });
 define({
   method: 'POST', path: '/', summary: 'Create a quotation (Motor order summary, Fire / IAR cards, renewal); premiums recalculated server-side', screen: `${SCREEN} > Create Quote (order summary)`,
-  middleware: [...canWrite, validate(quoteBody.refine((b) => b.leadRefId || b.clientId, { message: 'leadRefId is required', path: ['leadRefId'] }))],
+  middleware: [...canWrite, validate(quoteBody.refine((b) => b.leadRefId || b.clientId, { message: 'leadRefId is required', path: ['leadRefId'] })), ownRecord('lead', (req) => req.body.leadRefId), ownRecord('client', (req) => req.body.clientId)],
   request: { leadRefId: 'ld_1', productType: 'Motor', insurancePolicyType: 'PC', lossAndDamageCoverage: '1000000', lossAndDamageCoverageRate: '1.5', bodilyInjury: '200000', propertyDamage: '200000', APPAtotalCoverage: '250000', participantDetails: [{ insuranceCompanyName: 'Malayan Insurance Co., Inc.' }], insuranceVehicleDetails: [{ vehicleBrand: 'Toyota', vehicleModel: 'Vios', modelYear: '2024' }] },
   response: { ...example, success: true },
   handler: async (req, res) => {
@@ -114,11 +117,11 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one quotation (by id or number) with lead summary and premium breakdown', screen: `${SCREEN} > Quote detail`, middleware: canRead,
+  method: 'GET', path: '/:id', summary: 'Get one quotation (by id or number) with lead summary and premium breakdown', screen: `${SCREEN} > Quote detail`, middleware: [...canRead, ownRecord('quote')],
   response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, await svc.quoteById(req.params.id)),
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Update a quotation (not once converted); premiums recalculated', screen: `${SCREEN} > Edit quote`, middleware: [...canWrite, validate(quoteBody)],
+  method: 'PUT', path: '/:id', summary: 'Update a quotation (not once converted); premiums recalculated', screen: `${SCREEN} > Edit quote`, middleware: [...canWrite, ownRecord('quote'), validate(quoteBody)],
   request: { discount: '500', remarks: 'Loyalty discount' }, response: { ...example, success: true },
   handler: async (req, res) => {
     const { before, after } = await svc.updateQuote(req.params.id, req.body, actor(req));
@@ -127,7 +130,7 @@ define({
   },
 });
 define({
-  method: 'DELETE', path: '/:id', summary: 'Delete a Draft / Rejected / Dropped quotation', screen: `${SCREEN} > Delete`, middleware: canWrite,
+  method: 'DELETE', path: '/:id', summary: 'Delete a Draft / Rejected / Dropped quotation', screen: `${SCREEN} > Delete`, middleware: [...canWrite, ownRecord('quote')],
   response: { success: true, message: 'Quotation deleted', data: { quotationId: 'qt_1' } },
   handler: async (req, res) => {
     const q = await svc.deleteQuote(req.params.id, actor(req));
@@ -143,12 +146,12 @@ const statusHandler = async (req, res) => {
 for (const method of ['PUT', 'PATCH']) {
   define({
     method, path: '/:id/status', summary: 'Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)', screen: `${SCREEN} > Quote detail (status)`,
-    middleware: [...canWrite, validate(statusBody)], request: { status: 'Approved', updatedBy: 'agent' }, response: { ...example, quotationStatus: 'Approved', success: true }, handler: statusHandler,
+    middleware: [...canWrite, ownRecord('quote'), validate(statusBody)], request: { status: 'Approved', updatedBy: 'agent' }, response: { ...example, quotationStatus: 'Approved', success: true }, handler: statusHandler,
   });
 }
 define({
   method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail) and notify underwriting', screen: `${SCREEN} > Quote detail > Send for customer approval`,
-  middleware: canWrite, request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
+  middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
   handler: async (req, res) => {
     const r = await svc.sendForApproval(req.params.id, req.user);
     await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo } });
@@ -157,7 +160,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/submit-to-insurer', summary: 'Submit a customer-accepted quotation to the insurer (e-mail to the insurer contact)', screen: `${SCREEN} > Quote detail > Submit to insurer`,
-  middleware: canWrite, request: { submittedBy: 'agent' }, response: { success: true, message: 'Quotation submitted to insurer', data: { ...example, quotationStatus: 'SubmittedToInsurer' } },
+  middleware: [...canWrite, ownRecord('quote')], request: { submittedBy: 'agent' }, response: { success: true, message: 'Quotation submitted to insurer', data: { ...example, quotationStatus: 'SubmittedToInsurer' } },
   handler: async (req, res) => {
     const r = await svc.submitToInsurer(req.params.id, req.user);
     await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'submit-to-insurer', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, insurer: r.insurer?.name } });
@@ -166,7 +169,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/convert-to-policy', summary: 'Convert to policy: client from lead, policy number, receivable (bill number), commission accrual; repeat calls update the issued policy', screen: `${SCREEN} > Convert to policy / Payment confirmation`,
-  middleware: canWrite, request: { additionalPolicyData: { insuredName: 'Juan Dela Cruz', plateNumber: 'ABC 1234', inception: '2026-10-01', paymentStatus: 'Pending', paymentMethod: 'Direct Debit' }, createdBy: 'agent' },
+  middleware: [...canWrite, ownRecord('quote')], request: { additionalPolicyData: { insuredName: 'Juan Dela Cruz', plateNumber: 'ABC 1234', inception: '2026-10-01', paymentStatus: 'Pending', paymentMethod: 'Direct Debit' }, createdBy: 'agent' },
   response: { success: true, message: 'Policy created', data: { policy: { policyId: 'pol_1', policyNumber: 'POL-2026-00001', billNumber: 'INV-2026-00001' }, client: { clientId: 'cl_1' } } },
   handler: async (req, res) => {
     const r = await svc.convertToPolicy(req.params.id, req.body || {}, req.user);
@@ -180,7 +183,7 @@ define({
 });
 define({
   method: 'PATCH', path: '/:id/vehicle-info', summary: 'Save customer / vehicle information and photo keys on the quotation (convert-to-policy steps)', screen: `${SCREEN} > Convert to policy > Customer info / Vehicle photos`,
-  middleware: canWrite, request: { plateNumber: 'ABC 1234', chassisNumber: 'JTDBT923', motorNumber: '2NR123', vehicleFrontSidePhoto: 'vehicle/abc.jpg' }, response: { ...example, success: true },
+  middleware: [...canWrite, ownRecord('quote')], request: { plateNumber: 'ABC 1234', chassisNumber: 'JTDBT923', motorNumber: '2NR123', vehicleFrontSidePhoto: 'vehicle/abc.jpg' }, response: { ...example, success: true },
   handler: async (req, res) => {
     const { before, after } = await svc.updateVehicleInfo(req.params.id, req.body || {}, actor(req));
     await audit(req, { entity: 'quotation', entityId: after.id, action: 'vehicle-info', before: out(before), after: out(after) });
@@ -189,7 +192,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/send-mail-policy-quote/customer', summary: 'E-mail the policy / quotation summary to the customer', screen: `${SCREEN} > Coverage detailed view`,
-  middleware: canWrite, query: { policyId: 'pol_1' }, response: { success: true, message: 'E-mail queued', data: { to: 'juan@example.com' } },
+  middleware: [...canWrite, ownRecord('quote')], query: { policyId: 'pol_1' }, response: { success: true, message: 'E-mail queued', data: { to: 'juan@example.com' } },
   handler: async (req, res) => {
     const q = await svc.getQuoteRow(req.params.id);
     const policy = req.query.policyId || q.policy_id ? toPolicy(await getPolicyRow(req.query.policyId || q.policy_id)) : null;

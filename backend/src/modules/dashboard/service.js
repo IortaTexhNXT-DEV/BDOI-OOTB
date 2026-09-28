@@ -48,19 +48,21 @@ export async function executive(period = 'month') {
   };
 }
 
-export async function premiumByProduct() {
+/** Premium by product; ownerId limits it to one owner's policies. */
+export async function premiumByProduct(ownerId = null) {
   const rows = await many(`SELECT ${PRODUCT} AS product, COALESCE(sum(p.premium_total),0) AS premium, count(*)::int AS policies
-    FROM policies p LEFT JOIN products pr ON pr.id = p.product_id GROUP BY 1 ORDER BY 2 DESC`);
+    FROM policies p LEFT JOIN products pr ON pr.id = p.product_id WHERE ($1::text IS NULL OR p.owner_user_id = $1) GROUP BY 1 ORDER BY 2 DESC`, [ownerId]);
   return { labels: rows.map((r) => r.product), data: rows.map((r) => round2(r.premium)), policies: rows.map((r) => r.policies) };
 }
 
-export async function monthlyTrend(months = 12) {
+/** Monthly premium / policies / quotes / leads; ownerId limits it to one owner's book. */
+export async function monthlyTrend(months = 12, ownerId = null) {
   const rows = await many(`SELECT to_char(m, 'YYYY-MM') AS month, to_char(m, 'Mon') AS label,
-      COALESCE((SELECT sum(premium_total) FROM policies p WHERE date_trunc('month', p.created_at) = m), 0) AS premium,
-      (SELECT count(*)::int FROM policies p WHERE date_trunc('month', p.created_at) = m) AS policies,
-      (SELECT count(*)::int FROM quotes q WHERE date_trunc('month', q.created_at) = m AND q.deleted_at IS NULL) AS quotes,
-      (SELECT count(*)::int FROM leads l WHERE date_trunc('month', l.created_at) = m AND l.deleted_at IS NULL) AS leads
-    FROM generate_series(date_trunc('month', now()) - make_interval(months => $1 - 1), date_trunc('month', now()), interval '1 month') AS m ORDER BY m`, [months]);
+      COALESCE((SELECT sum(premium_total) FROM policies p WHERE date_trunc('month', p.created_at) = m AND ($2::text IS NULL OR p.owner_user_id = $2)), 0) AS premium,
+      (SELECT count(*)::int FROM policies p WHERE date_trunc('month', p.created_at) = m AND ($2::text IS NULL OR p.owner_user_id = $2)) AS policies,
+      (SELECT count(*)::int FROM quotes q WHERE date_trunc('month', q.created_at) = m AND q.deleted_at IS NULL AND ($2::text IS NULL OR q.created_by = $2)) AS quotes,
+      (SELECT count(*)::int FROM leads l WHERE date_trunc('month', l.created_at) = m AND l.deleted_at IS NULL AND ($2::text IS NULL OR l.owner_user_id = $2)) AS leads
+    FROM generate_series(date_trunc('month', now()) - make_interval(months => $1 - 1), date_trunc('month', now()), interval '1 month') AS m ORDER BY m`, [months, ownerId]);
   return { labels: rows.map((r) => r.label), months: rows.map((r) => r.month), premium: rows.map((r) => round2(r.premium)),
     policies: rows.map((r) => r.policies), quotes: rows.map((r) => r.quotes), leads: rows.map((r) => r.leads) };
 }
@@ -105,7 +107,7 @@ export async function sales(ownerId = null) {
     funnel: { leads: f.leads, quotedLeads: f.quoted_leads, quotations: f.quotes, policies: f.policies, leadToQuoteRate: pct(f.quoted_leads, f.leads), quoteToPolicyRate: pct(f.policies, f.quotes), leadToPolicyRate: pct(f.policies, f.leads) },
     leadsByStatus: leadsBy, quotationsByStatus: quotesBy.map((r) => ({ status: quoteStatusOut(r.status), count: r.count, premium: round2(r.premium) })),
     premiumThisMonth: round2(f.premium_month), renewalsDueIn60Days: f.renewals_due,
-    premiumByProduct: await premiumByProduct(), monthlyTrend: await monthlyTrend(6),
+    premiumByProduct: await premiumByProduct(ownerId), monthlyTrend: await monthlyTrend(6, ownerId),
   };
 }
 

@@ -4,6 +4,7 @@
  * receiptStatus is Converted when every line is Paid, Draft otherwise, Cancelled after cancellation (all reversed).
  */
 import { getSetting } from '../../lib/settings.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { applyToPolicy, ensureBilled, findClient, findPolicy, requirePolicy, reverseReceiptApplications } from './receivables.js';
@@ -54,6 +55,7 @@ export async function listReceipts(db, q, pg, { like = true } = {}) {
   add('r.policy_id', q.policyId || q.policyRefId, true); add('r.receipt_status', q.receiptStatus, true); add('r.client_id', q.clientId, true);
   if (q.fromDate) { p.push(isoDate(q.fromDate)); where.push(`r.received_date >= $${p.length}`); }
   if (q.toDate) { p.push(isoDate(q.toDate)); where.push(`r.received_date <= $${p.length}`); }
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'receipt', 'r', p));
   if (q.search) { p.push(q.search); where.push(`(r.receipt_number || ' ' || COALESCE(r.customer_name,'') || ' ' || COALESCE(r.customer_code,'') || ' ' || COALESCE(r.policy_number,'') || ' ' || COALESCE(r.transaction_number,'')) ILIKE '%' || $${p.length} || '%'`); }
   const w = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const total = (await db.query(`SELECT count(*)::int AS n FROM receipts r ${w}`, p)).rows[0].n;

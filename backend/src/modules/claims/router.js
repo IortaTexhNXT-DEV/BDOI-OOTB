@@ -1,6 +1,7 @@
 import multer from 'multer';
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
+import { ownRecord, withScope } from '../../lib/scope.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
@@ -18,6 +19,9 @@ const multerAny = multer({ storage: multer.memoryStorage(), limits: { fileSize: 
 const upload = { any: () => (req, res, next) => multerAny(req, res, (e) => next(e ? badRequest(e.message) : undefined)) };
 const read = [requireAuth, requirePermission('read:claims')];
 const write = [requireAuth, requirePermission('write:claims')];
+/** Status decisions (review, reject, settle, approve settlement, close) belong to the claims team; agents register, update and upload only. */
+const decide = [...write, requireRole('claims')];
+const policyRef = (req) => [req.body?.policyRefId, req.body?.policyId, req.body?.policyNumber].find((v) => v && !svc.PLACEHOLDER_REFS.has(String(v)));
 const str = z.union([z.string(), z.number(), z.boolean()]).optional().nullable();
 
 const createSchema = z.object({
@@ -34,9 +38,9 @@ define({
   middleware: [requireAuth, requirePermission('read:claims', 'read:reports')], query: { startDate: '2026-01-01', endDate: '2026-09-28', includeData: true, format: 'excel' },
   response: { success: true, data: { dateRange: { startDate: '2026-01-01', endDate: '2026-09-28' }, summary: { totalOpenClaims: 8, totalAgingClaims: 2, todaysClaims: 1, maxClaimsByState: { state: 'Metro Manila', count: 6, percentage: 40 } }, breakdown: { byType: [{ type: 'Motor', count: 12 }], byStatus: [{ status: 'Settled', count: 5 }], byLOB: [{ lob: 'MOTOR', count: 12 }], byState: [], agingBreakdown: { recent: 3, moderate: 2, high: 1, critical: 2 } }, detailedClaims: [] } },
   handler: async (req, res) => {
-    const data = await svc.claimsReport(req.query);
+    const data = await svc.claimsReport(await withScope(req));
     if (['excel', 'xlsx', 'csv'].includes(String(req.query.format || '').toLowerCase())) {
-      const rows = data.detailedClaims || (await svc.claimsReport({ ...req.query, includeData: 'true' })).detailedClaims;
+      const rows = data.detailedClaims || (await svc.claimsReport(await withScope(req, { ...req.query, includeData: 'true' }))).detailedClaims;
       const summary = [
         { k: 'Period', v: `${data.dateRange.startDate} to ${data.dateRange.endDate}` }, { k: 'Total claims', v: data.summary.totalClaims },
         { k: 'Open claims', v: data.summary.totalOpenClaims }, { k: 'Overdue claims', v: data.summary.totalAgingClaims },
@@ -54,19 +58,19 @@ define({
   middleware: [requireAuth, requirePermission('read:claims', 'read:reports')], query: { startDate: '2026-01-01', endDate: '2026-09-28', criteria: 'Open', reportType: 'excel' },
   response: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (claims-report-Open-2026-01-01-to-2026-09-28.xlsx)',
   handler: async (req, res) => {
-    const { start, end, rows } = await svc.criteriaRows(req.query);
+    const { start, end, rows } = await svc.criteriaRows(await withScope(req));
     if (String(req.query.reportType).toLowerCase() === 'json') return ok(res, { criteria: req.query.criteria || 'All', startDate: start, endDate: end, rows, total: rows.length });
     return sendSheet(res, { fileName: `claims-report-${req.query.criteria || 'All'}-${start}-to-${end}`, format: String(req.query.reportType).toLowerCase() === 'csv' ? 'csv' : 'excel', sheets: [{ name: 'Claims', columns: svc.REPORT_COLUMNS, rows }] });
   },
 });
 define({
-  method: 'GET', path: '/audit-trail/:id', summary: 'Field-level audit trail of a claim', screen: 'Operations > Claims > Audit trail', middleware: read,
+  method: 'GET', path: '/audit-trail/:id', summary: 'Field-level audit trail of a claim', screen: 'Operations > Claims > Audit trail', middleware: [...read, ownRecord('claim')],
   query: { sort: 'desc' }, response: { success: true, data: [{ id: 1, timestamp: '2026-09-21T02:00:00Z', action: 'Status Changed', fieldName: 'claimStatus', oldValue: 'registered', newValue: 'in-review', user: 'j.claims' }], total: 1, sort: 'desc' },
   handler: async (req, res) => { const rows = await svc.auditTrail(req.params.id, req.query.sort); res.json({ success: true, data: rows, total: rows.length, sort: req.query.sort === 'asc' ? 'asc' : 'desc' }); },
 });
 define({
   method: 'GET', path: '/getdocuments/:id', summary: 'Download a claim document (uploaded file, or generated PDF: Claims Acknowledgement Letter, Claims Discharge Voucher, Claims Data Sheet)', screen: 'Operations > Claims > Claim detailed view',
-  middleware: read, query: { documentName: 'Claims Acknowledgement Letter' }, response: 'application/pdf',
+  middleware: [...read, ownRecord('claim')], query: { documentName: 'Claims Acknowledgement Letter' }, response: 'application/pdf',
   handler: async (req, res) => {
     const doc = await svc.claimDocument(req.params.id, req.query.documentName);
     res.setHeader('Content-Type', doc.contentType);
@@ -76,7 +80,7 @@ define({
 });
 define({
   method: 'PUT', path: '/updatestatus/:id', summary: 'Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)', screen: 'Operations > Claims > Request approval',
-  middleware: [...write, validate(z.object({ claimStatus: z.string().min(1), note: z.string().max(2000).optional() }).passthrough())],
+  middleware: [...decide, ownRecord('claim'), validate(z.object({ claimStatus: z.string().min(1), note: z.string().max(2000).optional() }).passthrough())],
   request: { claimStatus: 'Processing', note: 'Documents complete' }, response: { success: true, message: 'Claim status updated', data: claimExample },
   handler: async (req, res) => {
     const r = await svc.updateStatus(req.params.id, req.body.claimStatus, req.user, req.body.note);
@@ -85,7 +89,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/rejectclaim/:id', summary: 'Reject a claim', screen: 'Operations > Claims > Settlement approval', middleware: write,
+  method: 'PUT', path: '/rejectclaim/:id', summary: 'Reject a claim', screen: 'Operations > Claims > Settlement approval', middleware: [...decide, ownRecord('claim')],
   request: { reason: 'Loss not covered' }, response: { success: true, message: 'Claim rejected', data: { ...claimExample, status: 'Rejected' } },
   handler: async (req, res) => {
     const r = await svc.rejectClaim(req.params.id, req.user, req.body?.reason);
@@ -95,7 +99,7 @@ define({
 });
 define({
   method: 'PUT', path: '/settle/:id', summary: 'Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled', screen: 'Operations > Claims > Settlement details',
-  middleware: [...write, upload.any(), validate(settleSchema)],
+  middleware: [...decide, ownRecord('claim'), upload.any(), validate(settleSchema)],
   request: { settlementType: 'Cash', settlementAmount: 75000, settlementIssueDate: '2026-09-25', settlementDate: '2026-09-28', settlementDocument: '(file)' },
   response: { success: true, message: 'Settlement submitted for approval', data: { ...claimExample, status: 'Pending Approval' } },
   handler: async (req, res) => {
@@ -106,7 +110,7 @@ define({
 });
 define({
   method: 'PUT', path: '/approve-settlement/:id', summary: 'Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester', screen: 'Operations > Claims > Settlement approval',
-  middleware: [...write, validate(z.object({ decision: z.enum(['approve', 'return', 'reject']).default('approve'), approvedAmount: z.coerce.number().positive().optional(), note: z.string().max(2000).optional() }))],
+  middleware: [...decide, ownRecord('claim'), validate(z.object({ decision: z.enum(['approve', 'return', 'reject']).default('approve'), approvedAmount: z.coerce.number().positive().optional(), note: z.string().max(2000).optional() }))],
   request: { decision: 'approve', approvedAmount: 75000, note: 'Within authority' }, response: { success: true, message: 'Settlement approved', data: { ...claimExample, status: 'Settled' } },
   handler: async (req, res) => {
     const r = await svc.approveSettlement(req.params.id, req.body, req.user);
@@ -115,7 +119,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/close/:id', summary: 'Close a settled or rejected claim', screen: 'Operations > Claims', middleware: write,
+  method: 'PUT', path: '/close/:id', summary: 'Close a settled or rejected claim', screen: 'Operations > Claims', middleware: [...decide, ownRecord('claim')],
   request: { note: 'File closed' }, response: { success: true, message: 'Claim closed', data: { ...claimExample, status: 'Closed' } },
   handler: async (req, res) => {
     const r = await svc.updateStatus(req.params.id, 'closed', req.user, req.body?.note);
@@ -129,19 +133,19 @@ define({
   response: { success: true, data: { claims: [claimExample], pagination: { total: 1, page: 1, pageSize: 10, limit: 10, totalPages: 1 } }, total: 1, page: 1, perPage: 10, totalPages: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query);
-    const { total, items } = await svc.listClaims(req.query, pg);
+    const { total, items } = await svc.listClaims(await withScope(req), pg);
     const meta = pageMeta(total, pg);
     res.json({ success: true, message: 'OK', data: { claims: items, pagination: { total, page: pg.page, pageSize: pg.perPage, limit: pg.perPage, totalPages: meta.totalPages } }, ...meta });
   },
 });
 define({
   method: 'GET', path: '/:id', summary: 'Claim details (by id or claim number) with policy, documents and status history', screen: 'Operations > Claims > Claim wizard / detailed view',
-  middleware: read, response: { success: true, data: claimExample },
+  middleware: [...read, ownRecord('claim')], response: { success: true, data: claimExample },
   handler: async (req, res) => ok(res, await svc.getClaim(req.params.id)),
 });
 define({
   method: 'POST', path: '/', summary: 'Register a claim (multipart). Blocked when premium is unpaid or the loss date is outside the policy period; sends the Preliminary Loss Advice', screen: 'Operations > Claims > Send mail',
-  middleware: [...write, upload.any(), validate(createSchema)],
+  middleware: [...write, upload.any(), validate(createSchema), ownRecord('policy', policyRef)],
   request: { policyNumber: 'POL-2026-00001', policyRefId: 'pol_1', lob: 'MOTOR', claimType: 'Motor', claimPriority: 'High', dateOfIncident: '2026-09-20', timeOfIncident: '14:30', addressOfIncident: 'EDSA cor. Ayala Ave', cityOfIncident: 'Makati', provinceOfIncident: 'Metro Manila', typeOfIncident: 'Collision', estimatedClaimAmount: 85000, policyInfo: '{"policyHolderName":"Maria Santos"}', driverDetails: '{"driverName":"Jose Santos"}', thirdPartyDetails: '{"thirdPartyName":"Pedro Cruz"}', emailData: '{"mailSubject":"New Claim Notification","write":"Please see attached"}', claimDocument: '(file)' },
   response: { success: true, message: 'Claim registered', data: claimExample },
   handler: async (req, res) => {
@@ -152,7 +156,7 @@ define({
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Update claim details / adjuster report (multipart; file stored as FIR)', screen: 'Operations > Claims > Adjuster submission',
-  middleware: [...write, upload.any()],
+  middleware: [...write, ownRecord('claim'), upload.any()],
   request: { insuranceCompanyClaimNumber: 'MAPFRE-CL-7781', reportedDate: '2026-09-21', dateOfIncident: '2026-09-20', addressOfIncident: 'EDSA', driverName: 'Jose Santos', adjusterName: 'Cunningham Lindsey PH', adjusterStatus: 'Assigned', 'thirdPartyDetails[thirdPartyName]': 'Pedro Cruz', file: '(file)' },
   response: { success: true, message: 'Claim updated', data: claimExample },
   handler: async (req, res) => {

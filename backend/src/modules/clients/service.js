@@ -1,6 +1,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { nextNumber, toDate } from '../documents/common.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
@@ -42,6 +43,7 @@ export async function listClients(q, pg) {
   if (search) add("(c.display_name ILIKE '%' || ? || '%' OR c.client_code ILIKE '%' || ? || '%' OR c.email ILIKE '%' || ? || '%' OR c.phone ILIKE '%' || ? || '%')", search);
   if (q.leadCategory || q.category) add('c.lead_category = ?', q.leadCategory || q.category);
   if (q.status) add('c.status = ?', q.status);
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'client', 'c', params));
   const w = where.join(' AND ');
   const total = (await one(`SELECT count(*)::int AS n FROM clients c WHERE ${w}`, params)).n;
   const rows = await many(`SELECT c.*, ${POLICIES_JSON} FROM clients c WHERE ${w} ORDER BY c.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -114,5 +116,9 @@ export async function convertLead(leadId, overrides, userId) {
   return getClient(id);
 }
 
-export const customerCodes = () => many(`SELECT id AS "clientId", client_code AS "customerCode", client_code AS code, display_name AS name
-  FROM clients WHERE status <> 'deleted' ORDER BY client_code`);
+export function customerCodes(scope = null) {
+  const params = [];
+  const own = scopeSql(scope, 'client', 'c', params);
+  return many(`SELECT id AS "clientId", client_code AS "customerCode", client_code AS code, display_name AS name
+    FROM clients c WHERE status <> 'deleted' AND ${own} ORDER BY client_code`, params);
+}

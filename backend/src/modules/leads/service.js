@@ -4,6 +4,7 @@ import { getSetting } from '../../lib/settings.js';
 import { nextNumber, toDate, lobOf } from '../documents/common.js';
 import { pick } from '../documents/tabular.js';
 import { quoteStatusIn } from '../documents/statuses.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 
 /** Fields the lead screens send, mapped to columns. Anything else is kept in `extra`. */
 const FIELD_MAP = {
@@ -102,6 +103,7 @@ function filters(q) {
   if (q.city) add('l.city ILIKE ?', q.city);
   if (q.status) add('l.status = ?', q.status);
   if (q.lob) add('l.lob = ?', lobOf(q.lob));
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'lead', 'l', params));
   const search = q.query || q.search || q.q || q.name;
   if (search) {
     params.push(search);
@@ -141,7 +143,7 @@ export async function leadStats(q) {
 }
 
 /** Report rows: category is a lead status, a quotation status (leads having such a quote) or All. */
-export async function leadReport(category) {
+export async function leadReport(category, scope = null) {
   const leadStatuses = await getSetting('leads.statuses', ['New', 'Contacted', 'Qualified', 'QuoteGenerated', 'Converted', 'Lost']);
   const params = [];
   let cond = 'l.deleted_at IS NULL';
@@ -151,6 +153,7 @@ export async function leadReport(category) {
     cond += isLead ? ' AND l.status = $1'
       : ' AND EXISTS (SELECT 1 FROM quotes q WHERE q.lead_id = l.id AND q.status = $1 AND q.deleted_at IS NULL)';
   }
+  if (scope) cond += ` AND ${scopeSql(scope, 'lead', 'l', params)}`;
   const rows = await many(`${SELECT} WHERE ${cond} ORDER BY l.created_at DESC LIMIT 50000`, params);
   const header = ['Lead Number', 'First Name', 'Last Name', 'Company', 'Category', 'LOB', 'Status', 'Email', 'Contact Number',
     'City', 'Province', 'Country', 'Quotations', 'Created At'];

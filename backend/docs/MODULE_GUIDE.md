@@ -28,6 +28,9 @@ minimal, clearly-correct front-end fix.
   codes are `read:` / `write:` + one of: profile, leads, clients, quotations, policies, endorsements, claims,
   renewals, receipts, collections, disbursements, commission, remittance, reinsurance, incentive, products,
   masters, users, roles, settings, reports, schedules, notifications, journal-vouchers, audit.
+- Record scoping: users whose roles are all in `security.scoped_roles` (default `agent`) only see their own book. Use
+  `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`
+  to the WHERE clause; guard detail, update and workflow routes with `ownRecord('<entity>')` (answers 404, not 403).
 - Validation: zod via `validate(schema)` from `src/lib/validate.js`. Be permissive where the front end sends
   extra fields (`.passthrough()`), strict on the fields you store.
 - Responses: match what the front end reads. Where it has no expectation, use

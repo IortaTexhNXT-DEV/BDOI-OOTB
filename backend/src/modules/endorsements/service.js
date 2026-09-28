@@ -7,6 +7,7 @@ import { nextNumber, toDate, num, round2, renderTemplate, emailTemplate } from '
 import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses.js';
 import { getPolicyRow, createReceivable } from '../policies/service.js';
 import { publicUrl } from '../uploads/storage.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -71,6 +72,7 @@ export async function listEndorsements(q, pg) {
   if (q.clientId) add('e.client_id = ?', q.clientId);
   if (q.policyId) add('(e.policy_id = ? OR p.policy_number = ?)', q.policyId);
   if (q.status) add('e.status = ?', endorsementStatusIn(q.status) || q.status);
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'endorsement', 'e', params));
   const search = q.search || q.query;
   if (search) add("(e.endorsement_number ILIKE '%' || ? || '%' OR p.policy_number ILIKE '%' || ? || '%' OR c.display_name ILIKE '%' || ? || '%')", search);
   const w = where.join(' AND ');

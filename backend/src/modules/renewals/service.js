@@ -8,6 +8,7 @@ import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { renderTemplate } from '../claims/docs.js';
 import { daysBetween, nextNumber, round2, toDate, today, unprocessable, usersWithRole } from '../claims/util.js';
 
@@ -144,6 +145,7 @@ export async function listRenewals(q, pg) {
   if (q.from || q.expiryFrom) add('p.expiry_date >= ?::date', q.from || q.expiryFrom);
   if (q.to || q.expiryTo) add('p.expiry_date <= ?::date', q.to || q.expiryTo);
   if (q.search) add('(p.policy_number ILIKE ? OR cl.display_name ILIKE ? OR r.renewal_number ILIKE ? OR pr.name ILIKE ?)', ...Array(4).fill(`%${q.search}%`));
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'renewal', 'r', params));
   const w = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const ctx = await readContext();
   let rows = (await many(`${BASE} ${w} ORDER BY p.expiry_date, r.created_at`, params)).map((r) => toApi(r, ctx));

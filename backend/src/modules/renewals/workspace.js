@@ -4,6 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { notFound } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
+import { assertVisible, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as an from './analytics.js';
 
@@ -19,6 +20,12 @@ const noteSchema = z.object({ note: z.string().max(2000).optional(), reason: z.s
 const queueItem = { id: 'rnw_1', renewalNumber: 'RN-2026-00001', policyNumber: 'POL-2025-00012', insuredName: 'Maria Santos', product: 'Motor Vehicle Insurance', insurer: 'MAPFRE Insurance Corporation', expiryDate: '2026-10-30', daysToExpiry: 32, currentPremium: 18500, renewalPremium: 21450.5, premiumVariancePct: 15.95, status: 'Quote Sent', statusCode: 'quoted', retentionRisk: 'Medium', riskScore: 35, noticeStage: 1, nextNotice: { stage: 2, code: 'second', label: 'Second Notice' }, assignedAgent: 'Ana Reyes', renewalAttempts: 1 };
 
 /** Run a renewal command, audit it and answer with the updated renewal. */
+// Record-level scope: a renewal (/:id...) or policy (/policies/:policyId) of someone else's book answers 404.
+// (param callbacks run before the route middleware, so authenticate first; the route's own requireAuth runs again after.)
+const visible = (entity, skip = () => false) => (req, res, next, id) => (skip(req) ? next() : requireAuth(req, res, (e) => (e ? next(e) : assertVisible(req, entity, id).then(() => next(), next))));
+router.param('id', visible('renewal', (req) => req.path.startsWith('/campaigns/')));
+router.param('policyId', visible('policy'));
+
 const command = (action, fn, message) => async (req, res) => {
   const r = await fn(req);
   await audit(req, { entity: 'renewal', entityId: r.renewal?.id || req.params.id, action, before: r.before ? { status: r.before.status, premiumNew: r.before.premium_new, noticeStage: r.before.notice_stage } : null, after: r.audit || { status: r.renewal?.statusCode, premium: r.renewal?.renewalPremium, noticeStage: r.renewal?.noticeStage } });
@@ -31,7 +38,7 @@ define({
   response: { success: true, data: [queueItem], dashboard: { totalPolicies: 14, dueSoon: 5, atRisk: 3, inGracePeriod: 1 }, total: 14, page: 1, perPage: 20, totalPages: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
-    const r = await an.renewalQueue(req.query, pg);
+    const r = await an.renewalQueue(await withScope(req), pg);
     res.json({ success: true, message: 'OK', data: r.items, dashboard: r.dashboard, ...pageMeta(r.total, pg) });
   },
 });

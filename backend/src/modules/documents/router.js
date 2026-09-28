@@ -10,6 +10,7 @@ import { buildPdf, sendPdf } from './pdf.js';
 import { quoteDoc, policyScheduleDoc, receiptDoc } from './templates.js';
 import { quoteById } from '../quotations/service.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
+import { ownRecord } from '../../lib/scope.js';
 
 const { router, define } = moduleRouter('Documents', '');
 const readQuotes = [requireAuth, requirePermission('read:quotations')];
@@ -26,13 +27,13 @@ const quotePdf = async (req, res) => {
 
 for (const [path, handler, label] of [
   ['/document-templates/quote-template/:id', quotePdf, 'Motor quotation PDF'], ['/document-templates/quote-template-fire/:id', quotePdf, 'Fire / IAR quotation PDF'],
-]) define({ method: 'GET', path, summary: label, screen: 'Operations > Quotation > Quote detail > Share > Download', middleware: readQuotes, response: 'application/pdf', handler });
+]) define({ method: 'GET', path, summary: label, screen: 'Operations > Quotation > Quote detail > Share > Download', middleware: [...readQuotes, ownRecord('quote')], response: 'application/pdf', handler });
 for (const [path, label] of [['/document-templates/policy-schedule/:id', 'Motor policy schedule PDF'], ['/document-templates/policy-schedule-fire/:id', 'Fire / IAR policy schedule PDF']]) {
-  define({ method: 'GET', path, summary: label, screen: 'Operations > Policy > Policy detail > Policy schedule', middleware: readPolicies, response: 'application/pdf', handler: policyPdf });
+  define({ method: 'GET', path, summary: label, screen: 'Operations > Policy > Policy detail > Policy schedule', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf', handler: policyPdf });
 }
 define({
   method: 'GET', path: '/document-templates/receipt/:id', summary: 'Official receipt PDF (optionally only some lines: lineIds=a,b)', screen: 'Accounts > Receipts > Print',
-  middleware: [requireAuth, requirePermission('read:receipts', 'read:policies')], query: { lineIds: 'rl_1,rl_2' }, response: 'application/pdf',
+  middleware: [requireAuth, requirePermission('read:receipts', 'read:policies'), ownRecord('receipt')], query: { lineIds: 'rl_1,rl_2' }, response: 'application/pdf',
   handler: async (req, res) => {
     const r = await one('SELECT r.*, c.display_name AS client_name FROM receipts r LEFT JOIN clients c ON c.id = r.client_id WHERE r.id = $1 OR r.receipt_number = $1', [req.params.id]);
     if (!r) throw notFound('Receipt not found');

@@ -2,12 +2,17 @@ import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { moduleRouter } from '../../lib/registry.js';
 import { loadUser, publicUser, requireAuth, signAccess, signRefresh, verify } from '../../lib/auth.js';
-import { badRequest, unauthorized } from '../../lib/errors.js';
+import { badRequest, conflict, forbidden, unauthorized } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { query } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { audit } from '../../lib/audit.js';
 import { config } from '../../config.js';
+import jwt from 'jsonwebtoken';
+import { assertPasswordAllowed, passwordExpired, passwordPolicy, savePassword } from '../../lib/password.js';
+import { loginHistory, recordLogin } from '../../lib/loginHistory.js';
+import { clearKey, hit, ipKey, isLimited, loginLimits, userKey } from '../../lib/rateLimit.js';
+import { generateSecret, otpauthUrl, verifyTotp } from '../../lib/totp.js';
 
 const { router, define } = moduleRouter('Auth', '/auth');
 
@@ -17,27 +22,103 @@ async function issueTokens(user, deviceId) {
   return { accessToken: signAccess(user), refreshToken: signRefresh(user, jti), expiresIn: config.accessTtl, issuedAt: new Date().toISOString(), user: publicUser(user) };
 }
 
+/** Roles that must enrol in two-factor authentication (security.require_2fa_roles). */
+async function twoFactorRequiredFor(user) {
+  const roles = (await getSetting('security.require_2fa_roles', [])) || [];
+  return Array.isArray(roles) && (user.roles || []).some((r) => roles.includes(r));
+}
+
+/** Normal sign-in payload plus the password-change flag (must_change_password or password older than the maximum age). */
+async function completeSignIn(req, user, { deviceId, method }) {
+  await query('UPDATE users SET failed_logins = 0, last_login_at = now() WHERE id = $1', [user.id]);
+  const tokens = await issueTokens(user, deviceId);
+  const expired = await passwordExpired(user);
+  tokens.user.mustChangePassword = !!user.must_change_password || expired;
+  if (expired) tokens.user.passwordExpired = true;
+  tokens.mustChangePassword = tokens.user.mustChangePassword;
+  await recordLogin(req, { userId: user.id, username: user.username, success: true, reason: 'ok', method });
+  await audit({ user: { id: user.id, username: user.username }, ip: req.ip }, { entity: 'session', entityId: user.id, action: 'login' });
+  return tokens;
+}
+
+/** 429 when the IP or the username has used up its attempts in the window; the attempt is still logged. */
+async function throttle(req, res, scope, username, { log = true } = {}) {
+  const limits = await loginLimits();
+  const keys = [ipKey(scope, req.ip), ...(username ? [userKey(scope, username)] : [])];
+  const r = isLimited(keys, limits);
+  if (!r.limited) return { keys, limited: false };
+  if (log) await recordLogin(req, { username, success: false, reason: 'rate-limited', method: scope === 'login' ? 'password' : scope });
+  res.set('Retry-After', String(r.retryAfter));
+  res.status(429).json({ success: false, message: `Too many attempts. Try again in ${r.retryAfter} seconds`, retryAfter: r.retryAfter, requestId: req.id });
+  return { keys, limited: true };
+}
+
 define({
-  method: 'POST', path: '/login', auth: false, summary: 'Sign in with username and password', screen: 'Sign-in',
+  method: 'POST', path: '/login', auth: false, summary: 'Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)', screen: 'Sign-in',
   request: { username: 'BrokerVerse', password: 'Technxt@1' },
-  response: { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 86400, issuedAt: '2026-01-01T00:00:00Z', user: { userId: 'usr_1', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator', roles: ['it-admin'], permissions: ['read:leads'] } },
+  response: { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 86400, issuedAt: '2026-01-01T00:00:00Z', mustChangePassword: false, user: { userId: 'usr_1', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator', roles: ['it-admin'], permissions: ['read:leads'], mustChangePassword: false, twoFactorEnabled: false } },
   middleware: [validate(z.object({ username: z.string().min(1), password: z.string().min(1), deviceId: z.string().optional() }))],
   handler: async (req, res) => {
     const { username, password, deviceId } = req.body;
+    const t = await throttle(req, res, 'login', username);
+    if (t.limited) return;
+    // Failed attempts count against the IP and the username; a successful sign-in clears the username counter.
+    const fail = async (user, reason, message) => {
+      hit(t.keys);
+      await recordLogin(req, { userId: user?.id ?? null, username, success: false, reason });
+      throw unauthorized(message);
+    };
     const user = await loadUser('lower(u.username) = lower($1)', [username]);
-    if (!user) throw unauthorized('Invalid username or password');
-    if (user.status === 'locked') throw unauthorized('Account locked. Contact the administrator');
-    if (user.status !== 'active') throw unauthorized('Account inactive');
+    if (!user) return fail(null, 'unknown-user', 'Invalid username or password');
+    if (user.status === 'locked') return fail(user, 'locked', 'Account locked. Contact the administrator');
+    if (user.status !== 'active') return fail(user, 'inactive', 'Account inactive');
     const okPw = await bcrypt.compare(password, user.password_hash);
     if (!okPw) {
       const max = Number(await getSetting('limits.max_login_attempts', 5));
       await query('UPDATE users SET failed_logins = failed_logins + 1, status = CASE WHEN failed_logins + 1 >= $2 THEN \'locked\' ELSE status END WHERE id = $1', [user.id, max]);
-      throw unauthorized('Invalid username or password');
+      return fail(user, 'bad-password', 'Invalid username or password');
     }
-    await query('UPDATE users SET failed_logins = 0, last_login_at = now() WHERE id = $1', [user.id]);
-    const tokens = await issueTokens(user, deviceId);
-    await audit({ user: { id: user.id, username: user.username }, ip: req.ip }, { entity: 'session', entityId: user.id, action: 'login' });
-    res.json(tokens);
+    clearKey(userKey('login', username));
+    if (user.totp_enabled) {
+      const minutes = Number(await getSetting('security.two_factor_challenge_minutes', 5)) || 5;
+      const challengeToken = jwt.sign({ sub: user.id, type: '2fa-challenge', deviceId: deviceId || null }, config.jwtSecret, { expiresIn: minutes * 60 });
+      await query('UPDATE users SET failed_logins = 0 WHERE id = $1', [user.id]);
+      await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: '2fa-required' });
+      return res.json({ success: true, message: 'Enter the code from your authenticator app', twoFactorRequired: true, challengeToken, expiresIn: minutes * 60 });
+    }
+    if (await twoFactorRequiredFor(user)) {
+      // Restricted session: only the enrolment endpoints; /auth/2fa/enable then returns the normal token payload.
+      await query('UPDATE users SET failed_logins = 0 WHERE id = $1', [user.id]);
+      await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: '2fa-setup-required' });
+      return res.json({ success: true, message: 'Two-factor authentication must be set up for your role', twoFactorSetupRequired: true,
+        accessToken: signAccess(user, { enrol2fa: true, expiresIn: 900 }), expiresIn: 900, user: publicUser(user) });
+    }
+    return res.json(await completeSignIn(req, user, { deviceId, method: 'password' }));
+  },
+});
+
+define({
+  method: 'POST', path: '/login/2fa', auth: false, summary: 'Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload', screen: 'Sign-in > Two-factor code',
+  request: { challengeToken: '<jwt from /auth/login>', code: '123456' },
+  response: { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 86400, user: { userId: 'usr_1', username: 'BrokerVerse', twoFactorEnabled: true } },
+  middleware: [validate(z.object({ challengeToken: z.string().min(10), code: z.string().min(6).max(10), deviceId: z.string().optional() }))],
+  handler: async (req, res) => {
+    let p;
+    try { p = verify(req.body.challengeToken); } catch { throw unauthorized('Sign-in challenge expired; sign in again'); }
+    if (p.type !== '2fa-challenge') throw unauthorized('Invalid sign-in challenge');
+    const user = await loadUser('u.id = $1', [p.sub]);
+    if (!user || user.status !== 'active' || !user.totp_enabled) throw unauthorized('Invalid sign-in challenge');
+    const t = await throttle(req, res, 'login', user.username);
+    if (t.limited) return;
+    const step = verifyTotp(user.totp_secret, req.body.code, { afterStep: user.totp_last_step });
+    if (step === null) {
+      hit(t.keys);
+      await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: 'bad-2fa-code', method: '2fa' });
+      throw unauthorized('Invalid authentication code');
+    }
+    await query('UPDATE users SET totp_last_step = $2 WHERE id = $1', [user.id, step]);
+    clearKey(userKey('login', user.username));
+    res.json(await completeSignIn(req, user, { deviceId: req.body.deviceId || p.deviceId, method: '2fa' }));
   },
 });
 
@@ -93,27 +174,42 @@ define({
 });
 
 define({
-  method: 'POST', path: '/change-password', summary: 'Change own password', screen: 'Profile > Change password',
+  method: 'POST', path: '/change-password', summary: 'Change own password (password policy and history from settings group "security")', screen: 'Profile > Change password',
   middleware: [requireAuth, validate(z.object({ currentPassword: z.string().min(1), newPassword: z.string().min(1) }))],
-  request: { currentPassword: 'old', newPassword: 'new' }, response: { success: true },
+  request: { currentPassword: 'Old@Pass1', newPassword: 'New@Pass2' }, response: { success: true },
   handler: async (req, res) => {
     const user = await loadUser('u.id = $1', [req.user.id]);
     if (!(await bcrypt.compare(req.body.currentPassword, user.password_hash))) throw badRequest('Current password is incorrect');
-    const min = Number(await getSetting('limits.password_min_length', 8));
-    if (req.body.newPassword.length < min) throw badRequest(`Password must be at least ${min} characters`);
-    await query('UPDATE users SET password_hash = $2, must_change_password = false WHERE id = $1', [user.id, await bcrypt.hash(req.body.newPassword, 10)]);
+    await assertPasswordAllowed(req.body.newPassword, { userId: user.id });
+    await savePassword(user.id, req.body.newPassword, { extraSql: 'must_change_password = false' });
     await audit(req, { entity: 'user', entityId: user.id, action: 'change-password' });
     res.json({ success: true, message: 'Password changed' });
   },
 });
 
 define({
-  method: 'POST', path: '/forgot-password', auth: false, summary: 'Request a password reset code (queued to the e-mail outbox)', screen: 'Forgot password',
+  method: 'GET', path: '/password-policy', auth: false, summary: 'Password rules from settings (for the change / reset password forms)', screen: 'Profile > Change password; Reset password',
+  response: { success: true, data: { minLength: 8, requireUpper: true, requireLower: true, requireDigit: true, requireSymbol: true, historyCount: 5, maxAgeDays: 90 } },
+  handler: async (_req, res) => res.json({ success: true, data: await passwordPolicy() }),
+});
+
+define({
+  method: 'GET', path: '/login-history', summary: 'Own sign-in history (success, from, to; paging)', screen: 'Profile > Sign-in history', middleware: [requireAuth],
+  query: { page: 1, perPage: 20, success: 'false' },
+  response: { success: true, data: [{ id: 1, at: '2026-09-28T01:00:00Z', username: 'BrokerVerse', ip: '10.0.0.5', userAgent: 'Mozilla/5.0', success: true, reason: 'ok', method: 'password' }], total: 1, page: 1, perPage: 20, totalPages: 1 },
+  handler: async (req, res) => { const r = await loginHistory(req.user.id, req.query); res.json({ success: true, data: r.items, total: r.total, page: r.page, perPage: r.perPage, totalPages: r.totalPages }); },
+});
+
+define({
+  method: 'POST', path: '/forgot-password', auth: false, summary: 'Request a password reset code (queued to the e-mail outbox; rate limited per IP and username)', screen: 'Forgot password',
   middleware: [validate(z.object({ username: z.string().optional(), email: z.string().optional() }))],
   request: { email: 'user@example.com' }, response: { success: true },
   handler: async (req, res) => {
     const { username, email } = req.body;
     if (!username && !email) throw badRequest('username or email is required');
+    const t = await throttle(req, res, 'forgot', username || email, { log: false });
+    if (t.limited) return;
+    hit(t.keys);
     const user = await loadUser(username ? 'lower(u.username) = lower($1)' : 'lower(u.email) = lower($1)', [username || email]);
     if (user) {
       const code = String(crypto.randomInt(100000, 999999));
@@ -126,17 +222,78 @@ define({
 });
 
 define({
-  method: 'POST', path: '/reset-password', auth: false, summary: 'Reset the password with the emailed code', screen: 'Verify code / Reset password',
+  method: 'POST', path: '/reset-password', auth: false, summary: 'Reset the password with the emailed code (password policy applies; wrong codes are rate limited)', screen: 'Verify code / Reset password',
   middleware: [validate(z.object({ username: z.string().optional(), email: z.string().optional(), code: z.string().min(4), newPassword: z.string().min(1) }))],
-  request: { username: 'juan.santos', code: '123456', newPassword: 'new' }, response: { success: true },
+  request: { username: 'juan.santos', code: '123456', newPassword: 'New@Pass2' }, response: { success: true },
   handler: async (req, res) => {
     const { username, email, code, newPassword } = req.body;
+    const t = await throttle(req, res, 'reset', username || email, { log: false });
+    if (t.limited) return;
     const user = await loadUser(username ? 'lower(u.username) = lower($1)' : 'lower(u.email) = lower($1)', [username || email]);
     const reset = user && (await query('SELECT id FROM password_resets WHERE user_id = $1 AND code = $2 AND used_at IS NULL AND expires_at > now() ORDER BY id DESC LIMIT 1', [user.id, code])).rows[0];
-    if (!reset) throw badRequest('Invalid or expired code');
+    if (!reset) { hit(t.keys); throw badRequest('Invalid or expired code'); }
+    await assertPasswordAllowed(newPassword, { userId: user.id });
     await query('UPDATE password_resets SET used_at = now() WHERE id = $1', [reset.id]);
-    await query('UPDATE users SET password_hash = $2, failed_logins = 0, status = CASE WHEN status = \'locked\' THEN \'active\' ELSE status END WHERE id = $1', [user.id, await bcrypt.hash(newPassword, 10)]);
+    await savePassword(user.id, newPassword, { extraSql: 'failed_logins = 0, must_change_password = false, status = CASE WHEN status = \'locked\' THEN \'active\' ELSE status END' });
+    await audit({ user: { id: user.id, username: user.username }, ip: req.ip }, { entity: 'user', entityId: user.id, action: 'reset-password' });
     res.json({ success: true, message: 'Password reset' });
+  },
+});
+
+// ---------------------------------------------------------------- two-factor authentication (TOTP, RFC 6238)
+const codeBody = validate(z.object({ code: z.string().min(6).max(10) }));
+
+define({
+  method: 'GET', path: '/2fa/status', summary: 'Own two-factor status (enabled, required by role)', screen: 'Profile > Security', middleware: [requireAuth],
+  response: { success: true, data: { enabled: false, required: false, enabledAt: null } },
+  handler: async (req, res) => {
+    const u = await loadUser('u.id = $1', [req.user.id]);
+    const row = (await query('SELECT totp_enabled_at FROM users WHERE id = $1', [req.user.id])).rows[0];
+    res.json({ success: true, data: { enabled: !!u.totp_enabled, required: await twoFactorRequiredFor(u), enabledAt: row?.totp_enabled_at || null, setupPending: !!u.totp_pending_secret } });
+  },
+});
+define({
+  method: 'POST', path: '/2fa/setup', summary: 'Start two-factor enrolment: returns a new base32 secret and the otpauth:// URL for the QR code', screen: 'Profile > Security > Set up two-factor',
+  middleware: [requireAuth],
+  response: { success: true, data: { secret: 'JBSWY3DPEHPK3PXP...', otpauthUrl: 'otpauth://totp/BrokerVerse:BrokerVerse?secret=...&issuer=BrokerVerse', issuer: 'BrokerVerse', account: 'BrokerVerse' } },
+  handler: async (req, res) => {
+    const u = await loadUser('u.id = $1', [req.user.id]);
+    if (u.totp_enabled) throw conflict('Two-factor authentication is already enabled; disable it first');
+    const secret = generateSecret();
+    await query('UPDATE users SET totp_pending_secret = $2 WHERE id = $1', [u.id, secret]);
+    const issuer = String(await getSetting('security.two_factor_issuer', 'BrokerVerse') || 'BrokerVerse');
+    await audit(req, { entity: 'user', entityId: u.id, action: '2fa-setup' });
+    res.json({ success: true, message: 'Scan the QR code, then confirm with a code', data: { secret, otpauthUrl: otpauthUrl({ secret, account: u.username, issuer }), issuer, account: u.username } });
+  },
+});
+define({
+  method: 'POST', path: '/2fa/enable', summary: 'Confirm enrolment with a code from the authenticator app; after a forced enrolment the normal token payload is returned', screen: 'Profile > Security > Set up two-factor',
+  middleware: [requireAuth, codeBody], request: { code: '123456' },
+  response: { success: true, message: 'Two-factor authentication enabled', data: { enabled: true } },
+  handler: async (req, res) => {
+    const u = await loadUser('u.id = $1', [req.user.id]);
+    if (u.totp_enabled) throw conflict('Two-factor authentication is already enabled');
+    if (!u.totp_pending_secret) throw badRequest('Call /auth/2fa/setup first');
+    const step = verifyTotp(u.totp_pending_secret, req.body.code);
+    if (step === null) throw badRequest('Invalid authentication code');
+    await query('UPDATE users SET totp_secret = totp_pending_secret, totp_pending_secret = NULL, totp_enabled = true, totp_enabled_at = now(), totp_last_step = $2 WHERE id = $1', [u.id, step]);
+    await audit(req, { entity: 'user', entityId: u.id, action: '2fa-enable' });
+    const body = { success: true, message: 'Two-factor authentication enabled', data: { enabled: true } };
+    if (req.user.enrol2fa) Object.assign(body, await completeSignIn(req, await loadUser('u.id = $1', [u.id]), { method: '2fa' }));
+    res.json(body);
+  },
+});
+define({
+  method: 'POST', path: '/2fa/disable', summary: 'Turn two-factor off with a current code (refused while a role requires it)', screen: 'Profile > Security',
+  middleware: [requireAuth, codeBody], request: { code: '123456' }, response: { success: true, message: 'Two-factor authentication disabled', data: { enabled: false } },
+  handler: async (req, res) => {
+    const u = await loadUser('u.id = $1', [req.user.id]);
+    if (!u.totp_enabled) throw badRequest('Two-factor authentication is not enabled');
+    if (await twoFactorRequiredFor(u)) throw forbidden('Two-factor authentication is required for your role');
+    if (verifyTotp(u.totp_secret, req.body.code, { afterStep: u.totp_last_step }) === null) throw badRequest('Invalid authentication code');
+    await query('UPDATE users SET totp_secret = NULL, totp_pending_secret = NULL, totp_enabled = false, totp_enabled_at = NULL, totp_last_step = NULL WHERE id = $1', [u.id]);
+    await audit(req, { entity: 'user', entityId: u.id, action: '2fa-disable' });
+    res.json({ success: true, message: 'Two-factor authentication disabled', data: { enabled: false } });
   },
 });
 

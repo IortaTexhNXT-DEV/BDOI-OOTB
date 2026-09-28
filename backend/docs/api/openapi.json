@@ -117,6 +117,12 @@
       "name": "Schedules"
     },
     {
+      "name": "Search"
+    },
+    {
+      "name": "System"
+    },
+    {
       "name": "System Settings"
     },
     {
@@ -3362,10 +3368,274 @@
         "x-screen": "Operations > Leads/Prospects > Create Lead (address fields)"
       }
     },
+    "/auth/2fa/disable": {
+      "post": {
+        "operationId": "postAuth2faDisable",
+        "summary": "Turn two-factor off with a current code (refused while a role requires it)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Profile > Security\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Two-factor authentication disabled",
+                  "data": {
+                    "enabled": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Profile > Security",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/2fa/enable": {
+      "post": {
+        "operationId": "postAuth2faEnable",
+        "summary": "Confirm enrolment with a code from the authenticator app; after a forced enrolment the normal token payload is returned",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Profile > Security > Set up two-factor\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Two-factor authentication enabled",
+                  "data": {
+                    "enabled": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Profile > Security > Set up two-factor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/2fa/setup": {
+      "post": {
+        "operationId": "postAuth2faSetup",
+        "summary": "Start two-factor enrolment: returns a new base32 secret and the otpauth:// URL for the QR code",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Profile > Security > Set up two-factor\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string"
+                        },
+                        "otpauthUrl": {
+                          "type": "string"
+                        },
+                        "issuer": {
+                          "type": "string"
+                        },
+                        "account": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "secret": "JBSWY3DPEHPK3PXP...",
+                    "otpauthUrl": "otpauth://totp/BrokerVerse:BrokerVerse?secret=...&issuer=BrokerVerse",
+                    "issuer": "BrokerVerse",
+                    "account": "BrokerVerse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Profile > Security > Set up two-factor"
+      }
+    },
+    "/auth/2fa/status": {
+      "get": {
+        "operationId": "getAuth2faStatus",
+        "summary": "Own two-factor status (enabled, required by role)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Profile > Security\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "required": {
+                          "type": "boolean"
+                        },
+                        "enabledAt": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "enabled": false,
+                    "required": false,
+                    "enabledAt": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Profile > Security"
+      }
+    },
     "/auth/change-password": {
       "post": {
         "operationId": "postAuthChangePassword",
-        "summary": "Change own password",
+        "summary": "Change own password (password policy and history from settings group \"security\")",
         "tags": [
           "Auth"
         ],
@@ -3417,8 +3687,8 @@
                 }
               },
               "example": {
-                "currentPassword": "old",
-                "newPassword": "new"
+                "currentPassword": "Old@Pass1",
+                "newPassword": "New@Pass2"
               }
             }
           }
@@ -3428,7 +3698,7 @@
     "/auth/forgot-password": {
       "post": {
         "operationId": "postAuthForgotPassword",
-        "summary": "Request a password reset code (queued to the e-mail outbox)",
+        "summary": "Request a password reset code (queued to the e-mail outbox; rate limited per IP and username)",
         "tags": [
           "Auth"
         ],
@@ -3482,7 +3752,7 @@
     "/auth/login": {
       "post": {
         "operationId": "postAuthLogin",
-        "summary": "Sign in with username and password",
+        "summary": "Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)",
         "tags": [
           "Auth"
         ],
@@ -3508,6 +3778,9 @@
                     "issuedAt": {
                       "type": "string"
                     },
+                    "mustChangePassword": {
+                      "type": "boolean"
+                    },
                     "user": {
                       "type": "object",
                       "properties": {
@@ -3531,6 +3804,12 @@
                           "items": {
                             "type": "string"
                           }
+                        },
+                        "mustChangePassword": {
+                          "type": "boolean"
+                        },
+                        "twoFactorEnabled": {
+                          "type": "boolean"
                         }
                       }
                     }
@@ -3541,6 +3820,7 @@
                   "refreshToken": "<jwt>",
                   "expiresIn": 86400,
                   "issuedAt": "2026-01-01T00:00:00Z",
+                  "mustChangePassword": false,
                   "user": {
                     "userId": "usr_1",
                     "username": "BrokerVerse",
@@ -3550,7 +3830,9 @@
                     ],
                     "permissions": [
                       "read:leads"
-                    ]
+                    ],
+                    "mustChangePassword": false,
+                    "twoFactorEnabled": false
                   }
                 }
               }
@@ -3580,6 +3862,220 @@
               "example": {
                 "username": "BrokerVerse",
                 "password": "Technxt@1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login-history": {
+      "get": {
+        "operationId": "getAuthLoginHistory",
+        "summary": "Own sign-in history (success, from, to; paging)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Profile > Sign-in history\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          },
+          {
+            "name": "success",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "false"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "ip": {
+                            "type": "string"
+                          },
+                          "userAgent": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "method": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "at": "2026-09-28T01:00:00Z",
+                      "username": "BrokerVerse",
+                      "ip": "10.0.0.5",
+                      "userAgent": "Mozilla/5.0",
+                      "success": true,
+                      "reason": "ok",
+                      "method": "password"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Profile > Sign-in history"
+      }
+    },
+    "/auth/login/2fa": {
+      "post": {
+        "operationId": "postAuthLogin2fa",
+        "summary": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "type": "integer"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "twoFactorEnabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "accessToken": "<jwt>",
+                  "refreshToken": "<jwt>",
+                  "expiresIn": 86400,
+                  "user": {
+                    "userId": "usr_1",
+                    "username": "BrokerVerse",
+                    "twoFactorEnabled": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "x-screen": "Sign-in > Two-factor code",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeToken": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "challengeToken": "<jwt from /auth/login>",
+                "code": "123456"
               }
             }
           }
@@ -3642,6 +4138,74 @@
             }
           }
         }
+      }
+    },
+    "/auth/password-policy": {
+      "get": {
+        "operationId": "getAuthPasswordPolicy",
+        "summary": "Password rules from settings (for the change / reset password forms)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Profile > Change password; Reset password\n\nAccess: Public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "minLength": {
+                          "type": "integer"
+                        },
+                        "requireUpper": {
+                          "type": "boolean"
+                        },
+                        "requireLower": {
+                          "type": "boolean"
+                        },
+                        "requireDigit": {
+                          "type": "boolean"
+                        },
+                        "requireSymbol": {
+                          "type": "boolean"
+                        },
+                        "historyCount": {
+                          "type": "integer"
+                        },
+                        "maxAgeDays": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "minLength": 8,
+                    "requireUpper": true,
+                    "requireLower": true,
+                    "requireDigit": true,
+                    "requireSymbol": true,
+                    "historyCount": 5,
+                    "maxAgeDays": 90
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen": "Profile > Change password; Reset password",
+        "security": []
       }
     },
     "/auth/profile": {
@@ -3836,7 +4400,7 @@
     "/auth/reset-password": {
       "post": {
         "operationId": "postAuthResetPassword",
-        "summary": "Reset the password with the emailed code",
+        "summary": "Reset the password with the emailed code (password policy applies; wrong codes are rate limited)",
         "tags": [
           "Auth"
         ],
@@ -3888,7 +4452,7 @@
               "example": {
                 "username": "juan.santos",
                 "code": "123456",
-                "newPassword": "new"
+                "newPassword": "New@Pass2"
               }
             }
           }
@@ -12422,7 +12986,7 @@
     "/dashboard/sales": {
       "get": {
         "operationId": "getDashboardSales",
-        "summary": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month",
+        "summary": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",
         "tags": [
           "Dashboards"
         ],
@@ -26446,7 +27010,7 @@
     "/policies": {
       "get": {
         "operationId": "getPolicies",
-        "summary": "List policies (paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",
+        "summary": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",
         "tags": [
           "Policies"
         ],
@@ -26469,6 +27033,15 @@
               "type": "integer"
             },
             "example": 10
+          },
+          {
+            "name": "mine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
           },
           {
             "name": "paymentStatus",
@@ -56741,6 +57314,191 @@
         "x-screen": "Master > Schedules > History"
       }
     },
+    "/search": {
+      "get": {
+        "operationId": "getSearch",
+        "summary": "Global search across leads, clients, quotations, policies, claims and endorsements (number, name, e-mail, phone, plate / chassis); scoped users only find their own book",
+        "tags": [
+          "Search"
+        ],
+        "description": "Front-end touchpoint: Header > Global search\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "NQQ 2025"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          },
+          {
+            "name": "types",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "policy,claim"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "subtitle": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "link": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "query": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "type": "policy",
+                      "id": "pol_1",
+                      "title": "POL-2026-00001",
+                      "subtitle": "Juan Dela Cruz · Motor · NQQ 2025",
+                      "status": "Active",
+                      "link": "/agent/policydetail/pol_1"
+                    }
+                  ],
+                  "total": 1,
+                  "query": "NQQ 2025"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Header > Global search"
+      }
+    },
+    "/version": {
+      "get": {
+        "operationId": "getVersion",
+        "summary": "Build and runtime information: name, version, git commit (GIT_COMMIT), start time, Node version, database reachability, pending migrations",
+        "tags": [
+          "System"
+        ],
+        "description": "Front-end touchpoint: Operations / monitoring\n\nAccess: Public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "commit": {
+                      "type": "string"
+                    },
+                    "startedAt": {
+                      "type": "string"
+                    },
+                    "uptimeSeconds": {
+                      "type": "integer"
+                    },
+                    "node": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "object",
+                      "properties": {
+                        "reachable": {
+                          "type": "boolean"
+                        },
+                        "latencyMs": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "pendingMigrations": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "name": "brokerverse-backend",
+                  "version": "1.0.0",
+                  "commit": "a1b2c3d",
+                  "startedAt": "2026-09-28T00:00:00.000Z",
+                  "uptimeSeconds": 3600,
+                  "node": "v20.18.0",
+                  "database": {
+                    "reachable": true,
+                    "latencyMs": 2
+                  },
+                  "pendingMigrations": 0
+                }
+              }
+            }
+          }
+        },
+        "x-screen": "Operations / monitoring",
+        "security": []
+      }
+    },
     "/settings": {
       "get": {
         "operationId": "getSettings",
@@ -58459,10 +59217,234 @@
         "x-screen": "Master > User Management > User"
       }
     },
+    "/users/{id}/2fa/reset": {
+      "post": {
+        "operationId": "postUsersId2faReset",
+        "summary": "Administrator turns off a user's two-factor authentication (lost device); the user enrols again",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > User > Edit\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "twoFactorEnabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "userId": "usr_1",
+                    "twoFactorEnabled": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > User > Edit"
+      }
+    },
+    "/users/{id}/login-history": {
+      "get": {
+        "operationId": "getUsersIdLoginHistory",
+        "summary": "Sign-in history of a user (success, from, to; paging)",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > User > View > Sign-in history\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          },
+          {
+            "name": "success",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "false"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "userId": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "ip": {
+                            "type": "string"
+                          },
+                          "userAgent": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "method": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "at": "2026-09-28T01:00:00Z",
+                      "userId": "usr_1",
+                      "username": "juan.santos",
+                      "ip": "10.0.0.5",
+                      "userAgent": "Mozilla/5.0",
+                      "success": false,
+                      "reason": "bad-password",
+                      "method": "password"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > User > View > Sign-in history"
+      }
+    },
     "/users/{id}/password": {
       "post": {
         "operationId": "postUsersIdPassword",
-        "summary": "Set a user password (administrator)",
+        "summary": "Set a user password (administrator; password policy and history apply)",
         "tags": [
           "User Management"
         ],

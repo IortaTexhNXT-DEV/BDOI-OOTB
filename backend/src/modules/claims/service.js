@@ -8,6 +8,7 @@ import path from 'node:path';
 import { config } from '../../config.js';
 import { many, one, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
@@ -15,7 +16,7 @@ import { buildPdf, renderTemplate } from './docs.js';
 import { daysBetween, nextNumber, parseJsonField, round2, storeUpload, toBool, toDate, toNum, today, unprocessable, usersWithRole } from './util.js';
 
 export const STATUSES = ['registered', 'in-review', 'pending-approval', 'approved', 'settled', 'closed', 'rejected'];
-const PLACEHOLDER_REFS = new Set(['POLICY-001', 'LEAD-001', 'QUOTE-001', '']);
+export const PLACEHOLDER_REFS = new Set(['POLICY-001', 'LEAD-001', 'QUOTE-001', '']);
 
 // ---------------------------------------------------------------- status vocabulary
 export async function statusLabels() {
@@ -146,6 +147,7 @@ export async function listClaims(q, pg) {
   if (q.dateTo || q.endDate) add('c.reported_date <= ?::date', q.dateTo || q.endDate);
   const search = q.search || q.q;
   if (search) add('(c.claim_number ILIKE ? OR p.policy_number ILIKE ? OR cl.display_name ILIKE ?)', `%${search}%`, `%${search}%`, `%${search}%`);
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'claim', 'c', params));
   const w = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const total = (await one(`SELECT count(*)::int AS n FROM (${BASE} ${w}) t`, params)).n;
   const rows = await many(`${BASE} ${w} ORDER BY c.created_at DESC, c.claim_number DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset]);
@@ -472,8 +474,10 @@ export async function claimDocument(id, documentName) {
 }
 
 // ---------------------------------------------------------------- reports
-async function reportRows(startDate, endDate) {
-  return many(`${BASE} WHERE c.reported_date BETWEEN $1::date AND $2::date ORDER BY c.reported_date DESC, c.claim_number DESC`, [startDate, endDate]);
+async function reportRows(startDate, endDate, scope = null) {
+  const params = [startDate, endDate];
+  const own = scopeSql(scope, 'claim', 'c', params);
+  return many(`${BASE} WHERE c.reported_date BETWEEN $1::date AND $2::date AND ${own} ORDER BY c.reported_date DESC, c.claim_number DESC`, params);
 }
 const countBy = (items, fn, key) => {
   const m = new Map();
@@ -482,11 +486,11 @@ const countBy = (items, fn, key) => {
 };
 
 /** Claims dashboard (GET /claims/report): summary, breakdowns, ageing and optionally the detailed rows. */
-export async function claimsReport({ startDate, endDate, includeData }) {
+export async function claimsReport({ startDate, endDate, includeData, [SCOPE]: scope = null }) {
   const start = (await toDate(startDate)) || `${new Date().getFullYear()}-01-01`;
   const end = (await toDate(endDate)) || await today();
   const ctx = await readContext();
-  const claims = (await reportRows(start, end)).map((r) => ({ ...toApi(r, ctx.labels, ctx.todayStr, ctx.open), state: r.loss_province || r.client_state || 'Unknown', city: r.loss_city || r.client_city || '' }));
+  const claims = (await reportRows(start, end, scope)).map((r) => ({ ...toApi(r, ctx.labels, ctx.todayStr, ctx.open), state: r.loss_province || r.client_state || 'Unknown', city: r.loss_city || r.client_city || '' }));
   const open = claims.filter((c) => c.isOpen);
   const byState = countBy(claims, (c) => c.state, 'state').map((s) => ({ ...s, percentage: claims.length ? Math.round((s.count / claims.length) * 100) : 0 }));
   const [t1, t2, t3] = (await getSetting('claims.aging_thresholds', [7, 15, 30])) || [7, 15, 30];
@@ -522,11 +526,11 @@ export const REPORT_COLUMNS = [
 ].map(([key, header]) => ({ key, header }));
 
 /** Rows for the Operational Reports > Claims criteria (All | Open | Settled | Rejected | Aging). */
-export async function criteriaRows({ startDate, endDate, criteria = 'All' }) {
+export async function criteriaRows({ startDate, endDate, criteria = 'All', [SCOPE]: scope = null }) {
   const start = (await toDate(startDate)) || '1900-01-01';
   const end = (await toDate(endDate)) || await today();
   const ctx = await readContext();
-  const all = (await reportRows(start, end)).map((r) => ({ ...toApi(r, ctx.labels, ctx.todayStr, ctx.open), state: r.loss_province || r.client_state || '', city: r.loss_city || r.client_city || '' }));
+  const all = (await reportRows(start, end, scope)).map((r) => ({ ...toApi(r, ctx.labels, ctx.todayStr, ctx.open), state: r.loss_province || r.client_state || '', city: r.loss_city || r.client_city || '' }));
   const c = String(criteria).toLowerCase();
   const filtered = all.filter((x) => (c === 'open' ? x.isOpen
     : c === 'settled' ? ['settled', 'closed'].includes(x.lifecycleStatus)

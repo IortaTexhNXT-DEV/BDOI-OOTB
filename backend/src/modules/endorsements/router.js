@@ -8,6 +8,7 @@ import { sendEntity, actor } from '../documents/common.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { uploadFile } from '../documents/tabular.js';
 import { storeFile } from '../uploads/storage.js';
+import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Endorsements', '/endorsements');
@@ -32,14 +33,14 @@ define({
   response: { success: true, data: { items: [example], pagination: { page: 1, perPage: 50, total: 1, totalPages: 1 } } },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
-    const { total, rows } = await svc.listEndorsements(req.query, pg);
+    const { total, rows } = await svc.listEndorsements(await withScope(req), pg);
     const pagination = { page: pg.page, perPage: pg.perPage, total, totalPages: Math.ceil(total / pg.perPage) };
     res.json({ success: true, data: { items: rows.map(out), pagination }, pagination });
   },
 });
 define({
   method: 'GET', path: '/get-endorsement/policy-id', summary: 'Policy details with its endorsements (endorsement start screen)', screen: `${SCREEN} > Personal details`,
-  middleware: canRead, query: { policyId: 'pol_1' }, response: { success: true, data: { policyId: 'pol_1', policyNumber: 'POL-2026-00001', endorsements: [example] } },
+  middleware: [...canRead, ownRecord('policy', (req) => req.query.policyId)], query: { policyId: 'pol_1' }, response: { success: true, data: { policyId: 'pol_1', policyNumber: 'POL-2026-00001', endorsements: [example] } },
   handler: async (req, res) => {
     if (!req.query.policyId) throw badRequest('policyId is required');
     const policy = toPolicy(await getPolicyRow(req.query.policyId));
@@ -49,7 +50,7 @@ define({
 });
 define({
   method: 'POST', path: '/create-endorsement', summary: 'Create an endorsement (personal / motor / coverage / extension / cancellation; Fire payloads)', screen: `${SCREEN} > Save`,
-  middleware: [...canWrite, validate(createBody)],
+  middleware: [...canWrite, validate(createBody), ownRecord('policy', (req) => req.body.policyId)],
   request: { policyId: 'pol_1', endorsementTypeIds: [1, 2], personalDetails: { FirstName: 'Juan', LastName: 'Dela Cruz', ContactNumber: '09179998888' }, motorDetails: { PlateNumber: 'NEW 1234' } },
   response: { ...example, success: true },
   handler: async (req, res) => {
@@ -60,7 +61,7 @@ define({
 });
 for (const [path, cancel, label] of [['/send-endorsement-to-customer/:id', false, 'Send the endorsement to the customer (PendingCustomer)'], ['/initiate-cancel-policy/:id', true, 'Initiate policy cancellation (InitiateCancel)']]) {
   define({
-    method: 'POST', path, summary: label, screen: `${SCREEN} > Summary`, middleware: canWrite, request: { sentBy: 'agent' },
+    method: 'POST', path, summary: label, screen: `${SCREEN} > Summary`, middleware: [...canWrite, ownRecord('endorsement')], request: { sentBy: 'agent' },
     response: { success: true, message: 'Endorsement sent', endorsement: { ...example, status: cancel ? 'InitiateCancel' : 'PendingCustomer' } },
     handler: async (req, res) => {
       const { before, after, emailedTo } = await svc.sendToCustomer(req.params.id, actor(req), cancel);
@@ -71,7 +72,7 @@ for (const [path, cancel, label] of [['/send-endorsement-to-customer/:id', false
 }
 define({
   method: 'POST', path: '/upload-document', summary: 'Upload the endorsement document (multipart: file, endorsementId)', screen: `${SCREEN} > Upload endorsement`,
-  middleware: [...canWrite, uploadFile], request: 'multipart/form-data file + endorsementId', response: { success: true, data: { documentKey: 'endorsement/abc.pdf', documentUrl: 'http://host/api/s3/object/endorsement/abc.pdf' } },
+  middleware: [...canWrite, uploadFile, ownRecord('endorsement', (req) => req.body?.endorsementId)], request: 'multipart/form-data file + endorsementId', response: { success: true, data: { documentKey: 'endorsement/abc.pdf', documentUrl: 'http://host/api/s3/object/endorsement/abc.pdf' } },
   handler: async (req, res) => {
     if (!req.file) throw badRequest('file is required');
     if (!req.body?.endorsementId) throw badRequest('endorsementId is required');
@@ -85,7 +86,7 @@ define({
 });
 define({
   method: 'POST', path: '/complete-endorsement', summary: 'Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner', screen: `${SCREEN} > Upload endorsement > Submit`,
-  middleware: [...canWrite, validate(completeBody)],
+  middleware: [...canWrite, validate(completeBody), ownRecord('endorsement', (req) => req.body.endorsementId)],
   request: { endorsementId: 'end_1', policyNumber: 'POL-2026-00001', endorsementNumber: 'INS-END-778', issuedDate: '2026-09-28', expiryDate: '2027-09-28', documentKey: 'endorsement/abc.pdf' },
   response: { ...example, status: 'Completed', success: true },
   handler: async (req, res) => {
@@ -96,7 +97,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number)', screen: `${SCREEN} > Detailed view`, middleware: canRead,
+  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number)', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
   response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, out(await svc.getEndorsementRow(req.params.id))),
 });
 

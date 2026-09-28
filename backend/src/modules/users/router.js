@@ -6,6 +6,8 @@ import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
+import { assertPasswordAllowed, recordHistory, savePassword } from '../../lib/password.js';
+import { loginHistory } from '../../lib/loginHistory.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
 const admin = [requireAuth, requireRole('it-admin', 'ba')];
@@ -13,7 +15,7 @@ const admin = [requireAuth, requireRole('it-admin', 'ba')];
 const userRow = (u) => ({
   ...publicUser(u), firstName: u.first_name, lastName: u.last_name, phone: u.phone, employeeCode: u.employee_code,
   branchCode: u.branch_code, department: u.department, designation: u.designation, reportingTo: u.reporting_to,
-  mustChangePassword: u.must_change_password, createdAt: u.created_at, updatedAt: u.updated_at,
+  mustChangePassword: u.must_change_password, passwordChangedAt: u.password_changed_at, createdAt: u.created_at, updatedAt: u.updated_at,
 });
 const listSql = `SELECT u.*,
   COALESCE((SELECT array_agg(r.code ORDER BY r.code) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS roles,
@@ -60,13 +62,35 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/password', summary: 'Set a user password (administrator)', screen: 'Master > User Management > User > Edit', middleware: [...admin, validate(z.object({ password: z.string().min(1) }))],
+  method: 'POST', path: '/:id/password', summary: 'Set a user password (administrator; password policy and history apply)', screen: 'Master > User Management > User > Edit', middleware: [...admin, validate(z.object({ password: z.string().min(1) }))],
   request: { password: 'Welcome@123' }, response: { success: true, data: { userId: 'usr_1' } },
   handler: async (req, res) => {
-    const r = await query("UPDATE users SET password_hash = $2, failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END WHERE id = $1 RETURNING id", [req.params.id, await bcrypt.hash(req.body.password, 10)]);
-    if (!r.rowCount) throw notFound('User not found');
+    if (!(await one('SELECT 1 FROM users WHERE id = $1', [req.params.id]))) throw notFound('User not found');
+    await assertPasswordAllowed(req.body.password, { userId: req.params.id });
+    await savePassword(req.params.id, req.body.password, { extraSql: "failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END" });
     await audit(req, { entity: 'user', entityId: req.params.id, action: 'set-password' });
     ok(res, { userId: req.params.id }, 'Password updated');
+  },
+});
+define({
+  method: 'GET', path: '/:id/login-history', summary: 'Sign-in history of a user (success, from, to; paging)', screen: 'Master > User Management > User > View > Sign-in history', middleware: admin,
+  query: { page: 1, perPage: 20, success: 'false', from: '2026-09-01', to: '2026-09-30' },
+  response: { success: true, data: [{ id: 1, at: '2026-09-28T01:00:00Z', userId: 'usr_1', username: 'juan.santos', ip: '10.0.0.5', userAgent: 'Mozilla/5.0', success: false, reason: 'bad-password', method: 'password' }], total: 1, page: 1, perPage: 20, totalPages: 1 },
+  handler: async (req, res) => {
+    const u = await one('SELECT id FROM users WHERE id = $1 OR username = $1', [req.params.id]);
+    if (!u) throw notFound('User not found');
+    const r = await loginHistory(u.id, req.query);
+    res.json({ success: true, data: r.items, total: r.total, page: r.page, perPage: r.perPage, totalPages: r.totalPages });
+  },
+});
+define({
+  method: 'POST', path: '/:id/2fa/reset', summary: 'Administrator turns off a user\'s two-factor authentication (lost device); the user enrols again', screen: 'Master > User Management > User > Edit',
+  middleware: admin, response: { success: true, data: { userId: 'usr_1', twoFactorEnabled: false } },
+  handler: async (req, res) => {
+    const r = await query('UPDATE users SET totp_secret = NULL, totp_pending_secret = NULL, totp_enabled = false, totp_enabled_at = NULL, totp_last_step = NULL WHERE id = $1 RETURNING id', [req.params.id]);
+    if (!r.rowCount) throw notFound('User not found');
+    await audit(req, { entity: 'user', entityId: req.params.id, action: '2fa-reset' });
+    ok(res, { userId: req.params.id, twoFactorEnabled: false }, 'Two-factor authentication reset');
   },
 });
 define({
@@ -85,12 +109,14 @@ define({
   handler: async (req, res) => {
     const b = req.body;
     if (await one('SELECT 1 FROM users WHERE lower(username) = lower($1)', [b.username])) throw conflict('Username already exists');
+    if (b.password) await assertPasswordAllowed(b.password);
     const hash = await bcrypt.hash(b.password || 'Welcome@1', 10);
     const id = await withTransaction(async (c) => {
       const r = await c.query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, phone, employee_code, branch_code, department, designation, reporting_to, status, must_change_password, created_by)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
         [b.username, hash, b.displayName || [b.firstName, b.lastName].filter(Boolean).join(' ') || b.username, b.firstName, b.lastName, b.email || null, b.phone, b.employeeCode, b.branchCode, b.department, b.designation, b.reportingTo, b.status || 'active', b.mustChangePassword ?? !b.password, req.user.username]);
       await setRoles(c, r.rows[0].id, b.roles);
+      await recordHistory(r.rows[0].id, hash, c);
       return r.rows[0].id;
     });
     const u = await loadUser('u.id = $1', [id]);
@@ -105,12 +131,13 @@ define({
     const before = await loadUser('u.id = $1', [req.params.id]);
     if (!before) throw notFound('User not found');
     const b = req.body;
+    if (b.password) await assertPasswordAllowed(b.password, { userId: before.id });
     await withTransaction(async (c) => {
       await c.query(`UPDATE users SET display_name = COALESCE($2, display_name), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), email = COALESCE($5, email),
         phone = COALESCE($6, phone), employee_code = COALESCE($7, employee_code), branch_code = COALESCE($8, branch_code), department = COALESCE($9, department), designation = COALESCE($10, designation),
         reporting_to = COALESCE($11, reporting_to), status = COALESCE($12, status), must_change_password = COALESCE($13, must_change_password), updated_by = $14 WHERE id = $1`,
         [before.id, b.displayName, b.firstName, b.lastName, b.email || null, b.phone, b.employeeCode, b.branchCode, b.department, b.designation, b.reportingTo, b.status, b.mustChangePassword, req.user.username]);
-      if (b.password) await c.query('UPDATE users SET password_hash = $2 WHERE id = $1', [before.id, await bcrypt.hash(b.password, 10)]);
+      if (b.password) await savePassword(before.id, b.password, { db: c });
       if (b.roles) await setRoles(c, before.id, b.roles);
     });
     const after = await loadUser('u.id = $1', [before.id]);
@@ -133,8 +160,9 @@ define({
   method: 'POST', path: '/:id/reset-password', summary: 'Administrator resets a user password', screen: 'Master > User Management > User', middleware: [...admin, validate(z.object({ newPassword: z.string().min(1), mustChangePassword: z.boolean().optional() }))],
   request: { newPassword: 'Welcome@1', mustChangePassword: true }, response: { success: true },
   handler: async (req, res) => {
-    const r = await query('UPDATE users SET password_hash = $2, must_change_password = $3, failed_logins = 0, status = CASE WHEN status = \'locked\' THEN \'active\' ELSE status END WHERE id = $1 RETURNING id', [req.params.id, await bcrypt.hash(req.body.newPassword, 10), req.body.mustChangePassword ?? true]);
-    if (!r.rowCount) throw notFound('User not found');
+    if (!(await one('SELECT 1 FROM users WHERE id = $1', [req.params.id]))) throw notFound('User not found');
+    await assertPasswordAllowed(req.body.newPassword, { userId: req.params.id });
+    await savePassword(req.params.id, req.body.newPassword, { extraSql: `must_change_password = ${(req.body.mustChangePassword ?? true) ? 'true' : 'false'}, failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END` });
     await audit(req, { entity: 'user', entityId: req.params.id, action: 'admin-reset-password' });
     ok(res, { userId: req.params.id }, 'Password reset');
   },

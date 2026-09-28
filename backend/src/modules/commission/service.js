@@ -4,6 +4,7 @@
  * Reversal after payment is a clawback (Dr Receivable from Agents / Cr Commission Expense).
  */
 import { getSetting } from '../../lib/settings.js';
+import { scopeSql } from '../../lib/scope.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { account, createJournal, reverseJournal } from '../accounting/lib/ledger.js';
 import { assertChecker, round2, num } from '../accounting/lib/http.js';
@@ -84,11 +85,15 @@ export async function referrerSummaryRow(db, ref) {
   };
 }
 
-export async function listReferrers(db) {
-  const refs = (await db.query('SELECT * FROM commission_referrers ORDER BY name')).rows;
+export async function listReferrers(db, scope = null) {
+  const params = [];
+  const own = scopeSql(scope, 'referrer', 'r', params);
+  const refs = (await db.query(`SELECT * FROM commission_referrers r WHERE ${own} ORDER BY name`, params)).rows;
   const referrers = [];
   for (const r of refs) referrers.push(await referrerSummaryRow(db, r));
-  const ready = (await db.query('SELECT COALESCE(sum(net_amount),0) AS n FROM commissions WHERE status = \'Approved\' AND disbursement_id IS NULL')).rows[0].n;
+  const rp = [];
+  const ownLines = scopeSql(scope, 'commission', 'c', rp);
+  const ready = (await db.query(`SELECT COALESCE(sum(net_amount),0) AS n FROM commissions c WHERE status = 'Approved' AND disbursement_id IS NULL AND ${ownLines}`, rp)).rows[0].n;
   return { summary: { cycleLabel: cycleLabel(monthStart()), dueThisCycle: round2(referrers.reduce((s, r) => s + r.netPayable, 0)), readyToPay: round2(ready) }, referrers };
 }
 
@@ -288,10 +293,12 @@ export async function approvedLines(db, referrerId) {
   return (await db.query(`${LINE_SQL} WHERE c.referrer_id = $1 AND c.status = 'Approved' AND c.disbursement_id IS NULL ORDER BY c.cycle_date`, [referrerId])).rows;
 }
 
-export async function agentsReadyToPay(db) {
+export async function agentsReadyToPay(db, scope = null) {
+  const params = [];
+  const own = scopeSql(scope, 'referrer', 'r', params);
   const rows = (await db.query(`SELECT r.*, count(c.id)::int AS n, COALESCE(sum(c.amount),0) AS gross, COALESCE(sum(c.net_amount),0) AS net
     FROM commission_referrers r JOIN commissions c ON c.referrer_id = r.id AND c.status = 'Approved' AND c.disbursement_id IS NULL
-    GROUP BY r.id ORDER BY r.name`)).rows;
+    WHERE ${own} GROUP BY r.id ORDER BY r.name`, params)).rows;
   const agents = rows.map((r) => ({ id: r.id, name: r.name, type: r.referrer_type, level: r.level, approvedLineCount: r.n, comsubGross: round2(r.gross), netPayable: round2(r.net), bankAccount: maskAccount(r) }));
   return { agents, summary: { agentCount: agents.length, totalComsubGross: round2(agents.reduce((s, a) => s + a.comsubGross, 0)), totalNet: round2(agents.reduce((s, a) => s + a.netPayable, 0)) } };
 }
@@ -301,19 +308,22 @@ const pctRows = (rows) => {
   return rows.map((r) => ({ label: r.label || 'Other', amount: round2(r.amount), pct: Math.round((Number(r.amount) / total) * 100) }));
 };
 
-export async function dashboard(db) {
-  const q = async (sql, p = []) => (await db.query(sql, p)).rows;
-  const live = 'status <> \'Reversed\' AND referrer_id IS NOT NULL';
+export async function dashboard(db, scope = null) {
+  // Scoped users (agents) see their own lines only: every query below shares the one ownership parameter.
+  const sp = [];
+  const own = scopeSql(scope, 'commission', 'commissions', sp);
+  const q = async (sql) => (await db.query(sql, sp)).rows;
+  const live = `status <> 'Reversed' AND referrer_id IS NOT NULL AND ${own}`;
   const [k] = await q(`SELECT COALESCE(sum(brokerage_amount),0) AS b, COALESCE(sum(amount),0) AS c,
     COALESCE(sum(net_amount) FILTER (WHERE status IN ('Eligible','Approved')),0) AS o, COALESCE(sum(withholding) FILTER (WHERE status = 'Paid'),0) AS w FROM commissions WHERE ${live}`);
   const b = round2(k.b); const c = round2(k.c);
   const byStatus = await q(`SELECT status, count(*)::int AS n, COALESCE(sum(net_amount),0) AS amt FROM commissions WHERE ${live} GROUP BY status`);
-  const [claw] = await q('SELECT count(*)::int AS n, COALESCE(sum(amount),0) AS a FROM commissions WHERE status = \'Reversed\' AND clawback');
+  const [claw] = await q(`SELECT count(*)::int AS n, COALESCE(sum(amount),0) AS a FROM commissions WHERE status = 'Reversed' AND clawback AND ${own}`);
   const trend = await q(`SELECT cycle_date AS m, sum(brokerage_amount) AS b, sum(amount) AS c FROM commissions WHERE ${live} AND cycle_date IS NOT NULL
     GROUP BY cycle_date ORDER BY cycle_date DESC LIMIT 6`);
   return {
     kpis: { brokerageIncome: b, comsubGross: c, netMargin: round2(b - c), marginPct: b ? Math.round(((b - c) / b) * 1000) / 10 : 0, outstandingPayable: round2(k.o), whtWithheldPaid: round2(k.w) },
-    comsubByReferrer: (await q(`SELECT r.name, sum(c.amount) AS amount FROM commissions c JOIN commission_referrers r ON r.id = c.referrer_id WHERE c.status <> 'Reversed'
+    comsubByReferrer: (await q(`SELECT r.name, sum(commissions.amount) AS amount FROM commissions JOIN commission_referrers r ON r.id = commissions.referrer_id WHERE commissions.status <> 'Reversed' AND ${own}
       GROUP BY r.name ORDER BY amount DESC LIMIT 8`)).map((r) => ({ name: r.name, amount: round2(r.amount) })),
     linesByStatus: LINE_STATUSES.map((s) => ({ status: s, count: byStatus.find((x) => x.status === s)?.n || 0 })),
     clawback: { lines: claw.n, amount: round2(claw.a) },

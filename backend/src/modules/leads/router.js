@@ -6,6 +6,7 @@ import { paging } from '../../lib/respond.js';
 import { withTransaction } from '../../db/pool.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows, sendTable } from '../documents/tabular.js';
+import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
@@ -28,7 +29,7 @@ const example = { leadId: 'ld_1', generatedLeadId: 'LD-2026-00001', firstName: '
 
 async function listHandler(req, res) {
   const pg = paging(req.query);
-  const { total, rows } = await svc.listLeads(req.query, pg);
+  const { total, rows } = await svc.listLeads(await withScope(req), pg);
   res.json({ success: true, data: rows.map(svc.toLead), page: pg.page, pageSize: pg.perPage, perPage: pg.perPage, total, totalPages: Math.ceil(total / pg.perPage) });
 }
 
@@ -45,14 +46,14 @@ define({
   method: 'GET', path: '/stats', summary: 'Lead KPIs for the stats cards', screen: `${SCREEN} (stats cards)`, middleware: canRead,
   query: { leadCategory: 'Retail' },
   response: { totalLeads: 16, recentLeads: 3, last30DaysLeads: 9, convertedLeads: 8, leadsWithQuotations: 12, conversionRate: 50, quotationRate: 75, growthRate: 12.5, leadsByStatus: [{ status: 'New', count: 4 }] },
-  handler: async (req, res) => { const s = await svc.leadStats(req.query); res.json({ success: true, ...s, data: s }); },
+  handler: async (req, res) => { const s = await svc.leadStats(await withScope(req)); res.json({ success: true, ...s, data: s }); },
 });
 define({
   method: 'GET', path: '/report', summary: 'Download the lead report (XLSX, or CSV with format=csv) for a status / quotation-status category', screen: `${SCREEN} > Generate Report`,
   middleware: canRead, query: { category: 'Converted', format: 'xlsx' }, response: 'binary file',
   handler: async (req, res) => {
     const category = req.query.category || 'All';
-    const { header, rows } = await svc.leadReport(category);
+    const { header, rows } = await svc.leadReport(category, await scopeOf(req));
     await audit(req, { entity: 'lead', entityId: null, action: 'report', after: { category, rows: rows.length } });
     sendTable(res, { header, rows, fileBase: `lead-report-${String(category).replace(/[^a-zA-Z0-9]/g, '')}-${new Date().toISOString().slice(0, 10)}`, format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Leads' });
   },
@@ -80,7 +81,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one lead (by id or lead number)', screen: `${SCREEN} > View`, middleware: canRead,
+  method: 'GET', path: '/:id', summary: 'Get one lead (by id or lead number)', screen: `${SCREEN} > View`, middleware: [...canRead, ownRecord('lead')],
   response: { ...example, success: true, data: example },
   handler: async (req, res) => sendEntity(res, svc.toLead(await svc.getLead(req.params.id))),
 });
@@ -95,7 +96,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Update a lead', screen: `${SCREEN} > Edit`, middleware: [...canWrite, validate(leadBody)],
+  method: 'PUT', path: '/:id', summary: 'Update a lead', screen: `${SCREEN} > Edit`, middleware: [...canWrite, ownRecord('lead'), validate(leadBody)],
   request: { firstName: 'Juan', contactNumber: '09179998888' }, response: { ...example, success: true, data: example },
   handler: async (req, res) => {
     const { before, after } = await svc.updateLead(req.params.id, req.body, actor(req));
@@ -105,7 +106,7 @@ define({
   },
 });
 define({
-  method: 'DELETE', path: '/:id', summary: 'Delete a lead (soft delete; blocked once a policy exists)', screen: `${SCREEN} > Delete`, middleware: canWrite,
+  method: 'DELETE', path: '/:id', summary: 'Delete a lead (soft delete; blocked once a policy exists)', screen: `${SCREEN} > Delete`, middleware: [...canWrite, ownRecord('lead')],
   response: { success: true, message: 'Lead deleted', data: { leadId: 'ld_1' } },
   handler: async (req, res) => {
     const lead = await svc.deleteLead(req.params.id, actor(req));
