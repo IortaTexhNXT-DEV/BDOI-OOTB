@@ -447,8 +447,14 @@ class ClaimsService {
         formData.append("claimType", claimData.claimType);
       if (claimData.claimPriority)
         formData.append("claimPriority", claimData.claimPriority);
-      if (claimData.dateOfIncident)
-        formData.append("dateOfIncident", claimData.dateOfIncident);
+      if (claimData.dateOfIncident) {
+        const d = claimData.dateOfIncident;
+        // send the calendar date the user picked (local), not a time-zone shifted timestamp
+        const iso = d instanceof Date
+          ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+          : String(d);
+        formData.append("dateOfIncident", iso);
+      }
       if (claimData.timeOfIncident)
         formData.append("timeOfIncident", claimData.timeOfIncident);
       if (claimData.addressOfIncident)
@@ -533,7 +539,11 @@ class ClaimsService {
       if (!response.ok) {
         const errorData = await response.json();
         console.log("Error Response:", errorData);
-        throw new Error(errorData.message || "Failed to create claim");
+        // the server lists each acceptance problem (loss date outside the policy period, unpaid premium ...)
+        const reasons = Array.isArray(errorData.details)
+          ? errorData.details.map((d) => d.message || d).filter(Boolean)
+          : [];
+        throw new Error([errorData.message || "Failed to create claim", ...reasons].join(" — "));
       }
 
       const data = await response.json();

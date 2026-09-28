@@ -37,6 +37,15 @@ const ClaimDetailsCard = ({
     { label: t("claimDetails.lightning"), value: "Lightning" },
     { label: t("claimDetails.other"), value: "Other" },
   ];
+  const MOTOR_INCIDENT_TYPES = [
+    { label: "Collision", value: "Collision" },
+    { label: "Theft / Carnapping", value: "Theft" },
+    { label: "Fire", value: "Fire" },
+    { label: "Flood / Typhoon (Acts of Nature)", value: "Acts of Nature" },
+    { label: "Third-party liability", value: "Third-party liability" },
+    { label: "Glass / windshield damage", value: "Glass damage" },
+    { label: t("claimDetails.other"), value: "Other" },
+  ];
   const [lastUpdatedData, setLastUpdatedData] = useState(null);
   const navigate = useNavigate();
 
@@ -135,6 +144,18 @@ const ClaimDetailsCard = ({
       (!values.driverName || values.driverName.trim() === "")
     ) {
       errors.driverName = t("claimDetails.driversNameRequired");
+    }
+    // date of loss and cause are required for every line; the server checks the policy period
+    if (!values.dateOfIncident) {
+      errors.dateOfIncident = t("claimDetails.dateOfIncidentRequired", "Date of loss is required");
+    } else if (new Date(values.dateOfIncident) > new Date()) {
+      errors.dateOfIncident = t("claimDetails.dateOfIncidentFuture", "Date of loss cannot be in the future");
+    }
+    if (!values.typeOfIncident) {
+      errors.typeOfIncident = t("claimDetails.typeOfIncidentRequired", "Select the cause of loss");
+    }
+    if (values.estimatedClaimAmount != null && Number(values.estimatedClaimAmount) < 0) {
+      errors.estimatedClaimAmount = t("claimDetails.estimateNegative", "Estimate cannot be negative");
     }
     return errors;
   };
@@ -934,7 +955,7 @@ const ClaimDetailsCard = ({
           </div>
         )}
 
-        {isFire && (
+        {(
           <>
             <div className="claim__details__card__sub__title mt-4 ml-2">
               {t("claimDetails.incidentDetails")}
@@ -947,8 +968,12 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("dateOfIncident", e.value)
                   }
-                  dateFormat="yy-mm-dd"
+                  dateFormat="dd/mm/yy"
+                  maxDate={new Date()}
                 />
+                {formik.touched.dateOfIncident && formik.errors.dateOfIncident && (
+                  <div style={{ fontSize: 12, color: "red" }}>{formik.errors.dateOfIncident}</div>
+                )}
               </div>
               <div className="col-12 md:col-6 lg:col-6">
                 <InputTextField
@@ -998,11 +1023,14 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("typeOfIncident", e.value)
                   }
-                  options={FIRE_INCIDENT_TYPES}
+                  options={isFire ? FIRE_INCIDENT_TYPES : MOTOR_INCIDENT_TYPES}
                   optionLabel="label"
                   optionValue="value"
                   placeholder={t("claimDetails.select")}
                 />
+                {formik.touched.typeOfIncident && formik.errors.typeOfIncident && (
+                  <div style={{ fontSize: 12, color: "red" }}>{formik.errors.typeOfIncident}</div>
+                )}
               </div>
             </div>
             <div className="grid mt-2">

@@ -97,9 +97,8 @@ export const postSendData = createAsyncThunk(
           ? "Fire"
           : "Motor",
         claimPriority: "High",
-        dateOfIncident:
-          claimThirdPartyData.dateOfIncident ||
-          new Date().toISOString().split("T")[0],
+        // entered on the claim form (required there); never defaulted to today
+        dateOfIncident: claimThirdPartyData.dateOfIncident || null,
         timeOfIncident:
           claimThirdPartyData.timeOfIncident ||
           new Date().toTimeString().slice(0, 5),
@@ -123,9 +122,9 @@ export const postSendData = createAsyncThunk(
         insuranceCompanyClaimNumber:
           claimThirdPartyData.insuranceCompanyClaimNumber || "",
         isCoInsurance: Boolean(claimDetailsData.isCoInsurance),
-        leadRefId: claimThirdPartyData.leadRefId || "LEAD-001",
-        quoteRefId: claimThirdPartyData.quoteRefId || "QUOTE-001",
-        policyRefId: claimThirdPartyData.policyRefId || "POLICY-001",
+        leadRefId: claimThirdPartyData.leadRefId || null,
+        quoteRefId: claimThirdPartyData.quoteRefId || null,
+        policyRefId: claimThirdPartyData.policyRefId || null,
         policyInfo: {
           insuranceCompanyName:
             claimDetailsData.InsuranceCompanyName ||

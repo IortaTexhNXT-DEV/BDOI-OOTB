@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -19,6 +20,7 @@ import { setPolicyHolderData } from "../claimDetails/store/claimDetailsReducers"
 const SendMail = () => {
   const { t } = useTranslation();
   const fileUploadRef = useRef(null);
+  const errorToast = useRef(null);
   const [uploadImage, setuploadImage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,7 +133,7 @@ const SendMail = () => {
         const claimData =
           result.payload.data?.claim || result.payload.data || result.payload;
         const claimId =
-          claimData.id || claimData.claimId || claimData.claim_id || "12234";
+          claimData.id || claimData.claimId || claimData.claim_id || null;
         const claimNumber =
           claimData.claimNumber || claimData.claim_number || claimData.id;
 
@@ -166,23 +168,20 @@ const SendMail = () => {
         };
 
         // Navigate to next page with claim ID in URL
-        if (claimId && claimId !== "12234") {
+        if (claimId) {
           navigate(`/agent/claimrequest/requestapproval/${claimId}`, {
             state: approvalState,
           });
         } else {
-          // Fallback navigation if no claim ID is available
-          console.log("No claim ID found, using fallback navigation");
-          navigate("/agent/claimrequest/requestapproval/12234", {
-            state: approvalState,
-          });
+          errorToast.current?.show({ severity: "error", summary: "Claim not registered", detail: "The server did not return a claim id", life: 8000 });
         }
       } else if (result.type === "sendmail/POST_SENT_MAIL_DATA/rejected") {
-        // Handle error - you might want to show a toast or error message
-        console.error(
-          "Failed to create claim - Action Rejected:",
-          result.payload
-        );
+        errorToast.current?.show({
+          severity: "error",
+          summary: t("common.error", "Claim not registered"),
+          detail: String(result.payload || "Failed to create claim"),
+          life: 8000,
+        });
       } else {
         // Handle other cases
         console.log("Unexpected result type:", result.type);
@@ -205,6 +204,7 @@ const SendMail = () => {
   };
   return (
     <div className="claimrequest__details__container">
+      <Toast ref={errorToast} />
       <div className="claim__details__container__titles">{t("agent.clients")}</div>
       <div 
         className="claim__details__container__back__btn mt-3 cursor-pointer"
