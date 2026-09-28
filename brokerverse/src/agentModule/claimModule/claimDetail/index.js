@@ -231,6 +231,15 @@ const ClaimDetail = () => {
             className="p-button-outlined"
             onClick={handleBack}
           />
+          {claimData.lifecycleStatus === "pending-approval" && (
+            // settlement waiting for a second claims user (maker-checker)
+            <Button
+              label={t("claims.reviewSettlement", "Review settlement")}
+              icon="pi pi-check-square"
+              className="ml-2"
+              onClick={() => navigate(`/agent/claimrequest/settlementapproval/${claimData.id || claimData.claimId}`)}
+            />
+          )}
         </div>
       </div>
 

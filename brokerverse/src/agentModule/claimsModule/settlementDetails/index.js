@@ -86,6 +86,18 @@ const SettlementDetails = () => {
 
   const formik = useFormik({
     initialValues: initialValues,
+    validate: (v) => {
+      const e = {};
+      if (!v.settlementType) e.settlementType = t("settlementDetails.typeRequired", "Select the settlement type");
+      const amt = Number(String(v.settlementAmount ?? "").replace(/,/g, ""));
+      if (!v.settlementAmount || !Number.isFinite(amt) || amt <= 0) e.settlementAmount = t("settlementDetails.amountRequired", "Enter a settlement amount greater than zero");
+      if (!v.settlementIssueDate) e.settlementIssueDate = t("settlementDetails.issueDateRequired", "Issue date is required");
+      if (!v.settlementDate) e.settlementDate = t("settlementDetails.settleDateRequired", "Settle date is required");
+      if (v.settlementIssueDate && v.settlementDate && new Date(v.settlementDate) < new Date(new Date(v.settlementIssueDate).toDateString())) {
+        e.settlementDate = t("settlementDetails.settleBeforeIssue", "Settle date cannot be before the issue date");
+      }
+      return e;
+    },
     onSubmit: (values) => {
       handleSubmit(values);
     },
@@ -209,15 +221,22 @@ const SettlementDetails = () => {
       );
 
       if (result.type.endsWith("/fulfilled")) {
-        toastRef.current.showToast();
+        // with maker-checker on, the settlement waits for a second claims user
+        const saved = result.payload?.data || result.payload || {};
+        const pending = /pending/i.test(String(saved.claimStatus || saved.status || saved.statusCode || ""));
+        if (pending) {
+          toastRef.current.showToast({ severity: "success", summary: t("settlementDetails.submittedForApproval", "Settlement submitted for approval"), detail: t("settlementDetails.awaitingChecker", "A second claims user must approve it before the claim is settled") });
+        } else {
+          toastRef.current.showToast();
+        }
         setTimeout(() => {
           navigate(`/agent/claimdetailedview/${claimId}`);
         }, 2000);
       } else {
-        console.error("Settlement submission failed:", result.payload);
+        toastRef.current?.showToast("error", t("common.error", "Settlement not submitted"), String(result.payload || "Settlement submission failed"));
       }
     } catch (error) {
-      console.error("Error submitting settlement:", error);
+      toastRef.current?.showToast("error", t("common.error", "Settlement not submitted"), error.message);
     } finally {
       setLoading(false);
     }
@@ -291,6 +310,9 @@ const SettlementDetails = () => {
                 optionValue="value"
                 placeholder={t("settlementDetails.select")}
               />
+              {formik.touched.settlementType && formik.errors.settlementType && (
+                <div style={{ fontSize: 12, color: "red" }}>{formik.errors.settlementType}</div>
+              )}
             </div>
             <div className="col-12 md:col-6 lg:col-6">
               <InputTextField
@@ -298,6 +320,9 @@ const SettlementDetails = () => {
                 value={formik.values.settlementAmount}
                 onChange={formik.handleChange("settlementAmount")}
               />
+              {formik.touched.settlementAmount && formik.errors.settlementAmount && (
+                <div style={{ fontSize: 12, color: "red" }}>{formik.errors.settlementAmount}</div>
+              )}
             </div>
           </div>
 
@@ -309,7 +334,7 @@ const SettlementDetails = () => {
                 onChange={(e) => {
                   formik.setFieldValue("settlementIssueDate", e.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat="dd/mm/yy"
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -319,8 +344,11 @@ const SettlementDetails = () => {
                 onChange={(e) => {
                   formik.setFieldValue("settlementDate", e.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat="dd/mm/yy"
               />
+              {formik.touched.settlementDate && formik.errors.settlementDate && (
+                <div style={{ fontSize: 12, color: "red" }}>{formik.errors.settlementDate}</div>
+              )}
             </div>
           </div>
 
