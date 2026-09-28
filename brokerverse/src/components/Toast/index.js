@@ -45,21 +45,32 @@ const CustomToast = forwardRef((props, ref) => {
   };
 
   const formattedMessage = formatMessage(message);
-  console.log(formattedMessage, "leo");
 
   useImperativeHandle(ref, () => ({
-    showToast(options = {}) {
+    // Accepts showToast({ severity, summary, detail }) or showToast(severity, summary, detail).
+    showToast(options = {}, positionalSummary, positionalDetail) {
+      const opts =
+        typeof options === "string"
+          ? { severity: options, summary: positionalSummary, detail: positionalDetail }
+          : options || {};
       const {
         severity = messageType ? messageType : "success",
         summary,
         detail,
-      } = options;
+      } = opts;
+      const icons = {
+        success: "pi pi-check-circle",
+        error: "pi pi-times-circle",
+        warn: "pi pi-exclamation-triangle",
+        info: "pi pi-info-circle",
+      };
 
       toastRef.current.show({
         severity,
         summary,
-        detail: detail || formattedMessage || message,
-        icon: "pi pi-check-circle custom-icon",
+        // an error never falls back to the screen's success message
+        detail: detail || (severity === "error" ? summary : formattedMessage || message),
+        icon: `${icons[severity] || icons.success} custom-icon`,
         className: "custom-toast",
       });
     },

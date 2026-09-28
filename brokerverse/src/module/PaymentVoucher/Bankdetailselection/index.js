@@ -143,6 +143,14 @@ function Bankdetailselection() {
   };
 
   // Prefill Total Amount from selected checkbook; clear when selection cleared
+  // Agent payout: the amount is the net (after WHT) of the commission lines selected on the invoice list
+  useEffect(() => {
+    if (!isAgentPayee) return;
+    const lines = location.state?.selectedInvoice || [];
+    const net = lines.reduce((sum, l) => sum + (Number(l.rawData?.totalAmount ?? String(l.totalAmount ?? 0).replace(/[^0-9.-]/g, "")) || 0), 0);
+    if (net > 0) setTotalAmount(net.toFixed(2));
+  }, [isAgentPayee, location.state]);
+
   useEffect(() => {
     if (isAgentPayee) return;
 

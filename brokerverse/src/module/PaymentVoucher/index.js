@@ -81,6 +81,14 @@ const Index = () => {
       payload: disbursementId,
     });
 
+    // An agent payout still awaiting approval opens its commission lines for the checker
+    const pendingAgentPayout =
+      (columnData?.payeeType === "Agent/Referrer" || columnData?.referrerId) &&
+      ["draft", "for-approval"].includes(String(columnData?.status || "").toLowerCase());
+    if (pendingAgentPayout) {
+      navigate(`/accounts/paymentvoucher/invoicelist/${disbursementId}`);
+      return;
+    }
     navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`);
   };
 
@@ -629,6 +637,17 @@ const Index = () => {
                 header={t("paymentVoucher.amount")}
                 headerStyle={headerStyle}
                 className="fieldvalue_container"
+              ></Column>
+              <Column
+                field="status"
+                header={t("paymentVoucher.status")}
+                headerStyle={headerStyle}
+                className="fieldvalue_container"
+                body={(rowData) =>
+                  rowData.status
+                    ? String(rowData.status).replace(/(^|-)(\w)/g, (m, sep, c) => (sep ? " " : "") + c.toUpperCase())
+                    : "-"
+                }
               ></Column>
               <Column
                 body={(columnData) => (

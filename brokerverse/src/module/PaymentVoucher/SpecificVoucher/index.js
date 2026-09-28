@@ -99,7 +99,9 @@ function SpecificVoucher() {
     if (isAgentPayee) {
       Navigate("/accounts/paymentvoucher/bankdetailselection", {
         state: {
-          disbursementData: disbursementDataFromState,
+          disbursementData: disbursementDataFromState || {
+            referrerName: disbursementData?.referrer?.name,
+          },
           selectedInvoice: selectedProducts,
           commissionLineIds,
           isAgentPayee: true,
@@ -147,13 +149,22 @@ function SpecificVoucher() {
 
       setLoading(true);
       try {
-        const agentPayee =
-          payeeTypeFromState === "Agent/Referrer" || Boolean(referrerIdFromState);
+        // Opened from the list or a link (no navigation state): read the payee from the saved voucher,
+        // so the checker can open a pending agent payout.
+        let payeeType = payeeTypeFromState;
+        let referrerId = referrerIdFromState;
+        if (!payeeType && !referrerId) {
+          const saved = await disbursementService.getDisbursementById(disbursementId);
+          const voucher = saved.data?.data || saved.data;
+          payeeType = voucher?.payeeType;
+          referrerId = voucher?.referrerId;
+        }
+        const agentPayee = payeeType === "Agent/Referrer" || Boolean(referrerId);
         setIsAgentPayee(agentPayee);
 
-        if (agentPayee && referrerIdFromState) {
+        if (agentPayee && referrerId) {
           const result = await disbursementService.getAgentInvoiceLines(
-            referrerIdFromState
+            referrerId
           );
           if (result.success) {
             const payload = result.data?.data || result.data;
@@ -164,12 +175,12 @@ function SpecificVoucher() {
               commissionLineId: invoice.commissionLineId || invoice.invoiceListId,
               VoucherNumber: formatCurrency(invoice.payables ?? 0),
               TransactionNumber: formatCurrency(invoice.outstanding ?? 0),
-              fcamount: invoice.fcAmount || "-",
-              VoucheDate: invoice.lcAmount || "-",
-              discount: invoice.excess || "-",
-              Amount: invoice.balAmount || "-",
-              vat: invoice.vat || "-",
-              wht: invoice.wht || "-",
+              fcamount: invoice.fcAmount ? formatCurrency(invoice.fcAmount) : "-",
+              VoucheDate: invoice.lcAmount ? formatCurrency(invoice.lcAmount) : "-",
+              discount: invoice.excess ? formatCurrency(invoice.excess) : "-",
+              Amount: invoice.balAmount ? formatCurrency(invoice.balAmount) : "-",
+              vat: invoice.vat ? formatCurrency(invoice.vat) : "-",
+              wht: invoice.wht ? formatCurrency(invoice.wht) : "-",
               comsub: invoice.comsub,
               policyNumber: invoice.policyNumber,
               totalAmount: formatCurrency(invoice.totalAmount ?? 0),
@@ -206,12 +217,12 @@ function SpecificVoucher() {
                 id: invoice.invoiceListId || index,
                 VoucherNumber: formatCurrency(invoice.payables ?? 0),
                 TransactionNumber: formatCurrency(invoice.outstanding ?? 0),
-                fcamount: invoice.fcAmount || "-",
-                VoucheDate: invoice.lcAmount || "-",
-                discount: invoice.excess || "-",
-                Amount: invoice.balAmount || "-",
-                vat: invoice.vat || "-",
-                wht: invoice.wht || "-",
+                fcamount: invoice.fcAmount ? formatCurrency(invoice.fcAmount) : "-",
+                VoucheDate: invoice.lcAmount ? formatCurrency(invoice.lcAmount) : "-",
+                discount: invoice.excess ? formatCurrency(invoice.excess) : "-",
+                Amount: invoice.balAmount ? formatCurrency(invoice.balAmount) : "-",
+                vat: invoice.vat ? formatCurrency(invoice.vat) : "-",
+                wht: invoice.wht ? formatCurrency(invoice.wht) : "-",
                 comsub: invoice.comsub,
                 totalAmount: formatCurrency(invoice.totalAmount ?? 0),
                 checkbooks: invoice.checkbooks || [],

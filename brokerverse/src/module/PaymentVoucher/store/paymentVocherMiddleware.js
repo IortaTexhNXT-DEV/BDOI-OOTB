@@ -47,6 +47,10 @@ export const paymentVocherMiddleware = createAsyncThunk(
           ),
           Amount: formatCurrency(disbursement.amount),
           action: disbursement.disbursementId,
+          payeeType: disbursement.payeeType,
+          payeeName: disbursement.payeeName,
+          referrerId: disbursement.referrerId,
+          status: disbursement.status,
         }));
 
         return {
