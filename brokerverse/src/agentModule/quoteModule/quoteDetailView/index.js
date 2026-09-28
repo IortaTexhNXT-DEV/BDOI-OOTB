@@ -203,6 +203,20 @@ const QuoteDetailView = ({ action }) => {
     iarPremiumDetails,
   ]);
 
+  // Tax rate (in %) the quotation was priced with: the server breakdown's rates, else derived
+  // from the stored amounts, else the product template / configured settings.
+  const taxRatePercent = (key, templateKey) => {
+    const toPct = (rate) => Number((Number(rate) * 100).toFixed(4));
+    const priced = quotationData?.taxRates?.[key];
+    if (priced !== undefined && priced !== null) return toPct(priced);
+    const net = Number(String(calculatedPremiums?.netPremium ?? "").replace(/,/g, ""));
+    const amount = Number(String(calculatedPremiums?.[key] ?? "").replace(/,/g, ""));
+    if (net > 0 && amount > 0) return Number(((amount / net) * 100).toFixed(2));
+    const template = productConfigurator?.configuration?.taxes?.[templateKey];
+    if (template) return Number(template);
+    return toPct(settingsTaxRates?.[key] || 0);
+  };
+
   console.log(calculatedPremiums, "calculatedPremiums --- QUOTE DETAIL VIEW");
 
   const { PolicyDetails, loading, currentLeadDetails } = useSelector(
@@ -542,6 +556,7 @@ const QuoteDetailView = ({ action }) => {
                       {quotationData?.participantDetails?.[0]
                         ?.insuranceCompanyName ||
                         quotationData?.participantDetails?.[0]?.participantName ||
+                        quotationData?.insuranceCompanyName ||
                         "N/A"}
                     </label>
                   </div>
@@ -1128,12 +1143,8 @@ const QuoteDetailView = ({ action }) => {
               </div>
               <div className="quote_details">
                 <label className="insurance_text">
-                  {t("quoteDetailView.dst")} ({" "}
-                  {
-                    productConfigurator?.configuration?.taxes
-                      ?.documentary_stamp_tax
-                  }
-                  %)
+                  {t("quoteDetailView.dst")} (
+                  {taxRatePercent("documentaryStampTax", "documentary_stamp_tax")}%)
                 </label>
                 <label className="alpha_text">
                   {formatCurrency(calculatedPremiums?.documentaryStampTax)}
@@ -1142,8 +1153,7 @@ const QuoteDetailView = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">
                   {t("quoteDetailView.vat")} (
-                  {productConfigurator?.configuration?.taxes?.value_added_tax}%
-                  )
+                  {taxRatePercent("valueAddedTax", "value_added_tax")}%)
                 </label>
                 <label className="alpha_text">
                   {formatCurrency(calculatedPremiums?.valueAddedTax)}
@@ -1152,11 +1162,7 @@ const QuoteDetailView = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">
                   {t("quoteDetailView.lgt")} (
-                  {
-                    productConfigurator?.configuration?.taxes
-                      ?.local_government_tax
-                  }
-                  % )
+                  {taxRatePercent("localGovernmentTax", "local_government_tax")}%)
                 </label>
                 <label className="alpha_text">
                   {formatCurrency(calculatedPremiums?.localGovernmentTax)}

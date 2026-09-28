@@ -26,6 +26,7 @@ export function toQuote(r) {
     insuranceCompanyName: r.insurer_name || doc.insuranceCompanyName || doc.participantDetails?.[0]?.insuranceCompanyName,
     netPremium: Number(r.premium_base), valueAddedTax: Number(r.vat), documentaryStampTax: Number(r.dst), localGovernmentTax: Number(r.lgt),
     fireServiceTax: Number(r.fst), accountPremiumOthers: Number(r.others), discount: Number(r.discount), NCD: Number(r.ncd),
+    taxRates: doc.premiumBreakdown?.taxRates || null, isRenewal: Boolean(doc.renewal?.policyId), renewedFromPolicyId: doc.renewal?.policyId || null,
     grossPremium: Number(r.premium_total), totalSumInsured: Number(r.sum_insured), commissionRate: r.commission_rate == null ? null : Number(r.commission_rate),
     commissionAmount: Number(r.commission_amount), currency: r.currency, validUntil: r.valid_until,
     customerAccepted: r.customer_accepted_at ? 'Yes' : (doc.customerAccepted ?? null),

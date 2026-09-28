@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
-import { notFound, badRequest, forbidden } from '../../lib/errors.js';
+import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/router.js';
@@ -129,13 +129,15 @@ function approvalToken(quoteId, hours) {
 export async function sendForApproval(id, user) {
   const q = await getQuoteRow(id);
   if (!['draft', 'sent'].includes(q.status)) throw badRequest(`Only Draft quotations can be sent for approval (current: ${quoteStatusOut(q.status)})`);
-  const to = q.lead_row?.email;
-  if (!to) throw badRequest('The lead has no e-mail address; add one before sending the quotation');
+  // Quotations without a lead (e.g. renewals of imported policies) go to the client's address.
+  const client = q.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [q.client_id]) : null;
+  const to = q.lead_row?.email || client?.email;
+  if (!to) throw badRequest(q.lead_row ? 'The lead has no e-mail address; add one before sending the quotation' : 'The client has no e-mail address; add one before sending the quotation');
   const hours = Number(await getSetting('quotations.approval_link_ttl_hours', 168));
   const token = approvalToken(q.id, hours);
   const url = `${String(await getSetting('general.frontend_url', 'http://localhost:3000')).replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
   const t = await emailTemplate('quote_approval');
-  const v = await vars(q, { approvalUrl: url, validHours: hours });
+  const v = await vars(q, { approvalUrl: url, validHours: hours, ...(!q.lead_row?.id && client?.display_name ? { customerName: client.display_name } : {}) });
   await queueEmail({ to, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
   await query("UPDATE quotes SET status = 'sent', approval_token_hash = $2, approval_sent_to = $3, approval_sent_at = now(), updated_by = $4, updated_at = now() WHERE id = $1",
     [q.id, sha(token), to, user.id]);
@@ -198,12 +200,39 @@ export async function convertToPolicy(id, body, user) {
     const clientId = q.client_id || (q.lead_id ? await clientFromLead(db, q.lead_id, extra.customerInfo || {}, q.created_by || user.id) : null);
     if (!clientId) throw badRequest('Quotation has no lead or client to insure');
     const doc = q.doc || {};
+    // Renewal quotation (renewals/service.js#createRenewalQuote): the policy becomes the next term of the expiring one.
+    const renewalOf = doc.renewal?.policyId ? doc.renewal : null;
+    let expiring = null;
+    if (renewalOf) {
+      expiring = (await db.query('SELECT id, policy_number, status, renewed_to, expiry_date FROM policies WHERE id = $1 FOR UPDATE', [renewalOf.policyId])).rows[0];
+      if (!expiring) throw badRequest(`Policy ${renewalOf.policyNumber || renewalOf.policyId} being renewed was not found`);
+      if (expiring.renewed_to || expiring.status === 'renewed') throw conflict(`Policy ${expiring.policy_number} has already been renewed`);
+      if (expiring.status === 'cancelled') throw conflict(`Policy ${expiring.policy_number} is cancelled`);
+      if (!extra.inception && !extra.inceptionDate) {
+        const next = new Date(`${expiring.expiry_date}T00:00:00Z`);
+        next.setUTCDate(next.getUTCDate() + 1);
+        extra.inception = next.toISOString().slice(0, 10);
+      }
+    }
     const issued = await issuePolicy(db, {
       quoteId: q.id, clientId, leadId: q.lead_id, productId: q.product_id, policyTypeId: q.policy_type_id, insuranceCompanyId: q.insurance_company_id,
       ownerUserId: q.created_by, agentUserId: q.agent_user_id || q.created_by, sumInsured: q.sum_insured, netPremium: q.premium_base,
       grossPremium: q.premium_total, commissionAmount: q.commission_amount, commissionRate: Number(q.commission_rate || 0), currency: q.currency,
       insuredName: extra.insuredName, productType: q.product_type, lob: q.lob, doc: stripReserved(doc),
+      receivableSource: renewalOf ? 'renewal' : 'policy', receivableReference: renewalOf?.renewalNumber || null,
     }, extra, user.id);
+    if (renewalOf) {
+      const link = { businessType: 'Renewal', renewal: { renewalId: renewalOf.renewalId, renewalNumber: renewalOf.renewalNumber, previousPolicyId: expiring.id, previousPolicyNumber: expiring.policy_number, quoteId: q.id } };
+      await db.query('UPDATE policies SET renewed_from = $2, details = details || $3::jsonb WHERE id = $1', [issued.policyId, expiring.id, JSON.stringify(link)]);
+      await db.query("UPDATE policies SET status = 'renewed', renewed_to = $2, updated_by = $3, updated_at = now() WHERE id = $1", [expiring.id, issued.policyId, user.id]);
+      const rn = (await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now()
+        WHERE policy_id = $1 AND status <> ALL($4) RETURNING id`, [expiring.id, issued.policyId, q.premium_total, ['renewed', 'lapsed']])).rows[0];
+      if (rn) {
+        const number = (await db.query('SELECT policy_number FROM policies WHERE id = $1', [issued.policyId])).rows[0].policy_number;
+        await db.query(`INSERT INTO renewal_activities(renewal_id, by_user, activity_type, description, details) VALUES ($1,$2,'Renewed',$3,$4)`,
+          [rn.id, user.username ?? null, `Renewed as policy ${number} from quotation ${q.quote_number}`, JSON.stringify({ quoteId: q.id, newPolicyId: issued.policyId })]);
+      }
+    }
     await db.query("UPDATE quotes SET status = 'converted', policy_id = $2, client_id = $3, updated_by = $4, updated_at = now() WHERE id = $1", [q.id, issued.policyId, clientId, user.id]);
     return { ...issued, clientId };
   });
