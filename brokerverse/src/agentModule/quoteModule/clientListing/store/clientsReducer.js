@@ -40,6 +40,8 @@ const clientReducer = createSlice({
                         CompanyName: client.companyName || "",
                         TaxNumber: client.taxNumber || "",
                         FirstName: client.firstName,
+                        DisplayName: client.displayName || client.companyName
+                            || [client.firstName, client.lastName].filter(Boolean).join(" "),
                         LastName: client.lastName,
                         PreferredName: client.preferredName,
                         EmailID: client.emailId,

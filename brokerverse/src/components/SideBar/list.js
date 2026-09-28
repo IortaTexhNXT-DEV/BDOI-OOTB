@@ -606,9 +606,9 @@ export const menuList = [
       {
         name: "Home",
         icon: <SvgAgentHomeIcon color="#9DA4AE" />,
-        path: "/",
+        path: "/agent/home",
         includes: [
-          "/",
+          "/agent/home",
           "/agent/notification",
           "/agent/viewprofile",
           "/agent/openitems",

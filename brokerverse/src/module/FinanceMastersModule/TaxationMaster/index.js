@@ -253,7 +253,7 @@ const TaxationMaster = () => {
                   header="Tax Rate"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.taxRate?.toUpperCase()}
+                  body={(rowData) => (rowData.taxRate ?? "") === "" ? "" : `${rowData.taxRate}%`}
                   sortable
                 ></Column>
                 <Column

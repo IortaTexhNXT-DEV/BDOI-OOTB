@@ -8,6 +8,9 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Reinsurance', '/reinsurance');
 const read = canRead('reinsurance');
 const write = canWrite('reinsurance');
+// Claims officers register and follow up recoveries on their claims (Reinsurance > Claims Recovery).
+const recoveryRead = canRead('reinsurance', 'write:claims');
+const recoveryWrite = canWrite('reinsurance', 'write:claims');
 const S = (n) => `Reinsurance > ${n}`;
 const treaty = { id: 1, treatyNumber: 'QS-MOTOR-2026', name: 'Motor Quota Share Treaty 2026', type: 'Quota Share', lineOfBusiness: 'Motor', reinsurers: ['RE001', 'RE002'], effectiveDate: '2026-01-01', expiryDate: '2026-12-31', cession: { percentage: 40, maxLimit: 50000000 }, commission: { type: 'Flat', rate: 32.5 }, status: 'Active', utilization: 12.5, premiumCeded: 1250000, claimsRecovered: 450000 };
 const cession = { id: 1, cessionNumber: 'CES-2026-00001', policyNumber: 'POL-2026-90002', insured: 'Sample Corp.', treatyId: 1, treatyNumber: 'QS-MOTOR-2026', grossPremium: 142500, sumInsured: 7500000, cessionPercentage: 40, cededPremium: 57000, cededSumInsured: 3000000, commission: 18525, netPremium: 38475, status: 'Pending' };
@@ -115,22 +118,22 @@ for (const action of ['confirm', 'reject']) {
 
 // ---------- recoveries ----------
 define({
-  method: 'GET', path: '/claims', summary: 'Reinsurance recovery claims (filter status, treatyId)', screen: S('Claims Recovery'), middleware: read,
+  method: 'GET', path: '/claims', summary: 'Reinsurance recovery claims (filter status, treatyId)', screen: S('Claims Recovery'), middleware: recoveryRead,
   response: { success: true, data: [{ id: 'rcl_1', recoveryNumber: 'RCL-2026-00001', claimNumber: 'CLM-2026-00001', grossClaim: 500000, recoverableAmount: 200000, status: 'Pending' }] },
   handler: async (req, res) => ok(res, await svc.listRecoveries(req.query)),
 });
 define({
-  method: 'GET', path: '/claims/:id', summary: 'One recovery claim', screen: S('Claims Recovery'), middleware: read, response: { success: true, data: { id: 'rcl_1' } },
+  method: 'GET', path: '/claims/:id', summary: 'One recovery claim', screen: S('Claims Recovery'), middleware: recoveryRead, response: { success: true, data: { id: 'rcl_1' } },
   handler: async (req, res) => ok(res, await svc.getRecovery(req.params.id)),
 });
 define({
-  method: 'POST', path: '/claims', summary: 'Register a recovery for a claim (recoverable from the cession share or XoL layers)', screen: S('Claims Recovery'), middleware: write,
+  method: 'POST', path: '/claims', summary: 'Register a recovery for a claim (recoverable from the cession share or XoL layers)', screen: S('Claims Recovery'), middleware: recoveryWrite,
   request: { claimNumber: 'CLM-2026-00001', grossClaim: 500000, causeOfLoss: 'Collision', documents: ['Loss Report'] }, response: { success: true, data: { recoverableAmount: 200000, status: 'Pending' } },
   handler: async (req, res) => created(res, await run(req, 'ri_recovery', 'create', () => svc.createRecovery(req.body || {}, req.user)), 'Recovery registered'),
 });
 for (const [path, action, label] of [['submit-recovery', 'submit', 'Submit to reinsurers'], ['settle', 'settle', 'Record the reinsurer settlement'], ['dispute', 'dispute', 'Mark as disputed'], ['cash-call', 'cash-call', 'Request a cash call']]) {
   define({
-    method: 'POST', path: `/claims/:id/${path}`, summary: label, screen: S('Claims Recovery'), middleware: write,
+    method: 'POST', path: `/claims/:id/${path}`, summary: label, screen: S('Claims Recovery'), middleware: recoveryWrite,
     request: { settle: { settlementAmount: 200000, recoveryDate: '2026-09-30' }, dispute: { reason: 'Late notification' }, 'cash-call': { amount: 100000 } }[action] || {},
     response: { success: true, data: { status: { submit: 'Processing', settle: 'Recovered', dispute: 'Disputed', 'cash-call': 'Processing' }[action] } },
     handler: async (req, res) => ok(res, await run(req, 'ri_recovery', action, () => svc.recoveryAction(req.params.id, action, req.body || {}, req.user)), 'Recovery updated'),
@@ -158,7 +161,7 @@ for (const action of ['submit', 'confirm']) {
 
 // ---------- analytics / reconciliation / reports ----------
 define({
-  method: 'GET', path: '/analytics', summary: 'Treaty utilization, loss ratio trend, retention, recovery performance, catastrophe exposure', screen: `${S('Analytics')}; ${S('Treaty Dashboard')}`, middleware: read,
+  method: 'GET', path: '/analytics', summary: 'Treaty utilization, loss ratio trend, retention, recovery performance, catastrophe exposure', screen: `${S('Analytics')}; ${S('Treaty Dashboard')}`, middleware: recoveryRead,
   response: { success: true, data: { treatyUtilization: [{ treaty: 'QS-MOTOR-2026', utilization: 12.5 }], lossRatioTrend: [{ month: 'Sep', gross: 65, net: 58 }], retentionOptimization: { current: { retention: 60, cession: 40, profitability: 15.5 } }, recoveryPerformance: { recoveryRate: 85 }, catastropheExposure: { zones: [], perils: [] } } },
   handler: async (_req, res) => ok(res, await svc.analytics()),
 });

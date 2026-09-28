@@ -241,11 +241,10 @@ const ClientListingIndividualCategory = ({
 
     const backgroundColor =
       colors[parseInt(index) % colors.length] || "#CCCCCC";
-    console.log(parseInt(index) % colors.length, "find");
 
     return (
       <Avatar
-        label={type.charAt(0)}
+        label={(type || "?").charAt(0).toUpperCase()}
         size="xlarge"
         shape="circle"
         style={{ backgroundColor: backgroundColor, color: "#fff" }}
@@ -255,9 +254,9 @@ const ClientListingIndividualCategory = ({
   const renderName = (rowData) => {
     return (
       <div className="name__box__container">
-        <div>{handleSvg(rowData.FirstName, rowData.id)}</div>
+        <div>{handleSvg(rowData.DisplayName || rowData.FirstName, rowData.id)}</div>
         <div>
-          <div className="name__text">{rowData.FirstName?.toUpperCase()}</div>
+          <div className="name__text">{(rowData.DisplayName || rowData.FirstName)?.toUpperCase()}</div>
           <div className="lead__id__text">{t("clients.clientIdLabel")}{rowData.LeadID} </div>
         </div>
       </div>
