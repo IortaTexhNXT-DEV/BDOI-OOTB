@@ -1,0 +1,2937 @@
+{
+ "sign-in.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "sign-in--new-quote.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "profile-menu.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-executive-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-executive-dashboard--new-quote.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-claims-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-claims-dashboard--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-underwriting-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-underwriting-dashboard--tab-group-workload-top-5.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-underwriting-dashboard--new-submission.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-underwriting-dashboard--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-agent-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-agent-dashboard--create-quote-motor.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-agent-dashboard--create-quote-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-agent-dashboard--create-quote-travel.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-agent-dashboard--create-quote-employee-benefit.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "dashboard-agent-dashboard--create-quote-property.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-dashboard--tab-performance-analytics.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-dashboard--tab-quick-actions.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-dashboard--create-new-product.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-dashboard--create-new-product--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-product-templates.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-product-templates--create-template.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-product-templates--create-template--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-coverage-builder.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-coverage-builder--add-coverage.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-coverage-builder--add-coverage--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-rating-engine.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-rating-engine--add-factor.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-rating-engine--add-factor--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-underwriting-rules.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-underwriting-rules--add-rule.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-underwriting-rules--add-rule--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-document-manager.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-document-manager--upload-template.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-approval-workflows.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-approval-workflows--create-workflow.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-approval-workflows--create-workflow--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-approval-workflows--new-product-approval.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-approval-workflows--new-product-approval--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-market-mapping.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-market-mapping--map-product.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-risk-mapping.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-risk-mapping--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "product-configurator-product-analytics.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-system-settings.png": {
+  "oldColors": {
+   "indigo #6366f1 as backgroundColor": 2,
+   "indigo #4f46e5 as backgroundColor": 1
+  },
+  "fonts": {},
+  "invisible": [
+   "theme-preview: Theme preview"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-system-settings--add-company-logo.png": {
+  "oldColors": {
+   "indigo #6366f1 as backgroundColor": 2,
+   "indigo #4f46e5 as backgroundColor": 1
+  },
+  "fonts": {},
+  "invisible": [
+   "theme-preview: Theme preview"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-system-settings--add-company-logo--validation.png": {
+  "oldColors": {
+   "indigo #6366f1 as backgroundColor": 2,
+   "indigo #4f46e5 as backgroundColor": 1
+  },
+  "fonts": {},
+  "invisible": [
+   "theme-preview: Theme preview"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-company.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-company--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-company--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-company--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-branch.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-branch--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-branch--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-organization-branch--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-insurance-company.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-insurance-company--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-insurance-company--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-insurance-company--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": [
+   "Cannot read properties of undefined (reading 'state')"
+  ]
+ },
+ "master-generals-insurance-management-line-of-business.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-line-of-business--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-line-of-business--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-line-of-business--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-product.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-product--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-product--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-product--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-cover.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-cover--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-cover--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-cover--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-signatories.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-signatories--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-signatories--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-signatories--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-vehicle.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-vehicle--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-vehicle--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-insurance-management-vehicle--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-country.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-country--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-country--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-country--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-state.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-state--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-state--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-state--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-city-master.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-city-master--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-city-master--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-location-city-master--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-commission-commission-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-commission-agents-referrer-accounts.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-commission-agents-referrer-accounts--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-hierarchy.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-hierarchy--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-hierarchy--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-hierarchy--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-designation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-designation--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-designation--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-employee.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-employee--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-employee--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-employee-management-employee--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-user.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-user--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-user--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-role.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-role--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-role--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-generals-user-management-role--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-premium-account-setup.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-premium-account-setup--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-miscellaneous-account-setup.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-miscellaneous-account-setup--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-customer-account-setup.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-customer-account-setup--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-ri-claims-account-setup.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-ri-claims-account-setup--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-transaction-code.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-transaction-code--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-transaction-code--add--tab-user-group-access.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-transaction-code--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-transaction-code--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-transaction-code--record--tab-user-group-access.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-currency.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-currency--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-currency--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-currency--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-exchange-rate.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-exchange-rate--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-exchange-rate--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-exchange-rate--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-bank.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-bank--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-bank--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-account-category.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-account-category--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-account-category--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-account-category--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-main-account.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-main-account--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-main-account--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-main-account--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-sub-account.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-sub-account--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-sub-account--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-sub-account--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-taxation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-taxation--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-taxation--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-taxation--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-petty-cash.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-petty-cash--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-petty-cash--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-petty-cash--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-remittance-master.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-remittance-master--add.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-remittance-master--add--tab-gl-mapping.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-remittance-master--add--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-remittance-master--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-remittance-master--record--tab-gl-mapping.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-incentive-programs.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: Add Program"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-incentive-programs--add-program.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: Add Program"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-incentive-programs--add-program--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: Add Program"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-incentive-programs--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: Add Program"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-incentive-programs--record--tab-target-configuration.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: Add Program"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-incentive-programs--record--tab-incentive-structure.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: Add Program"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-reinsurance-treaty.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-reinsurance-treaty--add-treaty.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "master-finance-reinsurance-treaty--add-treaty--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--tab-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--tab-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-motor.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-motor--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-fire-and-allied-perils--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-industrial-all-risks--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-employee-benefit.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-employee-benefit--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-travel.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-travel--tab-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-travel--tab-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-leads-prospects--create-lead-travel--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--tab-retail.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--tab-corporate.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-motor.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-motor--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-fire-and-allied-perils--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-travel.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-travel--tab-retail.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-travel--tab-corporate.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-property.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-property--tab-retail.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--create-lead-property--tab-corporate.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-clients--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-motor-quote.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-motor-quote--tab-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-motor-quote--tab-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-motor-quote--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-fire-and-allied-perils--tab-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-fire-and-allied-perils--tab-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-fire-and-allied-perils--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--create-quote-industrial-all-risks--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-quotation--record--tab-audit-trail.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-motor-policy.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-motor-policy--tab-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-motor-policy--tab-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-motor-policy--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-fire-and-allied-perils--tab-fire-and-allied-perils.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-fire-and-allied-perils--tab-industrial-all-risks.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--create-policy-fire-and-allied-perils--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-policy--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-claims.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-claims--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-policy.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-policy--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-batch.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-batch--create-batch.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-batch--create-batch--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-batch--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-queue.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-queue--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-queue--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-queue--record--tab-contact-information.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-renewal-queue--record--tab-claims-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-retention-analytics.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-retention-analytics--tab-product-performance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-retention-analytics--tab-agent-performance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-retention-analytics--tab-risk-analysis.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-at-risk-policies.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-at-risk-policies--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-at-risk-policies--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-at-risk-policies--record--tab-recommended-actions.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-at-risk-policies--record--tab-communication-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-negotiations.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-negotiations--tab-details.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-negotiations--tab-communications.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-negotiations--add-update.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-negotiations--add-update--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-negotiations--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--tab-win-back-campaigns.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--create-campaign.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--create-campaign--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--record--tab-policy-information.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-lapse-management--record--tab-win-back-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-performance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-performance--tab-agent-performance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "rank-icon: \ud83e\udd48"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-performance--tab-product-performance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-renewals-performance--tab-kpi-scorecard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-open-items.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-payments.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-payments--tab-pending.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-payments--tab-reviewing.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "operations-payments--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-receipts.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-receipts--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-collections.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-collections--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-accounting-query.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-accounting-query--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-all-clients-accounting.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-open-entry-matching.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-open-entry-un-matching.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-disbursement.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-disbursement--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-initiate.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-initiate--initiate.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-initiate--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-request.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-request--request.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-request--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-disbursement.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-disbursement--disbursement.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-disbursement--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-receipts.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-receipts--receipts.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-receipts--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-replenish.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-replenish--replenish.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-petty-cash-replenish--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-journal-voucher.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-journal-voucher--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-correction-jv.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-correction-jv--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-reversal-jv.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-reversal-jv--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-automated-processing.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-tracking.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-tracking--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-tracking--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-tracking--record--tab-insurer-details.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-tracking--record--tab-policies-3.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-tracking--record--tab-activity-log.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-statements.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-statements--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-settlement.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-settlement--tab-adjustments.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-settlement--tab-payment.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-settlement--tab-workflow.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-reconciliation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-reconciliation--tab-exceptions.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-reconciliation--tab-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-bulk-processing.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-scheduling.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-electronic-transfer.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-approval-workflow.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-approval-workflow--tab-remittance-approvalhistory.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-approval-workflow--tab-remittance-delegation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-approval-workflow--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-exception-management.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-agency-bill-processing.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-agency-bill-processing--tab-remittance-billdetails.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-agency-bill-processing--tab-remittance-remittanceadjustments.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-agency-bill-processing--tab-remittance-finalize.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-direct-bill-processing.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-direct-bill-processing--tab-2-bill-details.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "card-title: Total Bill Amount",
+   "card-value: \u20b10.00"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-direct-bill-processing--tab-3-late-charges.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-direct-bill-processing--tab-4-generate-bills.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-direct-bill-processing--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "card-title: Total Bill Amount",
+   "card-value: \u20b10.00"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-adjustments.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-adjustments--tab-adjustment-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-adjustments--new-adjustment.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-adjustments--new-adjustment--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-adjustments--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-notifications.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-notifications--tab-sent.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-notifications--tab-templates.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-notifications--tab-analytics.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-notifications--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--tab-audit-trails.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--tab-system-logs.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--tab-archive-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--tab-data-lineage.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--record--tab-basic-information.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--record--tab-change-history.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-history--record--tab-version-comparison.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-analytics.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-analytics--tab-top-performers.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-analytics--tab-trends-forecasts.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-remittance-analytics--tab-alerts-insights.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-my-programs.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-my-programs--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-my-programs--record--tab-progress.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-my-programs--record--tab-earning-potential.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-calculations.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: New Calculation"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-calculations--new-calculation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: New Calculation"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-calculations--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: New Calculation"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-calculations--record--tab-agent-details-3.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: New Calculation"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-calculations--record--tab-execution-log.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [
+   "main__btn__action p-button p-component: New Calculation"
+  ],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-approvals.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-approvals--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-approvals--record--tab-agent-details-3.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-approvals--record--tab-comments.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "accounts-incentive-statement.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--tab-utilization-analysis.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--tab-renewal-timeline.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--tab-capacity-management.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--add-treaty.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--add-treaty--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--record--tab-claims.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-treaty-dashboard--record--tab-documents.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-cession-tracking.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-cession-tracking--tab-line-of-business-breakdown.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-cession-tracking--record.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-claims-recovery.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-claims-recovery--tab-recovered-claims.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-reconciliation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-reconciliation--tab-exceptions.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reinsurance-analytics.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-production.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-production--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-claims.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-claims--validation.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-renewal.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-renewal--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-remittance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-remittance--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-broker-commission.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-operational-reports-broker-commission--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-soa-premium-receivable.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-soa-premium-receivable--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-collection-report.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-collection-report--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-payables.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-payables--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-journal.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-journal--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-trail-balance.png": {
+  "oldColors": {},
+  "fonts": {},
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ },
+ "reports-financial-reports-trail-balance--validation.png": {
+  "oldColors": {},
+  "fonts": {
+   "sans, Arial, sans-serif": 4
+  },
+  "invisible": [],
+  "overflow": false,
+  "jsErrors": []
+ }
+}
