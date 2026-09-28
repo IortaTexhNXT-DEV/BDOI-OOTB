@@ -430,8 +430,9 @@ function Createvoucher() {
     if (isAgentPayee && !values.AgentReferrer) {
       errors.AgentReferrer = t("paymentVoucher.thisFieldRequired");
     }
+    // Agent commission payouts are not tied to one customer, so the customer is optional there.
     if (!isInsurerPayee) {
-      if (!values.CustomerCode) {
+      if (!isAgentPayee && !values.CustomerCode) {
         errors.CustomerCode = t("paymentVoucher.thisFieldRequired");
       }
       if (!values.CustomerName && values.CustomerCode) {
@@ -676,7 +677,7 @@ function Createvoucher() {
               <div className="col-3 md:col-3 lg-col-3">
                 <DropDowns
                   className="dropdown__container"
-                  label={t("paymentVoucher.customerCode")}
+                  label={isAgentPayee ? `${t("paymentVoucher.customerCode")} (Optional)` : t("paymentVoucher.customerCode")}
                   value={formik.values.CustomerCode}
                   onChange={handleCustomerCodeChange}
                   options={getCustomerCodeOptions()}
@@ -694,7 +695,7 @@ function Createvoucher() {
               <div className="col-3 md:col-3 lg-col-3">
                 <DropDowns
                   className="dropdown__container"
-                  label={t("paymentVoucher.customerName")}
+                  label={isAgentPayee ? `${t("paymentVoucher.customerName")} (Optional)` : t("paymentVoucher.customerName")}
                   value={formik.values.CustomerName}
                   onChange={formik.handleChange("CustomerName")}
                   options={getCustomerNames(formik.values.CustomerCode)}
