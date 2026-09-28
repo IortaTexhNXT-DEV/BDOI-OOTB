@@ -112,7 +112,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     if (!values.entryType) {
       errors.entryType = "This field is required";
     }
-    if (!values.subAccount) {
+    // a sub account is needed only when the main account has sub accounts
+    const hasSubAccounts = subAccountsData.some((sub) => sub.mainAccount === values.mainAccount);
+    if (hasSubAccounts && !values.subAccount) {
       errors.subAccount = "This field is required";
     }
 
@@ -138,8 +140,15 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
   const [EditID, setEditID] = useState(null);
   const handleSubmit = (values) => {
     console.log(values, "find values in formik");
+    // keep the local amount in step with an edited foreign amount (same rate the line was entered with)
+    const original = (Array.isArray(journalVoucherPostTabelData) ? journalVoucherPostTabelData : []).find((r) => r.id === EditID) || {};
+    const oldForeign = parseFloat(original.foreignAmount);
+    const oldLocal = parseFloat(original.localAmount);
+    const rate = oldForeign > 0 && oldLocal > 0 ? oldLocal / oldForeign : 1;
+    const newForeign = parseFloat(values.foreignAmount);
     const valueWithId = {
       ...values,
+      localAmount: Number.isFinite(newForeign) ? (newForeign * rate).toFixed(2) : values.localAmount,
       id: EditID,
     };
     console.log(valueWithId, "find values in formik");

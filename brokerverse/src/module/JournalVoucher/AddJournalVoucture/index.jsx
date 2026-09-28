@@ -236,9 +236,8 @@ const AddJournalVocture = () => {
       } else {
         // Error - show error message
         const errorMessage =
-          result.payload || "Failed to approve journal voucher";
-        setToastMessage(errorMessage);
-        toastRef.current.showToast();
+          result.payload || "Failed to save journal voucher";
+        toastRef.current.showToast("error", "Journal voucher not saved", String(errorMessage));
       }
     } catch (error) {
       const errorMessage =
@@ -378,9 +377,8 @@ const AddJournalVocture = () => {
               classNames="dropdown__add__sub__JV"
               className="label__sub__add__JV"
               value={formik.values.transationDescription || ""}
-              disabled={true}
               onChange={(e) =>
-                formik.setFieldValue("transactionDescription", e.target.value)
+                formik.setFieldValue("transationDescription", e.target.value)
               }
             />
 
@@ -512,8 +510,13 @@ const AddJournalVocture = () => {
       </div>
       {buttonshow === 0 && (
         <div className="col-12 btn__view__Add__JV mt-2">
+          {Math.abs(totalForeignAmount - totalLocalAmount) > 0.01 && (
+            <div className="mb-2" style={{ fontSize: 12, color: "#b42318" }}>
+              Debits and credits must be equal before the voucher can be submitted.
+            </div>
+          )}
           <Button
-            label="Approve"
+            label="Submit for approval"
             className="save__add__btn__JV"
             onClick={handleApproval}
             disabled={
