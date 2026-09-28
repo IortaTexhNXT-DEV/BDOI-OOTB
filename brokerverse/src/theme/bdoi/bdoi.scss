@@ -15,6 +15,15 @@ body {
   color: $color-text;
 }
 
+// Plain form controls take the page font instead of the browser default.
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+}
+
 h1,
 h2,
 h3,
@@ -249,29 +258,28 @@ h6 {
 }
 
 // Tables: Header Blue header row with white bold text, alternating white / Background Blue rows.
-.p-datatable {
-  .p-datatable-thead > tr > th {
-    background: $brand-navy;
-    color: #ffffff;
-    font-family: $font-heading;
-    font-weight: 700;
-    border-color: rgba(255, 255, 255, 0.18);
+// !important because several screens style their own head row (transparent, light grey, or dark
+// text) with higher specificity; every head row is Header Blue with white text.
+.p-datatable .p-datatable-thead > tr > th,
+.protected__layout__content thead > tr > th {
+  background: $brand-navy !important;
+  color: #ffffff !important;
+  font-family: $font-heading;
+  font-weight: 700;
+  border-color: rgba(255, 255, 255, 0.18);
 
-    .p-sortable-column-icon,
-    .p-column-title {
-      color: #ffffff;
-    }
-
-    &.p-highlight,
-    &.p-sortable-column:not(.p-highlight):hover {
-      background: $brand-navy;
-      color: #ffffff;
-
-      .p-sortable-column-icon {
-        color: #ffffff;
-      }
-    }
+  * {
+    color: #ffffff !important;
   }
+
+  &.p-highlight,
+  &.p-sortable-column:not(.p-highlight):hover {
+    background: $brand-navy !important;
+    color: #ffffff !important;
+  }
+}
+
+.p-datatable {
 
   .p-datatable-tbody > tr {
     color: $color-text;

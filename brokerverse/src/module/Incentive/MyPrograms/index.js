@@ -268,7 +268,7 @@ const MyPrograms = () => {
                   size={60}
                   strokeWidth={8}
                   valueTemplate={"{value}%"}
-                  valueColor="#667eea"
+                  valueColor="#0072d8"
                   rangeColor="#e9ecef"
                 />
               </div>
@@ -436,7 +436,7 @@ const MyPrograms = () => {
                       size={120}
                       strokeWidth={10}
                       valueTemplate={"{value}%"}
-                      valueColor={selectedProgram.achievementPercent >= 100 ? "#28a745" : "#667eea"}
+                      valueColor={selectedProgram.achievementPercent >= 100 ? "#28a745" : "#0072d8"}
                       rangeColor="#e9ecef"
                     />
                   </div>

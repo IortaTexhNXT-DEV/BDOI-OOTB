@@ -93,7 +93,7 @@ const Statement = () => {
           data: statementData.monthlyTrend.map(item => item.earnings),
           fill: true,
           backgroundColor: 'rgba(102, 126, 234, 0.1)',
-          borderColor: documentStyle.getPropertyValue('--primary-color') || '#667eea',
+          borderColor: documentStyle.getPropertyValue('--primary-color') || '#0072d8',
           tension: 0.4
         }
       ]

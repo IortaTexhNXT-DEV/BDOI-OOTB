@@ -25,6 +25,8 @@ const hexMap = {
   "#0056b3": "#0072d8", // old BDO blue -> CTA Blue
   "#003d82": "#004ea8", // old BDO navy -> Header Blue
   "#0062ff": "#0072d8",
+  "#667eea": "#0072d8", // purple gradient start -> CTA Blue
+  "#764ba2": "#004ea8", // purple gradient end -> Header Blue
 };
 const hexRe = new RegExp(`(${Object.keys(hexMap).join("|")})(?![0-9a-f])`, "gi");
 
@@ -44,13 +46,13 @@ function convert(text, isStyle) {
     out = out.replace(
       /font-family:\s*([^;{}\n]*?)(\s*!important)?\s*;/g,
       (m, value, imp) =>
-        /poppins|inter/i.test(value) && !/nunito/i.test(value)
+        /poppins|inter|segoe/i.test(value) && !/nunito/i.test(value)
           ? `font-family: ${NUNITO_CSS}${imp || ""};`
           : m
     );
   } else {
     out = out.replace(/fontFamily:\s*(["'`])([^"'`\n]*)\1/g, (m, q, value) =>
-      /poppins|inter/i.test(value) && !/nunito/i.test(value) ? `fontFamily: ${NUNITO_JS}` : m
+      /poppins|inter|segoe/i.test(value) && !/nunito/i.test(value) ? `fontFamily: ${NUNITO_JS}` : m
     );
   }
   return out;

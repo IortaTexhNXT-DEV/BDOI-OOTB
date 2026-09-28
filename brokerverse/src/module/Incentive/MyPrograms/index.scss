@@ -145,7 +145,7 @@
           }
 
           .p-badge {
-            background: #667eea;
+            background: #0072d8;
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
           }
@@ -265,7 +265,7 @@
           padding: 1rem;
           background: #f8f9fa;
           border-radius: 8px;
-          border-left: 4px solid #667eea;
+          border-left: 4px solid #0072d8;
 
           .activity-date {
             font-size: 0.75rem;
@@ -294,7 +294,7 @@
               }
 
               .points {
-                color: #667eea;
+                color: #0072d8;
                 font-weight: 500;
               }
             }
@@ -307,7 +307,7 @@
   // Dialog Styles
   .p-dialog {
     .p-dialog-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
       color: white;
       border-radius: 12px 12px 0 0;
       padding: 1.5rem 2rem;
@@ -350,8 +350,8 @@
           }
 
           .p-highlight .p-tabview-nav-link {
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
+            color: #0072d8;
+            border-bottom: 2px solid #0072d8;
           }
         }
 
@@ -433,7 +433,7 @@
                   color: #6c757d;
 
                   &.remaining {
-                    color: #667eea;
+                    color: #0072d8;
                     font-weight: 500;
                   }
                 }
@@ -443,7 +443,7 @@
 
           .earning-breakdown {
             .earning-card {
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
               color: white;
               padding: 2rem;
               border-radius: 12px;
@@ -484,7 +484,7 @@
 
                   &::before {
                     content: '•';
-                    color: #667eea;
+                    color: #0072d8;
                     font-weight: bold;
                     position: absolute;
                     left: 0;

@@ -22,7 +22,7 @@
       margin-bottom: 1rem;
 
       .main__btn__action {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
         border: none;
         border-radius: 8px;
         padding: 0.75rem 1.5rem;
@@ -97,7 +97,7 @@
             padding: 0.75rem;
 
             &:focus {
-              border-color: #667eea;
+              border-color: #0072d8;
               box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
             }
           }
@@ -170,7 +170,7 @@
   // Dialog Styles
   .p-dialog {
     .p-dialog-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
       color: white;
       border-radius: 12px 12px 0 0;
       padding: 1.5rem 2rem;
@@ -213,8 +213,8 @@
           }
 
           .p-highlight .p-tabview-nav-link {
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
+            color: #0072d8;
+            border-bottom: 2px solid #0072d8;
           }
         }
 
@@ -265,7 +265,7 @@
                   padding: 0.75rem;
 
                   &:focus {
-                    border-color: #667eea;
+                    border-color: #0072d8;
                     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
                   }
 
@@ -351,7 +351,7 @@
           }
 
           &:not(.p-button-text) {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
             border: none;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 

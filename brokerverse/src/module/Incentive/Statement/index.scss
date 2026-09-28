@@ -35,7 +35,7 @@
           padding: 0.5rem 0.75rem;
 
           &:focus {
-            border-color: #667eea;
+            border-color: #0072d8;
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
           }
         }
@@ -43,12 +43,12 @@
 
       .p-button-outlined {
         border-radius: 6px;
-        border-color: #667eea;
-        color: #667eea;
+        border-color: #0072d8;
+        color: #0072d8;
 
         &:hover {
-          background: #667eea;
-          border-color: #667eea;
+          background: #0072d8;
+          border-color: #0072d8;
           color: white;
         }
       }
@@ -94,7 +94,7 @@
     }
 
     .statement-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
       color: white;
 
       .p-card-body {
@@ -214,7 +214,7 @@
           &.total-earnings {
             .card-icon {
               background: rgba(102, 126, 234, 0.1);
-              color: #667eea;
+              color: #0072d8;
             }
           }
 
@@ -267,7 +267,7 @@
           }
 
           .p-badge {
-            background: #667eea;
+            background: #0072d8;
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
           }
@@ -339,7 +339,7 @@
           padding: 1.5rem;
           background: #f8f9fa;
           border-radius: 8px;
-          border-left: 4px solid #667eea;
+          border-left: 4px solid #0072d8;
           margin-bottom: 1rem;
 
           &:last-child {
@@ -434,7 +434,7 @@
 
               &::before {
                 content: '•';
-                color: #667eea;
+                color: #0072d8;
                 font-weight: bold;
                 position: absolute;
                 left: 0;
@@ -557,7 +557,7 @@
     }
 
     .statement-header {
-      background: #667eea !important;
+      background: #0072d8 !important;
       color: white !important;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;

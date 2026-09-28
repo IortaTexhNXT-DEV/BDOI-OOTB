@@ -218,7 +218,7 @@ $tablet-md: 1024px;
         font-size: 0.85rem;
         color: #6c757d;
         font-weight: 500;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Nunito", Arial, sans-serif;
 
         @include mobile-sm {
           font-size: 0.8rem;
@@ -249,7 +249,7 @@ $tablet-md: 1024px;
 
       .audit-old-value,
       .audit-new-value {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Nunito", Arial, sans-serif;
         font-size: 0.85rem;
         background: $main-background;
         padding: 0.75rem;
