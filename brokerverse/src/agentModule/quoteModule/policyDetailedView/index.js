@@ -23,7 +23,14 @@ const PolicyDetailedView = ({ action }) => {
     state?.clientName ||
     policydetailedlist?.ClientName ||
     policydetailedlist?.clientName;
+  // Show the client code (CL-2026-00001), never the internal id
   const clientId =
+    state?.ClientCode ||
+    state?.client?.clientCode ||
+    state?.clientCode ||
+    policydetailedlist?.ClientCode ||
+    policydetailedlist?.client?.clientCode ||
+    policydetailedlist?.client?.generatedClientId ||
     state?.ClientId ||
     state?.clientId ||
     policydetailedlist?.ClientId ||

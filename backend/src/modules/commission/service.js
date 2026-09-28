@@ -24,6 +24,26 @@ export async function whtPctFor(ref) {
   const rate = byType[ref.referrer_type] ?? (await getSetting('tax.withholding_rate', 0.05));
   return round2(Number(rate) * 100);
 }
+/** Referrers shown as commission accounts: external / unlinked referrers, or users holding a commission-earning role. */
+async function eligibleSql(alias, params) {
+  const { commissionEligibleRoles } = await import('../policies/service.js');
+  params.push(await commissionEligibleRoles());
+  return `(${alias}.user_id IS NULL OR EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = ${alias}.user_id AND lower(ro.code) = ANY($${params.length})))`;
+}
+
+/** Why a referrer cannot be approved / paid (null when payable): no bank account on file (commission.require_bank_account). */
+export async function payoutBlockReason(ref) {
+  if (!(await getSetting('commission.require_bank_account', true))) return null;
+  if (!ref.bank_account_no || !String(ref.bank_account_no).trim()) {
+    return `${ref.name} has no bank account on file. Add the bank name and account number to the referrer before approving or paying commission.`;
+  }
+  return null;
+}
+export async function assertPayable(ref) {
+  const reason = await payoutBlockReason(ref);
+  if (reason) throw conflict(reason);
+}
+
 const maskAccount = (ref) => (ref.bank_account_no ? `${ref.bank_name || 'Bank'} ***${String(ref.bank_account_no).slice(-4)}` : null);
 
 /** comsub = fixed + net premium x pct; WHT on comsub when applicable; net margin = brokerage - comsub. */
@@ -81,14 +101,15 @@ export async function referrerSummaryRow(db, ref) {
   return {
     id: ref.id, name: ref.name, type: ref.referrer_type, level: ref.level, policies: new Set(lines.filter((l) => l.status !== 'Reversed').map((l) => l.policy_id)).size,
     netPayable: sumNet(cur), whtType: `${ref.referrer_type === 'External' ? 'Company' : 'Individual'} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct,
-    bankAccount: maskAccount(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
+    bankAccount: maskAccount(ref), bankAccountMissing: !ref.bank_account_no, payoutBlockedReason: await payoutBlockReason(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
   };
 }
 
 export async function listReferrers(db, scope = null) {
   const params = [];
   const own = scopeSql(scope, 'referrer', 'r', params);
-  const refs = (await db.query(`SELECT * FROM commission_referrers r WHERE ${own} ORDER BY name`, params)).rows;
+  const eligible = await eligibleSql('r', params);
+  const refs = (await db.query(`SELECT * FROM commission_referrers r WHERE ${own} AND ${eligible} ORDER BY name`, params)).rows;
   const referrers = [];
   for (const r of refs) referrers.push(await referrerSummaryRow(db, r));
   const rp = [];
@@ -106,7 +127,7 @@ export async function buildAccount(db, id) {
   const row = await referrerSummaryRow(db, ref);
   return {
     referrer: { id: ref.id, name: ref.name, status: ref.status, type: ref.referrer_type, level: ref.level, whtType: row.whtType, whtApplicable: ref.wht_applicable,
-      bankAccount: row.bankAccount, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin },
+      whtPct: row.whtPct, bankAccount: row.bankAccount, bankAccountMissing: row.bankAccountMissing, payoutBlockedReason: row.payoutBlockedReason, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin },
     summary: { cycleLabel: cycleLabel(monthStart()), dueThisCycle: sumNet(cur), upcoming: sumNet(future), paidToDate: sumNet(past.filter((l) => l.status === 'Paid')) },
     currentCycle: { label: cycleLabel(monthStart()), totalNet: sumNet(cur), lines: await view(cur) },
     futureCycles: { totalNet: sumNet(future), lines: await view(future) },
@@ -191,6 +212,7 @@ async function markEligible(db, line, user) {
 
 async function approve(db, line, user) {
   if (line.status !== 'Eligible') throw conflict(`Line is ${line.status}; only Eligible lines can be approved`);
+  await assertPayable(await getReferrer(db, line.referrer_id));
   await assertChecker(user, line.eligible_by, 'commission line');
   const jv = await createJournal(db, {
     source: 'commission', entryType: 'COMMISSION_ACCRUAL', referenceType: 'Commission', referenceId: line.id, policyId: line.policy_id, policyNumber: line.policy_number,
@@ -269,6 +291,7 @@ export async function accountAction(db, referrerId, action, user) {
   if (action === 'approve') {
     const eligible = lines.filter((l) => l.status === 'Eligible');
     if (!eligible.length) throw conflict('No Eligible lines to approve');
+    await assertPayable(await getReferrer(db, referrerId));
     for (const l of eligible) await approve(db, l, user);
   } else if (action === 'mark-eligible') {
     const accrued = lines.filter((l) => l.status === 'Accrued');
@@ -296,10 +319,15 @@ export async function approvedLines(db, referrerId) {
 export async function agentsReadyToPay(db, scope = null) {
   const params = [];
   const own = scopeSql(scope, 'referrer', 'r', params);
+  const eligible = await eligibleSql('r', params);
   const rows = (await db.query(`SELECT r.*, count(c.id)::int AS n, COALESCE(sum(c.amount),0) AS gross, COALESCE(sum(c.net_amount),0) AS net
     FROM commission_referrers r JOIN commissions c ON c.referrer_id = r.id AND c.status = 'Approved' AND c.disbursement_id IS NULL
-    WHERE ${own} GROUP BY r.id ORDER BY r.name`, params)).rows;
-  const agents = rows.map((r) => ({ id: r.id, name: r.name, type: r.referrer_type, level: r.level, approvedLineCount: r.n, comsubGross: round2(r.gross), netPayable: round2(r.net), bankAccount: maskAccount(r) }));
+    WHERE ${own} AND ${eligible} GROUP BY r.id ORDER BY r.name`, params)).rows;
+  const agents = [];
+  for (const r of rows) {
+    agents.push({ id: r.id, name: r.name, type: r.referrer_type, level: r.level, approvedLineCount: r.n, comsubGross: round2(r.gross), netPayable: round2(r.net),
+      bankAccount: maskAccount(r), payoutBlockedReason: await payoutBlockReason(r) });
+  }
   return { agents, summary: { agentCount: agents.length, totalComsubGross: round2(agents.reduce((s, a) => s + a.comsubGross, 0)), totalNet: round2(agents.reduce((s, a) => s + a.netPayable, 0)) } };
 }
 

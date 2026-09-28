@@ -14,6 +14,9 @@ import policyService from "../../../services/policyService";
 import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
 
+/** Upload folder -> vehicle photo slot. */
+const PHOTO_KEY = { left: "leftSide", right: "rightSide", front: "front", rear: "rear", interior: "interior" };
+
 const UploadVehiclePhotos = () => {
   const { t } = useTranslation();
   // S3 URLs for uploaded photos
@@ -269,7 +272,9 @@ const UploadVehiclePhotos = () => {
               maxFileSize={5 * 1024 * 1024} // 5MB
               multiple={false}
               showPreview={true}
+              autoUpload
               uploadPath="vehicle-photos/left"
+              onRemove={() => handlePhotoUpload(PHOTO_KEY["left"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('leftSide', url)}
               onUploadError={(error) => console.error('Left photo upload error:', error)}
             />
@@ -286,7 +291,9 @@ const UploadVehiclePhotos = () => {
               maxFileSize={5 * 1024 * 1024}
               multiple={false}
               showPreview={true}
+              autoUpload
               uploadPath="vehicle-photos/right"
+              onRemove={() => handlePhotoUpload(PHOTO_KEY["right"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('rightSide', url)}
               onUploadError={(error) => console.error('Right photo upload error:', error)}
             />
@@ -303,7 +310,9 @@ const UploadVehiclePhotos = () => {
               maxFileSize={5 * 1024 * 1024}
               multiple={false}
               showPreview={true}
+              autoUpload
               uploadPath="vehicle-photos/front"
+              onRemove={() => handlePhotoUpload(PHOTO_KEY["front"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('front', url)}
               onUploadError={(error) => console.error('Front photo upload error:', error)}
             />
@@ -320,7 +329,9 @@ const UploadVehiclePhotos = () => {
               maxFileSize={5 * 1024 * 1024}
               multiple={false}
               showPreview={true}
+              autoUpload
               uploadPath="vehicle-photos/rear"
+              onRemove={() => handlePhotoUpload(PHOTO_KEY["rear"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('rear', url)}
               onUploadError={(error) => console.error('Rear photo upload error:', error)}
             />
@@ -337,7 +348,9 @@ const UploadVehiclePhotos = () => {
               maxFileSize={5 * 1024 * 1024}
               multiple={false}
               showPreview={true}
+              autoUpload
               uploadPath="vehicle-photos/interior"
+              onRemove={() => handlePhotoUpload(PHOTO_KEY["interior"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('interior', url)}
               onUploadError={(error) => console.error('Interior photo upload error:', error)}
             />

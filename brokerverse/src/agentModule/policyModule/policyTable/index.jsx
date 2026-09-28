@@ -455,12 +455,11 @@ const LeadListingAllTable = ({
   const renderClientId = (rowData) => {
     return (
       <div className="category__text">
-        {(
+        {rowData.ClientCode ||
           rowData.client?.clientCode ||
           rowData.client?.generatedClientId ||
           rowData.clientCode ||
-          rowData.ClientId
-        )?.toUpperCase()}
+          rowData.ClientId}
       </div>
     );
   };

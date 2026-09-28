@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
+import { Toast } from "primereact/toast";
+import { Message } from "primereact/message";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CommissionService from "../../../services/commissionService";
@@ -17,6 +19,16 @@ const ReferrerAccountDetail = () => {
   const [detail, setDetail] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedLine, setSelectedLine] = useState(null);
+  const toast = useRef(null);
+
+  const showError = (err, fallback) => {
+    toast.current?.show({
+      severity: "error",
+      summary: fallback,
+      detail: err?.response?.data?.message || err?.message || fallback,
+      life: 6000,
+    });
+  };
 
   const loadDetail = useCallback(async () => {
     setLoading(true);
@@ -41,7 +53,7 @@ const ReferrerAccountDetail = () => {
       const res = await fn(id);
       setDetail(res?.data || res);
     } catch (err) {
-      console.error("Action failed", err);
+      showError(err, "Action failed");
     } finally {
       setActionLoading(false);
     }
@@ -61,7 +73,7 @@ const ReferrerAccountDetail = () => {
         },
       });
     } catch (err) {
-      console.error("Generate payout failed", err);
+      showError(err, "Generate payout failed");
     } finally {
       setActionLoading(false);
     }
@@ -106,7 +118,7 @@ const ReferrerAccountDetail = () => {
         if (refreshed) setSelectedLine(refreshed);
       }
     } catch (err) {
-      console.error("Failed to update WHT setting", err);
+      showError(err, "Failed to update WHT setting");
     } finally {
       setActionLoading(false);
     }
@@ -175,9 +187,16 @@ const ReferrerAccountDetail = () => {
   const { referrer, summary, currentCycle, futureCycles, past, actions } =
     detail;
   const typeLevel = [referrer.type, referrer.level].filter(Boolean).join(" · ");
+  // WHT rate configured for this referrer (commission service whtPctFor); never a hard-coded rate
+  const whtRateLabel =
+    referrer.whtPct !== undefined && referrer.whtPct !== null
+      ? `${referrer.whtPct}%`
+      : String(referrer.whtType || "").match(/[\d.]+%/)?.[0] || "";
+  const payoutBlocked = referrer.payoutBlockedReason || null;
 
   return (
     <div className="referrer-detail-page">
+      <Toast ref={toast} />
       <Button
         label="← Referrers"
         className="p-button-outlined back-btn"
@@ -197,7 +216,8 @@ const ReferrerAccountDetail = () => {
         </div>
         <h1>{referrer.name}</h1>
         <p className="meta">
-          WHT: {referrer.whtType || "—"} • Bank: {referrer.bankAccount} •{" "}
+          WHT: {referrer.whtType || "—"} • Bank:{" "}
+          {referrer.bankAccount || "Not on file"} •{" "}
           {referrer.policiesCount} policies on the book
         </p>
         <label className="wht-toggle">
@@ -207,11 +227,18 @@ const ReferrerAccountDetail = () => {
             disabled={actionLoading}
             onChange={(e) => handleWhtToggle(e.checked)}
           />
-          <span>Apply WHT (3%)</span>
+          <span>Apply WHT{whtRateLabel ? ` (${whtRateLabel})` : ""}</span>
           <span className="wht-hint">
             Deselect when withholding tax does not apply to this referrer
           </span>
         </label>
+        {payoutBlocked && (
+          <Message
+            severity="warn"
+            className="mt-2 w-full justify-content-start"
+            text={payoutBlocked}
+          />
+        )}
       </div>
 
       <div className="summary-row">
@@ -241,13 +268,17 @@ const ReferrerAccountDetail = () => {
             <Button
               label={`Approve ${actions.approveCount}`}
               className="p-button-sm approve-btn"
-              disabled={!actions.approveCount || actionLoading}
+              disabled={!actions.approveCount || actionLoading || Boolean(payoutBlocked)}
+              tooltip={payoutBlocked || undefined}
+              tooltipOptions={{ showOnDisabled: true }}
               onClick={() => runAction(CommissionService.approveLines)}
             />
             <Button
               label={`Generate payout (${actions.generatePayoutCount})`}
               className="p-button-sm payout-btn"
-              disabled={!actions.generatePayoutCount || actionLoading}
+              disabled={!actions.generatePayoutCount || actionLoading || Boolean(payoutBlocked)}
+              tooltip={payoutBlocked || undefined}
+              tooltipOptions={{ showOnDisabled: true }}
               onClick={handleGeneratePayout}
             />
           </div>
@@ -299,6 +330,7 @@ const ReferrerAccountDetail = () => {
         whtApplicable={Boolean(referrer.whtApplicable)}
         line={selectedLine}
         onUpdated={handleLineUpdated}
+        onError={(err) => showError(err, "Line action failed")}
       />
     </div>
   );

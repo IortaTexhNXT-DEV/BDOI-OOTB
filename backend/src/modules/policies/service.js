@@ -174,6 +174,20 @@ export async function createReceivable(db, { policyId, amount, source = 'policy'
   return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, user });
 }
 
+/** Roles that earn commission on the policies they produce (commission.eligible_roles, falling back to incentive.eligible_roles). */
+export async function commissionEligibleRoles() {
+  const roles = (await getSetting('commission.eligible_roles', null)) || (await getSetting('incentive.eligible_roles', ['agent'])) || ['agent'];
+  return (Array.isArray(roles) ? roles : [roles]).map((r) => String(r).toLowerCase());
+}
+
+/** The user id when the user is active and holds a commission-earning role, else null. */
+export async function eligibleCommissionUser(db, userId) {
+  const roles = await commissionEligibleRoles();
+  const r = await db.query(`SELECT u.id FROM users u JOIN user_roles ur ON ur.user_id = u.id JOIN roles ro ON ro.id = ur.role_id
+    WHERE u.id = $1 AND lower(ro.code) = ANY($2) LIMIT 1`, [userId, roles]);
+  return r.rows[0]?.id || null;
+}
+
 const hasReferrers = (d) => Boolean(d && [d.primary, ...(d.chain || [])].some((e) => e && e.referrerId && e.referrerId !== 'direct'));
 
 /** The commission module's accrual (referrer chain lines), when that module is installed. */
@@ -193,10 +207,13 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
     return (await db.query('SELECT * FROM commissions WHERE id = ANY($1)', [ids])).rows[0] || null;
   }
   if (!rate || !basis) return null;
+  // Only a producing user holding a commission-earning role (commission.eligible_roles, e.g. agent) earns the line;
+  // administrators and back-office users who key in a policy do not.
+  const agent = agentUserId ? await eligibleCommissionUser(db, agentUserId) : null;
+  if (!agent) return null;
   const wht = Number(await getSetting('tax.withholding_rate', 0));
   const amount = round2(basis * rate);
   const withholding = round2(amount * wht);
-  const agent = agentUserId ? (await db.query('SELECT id FROM users WHERE id = $1', [agentUserId])).rows[0]?.id : null;
   const status = await getSetting('commission.initial_status', 'Accrued');
   const r = await db.query(`INSERT INTO commissions(policy_id, quote_id, endorsement_id, agent_user_id, basis_amount, rate, amount, withholding, net_amount, period, status)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`, [policyId, quoteId, endorsementId, agent, round2(basis), rate, amount, withholding, round2(amount - withholding), period, status]);

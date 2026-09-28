@@ -58,7 +58,13 @@ const PolicyDetails = ({ action, flow }) => {
         <SvgLeftArrow />
         <div className="policy__container__back__btn__title">
           {flow === "lead" ? t("agent.leadIdLabel") : t("agent.clientIdLabel")}{" "}
-          {displayLeadId}
+          {flow === "lead"
+            ? displayLeadId || quotationData?.leadRefId || ""
+            : state?.client?.clientCode ||
+              state?.clientCode ||
+              quotationData?.client?.clientCode ||
+              quotationData?.client?.generatedClientId ||
+              ""}
         </div>
       </div>
       <PolicyDetailsCard action={action} flow={flow} lead={lead} />

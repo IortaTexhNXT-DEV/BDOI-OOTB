@@ -285,6 +285,14 @@ class PolicyService {
 
       // Client information (FIXED)
       ClientId: client.clientId || apiPolicy.clientId || "N/A",
+      // Client code shown to users (CL-2026-00001); ClientId stays the internal id used for API calls
+      ClientCode:
+        client.clientCode ||
+        client.generatedClientId ||
+        apiPolicy.clientCode ||
+        client.clientId ||
+        apiPolicy.clientId ||
+        "N/A",
       ClientName: clientName,
       clientId: apiPolicy.clientId,
       client: client,
@@ -556,6 +564,49 @@ class PolicyService {
     } finally {
       clearTimeout(timeoutId);
     }
+  }
+
+  /** JSON call to the policies API returning { success, data, error, errors }. */
+  async paymentCall(path, { method = "GET", body } = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}/policies/${path}`, {
+        method,
+        headers: { "Content-Type": "application/json", ...this.getAuthHeader() },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        return { success: false, error: data.message || `Request failed (${response.status})`, errors: data.errors || [] };
+      }
+      return { success: true, data: data.data, message: data.message };
+    } catch (error) {
+      return { success: false, error: error.message || "Request failed" };
+    }
+  }
+
+  /** Payment screen: open bills, captured payments, payment modes, gateway, whether the user may confirm. */
+  getPolicyPayments(policyId) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments`);
+  }
+
+  /** Record a payment (mode, reference, amount, date, proof) for finance to verify. */
+  capturePolicyPayment(policyId, payment) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments`, { method: "POST", body: { option: "payment", ...payment } });
+  }
+
+  /** Client pays later: the bill stays open; nothing is posted. */
+  recordPayLater(policyId) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments`, { method: "POST", body: { option: "pay-later" } });
+  }
+
+  /** Finance: confirm a captured payment (raises the official receipt). */
+  confirmPolicyPayment(policyId, paymentId) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments/${encodeURIComponent(paymentId)}/confirm`, { method: "POST", body: {} });
+  }
+
+  /** Finance: reject a captured payment. */
+  rejectPolicyPayment(policyId, paymentId, reason) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments/${encodeURIComponent(paymentId)}/reject`, { method: "POST", body: { reason } });
   }
 
   async updatePaymentStatus(policyId, paymentData) {

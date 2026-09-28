@@ -281,6 +281,8 @@ BEGIN
   INSERT INTO commission_referrers(id, name, referrer_type, level, user_id, email, status)
   SELECT DISTINCT 'ref-' || regexp_replace(lower(u.username), '[^a-z0-9]+', '-', 'g'), u.display_name, 'Agent', 'L1', u.id, u.email, 'Active'
   FROM commissions cm JOIN users u ON u.id = cm.agent_user_id WHERE cm.referrer_id IS NULL
+    AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id
+      AND ro.code IN (SELECT jsonb_array_elements_text(COALESCE((SELECT value FROM app_settings WHERE key = 'commission.eligible_roles'), '["agent","sales"]'::jsonb))))
   ON CONFLICT (id) DO NOTHING;
   UPDATE commissions cm SET referrer_id = r.id, policy_number = pl.policy_number, gross_premium = pl.premium_total, net_premium = cm.basis_amount,
     comsub_pct = round(cm.rate * 100, 2), wht_pct = round(CASE WHEN cm.amount > 0 THEN cm.withholding / cm.amount * 100 ELSE 0 END, 2),

@@ -87,6 +87,9 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
 
 /** Voucher for commission lines of one referrer (used by bulk agent disburse and single-line pay). */
 export async function createCommissionVoucher(db, { referrer, lines, user, status = 'for-approval', transactionCode = 'COMSUB', currency }) {
+  // No payout to a referrer without a bank account on file (commission.require_bank_account)
+  const { assertPayable } = await import('../commission/service.js');
+  await assertPayable(referrer);
   const gross = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const wht = round2(lines.reduce((s, l) => s + Number(l.withholding), 0));
   const d = await createDisbursement(db, { payeeType: AGENT, referrerId: referrer.id, referrerName: referrer.name, customerCode: referrer.id, transactionCode,

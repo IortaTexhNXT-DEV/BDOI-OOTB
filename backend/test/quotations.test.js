@@ -145,6 +145,24 @@ describe('quotations: create, premium, workflow, conversion', () => {
     expect((await uw('put', `/quotations/${quoteId}/status`).send({ status: 'Nonsense' })).status).toBe(400);
   });
 
+  it('refuses to issue a motor policy without KYC and vehicle identifiers (policy.kyc_required_fields)', async () => {
+    const r = await sales('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { insuredName: 'Lara Quimpo', inception: '2026-10-01' } });
+    expect(r.status).toBe(400);
+    const missing = r.body.errors.map((e) => e.message);
+    expect(missing).toEqual(['ID type', 'ID number', 'ID card image', 'Chassis number', 'Motor / engine number', 'Plate number or MV file number']);
+    expect(r.body.message).toContain('Missing: ID type; ID number');
+    // an ID document outside policy.kyc_id_types is refused; an MV file number stands in for a plate (new vehicle)
+    await sales('patch', `/quotations/${quoteId}/vehicle-info`).send({ idType: 'Library card', idCardNumber: 'X-1', idCardImage: 'id-cards/lara.jpg', chassisNumber: 'MHFXW42G5P0012345', motorNumber: '2NRX123456', MvFileNumber: '1301-00000012345' });
+    const bad = await sales('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { insuredName: 'Lara Quimpo' } });
+    expect(bad.status).toBe(400);
+    expect(bad.body.errors.map((e) => e.message).join()).toContain('Library card');
+    expect((await q('SELECT count(*)::int AS n FROM policies WHERE quote_id = $1', [quoteId]))[0].n).toBe(0);
+    // the required set is configuration: an empty list for MOTOR switches the check off
+    const { requiredKycFor } = await import('../src/modules/policies/kyc.js');
+    expect(await requiredKycFor('FIRE')).toEqual([]);
+    await sales('patch', `/quotations/${quoteId}/vehicle-info`).send({ idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456' });
+  });
+
   it('converts to policy: client, policy, receivable with bill number, commission accrual, owner notified', async () => {
     const r = await sales('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { insuredName: 'Lara Quimpo', plateNumber: 'NQQ 2025', inception: '2026-10-01', paymentStatus: 'Pending', paymentMethod: 'Direct Debit' }, createdBy: 'agent' });
     expect(r.status).toBe(201);
@@ -161,6 +179,12 @@ describe('quotations: create, premium, workflow, conversion', () => {
     const [rcv] = await q('SELECT * FROM receivables WHERE policy_id = $1', [policyId]);
     expect(Number(rcv.amount)).toBeCloseTo(policy.grossPremium, 2);
     expect(rcv.bill_number).toBe(policy.billNumber);
+    // issuance leaves the bill open: no receipt, payment status Pending
+    expect(rcv.status).toBe('open');
+    expect(Number(rcv.balance)).toBeCloseTo(Number(rcv.amount), 2);
+    expect(policy.paymentStatus).toBe('Pending');
+    expect((await q('SELECT count(*)::int AS n FROM receipts WHERE policy_id = $1', [policyId]))[0].n).toBe(0);
+    expect(policy.chassisNumber).toBe('MHFXW42G5P0012345');
     const [cm] = await q('SELECT * FROM commissions WHERE policy_id = $1', [policyId]);
     expect(Number(cm.amount)).toBeCloseTo(policy.netPremium * 0.15, 2);
     expect(cm.agent_user_id).toBe(salesId);
