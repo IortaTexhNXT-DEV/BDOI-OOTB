@@ -16,7 +16,12 @@ import DropdownField from "../../../component/DropdwonField";
 import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
 import addressService from "../../../../services/addressService";
-import { isThailand } from "../../../../utility/addressHelpers";
+import {
+  isThailand,
+  findAddressItem,
+  canonicalAddressValue,
+  addressOptionsWithSaved,
+} from "../../../../utility/addressHelpers";
 
 const ClaimDetailsCard = ({
   leadRefId,
@@ -25,7 +30,6 @@ const ClaimDetailsCard = ({
   initialLob,
 }) => {
   const { t } = useTranslation();
-  const [checked, setChecked] = useState(false);
   const location = useLocation();
 
   // Fire incident/cause-of-loss options (translated)
@@ -57,6 +61,10 @@ const ClaimDetailsCard = ({
         loading: claimDetailsMainReducers?.loading,
       };
     }
+  );
+  // "Same as Policy Holder": restored when coming back from the mail step
+  const [checked, setChecked] = useState(
+    claimThirdParty?.isPolicyHolderTheDriver === true
   );
 
   const isFire = isFireLob(
@@ -114,14 +122,31 @@ const ClaimDetailsCard = ({
 
   const dispatch = useDispatch();
 
+  // Policy holder name and address (house/street, barangay, country, province, city, ZIP) copied to the driver
+  const holderToDriver = (values) => ({
+    driverName: values.PolicyHolderName || "",
+    driverHouseNo: values.HouseNo || "",
+    driverBarangay: values.Barangay || "",
+    driverCountry: values.CountryName || "",
+    driverProvince: values.Province || "",
+    driverCity: values.CityName || "",
+    driverZipCode: values.ZipCode || "",
+    driverRoadThanon: values.RoadThanon || "",
+    driverSoiAlley: values.SoiAlley || "",
+    driverMooVillage: values.MooVillage || "",
+  });
+
   const handleSubmit = async (values) => {
     const lob = mapToApiLob(
       claimDetailsViewData?.lob ||
         claimDetailsViewData?.productType ||
         initialLob
     );
+    const holderAsDriver = !isFire && checked;
     const payload = {
       ...values,
+      ...(holderAsDriver ? holderToDriver(values) : {}),
+      isPolicyHolderTheDriver: holderAsDriver,
       leadRefId,
       quoteRefId,
       policyRefId,
@@ -191,36 +216,30 @@ const ClaimDetailsCard = ({
     };
   }, []);
 
-  const selectedCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.CountryName ||
-      c.id === formik.values.CountryName
+  const selectedCountryId = findAddressItem(
+    countryList,
+    formik.values.CountryName
   )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.Province ||
-      p.id === formik.values.Province
+  const selectedProvinceId = findAddressItem(
+    provinceList,
+    formik.values.Province
   )?.id;
-  const selectedCityId = cityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.CityName ||
-      c.id === formik.values.CityName
+  const selectedCityId = findAddressItem(
+    cityList,
+    formik.values.CityName
   )?.id;
 
-  const selectedDriverCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.driverCountry ||
-      c.id === formik.values.driverCountry
+  const selectedDriverCountryId = findAddressItem(
+    countryList,
+    formik.values.driverCountry
   )?.id;
-  const selectedDriverProvinceId = driverProvinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.driverProvince ||
-      p.id === formik.values.driverProvince
+  const selectedDriverProvinceId = findAddressItem(
+    driverProvinceList,
+    formik.values.driverProvince
   )?.id;
-  const selectedDriverCityId = driverCityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.driverCity ||
-      c.id === formik.values.driverCity
+  const selectedDriverCityId = findAddressItem(
+    driverCityList,
+    formik.values.driverCity
   )?.id;
 
   useEffect(() => {
@@ -387,29 +406,21 @@ const ClaimDetailsCard = ({
     }
   }, [formik, countryList]);
 
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
+  const holderCountryOptions = useMemo(
+    () => addressOptionsWithSaved(countryList, formik.values.CountryName),
+    [countryList, formik.values.CountryName]
+  );
+  const driverCountryOptions = useMemo(
+    () => addressOptionsWithSaved(countryList, formik.values.driverCountry),
+    [countryList, formik.values.driverCountry]
   );
   const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
+    () => addressOptionsWithSaved(provinceList, formik.values.Province),
+    [provinceList, formik.values.Province]
   );
   const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
+    () => addressOptionsWithSaved(cityList, formik.values.CityName),
+    [cityList, formik.values.CityName]
   );
   const availableDistricts = useMemo(
     () =>
@@ -420,20 +431,12 @@ const ClaimDetailsCard = ({
     [districtList]
   );
   const availableDriverProvinces = useMemo(
-    () =>
-      driverProvinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [driverProvinceList]
+    () => addressOptionsWithSaved(driverProvinceList, formik.values.driverProvince),
+    [driverProvinceList, formik.values.driverProvince]
   );
   const availableDriverCities = useMemo(
-    () =>
-      driverCityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [driverCityList]
+    () => addressOptionsWithSaved(driverCityList, formik.values.driverCity),
+    [driverCityList, formik.values.driverCity]
   );
   const availableDriverDistricts = useMemo(
     () =>
@@ -443,6 +446,36 @@ const ClaimDetailsCard = ({
       })),
     [driverDistrictList]
   );
+
+  // Saved names spelled differently from the master ("PHILIPPINES", "MAKATI CITY", a code) take the master name
+  useEffect(() => {
+    [
+      ["CountryName", countryList],
+      ["Province", provinceList],
+      ["CityName", cityList],
+      ["driverCountry", countryList],
+      ["driverProvince", driverProvinceList],
+      ["driverCity", driverCityList],
+    ].forEach(([field, list]) => {
+      const current = formik.values[field];
+      if (!current || !list.length) return;
+      const canonical = canonicalAddressValue(list, current);
+      if (canonical !== current) formik.setFieldValue(field, canonical, false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    countryList,
+    provinceList,
+    cityList,
+    driverProvinceList,
+    driverCityList,
+    formik.values.CountryName,
+    formik.values.Province,
+    formik.values.CityName,
+    formik.values.driverCountry,
+    formik.values.driverProvince,
+    formik.values.driverCity,
+  ]);
 
   // Update form when Redux data changes
   useEffect(() => {
@@ -704,19 +737,10 @@ const ClaimDetailsCard = ({
     setChecked(e.checked);
 
     if (e.checked) {
-      // Copy current policyholder form values to driver
+      // Copy current policyholder name and address to the driver
       formik.setValues({
         ...formik.values,
-        driverName: formik.values.PolicyHolderName || "",
-        driverHouseNo: formik.values.HouseNo || "",
-        driverBarangay: formik.values.Barangay || "",
-        driverCountry: formik.values.CountryName || "",
-        driverProvince: formik.values.Province || "",
-        driverCity: formik.values.CityName || "",
-        driverZipCode: formik.values.ZipCode || "",
-        driverRoadThanon: formik.values.RoadThanon || "",
-        driverSoiAlley: formik.values.SoiAlley || "",
-        driverMooVillage: formik.values.MooVillage || "",
+        ...holderToDriver(formik.values),
       });
     } else {
       formik.setValues({
@@ -792,7 +816,7 @@ const ClaimDetailsCard = ({
             <DropdownField
               label={t("claimDetails.country")}
               value={formik.values.CountryName}
-              options={countryOptions}
+              options={holderCountryOptions}
               onChange={(e) => {
                 formik.setFieldValue("CountryName", e.value);
                 formik.setFieldValue("Province", "");
@@ -1094,7 +1118,7 @@ const ClaimDetailsCard = ({
             <DropdownField
               label={t("claimDetails.country")}
               value={formik.values.driverCountry}
-              options={countryOptions}
+              options={driverCountryOptions}
               onChange={(e) => {
                 formik.setFieldValue("driverCountry", e.value);
                 formik.setFieldValue("driverProvince", "");

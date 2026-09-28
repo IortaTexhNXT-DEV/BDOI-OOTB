@@ -100,8 +100,12 @@ describe('claims', () => {
     expect(s.body.data.status).toBe('Processing');
     const adj = await as('c.maker', 'put', `/claims/${claim.id}`)
       .field('insuranceCompanyClaimNumber', 'MAPFRE-CL-1').field('adjusterName', 'Cordillera Adjusters').field('adjusterStatus', 'Assigned')
-      .field('driverName', 'Juan Driver Jr.').field('thirdPartyDetails[thirdPartyName]', 'Pedro Cruz Jr.').attach('file', Buffer.from('FIR CONTENT'), 'fir.pdf');
+      .field('driverName', 'Juan Driver Jr.').field('thirdPartyDetails[thirdPartyName]', 'Pedro Cruz Jr.')
+      .field('driverDetails', JSON.stringify({ driverHouseNo: '14 Jupiter St.', driverBarangay: 'Bel-Air', driverCountry: 'Philippines', driverProvince: 'Metro Manila', driverCity: 'Makati', driverZipCode: '1209' }))
+      .attach('file', Buffer.from('FIR CONTENT'), 'fir.pdf');
     expect(adj.status).toBe(200);
+    // the adjuster screen sends the driver address as driverDetails; it is kept and read back flat
+    expect(adj.body.data).toMatchObject({ driverName: 'Juan Driver Jr.', driverHouseNo: '14 Jupiter St.', driverBarangay: 'Bel-Air', driverCountry: 'Philippines', driverProvince: 'Metro Manila', driverCity: 'Makati', driverZipCode: '1209' });
     expect(adj.body.data.adjusterName).toBe('Cordillera Adjusters');
     expect(adj.body.data.thirdPartyWitnessDetails[0].name).toBe('Pedro Cruz Jr.');
     expect(adj.body.data.insuranceCompanyClaimNumber).toBe('MAPFRE-CL-1');

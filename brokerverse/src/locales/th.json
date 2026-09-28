@@ -242,6 +242,7 @@
   },
   "validation": {
     "fieldRequired": "กรุณากรอกข้อมูลในฟิลด์นี้",
+    "zipCodePhilippines": "รหัสไปรษณีย์ต้องเป็นตัวเลข 4 หลัก",
     "fieldCodeRequired": "กรุณากรอกรหัสในฟิลด์นี้",
     "emailRequired": "กรุณากรอกอีเมล",
     "invalidEmail": "ที่อยู่อีเมลไม่ถูกต้อง",

@@ -40,7 +40,8 @@ export const openStatuses = async () => (await getSetting('claims.open_statuses'
 const BASE = `SELECT c.*, p.policy_number, p.inception_date, p.expiry_date, p.sum_insured AS policy_sum_insured,
   p.premium_total AS policy_premium, p.owner_user_id AS policy_owner, p.status AS policy_status, p.client_id AS policy_client_id,
   p.quote_id AS policy_quote_id, cl.display_name AS client_name, cl.first_name AS client_first_name, cl.last_name AS client_last_name,
-  cl.email AS client_email, cl.phone AS client_phone, cl.address AS client_address, cl.city AS client_city, cl.state AS client_state,
+  cl.email AS client_email, cl.phone AS client_phone, cl.address AS client_address, cl.house_no AS client_house_no,
+  cl.barangay AS client_barangay, cl.city AS client_city, cl.state AS client_state,
   cl.country AS client_country, cl.postal_code AS client_postal, ic.name AS insurer_name, ic.contact_email AS insurer_email,
   pr.name AS product_name, pr.line AS product_line, hu.display_name AS handler_name
   FROM claims c JOIN policies p ON p.id = c.policy_id
@@ -66,7 +67,7 @@ export function toApi(r, labels, todayStr, open) {
   const label = labels[r.status] || r.status;
   const info = r.policy_info || {};
   const address = {
-    houseNo: info.houseNo || r.client_address || '', barangay: info.barangay || '', city: info.cityName || r.client_city || '',
+    houseNo: info.houseNo || r.client_house_no || r.client_address || '', barangay: info.barangay || r.client_barangay || '', city: info.cityName || r.client_city || '',
     province: info.province || r.client_state || '', country: info.countryName || r.client_country || '', zipCode: info.zipCode || r.client_postal || '',
     roadThanon: info.roadThanon || '', soiAlley: info.soiAlley || '', mooVillage: info.mooVillage || '',
   };

@@ -26,6 +26,24 @@ describe('addresses', () => {
     expect(cities.body.data.map((c) => c.name)).toContain('Pathum Wan');
     expect((await ctx.api('get', '/addresses/countries/XX/provinces')).body.data).toEqual([]);
   });
+  it('serves the Philippine hierarchy used by the claim screens: Metro Manila (NCR) -> Makati', async () => {
+    const provinces = await ctx.api('get', '/addresses/countries/Philippines/provinces');
+    expect(provinces.status).toBe(200);
+    const ncr = provinces.body.data.find((p) => p.name === 'Metro Manila');
+    expect(ncr).toMatchObject({ code: 'NCR' });
+    // province names are unique per country: no city (e.g. Makati) is listed as a province
+    expect(provinces.body.data.map((p) => p.name)).not.toContain('Makati');
+    for (const parent of [ncr.id, 'NCR', 'Metro Manila']) {
+      const cities = await ctx.api('get', `/addresses/provinces/${encodeURIComponent(parent)}/cities`);
+      const names = cities.body.data.map((c) => c.name);
+      expect(names).toContain('Makati');
+      expect(names).toEqual(expect.arrayContaining(['Quezon City', 'Manila', 'Taguig', 'Pasig', 'Pateros', 'Valenzuela', 'Las Piñas']));
+      expect(names).toHaveLength(17);
+      expect(names).not.toContain('Mati');
+    }
+    const davaoOriental = await ctx.api('get', '/addresses/provinces/Davao%20Oriental/cities');
+    expect(davaoOriental.body.data.map((c) => c.name)).toContain('Mati');
+  });
   it('looks up postal codes for auto-fill', async () => {
     const r = await ctx.api('get', '/addresses/postal-code?countryCode=PH&code=1209');
     expect(r.body.data[0]).toMatchObject({ province: 'Metro Manila', city: 'Makati', district: 'Bel-Air' });

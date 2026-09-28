@@ -81,6 +81,27 @@ export const getClaimDetailsViewData = createAsyncThunk(
         policyData?.isCoInsurance || policyData?.quotation?.isCoInsurance
       );
 
+      // Holder address: the CLIENT record of the policy first (endorsements update it), then the policy's own
+      // address, then the lead the policy came from. One source is taken whole so parts of two addresses never mix.
+      const policyRecord =
+        policyData?.data && !policyData?.policyNumber ? policyData.data : policyData;
+      const addressKeys = ["houseNo", "barangay", "country", "province", "city", "zipCode"];
+      const holderAddress =
+        [
+          policyRecord?.client,
+          policyRecord?.address,
+          leadData,
+          policyRecord?.lead,
+        ].find(
+          (src) =>
+            src && addressKeys.some((k) => String(src[k] ?? "").trim() !== "")
+        ) || {};
+      const holderClient = policyRecord?.client || null;
+      const holderFullName = (src) =>
+        src?.firstName && src?.lastName
+          ? `${src.firstName} ${src.lastName}`
+          : src?.firstName || "";
+
       // Combine the data
       const combinedData = {
         ...payload,
@@ -95,21 +116,20 @@ export const getClaimDetailsViewData = createAsyncThunk(
         PolicyHolderName:
           policyData?.policyHolderName ||
           policyData?.holderName ||
-          (leadData?.firstName && leadData?.lastName
-            ? `${leadData.firstName} ${leadData.lastName}`
-            : leadData?.firstName) ||
+          holderClient?.displayName ||
+          holderFullName(holderClient) ||
+          holderFullName(leadData) ||
+          policyRecord?.insuredName ||
           "",
-        HouseNo: policyData?.address?.houseNo || leadData?.houseNo || "",
-        Barangay: policyData?.address?.barangay || leadData?.barangay || "",
-        CountryName: policyData?.address?.country || leadData?.country || "",
-        Province: policyData?.address?.province || leadData?.province || "",
-        CityName: policyData?.address?.city || leadData?.city || "",
-        ZipCode: policyData?.address?.zipCode || leadData?.zipCode || "",
-        RoadThanon:
-          policyData?.address?.roadThanon || leadData?.roadThanon || "",
-        SoiAlley: policyData?.address?.soiAlley || leadData?.soiAlley || "",
-        MooVillage:
-          policyData?.address?.mooVillage || leadData?.mooVillage || "",
+        HouseNo: holderAddress.houseNo || "",
+        Barangay: holderAddress.barangay || "",
+        CountryName: holderAddress.country || "",
+        Province: holderAddress.province || "",
+        CityName: holderAddress.city || "",
+        ZipCode: holderAddress.zipCode || "",
+        RoadThanon: holderAddress.roadThanon || "",
+        SoiAlley: holderAddress.soiAlley || "",
+        MooVillage: holderAddress.mooVillage || "",
         isCoInsurance,
         participatingInsurersCount: participants.length,
       };
@@ -397,6 +417,7 @@ export const postClaimDetailsData = createAsyncThunk(
       driverRoadThanon: payload?.driverRoadThanon,
       driverSoiAlley: payload?.driverSoiAlley,
       driverMooVillage: payload?.driverMooVillage,
+      isPolicyHolderTheDriver: payload?.isPolicyHolderTheDriver === true,
       // Incident details (shared; Fire uses for loss location/cause)
       dateOfIncident: payload?.dateOfIncident,
       timeOfIncident: payload?.timeOfIncident,
