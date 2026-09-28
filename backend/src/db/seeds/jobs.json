@@ -54,5 +54,12 @@
     "description": "Enrol policies expiring within the pipeline window and lapse renewals past the grace period",
     "cron": "30 5 * * *",
     "handler": "renewalPipeline"
+  },
+  {
+    "code": "collection-reminders",
+    "name": "Collection reminders",
+    "description": "E-mail and notify clients about premiums falling due",
+    "cron": "0 8 * * *",
+    "handler": "collectionReminders"
   }
 ]

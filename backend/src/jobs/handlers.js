@@ -36,7 +36,7 @@ export async function quoteExpiry() {
 export async function receivableAgeing() {
   if (!(await tableExists('receivables'))) return { skipped: 'receivables table missing' };
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90, 120];
-  const rows = await many('SELECT id, due_date FROM receivables WHERE status = \'open\'');
+  const rows = await many('SELECT id, due_date FROM receivables WHERE status IN (\'open\', \'partial\')');
   let updated = 0;
   for (const r of rows) {
     const age = Math.max(0, Math.floor((Date.now() - new Date(r.due_date).getTime()) / 86400000));
@@ -63,3 +63,9 @@ export const scheduledReport = async (p) => (await import('../modules/reports/se
 
 /** Renewal batch notices queue and the daily renewal pipeline (enrol expiring policies, lapse overdue renewals). */
 export { processRenewalQueue, renewalPipeline } from '../modules/renewals/jobs.js';
+
+/** Due-date reminders to clients with bills falling due (e-mail + notification, no repeats within the configured window). */
+export async function collectionReminders() {
+  const { pool } = await import('../db/pool.js');
+  return (await import('../modules/collections/service.js')).sendDueDateReminders(pool, null);
+}
