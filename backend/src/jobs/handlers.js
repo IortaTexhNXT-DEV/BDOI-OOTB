@@ -57,3 +57,6 @@ export async function dailyReports() {
 export async function emailOutbox() {
   return sendQueuedEmails();
 }
+
+/** Scheduled report jobs created from Reports > Schedules (code report-<id>). */
+export const scheduledReport = async (p) => (await import('../modules/reports/service.js')).scheduledReport(p);
