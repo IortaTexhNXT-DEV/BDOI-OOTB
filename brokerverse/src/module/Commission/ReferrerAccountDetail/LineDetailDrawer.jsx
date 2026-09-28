@@ -179,7 +179,7 @@ const LineDetailDrawer = ({
               </p>
               <div className="rate-fields">
                 <label>
-                  Fixed (฿)
+                  Fixed (₱)
                   <InputNumber
                     value={rateFixed}
                     onValueChange={(e) => setRateFixed(e.value ?? 0)}

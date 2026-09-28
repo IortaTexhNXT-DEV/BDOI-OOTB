@@ -698,13 +698,13 @@ const AccountingQuery = () => {
               field="glCode"
               header={t("accounting.glCode")}
               sortable
-              body={(rowData) =>
-                rowData.glCode.split("-").length > 2
-                  ? rowData.glCode.split("-")[2] +
-                    "-" +
-                    rowData.glCode.split("-")[3]
-                  : rowData.glCode || "-"
-              }
+              body={(rowData) => {
+                if (!rowData.glCode) return "-";
+                const parts = rowData.glCode.split("-");
+                return parts.length > 2
+                  ? `${parts[2]}-${parts[3]}`
+                  : rowData.glCode;
+              }}
               style={{ minWidth: "120px" }}
             />
             <Column

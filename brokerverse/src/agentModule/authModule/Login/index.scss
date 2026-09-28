@@ -1,16 +1,13 @@
 .agent__container__login {
+  position: relative;
   justify-content: center;
   align-items: center;
-
-  .login__side__screen {
-    position: relative;
-    padding-top: 2.75rem; // Reserve space for language dropdown
-  }
 
   .login__lang_dropdown {
     position: absolute;
     top: 1.25rem;
     right: 1.25rem;
+    z-index: 10;
     display: flex;
     justify-content: flex-end;
 
@@ -34,7 +31,11 @@
     display: grid;
 
     &.bdo-theme {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
+      background: linear-gradient(
+        135deg,
+        var(--bv-primary, #0072d8) 0%,
+        var(--bv-secondary, #004ea8) 100%
+      );
       position: relative;
       overflow: hidden;
       display: flex;

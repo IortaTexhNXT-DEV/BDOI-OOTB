@@ -6,7 +6,7 @@ import InputTextField from "../../component/inputText";
 import { FileUpload } from "primereact/fileupload";
 import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
 import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { InputTextarea } from "primereact/inputtextarea";
 import "./index.scss";
 import customHistory from "../../../routes/customHistory";
@@ -21,6 +21,10 @@ const SendMail = () => {
   const fileUploadRef = useRef(null);
   const [uploadImage, setuploadImage] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const clientIdFromState =
+    location.state?.clientId ||
+    null;
 
   // Get loading, error states and claim response data from Redux
   const { loading, error, claimResponseData } = useSelector(
@@ -144,28 +148,33 @@ const SendMail = () => {
           })
         );
 
+        const resolvedClientId =
+          clientIdFromState ||
+          claimDetailsViewData?.clientId ||
+          claimData?.policy?.clientId ||
+          claimData?.clientId ||
+          result.payload?.data?.policy?.clientId ||
+          result.payload?.data?.clientId;
+
+        const approvalState = {
+          policyNumber: policyNumber,
+          claimNumber: claimNumber,
+          claimId: claimId,
+          policyHolderName: policyHolderName,
+          clientId: resolvedClientId,
+          fullResponse: result.payload,
+        };
+
         // Navigate to next page with claim ID in URL
         if (claimId && claimId !== "12234") {
           navigate(`/agent/claimrequest/requestapproval/${claimId}`, {
-            state: {
-              policyNumber: policyNumber, // Pass the actual policy number
-              claimNumber: claimNumber,
-              claimId: claimId,
-              policyHolderName: policyHolderName, // Pass the policy holder name
-              fullResponse: result.payload,
-            },
+            state: approvalState,
           });
         } else {
           // Fallback navigation if no claim ID is available
           console.log("No claim ID found, using fallback navigation");
           navigate("/agent/claimrequest/requestapproval/12234", {
-            state: {
-              policyNumber: policyNumber, // Pass the actual policy number
-              claimNumber: claimNumber,
-              claimId: claimId,
-              policyHolderName: policyHolderName, // Pass the policy holder name
-              fullResponse: result.payload,
-            },
+            state: approvalState,
           });
         }
       } else if (result.type === "sendmail/POST_SENT_MAIL_DATA/rejected") {

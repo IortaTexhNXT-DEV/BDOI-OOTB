@@ -410,6 +410,10 @@ const ClaimTable = () => {
         state: {
           claimId: claim.claimNumber,
           policyNumber: claim.policyNumber,
+          clientId:
+            claim.clientId ||
+            claim.policy?.clientId ||
+            claim.lead?.clientId,
         },
       });
       return;
@@ -490,6 +494,10 @@ const ClaimTable = () => {
         state: {
           claimId: claimId,
           policyNumber: claim.policyNumber,
+          clientId:
+            claim.clientId ||
+            claim.policy?.clientId ||
+            claim.lead?.clientId,
           ...(lob && { lob, productType: lob }),
         },
       });

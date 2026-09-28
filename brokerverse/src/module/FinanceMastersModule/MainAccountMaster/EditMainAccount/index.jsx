@@ -141,9 +141,9 @@ const EditMainAccount = () => {
     { name: "Option 3", value: "Comp00125" },
   ];
   const currencyCodeDatas = [
+    { name: "PHP - Philippine Peso", value: "PHP" },
     { name: "THB - Thai Baht", value: "THB" },
-    { name: "ISK - Iceland Krona", value: "ISK" },
-    { name: "AUD - Australian Dollar", value: "AUS" },
+    { name: "USD - US Dollar", value: "USD" },
   ];
 
   const home = { label: "Master" };

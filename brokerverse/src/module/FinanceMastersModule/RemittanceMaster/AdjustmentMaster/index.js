@@ -201,7 +201,7 @@ const AdjustmentMaster = () => {
           console.log(`Updating ${role} - ${category}: ${e.value}`);
         }}
         mode="currency"
-        currency="USD"
+        currency="PHP"
         className="w-full"
         disabled={isViewMode}
       />
@@ -344,7 +344,7 @@ const AdjustmentMaster = () => {
                       <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
                     </div>
                     <div className="rule-content">
-                      <strong>Condition:</strong> Amount Difference {'<'} $10<br />
+                      <strong>Condition:</strong> Amount Difference {'<'} {"\u20B1"}10<br />
                       <strong>Action:</strong> Write-off Difference
                     </div>
                   </div>

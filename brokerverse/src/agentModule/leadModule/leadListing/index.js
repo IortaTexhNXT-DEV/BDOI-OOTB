@@ -93,6 +93,32 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
+            handleClickIar();
+          }}
+        >
+          <div>
+            <SvgHome />
+          </div>
+          <div
+            style={{
+              fontFamily: "Nunito, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
+              color: "#111927",
+              width: "100%",
+            }}
+          >
+            {t("dashboard.Industrial All Risks", "Industrial All Risks")}
+          </div>
+        </div>
+      ),
+      value: "IndustrialAllRisks",
+    },
+    {
+      label: (
+        <div
+          style={{ display: "flex", alignItems: "center", gap: "10px" }}
+          onClick={() => {
             handleClickEmployeeBenefit();
           }}
         >
@@ -174,6 +200,10 @@ const LeadListing = () => {
 
   const handleClickFireAndAlliedPerils = () => {
     navigate("/agent/createlead/fire-allied-perils");
+  };
+
+  const handleClickIar = () => {
+    navigate("/agent/createlead/iar");
   };
 
   const handleClickEmployeeBenefit = () => {

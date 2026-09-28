@@ -354,6 +354,30 @@ const ClaimDetail = () => {
               <span className="label">{t("claims.driverZipCode")}</span>
               <span className="value">{claimData.driverZipCode || t("policyDetail.nA")}</span>
             </div>
+            {(claimData.driverRoadThanon ||
+              claimData.driverSoiAlley ||
+              claimData.driverMooVillage) && (
+              <>
+                <div className="detail-row">
+                  <span className="label">{t("claims.driverRoadThanon")}</span>
+                  <span className="value">
+                    {claimData.driverRoadThanon || t("policyDetail.nA")}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">{t("claims.driverSoiAlley")}</span>
+                  <span className="value">
+                    {claimData.driverSoiAlley || t("policyDetail.nA")}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">{t("claims.driverMooVillage")}</span>
+                  <span className="value">
+                    {claimData.driverMooVillage || t("policyDetail.nA")}
+                  </span>
+                </div>
+              </>
+            )}
           </Card>
         </div>
 
@@ -380,6 +404,62 @@ const ClaimDetail = () => {
               <span className="label">{t("claims.policyRefId")}</span>
               <span className="value">{claimData.policyRefId || t("policyDetail.nA")}</span>
             </div>
+            {(claimData.country ||
+              claimData.houseNo ||
+              claimData.roadThanon ||
+              claimData.soiAlley ||
+              claimData.mooVillage) && (
+              <>
+                <div className="detail-row">
+                  <span className="label">{t("claims.country")}</span>
+                  <span className="value">
+                    {claimData.country || t("policyDetail.nA")}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">{t("claims.province")}</span>
+                  <span className="value">
+                    {claimData.province || t("policyDetail.nA")}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">{t("claims.city")}</span>
+                  <span className="value">
+                    {claimData.city || t("policyDetail.nA")}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">{t("claims.houseNo")}</span>
+                  <span className="value">
+                    {claimData.houseNo || t("policyDetail.nA")}
+                  </span>
+                </div>
+                {(claimData.roadThanon ||
+                  claimData.soiAlley ||
+                  claimData.mooVillage) && (
+                  <>
+                    <div className="detail-row">
+                      <span className="label">{t("claims.roadThanon")}</span>
+                      <span className="value">
+                        {claimData.roadThanon || t("policyDetail.nA")}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">{t("claims.soiAlley")}</span>
+                      <span className="value">
+                        {claimData.soiAlley || t("policyDetail.nA")}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">{t("claims.mooVillage")}</span>
+                      <span className="value">
+                        {claimData.mooVillage || t("policyDetail.nA")}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </Card>
         </div>
 

@@ -280,7 +280,7 @@ const ReconciliationProcess = () => {
                 <Column selectionMode="multiple" style={{ width: '3em' }} />
                 <Column field="transDate" header="Date" />
                 <Column field="reference" header="Reference" />
-                <Column field="amount" header="Amount" body={(data) => `$${data.amount.toFixed(2)}`} />
+                <Column field="amount" header="Amount" body={(data) => `\u20B1${data.amount.toFixed(2)}`} />
                 <Column field="status" header="" body={statusBodyTemplate} style={{ width: '3em' }} />
               </DataTable>
             </div>
@@ -319,7 +319,7 @@ const ReconciliationProcess = () => {
                 <div className="selection-info">
                   <div>Selected Bank: {selectedBank.length}</div>
                   <div>Selected System: {selectedSystem.length}</div>
-                  <div className="difference">Difference: $234.50</div>
+                  <div className="difference">Difference: {"\u20B1"}234.50</div>
                 </div>
                 <Button
                   label="Match Selected"
@@ -355,7 +355,7 @@ const ReconciliationProcess = () => {
               >
                 <Column selectionMode="multiple" style={{ width: '3em' }} />
                 <Column field="policyNo" header="Policy" />
-                <Column field="premium" header="Premium" body={(data) => `$${data.premium.toFixed(2)}`} />
+                <Column field="premium" header="Premium" body={(data) => `\u20B1${data.premium.toFixed(2)}`} />
                 <Column field="transDate" header="Date" />
                 <Column field="status" header="" body={statusBodyTemplate} style={{ width: '3em' }} />
               </DataTable>
@@ -373,7 +373,7 @@ const ReconciliationProcess = () => {
               <Column field="type" header="Exception Type" />
               <Column field="bankRef" header="Bank Reference" />
               <Column field="sysRef" header="System Reference" />
-              <Column field="difference" header="Difference" body={(data) => data.difference ? `$${data.difference.toFixed(2)}` : '-'} />
+              <Column field="difference" header="Difference" body={(data) => data.difference ? `\u20B1${data.difference.toFixed(2)}` : '-'} />
               <Column field="action" header="Suggested Action" />
               <Column body={actionBodyTemplate} header="Actions" style={{ width: '10rem' }} />
             </DataTable>

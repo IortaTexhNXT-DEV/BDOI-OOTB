@@ -1,5 +1,12 @@
 export const DEFAULT_CURRENCY = "PHP";
 
+/** Updated at runtime when system settings load (see applySystemSettings). */
+export let ACTIVE_DEFAULT_CURRENCY = DEFAULT_CURRENCY;
+
+export const setActiveDefaultCurrency = (code) => {
+  ACTIVE_DEFAULT_CURRENCY = code || DEFAULT_CURRENCY;
+};
+
 export const SUPPORTED_CURRENCIES = [
   { label: "PHP", value: "PHP" },
   { label: "THB", value: "THB" },

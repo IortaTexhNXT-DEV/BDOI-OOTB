@@ -55,10 +55,12 @@ function AddExchange() {
     useState(null);
 
   const currencyCode = [
+    { label: "PHP", value: "PHP" },
     { label: "THB", value: "THB" },
     { label: "USD", value: "USD" },
   ];
   const ToCurrencyCode = [
+    { label: "PHP", value: "PHP" },
     { label: "THB", value: "THB" },
     { label: "USD", value: "USD" },
   ];

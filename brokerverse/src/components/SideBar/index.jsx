@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import SvgLogo from "../../assets/icons/SvgLogo";
 import SvgDot from "../../assets/icons/SvgDot";
@@ -17,61 +18,86 @@ import SvgAgentItemsIcon from "../../assets/agentIcon/SvgAgentItemsIcon";
 import SvgQuotationIcon from "../../assets/agentIcon/SvgQuotationIcon";
 import SvgPolicyIcon from "../../assets/agentIcon/SvgPolicyIcon";
 import Cookies from "js-cookie";
+import { DEFAULT_SYSTEM_SETTINGS } from "../../utility/systemCurrencies";
 
 const ResponsiveDrawer = () => {
   const [findPath, setPath] = useState(null);
   const [openSubMenu, setOpenSubMenu] = useState("  ");
   const [visible, setVisible] = useState(true);
+  const logoUrl = useSelector(
+    (state) =>
+      state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
+  );
 
   // Get user role and permissions from localStorage
   const userRole = localStorage.getItem("USER_ROLE");
-  const userPermissions = JSON.parse(localStorage.getItem("USER_PERMISSIONS") || "[]");
+  const userPermissions = JSON.parse(
+    localStorage.getItem("USER_PERMISSIONS") || "[]",
+  );
 
   // Log permissions for debugging
   console.log("🔐 Sidebar - User Role:", userRole);
   console.log("🔐 Sidebar - User Permissions:", userPermissions);
-  console.log("🔐 Sidebar - Raw USER_PERMISSIONS:", localStorage.getItem("USER_PERMISSIONS"));
+  console.log(
+    "🔐 Sidebar - Raw USER_PERMISSIONS:",
+    localStorage.getItem("USER_PERMISSIONS"),
+  );
   console.log("🔐 Sidebar - All localStorage keys:", Object.keys(localStorage));
 
   // Helper function to check if user has required permissions
   const hasPermission = (requiredPermissions) => {
     if (!requiredPermissions || requiredPermissions.length === 0) return true;
-    const hasAccess = requiredPermissions.some(permission => userPermissions.includes(permission));
-    console.log("🔐 Checking permissions:", { requiredPermissions, userPermissions, hasAccess });
+    const hasAccess = requiredPermissions.some((permission) =>
+      userPermissions.includes(permission),
+    );
+    console.log("🔐 Checking permissions:", {
+      requiredPermissions,
+      userPermissions,
+      hasAccess,
+    });
     return hasAccess;
   };
 
   // Filter menu recursively based on permissions
   const filterMenuByPermissions = (menu) => {
     return menu
-      .map(item => {
+      .map((item) => {
         // Check if menu item has permissions requirement
         if (item.permissions && !hasPermission(item.permissions)) {
-          console.log("🔐 Hiding menu item:", item.name, "due to missing permissions:", item.permissions);
+          console.log(
+            "🔐 Hiding menu item:",
+            item.name,
+            "due to missing permissions:",
+            item.permissions,
+          );
           return null; // Hide this item
         }
 
         // If item has submenu, filter submenu recursively
         if (item.submenu) {
           const filteredSubmenu = filterMenuByPermissions(item.submenu);
-          
+
           // If all submenu items are hidden, hide parent too
           if (filteredSubmenu.length === 0) {
-            console.log("🔐 Hiding parent menu:", item.name, "because all children are hidden");
+            console.log(
+              "🔐 Hiding parent menu:",
+              item.name,
+              "because all children are hidden",
+            );
             return null;
           }
-          
+
           return { ...item, submenu: filteredSubmenu };
         }
 
         return item;
       })
-      .filter(item => item !== null);
+      .filter((item) => item !== null);
   };
 
   // Apply permission filtering
   const filteredMenuList = filterMenuByPermissions(menuList);
-  
+
   console.log("🔐 Final filtered menu list:", filteredMenuList);
   console.log("🔐 Original menu list length:", menuList.length);
   console.log("🔐 Filtered menu list length:", filteredMenuList.length);
@@ -81,7 +107,7 @@ const ResponsiveDrawer = () => {
       navigationPath,
       hasEvent: !!event,
       currentOpenSubMenu: openSubMenu,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
     if (event) {
       event.stopPropagation();
@@ -99,7 +125,7 @@ const ResponsiveDrawer = () => {
       currentOpenSubMenu: openSubMenu,
       newOpenSubMenu: newState,
       willToggle: openSubMenu === name,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
     setOpenSubMenu(newState);
     console.log("🟢 After handleClick - openSubMenu set to:", newState);
@@ -120,7 +146,7 @@ const ResponsiveDrawer = () => {
   useEffect(() => {
     console.log("🟡 openSubMenu state changed:", {
       openSubMenu,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }, [openSubMenu]);
 
@@ -152,7 +178,18 @@ const ResponsiveDrawer = () => {
           }}
         >
           {/* <SvgLogo color={"#fff"} /> */}
-          <SvgFinalLogo />
+          {/* <SvgFinalLogo /> */}
+          <img
+            src={logoUrl}
+            alt="BDO Insure"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "36px",
+              width: "auto",
+              height: "auto",
+              objectFit: "contain",
+            }}
+          />
         </div>
         <Menu style={{ backgroundColor: "#ffffff !important", border: "none" }}>
           {filteredMenuList.map((data, index) => (
@@ -200,7 +237,7 @@ const ResponsiveDrawer = () => {
                     eventType: e?.type,
                     currentTarget: e?.currentTarget?.textContent,
                     target: e?.target?.textContent,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
                   });
                   handleClick(data.name);
                 }}
@@ -232,15 +269,23 @@ const ResponsiveDrawer = () => {
                                           <Link to={subsubmenuItem.path} />
                                         }
                                         onClick={(e) => {
-                                          console.log("🟣 MenuItem onClick (subsubmenuItem):", {
-                                            path: subsubmenuItem.path,
-                                            name: subsubmenuItem.name,
-                                            hasEvent: !!e,
-                                            eventType: e?.type,
-                                            currentTarget: e?.currentTarget?.textContent,
-                                            timestamp: new Date().toISOString()
-                                          });
-                                          handleNavigation(subsubmenuItem.path, e);
+                                          console.log(
+                                            "🟣 MenuItem onClick (subsubmenuItem):",
+                                            {
+                                              path: subsubmenuItem.path,
+                                              name: subsubmenuItem.name,
+                                              hasEvent: !!e,
+                                              eventType: e?.type,
+                                              currentTarget:
+                                                e?.currentTarget?.textContent,
+                                              timestamp:
+                                                new Date().toISOString(),
+                                            },
+                                          );
+                                          handleNavigation(
+                                            subsubmenuItem.path,
+                                            e,
+                                          );
                                         }}
                                       >
                                         <div className="menu__list">
@@ -264,7 +309,7 @@ const ResponsiveDrawer = () => {
                                           </span>
                                         </div>
                                       </MenuItem>
-                                    )
+                                    ),
                                   )}
                                 </SubMenu>
                               ) : (
@@ -272,14 +317,18 @@ const ResponsiveDrawer = () => {
                                   key={nestedIndex}
                                   component={<Link to={nestedItem.path} />}
                                   onClick={(e) => {
-                                    console.log("🟣 MenuItem onClick (nestedItem):", {
-                                      path: nestedItem.path,
-                                      name: nestedItem.name,
-                                      hasEvent: !!e,
-                                      eventType: e?.type,
-                                      currentTarget: e?.currentTarget?.textContent,
-                                      timestamp: new Date().toISOString()
-                                    });
+                                    console.log(
+                                      "🟣 MenuItem onClick (nestedItem):",
+                                      {
+                                        path: nestedItem.path,
+                                        name: nestedItem.name,
+                                        hasEvent: !!e,
+                                        eventType: e?.type,
+                                        currentTarget:
+                                          e?.currentTarget?.textContent,
+                                        timestamp: new Date().toISOString(),
+                                      },
+                                    );
                                     handleNavigation(nestedItem.path, e);
                                   }}
                                 >
@@ -313,15 +362,18 @@ const ResponsiveDrawer = () => {
                           key={subIndex}
                           component={<Link to={subItem.path} />}
                           onClick={(e) => {
-                            console.log("🟣 MenuItem onClick (subItem - Leads/Prospects):", {
-                              path: subItem.path,
-                              name: subItem.name,
-                              hasEvent: !!e,
-                              eventType: e?.type,
-                              currentTarget: e?.currentTarget?.textContent,
-                              parentMenuName: data.name,
-                              timestamp: new Date().toISOString()
-                            });
+                            console.log(
+                              "🟣 MenuItem onClick (subItem - Leads/Prospects):",
+                              {
+                                path: subItem.path,
+                                name: subItem.name,
+                                hasEvent: !!e,
+                                eventType: e?.type,
+                                currentTarget: e?.currentTarget?.textContent,
+                                parentMenuName: data.name,
+                                timestamp: new Date().toISOString(),
+                              },
+                            );
                             handleNavigation(subItem.path, e);
                           }}
                         >

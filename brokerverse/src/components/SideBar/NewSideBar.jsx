@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 import { menuList } from "./list";
 import "./NewSideBar.scss";
 import SidebarItemCollapse from "./SideBarItemCollapse";
@@ -13,11 +14,16 @@ import {
   COMMISSION_VIEW_MODE_EVENT,
   getCommissionViewMode,
 } from "../../module/Commission/utils/commissionViewMode";
+import { DEFAULT_SYSTEM_SETTINGS } from "../../utility/systemCurrencies";
 
 const NewSideBar = ({ onNavigate }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const logoUrl = useSelector(
+    (state) =>
+      state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
+  );
   const [pathArrayData, setPathArrayData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -30,9 +36,7 @@ const NewSideBar = ({ onNavigate }) => {
 
   useEffect(() => {
     const onViewModeChange = (event) => {
-      setCommissionViewModeState(
-        event?.detail || getCommissionViewMode(),
-      );
+      setCommissionViewModeState(event?.detail || getCommissionViewMode());
     };
     window.addEventListener(COMMISSION_VIEW_MODE_EVENT, onViewModeChange);
     return () => {
@@ -443,7 +447,7 @@ const NewSideBar = ({ onNavigate }) => {
       <ul className="list">
         {/* <div className="stack"> */}
         <a className="bdoi-brand" href="/" aria-label="BIBS home">
-          <img src="/bdoi/bdo-insure.png" alt="BDO Insure" />
+          <img src={logoUrl} alt="BDO Insure" />
           <span className="bdoi-brand-product">BIBS · BDOI Broker System</span>
         </a>
 

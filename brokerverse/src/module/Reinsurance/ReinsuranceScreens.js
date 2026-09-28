@@ -94,6 +94,7 @@ export const CessionDashboard = () => {
     { label: 'All Lines', value: 'all' },
     { label: 'Motor', value: 'Motor' },
     { label: 'Fire and Allied Perils', value: 'Fire and Allied Perils' },
+    { label: 'Industrial All Risks', value: 'Industrial All Risks' },
     { label: 'Travel', value: 'Travel' },
     { label: 'Employee Liability', value: 'Employee Liability' },
     { label: 'Property', value: 'Property' },

@@ -54,7 +54,7 @@ const NotificationMaster = () => {
     {
       id: 2,
       ruleName: "Large Amount Alert",
-      condition: "Amount > $50,000",
+      condition: "Amount > \u20B150,000",
       frequency: "Immediate",
       recipients: ["Manager", "Finance Head"],
       escalationLevel: 2,

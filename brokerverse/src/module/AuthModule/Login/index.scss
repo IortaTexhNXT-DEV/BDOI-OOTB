@@ -83,6 +83,12 @@ text-align: left;
         gap: 5px;
     }
 
+    .side__logo img,
+    .logo__icon img {
+        max-height: 40px;
+        width: auto;
+    }
+
     .right__side__login {
         display: grid;
         justify-content: center;

@@ -558,7 +558,7 @@ class DisbursementService {
         customerCode: customerCode,
         transactionCode: `TXN-CANCEL-${Date.now()}`,
         transactionDescription: `Cancellation refund for ${policyNumber || 'policy'}`,
-        instrumentCurrency: "THB",
+        instrumentCurrency: "PHP",
         remarks: `Refund disbursement for policy cancellation ${policyNumber || ''}`,
         amount: "0.00", // Will be updated when invoice list is created
         createdBy: createdBy

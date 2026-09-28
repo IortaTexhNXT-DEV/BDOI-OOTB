@@ -99,7 +99,7 @@ const CommissionDashboard = () => {
     scales: {
       y: {
         ticks: {
-          callback: (v) => "฿" + Math.round(v / 1000) + "k",
+          callback: (v) => "₱" + Math.round(v / 1000) + "k",
         },
         grid: { color: "#edf2f7" },
       },
@@ -363,7 +363,7 @@ const CommissionDashboard = () => {
       </div>
 
       <div className="panel funnel-panel">
-        <h3>PAYABLE FUNNEL — NET PAYABLE (฿) BY LIFECYCLE STAGE</h3>
+        <h3>PAYABLE FUNNEL — NET PAYABLE (₱) BY LIFECYCLE STAGE</h3>
         <div className="hbar-list funnel">
           {data.payableFunnel.map((f) => (
             <div className="hbar-row" key={f.status}>

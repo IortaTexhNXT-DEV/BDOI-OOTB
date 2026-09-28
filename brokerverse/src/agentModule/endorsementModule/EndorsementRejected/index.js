@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import "./index.scss";
 import CustomToast from "../../../components/Toast";
@@ -10,20 +10,35 @@ import CustomToast from "../../../components/Toast";
 const EndorsementRejected = () => {
   const { t } = useTranslation();
   const params = useParams();
-  const { id } = params;
+  const { endorsementId, id } = params;
+  const location = useLocation();
   const toastRef = useRef(null);
   const navigate = useNavigate();
+  const clientId = location.state?.clientId;
+  const clientName = location.state?.clientName;
+  const displayId = endorsementId || id || location.state?.endorsementNumber;
+
+  const navigateToClientView = (replace = false) => {
+    if (clientId) {
+      navigate(`/agent/clientview/${clientId}`, { replace });
+    } else if (replace) {
+      navigate("/agent/clientlisting", { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
+
   const handleReject = () => {
     toastRef.current.showToast();
     setTimeout(() => {
-      navigate(`/agent/clientview/${123}`);
+      navigateToClientView(true);
     }, 2000);
   };
   const handleCommonAction = () => {
-    navigate(`/agent/clientview/${123}`);
+    navigateToClientView(false);
   };
   const handleSubmit = () => {
-    navigate(`/agent/clientview/${123}`);
+    navigateToClientView(true);
   };
   return (
     <div className="endorsement__rejected__overall">
@@ -36,7 +51,8 @@ const EndorsementRejected = () => {
       >
         <SvgLeftArrow />
         <div className="endorsement__waiting__request__upload__back__btn__title">
-          Carson Darrin / {t("endorsement.clientId")} : {id}
+          {clientName || t("endorsement.client")} / {t("endorsement.clientId")} :{" "}
+          {location.state?.clientNumber || displayId || ""}
         </div>
       </div>
       <CustomToast ref={toastRef} message={t("endorsement.endorsementRejected")} />

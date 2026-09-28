@@ -118,8 +118,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     { label: "Option 2", value: "Debit" },
   ];
   const codeCurrencyType = [
+    { label: "PHP", value: "PHP" },
     { label: "THB", value: "THB" },
-    { label: "Option 2", value: "EURO" },
+    { label: "USD", value: "USD" },
   ];
 
   const customValidation = (values) => {

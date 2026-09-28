@@ -106,6 +106,7 @@ import Accountdataview from "../module/FinanceMastersModule/BankMaster/AccountDa
 import AddAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/AddAccountDetail/index";
 import ViewAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/ViewAccountData";
 import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/EditAccountData";
+import SystemSettingsPage from "../module/SystemSettings";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
 import InsuranceCompany from "../module/GeneralMasters/InsuranceManagementMasters/InsuranceCompany";
@@ -318,6 +319,10 @@ import {
   DocumentManager,
   ProductAnalytics,
 } from "../module/ProductConfigurator/ProductConfiguratorScreens";
+import {
+  RiskMappingList,
+  RiskMappingDetail,
+} from "../module/ProductConfigurator/RiskMapping";
 
 import OpenItemsListData from "../agentModule/openItems/OpenItemsListData";
 import { Navigate } from "react-router-dom";
@@ -333,6 +338,7 @@ import AccountingQuery from "../agentModule/accountingModule/AccountingQuery";
 import AllClientsAccountingView from "../agentModule/accountingModule/AllClientsAccountingView";
 import EmployeeLeadCreation from "../agentModule/EmployeeFlow/EmployeeLeadCreation";
 import FireLeadCreation from "../agentModule/leadModule/FireLeadCreation";
+import IarLeadCreation from "../agentModule/leadModule/IarLeadCreation";
 import CQPolicyAndRiskDetails from "../agentModule/EmployeeFlow/CQPolicyAndRiskDetails";
 import CQEmployeeBulkUpload from "../agentModule/EmployeeFlow/CQEmployeeBulkUpload";
 import CQcoverageDetails from "../agentModule/EmployeeFlow/CQcoverageDetails";
@@ -964,6 +970,10 @@ const Maincomponent = () => {
           />
 
           <Route />
+          <Route
+            path="master/configuration/system-settings"
+            element={<SystemSettingsPage />}
+          />
           <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 
@@ -1337,6 +1347,14 @@ const Maincomponent = () => {
           <Route
             path="product-configurator/market-mapping"
             element={<MarketMapping />}
+          />
+          <Route
+            path="product-configurator/risk-mapping"
+            element={<RiskMappingList />}
+          />
+          <Route
+            path="product-configurator/risk-mapping/:id"
+            element={<RiskMappingDetail />}
           />
           <Route
             path="product-configurator/analytics"
@@ -1859,6 +1877,10 @@ const Maincomponent = () => {
           <Route
             path="/agent/createlead/fire-allied-perils"
             element={<FireLeadCreation />}
+          />
+          <Route
+            path="/agent/createlead/iar"
+            element={<IarLeadCreation />}
           />
           <Route
             path="/agent/employee-benefit/create-quote"

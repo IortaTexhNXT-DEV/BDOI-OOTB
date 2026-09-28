@@ -190,6 +190,7 @@ export const getReceiptsListByIdMiddleware = createAsyncThunk(
       // Transform API response to match the expected format for receipt details
       const transformedData = response.data.receiptsList?.map(item => ({
         id: item.receiptListId,
+        receiptListId: item.receiptListId,
         policies: item.policies,
         netPremium: item.netPremium,
         paid: item.paid,
@@ -206,6 +207,8 @@ export const getReceiptsListByIdMiddleware = createAsyncThunk(
       })) || [];
 
       return {
+        receiptId: response.data.receiptId,
+        receiptNumber: response.data.receiptNumber,
         receiptDetailList: transformedData,
         paymentDetails: {
           totalPayment: response.data.receiptsList?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0).toFixed(2),

@@ -25,7 +25,7 @@ import {
   getLeadByIdMiddleware,
   deleteLeadMiddleware,
 } from "../../../Store/leadMiddleware";
-import { isFireLob } from "../../../../endorsementModule/constants/endorsementCategories";
+import { isFireLob, isIarLob } from "../../../../endorsementModule/constants/endorsementCategories";
 import countriesData from "../../../leadCreation/mock";
 
 const LeadListingMotorTable = ({ lob = null }) => {
@@ -304,6 +304,12 @@ const LeadListingMotorTable = ({ lob = null }) => {
       return;
     }
     dispatch(getLeadByIdMiddleware(leadId));
+    if (lob && isIarLob(lob)) {
+      navigate("/agent/createlead/iar", {
+        state: { leadRefId: leadId, leadId, isEdit: true },
+      });
+      return;
+    }
     if (lob && isFireLob(lob)) {
       navigate("/agent/createlead/fire-allied-perils", {
         state: { leadId, isEdit: true },

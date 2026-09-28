@@ -149,7 +149,7 @@ const RemittanceAdjustments = () => {
     const prefix = rowData.adjustmentAmount >= 0 ? '+' : '';
     return (
       <span style={{ color }}>
-        {prefix}${Math.abs(rowData.adjustmentAmount).toLocaleString()}
+        {prefix}{"\u20B1"}{Math.abs(rowData.adjustmentAmount).toLocaleString()}
       </span>
     );
   };
@@ -265,7 +265,7 @@ const RemittanceAdjustments = () => {
               <i className="pi pi-dollar" />
             </div>
             <div className="card-details">
-              <div className="card-value">$12,300</div>
+              <div className="card-value">{"\u20B1"}12,300</div>
               <div className="card-label">Total Adjustment Value</div>
             </div>
           </div>
@@ -335,7 +335,7 @@ const RemittanceAdjustments = () => {
               <Column
                 field="originalAmount"
                 header="Original Amount"
-                body={(data) => `$${data.originalAmount.toLocaleString()}`}
+                body={(data) => `\u20B1${data.originalAmount.toLocaleString()}`}
               />
               <Column
                 field="adjustmentAmount"
@@ -345,7 +345,7 @@ const RemittanceAdjustments = () => {
               <Column
                 field="newAmount"
                 header="New Amount"
-                body={(data) => `$${data.newAmount.toLocaleString()}`}
+                body={(data) => `\u20B1${data.newAmount.toLocaleString()}`}
               />
               <Column field="status" header="Status" body={statusBodyTemplate} />
               <Column field="dueDate" header="Due Date" />
@@ -373,7 +373,7 @@ const RemittanceAdjustments = () => {
                   const prefix = data.amount >= 0 ? '+' : '';
                   return (
                     <span style={{ color }}>
-                      {prefix}${Math.abs(data.amount).toLocaleString()}
+                      {prefix}{"\u20B1"}{Math.abs(data.amount).toLocaleString()}
                     </span>
                   );
                 }}
@@ -487,18 +487,18 @@ const RemittanceAdjustments = () => {
               <div className="detail-grid">
                 <div className="detail-item">
                   <label>Original Amount:</label>
-                  <span>${selectedAdjustment.originalAmount?.toLocaleString()}</span>
+                  <span>{"\u20B1"}{selectedAdjustment.originalAmount?.toLocaleString()}</span>
                 </div>
                 <div className="detail-item">
                   <label>Adjustment Amount:</label>
                   <span style={{ color: selectedAdjustment.adjustmentAmount >= 0 ? 'green' : 'red' }}>
                     {selectedAdjustment.adjustmentAmount >= 0 ? '+' : ''}
-                    ${Math.abs(selectedAdjustment.adjustmentAmount).toLocaleString()}
+                    {"\u20B1"}{Math.abs(selectedAdjustment.adjustmentAmount).toLocaleString()}
                   </span>
                 </div>
                 <div className="detail-item">
                   <label>New Amount:</label>
-                  <span>${selectedAdjustment.newAmount?.toLocaleString()}</span>
+                  <span>{"\u20B1"}{selectedAdjustment.newAmount?.toLocaleString()}</span>
                 </div>
                 <div className="detail-item">
                   <label>Status:</label>

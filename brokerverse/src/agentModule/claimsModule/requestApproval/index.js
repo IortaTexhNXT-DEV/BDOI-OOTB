@@ -173,7 +173,17 @@ const RequestApproval = ({ flow }) => {
   };
 
   const handleClientViewNavigation = () => {
-    navigate(`/agent/clientview/${123}`);
+    const clientId =
+      navigationState.clientId ||
+      fullResponse?.data?.policy?.clientId ||
+      fullResponse?.data?.claim?.policy?.clientId ||
+      fullResponse?.data?.clientId;
+
+    if (clientId) {
+      navigate(`/agent/clientview/${clientId}`);
+    } else {
+      navigate(-1);
+    }
   };
   return (
     <div className="claim__approval__overall">

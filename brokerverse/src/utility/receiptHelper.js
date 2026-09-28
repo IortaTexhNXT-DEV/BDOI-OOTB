@@ -181,7 +181,7 @@ export const buildReceiptData = (policyData, options = {}) => {
     receiptType: "Payment",
     receiptDate: new Date().toISOString(),
     customerCode: customerCode,
-    currencyCode: "THB",
+    currencyCode: "PHP",
     transactionCode: "PAYMENT",
     remarks: `Payment receipt for policy ${policyNumber}`,
     policyRefId: policyId,

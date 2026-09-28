@@ -1,31 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import InputField from "../../../components/InputField";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { Button } from "primereact/button";
-import NavBar from "../../../components/NavBar";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { Card } from "primereact/card";
 import SvgBack from "../../../assets/icons/SvgBack";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import documentTemplateService from "../../../services/documentTemplateService";
+import {
+  showSuccessMessage,
+  showErrorMessage,
+} from "../../../utility/toastUtils";
 
 function PolicyReceipts() {
   const { t } = useTranslation();
-  const { receiptDetailList, loading, total, paymentDetails } = useSelector(
-    ({ receiptsTableReducers }) => {
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [printLoading, setPrintLoading] = useState(false);
+
+  const { receiptDetailList, loading, currentReceiptId, receiptNumber } =
+    useSelector(({ receiptsTableReducers }) => {
       return {
         loading: receiptsTableReducers?.loading,
-        receiptDetailList: receiptsTableReducers?.receiptDetailList,
-        total: receiptsTableReducers,
-        paymentDetails: receiptsTableReducers?.paymentDetails,
+        receiptDetailList: receiptsTableReducers?.receiptDetailList || [],
+        currentReceiptId: receiptsTableReducers?.currentReceiptId,
+        receiptNumber:
+          receiptsTableReducers?.currentReceiptDetails?.receiptNumber,
       };
-    }
-  );
+    });
 
   const navigate = useNavigate();
   const items = [
@@ -47,6 +51,98 @@ function PolicyReceipts() {
     color: "#000",
     border: "none",
     textalign: "center",
+  };
+
+  const handlePrintAll = async () => {
+    if (!currentReceiptId) {
+      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
+      return;
+    }
+
+    try {
+      setPrintLoading(true);
+      showSuccessMessage(
+        t("accounts.addReceiptEdit.generatingPdf"),
+        t("common.success")
+      );
+
+      const result = await documentTemplateService.getReceiptPdf(
+        currentReceiptId,
+        {
+          fileName: `receipt-${receiptNumber || currentReceiptId}.pdf`,
+        }
+      );
+
+      if (!result.success) {
+        throw new Error(
+          result.error || t("accounts.addReceiptEdit.failedToPrintReceipt")
+        );
+      }
+
+      showSuccessMessage(
+        t("accounts.addReceiptEdit.pdfDownloadedSuccess"),
+        t("common.success")
+      );
+    } catch (error) {
+      console.error("Error printing receipt:", error);
+      showErrorMessage(
+        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
+        t("common.error")
+      );
+    } finally {
+      setPrintLoading(false);
+    }
+  };
+
+  const handlePrintSelected = async () => {
+    if (!currentReceiptId) {
+      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
+      return;
+    }
+
+    if (!selectedRows || selectedRows.length === 0) {
+      showErrorMessage(t("accounts.addReceiptEdit.selectOneToPrint"));
+      return;
+    }
+
+    try {
+      setPrintLoading(true);
+      showSuccessMessage(
+        t("accounts.addReceiptEdit.generatingPdf"),
+        t("common.success")
+      );
+
+      const lineIds = selectedRows
+        .map((row) => row.receiptListId || row.id)
+        .filter(Boolean);
+
+      const result = await documentTemplateService.getReceiptPdf(
+        currentReceiptId,
+        {
+          lineIds,
+          fileName: `receipt-${receiptNumber || currentReceiptId}-selected.pdf`,
+        }
+      );
+
+      if (!result.success) {
+        throw new Error(
+          result.error || t("accounts.addReceiptEdit.failedToPrintReceipt")
+        );
+      }
+
+      showSuccessMessage(
+        t("accounts.addReceiptEdit.pdfDownloadedSuccess"),
+        t("common.success")
+      );
+    } catch (error) {
+      console.error("Error printing selected receipt items:", error);
+      showErrorMessage(
+        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
+        t("common.error")
+      );
+    } finally {
+      setPrintLoading(false);
+    }
   };
 
   return (
@@ -79,7 +175,23 @@ function PolicyReceipts() {
           className="datatable_container"
           scrollable={true}
           scrollHeight="40vh"
+          selection={selectedRows}
+          onSelectionChange={(e) =>
+            setSelectedRows(Array.isArray(e.value) ? e.value : [])
+          }
+          selectionMode="checkbox"
+          dataKey="id"
         >
+          <Column
+            selectionMode="multiple"
+            exportable={false}
+            style={{ textAlign: "center", width: "3rem" }}
+            headerStyle={{
+              ...headerStyle,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          />
           <Column
             field="policies"
             header={t("accounts.policies")}
@@ -148,6 +260,47 @@ function PolicyReceipts() {
             className="fieldvalue_container"
           ></Column>
         </DataTable>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: "10px",
+          marginTop: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+        <Button
+          label={t("accounts.addReceiptEdit.printAll")}
+          onClick={handlePrintAll}
+          disabled={!currentReceiptId || printLoading || loading}
+          loading={printLoading}
+          style={{
+            minWidth: "150px",
+            padding: "10px 20px",
+            backgroundColor: "#28a745",
+            borderColor: "#28a745",
+          }}
+        />
+        <Button
+          label={t("accounts.addReceiptEdit.printSelected")}
+          onClick={handlePrintSelected}
+          disabled={
+            !currentReceiptId ||
+            !selectedRows ||
+            selectedRows.length === 0 ||
+            printLoading ||
+            loading
+          }
+          loading={printLoading}
+          style={{
+            minWidth: "160px",
+            padding: "10px 20px",
+            backgroundColor: "#198754",
+            borderColor: "#198754",
+          }}
+        />
       </div>
     </div>
   );

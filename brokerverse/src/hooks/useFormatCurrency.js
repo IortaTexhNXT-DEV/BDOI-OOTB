@@ -1,16 +1,19 @@
-import { useTranslation } from "react-i18next";
-import { formatCurrency as formatCurrencyUtil, getCurrencyForLanguage } from "../utility/currencyConverter";
+import { useSelector } from "react-redux";
+import { formatCurrency as formatCurrencyUtil, getDisplayCurrencyConfig } from "../utility/currencyConverter";
 
 /**
- * Hook that returns currency formatting tied to current i18n language.
- * Use in React components so they re-render when language changes.
- * English → USD, Thai → THB.
+ * Hook that returns currency formatting using the active system display currency.
+ * Re-renders when system settings currency changes.
  * @returns {{ formatCurrency: (amount, options?) => string, currencyCode: string, locale: string }}
  */
 export const useFormatCurrency = () => {
-  const { i18n } = useTranslation();
-  const lng = (i18n.language || "en").split("-")[0];
-  const { currency: currencyCode, locale } = getCurrencyForLanguage(lng);
+  const displayCurrency = useSelector(
+    (state) => state.systemSettingsReducer?.displayCurrency
+  );
+  const { currency: currencyCode, locale } = getDisplayCurrencyConfig();
+
+  // Subscribe to Redux currency so formatters refresh after settings change
+  void displayCurrency;
 
   const formatCurrency = (amount, options) => formatCurrencyUtil(amount, options);
 

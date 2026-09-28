@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
@@ -15,8 +14,7 @@ import "./index.scss";
 
 const ExecutiveDashboard = () => {
   const { t } = useTranslation();
-  const { currencyCode } = useFormatCurrency();
-  const currencySymbol = currencyCode === "USD" ? "$" : "฿";
+  const currencySymbol = "₱";
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [dateRange, setDateRange] = useState([
@@ -92,6 +90,7 @@ const ExecutiveDashboard = () => {
     labels: [
       "Motor",
       "Fire and Allied Perils",
+      "Industrial All Risks",
       "Employee Benefits",
       "Health",
       "Property",

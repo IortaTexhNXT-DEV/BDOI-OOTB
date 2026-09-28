@@ -7,6 +7,7 @@ import policyService from "../../../../services/policyService";
 import leadService from "../../../../services/leadService";
 import claimsService from "../../../../services/claimsService";
 import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
+import { normalizeCountryName } from "../../../../utility/addressHelpers";
 
 /**
  * Map productType/lob to API LOB value (MOTOR | FIRE)
@@ -104,9 +105,17 @@ export const getClaimDetailsViewData = createAsyncThunk(
         Province: policyData?.address?.province || leadData?.province || "",
         CityName: policyData?.address?.city || leadData?.city || "",
         ZipCode: policyData?.address?.zipCode || leadData?.zipCode || "",
+        RoadThanon:
+          policyData?.address?.roadThanon || leadData?.roadThanon || "",
+        SoiAlley: policyData?.address?.soiAlley || leadData?.soiAlley || "",
+        MooVillage:
+          policyData?.address?.mooVillage || leadData?.mooVillage || "",
         isCoInsurance,
         participatingInsurersCount: participants.length,
       };
+
+      // Normalize country for address API dropdown matching
+      combinedData.CountryName = normalizeCountryName(combinedData.CountryName);
 
       console.log("Combined data for claim details:", combinedData);
       console.log("=== END GET CLAIM DETAILS VIEW DATA ===");
@@ -233,15 +242,61 @@ export const getClaimDetailsForEdit = createAsyncThunk(
               claimData.lead?.lastName || ""
             }`.trim() ||
             "",
-          HouseNo: claimData.policy?.houseNo || claimData.lead?.houseNo || "",
+          HouseNo:
+            claimData.houseNo ||
+            claimData.driverHouseNo ||
+            claimData.policy?.houseNo ||
+            claimData.lead?.houseNo ||
+            "",
           Barangay:
-            claimData.policy?.barangay || claimData.lead?.barangay || "",
-          CountryName:
-            claimData.policy?.country || claimData.lead?.country || "",
+            claimData.barangay ||
+            claimData.driverBarangay ||
+            claimData.policy?.barangay ||
+            claimData.lead?.barangay ||
+            "",
+          CountryName: normalizeCountryName(
+            claimData.country ||
+              claimData.driverCountry ||
+              claimData.policy?.country ||
+              claimData.lead?.country ||
+              ""
+          ),
           Province:
-            claimData.policy?.province || claimData.lead?.province || "",
-          CityName: claimData.policy?.city || claimData.lead?.city || "",
-          ZipCode: claimData.policy?.zipCode || claimData.lead?.zipCode || "",
+            claimData.province ||
+            claimData.driverProvince ||
+            claimData.policy?.province ||
+            claimData.lead?.province ||
+            "",
+          CityName:
+            claimData.city ||
+            claimData.driverCity ||
+            claimData.policy?.city ||
+            claimData.lead?.city ||
+            "",
+          ZipCode:
+            claimData.zipCode ||
+            claimData.driverZipCode ||
+            claimData.policy?.zipCode ||
+            claimData.lead?.zipCode ||
+            "",
+          RoadThanon:
+            claimData.roadThanon ||
+            claimData.driverRoadThanon ||
+            claimData.policy?.roadThanon ||
+            claimData.lead?.roadThanon ||
+            "",
+          SoiAlley:
+            claimData.soiAlley ||
+            claimData.driverSoiAlley ||
+            claimData.policy?.soiAlley ||
+            claimData.lead?.soiAlley ||
+            "",
+          MooVillage:
+            claimData.mooVillage ||
+            claimData.driverMooVillage ||
+            claimData.policy?.mooVillage ||
+            claimData.lead?.mooVillage ||
+            "",
           isCoInsurance: Boolean(
             claimData.isCoInsurancePolicy ??
               claimData.isCoInsurance ??
@@ -256,19 +311,41 @@ export const getClaimDetailsForEdit = createAsyncThunk(
           driverName: claimData.driverName || "",
           driverHouseNo: claimData.driverHouseNo || "",
           driverBarangay: claimData.driverBarangay || "",
-          driverCountry: claimData.driverCountry || "",
+          driverCountry: normalizeCountryName(claimData.driverCountry || ""),
           driverProvince: claimData.driverProvince || "",
           driverCity: claimData.driverCity || "",
           driverZipCode: claimData.driverZipCode || "",
+          driverRoadThanon: claimData.driverRoadThanon || "",
+          driverSoiAlley: claimData.driverSoiAlley || "",
+          driverMooVillage: claimData.driverMooVillage || "",
           // Third party details
           InsuranceCompanyN:
-            claimData.thirdPartyWitnessDetails?.insuranceCompanyName || "",
-          name: claimData.thirdPartyWitnessDetails?.name || "",
+            claimData.thirdPartyWitnessDetails?.[0]
+              ?.thirdPartyInsuranceCompanyName ||
+            claimData.thirdPartyWitnessDetails?.insuranceCompanyName ||
+            "",
+          name:
+            claimData.thirdPartyWitnessDetails?.[0]?.thirdPartyName ||
+            claimData.thirdPartyWitnessDetails?.name ||
+            "",
           contactNumber:
-            claimData.thirdPartyWitnessDetails?.contactNumber || "",
-          plateNumber: claimData.thirdPartyWitnessDetails?.plateNumber || "",
-          unit: claimData.thirdPartyWitnessDetails?.unit || "",
-          shop: claimData.thirdPartyWitnessDetails?.shop || "",
+            claimData.thirdPartyWitnessDetails?.[0]
+              ?.thirdPartyContactNumber ||
+            claimData.thirdPartyWitnessDetails?.contactNumber ||
+            "",
+          plateNumber:
+            claimData.thirdPartyWitnessDetails?.[0]
+              ?.thirdPartyPlateNumber ||
+            claimData.thirdPartyWitnessDetails?.plateNumber ||
+            "",
+          unit:
+            claimData.thirdPartyWitnessDetails?.[0]?.thirdPartyUnit ||
+            claimData.thirdPartyWitnessDetails?.unit ||
+            "",
+          shop:
+            claimData.thirdPartyWitnessDetails?.[0]?.thirdPartyShop ||
+            claimData.thirdPartyWitnessDetails?.shop ||
+            "",
         };
 
         console.log("Mapped data for edit:", mappedData);
@@ -291,6 +368,17 @@ export const postClaimDetailsData = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     console.log(payload, "payload");
     const data = {
+      // Policyholder address (persisted into view data on fulfill)
+      PolicyHolderName: payload?.PolicyHolderName,
+      HouseNo: payload?.HouseNo,
+      Barangay: payload?.Barangay,
+      CountryName: payload?.CountryName,
+      Province: payload?.Province,
+      CityName: payload?.CityName,
+      ZipCode: payload?.ZipCode,
+      RoadThanon: payload?.RoadThanon,
+      SoiAlley: payload?.SoiAlley,
+      MooVillage: payload?.MooVillage,
       // Third party details
       InsuranceCompanyN: payload?.InsuranceCompanyN,
       name: payload?.name,
@@ -306,6 +394,9 @@ export const postClaimDetailsData = createAsyncThunk(
       driverProvince: payload?.driverProvince,
       driverCity: payload?.driverCity,
       driverZipCode: payload?.driverZipCode,
+      driverRoadThanon: payload?.driverRoadThanon,
+      driverSoiAlley: payload?.driverSoiAlley,
+      driverMooVillage: payload?.driverMooVillage,
       // Incident details (shared; Fire uses for loss location/cause)
       dateOfIncident: payload?.dateOfIncident,
       timeOfIncident: payload?.timeOfIncident,

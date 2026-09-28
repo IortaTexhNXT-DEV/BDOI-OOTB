@@ -45,6 +45,7 @@ export const FIRE_CANCELLATION_TYPES = [
  */
 export function getCategoriesForLob(lob) {
   if (!lob) return MOTOR_CATEGORIES;
+  if (isIarLob(lob)) return MOTOR_CATEGORIES; // IAR endorsements not in v1
   const upper = String(lob).toUpperCase();
   if (
     upper.includes("FIRE") ||
@@ -57,12 +58,27 @@ export function getCategoriesForLob(lob) {
 }
 
 /**
+ * Check if policy is Industrial All Risks LOB.
+ * @param {string} lob - productType, lob, or ProductDescription
+ * @returns {boolean}
+ */
+export function isIarLob(lob) {
+  if (!lob) return false;
+  const upper = String(lob).toUpperCase();
+  return (
+    upper === "IAR" ||
+    upper.includes("INDUSTRIAL ALL RISK") ||
+    upper.includes("INDUSTRIAL_ALL_RISK")
+  );
+}
+
+/**
  * Check if policy is Fire LOB.
  * @param {string} lob - productType, lob, or ProductDescription
  * @returns {boolean}
  */
 export function isFireLob(lob) {
-  if (!lob) return false;
+  if (!lob || isIarLob(lob)) return false;
   const upper = String(lob).toUpperCase();
   return (
     upper.includes("FIRE") ||

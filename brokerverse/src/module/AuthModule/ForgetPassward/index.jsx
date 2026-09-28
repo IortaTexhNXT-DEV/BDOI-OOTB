@@ -1,6 +1,5 @@
 import React from 'react';
 import '../Register/index.scss';
-import SvgWhiteLogo from '../../../assets/icons/SvgWhiteLogo';
 import InputField from '../../../components/InputField';
 import { Button } from 'primereact/button';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +14,7 @@ const ForgetPassward = () => {
                         <div className="p-mt-1 welcome__text">
                             {t('login.welcomeTo')}
                         </div>
-                        <SvgWhiteLogo color={"#fff"} />
+                        <img src="/BDO_insure_logo.png.png" alt="BDO" />
                         <div className="logo__cover___white">
                             {t('login.cover')}
                         </div>
@@ -29,7 +28,7 @@ const ForgetPassward = () => {
             <div className="col-12 md:col-4 p-5">
                 <div className="col-12 md:col-12 lg:col-12 ">
                     <div className='logo__icon'>
-                        <SvgWhiteLogo color={'#000'} />
+                        <img src="/BDO_insure_logo.png.png" alt="BDO" />
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12  ">

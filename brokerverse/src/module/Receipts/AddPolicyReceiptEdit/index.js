@@ -29,6 +29,7 @@ import {
   showErrorMessage,
 } from "../../../utility/toastUtils";
 import disbursementService from "../../../services/disbursementService";
+import documentTemplateService from "../../../services/documentTemplateService";
 import { getUserData } from "../../../utility/tokenManager";
 
 function PolicyReceipts() {
@@ -40,6 +41,7 @@ function PolicyReceipts() {
   const [editedData, setEditedData] = useState(null);
   const [showPrintButton, setShowPrintButton] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
 
   const dispatch = useDispatch();
   const location = useLocation();
@@ -88,11 +90,12 @@ function PolicyReceipts() {
       return;
     }
 
-    const pendingMap = new Map(
-      pendingReceivableList.map((item) => [item.id, item])
-    );
+    // In print mode, keep selection against the full list (paid + pending).
+    // Before approve, sync selection against pending items only.
+    const sourceList = showPrintButton ? allReceiptsList : pendingReceivableList;
+    const sourceMap = new Map(sourceList.map((item) => [item.id, item]));
     const refreshedSelection = selectedRows
-      .map((item) => pendingMap.get(item.id))
+      .map((item) => sourceMap.get(item.id))
       .filter(Boolean);
 
     if (
@@ -101,7 +104,7 @@ function PolicyReceipts() {
     ) {
       setSelectedRows(refreshedSelection);
     }
-  }, [pendingReceivableList, selectedRows]);
+  }, [pendingReceivableList, allReceiptsList, selectedRows, showPrintButton]);
 
   // Note: Success message and navigation are now handled directly in handleApprove function
 
@@ -308,6 +311,11 @@ function PolicyReceipts() {
     // After approval, selectedRows become "Paid" and pendingTotals will be recalculated without them
     const capturedPendingTotals = { ...pendingTotals };
 
+    // Capture selected policies before approve so we can re-select after IDs change
+    const approvedPolicies = new Set(
+      selectedRows.map((row) => String(row.policies ?? "")).filter(Boolean)
+    );
+
     // Proceed with approval
 
     // Prepare the receipt data for update API
@@ -319,7 +327,7 @@ function PolicyReceipts() {
       branchCode: customerData.branchCode || null,
       departmentCode: customerData.departmentCode || null,
       customerCode: customerData.customerCode,
-      currencyCode: customerData.currencyCode || "THB",
+      currencyCode: customerData.currencyCode || "PHP",
       transactionCode: customerData.transactionCode || "PAYMENT",
       remarks: customerData.remarks || "Payment for motor insurance premium",
       transactionNumber: customerData.transactionNumber || `TXN-${Date.now()}`,
@@ -500,17 +508,24 @@ function PolicyReceipts() {
         // Clear unsaved changes flag - payment is now recorded
         setHasUnsavedChanges(false);
 
-        // Backend has marked approved items as "Paid"
-        // Update Redux state with full list (filter on line 55 will exclude "Paid" items automatically)
-
-        // Update Redux state with full list from backend
-        dispatch({
-          type: "receiptsTable/setReceivableTableList",
-          payload: updatedReceipt.receiptsList, // Full list (includes Paid items)
-        });
-
-        // Clear selection since approved items are now hidden by filter
-        setSelectedRows([]);
+        // Pre-select just-approved rows (match by policy; IDs are recreated on update)
+        const refreshedList = (updatedReceipt.receiptsList || []).map((item) => ({
+          ...item,
+          id: item.receiptListId || item.id,
+          receiptListId: item.receiptListId || item.id,
+        }));
+        const preselected = refreshedList.filter(
+          (item) =>
+            normalizeStatus(item?.status) === "Paid" &&
+            approvedPolicies.has(String(item.policies ?? ""))
+        );
+        setSelectedRows(
+          preselected.length > 0
+            ? preselected
+            : refreshedList.filter(
+                (item) => normalizeStatus(item?.status) === "Paid"
+              )
+        );
 
         // Verify math: paid + unpaid should equal gross premium
         const calculatedTotal = updatedTotalPaid + updatedTotalUnpaid;
@@ -541,10 +556,42 @@ function PolicyReceipts() {
     }
   };
 
-  const handlePrint = async () => {
-    // Validation checks
-    if (!customerData.customerCode) {
-      showErrorMessage(t("accounts.addReceiptEdit.customerDataMissing"));
+  const handlePrintAll = async () => {
+    if (!customerData.receiptId) {
+      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
+      return;
+    }
+
+    try {
+      setPrintLoading(true);
+      showSuccessMessage(t("accounts.addReceiptEdit.generatingPdf"), t("common.success"));
+
+      const result = await documentTemplateService.getReceiptPdf(
+        customerData.receiptId,
+        {
+          fileName: `receipt-${customerData.receiptNumber || customerData.receiptId}.pdf`,
+        }
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || t("accounts.addReceiptEdit.failedToPrintReceipt"));
+      }
+
+      showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
+    } catch (error) {
+      console.error("Error printing receipt:", error);
+      showErrorMessage(
+        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
+        t("common.error")
+      );
+    } finally {
+      setPrintLoading(false);
+    }
+  };
+
+  const handlePrintSelected = async () => {
+    if (!customerData.receiptId) {
+      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
       return;
     }
 
@@ -554,27 +601,34 @@ function PolicyReceipts() {
     }
 
     try {
+      setPrintLoading(true);
       showSuccessMessage(t("accounts.addReceiptEdit.generatingPdf"), t("common.success"));
 
-      // Mock PDF URL - in production, this would come from the API
-      const pdfUrl =
-        "https://drive.google.com/file/d/1Kq9P6EqPbzhDWvKI0o5JD1XbojzJ1VrN/view?usp=sharing";
+      const lineIds = selectedRows
+        .map((row) => row.receiptListId || row.id)
+        .filter(Boolean);
 
-      // Create a temporary link to download the PDF
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.download = `receipt-${customerData.receiptNumber || "receipt"}.pdf`;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const result = await documentTemplateService.getReceiptPdf(
+        customerData.receiptId,
+        {
+          lineIds,
+          fileName: `receipt-${customerData.receiptNumber || customerData.receiptId}-selected.pdf`,
+        }
+      );
 
-      setTimeout(() => {
-        showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
-      }, 1000);
+      if (!result.success) {
+        throw new Error(result.error || t("accounts.addReceiptEdit.failedToPrintReceipt"));
+      }
+
+      showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
     } catch (error) {
-      console.error("Error printing receipt:", error);
-      showErrorMessage(t("accounts.addReceiptEdit.failedToPrintReceipt"), t("common.error"));
+      console.error("Error printing selected receipt items:", error);
+      showErrorMessage(
+        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
+        t("common.error")
+      );
+    } finally {
+      setPrintLoading(false);
     }
   };
   const template2 = {
@@ -694,6 +748,13 @@ function PolicyReceipts() {
             selection={selectedRows}
             onSelectionChange={(e) => {
               const nextSelection = Array.isArray(e.value) ? e.value : [];
+
+              // After approve, allow selecting any rows (including Paid) for printing.
+              if (showPrintButton) {
+                setSelectedRows(nextSelection);
+                return;
+              }
+
               const pendingMap = new Map(
                 pendingReceivableList.map((item) => [item.id, item])
               );
@@ -1028,11 +1089,12 @@ function PolicyReceipts() {
             />
           </div>
         ) : (
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <Button
               label={t("accounts.addReceiptEdit.goToHistory")}
               className="print"
               onClick={() => navigate("/accounts/receipts")}
+              disabled={printLoading}
               style={{
                 minWidth: "160px",
                 padding: "10px 20px",
@@ -1042,15 +1104,35 @@ function PolicyReceipts() {
               }}
             />
             <Button
-              label={t("accounts.addReceiptEdit.print")}
+              label={t("accounts.addReceiptEdit.printAll")}
               className="print"
-              onClick={handlePrint}
-              disabled={!selectedRows || loading}
+              onClick={handlePrintAll}
+              disabled={!customerData.receiptId || printLoading || loading}
+              loading={printLoading}
               style={{
                 minWidth: "150px",
                 padding: "10px 20px",
                 backgroundColor: "#28a745",
                 borderColor: "#28a745",
+              }}
+            />
+            <Button
+              label={t("accounts.addReceiptEdit.printSelected")}
+              className="print"
+              onClick={handlePrintSelected}
+              disabled={
+                !customerData.receiptId ||
+                !selectedRows ||
+                selectedRows.length === 0 ||
+                printLoading ||
+                loading
+              }
+              loading={printLoading}
+              style={{
+                minWidth: "160px",
+                padding: "10px 20px",
+                backgroundColor: "#198754",
+                borderColor: "#198754",
               }}
             />
           </div>

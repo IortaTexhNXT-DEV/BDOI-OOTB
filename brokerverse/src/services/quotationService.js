@@ -490,6 +490,30 @@ class QuotationService {
   }
 
   /**
+   * Create Industrial All Risks quotation
+   */
+  async createIarQuotation(quotationData) {
+    return this.createQuotation({
+      ...quotationData,
+      productType: quotationData.productType || "Industrial All Risks",
+      insurancePolicyType:
+        quotationData.insurancePolicyType || "2009",
+    });
+  }
+
+  /**
+   * Update Industrial All Risks quotation (Schedule of Cover / commercial fields)
+   */
+  async updateIarQuotation(quotationId, quotationData) {
+    return this.updateQuotation(quotationId, {
+      ...quotationData,
+      productType: quotationData.productType || "Industrial All Risks",
+      insurancePolicyType:
+        quotationData.insurancePolicyType || "2009",
+    });
+  }
+
+  /**
    * Send Fire quotation for customer approval (email)
    * @param {string} quotationId - Quotation ID
    * @returns {Promise<Object>} Result

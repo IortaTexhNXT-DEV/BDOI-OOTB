@@ -298,9 +298,9 @@ const RemittanceAnalytics = () => {
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-PH', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'PHP',
       minimumFractionDigits: 0
     }).format(value);
   };
@@ -531,7 +531,7 @@ const RemittanceAnalytics = () => {
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Total Value</span>
-                    <span className="stat-value">$3.9M</span>
+                    <span className="stat-value">₱3.9M</span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Avg Processing Time</span>
@@ -759,9 +759,9 @@ const RemittanceAnalytics = () => {
               <div className="chart-insights">
                 <h4>Key Insights:</h4>
                 <ul>
-                  <li>Revenue increased 8.3% from August to September ($3.6M to $3.9M)</li>
-                  <li>Best performing month: September with $3.9M revenue</li>
-                  <li>Average monthly revenue: $3.1M</li>
+                  <li>Revenue increased 8.3% from August to September (₱3.6M to ₱3.9M)</li>
+                  <li>Best performing month: September with ₱3.9M revenue</li>
+                  <li>Average monthly revenue: ₱3.1M</li>
                   <li>Revenue per transaction has increased 1.1% month-over-month</li>
                 </ul>
               </div>

@@ -16,7 +16,7 @@ const ViewEndorsement = () => {
     navigate("/agent/endorsement/paymentconfirmation");
   };
   const handlePayLater = () => {
-    navigate(`/agent/clientview/${123}`);
+    navigate(-1);
   };
 
   const handleEndorsement=()=>{

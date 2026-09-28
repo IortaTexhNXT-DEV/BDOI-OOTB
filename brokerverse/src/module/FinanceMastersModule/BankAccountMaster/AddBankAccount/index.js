@@ -38,8 +38,9 @@ function AddBankAccount() {
   ];
 
   const code = [
+    { name: "PHP", code: "PHP" },
     { name: "THB", code: "THB" },
-    // { name: "Rome", code: "RM" },
+    { name: "USD", code: "USD" },
   ];
 
   const home = { label: t("financeMasters.master") };

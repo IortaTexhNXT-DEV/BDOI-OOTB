@@ -67,8 +67,26 @@ const SettlementApproval = () => {
       if (result.success) {
         console.log("Claim rejected successfully:", result.data);
         toastRef.current.showToast();
-        setTimeout(() => {
-          navigate(`/agent/clientview/${123}`);
+        setTimeout(async () => {
+          let resolvedClientId = location.state?.clientId;
+          if (!resolvedClientId && claimId) {
+            try {
+              const claimResult = await claimsService.getClaimDetails(claimId);
+              const claimPayload = claimResult?.data;
+              resolvedClientId =
+                claimPayload?.data?.policy?.clientId ||
+                claimPayload?.policy?.clientId ||
+                claimPayload?.data?.clientId ||
+                claimPayload?.clientId;
+            } catch (fetchError) {
+              console.error("Failed to resolve clientId after reject:", fetchError);
+            }
+          }
+          if (resolvedClientId) {
+            navigate(`/agent/clientview/${resolvedClientId}`, { replace: true });
+          } else {
+            navigate("/agent/clientlisting", { replace: true });
+          }
         }, 2000);
       } else {
         console.error("Failed to reject claim:", result.error);

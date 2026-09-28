@@ -72,6 +72,7 @@ import profileReducers from "../agentModule/dashBoardModule/agentViewProfile/age
 import policydetailreducer from "../agentModule/quoteModule/policyDetails/store/policyDetailsReducer";
 import auditTrailReducers from "../agentModule/claimModule/claimAuditTrail/store/auditTrailReducers";
 import quotationAuditTrailReducers from "../agentModule/quoteModule/quotationAuditTrail/store/auditTrailReducers";
+import systemSettingsReducer from "../module/SystemSettings/store/systemSettingsSlice";
 const reducers = {
   journalVoucherMainReducers,
   paymentVoucherReducers,
@@ -141,6 +142,7 @@ const reducers = {
   policydetailreducer,
   auditTrailReducers,
   quotationAuditTrailReducers,
+  systemSettingsReducer,
 };
 
 export default reducers;

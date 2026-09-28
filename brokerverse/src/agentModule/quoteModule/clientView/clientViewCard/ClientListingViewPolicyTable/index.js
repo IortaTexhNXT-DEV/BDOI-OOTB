@@ -245,6 +245,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
           leadRefId: leadId || "LEAD-001",
           quoteRefId: quoteId || "QUOTE-001",
           policyRefId: policyId || "POLICY-001",
+          clientId,
           lob,
           productType: lob,
         },

@@ -44,6 +44,12 @@
         }
     }
 
+    .side__logo img,
+    .logo__icon img {
+        max-height: 40px;
+        width: auto;
+    }
+
     .forget__text {
         font-family: "Nunito", Arial, sans-serif;
         font-size: 14px;

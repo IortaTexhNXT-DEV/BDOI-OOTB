@@ -1,11 +1,11 @@
 # BDOI theme for the BrokerVerse front end
 
-The front end in `brokerverse/` is the `brokerverse-main.zip` snapshot from this repository with the
-BDOI theme applied: the look of iNXT BrokerVerse from `IortaTexhNXT-DEV/FinVerse`
+The front end in `brokerverse/` is the `brokerverse-dev.zip` snapshot from this repository (the branch
+the dev site is built from) with the BDOI theme applied: the look of iNXT BrokerVerse from `IortaTexhNXT-DEV/FinVerse`
 (`frontend/src/components/layout` and `frontend/src/styles/tokens.css`, from the BDO Style Guide).
 
 Styling only. Every screen, route, form and API call is as it was. The `build/` output that the zip
-carried is left out; `npm run build` produces it.
+carried is left out; `npm run build` produces it. `.env` is left out as well; copy it from `dev`.
 
 ## What changed
 
@@ -31,8 +31,12 @@ carried is left out; `npm run build` produces it.
 - `brokerverse/public/bdoi/`: BDO Insure logo, sign-in photo and the iorta TechNXT logo.
 - `brokerverse/src/Color.scss`, `src/components/SideBar/*`, `src/agentModule/authModule/Login/index.js`,
   `src/locales/{en,th}.json`, `public/index.html`: brand and colour edits.
-- Mechanical replacement across `src` of the hard-coded indigo hexes and Poppins/Inter font
-  declarations (one commit, `Replace the hard-coded indigo palette ...`, 449 files).
+- `brokerverse/scripts/apply-bdoi-palette.js` (`npm run theme:palette`): the codemod that rewrote the
+  hard-coded indigo / old BDO blue hexes and Poppins/Inter font declarations across `src` (second
+  commit, 455 files). It is idempotent: run it again after merging other branches into `dev`.
+- The dev System Settings screen keeps working: the sidebar and sign-in show the logo chosen there,
+  its Primary / Secondary colour still drive `--bv-primary` / `--bv-secondary`, and the two BDO presets
+  now carry the BDOI values (#0072d8 / #004ea8). Defaults in `src/utility/systemCurrencies.js` match.
 
 `bdoi-theme.patch` at the repository root holds the same changes as two git commits on top of the
 snapshot, for the live repository.
@@ -40,42 +44,34 @@ snapshot, for the live repository.
 ## Applying it to `iortatechnxt-technology/brokerverse` (branch `dev`)
 
 The site at brokerverse-dev.inxtuniverse.com is built from `dev` by `.github/workflows/deploy.yml`
-(push to `dev` builds and syncs `build/` to S3, then invalidates CloudFront). The snapshot here is
-`main`, which differs from `dev`, so apply the patch on a branch from `dev` and check the result before
-merging:
+(push to `dev` builds and syncs `build/` to S3, then invalidates CloudFront). The patch was made on the
+`brokerverse-dev.zip` snapshot, so on a `dev` checkout of the same state it applies cleanly:
 
 ```bash
 git checkout -b bdoi-theme dev
 git am --3way bdoi-theme.patch      # resolve any conflict in the files listed above
 npm install --legacy-peer-deps      # adds @fontsource/nunito
 npm run theme:bdoi                  # regenerate if primereact differs from the snapshot
+npm run theme:palette               # re-run the codemod if dev moved on since the snapshot
 CI=false npm run build
 ```
 
-Known differences between `main` and `dev` to check after the patch:
+Merging that branch into `dev` triggers the deploy, and the sign-in URL then opens the BDOI version.
 
-- `dev` shows `/bdo.png` in the sidebar and `/bdologinbanner.png` on sign-in; `main` used
-  `SvgFinalLogo`, `/iorta.png` and `/iortaloginbanner.gif`. The patch replaces the `main` references;
-  on `dev` point the same two places at `/bdoi/bdo-insure.png` and `/bdoi/login-photo.jpg`.
-- `dev` has a System Settings screen (Master > System Settings) with a Logo Preset and Primary /
-  Secondary Colour. Those runtime settings sit on top of the theme; set them to the BDOI colours
-  (#0072d8 / #004ea8) or leave them at their defaults.
-- `src/utility/constant.js` in the snapshot points `BASE_URL` at `http://localhost:8000/api`; `dev`
-  points at the dev API. The patch does not touch it.
+After the deploy, open Master > System Settings on the dev site: the saved Primary / Secondary
+colour there (currently Indigo #6366f1 / #4f46e5) still applies to the sign-in gradient behind the photo
+and to `--bv-primary`; pick the BDO Blue / BDO Navy presets and save to line it up with the theme.
 
 ## Checks done
 
 - Production build (`CI=false npm run build`) compiles; the only warnings are pre-existing lint warnings.
 - The built app was served locally, signed in against the dev API (read-only; every write request was
   blocked) and the sign-in, Executive Dashboard, Clients, Create Lead, Currency list / add /
-  validation, Quotation, Remittance Tracking, Reports and Product Templates screens were captured.
-  Before / after sheets are in `docs/theme-screens/`.
+  validation, System Settings, Quotation, Remittance Tracking, Reports and Product Templates screens
+  were captured. Before / after sheets are in `docs/theme-screens/`.
 
 ## Seen in the snapshot but not changed (not styling)
 
-- `src/agentModule/authModule/Login/index.js` pre-fills a real user ID and password in the form
-  (`initialValue`). Remove before any release.
-- The snapshot shows amounts with `$`; the dev site shows `₱` (display currency from `dev`'s
-  System Settings).
 - The Remittance screens show raw text keys (`remittance.approvalHistory`) as labels: the i18n
   entries are missing.
+- `brokerverse-be-main.zip` in this repository holds only a README.

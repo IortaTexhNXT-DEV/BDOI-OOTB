@@ -23,7 +23,7 @@ import "./index.scss";
 
 const PerformanceTracking = () => {
   const { t } = useTranslation();
-  const { formatCurrency, currencyCode } = useFormatCurrency();
+  const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -218,7 +218,7 @@ const PerformanceTracking = () => {
             },
             ticks: {
               callback: function(value) {
-                return (currencyCode === 'USD' ? '$' : '฿') + value + 'M';
+                return '₱' + value + 'M';
               }
             }
           }

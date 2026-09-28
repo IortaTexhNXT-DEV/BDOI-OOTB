@@ -189,12 +189,24 @@ const LeadListingAllTable = ({ clientId }) => {
    
 
     if (statusUpper === "REJECTED") {
-      navigate(`/agent/endorsement/rejected/${endorsementRef}`);
+      navigate(`/agent/endorsement/rejected/${endorsementRef}`, {
+        state: {
+          endorsementNumber: endorsementRef,
+          policyId,
+          clientId,
+        },
+      });
       return;
     }
 
     if (statusUpper === "PROCESSING") {
-      navigate(`/agent/endorsement/paymenterror/${endorsementRef}`);
+      navigate(`/agent/endorsement/paymenterror/${endorsementRef}`, {
+        state: {
+          endorsementNumber: endorsementRef,
+          policyId,
+          clientId,
+        },
+      });
       return;
     }
 

@@ -19,27 +19,39 @@ import { useDispatch, useSelector } from "react-redux";
 import { getPaymentDetails } from "../store/receiptsMiddleware";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import documentTemplateService from "../../../services/documentTemplateService";
+import {
+  showSuccessMessage,
+  showErrorMessage,
+} from "../../../utility/toastUtils";
 
 function PolicyReceipts() {
   const { t } = useTranslation();
   const location = useLocation();
-  const totalFC = location.state.totalFC;
+  const totalFC = location.state?.totalFC;
   console.log("totalFC", totalFC)
   const toastRef = useRef(null);
   const [selectedProducts, setSelectedProducts] = useState(false);
   const [products, setProducts] = useState("Approve");
   const navigate = useNavigate();
   const [errors, setErrors] = useState("");
+  const [printLoading, setPrintLoading] = useState(false);
 
-  const { paymentDetails, loading, total } = useSelector(
+  const { paymentDetails, loading, total, currentReceiptId } = useSelector(
     ({ receiptsTableReducers }) => {
       return {
         loading: receiptsTableReducers?.loading,
         paymentDetails: receiptsTableReducers?.paymentDetails,
         total: receiptsTableReducers,
+        currentReceiptId: receiptsTableReducers?.currentReceiptId,
       };
     }
   );
+
+  const receiptId =
+    location.state?.receiptId ||
+    location.state?.customerData?.receiptId ||
+    currentReceiptId;
   // console.log(paymentDetails[0].bankAccount, "paymentDetails")
   const initialValue = {
     totalPayment: totalFC,
@@ -70,42 +82,56 @@ function PolicyReceipts() {
   const dispatch = useDispatch();
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const handleSubmit = (values) => {
-    // const formErrors = validate(formik.values);
-    // setErrors(formErrors);
-    // console.log(formErrors, "iiiii");
-
+  const handleSubmit = async (values) => {
     // navigate('')
     setProducts("Print");
     if (products == "Print") {
-      // toastRef.current.showToast();
-      // setTimeout=()=>{
-      // navigate("/accounts/receipts")
-      //  ,2000 }
-      toastRef.current.showToast();
-      const pdfUrl = "https://drive.google.com/file/d/1Kq9P6EqPbzhDWvKI0o5JD1XbojzJ1VrN/view?usp=sharing";
-      const openInNewTab = () => {
-        const newTab = window.open(pdfUrl, "_blank");
+      toastRef.current?.showToast();
 
-        // Trigger download after opening
-        if (newTab) {
-            const link = newTab.document.createElement("a");
-            link.href = pdfUrl;
-            link.download = "document.pdf"; // Specify the filename
-            newTab.document.body.appendChild(link);
-            link.click();
-            newTab.document.body.removeChild(link);
+      if (!receiptId) {
+        showErrorMessage(
+          t("accounts.addReceiptEdit.receiptIdMissing"),
+          t("common.error")
+        );
+        return;
+      }
+
+      try {
+        setPrintLoading(true);
+        showSuccessMessage(
+          t("accounts.addReceiptEdit.generatingPdf"),
+          t("common.success")
+        );
+
+        const result = await documentTemplateService.getReceiptPdf(receiptId, {
+          fileName: `receipt-${receiptId}.pdf`,
+        });
+
+        if (!result.success) {
+          throw new Error(
+            result.error || t("accounts.addReceiptEdit.failedToPrintReceipt")
+          );
         }
-      };
 
-      // Download the PDF
-      openInNewTab();
+        showSuccessMessage(
+          t("accounts.addReceiptEdit.pdfDownloadedSuccess"),
+          t("common.success")
+        );
 
-      setTimeout(() => {
-        navigate("/accounts/receipts");
-      }, 2000);
+        setTimeout(() => {
+          navigate("/accounts/receipts");
+        }, 1000);
+      } catch (error) {
+        console.error("Error printing receipt:", error);
+        showErrorMessage(
+          error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
+          t("common.error")
+        );
+      } finally {
+        setPrintLoading(false);
+      }
     } else {
-      toastRef.current.showToast();
+      toastRef.current?.showToast();
       dispatch(getPaymentDetails(formik.values));
     }
   };

@@ -5,12 +5,15 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { MultiSelect } from "primereact/multiselect";
 import "./index.scss";
 import SvgWhatsAppIcon from "../../../../assets/agentIcon/SvgWhatsAppIcon";
 import SvgDownloadIcon from "../../../../assets/agentIcon/SvgDownloadIcon";
 import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
+import SvgSendToInsurerIcon from "../../../../assets/agentIcon/SvgSendToInsurerIcon";
 import emailService from "../../../../services/emailService";
 import documentTemplateService from "../../../../services/documentTemplateService";
+import { InsuranceCompanyOptions } from "../../policyDetails/mock";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
@@ -36,6 +39,9 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
     return quotationData.grossPremium ? parseFloat(quotationData.grossPremium) : 0;
   }, [quotationData, isFireLOB, firePremiumDetails]);
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showInsurerForm, setShowInsurerForm] = useState(false);
+  const [selectedInsurers, setSelectedInsurers] = useState([]);
+  const [isSendingToInsurers, setIsSendingToInsurers] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -45,6 +51,12 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const [aiSubject, setAiSubject] = useState("");
   const [aiHtmlContent, setAiHtmlContent] = useState("");
   const [quotePdfLoading, setQuotePdfLoading] = useState(false);
+
+  const resetInsurerForm = () => {
+    setShowInsurerForm(false);
+    setSelectedInsurers([]);
+    setIsSendingToInsurers(false);
+  };
 
   const handleCopyToClipboard = async () => {
     try {
@@ -83,6 +95,50 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleEmailClick = () => {
     setShowEmailForm(true);
+  };
+
+  const handleInsurerClick = () => {
+    setShowInsurerForm(true);
+  };
+
+  const handleSendToInsurers = async () => {
+    if (!selectedInsurers || selectedInsurers.length === 0) {
+      alert(t("shareOption.selectAtLeastOneCompany"));
+      return;
+    }
+
+    const quotationId = quotationData?.quotationId;
+    if (!quotationId) {
+      alert("Quotation ID is missing. Cannot send quote.");
+      return;
+    }
+
+    setIsSendingToInsurers(true);
+    try {
+      const result = await emailService.shareQuoteToInsurers({
+        quotationId,
+        insuranceCompanies: selectedInsurers,
+        productType: quotationData?.productType,
+        quotationNumber: quotationData?.quotationNumber,
+      });
+
+      if (result.success) {
+        alert(
+          result.partial
+            ? t("shareOption.sentToInsurersPartial")
+            : t("shareOption.sentToInsurersSuccess")
+        );
+        resetInsurerForm();
+        setModalVisible(false);
+      } else {
+        alert(result.error || t("shareOption.sentToInsurersError"));
+      }
+    } catch (error) {
+      console.error("Send to insurers error:", error);
+      alert(t("shareOption.sentToInsurersError"));
+    } finally {
+      setIsSendingToInsurers(false);
+    }
   };
 
   const handleGenerateAIContent = async () => {
@@ -251,23 +307,79 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
     window.open(whatsappUrl, "_blank");
   };
 
+  const dialogHeader = showInsurerForm
+    ? t("shareOption.sendToInsurerTitle")
+    : showEmailForm
+      ? "Send via Email"
+      : "Share Quote";
+
   return (
     <Dialog
       visible={modalVisible}
-      header={showEmailForm ? "Send via Email" : "Share Quote"}
+      header={dialogHeader}
       className={`modal__dialog__container share-modal ${
         showEmailForm ? "email-form-modal" : ""
-      }`}
+      } ${showInsurerForm ? "insurer-form-modal" : ""}`}
       onHide={() => {
+        if (isSendingToInsurers) return;
         setModalVisible(false);
         setShowEmailForm(false);
         setEmailAddress("");
         setCustomMessage("");
+        resetInsurerForm();
       }}
-      dismissableMask={true}
+      dismissableMask={!isSendingToInsurers}
       modal={true}
+      style={
+        showInsurerForm
+          ? { width: "480px", maxWidth: "min(480px, 95vw)" }
+          : undefined
+      }
     >
-      {!showEmailForm ? (
+      {showInsurerForm ? (
+        <div className="grid m-0">
+          <div className="col-12 mb-3">
+            <label htmlFor="insurer-multiselect" className="block mb-2 font-semibold">
+              {t("shareOption.selectInsuranceCompanies")} *
+            </label>
+            <MultiSelect
+              inputId="insurer-multiselect"
+              value={selectedInsurers}
+              options={InsuranceCompanyOptions}
+              onChange={(e) => setSelectedInsurers(e.value || [])}
+              optionLabel="label"
+              optionValue="value"
+              placeholder={t("shareOption.selectInsuranceCompaniesPlaceholder")}
+              display="chip"
+              className="w-full insurer-multiselect"
+              disabled={isSendingToInsurers}
+            />
+          </div>
+          <div className="col-12 flex justify-content-end gap-2">
+            <Button
+              label={t("common.cancel")}
+              className="p-button-text"
+              onClick={resetInsurerForm}
+              disabled={isSendingToInsurers}
+            />
+            <Button
+              label={
+                isSendingToInsurers
+                  ? t("shareOption.sendingToInsurers")
+                  : t("shareOption.send")
+              }
+              icon="pi pi-send"
+              onClick={handleSendToInsurers}
+              loading={isSendingToInsurers}
+              disabled={
+                isSendingToInsurers ||
+                !selectedInsurers ||
+                selectedInsurers.length === 0
+              }
+            />
+          </div>
+        </div>
+      ) : !showEmailForm ? (
         <div className="grid m-0">
           <div
             onClick={quotePdfLoading ? undefined : handleDownload}
@@ -296,6 +408,12 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
               <SvgWhatsAppIcon />
             </div>
             <div className="share__option_caption">{t("shareOption.whatsApp")}</div>
+          </div>
+          <div onClick={handleInsurerClick} className="col-2 p-0">
+            <div className="common__div mb-2 cursor-pointer">
+              <SvgSendToInsurerIcon />
+            </div>
+            <div className="share__option_caption">{t("shareOption.sendToInsurer")}</div>
           </div>
 
           <div className="col-12 submit__container">

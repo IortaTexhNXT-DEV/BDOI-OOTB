@@ -57,7 +57,11 @@ const EndorsementDetailedView = ({ action }) => {
   }, [endorsementId, endorsementData]);
 
   const handleCommonAction = () => {
-    navigate(`/agent/clientview/${state?.clientId || "123"}`);
+    if (state?.clientId) {
+      navigate(`/agent/clientview/${state.clientId}`);
+    } else {
+      navigate(-1);
+    }
   };
 
   const handleclickNavigation = () => {

@@ -66,7 +66,7 @@ const RemittanceNotifications = () => {
       status: "Pending",
       priority: "High",
       channel: "Email",
-      content: "An adjustment request requires your approval. Amount: $5,000",
+      content: "An adjustment request requires your approval. Amount: ₱5,000",
       isRead: false,
       hasAttachment: true
     },

@@ -68,13 +68,41 @@ class DocumentTemplateService {
   }
 
   /**
+   * Download receipt PDF (full receipt or selected line items).
+   * @param {string} receiptId - Receipt ID
+   * @param {Object} options - { lineIds?: string[], fileName?: string }
+   * @returns {Promise<{ success: boolean, error?: string }>}
+   */
+  async getReceiptPdf(receiptId, options = {}) {
+    const { lineIds = [], fileName } = options;
+    if (!receiptId) {
+      return { success: false, error: "Receipt ID is required" };
+    }
+
+    const params = new URLSearchParams();
+    if (Array.isArray(lineIds) && lineIds.length > 0) {
+      params.set("lineIds", lineIds.join(","));
+    }
+
+    const query = params.toString();
+    const path = `/document-templates/receipt/${receiptId}${query ? `?${query}` : ""}`;
+    const downloadName =
+      fileName ||
+      (lineIds.length > 0
+        ? `receipt-${receiptId}-selected.pdf`
+        : `receipt-${receiptId}.pdf`);
+
+    return this._fetchPdfAndDownload(`${this.baseURL}${path}`, downloadName);
+  }
+
+  /**
    * Fetch PDF from URL and return blob (no download)
    * @private
    */
   async _fetchPdfBlob(url) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       const response = await fetch(url, {
         method: "GET",
@@ -88,12 +116,15 @@ class DocumentTemplateService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        let message = errorData.message || errorData.error;
+        let message =
+          errorData.message ||
+          errorData.error?.message ||
+          (typeof errorData.error === "string" ? errorData.error : null);
         if (!message) {
-          if (response.status === 400 && errorData.code === "LOB_MISMATCH") {
+          if (response.status === 400 && errorData.error?.code === "LOB_MISMATCH") {
             message = "Document type does not match this record's line of business.";
           } else if (response.status === 404) {
-            message = "Quotation or policy not found.";
+            message = "Document not found.";
           } else {
             message = `Request failed (${response.status})`;
           }

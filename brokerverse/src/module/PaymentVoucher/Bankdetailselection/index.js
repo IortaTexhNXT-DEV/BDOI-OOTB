@@ -34,7 +34,7 @@ function Bankdetailselection() {
   const toastRef = useRef(null);
   const [date, setDate] = useState(null);
   const dispatch = useDispatch();
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState(null);
   const [visible, setVisible] = useState(false);
   console.log("first", selectedProducts);
   const Navigate = useNavigate();
@@ -143,6 +143,18 @@ function Bankdetailselection() {
       setTotalAmount(value);
     }
   };
+
+  // Prefill Total Amount from selected checkbook; clear when selection cleared
+  useEffect(() => {
+    if (isAgentPayee) return;
+
+    const rawAmount = selectedProducts?.rawData?.totaleAmount;
+    if (rawAmount !== undefined && rawAmount !== null && rawAmount !== "") {
+      setTotalAmount(String(rawAmount));
+    } else {
+      setTotalAmount("");
+    }
+  }, [selectedProducts, isAgentPayee]);
 
   const items = [
     { label: t("paymentVoucher.title"), url: "/accounts/paymentvoucher" },
@@ -291,16 +303,10 @@ function Bankdetailselection() {
       return;
     }
     const checkbookData = selectedProducts.rawData;
-
-    // Validate total amount if provided
-    if (checkbookData.length === 0) {
-      toastRef.current?.showToast("error", "Error", "No checkbook selected");
-      return;
-    }
+    const checkbookId = checkbookData.checkbookId;
 
     // Determine the new status based on current status
     let newStatus = checkbookData.status;
-    const checkbookId = checkbookData.checkbookId;
     if (checkbookData.status === "Pending") {
       newStatus = "Approved";
     } else if (checkbookData.status === "Approved") {
@@ -309,71 +315,84 @@ function Bankdetailselection() {
 
     try {
       if (newStatus === "Approved") {
-        const disbursementData = {
-          voucherDate: new Date().toISOString(),
-          branchCode:
-            disbursementDataFromState.BranchCode?.code ||
-            disbursementDataFromState.BranchCode,
-          payeeType:
-            disbursementDataFromState.PayeeType?.name ||
-            disbursementDataFromState.PayeeType,
-          criteria:
-            disbursementDataFromState.Criteria?.name ||
-            disbursementDataFromState.Criteria,
-          customerCode:
-            disbursementDataFromState.CustomerCode?.code ||
-            disbursementDataFromState.CustomerCode?.label ||
-            disbursementDataFromState.CustomerCode,
-          transactionCode:
-            disbursementDataFromState.Transactioncode?.code ||
-            disbursementDataFromState.Transactioncode,
-          transactionDescription:
-            disbursementDataFromState.TransactionDescription,
-          instrumentCurrency:
-            disbursementDataFromState.SelectInstrumentCurrency?.code ||
-            disbursementDataFromState.SelectInstrumentCurrency,
-          remarks: disbursementDataFromState.Remarks,
-          amount: checkbookData.totaleAmount,
-        };
+        const effectiveAmount = String(totalAmount ?? "").trim();
+        const parsedAmount = parseFloat(effectiveAmount);
 
-        console.log(disbursementData, checkbookData, "Checkbook***");
-        const disbursementUpdateResult =
-          await disbursementService.createDisbursement({
-            ...disbursementData,
+        if (!effectiveAmount || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+          toastRef.current?.showToast({
+            severity: "error",
+            summary: t("common.error"),
+            detail: t("paymentVoucher.invalidTotalAmount"),
           });
-        if (disbursementUpdateResult.success) {
-          setactionToast(t("paymentVoucher.disbursementCreatedSuccess"));
-        } else {
+          return;
+        }
+
+        const disbursementId = currentDisbursementId || agentDisbursementId;
+        if (!disbursementId) {
+          toastRef.current?.showToast({
+            severity: "error",
+            summary: t("common.error"),
+            detail: t("paymentVoucher.failedToUpdateDisbursement"),
+          });
+          return;
+        }
+
+        const disbursementUpdateResult =
+          await disbursementService.updateDisbursement(disbursementId, {
+            amount: effectiveAmount,
+          });
+
+        if (!disbursementUpdateResult.success) {
           console.error(
             "Failed to update disbursement:",
             disbursementUpdateResult.error
           );
-          toastRef.current?.showToast(
-            "error",
-            t("common.error"),
-            t("paymentVoucher.failedToUpdateDisbursement")
-          );
+          toastRef.current?.showToast({
+            severity: "error",
+            summary: t("common.error"),
+            detail:
+              disbursementUpdateResult.error ||
+              t("paymentVoucher.failedToUpdateDisbursement"),
+          });
+          return;
         }
+
+        const result = await disbursementService.updateCheckbook(checkbookId, {
+          status: newStatus,
+          totaleAmount: effectiveAmount,
+        });
+
+        if (result.success) {
+          setactionToast(newStatus);
+          setSelectedProducts(null);
+          setTotalAmount("");
+          await fetchCheckbookDetails();
+        } else {
+          console.error("Failed to update checkbook:", result.error);
+          toastRef.current?.showToast({
+            severity: "error",
+            summary: t("common.error"),
+            detail: result.error || t("paymentVoucher.failedToUpdateDisbursement"),
+          });
+        }
+        return;
       }
-      // Then, update the checkbook status
+
+      // Print path (Approved → Printed): status only
       const result = await disbursementService.updateCheckbook(checkbookId, {
         status: newStatus,
       });
       if (result.success) {
         console.log("Checkbook updated successfully:", result.data);
-        // Show success toast
         setactionToast(newStatus);
-        // Clear selection
-        setSelectedProducts([]);
-        // Refetch the checkbook list to show updated status
+        setSelectedProducts(null);
+        setTotalAmount("");
         await fetchCheckbookDetails();
-        // If status is now Printed, trigger PDF download
         if (newStatus === "Printed") {
           const pdfUrl =
             "https://drive.google.com/file/d/1xW048fNszD5YJeQNmWAmhqQy8Ey2KG0M/view?usp=sharing";
           const openInNewTab = () => {
             const newTab = window.open(pdfUrl, "_blank");
-            // Trigger download after opening
             if (newTab) {
               const link = newTab.document.createElement("a");
               link.href = pdfUrl;
@@ -387,7 +406,6 @@ function Bankdetailselection() {
         }
       } else {
         console.error("Failed to update checkbook:", result.error);
-        // You can show an error toast here if needed
       }
     } catch (error) {
       console.error("Error updating checkbook:", error);
@@ -594,8 +612,7 @@ function Bankdetailselection() {
                   (commissionLineIdsFromState?.length ||
                     selectedCommissionLineIds?.length) > 0
                 )
-              : selectedProducts?.length === 0 ||
-                selectedProducts?.status === "Printed"
+              : !selectedProducts || selectedProducts?.status === "Printed"
           }
         />
       </div>

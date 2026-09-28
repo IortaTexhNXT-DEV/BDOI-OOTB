@@ -1,4 +1,4 @@
-From ec850f9c9d46f3d778d45ae63e18dc4dab49d9cb Mon Sep 17 00:00:00 2001
+From ff1beb9949336f25ebb3e908746247c3f56e8344 Mon Sep 17 00:00:00 2001
 From: iorta TechNXT <iortatechnxt22@gmail.com>
 Date: Mon, 28 Sep 2026 11:09:03 +0000
 Subject: [PATCH 1/2] Add the BDOI theme layer: palette, Nunito, shell and
@@ -21,7 +21,7 @@ Styling only: no screen, route or API change.
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
 ---
- package-lock.json                             |  146 +-
+ package-lock.json                             |   15 +
  package.json                                  |    4 +-
  public/bdoi/bdo-insure.png                    |  Bin 0 -> 5907 bytes
  public/bdoi/iorta-technxt.png                 |  Bin 0 -> 49072 bytes
@@ -31,7 +31,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/App.scss                                  |    2 +-
  src/Color.scss                                |   10 +-
  src/agentModule/authModule/Login/index.js     |   25 +-
- src/components/SideBar/NewSideBar.jsx         |   17 +-
+ src/components/SideBar/NewSideBar.jsx         |   31 +-
  src/components/SideBar/NewSideBar.scss        |   88 +-
  src/components/SideBar/SideBarItem.jsx        |   10 +-
  .../SideBar/SideBarItemCollapse.jsx           |    4 +-
@@ -41,7 +41,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/theme/bdoi/bdoi.scss                      |  436 ++
  src/theme/bdoi/primereact-bdoi.css            | 6077 +++++++++++++++++
  src/theme/bdoi/tokens.scss                    |   59 +
- 20 files changed, 6769 insertions(+), 192 deletions(-)
+ 20 files changed, 6731 insertions(+), 113 deletions(-)
  create mode 100644 public/bdoi/bdo-insure.png
  create mode 100644 public/bdoi/iorta-technxt.png
  create mode 100644 public/bdoi/login-photo.jpg
@@ -51,7 +51,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  create mode 100644 src/theme/bdoi/tokens.scss
 
 diff --git a/package-lock.json b/package-lock.json
-index 8603847..229fa50 100644
+index 8ba561d..229fa50 100644
 --- a/package-lock.json
 +++ b/package-lock.json
 @@ -9,6 +9,7 @@
@@ -78,65 +78,7 @@ index 8603847..229fa50 100644
      "node_modules/@fullcalendar/core": {
        "version": "6.1.15",
        "resolved": "https://registry.npmjs.org/@fullcalendar/core/-/core-6.1.15.tgz",
-@@ -17762,20 +17772,6 @@
-         "is-typedarray": "^1.0.0"
-       }
-     },
--    "node_modules/typescript": {
--      "version": "5.9.3",
--      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
--      "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
--      "license": "Apache-2.0",
--      "peer": true,
--      "bin": {
--        "tsc": "bin/tsc",
--        "tsserver": "bin/tsserver"
--      },
--      "engines": {
--        "node": ">=14.17"
--      }
--    },
-     "node_modules/unbox-primitive": {
-       "version": "1.0.2",
-       "resolved": "https://registry.npmjs.org/unbox-primitive/-/unbox-primitive-1.0.2.tgz",
-@@ -20252,8 +20248,7 @@
-         "@babel/plugin-proposal-private-property-in-object": {
-           "version": "7.21.0-placeholder-for-preset-env.2",
-           "resolved": "https://registry.npmjs.org/@babel/plugin-proposal-private-property-in-object/-/plugin-proposal-private-property-in-object-7.21.0-placeholder-for-preset-env.2.tgz",
--          "integrity": "sha512-SOSkfJDddaM7mak6cPEpswyTRnuRltl429hMraQEglW+OkovnCzsiszTmsrlY//qLFjCpQDFRvjdm2wA5pPm9w==",
--          "requires": {}
-+          "integrity": "sha512-SOSkfJDddaM7mak6cPEpswyTRnuRltl429hMraQEglW+OkovnCzsiszTmsrlY//qLFjCpQDFRvjdm2wA5pPm9w=="
-         },
-         "semver": {
-           "version": "6.3.1",
-@@ -20499,14 +20494,12 @@
-     "@csstools/postcss-unset-value": {
-       "version": "1.0.2",
-       "resolved": "https://registry.npmjs.org/@csstools/postcss-unset-value/-/postcss-unset-value-1.0.2.tgz",
--      "integrity": "sha512-c8J4roPBILnelAsdLr4XOAR/GsTm0GJi4XpcfvoWk3U6KiTCqiFYc63KhRMQQX35jYMp4Ao8Ij9+IZRgMfJp1g==",
--      "requires": {}
-+      "integrity": "sha512-c8J4roPBILnelAsdLr4XOAR/GsTm0GJi4XpcfvoWk3U6KiTCqiFYc63KhRMQQX35jYMp4Ao8Ij9+IZRgMfJp1g=="
-     },
-     "@csstools/selector-specificity": {
-       "version": "2.2.0",
-       "resolved": "https://registry.npmjs.org/@csstools/selector-specificity/-/selector-specificity-2.2.0.tgz",
--      "integrity": "sha512-+OJ9konv95ClSTOJCmMZqpd5+YGsB2S+x6w3E1oaM8UuR5j8nTNHYSz8c9BEPGDOCMQYIEEGlVPj/VY64iTbGw==",
--      "requires": {}
-+      "integrity": "sha512-+OJ9konv95ClSTOJCmMZqpd5+YGsB2S+x6w3E1oaM8UuR5j8nTNHYSz8c9BEPGDOCMQYIEEGlVPj/VY64iTbGw=="
-     },
-     "@emotion/babel-plugin": {
-       "version": "11.11.0",
-@@ -20626,8 +20619,7 @@
-     "@emotion/use-insertion-effect-with-fallbacks": {
-       "version": "1.0.1",
-       "resolved": "https://registry.npmjs.org/@emotion/use-insertion-effect-with-fallbacks/-/use-insertion-effect-with-fallbacks-1.0.1.tgz",
--      "integrity": "sha512-jT/qyKZ9rzLErtrjGgdkMBn2OP8wl0G3sQlBb3YPryvKHsjvINUhVaPFfP+fpBcOkmrVOVEEHQFJ7nbj2TH2gw==",
--      "requires": {}
-+      "integrity": "sha512-jT/qyKZ9rzLErtrjGgdkMBn2OP8wl0G3sQlBb3YPryvKHsjvINUhVaPFfP+fpBcOkmrVOVEEHQFJ7nbj2TH2gw=="
-     },
-     "@emotion/utils": {
-       "version": "1.2.1",
-@@ -20701,6 +20693,11 @@
+@@ -20683,6 +20693,11 @@
        "resolved": "https://registry.npmjs.org/@eslint/js/-/js-8.55.0.tgz",
        "integrity": "sha512-qQfo2mxH5yVom1kacMtZZJFVdW+E70mqHMJvVg6WTLo+VBuQJ4TojZlfWBjK0ve5BdEeNAVxOsl/nvNMpJOaJA=="
      },
@@ -148,328 +90,6 @@ index 8603847..229fa50 100644
      "@fullcalendar/core": {
        "version": "6.1.15",
        "resolved": "https://registry.npmjs.org/@fullcalendar/core/-/core-6.1.15.tgz",
-@@ -20712,14 +20709,12 @@
-     "@fullcalendar/daygrid": {
-       "version": "6.1.10",
-       "resolved": "https://registry.npmjs.org/@fullcalendar/daygrid/-/daygrid-6.1.10.tgz",
--      "integrity": "sha512-Z4GRm1IyHKgxXFTWGcEI0nTsvYOIkpE0aMt3/o3ER2SZkF+hfwcDFhtj0c9+WhMjXFIWYeoTnA9rUOY7Zl/nxA==",
--      "requires": {}
-+      "integrity": "sha512-Z4GRm1IyHKgxXFTWGcEI0nTsvYOIkpE0aMt3/o3ER2SZkF+hfwcDFhtj0c9+WhMjXFIWYeoTnA9rUOY7Zl/nxA=="
-     },
-     "@fullcalendar/react": {
-       "version": "6.1.10",
-       "resolved": "https://registry.npmjs.org/@fullcalendar/react/-/react-6.1.10.tgz",
--      "integrity": "sha512-RVYevo5T4RUZzR8omlbnBwRCqVNJWKryzI0ZrFULyqIYggN6uPmMuB9GvbrTjDfKhsm438KQwwhJerg2lGh3xA==",
--      "requires": {}
-+      "integrity": "sha512-RVYevo5T4RUZzR8omlbnBwRCqVNJWKryzI0ZrFULyqIYggN6uPmMuB9GvbrTjDfKhsm438KQwwhJerg2lGh3xA=="
-     },
-     "@humanwhocodes/config-array": {
-       "version": "0.11.13",
-@@ -22611,14 +22606,12 @@
-     "acorn-import-assertions": {
-       "version": "1.9.0",
-       "resolved": "https://registry.npmjs.org/acorn-import-assertions/-/acorn-import-assertions-1.9.0.tgz",
--      "integrity": "sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==",
--      "requires": {}
-+      "integrity": "sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA=="
-     },
-     "acorn-jsx": {
-       "version": "5.3.2",
-       "resolved": "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz",
--      "integrity": "sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==",
--      "requires": {}
-+      "integrity": "sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ=="
-     },
-     "acorn-walk": {
-       "version": "7.2.0",
-@@ -22687,8 +22680,7 @@
-     "ajv-keywords": {
-       "version": "3.5.2",
-       "resolved": "https://registry.npmjs.org/ajv-keywords/-/ajv-keywords-3.5.2.tgz",
--      "integrity": "sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==",
--      "requires": {}
-+      "integrity": "sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ=="
-     },
-     "ansi-escapes": {
-       "version": "4.3.2",
-@@ -23059,8 +23051,7 @@
-     "babel-plugin-named-asset-import": {
-       "version": "0.3.8",
-       "resolved": "https://registry.npmjs.org/babel-plugin-named-asset-import/-/babel-plugin-named-asset-import-0.3.8.tgz",
--      "integrity": "sha512-WXiAc++qo7XcJ1ZnTYGtLxmBCVbddAml3CEXgWaBzNzLNoxtQ8AiGEFDMOhot9XjTCQbvP5E77Fj9Gk924f00Q==",
--      "requires": {}
-+      "integrity": "sha512-WXiAc++qo7XcJ1ZnTYGtLxmBCVbddAml3CEXgWaBzNzLNoxtQ8AiGEFDMOhot9XjTCQbvP5E77Fj9Gk924f00Q=="
-     },
-     "babel-plugin-polyfill-corejs2": {
-       "version": "0.4.7",
-@@ -23721,8 +23712,7 @@
-     "css-declaration-sorter": {
-       "version": "6.4.1",
-       "resolved": "https://registry.npmjs.org/css-declaration-sorter/-/css-declaration-sorter-6.4.1.tgz",
--      "integrity": "sha512-rtdthzxKuyq6IzqX6jEcIzQF/YqccluefyCYheovBOLhFT/drQA9zj/UbRAa9J7C0o6EG6u3E6g+vKkay7/k3g==",
--      "requires": {}
-+      "integrity": "sha512-rtdthzxKuyq6IzqX6jEcIzQF/YqccluefyCYheovBOLhFT/drQA9zj/UbRAa9J7C0o6EG6u3E6g+vKkay7/k3g=="
-     },
-     "css-has-pseudo": {
-       "version": "3.0.4",
-@@ -23805,8 +23795,7 @@
-     "css-prefers-color-scheme": {
-       "version": "6.0.3",
-       "resolved": "https://registry.npmjs.org/css-prefers-color-scheme/-/css-prefers-color-scheme-6.0.3.tgz",
--      "integrity": "sha512-4BqMbZksRkJQx2zAjrokiGMd07RqOa2IxIrrN10lyBe9xhn9DEvjUK79J6jkeiv9D9hQFXKb6g1jwU62jziJZA==",
--      "requires": {}
-+      "integrity": "sha512-4BqMbZksRkJQx2zAjrokiGMd07RqOa2IxIrrN10lyBe9xhn9DEvjUK79J6jkeiv9D9hQFXKb6g1jwU62jziJZA=="
-     },
-     "css-select": {
-       "version": "4.3.0",
-@@ -23910,8 +23899,7 @@
-     "cssnano-utils": {
-       "version": "3.1.0",
-       "resolved": "https://registry.npmjs.org/cssnano-utils/-/cssnano-utils-3.1.0.tgz",
--      "integrity": "sha512-JQNR19/YZhz4psLX/rQ9M83e3z2Wf/HdJbryzte4a3NSuafyp9w/I4U+hx5C2S9g41qlstH7DEWnZaaj83OuEA==",
--      "requires": {}
-+      "integrity": "sha512-JQNR19/YZhz4psLX/rQ9M83e3z2Wf/HdJbryzte4a3NSuafyp9w/I4U+hx5C2S9g41qlstH7DEWnZaaj83OuEA=="
-     },
-     "csso": {
-       "version": "4.2.0",
-@@ -24839,8 +24827,7 @@
-     "eslint-plugin-react-hooks": {
-       "version": "4.6.0",
-       "resolved": "https://registry.npmjs.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.0.tgz",
--      "integrity": "sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==",
--      "requires": {}
-+      "integrity": "sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g=="
-     },
-     "eslint-plugin-testing-library": {
-       "version": "5.11.1",
-@@ -25940,8 +25927,7 @@
-     "icss-utils": {
-       "version": "5.1.0",
-       "resolved": "https://registry.npmjs.org/icss-utils/-/icss-utils-5.1.0.tgz",
--      "integrity": "sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==",
--      "requires": {}
-+      "integrity": "sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA=="
-     },
-     "idb": {
-       "version": "7.1.1",
-@@ -27091,8 +27077,7 @@
-     "jest-pnp-resolver": {
-       "version": "1.2.3",
-       "resolved": "https://registry.npmjs.org/jest-pnp-resolver/-/jest-pnp-resolver-1.2.3.tgz",
--      "integrity": "sha512-+3NpwQEnRoIBtx4fyhblQDPgJI0H1IEIkX7ShLUjPGA7TtUTvI1oiKi3SR4oBR0hQhQR80l4WAe5RrXBwWMA8w==",
--      "requires": {}
-+      "integrity": "sha512-+3NpwQEnRoIBtx4fyhblQDPgJI0H1IEIkX7ShLUjPGA7TtUTvI1oiKi3SR4oBR0hQhQR80l4WAe5RrXBwWMA8w=="
-     },
-     "jest-regex-util": {
-       "version": "27.5.1",
-@@ -28846,8 +28831,7 @@
-     "postcss-browser-comments": {
-       "version": "4.0.0",
-       "resolved": "https://registry.npmjs.org/postcss-browser-comments/-/postcss-browser-comments-4.0.0.tgz",
--      "integrity": "sha512-X9X9/WN3KIvY9+hNERUqX9gncsgBA25XaeR+jshHz2j8+sYyHktHw1JdKuMjeLpGktXidqDhA7b/qm1mrBDmgg==",
--      "requires": {}
-+      "integrity": "sha512-X9X9/WN3KIvY9+hNERUqX9gncsgBA25XaeR+jshHz2j8+sYyHktHw1JdKuMjeLpGktXidqDhA7b/qm1mrBDmgg=="
-     },
-     "postcss-calc": {
-       "version": "8.2.4",
-@@ -28945,26 +28929,22 @@
-     "postcss-discard-comments": {
-       "version": "5.1.2",
-       "resolved": "https://registry.npmjs.org/postcss-discard-comments/-/postcss-discard-comments-5.1.2.tgz",
--      "integrity": "sha512-+L8208OVbHVF2UQf1iDmRcbdjJkuBF6IS29yBDSiWUIzpYaAhtNl6JYnYm12FnkeCwQqF5LeklOu6rAqgfBZqQ==",
--      "requires": {}
-+      "integrity": "sha512-+L8208OVbHVF2UQf1iDmRcbdjJkuBF6IS29yBDSiWUIzpYaAhtNl6JYnYm12FnkeCwQqF5LeklOu6rAqgfBZqQ=="
-     },
-     "postcss-discard-duplicates": {
-       "version": "5.1.0",
-       "resolved": "https://registry.npmjs.org/postcss-discard-duplicates/-/postcss-discard-duplicates-5.1.0.tgz",
--      "integrity": "sha512-zmX3IoSI2aoenxHV6C7plngHWWhUOV3sP1T8y2ifzxzbtnuhk1EdPwm0S1bIUNaJ2eNbWeGLEwzw8huPD67aQw==",
--      "requires": {}
-+      "integrity": "sha512-zmX3IoSI2aoenxHV6C7plngHWWhUOV3sP1T8y2ifzxzbtnuhk1EdPwm0S1bIUNaJ2eNbWeGLEwzw8huPD67aQw=="
-     },
-     "postcss-discard-empty": {
-       "version": "5.1.1",
-       "resolved": "https://registry.npmjs.org/postcss-discard-empty/-/postcss-discard-empty-5.1.1.tgz",
--      "integrity": "sha512-zPz4WljiSuLWsI0ir4Mcnr4qQQ5e1Ukc3i7UfE2XcrwKK2LIPIqE5jxMRxO6GbI3cv//ztXDsXwEWT3BHOGh3A==",
--      "requires": {}
-+      "integrity": "sha512-zPz4WljiSuLWsI0ir4Mcnr4qQQ5e1Ukc3i7UfE2XcrwKK2LIPIqE5jxMRxO6GbI3cv//ztXDsXwEWT3BHOGh3A=="
-     },
-     "postcss-discard-overridden": {
-       "version": "5.1.0",
-       "resolved": "https://registry.npmjs.org/postcss-discard-overridden/-/postcss-discard-overridden-5.1.0.tgz",
--      "integrity": "sha512-21nOL7RqWR1kasIVdKs8HNqQJhFxLsyRfAnUDm4Fe4t4mCWL9OJiHvlHPjcd8zc5Myu89b/7wZDnOSjFgeWRtw==",
--      "requires": {}
-+      "integrity": "sha512-21nOL7RqWR1kasIVdKs8HNqQJhFxLsyRfAnUDm4Fe4t4mCWL9OJiHvlHPjcd8zc5Myu89b/7wZDnOSjFgeWRtw=="
-     },
-     "postcss-double-position-gradients": {
-       "version": "3.1.2",
-@@ -28986,8 +28966,7 @@
-     "postcss-flexbugs-fixes": {
-       "version": "5.0.2",
-       "resolved": "https://registry.npmjs.org/postcss-flexbugs-fixes/-/postcss-flexbugs-fixes-5.0.2.tgz",
--      "integrity": "sha512-18f9voByak7bTktR2QgDveglpn9DTbBWPUzSOe9g0N4WR/2eSt6Vrcbf0hmspvMI6YWGywz6B9f7jzpFNJJgnQ==",
--      "requires": {}
-+      "integrity": "sha512-18f9voByak7bTktR2QgDveglpn9DTbBWPUzSOe9g0N4WR/2eSt6Vrcbf0hmspvMI6YWGywz6B9f7jzpFNJJgnQ=="
-     },
-     "postcss-focus-visible": {
-       "version": "6.0.4",
-@@ -29008,14 +28987,12 @@
-     "postcss-font-variant": {
-       "version": "5.0.0",
-       "resolved": "https://registry.npmjs.org/postcss-font-variant/-/postcss-font-variant-5.0.0.tgz",
--      "integrity": "sha512-1fmkBaCALD72CK2a9i468mA/+tr9/1cBxRRMXOUaZqO43oWPR5imcyPjXwuv7PXbCid4ndlP5zWhidQVVa3hmA==",
--      "requires": {}
-+      "integrity": "sha512-1fmkBaCALD72CK2a9i468mA/+tr9/1cBxRRMXOUaZqO43oWPR5imcyPjXwuv7PXbCid4ndlP5zWhidQVVa3hmA=="
-     },
-     "postcss-gap-properties": {
-       "version": "3.0.5",
-       "resolved": "https://registry.npmjs.org/postcss-gap-properties/-/postcss-gap-properties-3.0.5.tgz",
--      "integrity": "sha512-IuE6gKSdoUNcvkGIqdtjtcMtZIFyXZhmFd5RUlg97iVEvp1BZKV5ngsAjCjrVy+14uhGBQl9tzmi1Qwq4kqVOg==",
--      "requires": {}
-+      "integrity": "sha512-IuE6gKSdoUNcvkGIqdtjtcMtZIFyXZhmFd5RUlg97iVEvp1BZKV5ngsAjCjrVy+14uhGBQl9tzmi1Qwq4kqVOg=="
-     },
-     "postcss-image-set-function": {
-       "version": "4.0.7",
-@@ -29038,8 +29015,7 @@
-     "postcss-initial": {
-       "version": "4.0.1",
-       "resolved": "https://registry.npmjs.org/postcss-initial/-/postcss-initial-4.0.1.tgz",
--      "integrity": "sha512-0ueD7rPqX8Pn1xJIjay0AZeIuDoF+V+VvMt/uOnn+4ezUKhZM/NokDeP6DwMNyIoYByuN/94IQnt5FEkaN59xQ==",
--      "requires": {}
-+      "integrity": "sha512-0ueD7rPqX8Pn1xJIjay0AZeIuDoF+V+VvMt/uOnn+4ezUKhZM/NokDeP6DwMNyIoYByuN/94IQnt5FEkaN59xQ=="
-     },
-     "postcss-js": {
-       "version": "4.0.1",
-@@ -29092,14 +29068,12 @@
-     "postcss-logical": {
-       "version": "5.0.4",
-       "resolved": "https://registry.npmjs.org/postcss-logical/-/postcss-logical-5.0.4.tgz",
--      "integrity": "sha512-RHXxplCeLh9VjinvMrZONq7im4wjWGlRJAqmAVLXyZaXwfDWP73/oq4NdIp+OZwhQUMj0zjqDfM5Fj7qby+B4g==",
--      "requires": {}
-+      "integrity": "sha512-RHXxplCeLh9VjinvMrZONq7im4wjWGlRJAqmAVLXyZaXwfDWP73/oq4NdIp+OZwhQUMj0zjqDfM5Fj7qby+B4g=="
-     },
-     "postcss-media-minmax": {
-       "version": "5.0.0",
-       "resolved": "https://registry.npmjs.org/postcss-media-minmax/-/postcss-media-minmax-5.0.0.tgz",
--      "integrity": "sha512-yDUvFf9QdFZTuCUg0g0uNSHVlJ5X1lSzDZjPSFaiCWvjgsvu8vEVxtahPrLMinIDEEGnx6cBe6iqdx5YWz08wQ==",
--      "requires": {}
-+      "integrity": "sha512-yDUvFf9QdFZTuCUg0g0uNSHVlJ5X1lSzDZjPSFaiCWvjgsvu8vEVxtahPrLMinIDEEGnx6cBe6iqdx5YWz08wQ=="
-     },
-     "postcss-merge-longhand": {
-       "version": "5.1.7",
-@@ -29160,8 +29134,7 @@
-     "postcss-modules-extract-imports": {
-       "version": "3.0.0",
-       "resolved": "https://registry.npmjs.org/postcss-modules-extract-imports/-/postcss-modules-extract-imports-3.0.0.tgz",
--      "integrity": "sha512-bdHleFnP3kZ4NYDhuGlVK+CMrQ/pqUm8bx/oGL93K6gVwiclvX5x0n76fYMKuIGKzlABOy13zsvqjb0f92TEXw==",
--      "requires": {}
-+      "integrity": "sha512-bdHleFnP3kZ4NYDhuGlVK+CMrQ/pqUm8bx/oGL93K6gVwiclvX5x0n76fYMKuIGKzlABOy13zsvqjb0f92TEXw=="
-     },
-     "postcss-modules-local-by-default": {
-       "version": "4.0.3",
-@@ -29219,8 +29192,7 @@
-     "postcss-normalize-charset": {
-       "version": "5.1.0",
-       "resolved": "https://registry.npmjs.org/postcss-normalize-charset/-/postcss-normalize-charset-5.1.0.tgz",
--      "integrity": "sha512-mSgUJ+pd/ldRGVx26p2wz9dNZ7ji6Pn8VWBajMXFf8jk7vUoSrZ2lt/wZR7DtlZYKesmZI680qjr2CeFF2fbUg==",
--      "requires": {}
-+      "integrity": "sha512-mSgUJ+pd/ldRGVx26p2wz9dNZ7ji6Pn8VWBajMXFf8jk7vUoSrZ2lt/wZR7DtlZYKesmZI680qjr2CeFF2fbUg=="
-     },
-     "postcss-normalize-display-values": {
-       "version": "5.1.0",
-@@ -29291,8 +29263,7 @@
-     "postcss-opacity-percentage": {
-       "version": "1.1.3",
-       "resolved": "https://registry.npmjs.org/postcss-opacity-percentage/-/postcss-opacity-percentage-1.1.3.tgz",
--      "integrity": "sha512-An6Ba4pHBiDtyVpSLymUUERMo2cU7s+Obz6BTrS+gxkbnSBNKSuD0AVUc+CpBMrpVPKKfoVz0WQCX+Tnst0i4A==",
--      "requires": {}
-+      "integrity": "sha512-An6Ba4pHBiDtyVpSLymUUERMo2cU7s+Obz6BTrS+gxkbnSBNKSuD0AVUc+CpBMrpVPKKfoVz0WQCX+Tnst0i4A=="
-     },
-     "postcss-ordered-values": {
-       "version": "5.1.3",
-@@ -29314,8 +29285,7 @@
-     "postcss-page-break": {
-       "version": "3.0.4",
-       "resolved": "https://registry.npmjs.org/postcss-page-break/-/postcss-page-break-3.0.4.tgz",
--      "integrity": "sha512-1JGu8oCjVXLa9q9rFTo4MbeeA5FMe00/9C7lN4va606Rdb+HkxXtXsmEDrIraQ11fGz/WvKWa8gMuCKkrXpTsQ==",
--      "requires": {}
-+      "integrity": "sha512-1JGu8oCjVXLa9q9rFTo4MbeeA5FMe00/9C7lN4va606Rdb+HkxXtXsmEDrIraQ11fGz/WvKWa8gMuCKkrXpTsQ=="
-     },
-     "postcss-place": {
-       "version": "7.0.5",
-@@ -29409,8 +29379,7 @@
-     "postcss-replace-overflow-wrap": {
-       "version": "4.0.0",
-       "resolved": "https://registry.npmjs.org/postcss-replace-overflow-wrap/-/postcss-replace-overflow-wrap-4.0.0.tgz",
--      "integrity": "sha512-KmF7SBPphT4gPPcKZc7aDkweHiKEEO8cla/GjcBK+ckKxiZslIu3C4GCRW3DNfL0o7yW7kMQu9xlZ1kXRXLXtw==",
--      "requires": {}
-+      "integrity": "sha512-KmF7SBPphT4gPPcKZc7aDkweHiKEEO8cla/GjcBK+ckKxiZslIu3C4GCRW3DNfL0o7yW7kMQu9xlZ1kXRXLXtw=="
-     },
-     "postcss-selector-not": {
-       "version": "6.0.1",
-@@ -30006,8 +29975,7 @@
-     "redux-thunk": {
-       "version": "3.1.0",
-       "resolved": "https://registry.npmjs.org/redux-thunk/-/redux-thunk-3.1.0.tgz",
--      "integrity": "sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==",
--      "requires": {}
-+      "integrity": "sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw=="
-     },
-     "reflect.getprototypeof": {
-       "version": "1.0.4",
-@@ -30951,8 +30919,7 @@
-     "style-loader": {
-       "version": "3.3.3",
-       "resolved": "https://registry.npmjs.org/style-loader/-/style-loader-3.3.3.tgz",
--      "integrity": "sha512-53BiGLXAcll9maCYtZi2RCQZKa8NQQai5C4horqKyRmHj9H7QmcUyucrH+4KW/gBQbXM2AsB0axoEcFZPlfPcw==",
--      "requires": {}
-+      "integrity": "sha512-53BiGLXAcll9maCYtZi2RCQZKa8NQQai5C4horqKyRmHj9H7QmcUyucrH+4KW/gBQbXM2AsB0axoEcFZPlfPcw=="
-     },
-     "stylehacks": {
-       "version": "5.1.1",
-@@ -31480,12 +31447,6 @@
-         "is-typedarray": "^1.0.0"
-       }
-     },
--    "typescript": {
--      "version": "5.9.3",
--      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
--      "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
--      "peer": true
--    },
-     "unbox-primitive": {
-       "version": "1.0.2",
-       "resolved": "https://registry.npmjs.org/unbox-primitive/-/unbox-primitive-1.0.2.tgz",
-@@ -31588,8 +31549,7 @@
-     "use-sync-external-store": {
-       "version": "1.6.0",
-       "resolved": "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz",
--      "integrity": "sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==",
--      "requires": {}
-+      "integrity": "sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w=="
-     },
-     "util-deprecate": {
-       "version": "1.0.2",
-@@ -31876,8 +31836,7 @@
-         "ws": {
-           "version": "8.15.1",
-           "resolved": "https://registry.npmjs.org/ws/-/ws-8.15.1.tgz",
--          "integrity": "sha512-W5OZiCjXEmk0yZ66ZN82beM5Sz7l7coYxpRkzS+p9PP+ToQry8szKh+61eNktr7EA9DOwvFGhfC605jDHbP6QQ==",
--          "requires": {}
-+          "integrity": "sha512-W5OZiCjXEmk0yZ66ZN82beM5Sz7l7coYxpRkzS+p9PP+ToQry8szKh+61eNktr7EA9DOwvFGhfC605jDHbP6QQ=="
-         }
-       }
-     },
-@@ -32368,8 +32327,7 @@
-     "ws": {
-       "version": "7.5.9",
-       "resolved": "https://registry.npmjs.org/ws/-/ws-7.5.9.tgz",
--      "integrity": "sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q==",
--      "requires": {}
-+      "integrity": "sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q=="
-     },
-     "xml-name-validator": {
-       "version": "3.0.0",
 diff --git a/package.json b/package.json
 index cf0b4ac..a7999c6 100644
 --- a/package.json
@@ -4225,10 +3845,10 @@ index 0000000..80f0bc7
 +fs.writeFileSync(target, banner + css);
 +console.log(`wrote ${path.relative(process.cwd(), target)} (${css.length} bytes)`);
 diff --git a/src/App.scss b/src/App.scss
-index cab0976..a79a5e2 100644
+index 418f470..b715f16 100644
 --- a/src/App.scss
 +++ b/src/App.scss
-@@ -15,5 +15,5 @@
+@@ -21,5 +21,5 @@
    background-color: #1c2536 !important;
  }
  .p-card {
@@ -4273,22 +3893,22 @@ index b5a6148..9bfd16a 100644
 -$body-background: #f8f9fa;
 +$body-background: #f6f6f6;
 diff --git a/src/agentModule/authModule/Login/index.js b/src/agentModule/authModule/Login/index.js
-index 9646645..4403856 100644
+index f19db8e..fd4b06d 100644
 --- a/src/agentModule/authModule/Login/index.js
 +++ b/src/agentModule/authModule/Login/index.js
-@@ -16,7 +16,7 @@ const getLanguageOptions = (t) => [
+@@ -19,7 +19,7 @@ const getLanguageOptions = (t) => [
    { label: t("common.thai"), value: "th" },
  ];
  
--const bdoBannerImage = "/iortaloginbanner.gif";
+-const bdoBannerImage = "/bdologinbanner.png";
 +const bdoBannerImage = "/bdoi/login-photo.jpg";
  const initialValue = {
-   EmailAddress: "juan.santos",
-   Password: "agent123",
-@@ -93,21 +93,8 @@ const Login = () => {
-     <div className="grid m-0 agent__container__login">
-       <CustomToast ref={toastRef} message={t("login.loginSuccess")} />
-       <div className="col-12 md:col-8 left__side__login bdo-theme">
+   EmailAddress: "",
+   Password: "",
+@@ -124,34 +124,18 @@ const Login = () => {
+           background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
+         }}
+       >
 -        <div className="bdo-content-overlay">
 -          <div className="bdo-tagline">
 -            <h1>{t("login.tagline")}</h1>
@@ -4298,7 +3918,7 @@ index 9646645..4403856 100644
          <div className="bdo-banner-container">
 -          <img
 -            src={bdoBannerImage}
--            alt="iortaTechNxt Insurance"
+-            alt="BDO Insurance"
 -            className="bdo-banner-image"
 -          />
 -        </div>
@@ -4308,14 +3928,13 @@ index 9646645..4403856 100644
          </div>
        </div>
        <div className="col-12 md:col-4 login__side__screen p-5">
-@@ -122,12 +109,11 @@ const Login = () => {
-         </div>
          <div className="col-12 md:col-12 lg:col-12 bdo-logo-container">
  
 -          {/* <img src="/chinabank.png" alt="iortaTechNxt Logo" style={{ width: "70%", height: "70%" }} /> */}
 -
--          <img src="/iorta.png" alt="iortaTechNxt Logo" className="bdo-logo" />
-+          <img src="/bdoi/bdo-insure.png" alt="BDO Insure" className="bdo-logo" />
+-          {/* <img src="/iorta.png" alt="iortaTechNxt Logo" className="bdo-logo" /> */}
+-
+           <img src={logoUrl} alt="Logo" className="bdo-logo" />
          </div>
          <div className="col-12 md:col-12 lg:col-12  ">
            <div className="login__header">{t("login.title")}</div>
@@ -4323,7 +3942,7 @@ index 9646645..4403856 100644
          </div>
  
          <div className="col-12 md:col-12 lg:col-12  ">
-@@ -174,7 +160,8 @@ const Login = () => {
+@@ -198,7 +182,8 @@ const Login = () => {
          </div>
          <div className="col-12 md:col-12 lg:col-12 tech-footer">
            <div className="tech-powered-text">
@@ -4334,10 +3953,10 @@ index 9646645..4403856 100644
          </div>
        </div>
 diff --git a/src/components/SideBar/NewSideBar.jsx b/src/components/SideBar/NewSideBar.jsx
-index 14b540c..cc4a348 100644
+index c0bb09b..3ef6724 100644
 --- a/src/components/SideBar/NewSideBar.jsx
 +++ b/src/components/SideBar/NewSideBar.jsx
-@@ -4,7 +4,6 @@ import { menuList } from "./list";
+@@ -5,7 +5,6 @@ import { menuList } from "./list";
  import "./NewSideBar.scss";
  import SidebarItemCollapse from "./SideBarItemCollapse";
  import SidebarItem from "./SideBarItem";
@@ -4345,13 +3964,16 @@ index 14b540c..cc4a348 100644
  import { useLocation, useNavigate } from "react-router-dom";
  import findNamesByPath from "../../utility/findSidBarNames";
  import Cookies from "js-cookie";
-@@ -443,18 +442,10 @@ const NewSideBar = ({ onNavigate }) => {
+@@ -447,32 +446,10 @@ const NewSideBar = ({ onNavigate }) => {
      <div className="sidebar__overall__container">
        <ul className="list">
          {/* <div className="stack"> */}
 -        <div
 -          style={{
--            height: "20%",
+-            display: "flex",
+-            alignItems: "center",
+-            minHeight: "72px",
+-            padding: "12px 28px 8px 64px",
 -          }}
 -        >
 -          {/* <img
@@ -4359,10 +3981,21 @@ index 14b540c..cc4a348 100644
 -            alt="iortaTechNxt Logo"
 -            style={{ width: "100%", height: "20%" }}
 -          /> */}
--          <SvgFinalLogo />
+-          {/* <SvgFinalLogo /> */}
+-          <img
+-            src={logoUrl}
+-            alt="BDO Insure"
+-            style={{
+-              maxWidth: "100%",
+-              maxHeight: "36px",
+-              width: "auto",
+-              height: "auto",
+-              objectFit: "contain",
+-            }}
+-          />
 -        </div>
 +        <a className="bdoi-brand" href="/" aria-label="BIBS home">
-+          <img src="/bdoi/bdo-insure.png" alt="BDO Insure" />
++          <img src={logoUrl} alt="BDO Insure" />
 +          <span className="bdoi-brand-product">BIBS · BDOI Broker System</span>
 +        </a>
  
@@ -4672,7 +4305,7 @@ index 82b5249..f7cef77 100644
            }}
          >
 diff --git a/src/components/SideBar/SideBarItemCollapse.jsx b/src/components/SideBar/SideBarItemCollapse.jsx
-index 5bead55..70ea258 100644
+index 224fbe5..8bcfb76 100644
 --- a/src/components/SideBar/SideBarItemCollapse.jsx
 +++ b/src/components/SideBar/SideBarItemCollapse.jsx
 @@ -179,8 +179,8 @@ const SidebarItemCollapse = ({
@@ -4711,7 +4344,7 @@ index e5df351..c819c39 100644
  // Lazy load your application component
  // const LazyApp = lazy(() => import('./App'));
 diff --git a/src/locales/en.json b/src/locales/en.json
-index 6ba1ab2..d53b34f 100644
+index 998c07e..8e1e3c4 100644
 --- a/src/locales/en.json
 +++ b/src/locales/en.json
 @@ -55,7 +55,8 @@
@@ -4734,7 +4367,7 @@ index 6ba1ab2..d53b34f 100644
      "emailAddress": "Email Address",
      "emailAddressRequired": "Email Address is required",
 diff --git a/src/locales/th.json b/src/locales/th.json
-index cb0df66..de59381 100644
+index ee74656..6c3bc9e 100644
 --- a/src/locales/th.json
 +++ b/src/locales/th.json
 @@ -55,7 +55,8 @@
@@ -11350,23 +10983,21 @@ index 0000000..24c3a8f
 2.43.0
 
 
-From cb0cf8f4147e65a00c5363cf432d9b85dc1d1d23 Mon Sep 17 00:00:00 2001
+From e48238ae80acb72889af19ba961c586622d2d5d3 Mon Sep 17 00:00:00 2001
 From: iorta TechNXT <iortatechnxt22@gmail.com>
-Date: Mon, 28 Sep 2026 11:19:29 +0000
-Subject: [PATCH 2/2] Replace the hard-coded indigo palette and Poppins/Inter
- with the BDOI palette and Nunito
+Date: Mon, 28 Sep 2026 11:43:39 +0000
+Subject: [PATCH 2/2] Replace the hard-coded indigo / old BDO blues and
+ Poppins/Inter with the BDOI palette and Nunito
 
-Mechanical replacement across src (scss, css, js, jsx) of the colour and
-font literals that screens set inline instead of through Color.scss:
-indigo shades to the BDO Style Guide blues; the old dark sidebar fill to
-white where it is a background and to Near Black where it is a text
-colour; Poppins / Inter font declarations to Nunito with Arial as the
-fallback. No selector, layout or logic change.
+Generated by scripts/apply-bdoi-palette.js (npm run theme:palette), which is
+committed so the same rewrite can be re-run on later merges.
 
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
 ---
- src/App.scss                                  |   2 +-
+ package.json                                  |   3 +-
+ scripts/apply-bdoi-palette.js                 |  75 +++++++++
+ src/App.scss                                  |   8 +-
  src/Color.scss                                |  12 +-
  .../EmployeeFlow/CQEmployeeBulkUpload.js      |  26 +--
  .../EmployeeFlow/CQPolicyAndRiskDetails.js    |  22 +--
@@ -11374,7 +11005,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/agentModule/EmployeeFlow/index.scss       | 106 ++++++------
  .../AccountingQuery/index.scss                |   6 +-
  .../AllClientsAccountingView/index.scss       |   2 +-
- src/agentModule/authModule/Login/index.scss   |  32 ++--
+ src/agentModule/authModule/Login/index.scss   |  34 ++--
  .../claimModule/claimDetail/index.scss        |   2 +-
  .../claimModule/claimTable/index.jsx          |   4 +-
  src/agentModule/claimModule/index.scss        |  48 +++---
@@ -11416,10 +11047,11 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  .../viewUploadEndorsement/index.scss          |  28 ++--
  .../FireLeadCreation/FireLeadCreationCard.js  |   2 +-
  .../FireLeadCreationCard.scss                 |  10 +-
+ .../IarLeadCreation/IarLeadCreationCard.scss  |   2 +-
  .../leadModule/leadCreation/index.scss        |  16 +-
  .../leadCreation/leadCreationCard/index.scss  |   4 +-
  .../leadModule/leadEdit/index.scss            |  20 +--
- .../leadModule/leadListing/index.js           |  10 +-
+ .../leadModule/leadListing/index.js           |  12 +-
  .../leadModule/leadListing/index.scss         |  32 ++--
  .../LeadListingAllTable/index.js              |   4 +-
  .../LeadListingHomeTable/index.js             |   4 +-
@@ -11445,7 +11077,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/agentModule/policyModule/index.jsx        |   4 +-
  src/agentModule/policyModule/index.scss       |  48 +++---
  .../policyModule/policyTable/index.jsx        |   6 +-
- src/agentModule/quotationModule/index.jsx     |   4 +-
+ src/agentModule/quotationModule/index.jsx     |   6 +-
  src/agentModule/quotationModule/index.scss    |  48 +++---
  .../quotationModule/quotationTable/index.jsx  |   6 +-
  .../quoteModule/accessories/index.scss        |  18 +-
@@ -11477,9 +11109,9 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  .../productRecommandation/index.scss          | 154 +++++++++---------
  .../quoteComparisonView/index.scss            |  46 +++---
  .../quoteDetailView/Modal/index.scss          |  18 +-
- .../quoteModule/quoteDetailView/index.scss    |  26 +--
+ .../quoteModule/quoteDetailView/index.scss    |  28 ++--
  .../quoteModule/quoteListing/index.scss       |  36 ++--
- .../quoteListing/quoteListingCard/index.js    |  18 +-
+ .../quoteListing/quoteListingCard/index.js    |  20 +--
  .../quoteListing/quoteListingCard/index.scss  |   8 +-
  .../quoteModule/uploadPolicy/index.scss       |  22 +--
  .../uploadVehiclePhotos/index.scss            |  24 +--
@@ -11497,6 +11129,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/assets/agentIcon/SvgInxTlinkicon.jsx      |   2 +-
  src/assets/agentIcon/SvgPaymentLinkIcon.jsx   |   4 +-
  src/assets/agentIcon/SvgQr.jsx                |   2 +-
+ src/assets/agentIcon/SvgSendToInsurerIcon.jsx |   2 +-
  src/assets/agentIcon/SvgStore.jsx             |   2 +-
  src/assets/agentIcon/SvgUpload.jsx            |   2 +-
  src/assets/agentIcon/SvgUploadClose.jsx       |   4 +-
@@ -11521,6 +11154,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/assets/icons/SvgUploade.jsx               |   2 +-
  src/components/AgentSideBar/index.js          |  24 +--
  src/components/ChartComponent/index.scss      |  16 +-
+ src/components/Footer/index.scss              |  22 +--
  src/components/GobackComponent/index.jsx      |   2 +-
  src/components/Header/index.jsx               |   2 +-
  src/components/InputField/index.scss          |   6 +-
@@ -11594,7 +11228,7 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  .../DepartmentMasterInitial/index.js          |   4 +-
  .../DepartmentMasterInitial/index.scss        |  12 +-
  .../ExchangeRateMaster/AddExchange/index.scss |  12 +-
- .../SaveAndEditExchange/index.scss            |  10 +-
+ .../SaveAndEditExchange/index.scss            |  12 +-
  .../ViewExchange/index.scss                   |  12 +-
  .../ExchangeRateMaster/index.js               |   6 +-
  .../ExchangeRateMaster/index.scss             |  30 ++--
@@ -11811,17 +11445,129 @@ Claude-Session: https://claude.ai/code/session_01QpQXMLBHeDzTeTyCLm6kBF
  src/module/Reversals/TableData/TableData.jsx  |   2 +-
  src/module/Reversals/TableData/index.scss     |  10 +-
  src/module/Reversals/index.scss               |  30 ++--
+ src/module/SystemSettings/index.js            |  18 +-
+ src/module/SystemSettings/index.scss          |  34 ++--
  .../openEntryMatching/OpenEntryMatching.scss  |  36 ++--
  .../OpenEntryUnmatching.scss                  |  40 ++---
  src/routes/ProtectedRoute/index.scss          |   8 +-
  src/styles/modal-responsive.scss              |   8 +-
- 449 files changed, 3204 insertions(+), 3204 deletions(-)
+ src/utility/systemCurrencies.js               |   4 +-
+ 457 files changed, 3331 insertions(+), 3255 deletions(-)
+ create mode 100644 scripts/apply-bdoi-palette.js
 
+diff --git a/package.json b/package.json
+index a7999c6..ca8b2f3 100644
+--- a/package.json
++++ b/package.json
+@@ -45,7 +45,8 @@
+     "build": "craco build",
+     "test": "react-scripts test",
+     "eject": "react-scripts eject",
+-    "theme:bdoi": "node scripts/build-bdoi-theme.js"
++    "theme:bdoi": "node scripts/build-bdoi-theme.js",
++    "theme:palette": "node scripts/apply-bdoi-palette.js"
+   },
+   "eslintConfig": {
+     "extends": [
+diff --git a/scripts/apply-bdoi-palette.js b/scripts/apply-bdoi-palette.js
+new file mode 100644
+index 0000000..f2d079b
+--- /dev/null
++++ b/scripts/apply-bdoi-palette.js
+@@ -0,0 +1,75 @@
++/*
++ * One-off codemod behind the BDOI theme: rewrites the colours and fonts that are hard-coded in
++ * component stylesheets and inline styles under src/ to the BDO Style Guide palette and Nunito.
++ * Safe to run again (already converted values are left alone). src/theme/bdoi is skipped.
++ *
++ *   node scripts/apply-bdoi-palette.js
++ */
++const fs = require("fs");
++const path = require("path");
++
++const root = path.join(__dirname, "..", "src");
++const skip = path.join(root, "theme", "bdoi");
++// The System Settings colour presets are user choices, not theme values.
++const keep = [path.join(root, "module", "SystemSettings", "index.js")];
++const NUNITO_CSS = '"Nunito", Arial, sans-serif';
++const NUNITO_JS = '"Nunito, Arial, sans-serif"';
++
++const hexMap = {
++  "#6366f1": "#0072d8", // indigo -> CTA Blue
++  "#4f46e5": "#005fb4", // deep indigo -> CTA Blue hover
++  "#4338ca": "#004ea8", // indigo text -> Header Blue
++  "#c7d2fe": "#bfdcf2",
++  "#e0e7ff": "#e5f5ff", // -> Background Blue
++  "#eef2ff": "#eef8ff",
++  "#0056b3": "#0072d8", // old BDO blue -> CTA Blue
++  "#003d82": "#004ea8", // old BDO navy -> Header Blue
++  "#0062ff": "#0072d8",
++};
++const hexRe = new RegExp(`(${Object.keys(hexMap).join("|")})(?![0-9a-f])`, "gi");
++
++function convert(text, isStyle) {
++  let out = text.replace(hexRe, (m) => hexMap[m.toLowerCase()]);
++  out = out.replace(/rgba\(\s*99\s*,\s*102\s*,\s*241\s*,/g, "rgba(0, 114, 216,");
++  // The old dark sidebar colour: white where it paints a background, near black where it is text.
++  out = out
++    .split("\n")
++    .map((line) =>
++      /#1c2536/i.test(line)
++        ? line.replace(/#1c2536/gi, /background/i.test(line) ? "#ffffff" : "#2e2e2e")
++        : line
++    )
++    .join("\n");
++  if (isStyle) {
++    out = out.replace(
++      /font-family:\s*([^;{}\n]*?)(\s*!important)?\s*;/g,
++      (m, value, imp) =>
++        /poppins|inter/i.test(value) && !/nunito/i.test(value)
++          ? `font-family: ${NUNITO_CSS}${imp || ""};`
++          : m
++    );
++  } else {
++    out = out.replace(/fontFamily:\s*(["'`])([^"'`\n]*)\1/g, (m, q, value) =>
++      /poppins|inter/i.test(value) && !/nunito/i.test(value) ? `fontFamily: ${NUNITO_JS}` : m
++    );
++  }
++  return out;
++}
++
++let changed = 0;
++(function walk(dir) {
++  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
++    const full = path.join(dir, entry.name);
++    if (full === skip || keep.includes(full)) continue;
++    if (entry.isDirectory()) walk(full);
++    else if (/\.(s?css|jsx?|tsx?)$/.test(entry.name)) {
++      const text = fs.readFileSync(full, "utf8");
++      const next = convert(text, /\.s?css$/.test(entry.name));
++      if (next !== text) {
++        fs.writeFileSync(full, next);
++        changed += 1;
++      }
++    }
++  }
++})(root);
++console.log(`apply-bdoi-palette: ${changed} files updated`);
 diff --git a/src/App.scss b/src/App.scss
-index a79a5e2..d794ee2 100644
+index b715f16..5ebcbde 100644
 --- a/src/App.scss
 +++ b/src/App.scss
-@@ -12,7 +12,7 @@
+@@ -4,9 +4,9 @@
+ }
+ 
+ :root {
+-  --bv-primary: #0056b3;
+-  --bv-secondary: #003d82;
+-  --bv-primary-hover: #003d82;
++  --bv-primary: #0072d8;
++  --bv-secondary: #004ea8;
++  --bv-primary-hover: #004ea8;
+ }
+ 
+ .css-esmk4o {
+@@ -18,7 +18,7 @@
    transition: width, left, right, 300ms;
    // width: 23vw !important;
    min-width: 20vw !important;
@@ -12524,10 +12270,10 @@ index 2784ba6..46992a7 100644
              }
            }
 diff --git a/src/agentModule/authModule/Login/index.scss b/src/agentModule/authModule/Login/index.scss
-index a18b4fb..d26f830 100644
+index df1d698..320bfc3 100644
 --- a/src/agentModule/authModule/Login/index.scss
 +++ b/src/agentModule/authModule/Login/index.scss
-@@ -22,7 +22,7 @@
+@@ -19,7 +19,7 @@
  
    .logo__caption {
      color: #9da4ae;
@@ -12536,16 +12282,18 @@ index a18b4fb..d26f830 100644
      font-size: 14px;
      font-style: normal;
      font-weight: 300;
-@@ -34,7 +34,7 @@
-     display: grid;
- 
+@@ -33,8 +33,8 @@
      &.bdo-theme {
--      background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
-+      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
+       background: linear-gradient(
+         135deg,
+-        var(--bv-primary, #0056b3) 0%,
+-        var(--bv-secondary, #003d82) 100%
++        var(--bv-primary, #0072d8) 0%,
++        var(--bv-secondary, #004ea8) 100%
+       );
        position: relative;
        overflow: hidden;
-       display: flex;
-@@ -69,7 +69,7 @@
+@@ -70,7 +70,7 @@
          .bdo-tagline {
            h1 {
              color: #ffffff;
@@ -12554,7 +12302,7 @@ index a18b4fb..d26f830 100644
              font-size: 38px;
              font-weight: 700;
              margin-bottom: 16px;
-@@ -79,7 +79,7 @@
+@@ -80,7 +80,7 @@
  
            p {
              color: #ffffff;
@@ -12563,7 +12311,7 @@ index a18b4fb..d26f830 100644
              font-size: 16px;
              font-weight: 400;
              opacity: 0.95;
-@@ -100,7 +100,7 @@
+@@ -101,7 +101,7 @@
  
          span {
            color: #ffffff;
@@ -12572,7 +12320,7 @@ index a18b4fb..d26f830 100644
            font-size: 14px;
            opacity: 0.8;
            background: rgba(0, 0, 0, 0.2);
-@@ -130,7 +130,7 @@
+@@ -131,7 +131,7 @@
    .login__header {
      text-align: left;
      color: #111927;
@@ -12581,7 +12329,7 @@ index a18b4fb..d26f830 100644
      font-size: 24px;
      font-style: normal;
      font-weight: 600;
-@@ -139,8 +139,8 @@
+@@ -140,8 +140,8 @@
  
    .forget__text {
      text-align: right;
@@ -12592,7 +12340,7 @@ index a18b4fb..d26f830 100644
      font-size: 14px;
      font-style: normal;
      font-weight: 500;
-@@ -148,14 +148,14 @@
+@@ -149,14 +149,14 @@
      transition: color 0.3s ease;
  
      &:hover {
@@ -12609,7 +12357,7 @@ index a18b4fb..d26f830 100644
      font-size: 40px;
      font-style: normal;
      font-weight: 400;
-@@ -191,25 +191,25 @@
+@@ -192,25 +192,25 @@
  
    .login__button {
      width: 100%;
@@ -12639,7 +12387,7 @@ index a18b4fb..d26f830 100644
          box-shadow: 0 6px 20px rgba(0, 86, 179, 0.4);
          transform: translateY(-1px);
        }
-@@ -226,12 +226,12 @@
+@@ -227,12 +227,12 @@
  
      .tech-powered-text {
        color: #6b7280;
@@ -12668,10 +12416,10 @@ index b447732..99c9006 100644
    }
  
 diff --git a/src/agentModule/claimModule/claimTable/index.jsx b/src/agentModule/claimModule/claimTable/index.jsx
-index 4a47c14..732e689 100644
+index 9959837..4e14b18 100644
 --- a/src/agentModule/claimModule/claimTable/index.jsx
 +++ b/src/agentModule/claimModule/claimTable/index.jsx
-@@ -578,7 +578,7 @@ const ClaimTable = () => {
+@@ -586,7 +586,7 @@ const ClaimTable = () => {
    const ViewheaderStyle = {
      textalign: "center",
      fontSize: 16,
@@ -12680,7 +12428,7 @@ index 4a47c14..732e689 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -587,7 +587,7 @@ const ClaimTable = () => {
+@@ -595,7 +595,7 @@ const ClaimTable = () => {
    const headerStyle = {
      textalign: "center",
      fontSize: 16,
@@ -15707,6 +15455,19 @@ index 37bbe5a..29c4206 100644
        font-size: 12px;
      }
    }
+diff --git a/src/agentModule/leadModule/IarLeadCreation/IarLeadCreationCard.scss b/src/agentModule/leadModule/IarLeadCreation/IarLeadCreationCard.scss
+index 89e0e04..24ef15d 100644
+--- a/src/agentModule/leadModule/IarLeadCreation/IarLeadCreationCard.scss
++++ b/src/agentModule/leadModule/IarLeadCreation/IarLeadCreationCard.scss
+@@ -26,7 +26,7 @@
+   flex-wrap: wrap;
+   gap: 24px;
+   padding: 12px 16px;
+-  border: 1px solid #c7d2fe;
++  border: 1px solid #bfdcf2;
+   border-radius: 8px;
+   background: #f8fafc;
+ }
 diff --git a/src/agentModule/leadModule/leadCreation/index.scss b/src/agentModule/leadModule/leadCreation/index.scss
 index 4d4df72..2d29f6e 100644
 --- a/src/agentModule/leadModule/leadCreation/index.scss
@@ -15887,7 +15648,7 @@ index 28ae9a3..aa11ad5 100644
            font-weight: 400 !important;
            line-height: 24px !important;
 diff --git a/src/agentModule/leadModule/leadListing/index.js b/src/agentModule/leadModule/leadListing/index.js
-index 45236e3..7e19ffd 100644
+index 6df9e20..93ae7cf 100644
 --- a/src/agentModule/leadModule/leadListing/index.js
 +++ b/src/agentModule/leadModule/leadListing/index.js
 @@ -49,7 +49,7 @@ const LeadListing = () => {
@@ -15927,6 +15688,15 @@ index 45236e3..7e19ffd 100644
                fontSize: "16px",
                color: "#111927",
 @@ -153,7 +153,7 @@ const LeadListing = () => {
+           </div>
+           <div
+             style={{
+-              fontFamily: "Inter var",
++              fontFamily: "Nunito, Arial, sans-serif",
+               fontWeight: 400,
+               fontSize: "16px",
+               color: "#111927",
+@@ -179,7 +179,7 @@ const LeadListing = () => {
            </div>
            <div
              style={{
@@ -16121,10 +15891,10 @@ index cd64bff..8a5ce41 100644
      color: "#000",
      border: " none",
 diff --git a/src/agentModule/leadModule/leadListing/leadListingCard/LeadListingMotorTable/index.js b/src/agentModule/leadModule/leadListing/leadListingCard/LeadListingMotorTable/index.js
-index dda1fd2..fc43e4b 100644
+index c7e4125..67c1bdb 100644
 --- a/src/agentModule/leadModule/leadListing/leadListingCard/LeadListingMotorTable/index.js
 +++ b/src/agentModule/leadModule/leadListing/leadListingCard/LeadListingMotorTable/index.js
-@@ -433,7 +433,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
+@@ -439,7 +439,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
      justifyContent: "center",
      // textalign: center,
      fontSize: 16,
@@ -16133,7 +15903,7 @@ index dda1fd2..fc43e4b 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -445,7 +445,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
+@@ -451,7 +451,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
    const headerStyle = {
      textalign: "center",
      fontSize: 16,
@@ -17464,10 +17234,10 @@ index 6743aed..433fb0e 100644
                      fontWeight: 400,
                    }}
 diff --git a/src/agentModule/quotationModule/index.jsx b/src/agentModule/quotationModule/index.jsx
-index 8443c34..9e5c5c8 100644
+index 3bf5271..e44beba 100644
 --- a/src/agentModule/quotationModule/index.jsx
 +++ b/src/agentModule/quotationModule/index.jsx
-@@ -45,7 +45,7 @@ const ClientListingCard = () => {
+@@ -50,7 +50,7 @@ const ClientListingCard = () => {
            </div>
            <div
              style={{
@@ -17476,7 +17246,16 @@ index 8443c34..9e5c5c8 100644
                fontWeight: 400,
                fontSize: "16px",
                color: "#111927",
-@@ -69,7 +69,7 @@ const ClientListingCard = () => {
+@@ -74,7 +74,7 @@ const ClientListingCard = () => {
+           </div>
+           <div
+             style={{
+-              fontFamily: "Inter var",
++              fontFamily: "Nunito, Arial, sans-serif",
+               fontWeight: 400,
+               fontSize: "16px",
+               color: "#111927",
+@@ -98,7 +98,7 @@ const ClientListingCard = () => {
            </div>
            <div
              style={{
@@ -17842,7 +17621,7 @@ index cff599d..b298178 100644
      color: "#000",
      border: " none",
 diff --git a/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingCompanyCategory/index.js b/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingCompanyCategory/index.js
-index 2ab96f3..efd06c7 100644
+index 86aa7fd..538c182 100644
 --- a/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingCompanyCategory/index.js
 +++ b/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingCompanyCategory/index.js
 @@ -121,7 +121,7 @@ const ClientListingCompanyCategory = ({
@@ -17854,7 +17633,7 @@ index 2ab96f3..efd06c7 100644
        "#D8BFD8",
        "#FFA07A",
      ];
-@@ -186,7 +186,7 @@ const ClientListingCompanyCategory = ({
+@@ -187,7 +187,7 @@ const ClientListingCompanyCategory = ({
      justifyContent: "center",
      // textalign: center,
      fontSize: 16,
@@ -17863,7 +17642,7 @@ index 2ab96f3..efd06c7 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -197,7 +197,7 @@ const ClientListingCompanyCategory = ({
+@@ -198,7 +198,7 @@ const ClientListingCompanyCategory = ({
    const headerStyle = {
      textalign: "center",
      fontSize: 16,
@@ -17873,7 +17652,7 @@ index 2ab96f3..efd06c7 100644
      color: "#000",
      border: " none",
 diff --git a/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingIndividualCategory/index.js b/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingIndividualCategory/index.js
-index 4a80176..92f0e47 100644
+index 0824243..84a9794 100644
 --- a/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingIndividualCategory/index.js
 +++ b/src/agentModule/quoteModule/clientListing/clientListingCard/ClientListingIndividualCategory/index.js
 @@ -234,7 +234,7 @@ const ClientListingIndividualCategory = ({
@@ -17885,7 +17664,7 @@ index 4a80176..92f0e47 100644
        "#D8BFD8",
        "#FFA07A",
      ];
-@@ -298,7 +298,7 @@ const ClientListingIndividualCategory = ({
+@@ -299,7 +299,7 @@ const ClientListingIndividualCategory = ({
      justifyContent: "center",
      // textalign: center,
      fontSize: 16,
@@ -17894,7 +17673,7 @@ index 4a80176..92f0e47 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -309,7 +309,7 @@ const ClientListingIndividualCategory = ({
+@@ -310,7 +310,7 @@ const ClientListingIndividualCategory = ({
    const headerStyle = {
      textalign: "center",
      fontSize: 16,
@@ -18107,10 +17886,10 @@ index 676f3be..416dd7c 100644
      color: "#000",
      border: " none",
 diff --git a/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewEndorsementTable/index.js b/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewEndorsementTable/index.js
-index 2148b0b..8c73f92 100644
+index 7639daa..2229368 100644
 --- a/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewEndorsementTable/index.js
 +++ b/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewEndorsementTable/index.js
-@@ -385,7 +385,7 @@ const LeadListingAllTable = ({ clientId }) => {
+@@ -397,7 +397,7 @@ const LeadListingAllTable = ({ clientId }) => {
    const ViewheaderStyle = {
      textalign: "center",
      fontSize: 16,
@@ -18119,7 +17898,7 @@ index 2148b0b..8c73f92 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -396,7 +396,7 @@ const LeadListingAllTable = ({ clientId }) => {
+@@ -408,7 +408,7 @@ const LeadListingAllTable = ({ clientId }) => {
    const headerStyle = {
      textalign: "center",
      fontSize: 16,
@@ -18129,10 +17908,10 @@ index 2148b0b..8c73f92 100644
      color: "#000",
      border: " none",
 diff --git a/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewPolicyTable/index.js b/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewPolicyTable/index.js
-index f6213d6..4cad2b4 100644
+index f02ce94..dbf2240 100644
 --- a/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewPolicyTable/index.js
 +++ b/src/agentModule/quoteModule/clientView/clientViewCard/ClientListingViewPolicyTable/index.js
-@@ -432,7 +432,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
+@@ -433,7 +433,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
    const ViewheaderStyle = {
      textalign: "center",
      fontSize: 16,
@@ -18141,7 +17920,7 @@ index f6213d6..4cad2b4 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -441,7 +441,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
+@@ -442,7 +442,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
    const headerStyle = {
      textalign: "center",
      fontSize: 16,
@@ -18150,7 +17929,7 @@ index f6213d6..4cad2b4 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -565,7 +565,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
+@@ -566,7 +566,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
                    style={{
                      color: "#111927",
                      marginLeft: "16px",
@@ -20222,7 +20001,7 @@ index 728e2ab..52a3565 100644
          line-height: 1.6;
          margin: 0;
 diff --git a/src/agentModule/quoteModule/quoteDetailView/Modal/index.scss b/src/agentModule/quoteModule/quoteDetailView/Modal/index.scss
-index e2e0786..a964005 100644
+index b25305d..f1b073d 100644
 --- a/src/agentModule/quoteModule/quoteDetailView/Modal/index.scss
 +++ b/src/agentModule/quoteModule/quoteDetailView/Modal/index.scss
 @@ -31,7 +31,7 @@ $tablet-md: 1024px;
@@ -20294,7 +20073,7 @@ index e2e0786..a964005 100644
            @include mobile-sm {
              min-height: 48px;
 diff --git a/src/agentModule/quoteModule/quoteDetailView/index.scss b/src/agentModule/quoteModule/quoteDetailView/index.scss
-index 16cb142..de6f876 100644
+index 5e84e83..a412b67 100644
 --- a/src/agentModule/quoteModule/quoteDetailView/index.scss
 +++ b/src/agentModule/quoteModule/quoteDetailView/index.scss
 @@ -12,13 +12,13 @@
@@ -20393,6 +20172,15 @@ index 16cb142..de6f876 100644
      font-size: 16px;
      font-weight: 400;
    }
+@@ -143,7 +143,7 @@
+       border-bottom: 1px solid #e5e7eb;
+       text-align: left;
+       font-size: 13px;
+-      font-family: Poppins;
++      font-family: "Nunito", Arial, sans-serif;
+     }
+     th {
+       color: #6b7280;
 diff --git a/src/agentModule/quoteModule/quoteListing/index.scss b/src/agentModule/quoteModule/quoteListing/index.scss
 index e03cb24..d345271 100644
 --- a/src/agentModule/quoteModule/quoteListing/index.scss
@@ -20544,7 +20332,7 @@ index e03cb24..d345271 100644
            font-weight: 500 !important;
            line-height: 16px !important;
 diff --git a/src/agentModule/quoteModule/quoteListing/quoteListingCard/index.js b/src/agentModule/quoteModule/quoteListing/quoteListingCard/index.js
-index 9d98d33..a24c080 100644
+index e50cdc9..cad4dd3 100644
 --- a/src/agentModule/quoteModule/quoteListing/quoteListingCard/index.js
 +++ b/src/agentModule/quoteModule/quoteListing/quoteListingCard/index.js
 @@ -234,7 +234,7 @@ const QuoteListingCard = () => {
@@ -20583,7 +20371,7 @@ index 9d98d33..a24c080 100644
      fontWeight: 500,
      color: "#000",
      border: " none",
-@@ -577,7 +577,7 @@ const QuoteListingCard = () => {
+@@ -599,7 +599,7 @@ const QuoteListingCard = () => {
            </div>
            <div
              style={{
@@ -20592,7 +20380,7 @@ index 9d98d33..a24c080 100644
                fontWeight: 400,
                fontSize: "16px",
                color: "#111927",
-@@ -603,7 +603,7 @@ const QuoteListingCard = () => {
+@@ -625,7 +625,7 @@ const QuoteListingCard = () => {
            </div>
            <div
              style={{
@@ -20601,7 +20389,7 @@ index 9d98d33..a24c080 100644
                fontWeight: 400,
                fontSize: "16px",
                color: "#111927",
-@@ -629,7 +629,7 @@ const QuoteListingCard = () => {
+@@ -651,7 +651,7 @@ const QuoteListingCard = () => {
            </div>
            <div
              style={{
@@ -20610,7 +20398,7 @@ index 9d98d33..a24c080 100644
                fontWeight: 400,
                fontSize: "16px",
                color: "#111927",
-@@ -655,7 +655,7 @@ const QuoteListingCard = () => {
+@@ -677,7 +677,7 @@ const QuoteListingCard = () => {
            </div>
            <div
              style={{
@@ -20619,7 +20407,16 @@ index 9d98d33..a24c080 100644
                fontWeight: 400,
                fontSize: "16px",
                color: "#111927",
-@@ -681,7 +681,7 @@ const QuoteListingCard = () => {
+@@ -703,7 +703,7 @@ const QuoteListingCard = () => {
+           </div>
+           <div
+             style={{
+-              fontFamily: "Inter var",
++              fontFamily: "Nunito, Arial, sans-serif",
+               fontWeight: 400,
+               fontSize: "16px",
+               color: "#111927",
+@@ -729,7 +729,7 @@ const QuoteListingCard = () => {
            </div>
            <div
              style={{
@@ -21087,6 +20884,19 @@ index 2a38be1..0a5754b 100644
        d="M2.875 11.042h7.667V3.375H2.875v7.667Zm1.917-5.75h3.833v3.833H4.792V5.292ZM2.875 20.625h7.667v-7.667H2.875v7.667Zm1.917-5.75h3.833v3.833H4.792v-3.833Zm7.666-11.5v7.667h7.667V3.375h-7.667Zm5.75 5.75h-3.833V5.292h3.833v3.833Zm-5.74 3.833h1.917v1.917h-1.917v-1.917Zm1.917 1.917H16.3v1.917h-1.916v-1.917Zm-1.917 1.917h1.917v1.916h-1.917v-1.916Zm3.833 0h1.917v1.916H16.3v-1.916Zm1.917 1.916h1.917v1.917h-1.917v-1.917Zm-3.833 0H16.3v1.917h-1.916v-1.917Zm1.916-5.75h1.917v1.917H16.3v-1.917Zm1.917 1.917h1.917v1.917h-1.917v-1.917Z"
      />
    </svg>
+diff --git a/src/assets/agentIcon/SvgSendToInsurerIcon.jsx b/src/assets/agentIcon/SvgSendToInsurerIcon.jsx
+index 1eaa1bb..b1f5b62 100644
+--- a/src/assets/agentIcon/SvgSendToInsurerIcon.jsx
++++ b/src/assets/agentIcon/SvgSendToInsurerIcon.jsx
+@@ -5,7 +5,7 @@ const SvgSendToInsurerIcon = (props) => (
+     <circle cx={20} cy={20} r={20} fill="#FBFBFB" />
+     <g transform="translate(8.5 8)">
+       <path
+-        fill="#6366F1"
++        fill="#0072d8"
+         d="M3.833 6.25V4.333h15.334V6.25H3.833Zm0 13.417v-5.75h-.958V12l.958-4.792h15.334L20.125 12v1.917h-.958v5.75H17.25v-5.75h-3.833v5.75H3.833ZM5.75 17.75h5.75v-3.833H5.75v3.833Z"
+       />
+     </g>
 diff --git a/src/assets/agentIcon/SvgStore.jsx b/src/assets/agentIcon/SvgStore.jsx
 index 22f5e4a..5b0c528 100644
 --- a/src/assets/agentIcon/SvgStore.jsx
@@ -21568,6 +21378,109 @@ index 064248a..b510ff6 100644
          font-weight: 400;
          font-size: 8px;
          line-height: 21.44px;
+diff --git a/src/components/Footer/index.scss b/src/components/Footer/index.scss
+index 97ff614..62a0d9b 100644
+--- a/src/components/Footer/index.scss
++++ b/src/components/Footer/index.scss
+@@ -14,7 +14,7 @@
+       text-align: start;
+       font-size: 18px;
+       line-height: 27px;
+-      // font-family: poppins;
++      // font-family: "Nunito", Arial, sans-serif;
+       font-weight: 400;
+       color: $black !important;
+     }
+@@ -29,7 +29,7 @@
+         border-radius: 10px;
+         font-size: 18px !important;
+         line-height: 27px !important;
+-        // font-family: poppins;
++        // font-family: "Nunito", Arial, sans-serif;
+       }
+     }
+     @layer primereact {
+@@ -45,7 +45,7 @@
+       text-align: start;
+       font-size: 18px;
+       line-height: 27px;
+-      // font-family: poppins;
++      // font-family: "Nunito", Arial, sans-serif;
+       font-weight: 400;
+       color: $black !important;
+     }
+@@ -97,7 +97,7 @@
+     .policy__block__text {
+       font-size: 18px;
+       line-height: 27px;
+-      // font-family: poppins;
++      // font-family: "Nunito", Arial, sans-serif;
+       font-weight: 300;
+       color: $black !important;
+     }
+@@ -108,7 +108,7 @@
+     .terms__block__text {
+       font-size: 18px;
+       line-height: 27px;
+-      // font-family: poppins;
++      // font-family: "Nunito", Arial, sans-serif;
+       font-weight: 300;
+       color: $black !important;
+     }
+@@ -195,7 +195,7 @@
+         text-align: start;
+         font-size: 18px;
+         line-height: 27px;
+-        // font-family: poppins;
++        // font-family: "Nunito", Arial, sans-serif;
+         font-weight: 400;
+         color: $black !important;
+       }
+@@ -234,7 +234,7 @@
+       .policy__block__text {
+         font-size: 18px;
+         line-height: 27px;
+-        // font-family: poppins;
++        // font-family: "Nunito", Arial, sans-serif;
+         font-weight: 300;
+         color: $black !important;
+       }
+@@ -246,7 +246,7 @@
+       .terms__block__text {
+         font-size: 18px;
+         line-height: 27px;
+-        // font-family: poppins;
++        // font-family: "Nunito", Arial, sans-serif;
+         font-weight: 300;
+         color: $black !important;
+       }
+@@ -265,7 +265,7 @@
+         text-align: start;
+         font-size: 18px;
+         line-height: 27px;
+-        // font-family: poppins;
++        // font-family: "Nunito", Arial, sans-serif;
+         font-weight: 400;
+         color: $black !important;
+       }
+@@ -325,7 +325,7 @@
+         text-align: start;
+         font-size: 18px;
+         line-height: 27px;
+-        // font-family: poppins;
++        // font-family: "Nunito", Arial, sans-serif;
+         font-weight: 400;
+         color: $black !important;
+       }
+@@ -340,7 +340,7 @@
+           border-radius: 10px;
+           font-size: 18px !important;
+           line-height: 27px !important;
+-          // font-family: poppins;
++          // font-family: "Nunito", Arial, sans-serif;
+         }
+       }
+       @layer primereact {
 diff --git a/src/components/GobackComponent/index.jsx b/src/components/GobackComponent/index.jsx
 index eb82edc..2509a54 100644
 --- a/src/components/GobackComponent/index.jsx
@@ -21582,7 +21495,7 @@ index eb82edc..2509a54 100644
    };
    return (
 diff --git a/src/components/Header/index.jsx b/src/components/Header/index.jsx
-index 409ccdd..e7308b0 100644
+index a37a505..8375177 100644
 --- a/src/components/Header/index.jsx
 +++ b/src/components/Header/index.jsx
 @@ -37,7 +37,7 @@ const Header = () => {
@@ -22008,10 +21921,10 @@ index dd4d5ea..4995187 100644
                                  />
                                )}
 diff --git a/src/components/SideBar/index.jsx b/src/components/SideBar/index.jsx
-index 072d340..a8d8b4a 100644
+index dff1c47..1aa8682 100644
 --- a/src/components/SideBar/index.jsx
 +++ b/src/components/SideBar/index.jsx
-@@ -128,7 +128,7 @@ const ResponsiveDrawer = () => {
+@@ -154,7 +154,7 @@ const ResponsiveDrawer = () => {
      <Sidebar
        visible={visible}
        style={{
@@ -22020,7 +21933,7 @@ index 072d340..a8d8b4a 100644
          display: visible ? "block" : "none",
          height: "100vh",
          overflowY: "auto",
-@@ -139,7 +139,7 @@ const ResponsiveDrawer = () => {
+@@ -165,7 +165,7 @@ const ResponsiveDrawer = () => {
          },
        }}
        rootStyles={{
@@ -22029,16 +21942,16 @@ index 072d340..a8d8b4a 100644
        }}
        onHide={() => setVisible(false)}
      >
-@@ -154,7 +154,7 @@ const ResponsiveDrawer = () => {
-           {/* <SvgLogo color={"#fff"} /> */}
-           <SvgFinalLogo />
+@@ -191,7 +191,7 @@ const ResponsiveDrawer = () => {
+             }}
+           />
          </div>
 -        <Menu style={{ backgroundColor: "#1C2536 !important", border: "none" }}>
 +        <Menu style={{ backgroundColor: "#ffffff !important", border: "none" }}>
            {filteredMenuList.map((data, index) => (
              <React.Fragment key={data.name}>
                <SubMenu
-@@ -166,30 +166,30 @@ const ResponsiveDrawer = () => {
+@@ -203,30 +203,30 @@ const ResponsiveDrawer = () => {
                      data.name === openSubMenu ||
                      data.submenu.some((subItem) => subItem.path === findPath)
                        ? "#36435c"
@@ -22075,7 +21988,7 @@ index 072d340..a8d8b4a 100644
                      />
                    ) : undefined
                  }
-@@ -247,8 +247,8 @@ const ResponsiveDrawer = () => {
+@@ -292,8 +292,8 @@ const ResponsiveDrawer = () => {
                                            <SvgDot
                                              color={
                                                subsubmenuItem.path === findPath
@@ -22086,7 +21999,7 @@ index 072d340..a8d8b4a 100644
                                              }
                                            />
                                            <span
-@@ -287,8 +287,8 @@ const ResponsiveDrawer = () => {
+@@ -336,8 +336,8 @@ const ResponsiveDrawer = () => {
                                      <SvgDot
                                        color={
                                          nestedItem.path === findPath
@@ -22097,7 +22010,7 @@ index 072d340..a8d8b4a 100644
                                        }
                                      />
                                      <span
-@@ -349,7 +349,7 @@ const ResponsiveDrawer = () => {
+@@ -401,7 +401,7 @@ const ResponsiveDrawer = () => {
                                  <SvgAgentHomeIcon
                                    color={
                                      subItem.path === findPath
@@ -22106,7 +22019,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -357,7 +357,7 @@ const ResponsiveDrawer = () => {
+@@ -409,7 +409,7 @@ const ResponsiveDrawer = () => {
                                  <SvgAgentLeadIcon
                                    color={
                                      subItem.path === findPath
@@ -22115,7 +22028,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -365,7 +365,7 @@ const ResponsiveDrawer = () => {
+@@ -417,7 +417,7 @@ const ResponsiveDrawer = () => {
                                  <SvgAgentClientIcon
                                    color={
                                      subItem.path === findPath
@@ -22124,7 +22037,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -373,7 +373,7 @@ const ResponsiveDrawer = () => {
+@@ -425,7 +425,7 @@ const ResponsiveDrawer = () => {
                                  <SvgAgentItemsIcon
                                    color={
                                      subItem.path === findPath
@@ -22133,7 +22046,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -381,7 +381,7 @@ const ResponsiveDrawer = () => {
+@@ -433,7 +433,7 @@ const ResponsiveDrawer = () => {
                                  <SvgAgentItemsIcon
                                    color={
                                      subItem.path === findPath
@@ -22142,7 +22055,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -389,7 +389,7 @@ const ResponsiveDrawer = () => {
+@@ -441,7 +441,7 @@ const ResponsiveDrawer = () => {
                                  <SvgQuotationIcon
                                    color={
                                      subItem.path === findPath
@@ -22151,7 +22064,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -397,7 +397,7 @@ const ResponsiveDrawer = () => {
+@@ -449,7 +449,7 @@ const ResponsiveDrawer = () => {
                                  <SvgPolicyIcon
                                    color={
                                      subItem.path === findPath
@@ -22160,7 +22073,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -405,7 +405,7 @@ const ResponsiveDrawer = () => {
+@@ -457,7 +457,7 @@ const ResponsiveDrawer = () => {
                                  <SvgAgentPaymentIcon
                                    color={
                                      subItem.path === findPath
@@ -22169,7 +22082,7 @@ index 072d340..a8d8b4a 100644
                                        : "#9DA4AE"
                                    }
                                  />
-@@ -414,8 +414,8 @@ const ResponsiveDrawer = () => {
+@@ -466,8 +466,8 @@ const ResponsiveDrawer = () => {
                                <SvgDot
                                  color={
                                    subItem.path === findPath
@@ -22253,7 +22166,7 @@ index ec429d8..4b5394c 100644
    ::-webkit-scrollbar {
      display: none;
 diff --git a/src/components/SideBar/list.js b/src/components/SideBar/list.js
-index b5a9317..37b42bb 100644
+index 1ac1624..3b51a16 100644
 --- a/src/components/SideBar/list.js
 +++ b/src/components/SideBar/list.js
 @@ -15,7 +15,7 @@ import { useParams } from "react-router-dom";
@@ -22265,7 +22178,7 @@ index b5a9317..37b42bb 100644
      submenu: [
        {
          id: 1,
-@@ -1123,7 +1123,7 @@ export const menuList = [
+@@ -1142,7 +1142,7 @@ export const menuList = [
    },
    {
      name: "Commission",
@@ -22480,7 +22393,7 @@ index 4e67652..2d5cbcb 100644
          border-radius: 30px
      }
 diff --git a/src/module/AuthModule/Login/index.scss b/src/module/AuthModule/Login/index.scss
-index 754195c..a7932e1 100644
+index c8564aa..76181a2 100644
 --- a/src/module/AuthModule/Login/index.scss
 +++ b/src/module/AuthModule/Login/index.scss
 @@ -3,7 +3,7 @@
@@ -22519,7 +22432,7 @@ index 754195c..a7932e1 100644
          font-size: 16px;
          font-weight: 400;
  
-@@ -96,7 +96,7 @@ text-align: left;
+@@ -102,7 +102,7 @@ text-align: left;
  
      .login__button {
          width: 100%;
@@ -22529,7 +22442,7 @@ index 754195c..a7932e1 100644
          border-radius: 30px
      }
 diff --git a/src/module/AuthModule/Register/index.scss b/src/module/AuthModule/Register/index.scss
-index 6bc22d6..9ed594e 100644
+index 204542e..903e21b 100644
 --- a/src/module/AuthModule/Register/index.scss
 +++ b/src/module/AuthModule/Register/index.scss
 @@ -3,7 +3,7 @@
@@ -22565,7 +22478,7 @@ index 6bc22d6..9ed594e 100644
  
      }
  
-@@ -45,21 +45,21 @@
+@@ -51,21 +51,21 @@
      }
  
      .forget__text {
@@ -22591,7 +22504,7 @@ index 6bc22d6..9ed594e 100644
          font-size: 14px;
          font-weight: 500;
          line-height: 17px;
-@@ -71,7 +71,7 @@
+@@ -77,7 +77,7 @@
  
      .welcome__content {
          color: #B1B1B1;
@@ -22600,7 +22513,7 @@ index 6bc22d6..9ed594e 100644
          font-size: 16px;
          font-weight: 400;
  
-@@ -79,7 +79,7 @@
+@@ -85,7 +85,7 @@
  
      .welcome__text {
          color: #FFF;
@@ -22609,7 +22522,7 @@ index 6bc22d6..9ed594e 100644
  
          font-weight: 700 !important;
          margin-right: 5px !important;
-@@ -110,7 +110,7 @@
+@@ -116,7 +116,7 @@
  
      .login__button {
          width: 100%;
@@ -25658,9 +25571,18 @@ index 1e6418a..f25a5ab 100644
      border-left-style: hidden;
      border-color:  #d1d5db;
 diff --git a/src/module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange/index.scss b/src/module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange/index.scss
-index 982d59b..38eba61 100644
+index 982d59b..281e6af 100644
 --- a/src/module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange/index.scss
 +++ b/src/module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange/index.scss
+@@ -4,7 +4,7 @@
+     .label_header{
+        
+ color: #111927;
+- font-family: 'Inter', sans-serif, sans-serif;
++ font-family: "Nunito", Arial, sans-serif;
+ font-size: 30px;
+ // font-style: normal;
+ font-weight: 600;
 @@ -24,7 +24,7 @@ margin-left: 10px;
          color: #000;
          font-size: 16px;
@@ -29080,10 +29002,10 @@ index 59c5454..3a27a31 100644
      background: transparent;
      border-radius: 50%;
 diff --git a/src/module/GeneralMasters/Commission/AddCommission/index.jsx b/src/module/GeneralMasters/Commission/AddCommission/index.jsx
-index fc40c86..e3dbcbb 100644
+index 9ce5476..b6cdd3a 100644
 --- a/src/module/GeneralMasters/Commission/AddCommission/index.jsx
 +++ b/src/module/GeneralMasters/Commission/AddCommission/index.jsx
-@@ -195,7 +195,7 @@ const AddCommission = () => {
+@@ -196,7 +196,7 @@ const AddCommission = () => {
      // width: '10rem',
      // backgroundColor: 'red',
      fontSize: 16,
@@ -34361,7 +34283,7 @@ index cde3f63..251758b 100644
      background: transparent;
      border-radius: 50%;
 diff --git a/src/module/JournalVoucher/AddJournalVoucture/AddDataTabel/index.jsx b/src/module/JournalVoucher/AddJournalVoucture/AddDataTabel/index.jsx
-index b7da964..ad786a3 100644
+index c9e12e7..b0ec4aa 100644
 --- a/src/module/JournalVoucher/AddJournalVoucture/AddDataTabel/index.jsx
 +++ b/src/module/JournalVoucher/AddJournalVoucture/AddDataTabel/index.jsx
 @@ -78,7 +78,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
@@ -35140,10 +35062,10 @@ index 2f59390..374906e 100644
      height: 3rem;
      margin: 0.143rem;
 diff --git a/src/module/PaymentVoucher/Bankdetailselection/index.js b/src/module/PaymentVoucher/Bankdetailselection/index.js
-index 7e70ff4..8e389ed 100644
+index e71085b..384f8e5 100644
 --- a/src/module/PaymentVoucher/Bankdetailselection/index.js
 +++ b/src/module/PaymentVoucher/Bankdetailselection/index.js
-@@ -182,7 +182,7 @@ function Bankdetailselection() {
+@@ -194,7 +194,7 @@ function Bankdetailselection() {
    const headerStyle = {
      // backgroundColor: 'red',
      fontSize: 16,
@@ -35152,7 +35074,7 @@ index 7e70ff4..8e389ed 100644
      fontWeight: 500,
      padding: 6,
      color: "#000",
-@@ -496,7 +496,7 @@ function Bankdetailselection() {
+@@ -514,7 +514,7 @@ function Bankdetailselection() {
        <div className="tablegap_container">
          <DataTable
            value={checkbookList}
@@ -35548,10 +35470,10 @@ index 480d508..9b58f1a 100644
  font-weight: 500;
  }
 diff --git a/src/module/PaymentVoucher/SpecificVoucher/index.js b/src/module/PaymentVoucher/SpecificVoucher/index.js
-index d3907d2..34593cc 100644
+index 48fa704..157bd19 100644
 --- a/src/module/PaymentVoucher/SpecificVoucher/index.js
 +++ b/src/module/PaymentVoucher/SpecificVoucher/index.js
-@@ -289,7 +289,7 @@ function SpecificVoucher() {
+@@ -330,7 +330,7 @@ function SpecificVoucher() {
      width: "9rem",
      // backgroundColor: 'red',
      fontSize: 16,
@@ -35560,7 +35482,7 @@ index d3907d2..34593cc 100644
      fontWeight: 500,
      // padding: 4,
      color: "#000",
-@@ -343,7 +343,7 @@ function SpecificVoucher() {
+@@ -384,7 +384,7 @@ function SpecificVoucher() {
        <div className="tablegap_container">
          <DataTable
            value={invoiceListData}
@@ -37597,10 +37519,10 @@ index 18c2e5b..cb0f1cb 100644
  }
  @media screen and (min-width: 768px) {
 diff --git a/src/module/Receipts/AddPolicyReceiptEdit/index.js b/src/module/Receipts/AddPolicyReceiptEdit/index.js
-index 7ac1d25..b0cfc57 100644
+index 6e6ed5a..d21f4eb 100644
 --- a/src/module/Receipts/AddPolicyReceiptEdit/index.js
 +++ b/src/module/Receipts/AddPolicyReceiptEdit/index.js
-@@ -610,7 +610,7 @@ function PolicyReceipts() {
+@@ -664,7 +664,7 @@ function PolicyReceipts() {
    const headerStyle = {
      fontSize: 16,
      paddingLeft: 0,
@@ -37609,7 +37531,7 @@ index 7ac1d25..b0cfc57 100644
      fontWeight: 500,
      color: "#000",
      border: "none",
-@@ -689,7 +689,7 @@ function PolicyReceipts() {
+@@ -743,7 +743,7 @@ function PolicyReceipts() {
                .join("-")}`}
              value={allReceiptsList}
              tableStyle={{
@@ -38009,10 +37931,10 @@ index 8771877..ba9ba89 100644
      font-weight: 500;
    }
 diff --git a/src/module/Receipts/PaymentDetails/index.js b/src/module/Receipts/PaymentDetails/index.js
-index ff5bd24..bccb351 100644
+index f2ee4e8..3e0b0aa 100644
 --- a/src/module/Receipts/PaymentDetails/index.js
 +++ b/src/module/Receipts/PaymentDetails/index.js
-@@ -177,7 +177,7 @@ function PolicyReceipts() {
+@@ -203,7 +203,7 @@ function PolicyReceipts() {
  
    const headerStyle = {
      fontSize: 16,
@@ -38252,10 +38174,10 @@ index 575f7e0..ede7345 100644
        font-weight: 500;
        cursor: pointer;
 diff --git a/src/module/Receipts/PolicyReceiptsView/index.js b/src/module/Receipts/PolicyReceiptsView/index.js
-index 18fe4d8..ae3dabf 100644
+index 3768bd4..1425ea0 100644
 --- a/src/module/Receipts/PolicyReceiptsView/index.js
 +++ b/src/module/Receipts/PolicyReceiptsView/index.js
-@@ -42,7 +42,7 @@ function PolicyReceipts() {
+@@ -46,7 +46,7 @@ function PolicyReceipts() {
  
    const headerStyle = {
      fontSize: 16,
@@ -38264,7 +38186,7 @@ index 18fe4d8..ae3dabf 100644
      fontWeight: 500,
      color: "#000",
      border: "none",
-@@ -72,7 +72,7 @@ function PolicyReceipts() {
+@@ -168,7 +168,7 @@ function PolicyReceipts() {
            value={receiptDetailList}
            tableStyle={{
              minWidth: "50rem",
@@ -39044,6 +38966,192 @@ index 01711f6..d7911f4 100644
        .p-button-label {
          font-weight: 500 !important;
        }
+diff --git a/src/module/SystemSettings/index.js b/src/module/SystemSettings/index.js
+index 7333235..0317c3b 100644
+--- a/src/module/SystemSettings/index.js
++++ b/src/module/SystemSettings/index.js
+@@ -31,8 +31,8 @@ const LANGUAGE_OPTIONS = [
+ 
+ /** Preset theme colors — label includes hex so users can pick or type a code */
+ const THEME_COLOR_PRESETS = [
+-  { label: "BDO Blue — #0056b3", value: "#0056b3" },
+-  { label: "BDO Navy — #003d82", value: "#003d82" },
++  { label: "BDO Blue — #0072d8", value: "#0072d8" },
++  { label: "BDO Navy — #004ea8", value: "#004ea8" },
+   { label: "Indigo — #6366f1", value: "#6366f1" },
+   { label: "Deep Indigo — #4f46e5", value: "#4f46e5" },
+   { label: "Teal — #0d9488", value: "#0d9488" },
+@@ -55,8 +55,8 @@ const SystemSettingsPage = () => {
+   const [form, setForm] = useState({
+     logoUrl: "",
+     displayCurrency: "PHP",
+-    primaryColor: "#0056b3",
+-    secondaryColor: "#003d82",
++    primaryColor: "#0072d8",
++    secondaryColor: "#004ea8",
+     defaultLanguage: "en",
+     faviconUrl: "/favicon.ico",
+     appTitle: "Brokerverse",
+@@ -131,7 +131,7 @@ const SystemSettingsPage = () => {
+   };
+ 
+   const normalizeColor = (value) => {
+-    if (!value) return "#0056b3";
++    if (!value) return "#0072d8";
+     const v = String(value).replace(/^#/, "").trim();
+     return `#${v}`;
+   };
+@@ -520,7 +520,7 @@ const SystemSettingsPage = () => {
+                 <InputText
+                   value={form.primaryColor || ""}
+                   onChange={(e) => handleHexInput("primaryColor", e.target.value)}
+-                  placeholder="#0056b3"
++                  placeholder="#0072d8"
+                   maxLength={7}
+                   className="hex-input"
+                 />
+@@ -537,7 +537,7 @@ const SystemSettingsPage = () => {
+               <small className="hex-hint">
+                 {t(
+                   "systemSettings.hexHint",
+-                  "Hex code (e.g. #0056b3) — picker and presets stay in sync"
++                  "Hex code (e.g. #0072d8) — picker and presets stay in sync"
+                 )}
+               </small>
+             </div>
+@@ -567,7 +567,7 @@ const SystemSettingsPage = () => {
+                   onChange={(e) =>
+                     handleHexInput("secondaryColor", e.target.value)
+                   }
+-                  placeholder="#003d82"
++                  placeholder="#004ea8"
+                   maxLength={7}
+                   className="hex-input"
+                 />
+@@ -584,7 +584,7 @@ const SystemSettingsPage = () => {
+               <small className="hex-hint">
+                 {t(
+                   "systemSettings.hexHint",
+-                  "Hex code (e.g. #0056b3) — picker and presets stay in sync"
++                  "Hex code (e.g. #0072d8) — picker and presets stay in sync"
+                 )}
+               </small>
+             </div>
+diff --git a/src/module/SystemSettings/index.scss b/src/module/SystemSettings/index.scss
+index 80568fa..8ea5623 100644
+--- a/src/module/SystemSettings/index.scss
++++ b/src/module/SystemSettings/index.scss
+@@ -3,13 +3,13 @@
+     color: #111927;
+     font-size: 30px;
+     font-weight: 600;
+-    font-family: "Inter", sans-serif;
++    font-family: "Nunito", Arial, sans-serif;
+   }
+ 
+   .breadCrums__view__reversal {
+     border: none;
+     padding: 0;
+-    font-family: "Inter", sans-serif;
++    font-family: "Nunito", Arial, sans-serif;
+     color: #111927;
+     font-size: 16px;
+     font-weight: 500;
+@@ -23,7 +23,7 @@
+     color: #000;
+     font-size: 16px;
+     font-weight: 500;
+-    font-family: "Inter", sans-serif;
++    font-family: "Nunito", Arial, sans-serif;
+   }
+ 
+   .add__icon__alighn {
+@@ -38,18 +38,18 @@
+     }
+ 
+     .save__btn {
+-      background-color: #6366f1;
+-      border-color: #6366f1;
++      background-color: #0072d8;
++      border-color: #0072d8;
+       border-radius: 30px;
+       height: 40px;
+       min-width: 110px;
+-      font-family: "Inter", sans-serif;
++      font-family: "Nunito", Arial, sans-serif;
+       font-size: 16px;
+       font-weight: 500;
+ 
+       &:enabled:hover {
+-        background-color: #4f46e5;
+-        border-color: #4f46e5;
++        background-color: #005fb4;
++        border-color: #005fb4;
+       }
+     }
+   }
+@@ -61,7 +61,7 @@
+   }
+ 
+   .main__tabel__title {
+-    font-family: "Inter", sans-serif;
++    font-family: "Nunito", Arial, sans-serif;
+     font-size: 20px;
+     font-weight: 600;
+     line-height: 24px;
+@@ -75,7 +75,7 @@
+     gap: 0.5rem;
+ 
+     label {
+-      font-family: "Inter", sans-serif;
++      font-family: "Nunito", Arial, sans-serif;
+       font-weight: 500;
+       color: #4b5563;
+       font-size: 0.9rem;
+@@ -140,7 +140,7 @@
+   .hex-hint {
+     color: #6b7280;
+     font-size: 0.75rem;
+-    font-family: "Inter", sans-serif;
++    font-family: "Nunito", Arial, sans-serif;
+   }
+ 
+   .color-swatch {
+@@ -157,12 +157,12 @@
+     gap: 0.5rem;
+ 
+     .add-logo-btn {
+-      background-color: #6366f1;
+-      border-color: #6366f1;
++      background-color: #0072d8;
++      border-color: #0072d8;
+ 
+       &:enabled:hover {
+-        background-color: #4f46e5;
+-        border-color: #4f46e5;
++        background-color: #005fb4;
++        border-color: #005fb4;
+       }
+     }
+   }
+@@ -186,7 +186,7 @@
+     background: none;
+     border: none;
+     padding: 0;
+-    color: #6366f1;
++    color: #0072d8;
+     cursor: pointer;
+     text-decoration: underline;
+     font-size: inherit;
+@@ -200,7 +200,7 @@
+     justify-content: center;
+     color: #fff;
+     font-weight: 600;
+-    font-family: "Inter", sans-serif;
++    font-family: "Nunito", Arial, sans-serif;
+     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+   }
+ }
 diff --git a/src/module/accounts/openEntryMatching/OpenEntryMatching.scss b/src/module/accounts/openEntryMatching/OpenEntryMatching.scss
 index 91c4879..97cf7da 100644
 --- a/src/module/accounts/openEntryMatching/OpenEntryMatching.scss
@@ -39430,6 +39538,21 @@ index 92a45fa..1f7ad35 100644
          }
        }
  
+diff --git a/src/utility/systemCurrencies.js b/src/utility/systemCurrencies.js
+index a719020..37fbc3f 100644
+--- a/src/utility/systemCurrencies.js
++++ b/src/utility/systemCurrencies.js
+@@ -78,8 +78,8 @@ export const LOGO_PRESETS = [
+ export const DEFAULT_SYSTEM_SETTINGS = {
+   logoUrl: "/BDO_insure_logo.png.png",
+   displayCurrency: "PHP",
+-  primaryColor: "#0056b3",
+-  secondaryColor: "#003d82",
++  primaryColor: "#0072d8",
++  secondaryColor: "#004ea8",
+   defaultLanguage: "en",
+   faviconUrl: "/favicon.ico",
+   appTitle: "Brokerverse",
 -- 
 2.43.0
 

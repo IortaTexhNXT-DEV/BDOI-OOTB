@@ -223,8 +223,8 @@ function Createvoucher() {
     { name: "SLS", code: "SL" },
   ];
   const BranchCode = [
-    { name: "THB001", code: "THB" },
-    { name: "THB002", code: "THB2" },
+    { name: "PHP001", code: "PHP" },
+    { name: "PHP002", code: "PHP2" },
   ];
   const PayeeType = [
     { name: "Customer", code: "Customer" },

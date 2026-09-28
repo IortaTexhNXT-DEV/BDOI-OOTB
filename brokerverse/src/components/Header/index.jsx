@@ -26,7 +26,7 @@ const Header = () => {
       return (
         <div className="grid align-items-center">
           <div className="bdo-header-logo col-auto">
-            {/* <img src="/bdo.png" alt="BDO" className="bdo-logo-header" /> */}
+            {/* <img src="/BDO_insure_logo.png.png" alt="BDO Insure" className="bdo-logo-header" /> */}
           </div>
           <div className="col"></div>
           <div className="image__main__block col-auto">

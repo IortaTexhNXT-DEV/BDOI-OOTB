@@ -343,7 +343,15 @@ const AdjusterSubmission = () => {
       if (result.type.endsWith("/fulfilled")) {
         console.log("Adjuster submission successful:", result.payload);
         console.log("Navigating to settlement approval with claimId:", claimId);
-        Navigate(`/agent/claimrequest/settlementapproval/${claimId}`);
+        Navigate(`/agent/claimrequest/settlementapproval/${claimId}`, {
+          state: {
+            claimId,
+            clientId:
+              location.state?.clientId ||
+              claimDetails?.data?.policy?.clientId ||
+              claimDetails?.data?.clientId,
+          },
+        });
       } else {
         console.error("Adjuster submission failed:", result.payload);
         // You can add error handling here

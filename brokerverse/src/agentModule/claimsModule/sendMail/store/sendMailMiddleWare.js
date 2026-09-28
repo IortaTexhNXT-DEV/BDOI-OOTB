@@ -127,51 +127,60 @@ export const postSendData = createAsyncThunk(
         quoteRefId: claimThirdPartyData.quoteRefId || "QUOTE-001",
         policyRefId: claimThirdPartyData.policyRefId || "POLICY-001",
         policyInfo: {
-          insuranceCompanyName: claimDetailsData.InsuranceCompanyName || "",
-          policyNumber: claimDetailsData.policyNumber || "",
-          policyHolderName: claimDetailsData.PolicyHolderName || "",
-          houseNo: claimDetailsData.HouseNo || "",
-          barangay: claimDetailsData.Barangay || "",
-          countryName: claimDetailsData.CountryName || "",
-          province: claimDetailsData.Province || "",
-          cityName: claimDetailsData.CityName || "",
-          zipCode: claimDetailsData.ZipCode || "",
+          insuranceCompanyName:
+            claimDetailsData.InsuranceCompanyName ||
+            claimThirdPartyData.InsuranceCompanyName ||
+            "",
+          policyNumber:
+            claimDetailsData.policyNumber ||
+            claimThirdPartyData.policyNumber ||
+            "",
+          policyHolderName:
+            claimDetailsData.PolicyHolderName ||
+            claimThirdPartyData.PolicyHolderName ||
+            "",
+          houseNo:
+            claimDetailsData.HouseNo || claimThirdPartyData.HouseNo || "",
+          barangay:
+            claimDetailsData.Barangay || claimThirdPartyData.Barangay || "",
+          countryName:
+            claimDetailsData.CountryName ||
+            claimThirdPartyData.CountryName ||
+            "",
+          province:
+            claimDetailsData.Province || claimThirdPartyData.Province || "",
+          cityName:
+            claimDetailsData.CityName || claimThirdPartyData.CityName || "",
+          zipCode:
+            claimDetailsData.ZipCode || claimThirdPartyData.ZipCode || "",
+          roadThanon:
+            claimDetailsData.RoadThanon ||
+            claimThirdPartyData.RoadThanon ||
+            "",
+          soiAlley:
+            claimDetailsData.SoiAlley || claimThirdPartyData.SoiAlley || "",
+          mooVillage:
+            claimDetailsData.MooVillage ||
+            claimThirdPartyData.MooVillage ||
+            "",
         },
         thirdPartyDetails,
         ...(!isFire
-          ? {}
-          : {
+          ? {
               driverDetails: {
-                driverName:
-                  claimThirdPartyData.driverName ||
-                  claimDetailsData.PolicyHolderName ||
-                  "",
-                driverHouseNo:
-                  claimThirdPartyData.driverHouseNo ||
-                  claimDetailsData.HouseNo ||
-                  "",
-                driverBarangay:
-                  claimThirdPartyData.driverBarangay ||
-                  claimDetailsData.Barangay ||
-                  "",
-                driverCountry:
-                  claimThirdPartyData.driverCountry ||
-                  claimDetailsData.CountryName ||
-                  "",
-                driverProvince:
-                  claimThirdPartyData.driverProvince ||
-                  claimDetailsData.Province ||
-                  "",
-                driverCity:
-                  claimThirdPartyData.driverCity ||
-                  claimDetailsData.CityName ||
-                  "",
-                driverZipCode:
-                  claimThirdPartyData.driverZipCode ||
-                  claimDetailsData.ZipCode ||
-                  "",
+                driverName: claimThirdPartyData.driverName || "",
+                driverHouseNo: claimThirdPartyData.driverHouseNo || "",
+                driverBarangay: claimThirdPartyData.driverBarangay || "",
+                driverCountry: claimThirdPartyData.driverCountry || "",
+                driverProvince: claimThirdPartyData.driverProvince || "",
+                driverCity: claimThirdPartyData.driverCity || "",
+                driverZipCode: claimThirdPartyData.driverZipCode || "",
+                driverRoadThanon: claimThirdPartyData.driverRoadThanon || "",
+                driverSoiAlley: claimThirdPartyData.driverSoiAlley || "",
+                driverMooVillage: claimThirdPartyData.driverMooVillage || "",
               },
-            }),
+            }
+          : {}),
         emailData: {
           mailSubject: payload.mailSubject || "New Claim Notification",
           write:

@@ -100,7 +100,7 @@ const SidebarItemCollapse = ({
           // Check if this submenu item matches
           if (subItem.includes && Array.isArray(subItem.includes)) {
             const specificIncludes = subItem.includes.filter(
-              (inc) => inc !== "/"
+              (inc) => inc !== "/",
             );
             const hasGenericRoot = subItem.includes.includes("/");
 
@@ -133,7 +133,7 @@ const SidebarItemCollapse = ({
         console.log(
           "🟡 SidebarItemCollapse - Auto-expanding nested menu:",
           item?.name,
-          "because path matches"
+          "because path matches",
         );
         setLocalExpanded(true);
       } else {
@@ -143,7 +143,7 @@ const SidebarItemCollapse = ({
         console.log(
           "🟡 SidebarItemCollapse - Nested menu:",
           item?.name,
-          "does not match current path"
+          "does not match current path",
         );
       }
     }
@@ -214,7 +214,7 @@ const SidebarItemCollapse = ({
                 pathArrayData={pathArrayData}
                 onNavigate={onNavigate}
               />
-            )
+            ),
           )}
         </ul>
       )}

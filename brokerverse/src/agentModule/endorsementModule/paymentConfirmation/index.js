@@ -144,7 +144,7 @@ const PaymentConfirmation = () => {
               receiptType: "Payment",
               receiptDate: new Date().toISOString(),
               customerCode: clientNumber || "N/A",
-              currencyCode: "THB",
+              currencyCode: "PHP",
               transactionCode: "ENDORSEMENT_PAYMENT",
               remarks: `Endorsement payment receipt for policy ${policyData?.policyNumber || targetPolicyId
                 }`,

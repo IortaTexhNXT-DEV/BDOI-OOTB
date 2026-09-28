@@ -112,6 +112,19 @@ export const menuList = [
         permissions: ["read:product-market-mapping"],
       },
       {
+        id: 10,
+        name: "Risk Mapping",
+        path: "/product-configurator/risk-mapping",
+        includes: [
+          "/product-configurator/risk-mapping",
+          "/product-configurator/risk-mapping/",
+        ],
+        permissions: [
+          "read:product-risk-mapping",
+          "read:product-templates",
+        ],
+      },
+      {
         id: 9,
         name: "Product Analytics",
         path: "/product-configurator/analytics",
@@ -124,6 +137,12 @@ export const menuList = [
     name: "Master",
     icon: <SvgMassterIcon />,
     submenu: [
+      {
+        id: 0,
+        name: "System Settings",
+        path: "/master/configuration/system-settings",
+        includes: ["/master/configuration/system-settings"],
+      },
       {
         id: 1,
         name: "Generals",

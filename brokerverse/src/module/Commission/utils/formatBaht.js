@@ -1,14 +1,12 @@
-/** Format amounts as ฿-prefixed values to match commission mockups. */
+import { formatCurrency } from "../../../utility/currencyConverter";
+
+/**
+ * Format commission amounts as PHP (legacy name kept for call-site compatibility).
+ */
 export const formatBaht = (amount, { decimals } = {}) => {
-  const n = Number(amount);
-  if (Number.isNaN(n)) return "฿0";
-  const fractionDigits =
-    decimals !== undefined ? decimals : Number.isInteger(n) ? 0 : 2;
-  return (
-    "฿" +
-    n.toLocaleString("en-US", {
-      minimumFractionDigits: fractionDigits,
-      maximumFractionDigits: fractionDigits,
-    })
-  );
+  const options =
+    decimals !== undefined
+      ? { minimumFractionDigits: decimals, maximumFractionDigits: decimals }
+      : undefined;
+  return formatCurrency(amount, options);
 };

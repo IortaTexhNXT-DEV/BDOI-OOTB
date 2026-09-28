@@ -131,4 +131,32 @@
     font-size: 16px;
     font-weight: 400;
   }
+
+  .qdv-iar-schedule-wrap {
+    padding: 0 1.5rem 1rem;
+  }
+
+  .qdv-iar-schedule-table {
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 13px;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+    th {
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .qdv-iar-section-row td {
+      background: #f9fafb;
+    }
+  }
+
+  .qdv-iar-help {
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 2px;
+  }
 }

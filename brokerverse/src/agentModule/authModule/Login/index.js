@@ -9,7 +9,10 @@ import InputTextField from "../../component/inputText";
 import authService from "../../../services/authService";
 import { useTranslation } from "react-i18next";
 import { Dropdown } from "primereact/dropdown";
+import { useSelector } from "react-redux";
 import i18n from "../../../i18n";
+import SvgFinalLogo from "../../../assets/icons/SvgFinalLogo";
+import { DEFAULT_SYSTEM_SETTINGS } from "../../../utility/systemCurrencies";
 
 const getLanguageOptions = (t) => [
   { label: t("common.english"), value: "en" },
@@ -18,8 +21,8 @@ const getLanguageOptions = (t) => [
 
 const bdoBannerImage = "/bdoi/login-photo.jpg";
 const initialValue = {
-  EmailAddress: "juan.santos",
-  Password: "agent123",
+  EmailAddress: "",
+  Password: "",
 };
 
 const Login = () => {
@@ -28,6 +31,20 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { t } = useTranslation();
   const currentLanguage = (i18n.language && i18n.language.startsWith("th")) ? "th" : "en";
+  const logoUrl = useSelector(
+    (state) =>
+      state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
+  );
+  const primaryColor = useSelector(
+    (state) =>
+      state.systemSettingsReducer?.primaryColor ||
+      DEFAULT_SYSTEM_SETTINGS.primaryColor
+  );
+  const secondaryColor = useSelector(
+    (state) =>
+      state.systemSettingsReducer?.secondaryColor ||
+      DEFAULT_SYSTEM_SETTINGS.secondaryColor
+  );
 
   const validate = (values) => {
     const errors = {};
@@ -92,24 +109,29 @@ const Login = () => {
   return (
     <div className="grid m-0 agent__container__login">
       <CustomToast ref={toastRef} message={t("login.loginSuccess")} />
-      <div className="col-12 md:col-8 left__side__login bdo-theme">
+      <div className="login__lang_dropdown">
+        <Dropdown
+          value={currentLanguage}
+          options={getLanguageOptions(t)}
+          onChange={(e) => i18n.changeLanguage(e.value)}
+          className="login-language-dropdown"
+          placeholder={t("common.language")}
+        />
+      </div>
+      <div
+        className="col-12 md:col-8 left__side__login bdo-theme"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
+        }}
+      >
         <div className="bdo-banner-container">
           <img src={bdoBannerImage} alt="" className="bdo-banner-image" />
         </div>
       </div>
       <div className="col-12 md:col-4 login__side__screen p-5">
-        <div className="col-12 md:col-12 lg:col-12 login__lang_dropdown mb-2">
-          <Dropdown
-            value={currentLanguage}
-            options={getLanguageOptions(t)}
-            onChange={(e) => i18n.changeLanguage(e.value)}
-            className="login-language-dropdown"
-            placeholder={t("common.language")}
-          />
-        </div>
         <div className="col-12 md:col-12 lg:col-12 bdo-logo-container">
 
-          <img src="/bdoi/bdo-insure.png" alt="BDO Insure" className="bdo-logo" />
+          <img src={logoUrl} alt="Logo" className="bdo-logo" />
         </div>
         <div className="col-12 md:col-12 lg:col-12  ">
           <div className="login__header">{t("login.title")}</div>

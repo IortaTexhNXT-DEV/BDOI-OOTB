@@ -96,8 +96,8 @@ const RemittanceHistory = () => {
       id: 2,
       referenceNo: "TRF20250926001",
       actionType: "Amount Modification",
-      previousValue: "$120,000",
-      newValue: "$125,000",
+      previousValue: "₱120,000",
+      newValue: "₱125,000",
       changedBy: "Finance Head",
       changeDate: "2025-09-26 14:30",
       ipAddress: "192.168.1.105",
@@ -214,7 +214,7 @@ const RemittanceHistory = () => {
       date: '2025-09-26 14:30',
       icon: 'pi pi-pencil',
       color: '#FF9800',
-      description: 'Amount adjusted by Finance Head (+$5,000)'
+      description: 'Amount adjusted by Finance Head (+₱5,000)'
     },
     {
       status: 'Approved',
@@ -534,7 +534,7 @@ const RemittanceHistory = () => {
                 header="Amount"
                 body={(data) => {
                   const color = data.amount >= 0 ? 'inherit' : 'red';
-                  return <span style={{ color }}>${Math.abs(data.amount).toLocaleString()}</span>;
+                  return <span style={{ color }}>{"\u20B1"}{Math.abs(data.amount).toLocaleString()}</span>;
                 }}
               />
               <Column field="status" header="Status" body={statusBodyTemplate} />
@@ -676,7 +676,7 @@ const RemittanceHistory = () => {
                     </div>
                     <div className="detail-item">
                       <label>Amount:</label>
-                      <span>${selectedRecord.amount?.toLocaleString()}</span>
+                      <span>{"\u20B1"}{selectedRecord.amount?.toLocaleString()}</span>
                     </div>
                     <div className="detail-item">
                       <label>Status:</label>
@@ -702,7 +702,7 @@ const RemittanceHistory = () => {
                         <div className="version-data">
                           <div className="data-item">
                             <label>Amount:</label>
-                            <span className="old-value">$120,000</span>
+                            <span className="old-value">₱120,000</span>
                           </div>
                           <div className="data-item">
                             <label>Status:</label>
@@ -715,7 +715,7 @@ const RemittanceHistory = () => {
                         <div className="version-data">
                           <div className="data-item">
                             <label>Amount:</label>
-                            <span className="new-value">$125,000</span>
+                            <span className="new-value">₱125,000</span>
                           </div>
                           <div className="data-item">
                             <label>Status:</label>

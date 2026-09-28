@@ -34,8 +34,9 @@ const AddTaxation = () => {
     setSelectedOption(e.value);
   };
   const ToCurrencyCode = [
+    { label: "PHP", value: "PHP" },
     { label: "THB", value: "THB" },
-    { label: "USD", value: "RM" },
+    { label: "USD", value: "USD" },
   ];
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);

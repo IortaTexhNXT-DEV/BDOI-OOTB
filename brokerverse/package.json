@@ -45,7 +45,8 @@
     "build": "craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "theme:bdoi": "node scripts/build-bdoi-theme.js"
+    "theme:bdoi": "node scripts/build-bdoi-theme.js",
+    "theme:palette": "node scripts/apply-bdoi-palette.js"
   },
   "eslintConfig": {
     "extends": [

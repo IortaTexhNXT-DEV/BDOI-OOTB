@@ -648,7 +648,7 @@ export const exceptionMasterData = {
       id: 2,
       exceptionCode: "EXC-003",
       referenceNo: "PAY-2025-0890",
-      description: "Payment amount differs by $500",
+      description: "Payment amount differs by \u20B1500",
       detectedOn: "2025-09-26 15:00:00",
       severity: "Critical",
       assignedTo: "Finance Team",

@@ -2,20 +2,37 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import "./index.scss";
 
 const ClaimRejected = () => {
   const { t } = useTranslation();
-  const params = useParams();
-  const { id } = params;
+  const location = useLocation();
   const navigate = useNavigate();
+  const clientId = location.state?.clientId;
+  const claimId = location.state?.claimId;
+  const policyNumber = location.state?.policyNumber;
+
+  const navigateToClientView = () => {
+    if (clientId) {
+      navigate(`/agent/clientview/${clientId}`);
+    } else {
+      navigate(-1);
+    }
+  };
+
   const handleCommonAction = () => {
-    navigate(`/agent/clientview/${123}`);
+    navigateToClientView();
   };
   const handleSubmit = () => {
-    navigate("/agent/claimdocumentupload");
+    navigate("/agent/claimdocumentupload", {
+      state: {
+        clientId,
+        claimId,
+        policyNumber,
+      },
+    });
   };
   return (
     <div className="claimrejected__approval__overall">
@@ -26,7 +43,7 @@ const ClaimRejected = () => {
       >
         <SvgLeftArrow />
         <div className="claim__request__upload__back__btn__title">
-          {t("agent.clientIdLabel")} 1233333
+          {t("agent.clientIdLabel")} {clientId || ""}
         </div>
       </div>
       <Card className="mt-8 claimrequest__overall__card">
@@ -35,6 +52,7 @@ const ClaimRejected = () => {
             <img
               src="https://i.ibb.co/V21pJZs/REJECTED-1.png"
               className="claimtitle__img__container"
+              alt="Rejected"
             />
           </div>
           <div className="claimtitle__txt_container mt-6">

@@ -37,12 +37,20 @@ const PaymentErrorEndorsment = () => {
   const handleReject = () => {
     toastRef.current.showToast();
     setTimeout(() => {
-      navigate(`/agent/clientview/${clientId || "123"}`);
+      if (clientId) {
+        navigate(`/agent/clientview/${clientId}`, { replace: true });
+      } else {
+        navigate("/agent/clientlisting", { replace: true });
+      }
     }, 2000);
   };
 
   const handleCommonAction = () => {
-    navigate(`/agent/clientview/${clientId || "123"}`);
+    if (clientId) {
+      navigate(`/agent/clientview/${clientId}`);
+    } else {
+      navigate(-1);
+    }
   };
 
   const handleSubmit = () => {

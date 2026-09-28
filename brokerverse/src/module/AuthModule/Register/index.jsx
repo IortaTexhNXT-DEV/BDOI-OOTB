@@ -3,7 +3,6 @@ import '../Register/index.scss';
 import InputField from '../../../components/InputField';
 import { Button } from 'primereact/button';
 import SvgCheckBox from '../../../assets/icons/SvgCheckBox';
-import SvgWhiteLogo from '../../../assets/icons/SvgWhiteLogo';
 import { useTranslation } from 'react-i18next';
 
 const Register = () => {
@@ -16,7 +15,7 @@ const Register = () => {
                         <div className="p-mt-1 welcome__text">
                             {t('login.welcomeTo')}
                         </div>
-                        <SvgWhiteLogo color={'#fff'} />
+                        <img src="/BDO_insure_logo.png.png" alt="BDO" />
                         <div className="logo__cover___white">
                             {t('login.cover')}
                         </div>
@@ -30,7 +29,7 @@ const Register = () => {
             <div className="col-12 md:col-4 p-5">
                 <div className="col-12 md:col-12 lg:col-12  ">
                     <div className='logo__icon'>
-                        <span><SvgWhiteLogo color={"#000"} /> </span> <span className='cover__black'>{t('login.cover')}</span>
+                        <span><img src="/BDO_insure_logo.png.png" alt="BDO" /> </span> <span className='cover__black'>{t('login.cover')}</span>
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12  ">

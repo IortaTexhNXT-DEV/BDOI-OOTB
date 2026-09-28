@@ -23,6 +23,7 @@ import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
 import { QuotationStatus } from "../../../utils/statusHelpers";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorsementCategories";
 import { Toast } from "primereact/toast";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
@@ -108,10 +109,10 @@ const QuoteDetailView = ({ action }) => {
   );
   console.log("FETCHING", productConfigurator);
   useEffect(() => {
-    const isFire = (quotationData?.productType || "")
-      .toLowerCase()
-      .includes("fire");
-    if (quotationData && !isFire) {
+    const productType = quotationData?.productType || "";
+    const isFire = productType.toLowerCase().includes("fire");
+    const isIar = isIarLob(productType);
+    if (quotationData && !isFire && !isIar) {
       dispatch(
         fetchProductTemplateByIdMiddleware({
           templateCode: "MOT-003-2025",
@@ -120,21 +121,46 @@ const QuoteDetailView = ({ action }) => {
     }
   }, [quotationData, dispatch]);
 
-  const isFireLOB = useMemo(
-    () =>
-      quotationData?.productType === "Fire and Allied Perils" ||
-      quotationData?.productType?.toLowerCase?.().includes("fire"),
+  const isIarLOB = useMemo(
+    () => isIarLob(quotationData?.productType),
     [quotationData?.productType]
+  );
+
+  const isFireLOB = useMemo(
+    () => !isIarLOB && isFireLob(quotationData?.productType),
+    [quotationData?.productType, isIarLOB]
   );
 
   const fireRiskDetails = quotationData?.fireRiskDetails || quotationData?.fireRisk || {};
   const firePremiumDetails = quotationData?.firePremiumDetails || quotationData?.firePremium || {};
+  const iarPremiumDetails = quotationData?.iarPremiumDetails || {};
+  const iarSections = quotationData?.iarSections || [];
+  const iarScheduleSections =
+    iarPremiumDetails?.sections ||
+    (Array.isArray(iarSections) ? iarSections : []);
   const fireSumInsured = firePremiumDetails?.sumInsured || {};
   const fireCoverBreakup = firePremiumDetails?.coverBreakup || [];
 
   // Calculate premium breakdown from coverage details
   const calculatedPremiums = useMemo(() => {
     if (!quotationData) return null;
+
+    if (isIarLOB && iarPremiumDetails && Object.keys(iarPremiumDetails).length) {
+      return {
+        netPremium: iarPremiumDetails.totalPremiumPreLevy ?? quotationData.netPremium,
+        documentaryStampTax: "0.00",
+        localGovernmentTax: "0.00",
+        valueAddedTax: iarPremiumDetails.valueAddedTax ?? quotationData.valueAddedTax,
+        accountPremiumOthers: "0.00",
+        discount: iarPremiumDetails.discount ?? "0.00",
+        grossPremium:
+          iarPremiumDetails.totalPremiumLevyInclusive ??
+          iarPremiumDetails.totalPremium ??
+          quotationData.grossPremium,
+        totalSumInsured:
+          iarPremiumDetails.totalSumInsured ?? quotationData.totalSumInsured,
+      };
+    }
 
     // Fire LOB: Use firePremiumDetails
     if (isFireLOB && firePremiumDetails) {
@@ -165,7 +191,14 @@ const QuoteDetailView = ({ action }) => {
 
     // Motor: FALLBACK: Calculate from coverage details
     return calculatePremiumBreakdown(quotationData, productConfigurator);
-  }, [quotationData, productConfigurator, isFireLOB, firePremiumDetails]);
+  }, [
+    quotationData,
+    productConfigurator,
+    isFireLOB,
+    isIarLOB,
+    firePremiumDetails,
+    iarPremiumDetails,
+  ]);
 
   console.log(calculatedPremiums, "calculatedPremiums --- QUOTE DETAIL VIEW");
 
@@ -266,12 +299,15 @@ const QuoteDetailView = ({ action }) => {
 
     console.log("Starting policy conversion flow for quotation:", quotationId);
 
-    const isFireLOB =
-      quotationData?.productType === "Fire and Allied Perils" ||
-      quotationData?.productType?.toLowerCase?.().includes("fire");
-    const basePath = isFireLOB
-      ? "/agent/convertpolicy/customerinfo/fire/new"
-      : "/agent/convertpolicy/customerinfo/new";
+    const convertIsIar = isIarLob(quotationData?.productType);
+    const convertIsFire =
+      !convertIsIar &&
+      (quotationData?.productType === "Fire and Allied Perils" ||
+        quotationData?.productType?.toLowerCase?.().includes("fire"));
+    const basePath =
+      convertIsFire || convertIsIar
+        ? "/agent/convertpolicy/customerinfo/fire/new"
+        : "/agent/convertpolicy/customerinfo/new";
 
     navigate(`${basePath}/${quotationId}`, {
       state: { quotation: quotationData },
@@ -481,6 +517,8 @@ const QuoteDetailView = ({ action }) => {
                 <label>
                   {t("quoteDetailView.quoteIdColon")} {quotationData?.quotationNumber || "N/A"}
                   {isFireLOB && t("quoteDetailView.fireAndAlliedPerilsSuffix")}
+                  {isIarLOB &&
+                    ` — ${t("iarLead.productType", "Industrial All Risks")}`}
                 </label>
                 {quotationData?.quotationStatus && (
                   <StatusBadge
@@ -491,7 +529,7 @@ const QuoteDetailView = ({ action }) => {
                 )}
               </div>
             </div>
-            {!isFireLOB && (
+            {!isFireLOB && !isIarLOB && (
               <>
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.policyDetails")}</label>
@@ -630,6 +668,153 @@ const QuoteDetailView = ({ action }) => {
                       </div>
                     </div>
                   )}
+              </>
+            )}
+
+            {isIarLOB && (
+              <>
+                <div className="sub_title">
+                  <label className="policy_text">
+                    {t("quoteDetailView.policyDetails", "Policy Details")}
+                  </label>
+                  <div className="quote_details">
+                    <label className="insurance_text">
+                      {t("iarLead.productCode", "Product Code")}
+                    </label>
+                    <label className="alpha_text">
+                      {quotationData?.insurancePolicyType || "2009"}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">
+                      {t(
+                        "quoteDetailView.insurancePolicyType",
+                        "Insurance Policy Type"
+                      )}
+                    </label>
+                    <label className="alpha_text">
+                      {quotationData?.productType ||
+                        t("iarLead.productType", "Industrial All Risks")}
+                    </label>
+                  </div>
+                </div>
+
+                <div className="sub_title">
+                  <label className="policy_text">
+                    {t("iarLead.scheduleOfCover", "Schedule of Cover")}
+                  </label>
+                  <div className="qdv-iar-schedule-wrap">
+                    <table className="qdv-iar-schedule-table w-full">
+                      <thead>
+                        <tr>
+                          <th>
+                            {t(
+                              "iarLead.sectionItemPerils",
+                              "SECTION / ITEM / PERILS"
+                            )}
+                          </th>
+                          <th>{t("iarLead.sumInsured", "SUM INSURED")}</th>
+                          <th>{t("iarLead.premium", "PREMIUM")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {iarScheduleSections.length === 0 ? (
+                          <tr>
+                            <td colSpan={3}>
+                              {t("policyDetail.nA", "N/A")}
+                            </td>
+                          </tr>
+                        ) : (
+                          iarScheduleSections.map((section) => (
+                            <React.Fragment
+                              key={
+                                section.sectionId ||
+                                section.id ||
+                                section.sectionCode
+                              }
+                            >
+                              <tr className="qdv-iar-section-row">
+                                <td>
+                                  <strong>
+                                    {section.sectionLabel ||
+                                      section.sectionCode ||
+                                      "—"}
+                                  </strong>
+                                  {section.ratePercent != null && (
+                                    <div className="qdv-iar-help">
+                                      {t("iarLead.rate", "rate")}{" "}
+                                      {section.ratePercent}%
+                                    </div>
+                                  )}
+                                </td>
+                                <td>
+                                  {formatCurrency(
+                                    section.sectionSumInsured ?? 0
+                                  )}
+                                </td>
+                                <td>
+                                  {formatCurrency(
+                                    section.sectionPremium ?? 0
+                                  )}
+                                </td>
+                              </tr>
+                              {(section.items || []).map((item) => (
+                                <React.Fragment key={item.id || item.name}>
+                                  <tr>
+                                    <td style={{ paddingLeft: 16 }}>
+                                      Item: {item.name}
+                                    </td>
+                                    <td>
+                                      {formatCurrency(
+                                        item.itemSumInsured ?? 0
+                                      )}
+                                    </td>
+                                    <td />
+                                  </tr>
+                                  {(item.perils || []).map((p) => (
+                                    <tr key={p.id || p.name}>
+                                      <td style={{ paddingLeft: 28 }}>
+                                        {p.name}
+                                      </td>
+                                      <td>
+                                        {formatCurrency(p.sumInsured ?? 0)}
+                                      </td>
+                                      <td />
+                                    </tr>
+                                  ))}
+                                </React.Fragment>
+                              ))}
+                            </React.Fragment>
+                          ))
+                        )}
+                        <tr>
+                          <td>
+                            <strong>{t("common.total", "Total")}</strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {formatCurrency(
+                                iarPremiumDetails.totalSumInsured ??
+                                  calculatedPremiums?.totalSumInsured ??
+                                  quotationData?.totalSumInsured ??
+                                  0
+                              )}
+                            </strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {formatCurrency(
+                                iarPremiumDetails.totalPremiumPreLevy ??
+                                  calculatedPremiums?.netPremium ??
+                                  0
+                              )}
+                            </strong>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </>
             )}
 
@@ -777,7 +962,7 @@ const QuoteDetailView = ({ action }) => {
                 </label>
               </div>
             </div>
-            {!isFireLOB && (
+            {!isFireLOB && !isIarLOB && (
               <>
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.insuranceVehicleDetails")}</label>
@@ -841,6 +1026,63 @@ const QuoteDetailView = ({ action }) => {
             )}
             <div className="sub_title">
               <label className="policy_text">{t("quoteDetailView.paymentDetails")}</label>
+              {isIarLOB && (
+                <>
+                  <div className="quote_details">
+                    <label className="insurance_text">
+                      {t("iarLead.totalPremiumPreLevy", "Total premium (pre-levy)")}
+                    </label>
+                    <label className="alpha_text">
+                      {formatCurrency(calculatedPremiums?.netPremium)}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">
+                      {t("agent.valueAddedTax", "Value Added Tax")} (
+                      {iarPremiumDetails.vatPercent ?? 12}%)
+                    </label>
+                    <label className="alpha_text">
+                      {formatCurrency(calculatedPremiums?.valueAddedTax)}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">
+                      {t("quoteDetailView.discount", "Discount")}
+                    </label>
+                    <label className="alpha_text">
+                      {formatCurrency(
+                        calculatedPremiums?.discount === "NaN"
+                          ? 0
+                          : calculatedPremiums?.discount
+                      )}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">
+                      {t("quoteDetailView.totalSumInsured", "Total Sum Insured")}
+                    </label>
+                    <label className="alpha_text">
+                      {formatCurrency(
+                        iarPremiumDetails.totalSumInsured ??
+                          calculatedPremiums?.totalSumInsured ??
+                          quotationData?.totalSumInsured ??
+                          0
+                      )}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="gross_text">
+                      {t(
+                        "iarLead.totalPremiumLevyInclusive",
+                        "Total Premium (levy-inclusive)"
+                      )}
+                    </label>
+                    <label className="gross_count">
+                      {formatCurrency(calculatedPremiums?.grossPremium)}
+                    </label>
+                  </div>
+                </>
+              )}
               {isFireLOB && (
                 <>
                   <div className="quote_details">
@@ -873,7 +1115,7 @@ const QuoteDetailView = ({ action }) => {
                   </div>
                 </>
               )}
-              {!isFireLOB && (
+              {!isFireLOB && !isIarLOB && (
                 <>
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.netPremium")}</label>

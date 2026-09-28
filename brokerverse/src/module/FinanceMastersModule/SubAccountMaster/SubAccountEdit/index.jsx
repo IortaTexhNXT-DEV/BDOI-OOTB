@@ -28,9 +28,9 @@ const SubAdd = () => {
     { name: "Main0128" },
   ]);
   const [selectedOption1, setSelectedOption1] = useState([
+    { name: "PHP" },
     { name: "THB" },
-    { name: "EUR" },
-    { name: "AUD" },
+    { name: "USD" },
   ]);
   const handleDropdownChange = (e) => {
     setSelectedOption(e.value);

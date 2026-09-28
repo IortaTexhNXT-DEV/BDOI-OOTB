@@ -24,17 +24,19 @@ export const InsurancePolicyTypes = [
 
 export const InsurancePolicycontainer = [
   { label: "Maxicare", value: "Maxicare", sumInsured: "₱500,000" },
-  { label: "Medicard Thailand", value: "Medicard Thailand", sumInsured: "฿750,000" },
+  { label: "Medicard Thailand", value: "Medicard Thailand", sumInsured: "₱750,000" },
   { label: "Intellicare", value: "Intellicare", sumInsured: "₱1,000,000" },
-  { label: "AXA Thailand", value: "AXA Thailand", sumInsured: "฿2,000,000" },
+  { label: "AXA Thailand", value: "AXA Thailand", sumInsured: "₱2,000,000" },
 ];
 
 export const pesoTypes = [
+  { label: "PHP", value: "PHP" },
   { label: "THB", value: "THB" },
   { label: "USD", value: "USD" },
 ];
 
 export const PremiumCurrency = [
+  { label: "PHP", value: "PHP" },
   { label: "THB", value: "THB" },
   { label: "USD", value: "USD" },
 ];

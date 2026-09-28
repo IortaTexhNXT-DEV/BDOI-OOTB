@@ -482,6 +482,7 @@ const PolicyDetailView = () => {
         leadRefId: rawPolicyData?.leadId,
         quoteRefId: rawPolicyData?.quoteRefId,
         policyRefId: policyId,
+        clientId: rawPolicyData?.clientId || policyDetails?.clientId,
       },
     });
   };

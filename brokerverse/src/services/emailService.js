@@ -57,6 +57,72 @@ class EmailService {
   }
 
   /**
+   * Share quote to insurance companies (one email per company, PDF attached)
+   * @param {Object} params
+   * @param {string} params.quotationId
+   * @param {string[]} params.insuranceCompanies
+   * @param {string} [params.productType]
+   * @param {string} [params.quotationNumber]
+   * @returns {Promise<Object>} Result
+   */
+  async shareQuoteToInsurers({
+    quotationId,
+    insuranceCompanies,
+    productType,
+    quotationNumber,
+  }) {
+    try {
+      const controller = new AbortController();
+      // PDF generation + multiple sends can take longer than a single email
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+      console.log('Sharing quote to insurers:', insuranceCompanies);
+
+      const response = await fetch(`${this.baseURL}/share-quote-to-insurers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authService.getAuthHeader()
+        },
+        body: JSON.stringify({
+          quotationId,
+          insuranceCompanies,
+          productType,
+          quotationNumber,
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || 'Failed to share quote to insurance companies'
+        );
+      }
+
+      const data = await response.json();
+      console.log('Quote shared to insurers successfully:', data);
+
+      return {
+        success: true,
+        data,
+        partial: Array.isArray(data?.data?.failed) && data.data.failed.length > 0,
+      };
+    } catch (error) {
+      console.error('Share quote to insurers error:', error);
+      return {
+        success: false,
+        error:
+          error.name === 'AbortError'
+            ? 'Request timeout. Please try again.'
+            : error.message || 'Failed to share quote to insurance companies',
+      };
+    }
+  }
+
+  /**
    * Send custom email
    * @param {Object} emailData - Email data (to, subject, text/html)
    * @returns {Promise<Object>} Result

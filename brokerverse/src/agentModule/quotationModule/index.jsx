@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import SvgDot from "../../assets/agentIcon/SvgDots";
 import SvgMotor from "../../assets/agentIcon/SvgMotor";
 import SvgFire from "../../assets/agentIcon/SvgFire";
+import SvgHome from "../../assets/agentIcon/SvgHome";
 import BulkUploadModal from "./BulkUploadModal";
 import { useNavigate } from "react-router-dom";
 import QuoteStatsCards from "../quoteModule/quoteListing/QuoteStatsCards";
@@ -31,6 +32,10 @@ const ClientListingCard = () => {
   const handleCreateQuote = () => {
     // Navigate to lead listing to select a lead for quote creation
     navigate("/agent/leadlisting");
+  };
+
+  const handleCreateIarQuote = () => {
+    navigate("/agent/createlead/iar");
   };
 
   const dropdownOptions = [
@@ -82,6 +87,30 @@ const ClientListingCard = () => {
       ),
       value: "FireAndAlliedPerils",
     },
+    {
+      label: (
+        <div
+          style={{ display: "flex", alignItems: "center", gap: "10px" }}
+          onClick={() => handleCreateIarQuote()}
+        >
+          <div>
+            <SvgHome />
+          </div>
+          <div
+            style={{
+              fontFamily: "Nunito, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
+              color: "#111927",
+              width: "100%",
+            }}
+          >
+            {t("quotationPage.industrialAllRisks", "Industrial All Risks")}
+          </div>
+        </div>
+      ),
+      value: "IndustrialAllRisks",
+    },
   ];
 
   return (
@@ -124,6 +153,15 @@ const ClientListingCard = () => {
                 minWidth: "150px",
                 border: "1px solid #E5E7EB",
                 borderRadius: "8px",
+              }}
+              onChange={(e) => {
+                setSelectedOption(e.value);
+                if (e.value === "IndustrialAllRisks") {
+                  handleCreateIarQuote();
+                } else if (e.value === "Motor" || e.value === "FireAndAlliedPerils") {
+                  handleCreateQuote();
+                }
+                setSelectedOption(null);
               }}
             />
           </div>

@@ -7,11 +7,12 @@ import { Button } from "primereact/button";
 import DropdownField from "../../component/DropdwonField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import document from "../../../assets/images/document.png";
 const ClaimDocumentUpload = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const { claimDocumentUploadData, loading } = useSelector(
     ({ claimDocumentUploadMainReducers }) => {
       return {
@@ -41,9 +42,15 @@ const ClaimDocumentUpload = () => {
   ];
   console.log(claimDocumentUploadData, "claimDocumentUploadData");
   const Navigate = useNavigate();
+  const clientId =
+    location.state?.clientId || claimDocumentUploadData?.clientId;
 
   const handleCommonAction = () => {
-    Navigate(`/agent/clientview/${123}`);
+    if (clientId) {
+      Navigate(`/agent/clientview/${clientId}`);
+    } else {
+      Navigate(-1);
+    }
   };
   return (
     <div className="claim__docupload__upload__container">
@@ -54,7 +61,7 @@ const ClaimDocumentUpload = () => {
       >
         <SvgLeftArrow />
         <div className="claim__request__upload__back__btn__title">
-          {t("agent.clientIdLabel")} {claimDocumentUploadData?.clientId ?? "123456"}
+          {t("agent.clientIdLabel")} {clientId || ""}
         </div>
       </div>
       <Card className="mt-4">

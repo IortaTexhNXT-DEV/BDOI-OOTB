@@ -290,8 +290,9 @@ const ClientListingIndividualCategory = ({
     navigate("/agent/clientedit");
   };
 
-  const handleViewAction = () => {
-    navigate(`/agent/clientview/${123}`);
+  const handleViewAction = (rowData) => {
+    const clientId = rowData.id || rowData.clientId || rowData.LeadID;
+    navigate(`/agent/clientview/${clientId}`);
   };
 
   const ViewheaderStyle = {

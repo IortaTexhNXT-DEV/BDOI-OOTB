@@ -96,12 +96,22 @@ const receiptsReducer = createSlice({
     });
     builder.addCase(getReceiptsListByIdMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      state.receiptDetailList = action.payload.receiptDetailList;
+      state.currentReceiptId = action.payload.receiptId || null;
+      state.currentReceiptDetails = {
+        ...(state.currentReceiptDetails || {}),
+        receiptId: action.payload.receiptId || null,
+        receiptNumber: action.payload.receiptNumber || null,
+      };
+      state.receiptDetailList = (action.payload.receiptDetailList || []).map((item) => ({
+        ...item,
+        id: item.receiptListId || item.id,
+        receiptListId: item.receiptListId || item.id,
+      }));
       state.paymentDetails = action.payload.paymentDetails;
     });
     builder.addCase(getReceiptsListByIdMiddleware.rejected, (state, action) => {
       state.loading = false;
-
+      state.currentReceiptId = null;
       state.receiptDetailList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
@@ -264,6 +274,7 @@ const receiptsReducer = createSlice({
       // Extract receiptsList to receivableTableList for the edit page
       state.receivableTableList = action.payload.receiptsList.map(item => ({
         id: item.receiptListId,
+        receiptListId: item.receiptListId,
         policies: item.policies,
         netPremium: item.netPremium,
         paid: item.paid,

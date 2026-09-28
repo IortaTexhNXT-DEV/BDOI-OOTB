@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 // import DatepickerField from "../../../component/datePicker";
 // import SvgBlueArrow from "../../../../assets/agentIcon/SvgBlueArrow";
 import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 // import SvgDot from "../../../../assets/agentIcon/SvgDot";
 import { useSelector } from "react-redux";
 import { useFormik } from "formik";
@@ -25,9 +25,11 @@ const handleSubmit = () => {
   // navigate("/agent/convertpolicy/uploadvehiclephotos");
 };
 
-const PCpolicyDetails = ({ action, state }) => {
+const PCpolicyDetails = ({ action, state: stateProp }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = stateProp || location.state;
 
   const handleclick = () => {
     // Parse premium values from display strings (remove commas)
@@ -60,13 +62,20 @@ const PCpolicyDetails = ({ action, state }) => {
     });
   };
   const handlePayLater = () => {
-    navigate(`/agent/clientview/${123}`);
+    const clientId = state?.clientId;
+    if (clientId) {
+      navigate(`/agent/clientview/${clientId}`, { replace: true });
+    } else {
+      navigate(-1);
+    }
   };
   const handleAccountingSubmit = () => {
-    // Navigate to premium accounting entries page with client ID
-    // Using a default client ID for now - this should be updated based on actual client ID from policy data
-    const clientId = state?.clientId || "12345678"; // Default client ID as shown in the image
-    navigate(`/agent/premium-accounting-entries/${clientId}`);
+    const clientId = state?.clientId;
+    if (clientId) {
+      navigate(`/agent/premium-accounting-entries/${clientId}`);
+    } else {
+      navigate(-1);
+    }
   };
 
   const { policydetailedlist, loading } = useSelector(

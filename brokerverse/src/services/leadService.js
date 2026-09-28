@@ -502,6 +502,14 @@ class LeadService {
   }
 
   /**
+   * Create an Industrial All Risks lead (personal details only).
+   * Uses POST /leads with lob: "IAR".
+   */
+  async createIarLead(payload) {
+    return this.createFireLead({ ...payload, lob: "IAR" });
+  }
+
+  /**
    * Generate lead report Excel file
    * @param {string} category - Report category (Excel, Converted, Pending, Dropped/Declined, Revised/Reconstruct)
    * @returns {Promise<Object>} API response with Excel file download

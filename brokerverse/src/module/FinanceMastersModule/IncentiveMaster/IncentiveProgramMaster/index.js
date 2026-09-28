@@ -58,7 +58,7 @@ const IncentiveProgramMaster = () => {
     targetMetric: "",
     baseTarget: 0,
     stretchTarget: 0,
-    currency: "THB",
+    Currency: "PHP",
     calculationFrequency: "",
     status: "Active",
     structure: []
@@ -108,6 +108,7 @@ const IncentiveProgramMaster = () => {
   ];
 
   const currencyOptions = [
+    { label: "PHP", value: "PHP" },
     { label: "THB", value: "THB" },
     { label: "USD", value: "USD" }
   ];
@@ -168,7 +169,7 @@ const IncentiveProgramMaster = () => {
 targetMetric: "",
     baseTarget: 0,
     stretchTarget: 0,
-    currency: "THB",
+    Currency: "PHP",
       calculationFrequency: "",
       status: "Active",
       structure: []

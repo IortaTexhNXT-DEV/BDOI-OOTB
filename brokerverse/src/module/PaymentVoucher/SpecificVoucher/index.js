@@ -54,6 +54,29 @@ function SpecificVoucher() {
     disbursementDataFromState?.AgentReferrer?.code ||
     disbursementDataFromState?.referrerId;
 
+  const resolveCustomerCodeFromState = () => {
+    const fromState = disbursementDataFromState?.CustomerCode;
+    if (!fromState) return null;
+    if (typeof fromState === "string") return fromState || null;
+    return fromState.code || fromState.label || fromState.name || null;
+  };
+
+  const resolveCustomerCode = async () => {
+    const fromState = resolveCustomerCodeFromState();
+    if (fromState) return fromState;
+
+    if (!disbursementId) return null;
+
+    const result = await disbursementService.getDisbursementById(disbursementId);
+    if (!result.success) {
+      console.error("Failed to fetch disbursement for customerCode:", result.error);
+      return null;
+    }
+
+    const disbursement = result.data?.data || result.data;
+    return disbursement?.customerCode || null;
+  };
+
   const handlebankdetail = async () => {
     const ids = selectedProducts?.map((item) => item.id);
     const commissionLineIds = selectedProducts
@@ -155,8 +178,20 @@ function SpecificVoucher() {
             console.error("Failed to fetch agent invoice lines:", result.error);
           }
         } else {
+          const customerCode = await resolveCustomerCode();
+
+          if (!customerCode) {
+            setInvoiceListData([]);
+            toastRef.current?.showToast({
+              severity: "error",
+              summary: t("common.error"),
+              detail: t("paymentVoucher.customerCodeMissingForInvoiceList"),
+            });
+            return;
+          }
+
           const result = await disbursementService.getInvoiceListByCustomerCode(
-            disbursementId
+            customerCode
           );
           const { success, data } = result;
 
@@ -183,9 +218,15 @@ function SpecificVoucher() {
             }
           } else {
             console.error(
-              "Failed to fetch disbursement details:",
+              "Failed to fetch invoice list by customer code:",
               result.error
             );
+            toastRef.current?.showToast({
+              severity: "error",
+              summary: t("common.error"),
+              detail:
+                result.error || t("paymentVoucher.failedToLoadDisbursementDetails"),
+            });
           }
         }
       } catch (error) {
@@ -410,10 +451,7 @@ function SpecificVoucher() {
               body={(row) => {
                 const n = Number(row.comsub ?? row.rawData?.comsub);
                 if (Number.isNaN(n)) return "-";
-                return `฿${n.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`;
+                return formatCurrency(n);
               }}
             ></Column>
           ) : null}

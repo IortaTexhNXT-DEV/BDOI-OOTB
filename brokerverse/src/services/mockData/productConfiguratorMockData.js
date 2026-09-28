@@ -223,8 +223,8 @@ const coverageConfigurations = [
     type: 'Mandatory',
     description: 'Mandatory coverage for bodily injury/death to third parties',
     limits: [
-      { type: 'Per Person', amount: 100000, currency: 'THB' },
-      { type: 'Per Event', amount: 500000, currency: 'THB' }
+      { type: 'Per Person', amount: 100000, currency: 'PHP' },
+      { type: 'Per Event', amount: 500000, currency: 'PHP' }
     ],
     deductible: 0,
     waitingPeriod: 0,
@@ -240,7 +240,7 @@ const coverageConfigurations = [
     type: 'Optional',
     description: 'Coverage for typhoon, flood, earthquake damages',
     limits: [
-      { type: 'Maximum', amount: 1000000, currency: 'THB' }
+      { type: 'Maximum', amount: 1000000, currency: 'PHP' }
     ],
     deductible: 5000,
     waitingPeriod: 0,
@@ -256,8 +256,8 @@ const coverageConfigurations = [
     type: 'Mandatory',
     description: 'Inpatient coverage including room and board',
     limits: [
-      { type: 'Annual', amount: 500000, currency: 'THB' },
-      { type: 'Per Illness', amount: 150000, currency: 'THB' }
+      { type: 'Annual', amount: 500000, currency: 'PHP' },
+      { type: 'Per Illness', amount: 150000, currency: 'PHP' }
     ],
     deductible: 0,
     waitingPeriod: 30,

@@ -304,6 +304,7 @@ const departmentCodesData = [
 ];
 
 const currencyCodesData = [
+  { code: "PHP", description: "Philippine Peso" },
   { code: "THB", description: "Thai Baht" },
   { code: "USD", description: "US Dollar" },
   { code: "INR", description: "Indian Rupee" },
@@ -311,6 +312,7 @@ const currencyCodesData = [
 ];
 
 const EXCHANGE_RATES = {
+  PHP: 1.0,
   USD: 58.86,
   EUR: 67.99,
   EURO: 67.99, // Alias for EUR

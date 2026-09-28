@@ -46,6 +46,17 @@ const LeadListingCard = () => {
               <LeadListingMotorCards lob="FIRE" activeTab={activeTab} tabIndex={1} />
             )}
           </TabPanel>
+          <TabPanel header={t("dashboard.Industrial All Risks", "Industrial All Risks")}>
+            {viewMode === "table" ? (
+              <LeadListingMotorTable
+                lob="IAR"
+                leadtabledata={leadtabledata}
+                paymentSearchList={paymentSearchList}
+              />
+            ) : (
+              <LeadListingMotorCards lob="IAR" activeTab={activeTab} tabIndex={2} />
+            )}
+          </TabPanel>
         </TabView>
       </Card>
     </div>

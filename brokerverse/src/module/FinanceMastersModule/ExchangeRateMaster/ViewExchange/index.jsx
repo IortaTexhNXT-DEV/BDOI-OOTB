@@ -23,7 +23,7 @@ import { useSelector } from "react-redux";
 const initialValues = {
   EffectiveFrom: new Date(),
   EffectiveTo: new Date(),
-  CurrencyCode: "THB",
+  CurrencyCode: "PHP",
   ToCurrencyCode: "USD",
   ExchangeRate: "",
   CurrencyDescription: "",

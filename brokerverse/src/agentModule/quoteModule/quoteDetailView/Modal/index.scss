@@ -232,4 +232,45 @@ $tablet-md: 1024px;
       }
     }
   }
+
+  // Keep insurer dialog width fixed; wrap selected chips
+  &.insurer-form-modal {
+    width: 480px !important;
+    max-width: min(480px, 95vw) !important;
+
+    .p-dialog-content {
+      overflow-x: hidden;
+    }
+
+    .insurer-multiselect.p-multiselect {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .insurer-multiselect .p-multiselect-label-container {
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .insurer-multiselect .p-multiselect-label {
+      white-space: normal !important;
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .insurer-multiselect .p-multiselect-token,
+    .insurer-multiselect .p-chip {
+      max-width: 100%;
+      margin: 0;
+    }
+
+    .insurer-multiselect .p-chip-text,
+    .insurer-multiselect .p-multiselect-token-label {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
 }

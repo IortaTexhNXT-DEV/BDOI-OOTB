@@ -12,7 +12,11 @@ const PolicyAccountingView = ({ action }) => {
     const navigate = useNavigate();
     const { state } = useLocation();
     const handleClientViewNavigation = () => {
-        navigate(`/agent/clientview/${123}`);
+        if (state?.clientId) {
+            navigate(`/agent/clientview/${state.clientId}`);
+        } else {
+            navigate(-1);
+        }
     };
 
     return (

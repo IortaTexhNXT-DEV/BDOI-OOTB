@@ -1,32 +1,40 @@
-import i18n from "../i18n";
+import { CURRENCY_LOCALE_MAP, DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
 
-const CURRENCY_BY_LANGUAGE = {
-  en: { currency: "USD", locale: "en-US" },
-  th: { currency: "THB", locale: "th-TH" },
-};
-
-const DEFAULT = { currency: "USD", locale: "en-US" };
+let activeCurrency = DEFAULT_SYSTEM_SETTINGS.displayCurrency;
+let activeLocale =
+  CURRENCY_LOCALE_MAP[DEFAULT_SYSTEM_SETTINGS.displayCurrency] || "en-PH";
 
 /**
- * Get currency and locale for a given language code.
- * @param {string} lng - Language code (e.g. 'en', 'th')
+ * Apply display currency from system settings.
+ * @param {string} code - ISO currency code
+ */
+export const setDisplayCurrency = (code) => {
+  const next = (code || DEFAULT_SYSTEM_SETTINGS.displayCurrency).toUpperCase();
+  activeCurrency = next;
+  activeLocale = CURRENCY_LOCALE_MAP[next] || "en-US";
+};
+
+/**
  * @returns {{ currency: string, locale: string }}
  */
-export const getCurrencyForLanguage = (lng) => {
-  const base = (lng || "").split("-")[0];
-  return CURRENCY_BY_LANGUAGE[base] || DEFAULT;
-};
+export const getDisplayCurrencyConfig = () => ({
+  currency: activeCurrency,
+  locale: activeLocale,
+});
 
 /**
- * Format a numeric amount as currency using the current i18n language.
- * English → USD, Thai → THB.
- * @param {number|string|null|undefined} amount - Value to format
+ * @deprecated Prefer getDisplayCurrencyConfig — language no longer maps to currency.
+ */
+export const getCurrencyForLanguage = () => getDisplayCurrencyConfig();
+
+/**
+ * Format a numeric amount using the active system display currency.
+ * @param {number|string|null|undefined} amount
  * @param {{ minimumFractionDigits?: number, maximumFractionDigits?: number }} [options]
  * @returns {string}
  */
 export const formatCurrency = (amount, options = {}) => {
-  const lng = (i18n.language || "en").split("-")[0];
-  const { currency, locale } = getCurrencyForLanguage(lng);
+  const { currency, locale } = getDisplayCurrencyConfig();
 
   if (amount === null || amount === undefined || amount === "") {
     return new Intl.NumberFormat(locale, {

@@ -111,6 +111,7 @@ const AddCommission = () => {
   const productOption = [
     { label: "Motor", value: "Motor" },
     { label: "Fire and Allied Perils", value: "Fire and Allied Perils" },
+    { label: "Industrial All Risks", value: "Industrial All Risks" },
   ];
   const insuranceCompany= [
     { label: "Option 1", value: "PIONEER INSURANCE AND SURETY CORP (PISC)" },

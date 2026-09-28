@@ -467,12 +467,17 @@ const QuoteListingCard = () => {
         console.log("Quotation details fetched:", result.payload);
 
         const quotationData = result.payload;
+        const isIarLOB =
+          quotationData?.productType === "Industrial All Risks" ||
+          quotationData?.productType?.toUpperCase?.().includes("IAR") ||
+          quotationData?.productType?.toLowerCase?.().includes("industrial all risk");
         const isFireLOB =
-          quotationData?.productType === "Fire and Allied Perils" ||
-          quotationData?.productType?.toLowerCase?.().includes("fire");
+          !isIarLOB &&
+          (quotationData?.productType === "Fire and Allied Perils" ||
+            quotationData?.productType?.toLowerCase?.().includes("fire"));
 
-        // Fire and Allied Perils: go to quotation detail view (Fire quotation page)
-        if (isFireLOB) {
+        // IAR / Fire: go to quotation detail view
+        if (isIarLOB || isFireLOB) {
           navigate("/agent/quotedetailview", {
             state: { quotationData },
           });
@@ -507,10 +512,17 @@ const QuoteListingCard = () => {
 
       console.log("Converting quotation to policy:", rowData.quotationId);
 
+      const isIarLOB =
+        rowData.productType === "Industrial All Risks" ||
+        rowData.productType?.toUpperCase?.().includes("IAR") ||
+        rowData.productType?.toLowerCase?.().includes("industrial all risk");
       const isFireLOB =
-        rowData.productType === "Fire and Allied Perils" ||
-        rowData.productType?.toLowerCase?.().includes("fire");
+        !isIarLOB &&
+        (rowData.productType === "Fire and Allied Perils" ||
+          rowData.productType?.toLowerCase?.().includes("fire"));
       const basePath = isFireLOB
+        ? "/agent/convertpolicy/customerinfo/fire/new"
+        : isIarLOB
         ? "/agent/convertpolicy/customerinfo/fire/new"
         : "/agent/convertpolicy/customerinfo/new";
 
@@ -560,6 +572,16 @@ const QuoteListingCard = () => {
       });
     } else {
       navigate("/agent/createlead/fire-allied-perils");
+    }
+  };
+
+  const handleClickIar = () => {
+    if (leadRefId && currentLeadDetails) {
+      navigate("/agent/createlead/iar", {
+        state: { leadRefId, lead: currentLeadDetails },
+      });
+    } else {
+      navigate("/agent/createlead/iar");
     }
   };
 
@@ -615,6 +637,32 @@ const QuoteListingCard = () => {
         </div>
       ),
       value: "FireAndAlliedPerils",
+    },
+    {
+      label: (
+        <div
+          style={{ display: "flex", alignItems: "center", gap: "10px" }}
+          onClick={() => {
+            handleClickIar();
+          }}
+        >
+          <div>
+            <SvgHome />
+          </div>
+          <div
+            style={{
+              fontFamily: "Nunito, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "16px",
+              color: "#111927",
+              width: "100%",
+            }}
+          >
+            {t("dashboard.Industrial All Risks", "Industrial All Risks")}
+          </div>
+        </div>
+      ),
+      value: "IndustrialAllRisks",
     },
     {
       label: (
@@ -731,6 +779,8 @@ const QuoteListingCard = () => {
                     handleclick();
                   } else if (e.value === "FireAndAlliedPerils") {
                     handleClickFireAndAlliedPerils();
+                  } else if (e.value === "IndustrialAllRisks") {
+                    handleClickIar();
                   }
                 }}
                 placeholder={t("quoteListing.addQuote")}
