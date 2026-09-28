@@ -307,6 +307,12 @@ class ClaimsService {
       if (adjusterData.driverName) {
         formData.append("driverName", adjusterData.driverName);
       }
+      if (adjusterData.driverDetails) {
+        formData.append(
+          "driverDetails",
+          JSON.stringify(adjusterData.driverDetails)
+        );
+      }
       if (adjusterData.adjusterName) {
         formData.append("adjusterName", adjusterData.adjusterName);
       }

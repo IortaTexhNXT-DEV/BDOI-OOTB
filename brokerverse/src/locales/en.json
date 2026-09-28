@@ -243,6 +243,7 @@
   },
   "validation": {
     "fieldRequired": "This field is required",
+    "zipCodePhilippines": "ZIP code must be 4 digits",
     "fieldCodeRequired": "This field Code is required",
     "emailRequired": "Email is required",
     "invalidEmail": "Invalid email address",

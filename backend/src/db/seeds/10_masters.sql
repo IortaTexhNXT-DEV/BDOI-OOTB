@@ -9,6 +9,25 @@ INSERT INTO cities(state_id, name)
 SELECT s.id, v.city FROM (VALUES ('Metro Manila','Makati'),('Metro Manila','Quezon City'),('Metro Manila','Manila'),('Metro Manila','Taguig'),('Metro Manila','Pasig'),('Cavite','Bacoor'),('Laguna','Santa Rosa'),('Cebu','Cebu City'),('Cebu','Mandaue'),('Davao del Sur','Davao City'),('Pampanga','San Fernando'),('Bulacan','Malolos'),('Batangas','Batangas City'),('Iloilo','Iloilo City'),('Negros Occidental','Bacolod')) AS v(state,city)
 JOIN states s ON s.name = v.state
 WHERE NOT EXISTS (SELECT 1 FROM cities c WHERE c.name = v.city);
+-- Philippine address master: all 17 local government units of Metro Manila (NCR: 16 cities + Pateros) and more
+-- provinces / cities used by the claim and lead address pickers. Idempotent per (province, city).
+INSERT INTO states(country_id, code, name)
+SELECT c.id, v.code, v.name FROM (VALUES ('RIZ','Rizal'),('DAO','Davao Oriental'),('PAN','Pangasinan'),('NEC','Negros Oriental')) AS v(code,name)
+JOIN countries c ON c.code = 'PH'
+WHERE NOT EXISTS (SELECT 1 FROM states s WHERE s.country_id = c.id AND s.name = v.name);
+INSERT INTO cities(state_id, name)
+SELECT s.id, v.city FROM (VALUES
+ ('Metro Manila','Caloocan'),('Metro Manila','Las Piñas'),('Metro Manila','Makati'),('Metro Manila','Malabon'),('Metro Manila','Mandaluyong'),
+ ('Metro Manila','Manila'),('Metro Manila','Marikina'),('Metro Manila','Muntinlupa'),('Metro Manila','Navotas'),('Metro Manila','Parañaque'),
+ ('Metro Manila','Pasay'),('Metro Manila','Pasig'),('Metro Manila','Pateros'),('Metro Manila','Quezon City'),('Metro Manila','San Juan'),
+ ('Metro Manila','Taguig'),('Metro Manila','Valenzuela'),
+ ('Cavite','Dasmariñas'),('Cavite','Imus'),('Cavite','General Trias'),('Cavite','Tagaytay'),
+ ('Laguna','Calamba'),('Laguna','Biñan'),('Laguna','San Pedro'),
+ ('Rizal','Antipolo'),('Rizal','Cainta'),('Rizal','Taytay'),
+ ('Cebu','Lapu-Lapu'),('Davao del Sur','Digos'),('Davao Oriental','Mati'),
+ ('Pampanga','Angeles'),('Bulacan','Meycauayan'),('Batangas','Lipa'),('Pangasinan','Dagupan'),('Negros Oriental','Dumaguete')) AS v(state, city)
+JOIN states s ON s.name = v.state JOIN countries c ON c.id = s.country_id AND c.code = 'PH'
+WHERE NOT EXISTS (SELECT 1 FROM cities ci WHERE ci.state_id = s.id AND ci.name = v.city);
 INSERT INTO currencies(code, name, symbol, decimals, is_base, exchange_rate) VALUES
  ('PHP','Philippine Peso','₱',2,true,1),('USD','US Dollar','$',2,false,0.0177),('EUR','Euro','€',2,false,0.0163),('SGD','Singapore Dollar','S$',2,false,0.0238),('JPY','Japanese Yen','¥',0,false,2.65)
 ON CONFLICT (code) DO NOTHING;

@@ -69,7 +69,9 @@ export const postSendData = createAsyncThunk(
 
       // Prepare the API payload structure
       const apiPayload = {
-        isPolicyHolderTheDriver: "false", // Default value, can be made dynamic
+        isPolicyHolderTheDriver: claimThirdPartyData.isPolicyHolderTheDriver
+          ? "true"
+          : "false",
         policyNumber:
           claimDetailsData.policyNumber || payload.policyNumber || "",
         createdBy: (() => {

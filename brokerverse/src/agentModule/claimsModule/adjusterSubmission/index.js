@@ -19,7 +19,15 @@ import {
   getClaimDetails,
 } from "./store/adjusterSubmissionMiddleWare";
 import { isFireLob } from "../../endorsementModule/constants/endorsementCategories";
-import countriesData from "./data";
+import addressService from "../../../services/addressService";
+import {
+  addressOptionsWithSaved,
+  canonicalAddressValue,
+  findAddressItem,
+  isPhilippines,
+  isValidPhilippineZip,
+  normalizeCountryName,
+} from "../../../utility/addressHelpers";
 
 const AdjusterSubmission = () => {
   const { t } = useTranslation();
@@ -195,17 +203,6 @@ const AdjusterSubmission = () => {
   const handleBackNavigation = () => {
     customHistory.back();
   };
-  const City = countriesData.city.map((city) => ({
-    label: city,
-  }));
-
-  const State = countriesData.state.map((state) => ({
-    label: state,
-  }));
-
-  const Country = countriesData.countries.map((country) => ({
-    label: country,
-  }));
   // Default form values - will be updated when API data is available
   const formInitialValue = {
     adjusterName: "",
@@ -217,9 +214,9 @@ const AdjusterSubmission = () => {
     driversName: "",
     houseNumber: "",
     barangay: "",
-    country: null,
-    province: null,
-    city: null,
+    country: "",
+    province: "",
+    city: "",
     zipCode: "",
     name: "",
     contactNumber: "",
@@ -287,10 +284,14 @@ const AdjusterSubmission = () => {
     }
     if (!values.zipCode) {
       errors.zipCode = t("validation.fieldRequired");
-    }
-
-    if (!values.zipCode) {
-      errors.zipCode = t("validation.fieldRequired");
+    } else if (
+      isPhilippines(values.country) &&
+      !isValidPhilippineZip(values.zipCode)
+    ) {
+      errors.zipCode = t(
+        "validation.zipCodePhilippines",
+        "ZIP code must be 4 digits"
+      );
     }
     return errors;
   };
@@ -326,6 +327,16 @@ const AdjusterSubmission = () => {
           : "",
         addressOfIncident: values.placeOfAccident || "",
         driverName: values.driversName || "",
+        // driver address (country / province / city are address-master names)
+        driverDetails: {
+          driverName: values.driversName || "",
+          driverHouseNo: values.houseNumber || "",
+          driverBarangay: values.barangay || "",
+          driverCountry: values.country || "",
+          driverProvince: values.province || "",
+          driverCity: values.city || "",
+          driverZipCode: String(values.zipCode || "").trim(),
+        },
         adjusterName: values.adjusterName || "",
         adjusterStatus: "Assigned", // Default status
         thirdPartyName: values.name || "",
@@ -369,6 +380,101 @@ const AdjusterSubmission = () => {
     onSubmit: handleSubmit,
   });
 
+  // Address master (addresses API): Country -> Province -> City; Province filters City.
+  const [countryList, setCountryList] = useState([]);
+  const [provinceList, setProvinceList] = useState([]);
+  const [cityList, setCityList] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await addressService.getCountries();
+      if (!cancelled && res.success && Array.isArray(res.data)) {
+        setCountryList(res.data);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Parent key for the child list: master id when matched, otherwise the saved name (the API accepts names too)
+  const countryKey =
+    findAddressItem(countryList, formik.values.country)?.id ??
+    (formik.values.country || "");
+  const provinceKey =
+    findAddressItem(provinceList, formik.values.province)?.id ??
+    (formik.values.province || "");
+
+  useEffect(() => {
+    if (!countryKey) {
+      setProvinceList([]);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      const res = await addressService.getProvincesByCountry(countryKey);
+      if (!cancelled) {
+        setProvinceList(res.success && Array.isArray(res.data) ? res.data : []);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [countryKey]);
+
+  useEffect(() => {
+    if (!provinceKey) {
+      setCityList([]);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      const res = await addressService.getCitiesByProvince(provinceKey);
+      if (!cancelled) {
+        setCityList(res.success && Array.isArray(res.data) ? res.data : []);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [provinceKey]);
+
+  // Saved values that match the master by code or a different spelling ("PHILIPPINES", "MAKATI CITY") take the master name
+  useEffect(() => {
+    [
+      ["country", countryList],
+      ["province", provinceList],
+      ["city", cityList],
+    ].forEach(([field, list]) => {
+      const current = formik.values[field];
+      if (!current || !list.length) return;
+      const canonical = canonicalAddressValue(list, current);
+      if (canonical !== current) formik.setFieldValue(field, canonical, false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    countryList,
+    provinceList,
+    cityList,
+    formik.values.country,
+    formik.values.province,
+    formik.values.city,
+  ]);
+
+  const countryOptions = useMemo(
+    () => addressOptionsWithSaved(countryList, formik.values.country),
+    [countryList, formik.values.country]
+  );
+  const provinceOptions = useMemo(
+    () => addressOptionsWithSaved(provinceList, formik.values.province),
+    [provinceList, formik.values.province]
+  );
+  const cityOptions = useMemo(
+    () => addressOptionsWithSaved(cityList, formik.values.city),
+    [cityList, formik.values.city]
+  );
+
   // Update form values when claim details are loaded (only once)
   useEffect(() => {
     if (
@@ -384,27 +490,35 @@ const AdjusterSubmission = () => {
       const leadData = claimData?.lead || {};
       const thirdPartyData = claimData?.thirdPartyWitnessDetails?.[0] || {};
 
-      // Helper function to map API values to dropdown options
-      const mapDropdownValue = (apiValue, dropdownOptions) => {
-        if (!apiValue) return null;
-
-        // Try exact match first
-        const exactMatch = dropdownOptions.find(
-          (option) => option.label.toLowerCase() === apiValue.toLowerCase()
-        );
-        if (exactMatch) return exactMatch;
-
-        // Try partial match
-        const partialMatch = dropdownOptions.find(
-          (option) =>
-            option.label.toLowerCase().includes(apiValue.toLowerCase()) ||
-            apiValue.toLowerCase().includes(option.label.toLowerCase())
-        );
-        if (partialMatch) return partialMatch;
-
-        // Return null if no match found
-        return null;
+      // Driver address: the one saved on the claim; when none was saved and the policy holder is the driver,
+      // the holder address of the claim (client record of the policy), then the lead.
+      const text = (v) => String(v ?? "").trim();
+      const holderName = text(
+        claimData?.policyHolderName || claimData?.policy?.policyHolderName
+      ).toLowerCase();
+      const driverIsHolder =
+        claimData?.isPolicyHolderTheDriver === true ||
+        !text(claimData?.driverName) ||
+        (holderName && text(claimData?.driverName).toLowerCase() === holderName);
+      const driverAddress = {
+        houseNo: claimData?.driverHouseNo,
+        barangay: claimData?.driverBarangay,
+        country: claimData?.driverCountry,
+        province: claimData?.driverProvince,
+        city: claimData?.driverCity,
+        zipCode: claimData?.driverZipCode,
       };
+      const hasAddress = (a) =>
+        Boolean(a) &&
+        ["houseNo", "barangay", "country", "province", "city", "zipCode"].some(
+          (k) => text(a[k])
+        );
+      const holderAddress = [claimData, claimData?.policy, leadData].find(
+        hasAddress
+      );
+      const address = hasAddress(driverAddress)
+        ? driverAddress
+        : (driverIsHolder && holderAddress) || {};
 
       const updatedValues = {
         adjusterName: "",
@@ -423,21 +537,12 @@ const AdjusterSubmission = () => {
             ? `${leadData.firstName} ${leadData.lastName}`
             : "") ||
           "",
-        houseNumber: claimData?.driverHouseNo || leadData?.houseNo || "",
-        barangay: claimData?.driverBarangay || leadData?.barangay || "",
-        country: mapDropdownValue(
-          claimData?.driverCountry || leadData?.country || "",
-          Country
-        ),
-        province: mapDropdownValue(
-          claimData?.driverProvince || leadData?.province || "",
-          State
-        ),
-        city: mapDropdownValue(
-          claimData?.driverCity || leadData?.city || "",
-          City
-        ),
-        zipCode: claimData?.driverZipCode || leadData?.zipCode || "",
+        houseNumber: text(address.houseNo),
+        barangay: text(address.barangay),
+        country: normalizeCountryName(text(address.country)),
+        province: text(address.province),
+        city: text(address.city),
+        zipCode: text(address.zipCode),
         name: thirdPartyData?.thirdPartyName || "",
         contactNumber: thirdPartyData?.thirdPartyContactNumber || "",
         plateNumber: thirdPartyData?.thirdPartyPlateNumber || "",
@@ -450,21 +555,6 @@ const AdjusterSubmission = () => {
           "",
         file: null,
       };
-
-      console.log("=== DROPDOWN MAPPING DEBUG ===");
-      console.log(
-        "API Country:",
-        claimData?.driverCountry || leadData?.country
-      );
-      console.log(
-        "API Province:",
-        claimData?.driverProvince || leadData?.province
-      );
-      console.log("API City:", claimData?.driverCity || leadData?.city);
-      console.log("Mapped Country:", updatedValues.country);
-      console.log("Mapped Province:", updatedValues.province);
-      console.log("Mapped City:", updatedValues.city);
-      console.log("=== END DROPDOWN MAPPING DEBUG ===");
 
       console.log("Updated Form Values:", updatedValues);
 
@@ -749,7 +839,7 @@ return `${policyHolderName} / ${
           </div>
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
             <InputTextField
-              label={t("agent.barangaySubd")}
+              label={`${t("agent.barangaySubd")}*`}
               value={formik.values.barangay}
               onChange={formik.handleChange("barangay")}
             />
@@ -762,16 +852,16 @@ return `${policyHolderName} / ${
 
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2">
             <DropdownField
-              label={t("agent.country")}
+              label={`${t("agent.country")}*`}
               value={formik.values.country}
               onChange={(e) => {
-                console.log("Country selected:", e);
-                console.log("Country selected value:", e.value);
-                formik.setFieldValue("country", e.value);
+                formik.setFieldValue("country", e.value || "");
+                formik.setFieldValue("province", "");
+                formik.setFieldValue("city", "");
               }}
-              options={Country}
+              options={countryOptions}
               optionLabel="label"
-              optionValue="label"
+              optionValue="value"
             />
             {formik.touched.country && formik.errors.country && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -781,16 +871,16 @@ return `${policyHolderName} / ${
           </div>
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2">
             <DropdownField
-              label={t("agent.province")}
+              label={`${t("agent.province")}*`}
               value={formik.values.province}
               onChange={(e) => {
-                console.log("Province selected:", e);
-                console.log("Province selected value:", e.value);
-                formik.setFieldValue("province", e.value);
+                formik.setFieldValue("province", e.value || "");
+                formik.setFieldValue("city", "");
               }}
-              options={State}
+              options={provinceOptions}
               optionLabel="label"
-              optionValue="label"
+              optionValue="value"
+              disabled={!formik.values.country}
             />
             {formik.touched.province && formik.errors.province && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -800,16 +890,13 @@ return `${policyHolderName} / ${
           </div>
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2">
             <DropdownField
-              label={t("agent.city")}
+              label={`${t("agent.city")}*`}
               value={formik.values.city}
-              onChange={(e) => {
-                console.log("City selected:", e);
-                console.log("City selected value:", e.value);
-                formik.setFieldValue("city", e.value);
-              }}
-              options={City}
+              onChange={(e) => formik.setFieldValue("city", e.value || "")}
+              options={cityOptions}
               optionLabel="label"
-              optionValue="label"
+              optionValue="value"
+              disabled={!formik.values.province}
             />
             {formik.touched.city && formik.errors.city && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -819,9 +906,10 @@ return `${policyHolderName} / ${
           </div>
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
             <InputTextField
-              label={t("agent.zipCode")}
+              label={`${t("agent.zipCode")}*`}
               value={formik.values.zipCode}
               onChange={formik.handleChange("zipCode")}
+              maxLength={isPhilippines(formik.values.country) ? 4 : undefined}
             />
             {formik.touched.zipCode && formik.errors.zipCode && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
