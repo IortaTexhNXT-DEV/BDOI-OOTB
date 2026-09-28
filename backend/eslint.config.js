@@ -13,5 +13,7 @@ export default [
       'prefer-const': 'error',
     },
   },
+  // Command-line scripts (migrate, seed, API export) report progress on the console.
+  { files: ['src/db/*.js', 'src/tools/*.js'], rules: { 'no-console': 'off' } },
   { files: ['test/**'], languageOptions: { globals: { ...globals.node } } },
 ];
