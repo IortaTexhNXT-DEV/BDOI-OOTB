@@ -63,26 +63,13 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
           value: r.id,
           label: r.name,
           level: r.level,
+          whtPct: r.whtApplicable === false ? 0 : Number(r.whtPct ?? 0),
         }));
         if (!cancelled) setReferrerOptions(list);
       })
       .catch(() => {
-        if (!cancelled) {
-          setReferrerOptions([
-            { value: "ref-somchai", label: "Khun Somchai", level: "L1" },
-            { value: "ref-siam", label: "Siam Motors Agency", level: "L1" },
-            { value: "ref-vipha", label: "Khun Vipha", level: "L2" },
-            { value: "ref-bangkok", label: "Bangkok Referral Co.", level: null },
-            { value: "ref-anucha", label: "Khun Anucha", level: "L1" },
-            {
-              value: "ref-chao",
-              label: "Chao Phraya Brokers Ltd.",
-              level: null,
-            },
-            { value: "ref-nattaya", label: "Khun Nattaya", level: "L2" },
-            { value: "ref-phuket", label: "Phuket Partners Ltd.", level: null },
-          ]);
-        }
+        // no invented referrers: without the list only "Direct" can be chosen
+        if (!cancelled) setReferrerOptions([]);
       });
     return () => {
       cancelled = true;
@@ -115,7 +102,17 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
   );
   const comsubGross = Number((primaryComsub + chainComsubTotal).toFixed(2));
   const margin = Number((brokerageAmount - comsubGross - disc).toFixed(2));
-  const wht = Number((comsubGross * 0.03).toFixed(2));
+  // withholding at each referrer's configured rate (Individual / Company, from Commission settings)
+  const whtOf = (referrerId) => referrerOptions.find((o) => o.value === referrerId)?.whtPct || 0;
+  const wht = Number(
+    (
+      (isDirect ? 0 : (primaryComsub * whtOf(details.primary?.referrerId)) / 100) +
+      (details.chain || []).reduce(
+        (sum, row) => sum + (comsubAmount(row.comsubFixed, row.comsubPct, net) * whtOf(row.referrerId)) / 100,
+        0
+      )
+    ).toFixed(2)
+  );
   const netPayable = Number((comsubGross - wht).toFixed(2));
 
   const patch = (next) => onChange({ ...details, ...next });
@@ -373,7 +370,7 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
         Comsub is on the <strong>full net</strong> premium ({formatBaht(net)}) —
         the customer discount comes <strong>out of the broker&apos;s commission</strong>
         , not the referrer&apos;s comsub. Margin = brokerage – comsub – discount.
-        WHT 3% is withheld at payout → net payable {formatBaht(netPayable)}.
+        Withholding tax ({formatBaht(wht)}) is deducted at payout at each referrer&apos;s configured rate → net payable {formatBaht(netPayable)}.
       </p>
     </div>
   );

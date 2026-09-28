@@ -1075,7 +1075,7 @@ const OrderSummary = ({ action, flow }) => {
         <div className="order__summary__back__btn__title">
           {flow === "renewal"
             ? clientData
-              ? `${clientData.firstName || ""} ${clientData.lastName || ""}}`
+              ? `${clientData.firstName || ""} ${clientData.lastName || ""}`
               : t("agent.loadingClientData")
             : leadData
             ? `${leadData.firstName || ""} ${

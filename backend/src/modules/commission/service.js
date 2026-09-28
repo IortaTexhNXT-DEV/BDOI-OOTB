@@ -80,7 +80,7 @@ export async function referrerSummaryRow(db, ref) {
   const whtPct = await whtPctFor(ref);
   return {
     id: ref.id, name: ref.name, type: ref.referrer_type, level: ref.level, policies: new Set(lines.filter((l) => l.status !== 'Reversed').map((l) => l.policy_id)).size,
-    netPayable: sumNet(cur), whtType: `${ref.referrer_type === 'External' ? 'Company' : 'Individual'} ${whtPct}%`, whtApplicable: ref.wht_applicable,
+    netPayable: sumNet(cur), whtType: `${ref.referrer_type === 'External' ? 'Company' : 'Individual'} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct,
     bankAccount: maskAccount(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
   };
 }
