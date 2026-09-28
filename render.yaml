@@ -1,0 +1,49 @@
+# Render Blueprint: one-click hosting of BrokerVerse (PostgreSQL + API + web).
+# Render dashboard > New > Blueprint > pick this repository and branch. After the first deploy, open the
+# brokerverse-web URL and sign in as BrokerVerse (password = ADMIN_PASSWORD, set in the dashboard).
+databases:
+  - name: brokerverse-db
+    databaseName: brokerverse
+    user: brokerverse
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: brokerverse-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brokerverse-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false            # set to the brokerverse-web URL, e.g. https://brokerverse-web.onrender.com
+      - key: PUBLIC_BASE_URL
+        sync: false            # set to this service's URL, e.g. https://brokerverse-api.onrender.com
+      - key: UPLOAD_DIR
+        value: /app/uploads
+    disk:
+      name: uploads
+      mountPath: /app/uploads
+      sizeGB: 1
+
+  - type: web
+    name: brokerverse-web
+    runtime: static
+    rootDir: brokerverse
+    buildCommand: npm ci --legacy-peer-deps && CI=false GENERATE_SOURCEMAP=false npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_BASE_URL
+        sync: false            # the API URL + /api, e.g. https://brokerverse-api.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
