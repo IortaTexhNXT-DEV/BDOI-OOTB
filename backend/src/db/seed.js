@@ -16,6 +16,7 @@ export const ROLES = [
   ['claims', 'Claims Officer', 'Claims registration, review and settlement', false],
   ['finance', 'Finance / Accounts', 'Receipts, collections, disbursement, commission, financial reports', false],
   ['agent', 'Agent / Referrer', 'Own leads, quotations and policies', false],
+  ['user-access-admin', 'User Access Administrator', 'Creates and maintains users, roles and access; reviews the audit trail and sign-in history. Cannot grant administrator roles or change its own access.', true],
 ];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit'];
 const ROLE_PERMS = {
@@ -23,9 +24,10 @@ const ROLE_PERMS = {
   underwriting: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'receipts:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
-  finance: ['profile', 'clients:read', 'policies:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
+  finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
   // Agents work their own book (record scoping: security.scoped_roles): endorsements and first notice of loss on their own
   // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
+  'user-access-admin': ['profile', 'users', 'roles', 'audit:read', 'notifications', 'settings:read'],
   agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'endorsements', 'claims', 'notifications'],
 };
 

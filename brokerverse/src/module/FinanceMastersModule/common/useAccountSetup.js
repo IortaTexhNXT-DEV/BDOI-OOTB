@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import mastersService from "../../../services/mastersService";
 import useMasterOptions from "../../GeneralMasters/common/useMasterOptions";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const TYPE = "account-setup";
 const byCode = { valueKey: "code" };
 const toDate = (value) => (value ? new Date(value) : null);
@@ -34,7 +35,7 @@ const useAccountSetup = (setupCode, setupName, setFormData) => {
         effectiveFromDate: toDate(record.effectiveFrom) || prev.effectiveFromDate,
         effectiveToDate: toDate(record.effectiveTo) || prev.effectiveToDate,
         modifiedBy: record.updatedBy || record.createdBy || prev.modifiedBy,
-        modifiedOn: record.updatedAt ? new Date(record.updatedAt).toLocaleString() : prev.modifiedOn,
+        modifiedOn: record.updatedAt ? new Date(record.updatedAt).toLocaleString(numberLocale()) : prev.modifiedOn,
       }));
     },
     [setFormData]

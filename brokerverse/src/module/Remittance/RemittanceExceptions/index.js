@@ -15,6 +15,7 @@ import authService from "../../../services/authService";
 import { downloadCsv, isoDate, showError, showSuccess } from "../shared";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const emptyResolution = { resolutionType: "", resolutionAmount: 0, resolutionNotes: "" };
 const SEVERITIES = ["Critical", "High", "Medium", "Low"];
 const STATUSES = ["Open", "In Progress", "Escalated", "Resolved"];
@@ -25,7 +26,7 @@ const dueBy = (row) => {
   const match = /(\d+)\s*(hour|day)/i.exec(String(row.sla || ""));
   if (!match || !row.createdAt) return "-";
   const hours = Number(match[1]) * (/day/i.test(match[2]) ? 24 : 1);
-  return new Date(new Date(row.createdAt).getTime() + hours * 3600000).toLocaleString();
+  return new Date(new Date(row.createdAt).getTime() + hours * 3600000).toLocaleString(numberLocale());
 };
 
 const RemittanceExceptions = () => {

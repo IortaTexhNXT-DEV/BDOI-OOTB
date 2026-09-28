@@ -20,6 +20,7 @@ import authService from "../../../services/authService";
 import { formatDate, isoDate, showError, statusSeverity } from "../shared";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const AutomatedRemittanceProcessing = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -293,7 +294,7 @@ const AutomatedRemittanceProcessing = () => {
           </div>
           <div className="history-details">
             <p><i className="pi pi-user"></i> {item.processedBy}</p>
-            <p><i className="pi pi-calendar"></i> {new Date(item.processedAt).toLocaleString()}</p>
+            <p><i className="pi pi-calendar"></i> {new Date(item.processedAt).toLocaleString(numberLocale())}</p>
             <p><i className="pi pi-file"></i> {item.itemCount} items</p>
             <p><i className="pi pi-wallet"></i> {formatCurrency(item.totalAmount)}</p>
             <p><i className="pi pi-clock"></i> {item.duration}</p>

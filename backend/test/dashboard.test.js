@@ -59,7 +59,7 @@ describe('dashboards', () => {
   });
   it('enforces permissions', async () => {
     expect((await finance('get', '/dashboard/sales')).status).toBe(403);
-    expect((await finance('get', '/dashboard/claims')).status).toBe(403);
+    expect((await finance('get', '/dashboard/claims')).status).toBe(200); // finance reads claims KPIs
     expect((await claims('get', '/dashboard/underwriting')).status).toBe(403);
     expect((await request(ctx.app).get('/api/dashboard/executive')).status).toBe(401);
   });

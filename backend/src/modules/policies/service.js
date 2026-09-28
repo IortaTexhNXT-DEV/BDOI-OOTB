@@ -161,15 +161,17 @@ export async function updatePaymentStatus(id, { paymentStatus, paymentMethod }, 
 }
 
 const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMonth(x.getUTCMonth() + m); return x.toISOString().slice(0, 10); };
-const addDays = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 
-/** Receivable (bill) for a premium amount; bill number from numbering.invoice.prefix. */
-export async function createReceivable(db, { policyId, clientId, amount, fromDate }) {
-  const bill = await nextNumber(db, 'invoice', 'invoice');
-  const dueDays = Number(await getSetting('receivables.due_days', 30));
-  const r = await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date)
-    VALUES ($1,$2,$3,$4,$4,$5) RETURNING *`, [bill, policyId, clientId, round2(amount), addDays(fromDate, dueDays)]);
-  return r.rows[0];
+/**
+ * Receivable (bill) for a premium amount. Delegates to the finance module so every bill is booked in the
+ * ledger at issuance (Dr premium receivable / Cr due to insurer / Cr commission income) and opens a
+ * collection item; the bill number comes from numbering.invoice.prefix.
+ */
+export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null }) {
+  const policy = (await db.query(`SELECT p.*, ic.name AS insurer_name FROM policies p
+    LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
+  const { createReceivable: financeReceivable } = await import('../receipts/receivables.js');
+  return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, user });
 }
 
 const hasReferrers = (d) => Boolean(d && [d.primary, ...(d.chain || [])].some((e) => e && e.referrerId && e.referrerId !== 'direct'));
@@ -222,7 +224,8 @@ export async function issuePolicy(db, src, body, userId) {
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
     JSON.stringify({ ...(src.doc || {}), ...docOf(body) }), userId]);
   const policyId = r.rows[0].id;
-  const receivable = await createReceivable(db, { policyId, clientId: src.clientId, amount: src.grossPremium, fromDate: inception });
+  const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: 'policy', user: { id: userId },
+    breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount } });
   await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [policyId, receivable.bill_number]);
   const details = { commissionDetails: src.doc?.commissionDetails || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
   await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);

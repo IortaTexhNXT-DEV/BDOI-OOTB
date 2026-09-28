@@ -8,6 +8,7 @@ import { Tag } from "primereact/tag";
 import { getLeadStatsMiddleware } from "../../Store/leadMiddleware";
 import "./index.scss";
 
+import { numberLocale } from "../../../../utility/currencyConverter";
 const LeadStatsCards = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -163,7 +164,7 @@ const LeadStatsCards = () => {
                   />
                 )}
               </div>
-              <div className="kpi-value">{kpi.value.toLocaleString()}</div>
+              <div className="kpi-value">{kpi.value.toLocaleString(numberLocale())}</div>
               {kpi.subtitleKey && (
                 <div className="kpi-subtitle">
                   {t(kpi.subtitleKey, kpi.subtitleValue || {})}

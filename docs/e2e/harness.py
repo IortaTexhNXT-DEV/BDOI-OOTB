@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright, expect
 
 BUILD = os.environ.get('BUILD_DIR', '/tmp/ourbuild')
 API = os.environ.get('API', 'http://localhost:8000/api')
-PORT = int(os.environ.get('WEB_PORT', '5061'))
+PORT = int(os.environ.get('WEB_PORT', '5080'))
 BASE = f'http://127.0.0.1:{PORT}'
 OUT = os.environ.get('E2E_OUT', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'run'))
 os.makedirs(f'{OUT}/shots', exist_ok=True)
@@ -76,22 +76,37 @@ def login(page, username, password):
     except Exception: return False
     settle(page, 1500); return True
 
-def field(page, label, scope=None):
-    """Locate the control that belongs to a visible label text."""
-    scope = scope or page
-    lab = scope.locator('label, span, div').filter(has_text=re.compile(rf'^\s*{re.escape(label)}\s*\*?\s*$', re.I)).first
-    box = lab.locator('xpath=ancestor::*[.//input or .//textarea or .//*[contains(@class,"p-dropdown")]][1]')
-    return box
+def label_el(page, label, scope=None):
+    """The visible label element whose own text is `label` (a trailing * is allowed)."""
+    scope = scope or page.locator('.main__content, .p-dialog:visible').last
+    pat = re.compile(rf'^\s*{re.escape(label)}\s*\*?\s*$', re.I)
+    return scope.locator('label, span, div, p').filter(has_text=pat).filter(has_not=scope.locator('input')).last
 
 def fill(page, label, value, scope=None):
-    box = field(page, label, scope)
-    inp = box.locator('input:not([type=hidden]), textarea').first
-    inp.click(); inp.fill(''); inp.type(str(value), delay=10)
+    lab = label_el(page, label, scope)
+    fid = lab.get_attribute('for')
+    unique = fid and page.locator(f'[id="{fid}"]').count() == 1
+    if unique:
+        inp = page.locator(f'[id="{fid}"]')
+    else:
+        inp = None
+        text_input = 'self::input[not(@type="hidden") and not(@type="checkbox") and not(@type="radio")] or self::textarea'
+        for xp in (f'xpath=preceding-sibling::*[{text_input}][1]', f'xpath=following-sibling::*[{text_input}][1]',
+                   f'xpath=../*[{text_input}][1]', f'xpath=../*//*[{text_input}][1]', f'xpath=following::*[{text_input}][1]'):
+            cand = lab.locator(xp)
+            if cand.count():
+                inp = cand.first; break
+    inp.click(); inp.fill(''); inp.type(str(value), delay=5)
     inp.press('Tab')
 
 def choose(page, label, option, scope=None):
-    box = field(page, label, scope)
-    dd = box.locator('.p-dropdown, .p-multiselect, .p-autocomplete').first
+    lab = label_el(page, label, scope)
+    ddx = 'contains(concat(" ",@class," ")," p-dropdown ") or contains(concat(" ",@class," ")," p-multiselect ") or contains(concat(" ",@class," ")," p-autocomplete ")'
+    dd = None
+    for xp in (f'xpath=preceding-sibling::*[{ddx}][1]', f'xpath=../*[{ddx}][1]', f'xpath=../*//*[{ddx}][1]', f'xpath=following::*[{ddx}][1]'):
+        cand = lab.locator(xp)
+        if cand.count():
+            dd = cand.first; break
     dd.click(); page.wait_for_timeout(300)
     panel = page.locator('.p-dropdown-panel:visible, .p-multiselect-panel:visible, .p-autocomplete-panel:visible').last
     flt = panel.locator('input.p-dropdown-filter, input.p-multiselect-filter')
@@ -105,9 +120,12 @@ def click(page, name, exact=False):
 
 def menu(page, *path):
     """Open a screen through the sidebar, the way a user does."""
+    side = page.locator('.sidebar__overall__container')
     for i, label in enumerate(path):
-        item = page.locator('.sidebar__overall__container').get_by_text(label, exact=True).first
-        item.click(); page.wait_for_timeout(400 if i < len(path) - 1 else 0)
+        nxt = path[i + 1] if i + 1 < len(path) else None
+        if nxt and side.get_by_text(nxt, exact=True).first.is_visible():
+            continue  # group already open
+        side.get_by_text(label, exact=True).first.click(); page.wait_for_timeout(400 if nxt else 0)
     settle(page)
 
 def toast_text(page):
@@ -116,4 +134,8 @@ def toast_text(page):
     except Exception: return ''
 
 def error_texts(page):
-    return [x.strip() for x in page.locator('.p-error, small.p-invalid, .error-message, .text-danger, .p-invalid + small').all_inner_texts() if x.strip()]
+    sel = '.p-error, small.p-invalid, .error-message, .text-danger, .p-invalid + small, [class*=error]:not(input):not(.p-toast *)'
+    out = [x.strip() for x in page.locator(sel).all_inner_texts() if x.strip()]
+    # red helper text rendered without a class
+    out += page.evaluate("""()=>[...document.querySelectorAll('small,span,div,p')].filter(e=>e.children.length===0&&e.offsetParent&&/^rgb\\((2[0-5]\\d|1[7-9]\\d), ([0-8]?\\d), ([0-8]?\\d)\\)$/.test(getComputedStyle(e).color)&&e.innerText.trim().length>3).map(e=>e.innerText.trim())""")
+    return out

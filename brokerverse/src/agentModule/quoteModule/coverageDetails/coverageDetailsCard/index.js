@@ -1,3 +1,4 @@
+import { formatNumber } from "../../../../utility/currencyConverter";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
@@ -63,7 +64,7 @@ const CoverageDetailsCard = ({
         return numericMatch.value;
       }
 
-      return numericValue.toLocaleString("en-IN");
+      return formatNumber(numericValue);
     }
 
     return valueStr;
@@ -195,7 +196,7 @@ const CoverageDetailsCard = ({
       LossandDamagecoverage: keepOrFallback(
         rawValues?.LossandDamagecoverage,
         renewalCoverageData?.LossandDamagecoverage,
-        "1,00,000.00"
+        formatNumber(100000, { minimumFractionDigits: 2 })
       ),
       LossandDamagecoverageRate: keepOrFallback(
         rawValues?.LossandDamagecoverageRate,

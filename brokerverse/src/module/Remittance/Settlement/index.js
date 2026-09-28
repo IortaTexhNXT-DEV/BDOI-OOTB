@@ -22,6 +22,7 @@ import { isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const initialSettlement = () => ({
   id: null,
   settlementNo: "-",
@@ -635,7 +636,7 @@ const SettlementProcessing = () => {
                             item.status === 'Draft' ? 'info' : 'secondary'
                           } />}
                         </div>
-                        <small>{new Date(item.at).toLocaleString()}</small>
+                        <small>{new Date(item.at).toLocaleString(numberLocale())}</small>
                         {item.notes && <p className="workflow-notes">{item.notes}</p>}
                       </div>
                     )}

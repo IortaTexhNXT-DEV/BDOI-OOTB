@@ -20,6 +20,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { downloadCsv, isoDate, showError, statusSeverity } from "../shared";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const ACTION_STYLE = {
   create: { icon: "pi pi-plus", color: "#4CAF50" },
   approve: { icon: "pi pi-verified", color: "#4CAF50" },
@@ -285,7 +286,7 @@ const RemittanceHistory = () => {
               <i className="pi pi-database" />
             </div>
             <div className="card-details">
-              <div className="card-value">{historyTotal.toLocaleString()}</div>
+              <div className="card-value">{historyTotal.toLocaleString(numberLocale())}</div>
               <div className="card-label">Total Records</div>
             </div>
           </div>
@@ -368,7 +369,7 @@ const RemittanceHistory = () => {
         </div>
 
         <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-          <TabPanel header={<span>Transaction History <Badge value={visibleHistory.length.toLocaleString()} className="ml-2" /></span>}>
+          <TabPanel header={<span>Transaction History <Badge value={visibleHistory.length.toLocaleString(numberLocale())} className="ml-2" /></span>}>
             <DataTable
               value={visibleHistory}
               loading={loading}
@@ -468,7 +469,7 @@ const RemittanceHistory = () => {
               <Column
                 field="recordCount"
                 header="Records"
-                body={(data) => data.recordCount.toLocaleString()}
+                body={(data) => data.recordCount.toLocaleString(numberLocale())}
               />
               <Column field="dataSize" header="Data Size" />
               <Column field="archiveType" header="Type" />

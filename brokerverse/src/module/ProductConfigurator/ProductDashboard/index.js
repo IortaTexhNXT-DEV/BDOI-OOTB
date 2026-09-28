@@ -17,6 +17,7 @@ import productConfiguratorService from '../../../services/productConfiguratorSer
 import mastersService from '../../../services/mastersService';
 import './style.scss';
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const ProductDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -304,7 +305,7 @@ const ProductDashboard = () => {
             <DataTable value={analytics?.topProducts || []}>
               <Column field="productName" header={t('productConfiguratorDashboard.product')} />
               <Column field="totalPolicies" header={t('productConfiguratorDashboard.policies')} sortable
-                body={(rowData) => rowData.totalPolicies.toLocaleString()} />
+                body={(rowData) => rowData.totalPolicies.toLocaleString(numberLocale())} />
               <Column field="totalPremium" header={t('productConfiguratorDashboard.premium')} sortable
                 body={(rowData) => formatCurrency(rowData.totalPremium)} />
               <Column field="lossRatio" header={t('productConfiguratorDashboard.lossRatio')} sortable

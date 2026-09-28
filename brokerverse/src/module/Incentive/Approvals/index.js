@@ -21,6 +21,7 @@ import incentiveService from "../../../services/incentiveService";
 import { isoDate, loadSettings, showError, showSuccess } from "../../Remittance/shared";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const PRIORITY_LABEL = { Urgent: "High", High: "High", Normal: "Medium", Low: "Low" };
 
 const Approvals = () => {
@@ -515,7 +516,7 @@ const Approvals = () => {
                   </div>
                   <div className="detail-item">
                     <label>Submitted Date:</label>
-                    <span>{new Date(selectedApproval.submittedDate).toLocaleString()}</span>
+                    <span>{new Date(selectedApproval.submittedDate).toLocaleString(numberLocale())}</span>
                   </div>
                   <div className="detail-item">
                     <label>Days Waiting:</label>
@@ -536,7 +537,7 @@ const Approvals = () => {
                         <i className="pi pi-check"></i>
                         <div className="history-content">
                           <div className="history-action">Approved by {selectedApproval.approvedBy}</div>
-                          <div className="history-date">{new Date(selectedApproval.approvalDate).toLocaleString()}</div>
+                          <div className="history-date">{new Date(selectedApproval.approvalDate).toLocaleString(numberLocale())}</div>
                           {selectedApproval.approvalComment && (
                             <div className="history-comment">{selectedApproval.approvalComment}</div>
                           )}
@@ -548,7 +549,7 @@ const Approvals = () => {
                         <i className="pi pi-times"></i>
                         <div className="history-content">
                           <div className="history-action">Rejected by {selectedApproval.rejectedBy}</div>
-                          <div className="history-date">{new Date(selectedApproval.rejectionDate).toLocaleString()}</div>
+                          <div className="history-date">{new Date(selectedApproval.rejectionDate).toLocaleString(numberLocale())}</div>
                           {selectedApproval.rejectionComment && (
                             <div className="history-comment">{selectedApproval.rejectionComment}</div>
                           )}

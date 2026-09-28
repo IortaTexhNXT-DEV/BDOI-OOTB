@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requireRole } from '../../lib/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
 import { getSettings, setSetting } from '../../lib/settings.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
@@ -38,7 +38,7 @@ define({
 });
 define({
   method: 'GET', path: '/audit', summary: 'Audit trail (filter by entity / entityId / user)', screen: 'Master > Audit trail', roles: ['it-admin', 'ba'],
-  middleware: [requireAuth, requireRole('it-admin', 'ba')], query: { entity: 'policy', entityId: 'pol_1', limit: 100 },
+  middleware: [requireAuth, requirePermission('read:audit')], query: { entity: 'policy', entityId: 'pol_1', limit: 100 },
   response: { success: true, data: [{ at: '2026-01-01T00:00:00Z', username: 'BrokerVerse', entity: 'policy', action: 'create' }] },
   handler: async (req, res) => {
     const { entity, entityId, username } = req.query;

@@ -1,23 +1,10 @@
-export const BodilyInjuryOptions = [
-  { label: "1,00,000", value: "1,00,000" },
-  { label: "2,00,000", value: "2,00,000" },
-  { label: "3,00,000", value: "3,00,000" },
-  { label: "4,00,000", value: "4,00,000" },
-  { label: "5,00,000", value: "5,00,000" },
-];
+import { formatNumber } from "../../../../utility/currencyConverter";
 
-export const PropertyDamageOptions = [
-  { label: "1,00,000", value: "1,00,000" },
-  { label: "2,00,000", value: "2,00,000" },
-  { label: "3,00,000", value: "3,00,000" },
-  { label: "4,00,000", value: "4,00,000" },
-  { label: "5,00,000", value: "5,00,000" },
-];
+// Amount options in the configured grouping (PHP: 100,000).
+const amountOptions = (amounts) => amounts.map((a) => ({ label: formatNumber(a), value: formatNumber(a) }));
 
-export const AutopassengerpersonalAccidentOptions = [
-  { label: "10,000", value: "10,000" },
-  { label: "20,000", value: "20,000" },
-  { label: "30,000", value: "30,000" },
-  { label: "40,000", value: "40,000" },
-  { label: "50,000", value: "50,000" },
-];
+export const BodilyInjuryOptions = amountOptions([100000, 200000, 300000, 400000, 500000]);
+
+export const PropertyDamageOptions = amountOptions([100000, 200000, 300000, 400000, 500000]);
+
+export const AutopassengerpersonalAccidentOptions = amountOptions([10000, 20000, 30000, 40000, 50000]);

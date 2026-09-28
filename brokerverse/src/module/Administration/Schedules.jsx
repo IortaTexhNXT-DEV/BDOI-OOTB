@@ -11,7 +11,8 @@ import { Toast } from "primereact/toast";
 import adminService from "../../services/adminService";
 import "./index.scss";
 
-const fmt = (d) => (d ? new Date(d).toLocaleString() : "-");
+import { numberLocale } from "../../utility/currencyConverter";
+const fmt = (d) => (d ? new Date(d).toLocaleString(numberLocale()) : "-");
 const statusTag = (s) => (s ? <Tag value={s} severity={s === "success" ? "success" : s === "failed" ? "danger" : "info"} /> : "-");
 
 /** Master > Schedules: the jobs the backend runs on a timetable (renewal notices, expiries, ageing, reports, e-mail). */

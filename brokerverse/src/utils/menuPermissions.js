@@ -90,6 +90,10 @@ export const roleMenuPermissions = {
     reinsurance: ["Reconciliation"],
     reports: ["Financial Reports", "Operational Reports"],
   },
+  // Users, roles and access only; no business screens. Nested grants use "Group > Item".
+  "user-access-admin": {
+    master: ["Generals > User Management", "Audit Trail"],
+  },
   agent: {
     dashboard: ["Agent Dashboard"],
     operations: ["Home", "Leads/Prospects", "Clients", "Quotation", "Policy", "Claims", "Renewals"],
@@ -113,15 +117,32 @@ export const getUserRoles = () => {
 
 const norm = (s) => String(s || "").trim().toLowerCase();
 
-/** True when one role may open a second-level item of a top-level menu. */
+/** Grants of one role for a top-level menu: [["Item"], ["Group", "Item"], ...] (split on " > "). */
+const grantsFor = (role, menuName) => {
+  const perms = roleMenuPermissions[norm(role)];
+  const allowed = perms && perms[norm(menuName)];
+  return Array.isArray(allowed) ? allowed.map((a) => String(a).split(">").map(norm)) : [];
+};
+
+/** True when one role may open a second-level item of a top-level menu (whole item or part of it). */
 export const checkSubmenuAccess = (role, menuName, submenu) => {
   const perms = roleMenuPermissions[norm(role)];
   if (!perms) return false;
   if (perms.all) return true;
-  const allowed = perms[norm(menuName)];
-  if (!Array.isArray(allowed)) return false;
   const name = norm(typeof submenu === "object" ? submenu.name : submenu);
-  return allowed.some((a) => norm(a) === name);
+  return grantsFor(role, menuName).some((path) => path[0] === name);
+};
+
+/** Keep only the parts of an item a set of grant paths allows (a path that ends at the item keeps it whole). */
+const pruneItem = (item, paths) => {
+  if (paths.some((p) => p.length === 0) || !item.submenu) return item;
+  const submenu = item.submenu
+    .map((child) => {
+      const rest = paths.filter((p) => p[0] === norm(child.name)).map((p) => p.slice(1));
+      return rest.length ? pruneItem(child, rest) : null;
+    })
+    .filter(Boolean);
+  return submenu.length ? { ...item, submenu } : null;
 };
 
 /** True when one role may see a top-level menu (or one of its items). */
@@ -143,12 +164,29 @@ export const filterMenuForRoles = (menuList, roles) => {
       if (!menu.submenu) {
         return list.some((r) => hasMenuAccess(r, menu.name)) ? menu : null;
       }
-      const submenu = menu.submenu.filter((item) =>
-        list.some((r) => checkSubmenuAccess(r, menu.name, item.name))
-      );
+      const paths = list.flatMap((r) => grantsFor(r, menu.name));
+      const submenu = menu.submenu
+        .map((item) => {
+          const rest = paths.filter((p) => p[0] === norm(item.name)).map((p) => p.slice(1));
+          return rest.length ? pruneItem(item, rest) : null;
+        })
+        .filter(Boolean);
       return submenu.length ? { ...menu, submenu } : null;
     })
     .filter(Boolean);
+};
+
+/** First screen the roles may open (landing page for roles without a dashboard). */
+export const firstAllowedPath = (menuList, roles) => {
+  const walk = (items) => {
+    for (const item of items || []) {
+      if (item.path && !item.submenu) return item.path;
+      const inner = walk(item.submenu);
+      if (inner) return inner;
+    }
+    return null;
+  };
+  return walk(filterMenuForRoles(menuList, roles));
 };
 
 /** Backwards-compatible single-role filter. */

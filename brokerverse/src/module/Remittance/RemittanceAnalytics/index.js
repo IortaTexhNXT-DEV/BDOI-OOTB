@@ -21,6 +21,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { downloadCsv, isoDate, showError } from "../shared";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const CHART_COLORS = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d'];
 const DAY_MS = 86400000;
 
@@ -454,7 +455,7 @@ const RemittanceAnalytics = () => {
                 <div className="stats-list">
                   <div className="stat-item">
                     <span className="stat-label">Total Transactions</span>
-                    <span className="stat-value">{totalCount.toLocaleString()}</span>
+                    <span className="stat-value">{totalCount.toLocaleString(numberLocale())}</span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Total Value</span>
@@ -483,7 +484,7 @@ const RemittanceAnalytics = () => {
                     <Column
                       field="transactionCount"
                       header="Transactions"
-                      body={(data) => data.transactionCount.toLocaleString()}
+                      body={(data) => data.transactionCount.toLocaleString(numberLocale())}
                     />
                     <Column
                       field="totalValue"

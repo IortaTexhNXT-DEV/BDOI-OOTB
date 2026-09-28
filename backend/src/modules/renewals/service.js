@@ -3,7 +3,7 @@
  * ordered notices (first, second, final), contact log, maker-checker approval, renewal completion (new policy term)
  * and lapse / reinstatement.
  */
-import { many, one, query, withTransaction } from '../../db/pool.js';
+import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
@@ -387,9 +387,10 @@ export async function completeRenewal(id, user, input = {}) {
   });
   let receivableId = null;
   if (await getSetting('renewals.create_receivable', true) && premium > 0) {
-    const bill = await nextNumber('invoice', 'numbering.invoice.prefix', 'INV', { table: 'receivables', column: 'bill_number' });
-    receivableId = (await one(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date) VALUES ($1,$2,$3,$4,$4,$5) RETURNING id`, [bill, result.id, r.policy_client_id, premium, inception])).id;
-    await query('UPDATE policies SET bill_number = $2 WHERE id = $1', [result.id, bill]);
+    const { createReceivable } = await import('../policies/service.js');
+    const rcv = await createReceivable(pool, { policyId: result.id, amount: premium, source: 'renewal', reference: r.renewal_number || null, user });
+    receivableId = rcv.id;
+    await query('UPDATE policies SET bill_number = $2 WHERE id = $1', [result.id, rcv.bill_number]);
   }
   if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'info', title: `Policy renewed: ${r.policy_number}`, message: `New term ${result.policy_number} from ${inception} to ${expiry}`, link: `/agent/policydetail/${result.id}`, entity: 'policy', entityId: result.id });
   return { before: r, newPolicy: { id: result.id, policyNumber: result.policy_number, inceptionDate: inception, expiryDate: expiry, premium, receivableId }, renewal: await getRenewal(r.id) };

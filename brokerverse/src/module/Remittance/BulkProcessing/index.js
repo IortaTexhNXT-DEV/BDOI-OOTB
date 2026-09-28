@@ -15,6 +15,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const BulkProcessing = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
@@ -186,7 +187,7 @@ const BulkProcessing = () => {
                 <div className="status-info mt-3">
                   <Tag value={processedRecords[0].status}
                        severity={statusSeverity(processedRecords[0].status)} />
-                  <span className="ml-2">Processed on {new Date(processedRecords[0].processedAt).toLocaleString()}</span>
+                  <span className="ml-2">Processed on {new Date(processedRecords[0].processedAt).toLocaleString(numberLocale())}</span>
                 </div>
               </div>
             )}

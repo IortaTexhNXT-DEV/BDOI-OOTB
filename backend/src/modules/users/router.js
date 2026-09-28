@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { moduleRouter } from '../../lib/registry.js';
-import { loadUser, publicUser, requireAuth, requireRole } from '../../lib/auth.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { loadUser, publicUser, requireAuth, requirePermission } from '../../lib/auth.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
@@ -10,7 +10,17 @@ import { assertPasswordAllowed, recordHistory, savePassword } from '../../lib/pa
 import { loginHistory } from '../../lib/loginHistory.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
-const admin = [requireAuth, requireRole('it-admin', 'ba')];
+const admin = [requireAuth, requirePermission('write:users')];
+const viewer = [requireAuth, requirePermission('read:users')];
+const roleAdmin = [requireAuth, requirePermission('write:roles')];
+
+/** Roles that only an IT administrator may grant (segregation of duties). */
+const PRIVILEGED_ROLES = ['it-admin', 'ba'];
+function assertCanAssign(req, targetUserId, codes) {
+  const isItAdmin = (req.user.roles || []).includes('it-admin');
+  if (!isItAdmin && codes.some((c) => PRIVILEGED_ROLES.includes(c))) throw forbidden('Only an IT administrator can grant the IT administrator or business administrator role');
+  if (targetUserId && targetUserId === req.user.id && !isItAdmin) throw forbidden('You cannot change your own roles or access');
+}
 
 const userRow = (u) => ({
   ...publicUser(u), firstName: u.first_name, lastName: u.last_name, phone: u.phone, employeeCode: u.employee_code,
@@ -37,7 +47,7 @@ async function setRoles(client, userId, codes) {
 }
 
 define({
-  method: 'GET', path: '/', summary: 'List users (search, role, status, paging)', screen: 'Master > User Management > User', middleware: admin,
+  method: 'GET', path: '/', summary: 'List users (search, role, status, paging)', screen: 'Master > User Management > User', middleware: viewer,
   query: { search: 'juan', role: 'sales', status: 'active', page: 1, perPage: 10 },
   response: { success: true, data: [{ userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['agent'], status: 'active' }], total: 1, page: 1, perPage: 10 },
   handler: async (req, res) => {
@@ -53,7 +63,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/stats', summary: 'User counts (total, active, by role)', screen: 'Master > User Management > User', middleware: admin,
+  method: 'GET', path: '/stats', summary: 'User counts (total, active, by role)', screen: 'Master > User Management > User', middleware: viewer,
   response: { success: true, data: { totalUsers: 12, activeUsers: 11, byRole: { sales: 3 } } },
   handler: async (_req, res) => {
     const t = await one("SELECT count(*)::int AS total, count(*) FILTER (WHERE status = 'active')::int AS active FROM users");
@@ -73,7 +83,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id/login-history', summary: 'Sign-in history of a user (success, from, to; paging)', screen: 'Master > User Management > User > View > Sign-in history', middleware: admin,
+  method: 'GET', path: '/:id/login-history', summary: 'Sign-in history of a user (success, from, to; paging)', screen: 'Master > User Management > User > View > Sign-in history', middleware: viewer,
   query: { page: 1, perPage: 20, success: 'false', from: '2026-09-01', to: '2026-09-30' },
   response: { success: true, data: [{ id: 1, at: '2026-09-28T01:00:00Z', userId: 'usr_1', username: 'juan.santos', ip: '10.0.0.5', userAgent: 'Mozilla/5.0', success: false, reason: 'bad-password', method: 'password' }], total: 1, page: 1, perPage: 20, totalPages: 1 },
   handler: async (req, res) => {
@@ -94,7 +104,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one user', screen: 'Master > User Management > User > View', middleware: admin,
+  method: 'GET', path: '/:id', summary: 'Get one user', screen: 'Master > User Management > User > View', middleware: viewer,
   response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', roles: ['agent'] } },
   handler: async (req, res) => {
     const u = await loadUser('u.id = $1 OR u.username = $1', [req.params.id]);
@@ -110,6 +120,7 @@ define({
     const b = req.body;
     if (await one('SELECT 1 FROM users WHERE lower(username) = lower($1)', [b.username])) throw conflict('Username already exists');
     if (b.password) await assertPasswordAllowed(b.password);
+    assertCanAssign(req, null, b.roles);
     const hash = await bcrypt.hash(b.password || 'Welcome@1', 10);
     const id = await withTransaction(async (c) => {
       const r = await c.query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, phone, employee_code, branch_code, department, designation, reporting_to, status, must_change_password, created_by)
@@ -131,6 +142,8 @@ define({
     const before = await loadUser('u.id = $1', [req.params.id]);
     if (!before) throw notFound('User not found');
     const b = req.body;
+    if (b.roles) assertCanAssign(req, before.id, b.roles);
+    else if (before.id === req.user.id && b.status) assertCanAssign(req, before.id, []);
     if (b.password) await assertPasswordAllowed(b.password, { userId: before.id });
     await withTransaction(async (c) => {
       await c.query(`UPDATE users SET display_name = COALESCE($2, display_name), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), email = COALESCE($5, email),
@@ -198,7 +211,7 @@ async function setPerms(client, roleId, codes) {
   if (codes.length) await client.query('INSERT INTO role_permissions(role_id, permission_id) SELECT $1, id FROM permissions WHERE code = ANY($2)', [roleId, codes]);
 }
 rolesRouter.define({
-  method: 'POST', path: '/', summary: 'Create a role', screen: 'Master > User Management > Role > Add', middleware: [...admin, validate(roleSchema)],
+  method: 'POST', path: '/', summary: 'Create a role', screen: 'Master > User Management > Role > Add', middleware: [...roleAdmin, validate(roleSchema)],
   request: { code: 'branch-manager', name: 'Branch Manager', permissions: ['read:leads', 'read:policies', 'read:reports'] }, response: { success: true, data: { id: 9, code: 'branch-manager' } },
   handler: async (req, res) => {
     const b = req.body;
@@ -213,7 +226,7 @@ rolesRouter.define({
   },
 });
 rolesRouter.define({
-  method: 'PUT', path: '/:id', summary: 'Update a role and its permissions', screen: 'Master > User Management > Role > Edit', middleware: [...admin, validate(roleSchema.partial())],
+  method: 'PUT', path: '/:id', summary: 'Update a role and its permissions', screen: 'Master > User Management > Role > Edit', middleware: [...roleAdmin, validate(roleSchema.partial())],
   request: { name: 'Branch Manager', permissions: ['read:leads'] }, response: { success: true },
   handler: async (req, res) => {
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
@@ -228,7 +241,7 @@ rolesRouter.define({
   },
 });
 rolesRouter.define({
-  method: 'DELETE', path: '/:id', summary: 'Delete a non-system role with no users', screen: 'Master > User Management > Role', middleware: admin, response: { success: true },
+  method: 'DELETE', path: '/:id', summary: 'Delete a non-system role with no users', screen: 'Master > User Management > Role', middleware: roleAdmin, response: { success: true },
   handler: async (req, res) => {
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
     if (!role) throw notFound('Role not found');

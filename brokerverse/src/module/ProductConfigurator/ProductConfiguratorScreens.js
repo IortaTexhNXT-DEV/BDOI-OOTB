@@ -33,6 +33,7 @@ import ProductConfiguratorTab from "./PoductConfiguratorTab/ProductConfiguratorT
 import { fetchProductTemplateByIdMiddleware } from "./store/productConfiguratorMiddleware";
 import { clearProductTemplate } from "./store/productConfiguratorSlice";
 
+import { numberLocale } from "../../utility/currencyConverter";
 /** Product templates as dropdown options for attaching a component to a product. */
 const useProductOptions = () => {
   const [options, setOptions] = useState([]);
@@ -1920,7 +1921,7 @@ export const ProductAnalytics = () => {
               field="totalPolicies"
               header={t("productAnalytics.policies")}
               sortable
-              body={(rowData) => rowData.totalPolicies.toLocaleString()}
+              body={(rowData) => rowData.totalPolicies.toLocaleString(numberLocale())}
             />
             <Column
               field="totalPremium"

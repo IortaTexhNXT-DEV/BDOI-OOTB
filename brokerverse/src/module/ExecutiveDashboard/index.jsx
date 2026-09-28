@@ -16,6 +16,7 @@ import dashboardService from "../../services/dashboardService";
 import reportsService from "../../services/reportsService";
 import "./index.scss";
 
+import { numberLocale } from "../../utility/currencyConverter";
 const CHART_COLORS = [
   "#0066CC",
   "#E65100",
@@ -86,7 +87,7 @@ const ExecutiveDashboard = () => {
     if (value === null || value === undefined) return "-";
     if (CURRENCY_KPIS.includes(key)) return money(value);
     if (PERCENT_KPIS.includes(key)) return `${value}%`;
-    return Number(value).toLocaleString();
+    return Number(value).toLocaleString(numberLocale());
   };
 
   const periodOptions = [

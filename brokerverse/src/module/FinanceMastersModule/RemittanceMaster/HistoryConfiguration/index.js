@@ -21,6 +21,7 @@ import { showError } from "../../../Remittance/shared";
 import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
 
+import { numberLocale } from "../../../../utility/currencyConverter";
 const TYPE = "remittance-history-config";
 
 const HistoryConfiguration = () => {
@@ -653,7 +654,7 @@ const HistoryConfiguration = () => {
                 <Column
                   field="recordsAffected"
                   header="Records"
-                  body={(data) => data.recordsAffected.toLocaleString()}
+                  body={(data) => data.recordsAffected.toLocaleString(numberLocale())}
                   style={{ width: '10%' }}
                 />
                 <Column field="status" header="Status" body={statusBodyTemplate} style={{ width: '8%' }} />

@@ -1,0 +1,32 @@
+# Defects found by the end-to-end test
+
+Severity: High = blocks a business flow or loses data; Medium = wrong data, hard-coded value or broken rule; Low =
+layout, wording, usability. Status is updated as fixes land and the step is re-run.
+
+| # | Step / screen | Defect | Severity | Status |
+|---|---|---|---|---|
+| D1 | Master > User Management > Add User | Ticking a role left "At least one role is required" (validation on touch ran on the old value), so no user could be saved | High | Fixed, re-tested (15/15) |
+| D2 | Create Lead | Contact number accepts only 10 digits (9171234567); the usual PH mobile form 09171234567 or +63 917... is refused with no prefix shown | Medium | Open |
+| D3 | Create Lead (all date fields using agentModule/component/datePicker) | Date picker has no date format, so it uses US MM/DD/YYYY; Configuration says DD/MM/YYYY | Medium | Open |
+| D4 | Create Lead | Every label has for="input" (duplicate ids): labels are not tied to their fields for screen readers | Low | Open |
+| D5 | Lead Details | No "Create Quote" action for an existing lead; the only way into a quote is straight after creating the lead | Medium | Open |
+| D6 | Create Quote (page 1) | "Insurance Company Name" floating label overlaps the "Select Insurance Company" placeholder | Low | Open |
+| D7 | Create Quote (opened by URL) | Header shows "Lead ID: 1234567" (hard-coded fallback) instead of loading the lead from the route id | Medium | Open |
+| D8 | Create Quote (page 1) | Hard-coded options in quoteModule/policyDetails/mock.js: policy types (PC/MCY/CV), account codes (ACME001...), vehicle brands (4 of 8 in the master), models, variants, model years (stop at 2025), colours; should come from the vehicle/policy-type masters, agents/referrers, and the current year | Medium | Open |
+| D9 | Leads (list) | Fifth KPI card is cut off at the right edge (card row overflows) | Low | Open |
+| D10 | Leads (list) | "Create Lead" button label is vertically misaligned with its icon | Low | Open |
+| D11 | Create Quote > coverage | Amounts shown and stored in Indian lakh grouping (1,00,000; en-IN); PH grouping required (100,000). Also 46 bare toLocaleString() calls used the browser locale | Medium | Fixed in source (formatNumber / numberLocale on the configured locale, en-PH); re-test pending |
+| D12 | Create Quote > coverage / summary | Coverage page gross (28,452.01) includes CTPL 447.01; order summary net premium (28,005.00) excludes it: CTPL treatment must be confirmed (separate CTPL policy or part of the premium) | Medium | Business decision |
+| D13 | Create Quote > coverage | APPA 50,000 per seat on a 5-seater shows total coverage 1,000 and premium 5.00 | Medium | To verify with the business rule |
+| D14 | Create Quote > order summary | Amounts in input boxes have no thousands grouping (28005.00) | Low | Open |
+| D15 | Create Quote > order summary | Authorized Signature options hard-coded (JACINTO, RINA CRUZ, NOEL LIM); should come from the Signatories master | Medium | Open |
+| D16 | Plan Recommendations | Header "Lead ID :" empty; two plans both badged RECOMMENDED; advisor text shows the raw code "private_cars" | Low | Open |
+| D17 | Quote details | Vehicle colour shown as the internal code "GalacticSilver"; model variant list is not filtered by model (Rav4 / Camry) | Low | Open |
+| D18 | Convert Policy > Customer Information | Next is allowed with no ID card image, no ID number and no motor / chassis / plate / MV file number: issuance proceeds without KYC and vehicle identifiers | High | Open |
+| D19 | Approve-quote (public page) | Premium table still italic: the public page is outside the app shell, so the leaked table style is not neutralised there | Low | Open |
+| D20 | Policy > Payment Confirmation | "Processing Mock Payment": the screen auto-completes payment and issues an official receipt (bank-transfer, full amount) without any payment being captured; production needs a payment capture (mode, reference, amount, date, proof) creating a receipt for finance to verify, or a gateway | High | Open |
+| D21 | Policy Details | Client ID card shows the internal id (cl_692a…) instead of the client code CL-2026-00001 | Low | Open |
+| D22 | Policy issuance (backend) | Issuing a policy created the bill without a ledger entry and without a collection item (booked only at first payment; collections register empty until a manual sync) | High | Fixed in backend (bills now go through the finance receivable routine: booking journal + collection item at issuance), 202 tests pass; re-test in the recorded run |
+| D23 | Convert Policy > vehicle photos / Upload Policy | Two-step upload (Choose Files, then a separate Upload button per file); easy to miss, blocks Next with "No Photos" | Low | Open |
+| D24 | Executive Dashboard (finance persona) | Shows "Requires permission: read:claims": the dashboard calls the claims KPIs the finance role could not read | Medium | Fixed (finance gets read access to claims, needed for claim payments); re-test |
+| D25 | Executive Dashboard | Quick actions (New Quote, Underwriting, View Claims) are shown to every persona, including ones whose role cannot open those screens; should follow the role's menu | Low | Open |

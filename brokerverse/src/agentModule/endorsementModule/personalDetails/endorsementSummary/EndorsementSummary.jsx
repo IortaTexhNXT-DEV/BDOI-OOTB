@@ -20,6 +20,7 @@ import axios from "axios";
 import { validateAccountingEquation } from "../../../../utility/accountingValidation";
 import { isFireLob } from "../../constants/endorsementCategories";
 
+import { numberLocale } from "../../../../utility/currencyConverter";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -607,37 +608,37 @@ const EndorsementSummary = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.building")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.Building ?? 0).toLocaleString()}
+                  {(fireSumInsured?.Building ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.plantAndMachinery")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.PlantAndMachinery ?? 0).toLocaleString()}
+                  {(fireSumInsured?.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.otherContents")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.OtherContents ?? 0).toLocaleString()}
+                  {(fireSumInsured?.OtherContents ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.grossProfit")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.GrossProfit ?? 0).toLocaleString()}
+                  {(fireSumInsured?.GrossProfit ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.wages")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.Wages ?? 0).toLocaleString()}
+                  {(fireSumInsured?.Wages ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.lossOfRent")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.LossOfRent ?? 0).toLocaleString()}
+                  {(fireSumInsured?.LossOfRent ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
             </div>
@@ -650,7 +651,7 @@ const EndorsementSummary = ({ action }) => {
                       {cover?.coverDesc || `Cover ${i + 1}`}
                     </label>
                     <label className="alpha_text">
-                      SI: {(cover?.si ?? 0).toLocaleString()} | Rate:{" "}
+                      SI: {(cover?.si ?? 0).toLocaleString(numberLocale())} | Rate:{" "}
                       {cover?.rate ?? 0}% | Premium: {formatCurrency(cover?.premium ?? 0)}
                     </label>
                   </div>

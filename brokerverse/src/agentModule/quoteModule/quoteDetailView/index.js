@@ -28,6 +28,7 @@ import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorseme
 import { Toast } from "primereact/toast";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -870,37 +871,37 @@ const QuoteDetailView = ({ action }) => {
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.building")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.Building ?? 0).toLocaleString()}
+                      {(fireSumInsured.Building ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.plantAndMachinery")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString()}
+                      {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.otherContents")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.OtherContents ?? 0).toLocaleString()}
+                      {(fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.grossProfit")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.GrossProfit ?? 0).toLocaleString()}
+                      {(fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.wages")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.Wages ?? 0).toLocaleString()}
+                      {(fireSumInsured.Wages ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.lossOfRent")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.LossOfRent ?? 0).toLocaleString()}
+                      {(fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                 </div>
@@ -1019,7 +1020,7 @@ const QuoteDetailView = ({ action }) => {
                       {quotationData?.totalSumInsured
                         ? `${parseFloat(
                             quotationData.totalSumInsured
-                          ).toLocaleString()}.00`
+                          ).toLocaleString(numberLocale())}.00`
                         : "N/A"}
                     </label>
                   </div>

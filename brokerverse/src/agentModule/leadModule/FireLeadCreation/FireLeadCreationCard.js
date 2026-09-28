@@ -24,6 +24,7 @@ import {
   getLeadByIdMiddleware,
 } from "../Store/leadMiddleware";
 import quotationService from "../../../services/quotationService";
+import { numberLocale } from "../../../utility/currencyConverter";
 import {
   CONSTRUCTION_TYPES,
   BUILDING_TYPES,
@@ -1728,7 +1729,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
               <label className="insurance_text">{t(f.labelKey)}</label>
               <label className="alpha_text">
                 {siValues[f.key] != null && siValues[f.key] !== ""
-                  ? Number(siValues[f.key]).toLocaleString()
+                  ? Number(siValues[f.key]).toLocaleString(numberLocale())
                   : "0"}
               </label>
             </div>

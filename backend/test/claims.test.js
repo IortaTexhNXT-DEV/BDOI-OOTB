@@ -162,7 +162,9 @@ describe('claims', () => {
   it('enforces permissions per persona', async () => {
     expect((await as('s.sales', 'get', '/claims')).status).toBe(200);
     expect((await register('s.sales', base, false)).status).toBe(403);
-    expect((await as('f.finance', 'get', '/claims')).status).toBe(403);
+    // Finance reads claims (claim payments, dashboards) but cannot register them.
+    expect((await as('f.finance', 'get', '/claims')).status).toBe(200);
+    expect((await register('f.finance', base, false)).status).toBe(403);
     expect((await request(ctx.app).get('/api/claims')).status).toBe(401);
   });
 });

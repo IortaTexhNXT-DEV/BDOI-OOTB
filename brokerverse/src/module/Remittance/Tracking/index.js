@@ -20,6 +20,7 @@ import { downloadCsv, formatDate, isoDate, loadInsurerOptions, loadSettings, sho
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const RemittanceTracking = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -396,7 +397,7 @@ const RemittanceTracking = () => {
                     <div className="timeline-content">
                       <div className="timeline-header">
                         <strong>{item.action}</strong>
-                        <small>{new Date(item.at).toLocaleString()}</small>
+                        <small>{new Date(item.at).toLocaleString(numberLocale())}</small>
                       </div>
                       <div className="timeline-details">
                         <p>By: {item.by}</p>

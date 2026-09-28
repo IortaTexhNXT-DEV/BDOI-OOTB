@@ -17,6 +17,7 @@ import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
 import quotationService from "../../../services/quotationService";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const CustomerInfoFire = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -363,7 +364,7 @@ const CustomerInfoFire = ({ action }) => {
               <div key={key} className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
                 <InputTextField
                   label={label}
-                  value={sumInsured[key] != null ? Number(sumInsured[key]).toLocaleString() : "0"}
+                  value={sumInsured[key] != null ? Number(sumInsured[key]).toLocaleString(numberLocale()) : "0"}
                   disabled
                 />
               </div>

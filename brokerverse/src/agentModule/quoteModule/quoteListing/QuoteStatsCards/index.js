@@ -9,6 +9,7 @@ import { Tag } from "primereact/tag";
 import { getQuotationStatsMiddleware } from "../../Store/quotationMiddleware";
 import "./index.scss";
 
+import { numberLocale } from "../../../../utility/currencyConverter";
 const QuoteStatsCards = ({ leadRefId }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -311,7 +312,7 @@ const QuoteStatsCards = ({ leadRefId }) => {
                     {kpi.isFinancial
                       ? kpi.formatted
                       : typeof kpi.value === "number"
-                      ? kpi.value.toLocaleString()
+                      ? kpi.value.toLocaleString(numberLocale())
                       : kpi.value}
                   </div>
                   {kpi.subtitle && (
@@ -386,7 +387,7 @@ const QuoteStatsCards = ({ leadRefId }) => {
                   {kpi.isFinancial
                     ? kpi.formatted
                     : typeof kpi.value === "number"
-                    ? kpi.value.toLocaleString()
+                    ? kpi.value.toLocaleString(numberLocale())
                     : kpi.value}
                 </div>
                 {kpi.subtitle && (

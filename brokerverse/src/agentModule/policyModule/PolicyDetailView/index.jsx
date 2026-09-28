@@ -25,6 +25,7 @@ import { BASE_URL } from "../../../utility/constant";
 import useTaxRates from "../../quoteModule/utils/useTaxRates";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
 const ENDORSEMENT_TYPE_KEYS = {
   1: "policyDetail.endorsementTypePersonalDetails",
   2: "policyDetail.endorsementTypeMotorDetails",
@@ -1858,34 +1859,34 @@ const PolicyDetailView = () => {
                         {
                           key: "building",
                           label: t("policyDetail.building"),
-                          value: (fireSumInsured.Building ?? 0).toLocaleString(),
+                          value: (fireSumInsured.Building ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "plantAndMachinery",
                           label: t("policyDetail.plantAndMachinery"),
                           value: (
                             fireSumInsured.PlantAndMachinery ?? 0
-                          ).toLocaleString(),
+                          ).toLocaleString(numberLocale()),
                         },
                         {
                           key: "otherContents",
                           label: t("policyDetail.otherContents"),
-                          value: (fireSumInsured.OtherContents ?? 0).toLocaleString(),
+                          value: (fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "grossProfit",
                           label: t("policyDetail.grossProfit"),
-                          value: (fireSumInsured.GrossProfit ?? 0).toLocaleString(),
+                          value: (fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "wages",
                           label: t("policyDetail.wages"),
-                          value: (fireSumInsured.Wages ?? 0).toLocaleString(),
+                          value: (fireSumInsured.Wages ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "lossOfRent",
                           label: t("policyDetail.lossOfRent"),
-                          value: (fireSumInsured.LossOfRent ?? 0).toLocaleString(),
+                          value: (fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale()),
                         },
                       ]}
                     />

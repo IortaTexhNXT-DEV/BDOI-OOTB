@@ -10,7 +10,7 @@ import { initializeGlobalToast } from "../../utility/toastUtils";
 import AgentNavBar from "../../agentModule/component/navBar";
 import NewSideBar from "../../components/SideBar/NewSideBar";
 import { menuList } from "../../components/SideBar/list";
-import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+import { firstAllowedPath, getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { loadIdleMinutes, startIdleTimer } from "../../utility/idleTimeout";
 import { logout } from "../../utility/logout";
@@ -179,6 +179,8 @@ const ProtectedLayout = () => {
           </div>
           {!Auth() ? (
             <Navigate to="/login" replace />
+          ) : location.pathname === "/" && !isPathAllowed("/", menuList, getUserRoles()) && firstAllowedPath(menuList, getUserRoles()) ? (
+            <Navigate to={firstAllowedPath(menuList, getUserRoles())} replace />
           ) : isPathAllowed(location.pathname, menuList, getUserRoles()) ? (
             <ErrorBoundary resetKey={location.pathname}>
               <Outlet />

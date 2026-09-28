@@ -143,7 +143,7 @@ export async function completeEndorsement(body, userId) {
     const p = await applyToPolicy(db, e, completion, userId);
     let receivableId = null;
     if (Number(e.premium_delta) > 0) {
-      receivableId = (await createReceivable(db, { policyId: p.id, clientId: p.client_id, amount: Number(e.premium_delta), fromDate: completion.issuedDate || toDate(new Date()) })).id;
+      receivableId = (await createReceivable(db, { policyId: p.id, amount: Number(e.premium_delta), source: 'endorsement', reference: e.endorsement_number })).id;
     }
     await db.query(`UPDATE endorsements SET status = $2, completion = $3, document_key = COALESCE($4, document_key), completed_at = now(), completed_by = $5,
       receivable_id = $6, updated_by = $5, updated_at = now() WHERE id = $1`, [e.id, e.is_cancel ? 'cancelled' : 'completed', JSON.stringify(completion), body.documentKey || null, userId, receivableId]);
