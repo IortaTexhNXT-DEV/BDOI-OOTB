@@ -384,8 +384,8 @@ export const getDraftReceiptsMiddleware = createAsyncThunk(
   GET_DRAFT_RECEIPTS,
   async (payload, { rejectWithValue }) => {
     try {
-      const { page = 1, pageSize = 100 } = payload || {}; // Get more records for dropdown
-      const response = await receiptsService.getReceipts(page, pageSize);
+      const { pageSize = 500 } = payload || {};
+      const response = await receiptsService.getDraftReceipts(pageSize);
       
       // Filter for Draft receipts only and transform for dropdown use
       const draftReceipts = response.data

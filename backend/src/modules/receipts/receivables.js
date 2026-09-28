@@ -113,9 +113,16 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   }, ctx.user);
   const upd = (await db.query(`UPDATE receivables SET balance = balance - $2, last_payment_at = now(), updated_at = now(),
       status = CASE WHEN balance - $2 <= 0 THEN 'paid' ELSE 'partial' END WHERE id = $1 RETURNING *`, [rcv.id, amount])).rows[0];
+  if (Number(upd.balance) <= 0) await db.query('UPDATE collection_items SET closed_at = COALESCE(closed_at, now()), updated_at = now() WHERE receivable_id = $1', [rcv.id]);
   await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null]);
   return upd;
+}
+
+/** Commission eligibility: once nothing is open on the policy, the premium counts as collected. */
+async function commissionWhenSettled(db, policy, ctx) {
+  const stillOpen = (await db.query('SELECT count(*)::int AS n FROM receivables WHERE policy_id = $1 AND balance > 0 AND status IN (\'open\',\'partial\')', [policy.id])).rows[0].n;
+  if (!stillOpen) await onPolicyPremiumCollected(db, policy.id, ctx.receipt?.receipt_number || null);
 }
 
 /**
@@ -126,6 +133,7 @@ export async function applyToPolicy(db, ctx) {
   const { policy } = ctx;
   let remaining = round2(ctx.amount);
   if (!(remaining > 0)) return 0;
+  if (ctx.receivableId) return applyToBill(db, ctx, remaining);
   const hasAny = (await policyReceivables(db, policy.id)).length > 0;
   if (!hasAny) await createReceivable(db, { policy, amount: Math.max(remaining, round2(ctx.billAmount || 0)), breakdown: ctx.billAmount && round2(ctx.billAmount) >= remaining ? ctx.breakdown : {}, source: ctx.source || 'policy', user: ctx.user });
   const open = (await db.query(`SELECT * FROM receivables WHERE policy_id = $1 AND status IN ('open','partial') AND balance > 0
@@ -140,9 +148,24 @@ export async function applyToPolicy(db, ctx) {
     const extra = await createReceivable(db, { policy, amount: remaining, breakdown: {}, source: ctx.source === 'policy' ? 'receipt' : (ctx.source || 'receipt'), reference: ctx.receipt?.receipt_number, user: ctx.user });
     await applyToReceivable(db, extra, remaining, ctx);
   }
-  const stillOpen = (await db.query('SELECT count(*)::int AS n FROM receivables WHERE policy_id = $1 AND balance > 0 AND status IN (\'open\',\'partial\')', [policy.id])).rows[0].n;
-  if (!stillOpen) await onPolicyPremiumCollected(db, policy.id, ctx.receipt?.receipt_number || null);
+  await commissionWhenSettled(db, policy, ctx);
   return round2(ctx.amount);
+}
+
+/**
+ * Apply a payment to one named bill only (Accounts > Receipts > Add receipt against an open receivable). The amount
+ * may be partial but never more than the bill's balance: excess is refused here, whatever the client sent.
+ */
+async function applyToBill(db, ctx, amount) {
+  const { policy } = ctx;
+  const rcv = (await db.query('SELECT * FROM receivables WHERE id = $1 FOR UPDATE', [ctx.receivableId])).rows[0];
+  if (!rcv) throw notFound('Receivable not found');
+  if (rcv.policy_id !== policy.id) throw badRequest(`Bill ${rcv.bill_number} does not belong to policy ${policy.policy_number}`);
+  if (!['open', 'partial'].includes(rcv.status) || !(Number(rcv.balance) > 0)) throw badRequest(`Bill ${rcv.bill_number} has no open balance`);
+  if (amount > round2(rcv.balance)) throw badRequest(`Amount ${amount.toFixed(2)} exceeds the outstanding balance of bill ${rcv.bill_number} (${round2(rcv.balance).toFixed(2)})`);
+  await applyToReceivable(db, rcv, amount, ctx);
+  await commissionWhenSettled(db, policy, ctx);
+  return amount;
 }
 
 /** Undo every application of a receipt: reversing journals and restoring receivable balances. */
@@ -152,6 +175,7 @@ export async function reverseReceiptApplications(db, receipt, user) {
     if (a.journal_id) await reverseJournal(db, a.journal_id, user, { description: `Cancellation of receipt ${receipt.receipt_number}` });
     await db.query(`UPDATE receivables SET balance = balance + $2, updated_at = now(),
       status = CASE WHEN balance + $2 >= amount THEN 'open' ELSE 'partial' END WHERE id = $1`, [a.receivable_id, a.amount]);
+    await db.query('UPDATE collection_items SET closed_at = NULL, updated_at = now() WHERE receivable_id = $1', [a.receivable_id]);
     await db.query('UPDATE receipt_applications SET status = \'reversed\', reversed_at = now() WHERE id = $1', [a.id]);
   }
   return apps.length;

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
+import { createReceivable, findPolicy } from '../src/modules/receipts/receivables.js';
 
 let ctx;
 beforeAll(async () => { ctx = await setupFinance(); });
@@ -102,6 +103,73 @@ describe('receipts', () => {
     expect(up.body.data.created).toBe(1);
     expect(up.body.data.failed).toBe(1);
     expect(up.body.data.errors[0].row).toBe(3);
+  });
+
+  it('add receipt against an open endorsement bill: open-receivables lists it, partial 2,000 then 3,010, excess refused, journals balanced', async () => {
+    const { policy, client, gross } = await makePolicy({ net: 8000 });
+    const pol = await findPolicy(pool, policy.id);
+    const first = await createReceivable(pool, { policy: pol, amount: gross, source: 'policy' });
+    const bill = await createReceivable(pool, { policy: pol, amount: 5010, breakdown: { netPremium: 4000 }, source: 'endorsement', reference: 'END-T' });
+
+    const open = await ctx.as('maker')('get', `/receipts/open-receivables?customerCode=${client.client_code}`);
+    expect(open.status).toBe(200);
+    expect(open.body.data.map((x) => x.billNumber)).toEqual(expect.arrayContaining([first.bill_number, bill.bill_number]));
+    const row = open.body.data.find((x) => x.billNumber === bill.bill_number);
+    expect(row).toMatchObject({ receivableId: bill.id, customerCode: client.client_code, policyNumber: policy.policy_number, amount: 5010, balance: 5010, status: 'Open' });
+    const all = await ctx.as('maker')('get', '/receipts/open-receivables');
+    expect(all.body.data.some((x) => x.customerCode === client.client_code)).toBe(true);
+    expect((await ctx.as('claims')('get', '/receipts/open-receivables')).status).toBe(403);
+
+    const pay = (amount, extra = {}) => ctx.as('maker')('post', '/receipts').send({ receivableId: bill.id, amount, customerCode: client.client_code, policyRefId: policy.id,
+      receiptType: 'Payment', transactionCode: 'OR', currencyCode: 'PHP', branchCode: 'HO', departmentCode: 'FIN', paymentMode: 'cash', ...extra });
+    expect((await pay(0)).status).toBe(400);
+    expect((await pay(-5)).status).toBe(400);
+    expect((await pay(5010.01)).status).toBe(400);
+    const other = await makePolicy({ net: 1000 });
+    expect((await pay(100, { customerCode: other.client.client_code })).status).toBe(400);
+    expect((await pay(100, { policyRefId: other.policy.id })).status).toBe(400);
+
+    const p1 = await pay(2000);
+    expect(p1.status).toBe(201);
+    expect(p1.body.data.receiptNumber).toMatch(/^OR/);
+    expect(p1.body.data.amount).toBe(2000);
+    expect(p1.body.data.receivableId).toBe(bill.id);
+    expect(p1.body.data.branchCode).toBe('HO');
+    expect(p1.body.data.receiptsList[0]).toMatchObject({ paid: '2000.00', unPaid: '3010.00', lcAmount: '5010.00' });
+    let r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [bill.id])).rows[0];
+    expect(r).toEqual({ balance: 3010, status: 'partial' });
+    // the older policy bill is untouched: the payment went to the chosen bill only
+    expect((await query('SELECT balance FROM receivables WHERE id = $1', [first.id])).rows[0].balance).toBe(gross);
+    const jl = (await query(`SELECT l.account_code, l.debit, l.credit FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
+      WHERE j.reference_id = $1 ORDER BY l.line_no`, [p1.body.data.receiptId])).rows;
+    expect(jl).toHaveLength(2);
+    expect(jl.reduce((s, l) => s + Number(l.debit), 0)).toBe(2000);
+    expect(jl.reduce((s, l) => s + Number(l.credit), 0)).toBe(2000);
+    expect(jl.find((l) => Number(l.credit) > 0).account_code).toBe('1202001');
+    const partial = await ctx.as('maker')('get', `/receipts/open-receivables?customerCode=${client.client_code}&policyNumber=${policy.policy_number}`);
+    expect(partial.body.data.find((x) => x.billNumber === bill.bill_number)).toMatchObject({ balance: 3010, paidAmount: 2000, status: 'Partial' });
+
+    const excess = await pay(4000);
+    expect(excess.status).toBe(400);
+    expect(excess.body.message || excess.body.error?.message).toMatch(/exceeds the outstanding balance/);
+    expect((await query('SELECT balance FROM receivables WHERE id = $1', [bill.id])).rows[0].balance).toBe(3010);
+
+    const p2 = await pay(3010);
+    expect(p2.status).toBe(201);
+    r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [bill.id])).rows[0];
+    expect(r).toEqual({ balance: 0, status: 'paid' });
+    expect((await query('SELECT closed_at FROM collection_items WHERE receivable_id = $1', [bill.id])).rows[0].closed_at).toBeTruthy();
+    expect((await pay(1)).status).toBe(409);
+    const after = await ctx.as('maker')('get', `/receipts/open-receivables?customerCode=${client.client_code}`);
+    expect(after.body.data.map((x) => x.billNumber)).toEqual([first.bill_number]);
+    expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
+
+    // cancelling the balance receipt re-opens the bill and its collection item
+    expect((await ctx.as('maker')('post', `/receipts/${p2.body.data.receiptId}/cancel`).send({ reason: 'Cheque bounced' })).status).toBe(200);
+    r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [bill.id])).rows[0];
+    expect(r).toEqual({ balance: 3010, status: 'partial' });
+    expect((await query('SELECT closed_at FROM collection_items WHERE receivable_id = $1', [bill.id])).rows[0].closed_at).toBeNull();
+    expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
   });
 
   it('billing statement PDF for a policy', async () => {

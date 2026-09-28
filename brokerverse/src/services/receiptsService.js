@@ -13,6 +13,18 @@ export const receiptsService = {
     }
   },
 
+  // Draft receipts (pay-later) for the Add receipt screen
+  getDraftReceipts: async (pageSize = 500) => {
+    const response = await getRequest('receipts', { receiptStatus: 'Draft', page: 1, pageSize });
+    return response.data;
+  },
+
+  // Open (unpaid / partial) bills to collect; params: customerCode, policyNumber, search
+  getOpenReceivables: async (params = {}) => {
+    const response = await getRequest('receipts/open-receivables', params);
+    return response.data?.data || [];
+  },
+
   // Get receipt by ID
   getReceiptById: async (receiptId) => {
     try {
