@@ -7,6 +7,7 @@ import { nextNumber, toDate, num, round2, renderTemplate, emailTemplate } from '
 import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses.js';
 import { getPolicyRow, createReceivable } from '../policies/service.js';
 import { publicUrl } from '../uploads/storage.js';
+import { premiumBreakdown } from '../quotations/premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 
 export function toEndorsement(r) {
@@ -48,6 +49,73 @@ async function typeOf(ids, isCancel) {
   return names.length ? [...new Set(names)].join(',') : 'other';
 }
 
+/**
+ * Coverage change form keys (PascalCase, as the endorsement screen sends them) -> policy document keys. COVER_INPUTS are
+ * the pricing inputs (sums insured, rates, discount, others); COVER_FIGURES the figures derived from them.
+ */
+const COVER_INPUTS = {
+  LossandDamagecoverage: 'lossAndDamageCoverage', LossandDamagecoverageRate: 'lossAndDamageCoverageRate', ActsofNatureRate: 'actsOfNatureRate',
+  CtplCoverageRate: 'ctplCoverageRate', BodilyInjury: 'bodilyInjury', PropertyDamage: 'propertyDamage', APPATotalCoverage: 'APPAtotalCoverage',
+  AutopassengerpersonalAccident: 'autoPassengerPersonalAccident', Discount: 'discount', OthersPremium: 'accountPremiumOthers',
+};
+const COVER_FIGURES = {
+  LossandDamagecoveragepremium: 'lossAndDamageCoveragePremium', ActsofNaturepremium: 'actsOfNaturePremium', BodilyInjuryCoveragePremium: 'bodilyInjuryCoveragePremium',
+  PropertyDamageCoveragePremium: 'propertyDamageCoveragePremium', APPAcoveragePremium: 'APPAcoveragePremium', TotalSumInsured: 'totalSumInsured',
+  NETpremium: 'netPremium', ValueAddedTax: 'valueAddedTax', DocumentaryStampTax: 'documentaryStampTax', LocalGovtTax: 'localGovernmentTax', Grosspremium: 'grossPremium',
+};
+/** A coverage change is priceable when it carries at least one sum insured. */
+const SUM_INSURED_KEYS = ['LossandDamagecoverage', 'BodilyInjury', 'PropertyDamage', 'APPATotalCoverage'];
+/** Cover rates kept from the policy (the endorsement screen does not edit them). */
+const POLICY_RATES = ['roadsideAssistanceRate', 'personalAccidentCoverRate', 'bodilyInjuryRate', 'propertyDamageRate', 'APPARate'];
+/** Flat cover premiums kept from the policy when their basis (sum insured / rate) is absent; premium.js passes them through. */
+const FLAT_PREMIUMS = [['bodilyInjuryCoveragePremium', 'bodilyInjury'], ['propertyDamageCoveragePremium', 'propertyDamage'], ['APPAcoveragePremium', 'APPAtotalCoverage'],
+  ['roadsideAssistancePremium', 'roadsideAssistanceRate'], ['personalAccidentCoverPremium', 'personalAccidentCoverRate'], ['actsOfNaturePremium', 'actsOfNatureRate']];
+const given = (v) => v !== undefined && v !== null && v !== '';
+const TOLERANCE = 0.01 + 1e-9;
+
+/**
+ * Price a coverage change on the server with the quotation premium routine (premium.default_rates, tax.*_rate and
+ * premium.taxes_by_lob): the policy's current cover inputs overlaid with the edited ones. Returns null when the change
+ * carries no sum insured (nothing to price). When no pricing input differs from the policy the premium is unchanged.
+ */
+async function priceCoverageChange(cc, policy) {
+  if (!cc || !SUM_INSURED_KEYS.some((k) => given(cc[k]))) return null;
+  const doc = policy.doc || {};
+  const current = { grossPremium: round2(Number(policy.premium_total)), netPremium: round2(Number(policy.net_premium)),
+    valueAddedTax: round2(num(doc.valueAddedTax)), documentaryStampTax: round2(num(doc.documentaryStampTax)), localGovernmentTax: round2(num(doc.localGovernmentTax)) };
+  const input = { lob: policy.lob, productType: policy.product_type, ctplCoverageRate: doc.ctplCoverageRate ?? doc.ctplCoveragePremium };
+  for (const docKey of Object.values(COVER_INPUTS)) if (given(doc[docKey])) input[docKey] = doc[docKey];
+  for (const k of POLICY_RATES) if (given(doc[k])) input[k] = doc[k];
+  let changed = false;
+  for (const [formKey, docKey] of Object.entries(COVER_INPUTS)) {
+    if (!given(cc[formKey])) continue;
+    if (num(cc[formKey]) !== num(input[docKey])) changed = true;
+    input[docKey] = cc[formKey];
+  }
+  if (!changed) return { changed, current, next: current };
+  for (const [premiumKey, basisKey] of FLAT_PREMIUMS) if (!num(input[basisKey]) && given(doc[premiumKey])) input[premiumKey] = doc[premiumKey];
+  const next = await premiumBreakdown(input);
+  return { changed, current, next: { ...next, grossPremium: round2(next.grossPremium), netPremium: round2(next.netPremium) } };
+}
+
+/** The coverage change as stored: the edited inputs with the server-priced figures. */
+function pricedCoverage(cc, priced) {
+  if (!priced.changed) return cc;
+  const out = { ...cc };
+  for (const [formKey, docKey] of Object.entries(COVER_FIGURES)) if (given(priced.next[docKey])) out[formKey] = round2(priced.next[docKey]).toFixed(2);
+  return out;
+}
+
+/** Previous / new / change figures of a priced coverage change (the summary screen's Payment Details). */
+function premiumChangeOf(priced) {
+  const pick = (f) => ({ grossPremium: round2(f.grossPremium), netPremium: round2(f.netPremium), valueAddedTax: round2(num(f.valueAddedTax)),
+    documentaryStampTax: round2(num(f.documentaryStampTax)), localGovernmentTax: round2(num(f.localGovernmentTax)) });
+  const previous = pick(priced.current);
+  const next = pick(priced.next);
+  const delta = Object.fromEntries(Object.keys(next).map((k) => [k, round2(next[k] - previous[k])]));
+  return { changed: priced.changed, previous, next, delta, taxRates: priced.next.taxRates || null };
+}
+
 export async function createEndorsement(body, userId) {
   const policy = await getPolicyRow(body.policyId);
   if (['cancelled', 'expired'].includes(policy.status)) throw badRequest(`Policy ${policy.policy_number} is ${policy.status} and cannot be endorsed`);
@@ -55,9 +123,23 @@ export async function createEndorsement(body, userId) {
   const isCancel = body.isCancelPolicy === true;
   const { cancellationType, premiumDelta, effectiveDate, remarks } = body;
   const changes = Object.fromEntries(Object.entries(body).filter(([k]) => !CONTROL_FIELDS.includes(k)));
-  let delta = premiumDelta !== undefined && premiumDelta !== null && premiumDelta !== '' ? num(premiumDelta) : 0;
-  const newGross = num(changes.coverageChanges?.Grosspremium ?? changes.coverageChanges?.grossPremium);
-  if (!delta && !isCancel && newGross) delta = round2(newGross - Number(policy.premium_total));
+  const clientDelta = given(premiumDelta) ? num(premiumDelta) : null;
+  let delta = clientDelta ?? 0;
+  const priced = isCancel ? null : await priceCoverageChange(changes.coverageChanges, policy);
+  if (priced) {
+    // the server price wins; a client figure that disagrees means the screen priced something else
+    const serverDelta = round2(priced.next.grossPremium - priced.current.grossPremium);
+    if (clientDelta !== null && Math.abs(clientDelta - serverDelta) > TOLERANCE) {
+      throw badRequest(`premiumDelta ${clientDelta.toFixed(2)} does not match the recalculated premium change ${serverDelta.toFixed(2)} `
+        + `(new gross ${priced.next.grossPremium.toFixed(2)} - current gross ${priced.current.grossPremium.toFixed(2)})`);
+    }
+    delta = serverDelta;
+    changes.coverageChanges = pricedCoverage(changes.coverageChanges, priced);
+    changes.premiumChange = premiumChangeOf(priced);
+  } else if (clientDelta === null && !isCancel) {
+    const newGross = num(changes.coverageChanges?.Grosspremium ?? changes.coverageChanges?.grossPremium);
+    if (newGross) delta = round2(newGross - Number(policy.premium_total));
+  }
   const number = await nextNumber(null, 'endorsement', 'endorsement');
   const r = await one(`INSERT INTO endorsements(endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks,
       endorsement_type_ids, is_cancel, cancellation_type, created_by) VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
@@ -122,7 +204,17 @@ async function applyToPolicy(db, e, completion, userId) {
       [p.client_id, pd.EmailID, pd.ContactNumber, pd.HouseNo, pd.Barangay, pd.City, pd.Province, pd.Country, pd.ZIPCode, userId]);
     }
   }
-  if (ch.coverageChanges) doc.endorsedCoverage = ch.coverageChanges;
+  if (ch.coverageChanges) {
+    doc.endorsedCoverage = ch.coverageChanges;
+    // a priced coverage change becomes the policy's cover and premium figures
+    if (ch.premiumChange?.changed && !e.is_cancel) {
+      for (const [formKey, docKey] of Object.entries({ ...COVER_INPUTS, ...COVER_FIGURES })) if (given(ch.coverageChanges[formKey])) doc[docKey] = ch.coverageChanges[formKey];
+      doc.grossPremium = cols.premium_total.toFixed(2);
+      doc.netPremium = round2(Number(p.net_premium) + num(ch.premiumChange.delta?.netPremium)).toFixed(2);
+      cols.net_premium = Number(doc.netPremium);
+      if (num(ch.coverageChanges.TotalSumInsured)) cols.sum_insured = round2(num(ch.coverageChanges.TotalSumInsured));
+    }
+  }
   if (ch.policyExtension && completion.expiryDate) cols.expiry_date = completion.expiryDate;
   if (e.is_cancel) cols.status = 'cancelled';
   doc.endorsements = [...(doc.endorsements || []), { endorsementId: e.id, endorsementNumber: e.endorsement_number, completedAt: new Date().toISOString() }];
@@ -143,9 +235,16 @@ export async function completeEndorsement(body, userId) {
     const e = (await db.query('SELECT * FROM endorsements WHERE id = $1 FOR UPDATE', [e0.id])).rows[0];
     const p = await applyToPolicy(db, e, completion, userId);
     let receivableId = null;
-    if (Number(e.premium_delta) > 0) {
-      receivableId = (await createReceivable(db, { policyId: p.id, amount: Number(e.premium_delta), source: 'endorsement', reference: e.endorsement_number })).id;
+    const delta = Number(e.premium_delta);
+    if (delta > 0) {
+      // additional premium is billed like any premium: receivable, booking journal and collection item (finance routine)
+      const dp = e.changes?.premiumChange?.delta;
+      const breakdown = dp && dp.netPremium > 0 ? { netPremium: dp.netPremium, vat: dp.valueAddedTax, dst: dp.documentaryStampTax, lgt: dp.localGovernmentTax } : {};
+      receivableId = (await createReceivable(db, { policyId: p.id, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
     }
+    // A negative delta (return premium) is recorded on the endorsement and lowers the policy premium, but nothing is billed.
+    // TODO: returning it is a business decision (refund vs. credit against a later bill); there is no automatic refund, so
+    // finance raises a client refund payment voucher (disbursements) once the return is approved.
     await db.query(`UPDATE endorsements SET status = $2, completion = $3, document_key = COALESCE($4, document_key), completed_at = now(), completed_by = $5,
       receivable_id = $6, updated_by = $5, updated_at = now() WHERE id = $1`, [e.id, e.is_cancel ? 'cancelled' : 'completed', JSON.stringify(completion), body.documentKey || null, userId, receivableId]);
     return p;

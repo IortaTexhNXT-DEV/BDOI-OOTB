@@ -22,6 +22,8 @@ import { validateAccountingEquation } from "../../../../utility/accountingValida
 import { isFireLob } from "../../constants/endorsementCategories";
 
 import { numberLocale } from "../../../../utility/currencyConverter";
+import useTaxRates from "../../../quoteModule/utils/useTaxRates";
+import { getTaxRates } from "../../../quoteModule/utils/premiumCalculations";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -175,6 +177,32 @@ const EndorsementSummary = ({ action }) => {
       }
     }
   }, [coverageChanges, state?.endorsementId]);
+
+  // tax rates the premium was priced with: the server's (premiumChange.taxRates), else the quotation's source
+  // (product template, then app_settings tax.vat_rate / tax.dst_rate / tax.lgt_rate)
+  const settingsTaxRates = useTaxRates();
+  const taxRates = useMemo(() => {
+    const priced =
+      state?.endorsementData?.premiumChange?.taxRates ||
+      state?.endorsementData?.summary?.premiumChange?.taxRates;
+    if (priced) {
+      return {
+        valueAddedTax: Number(priced.valueAddedTax) || 0,
+        documentaryStampTax: Number(priced.documentaryStampTax) || 0,
+        localGovernmentTax: Number(priced.localGovernmentTax) || 0,
+      };
+    }
+    return getTaxRates(productConfigurator, settingsTaxRates);
+  }, [state?.endorsementData, productConfigurator, settingsTaxRates]);
+  const percentOf = (rate) => Number((Number(rate || 0) * 100).toFixed(4));
+  // premium change of the endorsement: positive = additional premium, negative = return premium
+  const premiumDelta = useMemo(() => {
+    const raw =
+      state?.endorsementData?.premiumDelta ??
+      state?.endorsementData?.summary?.premiumDelta;
+    const n = Number(raw);
+    return raw === undefined || raw === null || raw === "" || Number.isNaN(n) ? null : n;
+  }, [state?.endorsementData]);
 
   const quotationData = policyData?.quotation;
 
@@ -740,10 +768,7 @@ const EndorsementSummary = ({ action }) => {
           </div>
           <div className="quote_details">
             <label className="insurance_text">
-              {t("endorsementSummary.dst")} (
-              {productConfigurator?.configuration?.taxes?.documentary_stamp_tax ??
-                "12.5"}
-              %)
+              {t("endorsementSummary.dst")} ({percentOf(taxRates.documentaryStampTax)}%)
             </label>
             <label className="alpha_text">
               {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
@@ -752,10 +777,7 @@ const EndorsementSummary = ({ action }) => {
           </div>
           <div className="quote_details">
             <label className="insurance_text">
-              {t("endorsementSummary.vat")} (
-              {productConfigurator?.configuration?.taxes?.value_added_tax ??
-                "12"}
-              %)
+              {t("endorsementSummary.vat")} ({percentOf(taxRates.valueAddedTax)}%)
             </label>
             <label className="alpha_text">
               {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
@@ -764,10 +786,7 @@ const EndorsementSummary = ({ action }) => {
           </div>
           <div className="quote_details">
             <label className="insurance_text">
-              LGT (
-              {productConfigurator?.configuration?.taxes
-                ?.local_government_tax ?? "2"}
-              %)
+              {t("endorsementSummary.lgt", "LGT")} ({percentOf(taxRates.localGovernmentTax)}%)
             </label>
             <label className="alpha_text">
               {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
@@ -795,6 +814,21 @@ const EndorsementSummary = ({ action }) => {
               {formatCurrency(coverageChanges?.Grosspremium ?? coverageChanges?.totalPremium ?? firePremiumDetails?.totalPremium ?? 0)}
             </label>
           </div>
+          {premiumDelta !== null && (
+            <div className="quote_details">
+              <label className="gross_text">
+                {premiumDelta > 0
+                  ? t("endorsementSummary.additionalPremium", "Additional premium")
+                  : premiumDelta < 0
+                  ? t("endorsementSummary.returnPremium", "Return premium")
+                  : t("endorsementSummary.premiumChange", "Premium change")}
+              </label>
+              <label className="gross_count">
+                {premiumDelta < 0 ? "-" : ""}
+                {formatCurrency(Math.abs(premiumDelta))}
+              </label>
+            </div>
+          )}
         </div>
       </Card>
       <div className="button_component">

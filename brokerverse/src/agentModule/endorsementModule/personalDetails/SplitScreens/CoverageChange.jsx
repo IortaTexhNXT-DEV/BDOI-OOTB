@@ -1,17 +1,121 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import CalculaitionTextInputs from "../../../component/calculaitionTextInputs";
 import InputTextField from "../../../component/inputText";
 import DropdownField from "../../../component/DropdwonField";
 import {
   computeAllPremiums,
-  calculatePremiumBreakdown,
+  getTaxRates,
 } from "../../../quoteModule/utils/premiumCalculations";
+import { parseNumericValue } from "../../../quoteModule/utils/quotationDataTransform";
+import useTaxRates from "../../../quoteModule/utils/useTaxRates";
+import { formatNumber } from "../../../../utility/currencyConverter";
 import {
   AutopassengerpersonalAccidentOptions,
   BodilyInjuryOptions,
   PropertyDamageOptions,
 } from "../../../quoteModule/coverageDetails/coverageDetailsCard/mock";
+
+/** Inputs that drive the premium: a change to any of them re-prices the cover. */
+const PRICING_INPUTS = [
+  "LossandDamagecoverage",
+  "LossandDamagecoverageRate",
+  "ActsofNatureRate",
+  "CtplCoverageRate",
+  "BodilyInjury",
+  "PropertyDamage",
+  "APPATotalCoverage",
+  "AutopassengerpersonalAccident",
+  "Discount",
+  "OthersPremium",
+];
+
+/** Cents rounding, the same as the server (premium.js) so the premium change matches its price. */
+const round2 = (n) =>
+  Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+const money = (n) => round2(n).toFixed(2);
+/** Decimal tax rate (0.0075) as a percentage label (0.75). */
+const percentOf = (rate) => Number((Number(rate || 0) * 100).toFixed(4));
+
+/** Numeric fingerprint of the pricing inputs ("1,200,000" and 1200000 are the same). */
+const pricingKey = (details) =>
+  PRICING_INPUTS.map((k) => parseNumericValue(details?.[k])).join("|");
+
+/**
+ * Dropdown options plus the stored amount when it is not one of them, and the option value that matches the stored
+ * amount whatever its grouping ("2,00,000", 200000 and "200,000" all select 200,000).
+ */
+const withStoredAmount = (options, stored) => {
+  if (stored === undefined || stored === null || stored === "") {
+    return { options, value: "" };
+  }
+  const amount = parseNumericValue(stored);
+  const hit = options.find((o) => parseNumericValue(o.value) === amount);
+  if (hit) return { options, value: hit.value };
+  const extra = { label: formatNumber(amount), value: formatNumber(amount) };
+  return { options: [...options, extra], value: extra.value };
+};
+
+/**
+ * Price the coverage like the quotation (quoteModule/utils/premiumCalculations): cover premiums from the policy's own
+ * rates (defaults for BI / PD / APPA), flat premiums kept where a cover has no sum insured or rate, taxes at the
+ * configured rates, each rounded to cents.
+ */
+const priceCoverage = (details, taxRates, fallbackOwnDamageRate) => {
+  const odRate = details.LossandDamagecoverageRate || fallbackOwnDamageRate || "";
+  const c = computeAllPremiums({
+    lossAndDamageCoverage: details.LossandDamagecoverage,
+    lossAndDamageCoverageRate: odRate,
+    actsOfNatureRate: details.ActsofNatureRate || 0,
+    ctplCoverageRate: details.CtplCoverageRate || 0,
+    roadsideAssistanceRate: details.RoadsideAssistanceRate || 0,
+    personalAccidentCoverRate: details.PersonalAccidentCoverRate || 0,
+    bodilyInjury: details.BodilyInjury,
+    bodilyInjuryRate: details.BodilyInjuryRate,
+    propertyDamage: details.PropertyDamage,
+    propertyDamageRate: details.PropertyDamageRate,
+    APPAtotalCoverage: details.APPATotalCoverage,
+    APPARate: details.APPARate,
+    autoPassengerPersonalAccident: details.AutopassengerpersonalAccident,
+  });
+  // a cover without a basis keeps the premium the policy has for it
+  const keep = (basis, computed, existing) =>
+    parseNumericValue(basis) ? computed : existing || computed;
+  const aon = keep(details.ActsofNatureRate, c.actsOfNaturePremium, details.ActsofNaturepremium);
+  const bi = keep(details.BodilyInjury, c.bodilyInjuryCoveragePremium, details.BodilyInjuryCoveragePremium);
+  const pd = keep(details.PropertyDamage, c.propertyDamageCoveragePremium, details.PropertyDamageCoveragePremium);
+  const appa = keep(details.APPATotalCoverage, c.APPAcoveragePremium, details.APPAcoveragePremium);
+  const ra = keep(details.RoadsideAssistanceRate, c.roadsideAssistancePremium, details.RoadsideAssistancePremium);
+  const pac = keep(details.PersonalAccidentCoverRate, c.personalAccidentCoverPremium, details.PersonalAccidentCoverPremium);
+  const net = round2(
+    [c.lossAndDamageCoveragePremium, aon, c.ctplCoveragePremium, ra, pac, bi, pd, appa]
+      .map((v) => round2(parseNumericValue(v)))
+      .reduce((s, v) => s + v, 0)
+  );
+  const vat = round2(net * taxRates.valueAddedTax);
+  const dst = round2(net * taxRates.documentaryStampTax);
+  const lgt = round2(net * taxRates.localGovernmentTax);
+  const others = round2(parseNumericValue(details.OthersPremium));
+  const discount = round2(parseNumericValue(details.Discount));
+  const gross = Math.max(0, round2(net + vat + dst + lgt + others - discount));
+  return {
+    ...details,
+    LossandDamagecoverageRate: odRate,
+    LossandDamagecoveragepremium: money(parseNumericValue(c.lossAndDamageCoveragePremium)),
+    ActsofNaturepremium: money(parseNumericValue(aon)),
+    BodilyInjuryCoveragePremium: money(parseNumericValue(bi)),
+    PropertyDamageCoveragePremium: money(parseNumericValue(pd)),
+    APPAcoveragePremium: money(parseNumericValue(appa)),
+    TotalSumInsured: c.totalSumInsured,
+    NETpremium: money(net),
+    ValueAddedTax: money(vat),
+    DocumentaryStampTax: money(dst),
+    LocalGovtTax: money(lgt),
+    OthersPremium: money(others),
+    Discount: money(discount),
+    Grosspremium: money(gross),
+  };
+};
 
 const CoverageChange = ({
   disabled,
@@ -19,712 +123,242 @@ const CoverageChange = ({
   productConfigurator,
   coverageDetails,
   setCoverageDetails,
+  currentGrossPremium,
   index,
   shouldSubmit,
   onSectionSubmitted,
 }) => {
   const { t } = useTranslation();
-  const dat = productConfigurator?.configuration || {};
-  const { premiumRates, taxes } = dat;
-
-  // Track if data has been initialized (loaded from parent)
-  const isDataInitialized = useRef(false);
-
-  // Track if premium data already exists (check once when data is loaded)
-  const hasExistingPremiumData = useRef(false);
-
-  // Track previous values to detect user changes
-  const prevValuesRef = useRef(null);
-
-  // Handle automatic calculation when coverage details change
-  const handleCalculation = useCallback(
-    (currentCoverageDetails) => {
-      // Calculate all premiums based on coverage, rates, and sum insured
-      // Map PascalCase form fields to camelCase for computeAllPremiums
-      const computed = computeAllPremiums({
-        lossAndDamageCoverage: currentCoverageDetails.LossandDamagecoverage,
-        lossAndDamageCoverageRate:
-          currentCoverageDetails.LossandDamagecoverageRate ||
-          premiumRates[vehicleType],
-        actsOfNatureRate:
-          currentCoverageDetails.ActsofNatureRate ||
-          premiumRates?.acts_of_nature ||
-          "0",
-        ctplCoverageRate:
-          currentCoverageDetails.CtplCoverageRate ||
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] ||
-          premiumRates?.ctplCoverageRate ||
-          "0",
-        roadsideAssistanceRate: premiumRates?.roadsideAssistanceRate || "0",
-        personalAccidentCoverRate:
-          premiumRates?.personalAccidentCoverRate || "0",
-        bodilyInjury: currentCoverageDetails.BodilyInjury,
-        propertyDamage: currentCoverageDetails.PropertyDamage,
-        APPAtotalCoverage: currentCoverageDetails.APPATotalCoverage,
-        autoPassengerPersonalAccident:
-          currentCoverageDetails.AutopassengerpersonalAccident,
-      });
-
-      // Calculate full premium breakdown including taxes and gross premium
-      const breakdown = calculatePremiumBreakdown(
-        {
-          ...computed,
-          discount: currentCoverageDetails.Discount || "0",
-        },
-        productConfigurator
-      );
-
-      // Validate gross premium vs sum insured
-      const sumInsuredNum = parseFloat(computed.totalSumInsured) || 0;
-      const grossPremiumNum = parseFloat(breakdown.grossPremium) || 0;
-      if (sumInsuredNum > 0 && grossPremiumNum > 0) {
-        const premiumRatio = (grossPremiumNum / sumInsuredNum) * 100;
-        if (premiumRatio > 10) {
-          console.warn(
-            `⚠️ [Coverage Change] Gross Premium (${
-              breakdown.grossPremium
-            }) is ${premiumRatio.toFixed(2)}% of Sum Insured (${
-              computed.totalSumInsured
-            }). This seems unusually high (>10%). Expected range: 1-5%.`
-          );
-        } else {
-          console.log(
-            `[Coverage Change] Premium ratio: ${premiumRatio.toFixed(
-              2
-            )}% (within expected range)`
-          );
-        }
-      }
-
-      // Map computed camelCase results back to PascalCase for the form
-      const updatedCoverageDetails = {
-        ...currentCoverageDetails,
-        LossandDamagecoveragepremium: computed.lossAndDamageCoveragePremium,
-        ActsofNaturepremium: computed.actsOfNaturePremium,
-        CtplCoverageRate:
-          computed.ctplCoverageRate ||
-          currentCoverageDetails.CtplCoverageRate ||
-          "",
-        BodilyInjuryCoveragePremium: computed.bodilyInjuryCoveragePremium,
-        PropertyDamageCoveragePremium: computed.propertyDamageCoveragePremium,
-        APPACoveragePremium: computed.APPAcoveragePremium,
-        TotalSumInsured: computed.totalSumInsured,
-        NETpremium: breakdown.netPremium,
-        ValueAddedTax: breakdown.valueAddedTax,
-        DocumentaryStampTax: breakdown.documentaryStampTax,
-        LocalGovtTax: breakdown.localGovernmentTax,
-        OthersPremium: breakdown.accountPremiumOthers,
-        Grosspremium: breakdown.grossPremium,
-        // Keep discount as user input (it's already in PascalCase)
-        Discount: currentCoverageDetails.Discount || "0.00",
-      };
-
-      // Update the coverage details with all calculated values
-      setCoverageDetails(updatedCoverageDetails);
-    },
-    [setCoverageDetails, premiumRates, productConfigurator, vehicleType]
+  const premiumRates = productConfigurator?.configuration?.premiumRates;
+  // same tax source as the quotation: the product template, else app_settings (tax.vat_rate / dst_rate / lgt_rate)
+  const settingsTaxRates = useTaxRates();
+  const taxRates = useMemo(
+    () => getTaxRates(productConfigurator, settingsTaxRates),
+    [productConfigurator, settingsTaxRates]
   );
 
-  // Initialize and track data changes
+  const policyKey =
+    coverageDetails.policyId ||
+    coverageDetails.policyNumber ||
+    (coverageDetails.LossandDamagecoverage ? "policy" : "");
+  const key = pricingKey(coverageDetails);
+  // pricing inputs as loaded from the policy, and as last priced
+  const loadedRef = useRef({ policy: null, key: null });
+  const pricedKeyRef = useRef(null);
+
   useEffect(() => {
-    // Check if premium data exists (check on every render to handle async loading)
-    const netPremium = coverageDetails.NETpremium;
-    const grossPremium = coverageDetails.Grosspremium;
-    const currentlyHasPremiumData = !!(
-      (netPremium &&
-        netPremium !== "" &&
-        netPremium !== "0" &&
-        netPremium !== "0.00") ||
-      (grossPremium &&
-        grossPremium !== "" &&
-        grossPremium !== "0" &&
-        grossPremium !== "0.00")
-    );
-
-    // Check if we have actual data (not just empty strings)
-    const hasActualData = !!(
-      coverageDetails.LossandDamagecoverage ||
-      coverageDetails.policyId ||
-      coverageDetails.policyNumber
-    );
-
-    // First time: Initialize tracking only when we have actual data
-    if (!isDataInitialized.current) {
-      // Wait until we have actual data before initializing
-      if (!hasActualData) {
-        return; // Don't initialize yet, wait for data to load
-      }
-
-      hasExistingPremiumData.current = currentlyHasPremiumData;
-      isDataInitialized.current = true;
-
-      // Initialize previous values ref with actual data
-      prevValuesRef.current = {
-        LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-        LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-        ActsofNatureRate: coverageDetails.ActsofNatureRate,
-        CtplCoverageRate: coverageDetails.CtplCoverageRate,
-        BodilyInjury: coverageDetails.BodilyInjury,
-        PropertyDamage: coverageDetails.PropertyDamage,
-        APPATotalCoverage: coverageDetails.APPATotalCoverage,
-        AutopassengerpersonalAccident:
-          coverageDetails.AutopassengerpersonalAccident,
-        Discount: coverageDetails.Discount,
-        OthersPremium: coverageDetails.OthersPremium,
-      };
-
-      // If premium data exists, don't calculate - just show existing data
-      if (hasExistingPremiumData.current) {
-        return;
-      }
-    }
-
-    // After initialization: Update flag if premium data was loaded asynchronously
-    if (currentlyHasPremiumData && !hasExistingPremiumData.current) {
-      hasExistingPremiumData.current = true;
-      // Update prevValuesRef when premium data is detected
-      if (prevValuesRef.current) {
-        prevValuesRef.current = {
-          LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-          LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-          ActsofNatureRate: coverageDetails.ActsofNatureRate,
-          CtplCoverageRate: coverageDetails.CtplCoverageRate,
-          BodilyInjury: coverageDetails.BodilyInjury,
-          PropertyDamage: coverageDetails.PropertyDamage,
-          APPATotalCoverage: coverageDetails.APPATotalCoverage,
-          AutopassengerpersonalAccident:
-            coverageDetails.AutopassengerpersonalAccident,
-          Discount: coverageDetails.Discount,
-          OthersPremium: coverageDetails.OthersPremium,
-        };
-      }
-      return; // Don't recalculate when premium data is first detected
-    }
-
-    // If premium data exists, don't recalculate unless user explicitly changes input
-    if (hasExistingPremiumData.current) {
-      // Check if user has changed input values
-      if (!prevValuesRef.current) {
-        // Initialize prevValuesRef if it doesn't exist yet
-        prevValuesRef.current = {
-          LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-          LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-          ActsofNatureRate: coverageDetails.ActsofNatureRate,
-          CtplCoverageRate: coverageDetails.CtplCoverageRate,
-          BodilyInjury: coverageDetails.BodilyInjury,
-          PropertyDamage: coverageDetails.PropertyDamage,
-          APPATotalCoverage: coverageDetails.APPATotalCoverage,
-          AutopassengerpersonalAccident:
-            coverageDetails.AutopassengerpersonalAccident,
-          Discount: coverageDetails.Discount,
-          OthersPremium: coverageDetails.OthersPremium,
-        };
-        return;
-      }
-
-      const prev = prevValuesRef.current;
-      const hasChanged =
-        prev.LossandDamagecoverage !== coverageDetails.LossandDamagecoverage ||
-        prev.LossandDamagecoverageRate !==
-          coverageDetails.LossandDamagecoverageRate ||
-        prev.ActsofNatureRate !== coverageDetails.ActsofNatureRate ||
-        prev.CtplCoverageRate !== coverageDetails.CtplCoverageRate ||
-        prev.BodilyInjury !== coverageDetails.BodilyInjury ||
-        prev.PropertyDamage !== coverageDetails.PropertyDamage ||
-        prev.APPATotalCoverage !== coverageDetails.APPATotalCoverage ||
-        prev.AutopassengerpersonalAccident !==
-          coverageDetails.AutopassengerpersonalAccident ||
-        prev.Discount !== coverageDetails.Discount ||
-        prev.OthersPremium !== coverageDetails.OthersPremium;
-
-      // If user changed input, allow recalculation (user wants to update)
-      if (hasChanged) {
-        // User explicitly changed input, so allow recalculation
-        hasExistingPremiumData.current = false;
-        // Continue to calculation logic below
-      } else {
-        // No user changes, just update tracking and return (don't recalculate)
-        prevValuesRef.current = {
-          LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-          LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-          ActsofNatureRate: coverageDetails.ActsofNatureRate,
-          CtplCoverageRate: coverageDetails.CtplCoverageRate,
-          BodilyInjury: coverageDetails.BodilyInjury,
-          PropertyDamage: coverageDetails.PropertyDamage,
-          APPATotalCoverage: coverageDetails.APPATotalCoverage,
-          AutopassengerpersonalAccident:
-            coverageDetails.AutopassengerpersonalAccident,
-          Discount: coverageDetails.Discount,
-          OthersPremium: coverageDetails.OthersPremium,
-        };
-        return; // Exit early - don't recalculate
-      }
-    }
-
-    // After initialization: Check for user changes (for cases without existing premium data)
-    if (!prevValuesRef.current) {
-      // Initialize prevValuesRef if it doesn't exist
-      prevValuesRef.current = {
-        LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-        LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-        ActsofNatureRate: coverageDetails.ActsofNatureRate,
-        BodilyInjury: coverageDetails.BodilyInjury,
-        PropertyDamage: coverageDetails.PropertyDamage,
-        APPATotalCoverage: coverageDetails.APPATotalCoverage,
-        AutopassengerpersonalAccident:
-          coverageDetails.AutopassengerpersonalAccident,
-        Discount: coverageDetails.Discount,
-        OthersPremium: coverageDetails.OthersPremium,
-      };
+    if (!policyKey) return; // policy not loaded yet
+    if (loadedRef.current.policy !== policyKey) {
+      // the policy's own figures stand until the user edits a pricing input
+      loadedRef.current = { policy: policyKey, key };
+      pricedKeyRef.current = key;
       return;
     }
-
-    const prev = prevValuesRef.current;
-    const hasChanged =
-      prev.LossandDamagecoverage !== coverageDetails.LossandDamagecoverage ||
-      prev.LossandDamagecoverageRate !==
-        coverageDetails.LossandDamagecoverageRate ||
-      prev.ActsofNatureRate !== coverageDetails.ActsofNatureRate ||
-      prev.BodilyInjury !== coverageDetails.BodilyInjury ||
-      prev.PropertyDamage !== coverageDetails.PropertyDamage ||
-      prev.APPATotalCoverage !== coverageDetails.APPATotalCoverage ||
-      prev.AutopassengerpersonalAccident !==
-        coverageDetails.AutopassengerpersonalAccident ||
-      prev.Discount !== coverageDetails.Discount ||
-      prev.OthersPremium !== coverageDetails.OthersPremium;
-
-    // If no changes detected, update prevValuesRef to current values (in case parent updated them)
-    // but don't recalculate
-    if (!hasChanged) {
-      // Update prevValuesRef to match current values (handles parent updates)
-      prevValuesRef.current = {
-        LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-        LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-        ActsofNatureRate: coverageDetails.ActsofNatureRate,
-        BodilyInjury: coverageDetails.BodilyInjury,
-        PropertyDamage: coverageDetails.PropertyDamage,
-        APPATotalCoverage: coverageDetails.APPATotalCoverage,
-        AutopassengerpersonalAccident:
-          coverageDetails.AutopassengerpersonalAccident,
-        Discount: coverageDetails.Discount,
-        OthersPremium: coverageDetails.OthersPremium,
-      };
-      return;
-    }
-
-    // User has changed input - calculate premium
-    // Only calculate if we have the required values
-    if (
-      coverageDetails.LossandDamagecoverage &&
-      coverageDetails.LossandDamagecoverageRate &&
-      (coverageDetails.BodilyInjury ||
-        coverageDetails.PropertyDamage ||
-        coverageDetails.APPATotalCoverage)
-    ) {
-      handleCalculation(coverageDetails);
-
-      // Update previous values after calculation
-      prevValuesRef.current = {
-        LossandDamagecoverage: coverageDetails.LossandDamagecoverage,
-        LossandDamagecoverageRate: coverageDetails.LossandDamagecoverageRate,
-        ActsofNatureRate: coverageDetails.ActsofNatureRate,
-        BodilyInjury: coverageDetails.BodilyInjury,
-        PropertyDamage: coverageDetails.PropertyDamage,
-        APPATotalCoverage: coverageDetails.APPATotalCoverage,
-        AutopassengerpersonalAccident:
-          coverageDetails.AutopassengerpersonalAccident,
-        Discount: coverageDetails.Discount,
-        OthersPremium: coverageDetails.OthersPremium,
-      };
-    }
+    if (key === pricedKeyRef.current) return;
+    pricedKeyRef.current = key;
+    setCoverageDetails(
+      priceCoverage(coverageDetails, taxRates, premiumRates?.[vehicleType])
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    coverageDetails.LossandDamagecoverage,
-    coverageDetails.LossandDamagecoverageRate,
-    coverageDetails.ActsofNatureRate,
-    coverageDetails.CtplCoverageRate,
-    coverageDetails.BodilyInjury,
-    coverageDetails.PropertyDamage,
-    coverageDetails.APPATotalCoverage,
-    coverageDetails.AutopassengerpersonalAccident,
-    coverageDetails.Discount,
-    coverageDetails.OthersPremium,
-    coverageDetails.NETpremium,
-    coverageDetails.Grosspremium,
-    handleCalculation,
-  ]);
+  }, [policyKey, key]);
 
-  // Handle form submission
+  // tax rates arriving after an edit re-price with the right rates
+  useEffect(() => {
+    if (!policyKey || pricedKeyRef.current === loadedRef.current.key) return;
+    setCoverageDetails(
+      priceCoverage(coverageDetails, taxRates, premiumRates?.[vehicleType])
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taxRates]);
+
+  // Handle form submission: the parent keeps the edited coverage (sectionValuesRef[index])
   useEffect(() => {
     if (shouldSubmit && onSectionSubmitted) {
-      // Coverage change doesn't need validation, just pass the current data
       onSectionSubmitted(index, coverageDetails);
     }
   }, [shouldSubmit, onSectionSubmitted, index, coverageDetails]);
 
+  const setField = useCallback(
+    (field, value) => setCoverageDetails({ ...coverageDetails, [field]: value }),
+    [coverageDetails, setCoverageDetails]
+  );
+
+  const bodilyInjury = withStoredAmount(BodilyInjuryOptions, coverageDetails.BodilyInjury);
+  const propertyDamage = withStoredAmount(PropertyDamageOptions, coverageDetails.PropertyDamage);
+  const appa = withStoredAmount(
+    AutopassengerpersonalAccidentOptions,
+    coverageDetails.AutopassengerpersonalAccident
+  );
+
+  const text = (v) => (v === undefined || v === null ? "" : String(v));
+  const premiumChange =
+    coverageDetails.Grosspremium !== "" && coverageDetails.Grosspremium !== undefined
+      ? round2(parseNumericValue(coverageDetails.Grosspremium) - parseNumericValue(currentGrossPremium))
+      : 0;
+  const premiumChangeLabel =
+    premiumChange > 0
+      ? t("endorsement.additionalPremium", "Additional premium")
+      : premiumChange < 0
+      ? t("endorsement.returnPremium", "Return premium")
+      : t("endorsement.premiumChange", "Premium change");
+
+  const half = "col-12 md:col-6 lg:col-6 xl:col-6 mt-2";
+  const readOnly = (label, value) => (
+    <InputTextField readOnly label={label} value={text(value)} />
+  );
+
   return (
     <div>
       <div className="customer__info__subtitle mt-2 mb-2">{t("endorsement.coverageChange")}</div>
-      {/* <form onSubmit={formik.handleSubmit}> */}
-      <div class="grid">
-        <div class="col-12 mt-2">
+      <div className="grid">
+        <div className="col-12 mt-2">
           <InputTextField
             disabled={disabled}
             label={t("endorsement.ownDamageCoverage")}
-            value={coverageDetails.LossandDamagecoverage}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                LossandDamagecoverage: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.LossandDamagecoverage &&
-              coverageDetails.LossandDamagecoverage.length > 0
-            }
+            value={text(coverageDetails.LossandDamagecoverage)}
+            keyfilter="num"
+            onChange={(e) => setField("LossandDamagecoverage", e.target.value)}
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <InputTextField
-            disabled={disabled}
-            label={t("endorsement.ownDamageCoverageRate")}
-            className="cursor-not-allowed border-none outline-none focus:outline-none
-            focus:border-none focus:ring-0 focus:ring-transparent focus:ring-offset-0 text-blue-500
-            "
-            value={coverageDetails.LossandDamagecoverageRate}
-          />
+        <div className={half}>
+          {readOnly(t("endorsement.ownDamageCoverageRate"), coverageDetails.LossandDamagecoverageRate)}
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.ownDamageCoveragePremium")}
-            disabled={disabled}
             value={coverageDetails.LossandDamagecoveragepremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                LossandDamagecoveragepremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.LossandDamagecoveragepremium &&
-              coverageDetails.LossandDamagecoveragepremium.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <InputTextField
-            label="Acts of Nature Rate"
-            className="cursor-not-allowed border-none"
-            disabled={disabled}
-            value={coverageDetails.ActsofNatureRate}
-          />
+        <div className={half}>
+          {readOnly(t("endorsement.actsOfNatureRate", "Acts of nature rate"), coverageDetails.ActsofNatureRate)}
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.actsOfNaturePremium")}
-            disabled={disabled}
             value={coverageDetails.ActsofNaturepremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                ActsofNaturepremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.ActsofNaturepremium &&
-              coverageDetails.ActsofNaturepremium.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className="col-12 mt-2">
           <InputTextField
             disabled={disabled}
-            label="CTPL Coverage Rate"
-            value={coverageDetails.CtplCoverageRate}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                CtplCoverageRate: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.CtplCoverageRate &&
-              coverageDetails.CtplCoverageRate.length > 0
-            }
+            label={t("endorsement.ctplCoverageRate", "CTPL Coverage Rate")}
+            value={text(coverageDetails.CtplCoverageRate)}
+            keyfilter="num"
+            onChange={(e) => setField("CtplCoverageRate", e.target.value)}
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <DropdownField
             disabled={disabled}
-            label={t("endorsement.bodilyInjury")}
-            value={coverageDetails.BodilyInjury}
-            options={BodilyInjuryOptions}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                BodilyInjury: e.value,
-              });
-            }}
+            label={t("endorsement.bodilyInjury", "Bodily injury")}
+            value={bodilyInjury.value}
+            options={bodilyInjury.options}
+            onChange={(e) => setField("BodilyInjury", e.value)}
             optionLabel="label"
-            error={
-              coverageDetails.BodilyInjury &&
-              coverageDetails.BodilyInjury.length > 0
-            }
           />
         </div>
-
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.bodilyInjuryCoveragePremium")}
-            disabled={disabled}
             value={coverageDetails.BodilyInjuryCoveragePremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                BodilyInjuryCoveragePremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.BodilyInjuryCoveragePremium &&
-              coverageDetails.BodilyInjuryCoveragePremium.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <DropdownField
             disabled={disabled}
             label={t("endorsement.propertyDamage")}
-            value={coverageDetails.PropertyDamage}
-            options={PropertyDamageOptions}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                PropertyDamage: e.value,
-              });
-            }}
+            value={propertyDamage.value}
+            options={propertyDamage.options}
+            onChange={(e) => setField("PropertyDamage", e.value)}
             optionLabel="label"
-            error={
-              coverageDetails.PropertyDamage &&
-              coverageDetails.PropertyDamage.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            label="Property Damage Coverage Premium"
-            disabled={disabled}
+            label={t("endorsement.propertyDamageCoveragePremium", "Property damage coverage premium")}
             value={coverageDetails.PropertyDamageCoveragePremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                PropertyDamageCoveragePremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.PropertyDamageCoveragePremium &&
-              coverageDetails.PropertyDamageCoveragePremium.length > 0
-            }
           />
         </div>
-        <div class="col-12 mt-2">
+        <div className="col-12 mt-2">
           <DropdownField
-            label={t("endorsement.autoPassengerPersonalAccident")}
+            label={t("endorsement.autoPassengerPersonalAccident", "Auto passenger personal accident")}
             disabled={disabled}
-            value={coverageDetails.AutopassengerpersonalAccident}
-            options={AutopassengerpersonalAccidentOptions}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                AutopassengerpersonalAccident: e.value,
-              });
-            }}
+            value={appa.value}
+            options={appa.options}
+            onChange={(e) => setField("AutopassengerpersonalAccident", e.value)}
             optionLabel="label"
-            error={
-              coverageDetails.AutopassengerpersonalAccident &&
-              coverageDetails.AutopassengerpersonalAccident.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <InputTextField
-            disabled={disabled}
-            label={t("endorsement.appaTotalCoverage")}
-            className="cursor-not-allowed border-none"
-            value={coverageDetails.APPATotalCoverage}
-          />
+        <div className={half}>
+          {readOnly(t("endorsement.appaTotalCoverage"), coverageDetails.APPATotalCoverage)}
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
-            label={t("endorsement.actsOfNaturePremium")}
-            value={coverageDetails.ActsofNaturepremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                ActsofNaturepremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.ActsofNaturepremium &&
-              coverageDetails.ActsofNaturepremium.length > 0
-            }
+            label={t("endorsement.appaCoveragePremium", "APPA coverage premium")}
+            value={coverageDetails.APPAcoveragePremium}
           />
         </div>
-        <div class="col-12 mt-2">
+        <div className="col-12 mt-2">
           <CalculaitionTextInputs
-            disabled={disabled}
-            label="Total Sum Insured"
+            label={t("endorsement.totalSumInsured", "Total Sum Insured")}
             value={coverageDetails.TotalSumInsured}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                TotalSumInsured: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.TotalSumInsured &&
-              coverageDetails.TotalSumInsured.length > 0
-            }
           />
         </div>
-
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
             label={t("endorsement.netPremium")}
             value={coverageDetails.NETpremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                NETpremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.NETpremium &&
-              coverageDetails.NETpremium.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
-            label={`Value Added Tax ( ${taxes?.value_added_tax || 0}% )`}
+            label={`${t("endorsement.valueAddedTax", "Value Added Tax")} ( ${percentOf(taxRates.valueAddedTax)}% )`}
             value={coverageDetails.ValueAddedTax}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                ValueAddedTax: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.ValueAddedTax &&
-              coverageDetails.ValueAddedTax.length > 0
-            }
           />
         </div>
-
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
-            label="Others(Acc. premium)"
+            label={t("endorsement.othersAccPremium", "Others(Acc. premium)")}
             value={coverageDetails.OthersPremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                OthersPremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.OthersPremium &&
-              coverageDetails.OthersPremium.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
-            label={`Documentary Stamp Tax ( ${
-              taxes?.documentary_stamp_tax || 0
-            }% )`}
+            label={`${t("endorsement.documentaryStampTax", "Documentary Stamp Tax")} ( ${percentOf(taxRates.documentaryStampTax)}% )`}
             value={coverageDetails.DocumentaryStampTax}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                DocumentaryStampTax: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.DocumentaryStampTax &&
-              coverageDetails.DocumentaryStampTax.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
-            label={`Local Gov’t Tax ( ${taxes?.local_government_tax || 0}% )`}
+            label={`${t("endorsement.localGovtTax", "Local Gov’t Tax")} ( ${percentOf(taxRates.localGovernmentTax)}% )`}
             value={coverageDetails.LocalGovtTax}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                LocalGovtTax: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.LocalGovtTax &&
-              coverageDetails.LocalGovtTax.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
             label={t("endorsement.discount")}
             value={coverageDetails.Discount}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                Discount: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.Discount && coverageDetails.Discount.length > 0
-            }
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
             label={t("endorsement.others")}
             value={coverageDetails.Others}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                Others: e.target.value,
-              });
-            }}
-            error={coverageDetails.Others && coverageDetails.Others.length > 0}
           />
         </div>
-        <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+        <div className={half}>
           <CalculaitionTextInputs
-            disabled={disabled}
             label={t("endorsement.grossPremium")}
             value={coverageDetails.Grosspremium}
-            onChange={(e) => {
-              setCoverageDetails({
-                ...coverageDetails,
-                Grosspremium: e.target.value,
-              });
-            }}
-            error={
-              coverageDetails.Grosspremium &&
-              coverageDetails.Grosspremium.length > 0
-            }
+          />
+        </div>
+        <div className={half}>
+          <CalculaitionTextInputs
+            label={premiumChangeLabel}
+            value={money(premiumChange)}
           />
         </div>
       </div>
-      {/* </form> */}
     </div>
   );
 };
