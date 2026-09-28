@@ -143,6 +143,8 @@ describe('running reports', () => {
   });
   it('claims position by criteria', async () => {
     expect((await run('claims-position', { ...Y, ReportCriteria: 'All' })).total).toBe(3);
+    // the screens' generic "Overall" default maps to the report's overall view
+    expect((await run('claims-position', { ...Y, ReportCriteria: 'Overall' })).total).toBe(3);
     const open = await run('claims-position', { ...Y, ReportCriteria: 'Open' });
     expect(open.data.rows.map((r) => r.claimNumber)).toEqual(['RPT-CLM-1']);
     expect((await run('claims-position', { ...Y, ReportCriteria: 'Settled' })).data.totals.settledAmount).toBe(7000);

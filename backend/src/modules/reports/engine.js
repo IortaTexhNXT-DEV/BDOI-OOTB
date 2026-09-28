@@ -89,7 +89,9 @@ export async function normalizeParams(query, raw = {}) {
   if (from > to) throw badRequest('From date must be on or before To date');
   const keys = Object.keys(query.criteria || {});
   const wanted = pick(raw, 'criteria');
-  const criteria = wanted ? keys.find((k) => norm(k) === norm(wanted)) : keys[0];
+  // "Overall" / "All" is the screens' generic default: it means the report's first (overall) view
+  const generic = wanted && ['overall', 'all'].includes(norm(wanted));
+  const criteria = wanted ? keys.find((k) => norm(k) === norm(wanted)) || (generic ? keys[0] : undefined) : keys[0];
   if (wanted && !criteria) throw badRequest(`Report criteria must be one of: ${keys.join(', ')}`);
   const filters = {};
   const ignored = [];
