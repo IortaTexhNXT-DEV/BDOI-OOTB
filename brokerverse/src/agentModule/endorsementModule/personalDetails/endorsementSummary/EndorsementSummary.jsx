@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { BASE_URL } from "../../../../utility/constant";
 import authService from "../../../../services/authService";
 import policyService from "../../../../services/policyService";
+import endorsementService from "../../../../services/endorsementService";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import ShareOption from "../../../quoteModule/quoteDetailView/Modal/ShareOption";
 import { formatDate } from "@fullcalendar/core/index.js";
@@ -26,8 +27,27 @@ const EndorsementSummary = ({ action }) => {
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { state } = useLocation();
+  const { state: navState } = useLocation();
   const { id: endorsementIdFromUrl } = useParams();
+  // Opened from a link, a notification or a refresh: load the endorsement instead of relying on navigation state
+  const [loadedState, setLoadedState] = useState(null);
+  useEffect(() => {
+    if (navState?.endorsementData || !endorsementIdFromUrl) return;
+    let cancelled = false;
+    endorsementService.getEndorsementById(endorsementIdFromUrl).then((res) => {
+      const data = res?.data?.data || res?.data || res;
+      if (cancelled || !data?.id) return;
+      setLoadedState({
+        endorsementId: data.id,
+        policyId: data.policyId,
+        clientId: data.clientId,
+        clientName: data.clientName,
+        endorsementData: data,
+      });
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [navState?.endorsementData, endorsementIdFromUrl]);
+  const state = navState?.endorsementData ? navState : loadedState || navState;
   const [modalVisible, setModalVisible] = useState(false);
 
   const [policyData, setPolicyData] = useState(null);
@@ -223,6 +243,7 @@ const EndorsementSummary = ({ action }) => {
     }
 
     if (!window.confirm(t("endorsementSummary.confirmSendToInsurance"))) {
+      setIsSending(false);
       return;
     }
 
@@ -379,7 +400,7 @@ const EndorsementSummary = ({ action }) => {
         <div className="quote_details">
           <label>{t("endorsementSummary.checkEndorsementDetails")}</label>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <label>{t("endorsementSummary.endorsementIdColon")} {state?.endorsementId || t("policyDetail.nA")}</label>
+            <label>{t("endorsementSummary.endorsementIdColon")} {state?.endorsementData?.endorsementNumber || state?.endorsementId || t("policyDetail.nA")}</label>
           </div>
         </div>
         <div className="sub_title">

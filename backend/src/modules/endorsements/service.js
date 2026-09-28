@@ -21,7 +21,8 @@ export function toEndorsement(r) {
     premiumDelta: Number(r.premium_delta), effectiveDate: r.effective_date, remarks: r.remarks, documentKey: r.document_key,
     documentUrl: r.document_key ? (/^https?:/.test(r.document_key) ? r.document_key : publicUrl(r.document_key)) : null, completionDetails: r.completion || {},
     policyExpiry: r.policy_expiry, lob: r.lob, receivableId: r.receivable_id, sentAt: r.sent_at, completedAt: r.completed_at,
-    summary: { status, endorsementTypeIds: r.endorsement_type_ids || [], coverageChanges: changes.coverageChanges || null, premiumDelta: Number(r.premium_delta) },
+    // the summary screen reads every change group (personalDetails, motorDetails, policyExtension, coverageChanges ...)
+    summary: { ...changes, status, endorsementTypeIds: r.endorsement_type_ids || [], coverageChanges: changes.coverageChanges || null, premiumDelta: Number(r.premium_delta) },
     createdBy: r.created_by_name || r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }

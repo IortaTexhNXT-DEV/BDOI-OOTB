@@ -979,7 +979,7 @@ const LeadListingAllTable = ({
             );
           })}
           <div className="mt-5">
-            <Button label={t("policyTable.proceed")} onClick={handleDialogButtonClick} />
+            <Button label={t("policyTable.proceed")} onClick={handleDialogButtonClick} disabled={!handleTypes().length} />
           </div>
         </div>
       </Dialog>

@@ -18,7 +18,7 @@ const LeadListing = ({ action }) => {
 
   const items = [
     { label: "Clients", url: "/agent/clientlisting" },
-    { label: `Client ID : ${clientId || '12345678'}` }
+    { label: clientId ? `Client ID : ${clientId}` : "Client" }
   ];
   const Initiate = { label: "Home" };
 

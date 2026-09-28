@@ -33,6 +33,8 @@ const PersonalDetails = () => {
   const dispatch = useDispatch();
 
   const [submitTargetIndex, setSubmitTargetIndex] = useState(null);
+  // values each section submitted (what the user edited), by section index
+  const sectionValuesRef = useRef({});
   const [currentSectionIndex, setCurrentSectionIndex] = useState(null);
 
   const { policydetailedlist, productConfigurator } = useSelector(
@@ -408,11 +410,12 @@ const PersonalDetails = () => {
         endorsementTypeIds: endorsementTypes.map(Number),
       };
 
+      const edited = sectionValuesRef.current;
       if (endorsementTypeSet.has("1")) {
-        payload.personalDetails = personalDetailsData;
+        payload.personalDetails = edited[1] || personalDetailsData;
       }
       if (endorsementTypeSet.has("2")) {
-        payload.motorDetails = motorDetailsData;
+        payload.motorDetails = edited[2] || motorDetailsData;
       }
       if (endorsementTypeSet.has("3")) {
         payload.coverageChanges = coverageDetails;
@@ -510,11 +513,17 @@ const PersonalDetails = () => {
     isFire,
   ]);
 
+  const handleSectionInvalid = useCallback(() => {
+    setCurrentSectionIndex(null);
+    setSubmitTargetIndex(null);
+  }, []);
+
   const handleSectionSubmitted = useCallback(
     (index, payload) => {
       if (currentSectionIndex !== index) {
         return;
       }
+      if (payload && typeof payload === "object") sectionValuesRef.current[index] = payload;
 
       if (isFire && payload) {
         if (payload.isCancelPolicy) {
@@ -573,7 +582,7 @@ const PersonalDetails = () => {
       parts.push(clientName);
     }
     if (policydetailedlist?.ClientId) {
-      parts.push(`Client ID : ${policydetailedlist?.ClientId}`);
+      parts.push(`Client ID : ${policydetailedlist?.client?.clientCode || policydetailedlist?.client?.generatedClientId || policydetailedlist?.ClientId}`);
     }
 
     return parts.join(" / ") || t("endorsement.client");
@@ -639,6 +648,7 @@ const PersonalDetails = () => {
             disabled={endorsementTypeSet.has("5")}
             shouldSubmit={submitTargetIndex === 1}
             onSectionSubmitted={handleSectionSubmitted}
+            onSectionInvalid={handleSectionInvalid}
             personalDetails={personalDetailsData}
           />
         )}

@@ -579,7 +579,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
             );
           })}
           <div className="mt-5">
-            <Button label={t("endorsement.proceed")} onClick={handleDialogButtonClick} />
+            <Button label={t("endorsement.proceed")} onClick={handleDialogButtonClick} disabled={!handleTypes().length} />
           </div>
         </div>
       </Dialog>
