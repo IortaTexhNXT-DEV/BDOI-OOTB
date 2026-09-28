@@ -24,7 +24,7 @@ const ROLE_PERMS = {
   'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'receipts:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   finance: ['profile', 'clients:read', 'policies:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
-  agent: ['profile', 'leads', 'quotations', 'policies', 'notifications'],
+  agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'notifications'],
 };
 
 export async function seed({ log = console.log } = {}) {
