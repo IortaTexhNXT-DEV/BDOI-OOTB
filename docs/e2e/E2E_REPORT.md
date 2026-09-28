@@ -56,4 +56,4 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 
 ## Defects
 
-75 defects logged, 59 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the ones that need a business decision are D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts).
+76 defects logged, 60 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the ones that need a business decision are D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts).

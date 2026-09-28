@@ -37,7 +37,7 @@ export async function setupFinance() {
   let app;
   try { app = await createApp(); } catch { app = await minimalApp(); }
   const login = async (username, password) => (await request(app).post('/api/auth/login').send({ username, password })).body.accessToken;
-  const admin = await login('BrokerVerse', 'Technxt@1');
+  const admin = await login('BrokerVerse', process.env.ADMIN_PASSWORD);
   const as = (token) => (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
   const adminApi = as(admin);
   const personas = { maker: ['fin.maker', 'finance'], checker: ['fin.checker', 'finance'], agent: ['agt.user', 'agent'], claims: ['clm.user', 'claims'], sales: ['sls.user', 'sales'] };

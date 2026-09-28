@@ -55,7 +55,7 @@ async function throttle(req, res, scope, username, { log = true } = {}) {
 
 define({
   method: 'POST', path: '/login', auth: false, summary: 'Sign in with username and password (rate limited; answers twoFactorRequired + challengeToken when two-factor is on)', screen: 'Sign-in',
-  request: { username: 'BrokerVerse', password: 'Technxt@1' },
+  request: { username: 'BrokerVerse', password: '<password>' },
   response: { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 86400, issuedAt: '2026-01-01T00:00:00Z', mustChangePassword: false, user: { userId: 'usr_1', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator', roles: ['it-admin'], permissions: ['read:leads'], mustChangePassword: false, twoFactorEnabled: false } },
   middleware: [validate(z.object({ username: z.string().min(1), password: z.string().min(1), deviceId: z.string().optional() }))],
   handler: async (req, res) => {

@@ -12,16 +12,16 @@ PERSONAS = [
     ('liza.finance', 'Liza Garcia', 'Finance / Accounts', 'finance'),
     ('fe.approver', 'Felix Aquino', 'Finance / Accounts', 'finance'),
 ]
-PASSWORD = os.environ.get('PERSONA_PASSWORD', 'Persona@2026')
+PASSWORD = os.environ['PERSONA_PASSWORD']
 
 def run(pg, rec):
     # 1. sign-in
     ok = login(pg, 'BrokerVerse', 'wrong-password')
     msg = toast_text(pg) or ' '.join(error_texts(pg))
     rec.step(pg, 'BrokerVerse', 'Sign-in', 'wrong password', [('sign-in refused', not ok), ('error message shown', bool(msg.strip()), msg[:80])])
-    ok = login(pg, 'BrokerVerse', 'Technxt@1')
+    ok = login(pg, 'BrokerVerse', os.environ['ADMIN_PASSWORD'])
     rec.step(pg, 'BrokerVerse', 'Sign-in', 'correct password', [('dashboard opens', ok and '/login' not in pg.url, pg.url)])
-    admin = token_for('BrokerVerse', 'Technxt@1')
+    admin = token_for('BrokerVerse', os.environ['ADMIN_PASSWORD'])
 
     # 2. users through the UI
     menu(pg, 'Master', 'Generals', 'User Management', 'User')

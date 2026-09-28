@@ -1,6 +1,6 @@
 """Step 5: the agent creates a Motor lead through Operations > Leads/Prospects > Create Lead."""
 from harness import *
-PASSWORD = os.environ.get('PERSONA_PASSWORD', 'Persona@2026')
+PASSWORD = os.environ['PERSONA_PASSWORD']
 LEAD = dict(first='Andrea', last='Villanueva', preferred='Andi', email='andrea.villanueva@example.ph', phone='9171234567', zip='1226', barangay='San Lorenzo', street='12 Amorsolo St.')
 
 def pick_date(pg, label, day, month, year):

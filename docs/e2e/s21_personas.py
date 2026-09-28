@@ -5,7 +5,7 @@ import json, os, subprocess, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 API = os.environ.get('API', 'http://localhost:8000/api')
-PW = os.environ.get('PERSONA_PASSWORD', 'Persona@2026')
+PW = os.environ['PERSONA_PASSWORD']
 
 # user, persona, forbidden screen, forbidden API call (method, path, body)
 CASES = [

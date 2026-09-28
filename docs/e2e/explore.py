@@ -1,6 +1,6 @@
 import sys, json
 from harness import *
-url = sys.argv[1]; user = sys.argv[2] if len(sys.argv) > 2 else 'BrokerVerse'; pw = sys.argv[3] if len(sys.argv) > 3 else 'Technxt@1'
+url = sys.argv[1]; user = sys.argv[2] if len(sys.argv) > 2 else 'BrokerVerse'; pw = sys.argv[3] if len(sys.argv) > 3 else os.environ['ADMIN_PASSWORD']
 serve()
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path='/opt/pw-browsers/chromium'); pg = b.new_context(viewport={'width': 1600, 'height': 1000}).new_page()

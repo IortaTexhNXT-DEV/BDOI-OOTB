@@ -3861,7 +3861,7 @@
               },
               "example": {
                 "username": "BrokerVerse",
-                "password": "Technxt@1"
+                "password": "<password>"
               }
             }
           }
@@ -27660,6 +27660,606 @@
         }
       }
     },
+    "/policies/{id}/payments": {
+      "get": {
+        "operationId": "getPoliciesIdPayments",
+        "summary": "Payment screen: open bills, captured payments, payment modes, gateway (if configured), whether the user can confirm",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Payment\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "outstanding": {
+                          "type": "number"
+                        },
+                        "receivables": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "receivableId": {
+                                "type": "string"
+                              },
+                              "billNumber": {
+                                "type": "string"
+                              },
+                              "balance": {
+                                "type": "number"
+                              },
+                              "pendingVerification": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "captures": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "policyId": {
+                                "type": "string"
+                              },
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "receivableId": {
+                                "type": "string"
+                              },
+                              "billNumber": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "number"
+                              },
+                              "paymentMode": {
+                                "type": "string"
+                              },
+                              "referenceNo": {
+                                "type": "string"
+                              },
+                              "paymentDate": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "receiptNumber": {}
+                            }
+                          }
+                        },
+                        "modes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "referenceRequired": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "gateway": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "url": {}
+                          }
+                        },
+                        "canConfirm": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyId": "pol_1",
+                    "outstanding": 11862.5,
+                    "receivables": [
+                      {
+                        "receivableId": "rcv_1",
+                        "billNumber": "INV-2026-00001",
+                        "balance": 11862.5,
+                        "pendingVerification": 0
+                      }
+                    ],
+                    "captures": [
+                      {
+                        "id": "pp_1",
+                        "policyId": "pol_1",
+                        "policyNumber": "POL-2026-00001",
+                        "receivableId": "rcv_1",
+                        "billNumber": "INV-2026-00001",
+                        "amount": 11862.5,
+                        "paymentMode": "bank-transfer",
+                        "referenceNo": "BDO-778812",
+                        "paymentDate": "2026-09-28",
+                        "status": "submitted",
+                        "receiptNumber": null
+                      }
+                    ],
+                    "modes": [
+                      {
+                        "value": "bank-transfer",
+                        "label": "Bank transfer",
+                        "referenceRequired": true
+                      }
+                    ],
+                    "gateway": {
+                      "enabled": false,
+                      "url": null
+                    },
+                    "canConfirm": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Payment"
+      },
+      "post": {
+        "operationId": "postPoliciesIdPayments",
+        "summary": "Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Payment\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "option": {
+                          "type": "string"
+                        },
+                        "capture": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "policyId": {
+                              "type": "string"
+                            },
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "receivableId": {
+                              "type": "string"
+                            },
+                            "billNumber": {
+                              "type": "string"
+                            },
+                            "amount": {
+                              "type": "number"
+                            },
+                            "paymentMode": {
+                              "type": "string"
+                            },
+                            "referenceNo": {
+                              "type": "string"
+                            },
+                            "paymentDate": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "receiptNumber": {}
+                          }
+                        },
+                        "receipt": {},
+                        "posted": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "option": "payment",
+                    "capture": {
+                      "id": "pp_1",
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2026-00001",
+                      "receivableId": "rcv_1",
+                      "billNumber": "INV-2026-00001",
+                      "amount": 11862.5,
+                      "paymentMode": "bank-transfer",
+                      "referenceNo": "BDO-778812",
+                      "paymentDate": "2026-09-28",
+                      "status": "submitted",
+                      "receiptNumber": null
+                    },
+                    "receipt": null,
+                    "posted": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Payment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "option": {
+                    "type": "string"
+                  },
+                  "paymentMode": {
+                    "type": "string"
+                  },
+                  "referenceNo": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "paymentDate": {
+                    "type": "string"
+                  },
+                  "proofKey": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "option": "payment",
+                "paymentMode": "bank-transfer",
+                "referenceNo": "BDO-778812",
+                "amount": 11862.5,
+                "paymentDate": "2026-09-28",
+                "proofKey": "payment-proofs/abc.jpg"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/payments/{paymentId}/confirm": {
+      "post": {
+        "operationId": "postPoliciesIdPaymentsPaymentIdConfirm",
+        "summary": "Finance: verify a captured payment; raises the official receipt (Dr Cash / Cr Premium Receivable)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Payment (finance verification)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "capture": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "policyId": {
+                              "type": "string"
+                            },
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "receivableId": {
+                              "type": "string"
+                            },
+                            "billNumber": {
+                              "type": "string"
+                            },
+                            "amount": {
+                              "type": "number"
+                            },
+                            "paymentMode": {
+                              "type": "string"
+                            },
+                            "referenceNo": {
+                              "type": "string"
+                            },
+                            "paymentDate": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "receiptNumber": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "capture": {
+                      "id": "pp_1",
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2026-00001",
+                      "receivableId": "rcv_1",
+                      "billNumber": "INV-2026-00001",
+                      "amount": 11862.5,
+                      "paymentMode": "bank-transfer",
+                      "referenceNo": "BDO-778812",
+                      "paymentDate": "2026-09-28",
+                      "status": "confirmed",
+                      "receiptNumber": "OR-2026-00001"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Payment (finance verification)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/payments/{paymentId}/reject": {
+      "post": {
+        "operationId": "postPoliciesIdPaymentsPaymentIdReject",
+        "summary": "Finance: reject a captured payment (not received / wrong reference)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Payment (finance verification)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "capture": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "policyId": {
+                              "type": "string"
+                            },
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "receivableId": {
+                              "type": "string"
+                            },
+                            "billNumber": {
+                              "type": "string"
+                            },
+                            "amount": {
+                              "type": "number"
+                            },
+                            "paymentMode": {
+                              "type": "string"
+                            },
+                            "referenceNo": {
+                              "type": "string"
+                            },
+                            "paymentDate": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "receiptNumber": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "capture": {
+                      "id": "pp_1",
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2026-00001",
+                      "receivableId": "rcv_1",
+                      "billNumber": "INV-2026-00001",
+                      "amount": 11862.5,
+                      "paymentMode": "bank-transfer",
+                      "referenceNo": "BDO-778812",
+                      "paymentDate": "2026-09-28",
+                      "status": "rejected",
+                      "receiptNumber": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Payment (finance verification)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "No matching credit in the bank statement"
+              }
+            }
+          }
+        }
+      }
+    },
     "/policies/bulk-upload": {
       "post": {
         "operationId": "postPoliciesBulkUpload",
@@ -27734,6 +28334,111 @@
             }
           }
         }
+      }
+    },
+    "/policies/payment-captures": {
+      "get": {
+        "operationId": "getPoliciesPaymentCaptures",
+        "summary": "Premium payments captured on policies, for finance verification (status submitted | confirmed | rejected | all)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Payment (finance verification)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "submitted"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "policyId": {
+                            "type": "string"
+                          },
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "receivableId": {
+                            "type": "string"
+                          },
+                          "billNumber": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number"
+                          },
+                          "paymentMode": {
+                            "type": "string"
+                          },
+                          "referenceNo": {
+                            "type": "string"
+                          },
+                          "paymentDate": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "receiptNumber": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "pp_1",
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2026-00001",
+                      "receivableId": "rcv_1",
+                      "billNumber": "INV-2026-00001",
+                      "amount": 11862.5,
+                      "paymentMode": "bank-transfer",
+                      "referenceNo": "BDO-778812",
+                      "paymentDate": "2026-09-28",
+                      "status": "submitted",
+                      "receiptNumber": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Payment (finance verification)"
       }
     },
     "/policy-renewals": {
@@ -29321,6 +30026,351 @@
                   }
                 ],
                 "status": "Draft"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policy-renewals/policies/{policyId}/prefill": {
+      "get": {
+        "operationId": "getPolicyRenewalsPoliciesPolicyIdPrefill",
+        "summary": "Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)",
+        "tags": [
+          "Policy renewals"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "clientId": {
+                          "type": "string"
+                        },
+                        "clientCode": {
+                          "type": "string"
+                        },
+                        "insuranceCompanyName": {
+                          "type": "string"
+                        },
+                        "sumInsured": {
+                          "type": "integer"
+                        },
+                        "renewal": {},
+                        "coverageDetails": {
+                          "type": "object",
+                          "properties": {
+                            "lossAndDamageCoverage": {
+                              "type": "integer"
+                            },
+                            "totalSumInsured": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "accessories": {
+                          "type": "object",
+                          "properties": {
+                            "aircon": {
+                              "type": "string"
+                            },
+                            "stereo": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "vehicle": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyId": "pol_1",
+                    "policyNumber": "POL-2025-00012",
+                    "clientId": "cl_1",
+                    "clientCode": "CL-2026-00001",
+                    "insuranceCompanyName": "MAPFRE Insurance Corporation",
+                    "sumInsured": 850000,
+                    "renewal": null,
+                    "coverageDetails": {
+                      "lossAndDamageCoverage": 850000,
+                      "totalSumInsured": 850000
+                    },
+                    "accessories": {
+                      "aircon": "",
+                      "stereo": ""
+                    },
+                    "vehicle": {},
+                    "source": "policy"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)"
+      }
+    },
+    "/policy-renewals/policies/{policyId}/quotation": {
+      "post": {
+        "operationId": "postPolicyRenewalsPoliciesPolicyIdQuotation",
+        "summary": "Renewal wizard \"Completed Quote\": save the wizard data and create (or update) the renewal quotation linked to the expiring policy",
+        "tags": [
+          "Policy renewals"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationId": {
+                          "type": "string"
+                        },
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "quotation": {
+                          "type": "object",
+                          "properties": {
+                            "quotationId": {
+                              "type": "string"
+                            },
+                            "renewal": {
+                              "type": "object",
+                              "properties": {
+                                "policyId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "renewal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "renewalNumber": {
+                              "type": "string"
+                            },
+                            "policyId": {
+                              "type": "string"
+                            },
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "clientId": {
+                              "type": "string"
+                            },
+                            "insuredName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "statusCode": {
+                              "type": "string"
+                            },
+                            "policyExpiry": {
+                              "type": "string"
+                            },
+                            "grossPremium": {
+                              "type": "number"
+                            },
+                            "paymentStatus": {
+                              "type": "string"
+                            },
+                            "coverageDetails": {
+                              "type": "object",
+                              "properties": {
+                                "lossAndDamageCoverage": {
+                                  "type": "string"
+                                },
+                                "totalSumInsured": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "policy": {
+                              "type": "object",
+                              "properties": {
+                                "policyNumber": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Renewal quotation created",
+                  "data": {
+                    "quotationId": "qt_1",
+                    "quotationNumber": "QT-2026-00002",
+                    "quotation": {
+                      "quotationId": "qt_1",
+                      "renewal": {
+                        "policyId": "pol_1"
+                      }
+                    },
+                    "renewal": {
+                      "id": "rnw_1",
+                      "renewalNumber": "RN-2026-00001",
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2025-00012",
+                      "clientId": "cl_1",
+                      "insuredName": "Maria Santos",
+                      "status": "Quote Sent",
+                      "statusCode": "quoted",
+                      "policyExpiry": "2026-10-30",
+                      "grossPremium": 21450.5,
+                      "paymentStatus": "Paid",
+                      "coverageDetails": {
+                        "lossAndDamageCoverage": "850000",
+                        "totalSumInsured": "850000"
+                      },
+                      "policy": {
+                        "policyNumber": "POL-2025-00012"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Policy > Renewal > Order summary",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coverageDetails": {
+                    "type": "object",
+                    "properties": {
+                      "lossAndDamageCoverage": {
+                        "type": "string"
+                      },
+                      "lossAndDamageCoverageRate": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "accessories": {
+                    "type": "object",
+                    "properties": {
+                      "aircon": {
+                        "type": "string"
+                      },
+                      "stereo": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "orderSummary": {
+                    "type": "object",
+                    "properties": {
+                      "discount": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "coverageDetails": {
+                  "lossAndDamageCoverage": "850000",
+                  "lossAndDamageCoverageRate": "1.6"
+                },
+                "accessories": {
+                  "aircon": "",
+                  "stereo": ""
+                },
+                "orderSummary": {
+                  "discount": 0
+                }
               }
             }
           }
@@ -36817,6 +37867,76 @@
         "x-screen": "Operations > Quotation > Create Quote (policy / coverage details)"
       }
     },
+    "/quotations/master/account-codes": {
+      "get": {
+        "operationId": "getQuotationsMasterAccountCodes",
+        "summary": "Account codes for a quote: active referrers (agents, sub-agents, external) as dropdown options",
+        "tags": [
+          "Quotation masters"
+        ],
+        "description": "Front-end touchpoint: Operations > Quotation > Create Quote (policy / coverage details)\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "ref-jdelacruz",
+                      "code": "ref-jdelacruz",
+                      "label": "Juan Dela Cruz (Agent)",
+                      "value": "ref-jdelacruz",
+                      "type": "Agent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Quotation > Create Quote (policy / coverage details)"
+      }
+    },
     "/quotations/master/banks/get-all-banks": {
       "get": {
         "operationId": "getQuotationsMasterBanksGetAllBanks",
@@ -41450,6 +42570,130 @@
             }
           }
         }
+      }
+    },
+    "/receipts/open-receivables": {
+      "get": {
+        "operationId": "getReceiptsOpenReceivables",
+        "summary": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)",
+        "tags": [
+          "Receipts"
+        ],
+        "description": "Front-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "customerCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "CL-2026-00001"
+          },
+          {
+            "name": "policyNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "POL-2026-00001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "receivableId": {
+                            "type": "string"
+                          },
+                          "billNumber": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "customerCode": {
+                            "type": "string"
+                          },
+                          "customerName": {
+                            "type": "string"
+                          },
+                          "policyId": {
+                            "type": "string"
+                          },
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "integer"
+                          },
+                          "paidAmount": {
+                            "type": "integer"
+                          },
+                          "balance": {
+                            "type": "integer"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "currency": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "receivableId": "rcv_1",
+                      "billNumber": "INV-2026-00002",
+                      "source": "endorsement",
+                      "customerCode": "CL-2026-00001",
+                      "customerName": "Maria Santos",
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2026-00001",
+                      "amount": 5010,
+                      "paidAmount": 0,
+                      "balance": 5010,
+                      "dueDate": "2026-10-28",
+                      "status": "Open",
+                      "currency": "PHP"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Receipts > Add receipt"
       }
     },
     "/receipts/printReceipt": {
@@ -58863,6 +60107,12 @@
                               "type": "string"
                             }
                           },
+                          "roleNames": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
                           "status": {
                             "type": "string"
                           }
@@ -58889,6 +60139,9 @@
                       "displayName": "Juan Santos",
                       "roles": [
                         "agent"
+                      ],
+                      "roleNames": [
+                        "Agent / Referrer"
                       ],
                       "status": "active"
                     }

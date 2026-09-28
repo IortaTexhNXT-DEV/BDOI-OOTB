@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { pool, query } from './pool.js';
 
@@ -52,11 +53,14 @@ export async function seed({ log = console.log } = {}) {
     const codes = items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`]));
     await grant(role, codes);
   }
-  // Admin login requested for the platform
-  const adminHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Technxt@1', 10);
+  // First administrator. The password comes from ADMIN_PASSWORD; without it a random one is generated and shown once.
+  // An existing administrator keeps the password it has.
+  const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
+  const adminHash = await bcrypt.hash(adminPassword, 10);
   const admin = await query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, status, created_by)
     VALUES ('BrokerVerse', $1, 'BrokerVerse Administrator', 'BrokerVerse', 'Admin', 'admin@brokerverse.local', 'active', 'seed')
-    ON CONFLICT (username) DO UPDATE SET display_name = EXCLUDED.display_name RETURNING id`, [adminHash]);
+    ON CONFLICT (username) DO UPDATE SET display_name = EXCLUDED.display_name RETURNING id, (xmax = 0) AS inserted`, [adminHash]);
+  if (admin.rows[0].inserted && !process.env.ADMIN_PASSWORD) log(`administrator BrokerVerse created with password ${adminPassword} (change it after the first sign-in)`);
   await query('INSERT INTO user_roles(user_id, role_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [admin.rows[0].id, roleIds['it-admin']]);
   // Configuration defaults (all editable from System Settings)
   const settings = JSON.parse(fs.readFileSync(path.join(here, 'seeds', 'settings.json'), 'utf8'));
