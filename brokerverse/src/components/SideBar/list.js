@@ -821,6 +821,9 @@ export const menuList = [
           "/accounts/receipts/addreceiptedit",
           "/accounts/receipts/paymentdetails",
           "/accounts/receipts",
+          // finance verifies payments captured on a policy (linked from the "Premium payment to verify" notification)
+          "/agent/policy/paymentoptions",
+          "/agent/policy/paymentconfirmation",
         ],
         permissions: ["read:receipts"],
       },
