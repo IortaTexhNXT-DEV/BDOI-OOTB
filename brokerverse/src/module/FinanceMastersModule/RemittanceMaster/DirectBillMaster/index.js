@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { TabView, TabPanel } from "primereact/tabview";
@@ -12,80 +12,74 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { directBillData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../../services/remittanceService";
+import { showError, showSuccess } from "../../../Remittance/shared";
+import { MasterLookup, saveAndReturn } from "../masterRecord";
 import "./index.scss";
 
 const DirectBillMaster = () => {
   const { t } = useTranslation();
-  const { currencyCode } = useFormatCurrency();
+  const { currencyCode, formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const { mode } = useParams();
   const location = useLocation();
   const isViewMode = mode === "view";
-  const isEditMode = mode === "edit";
   const toast = React.useRef(null);
 
-  // Initialize with mock data
-  const mockConfig = directBillData.configurations[0];
+  const cfg = location.state?.data || {};
+  const lateFee = cfg.lateFee || {};
+  const glMapping = cfg.glMapping || {};
 
   // Form states
-  const [configCode, setConfigCode] = useState(isEditMode ? mockConfig.code : "");
-  const [configName, setConfigName] = useState(isEditMode ? mockConfig.name : "");
-  const [isActive, setIsActive] = useState(mockConfig.status === "Active");
-  const [billMethod, setBillMethod] = useState(mockConfig.billMethod);
-  const [billFrequency, setBillFrequency] = useState(mockConfig.frequency);
-  const [paymentDueDays, setPaymentDueDays] = useState(mockConfig.dueDays);
-  const [gracePeriod, setGracePeriod] = useState(mockConfig.lateFee.gracePeriod);
-  const [applyLateCharges, setApplyLateCharges] = useState(mockConfig.lateFee.type !== "None");
-  const [lateChargeType, setLateChargeType] = useState(mockConfig.lateFee.type);
-  const [lateChargeValue, setLateChargeValue] = useState(mockConfig.lateFee.rate);
-  const [minLateCharge, setMinLateCharge] = useState(mockConfig.lateFee.minimumCharge);
+  const [configCode, setConfigCode] = useState(cfg.code || "");
+  const [configName, setConfigName] = useState(cfg.name || "");
+  const [isActive, setIsActive] = useState(cfg.status === undefined ? true : cfg.status === true || cfg.status === "Active");
+  const [billMethod, setBillMethod] = useState(cfg.billMethod || null);
+  const [billFrequency, setBillFrequency] = useState(cfg.frequency || null);
+  const [paymentDueDays, setPaymentDueDays] = useState(cfg.dueDays ?? 30);
+  const [gracePeriod, setGracePeriod] = useState(lateFee.gracePeriod ?? 0);
+  const [applyLateCharges, setApplyLateCharges] = useState(Boolean(lateFee.type) && lateFee.type !== "None");
+  const [lateChargeType, setLateChargeType] = useState(lateFee.type && lateFee.type !== "None" ? lateFee.type : "Percentage");
+  const [lateChargeValue, setLateChargeValue] = useState(lateFee.rate ?? 0);
+  const [minLateCharge, setMinLateCharge] = useState(lateFee.minimumCharge ?? 0);
 
-  // Active bills data from mock
-  const [activeBills, setActiveBills] = useState(directBillData.activeBills);
+  const [activeBills, setActiveBills] = useState([]);
+  const [insurers, setInsurers] = useState([]);
 
-  // Insurer setup data - converted from common insurers data
-  const [insurers, setInsurers] = useState([
-    {
-      id: 1,
-      insurerCode: "INS001",
-      insurerName: "Allianz Insurance",
-      billMethod: "Direct Bill",
-      paymentTerms: 30,
-      creditLimit: 500000,
-      contactEmail: "billing@allianz.com",
-      autoGenerate: true,
-      active: true
-    },
-    {
-      id: 2,
-      insurerCode: "INS002",
-      insurerName: "AXA Insurance",
-      billMethod: "Policy-wise",
-      paymentTerms: 45,
-      creditLimit: 750000,
-      contactEmail: "accounts@axa.com",
-      autoGenerate: false,
-      active: true
-    },
-    {
-      id: 3,
-      insurerCode: "INS003",
-      insurerName: "MetLife",
-      billMethod: "Account Current",
-      paymentTerms: 30,
-      creditLimit: 300000,
-      contactEmail: "remittance@metlife.com",
-      autoGenerate: true,
-      active: true
-    }
-  ]);
+  const [receivableAccount, setReceivableAccount] = useState(glMapping.receivable || "");
+  const [premiumAccount, setPremiumAccount] = useState(glMapping.premium || "");
+  const [lateChargeAccount, setLateChargeAccount] = useState(glMapping.lateFee || "");
+  const [badDebtAccount, setBadDebtAccount] = useState(glMapping.refund || "");
 
-  // GL Accounts from mock data
-  const [receivableAccount, setReceivableAccount] = useState(mockConfig.glMapping.premium);
-  const [premiumAccount, setPremiumAccount] = useState(mockConfig.glMapping.premium);
-  const [lateChargeAccount, setLateChargeAccount] = useState(mockConfig.glMapping.lateFee);
-  const [badDebtAccount, setBadDebtAccount] = useState(mockConfig.glMapping.refund);
+  const loadBills = () => remittanceService.listDirectBills({ perPage: 200 })
+    .then((rows) => setActiveBills((rows || []).filter((b) => b.billNo && !["settled", "rejected", "cancelled"].includes(b.statusCode)).map((b) => ({
+      ...b,
+      policyNo: `${b.policyCount} policies`,
+      insured: b.insurerName,
+      premium: b.billAmount,
+      installment: b.period
+    }))))
+    .catch((error) => showError(toast, error));
+
+  useEffect(() => {
+    const setup = cfg.insurerSetup || [];
+    masterService.options("insurance-company")
+      .then((rows) => setInsurers(rows.map((r) => ({
+        id: r.id,
+        insurerCode: r.code,
+        insurerName: r.label,
+        billMethod: cfg.billMethod || "",
+        paymentTerms: cfg.dueDays ?? 30,
+        creditLimit: 0,
+        contactEmail: "",
+        autoGenerate: false,
+        active: true,
+        ...(setup.find((x) => x.insurerCode === r.code) || {})
+      }))))
+      .catch((error) => showError(toast, error));
+    loadBills();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const billMethodOptions = [
     { label: "Policy-wise", value: "Policy-wise" },
@@ -107,47 +101,41 @@ const DirectBillMaster = () => {
     { label: "Tiered", value: "Tiered" }
   ];
 
-  const handleSave = async () => {
+  const handleSave = () => saveAndReturn({
+    type: "remittance-direct-bill",
+    id: cfg.id,
+    toast,
+    navigate,
+    record: {
+      code: configCode,
+      name: configName,
+      isActive,
+      billMethod,
+      frequency: billFrequency,
+      dueDays: paymentDueDays,
+      lateFee: {
+        type: applyLateCharges ? lateChargeType : "None",
+        rate: lateChargeValue,
+        minimumCharge: minLateCharge,
+        gracePeriod
+      },
+      glMapping: {
+        receivable: receivableAccount,
+        premium: premiumAccount,
+        lateFee: lateChargeAccount,
+        refund: badDebtAccount
+      },
+      insurerSetup: insurers.map(({ id, ...rest }) => rest)
+    }
+  });
+
+  const sendBills = async (bills) => {
     try {
-      const configData = {
-        code: configCode,
-        name: configName,
-        billMethod,
-        frequency: billFrequency,
-        dueDays: paymentDueDays,
-        lateFee: {
-          type: applyLateCharges ? lateChargeType : "None",
-          rate: lateChargeValue,
-          minimumCharge: minLateCharge,
-          gracePeriod
-        },
-        glMapping: {
-          premium: premiumAccount,
-          lateFee: lateChargeAccount,
-          refund: badDebtAccount
-        },
-        status: isActive ? "Active" : "Inactive"
-      };
-
-      await mockCrudOperations.create("directBillConfiguration", configData);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Direct Bill Master configuration saved successfully',
-        life: 3000
-      });
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1500);
+      await Promise.all(bills.map((b) => remittanceService.sendBill(b.id, { deliveryMethod: ["email"] })));
+      showSuccess(toast, `${bills.length} bill(s) sent`);
+      loadBills();
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save configuration',
-        life: 3000
-      });
+      showError(toast, error);
     }
   };
 
@@ -335,21 +323,6 @@ const DirectBillMaster = () => {
 
           <TabPanel header="Insurer Setup">
             <div className="insurer-setup-section">
-              <div className="toolbar mb-3">
-                <Button
-                  label={t("remittance.addInsurer")}
-                  icon="pi pi-plus"
-                  className="p-button-primary mr-2"
-                  disabled={isViewMode}
-                />
-                <Button
-                  label={t("common.import")}
-                  icon="pi pi-upload"
-                  className="p-button-secondary"
-                  disabled={isViewMode}
-                />
-              </div>
-
               <DataTable value={insurers} className="insurer-grid" stripedRows>
                 <Column field="insurerCode" header="Insurer Code" style={{ width: "10%" }} />
                 <Column field="insurerName" header="Insurer Name" style={{ width: "20%" }} />
@@ -357,7 +330,7 @@ const DirectBillMaster = () => {
                 <Column field="paymentTerms" header="Payment Terms" style={{ width: "10%" }}
                   body={(rowData) => `${rowData.paymentTerms} days`} />
                 <Column field="creditLimit" header="Credit Limit" style={{ width: "12%" }}
-                  body={(rowData) => `$${rowData.creditLimit.toLocaleString()}`} />
+                  body={(rowData) => formatCurrency(rowData.creditLimit)} />
                 <Column field="contactEmail" header="Contact Email" style={{ width: "15%" }} />
                 <Column field="autoGenerate" header="Auto Generate" style={{ width: "8%" }}
                   body={autoGenerateTemplate} />
@@ -380,51 +353,19 @@ const DirectBillMaster = () => {
               <div className="grid">
                 <div className="col-12 md:col-6">
                   <label>Receivable Account *</label>
-                  <div className="p-inputgroup">
-                    <InputText
-                      value={receivableAccount}
-                      onChange={(e) => setReceivableAccount(e.target.value)}
-                      disabled={isViewMode}
-                      className="w-full"
-                    />
-                    <Button icon="pi pi-search" disabled={isViewMode} />
-                  </div>
+                  <MasterLookup type="main-account" value={receivableAccount} onChange={setReceivableAccount} disabled={isViewMode} toast={toast} className="w-full" />
                 </div>
                 <div className="col-12 md:col-6">
                   <label>Premium Account *</label>
-                  <div className="p-inputgroup">
-                    <InputText
-                      value={premiumAccount}
-                      onChange={(e) => setPremiumAccount(e.target.value)}
-                      disabled={isViewMode}
-                      className="w-full"
-                    />
-                    <Button icon="pi pi-search" disabled={isViewMode} />
-                  </div>
+                  <MasterLookup type="main-account" value={premiumAccount} onChange={setPremiumAccount} disabled={isViewMode} toast={toast} className="w-full" />
                 </div>
                 <div className="col-12 md:col-6">
                   <label>Late Charge Account *</label>
-                  <div className="p-inputgroup">
-                    <InputText
-                      value={lateChargeAccount}
-                      onChange={(e) => setLateChargeAccount(e.target.value)}
-                      disabled={isViewMode}
-                      className="w-full"
-                    />
-                    <Button icon="pi pi-search" disabled={isViewMode} />
-                  </div>
+                  <MasterLookup type="main-account" value={lateChargeAccount} onChange={setLateChargeAccount} disabled={isViewMode} toast={toast} className="w-full" />
                 </div>
                 <div className="col-12 md:col-6">
                   <label>Bad Debt Account *</label>
-                  <div className="p-inputgroup">
-                    <InputText
-                      value={badDebtAccount}
-                      onChange={(e) => setBadDebtAccount(e.target.value)}
-                      disabled={isViewMode}
-                      className="w-full"
-                    />
-                    <Button icon="pi pi-search" disabled={isViewMode} />
-                  </div>
+                  <MasterLookup type="main-account" value={badDebtAccount} onChange={setBadDebtAccount} disabled={isViewMode} toast={toast} className="w-full" />
                 </div>
               </div>
             </div>
@@ -438,12 +379,14 @@ const DirectBillMaster = () => {
                   icon="pi pi-plus"
                   className="p-button-primary mr-2"
                   disabled={isViewMode}
+                  onClick={() => navigate("/finance/remittance/directbill")}
                 />
                 <Button
                   label={t("remittance.sendReminders")}
                   icon="pi pi-send"
                   className="p-button-secondary"
-                  disabled={isViewMode}
+                  disabled={isViewMode || !activeBills.length}
+                  onClick={() => sendBills(activeBills)}
                 />
               </div>
 
@@ -457,7 +400,7 @@ const DirectBillMaster = () => {
                   field="premium"
                   header="Premium"
                   style={{ width: "12%" }}
-                  body={(rowData) => `$${rowData.premium.toLocaleString()}`}
+                  body={(rowData) => formatCurrency(rowData.premium)}
                 />
                 <Column field="installment" header="Installment" style={{ width: "10%" }} />
                 <Column
@@ -465,7 +408,7 @@ const DirectBillMaster = () => {
                   header="Status"
                   style={{ width: "8%" }}
                   body={(rowData) => (
-                    <span className={`status-badge ${rowData.status.toLowerCase()}`}>
+                    <span className={`status-badge ${String(rowData.status).toLowerCase().replace(/\s+/g, "-")}`}>
                       {rowData.status}
                     </span>
                   )}
@@ -474,10 +417,9 @@ const DirectBillMaster = () => {
                   <Column
                     header="Actions"
                     style={{ width: "10%" }}
-                    body={() => (
+                    body={(rowData) => (
                       <div>
-                        <Button icon="pi pi-eye" className="p-button-text p-button-sm mr-1" />
-                        <Button icon="pi pi-send" className="p-button-text p-button-sm" />
+                        <Button icon="pi pi-send" className="p-button-text p-button-sm" onClick={() => sendBills([rowData])} />
                       </div>
                     )}
                   />

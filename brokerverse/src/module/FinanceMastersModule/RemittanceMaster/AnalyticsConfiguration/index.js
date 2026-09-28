@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
@@ -18,8 +18,24 @@ import { RadioButton } from "primereact/radiobutton";
 import { Slider } from "primereact/slider";
 import { Toast } from "primereact/toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { analyticsConfigurationData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+
+const TYPE = "remittance-analytics-config";
+const toWidget = (dashboard) => ({
+  id: dashboard.id,
+  record: dashboard,
+  widgetName: dashboard.name,
+  widgetType: dashboard.widgets?.[0]?.type || "Chart",
+  chartType: dashboard.widgets?.[0]?.chartType === "Line" ? "Line Chart" : "Bar Chart",
+  dataSource: dashboard.widgets?.[0]?.metric || dashboard.widgets?.[0]?.data || "",
+  refreshInterval: dashboard.refreshRate,
+  enabled: dashboard.status === "Active",
+  position: { x: 0, y: 0, width: 6, height: 4 },
+  filters: dashboard.filters || ["Date Range"]
+});
 
 const AnalyticsConfiguration = () => {
   const { t } = useTranslation();
@@ -28,43 +44,8 @@ const AnalyticsConfiguration = () => {
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
 
-  // Dashboard widgets configuration from mock data
-  const [dashboardWidgets, setDashboardWidgets] = useState(
-    analyticsConfigurationData.dashboards.map(dashboard => ({
-      id: dashboard.id,
-      widgetName: dashboard.name,
-      widgetType: dashboard.widgets[0]?.type || "Chart",
-      chartType: dashboard.widgets[0]?.chartType === "Line" ? "Line Chart" : "Bar Chart",
-      dataSource: dashboard.widgets[0]?.metric || "Analytics Data",
-      refreshInterval: dashboard.refreshRate,
-      enabled: true,
-      position: { x: 0, y: 0, width: 6, height: 4 },
-      filters: ["Date Range"]
-    }))
-  ).concat([
-    {
-      id: 3,
-      widgetName: "Transaction Volume",
-      widgetType: "Chart",
-      chartType: "Line Chart",
-      dataSource: "Transaction Summary",
-      refreshInterval: 5,
-      enabled: true,
-      position: { x: 0, y: 0, width: 6, height: 4 },
-      filters: ["Date Range", "Transaction Type"]
-    },
-    {
-      id: 4,
-      widgetName: "Payment Status Distribution",
-      widgetType: "Chart",
-      chartType: "Pie Chart",
-      dataSource: "Payment Status",
-      refreshInterval: 10,
-      enabled: true,
-      position: { x: 6, y: 0, width: 6, height: 4 },
-      filters: ["Date Range"]
-    }
-  ]);
+  // Dashboard widgets are records of the remittance-analytics-config master
+  const [dashboardWidgets, setDashboardWidgets] = useState([]);
 
   // KPI definitions
   const [kpiDefinitions, setKpiDefinitions] = useState([
@@ -114,42 +95,8 @@ const AnalyticsConfiguration = () => {
     }
   ]);
 
-  // Report templates
-  const [reportTemplates, setReportTemplates] = useState([
-    {
-      id: 1,
-      templateName: "Monthly Settlement Summary",
-      category: "Settlement",
-      frequency: "Monthly",
-      format: "PDF + Excel",
-      recipients: ["Finance Team", "Management"],
-      dataPoints: ["Total Volume", "Settlement Time", "Success Rate"],
-      lastGenerated: "2025-09-01",
-      status: "Active"
-    },
-    {
-      id: 2,
-      templateName: "Client Performance Dashboard",
-      category: "Client Analytics",
-      frequency: "Weekly",
-      format: "Dashboard",
-      recipients: ["Sales Team", "Account Managers"],
-      dataPoints: ["Transaction Volume", "Payment Patterns", "Outstanding"],
-      lastGenerated: "2025-09-23",
-      status: "Active"
-    },
-    {
-      id: 3,
-      templateName: "Exception Analysis Report",
-      category: "Operations",
-      frequency: "Daily",
-      format: "Email Alert",
-      recipients: ["Operations Team"],
-      dataPoints: ["Exception Types", "Resolution Time", "Root Causes"],
-      lastGenerated: "2025-09-26",
-      status: "Active"
-    }
-  ]);
+  // Report templates (remittance-report-template master)
+  const [reportTemplates, setReportTemplates] = useState([]);
 
   // Analytics settings
   const [analyticsSettings, setAnalyticsSettings] = useState({
@@ -162,6 +109,30 @@ const AnalyticsConfiguration = () => {
     alertThreshold: 80,
     exportFormats: ["PDF", "Excel", "CSV"]
   });
+
+  useEffect(() => {
+    masterService.list(TYPE)
+      .then((rows) => {
+        setDashboardWidgets((rows || []).map(toWidget));
+        const saved = (rows || []).find((r) => r.screenSettings)?.screenSettings;
+        if (saved?.kpiDefinitions) setKpiDefinitions(saved.kpiDefinitions);
+        if (saved?.analyticsSettings) setAnalyticsSettings(saved.analyticsSettings);
+      })
+      .catch((error) => showError(toast, error));
+    remittanceService.reportTemplates()
+      .then((rows) => setReportTemplates((rows || []).map((tpl) => ({
+        id: tpl.id,
+        templateName: tpl.name,
+        category: tpl.category,
+        frequency: tpl.frequency,
+        format: [].concat(tpl.format || []).join(" + "),
+        recipients: tpl.distribution?.email || [],
+        dataPoints: (tpl.sections || []).map((sec) => sec.name),
+        lastGenerated: "-",
+        status: tpl.status
+      }))))
+      .catch((error) => showError(toast, error));
+  }, []);
 
   const [showWidgetDialog, setShowWidgetDialog] = useState(false);
   const [showKpiDialog, setShowKpiDialog] = useState(false);
@@ -362,14 +333,19 @@ const AnalyticsConfiguration = () => {
 
   const handleSave = async () => {
     try {
-      const configData = {
-        dashboardWidgets,
-        kpiDefinitions,
-        reportTemplates,
-        analyticsSettings
-      };
-
-      await mockCrudOperations.update("analyticsConfiguration", 1, configData);
+      await Promise.all(dashboardWidgets.map((w, i) => {
+        const base = w.record || {};
+        const [first, ...rest] = base.widgets || [{}];
+        return saveRecord(TYPE, w.record ? w.id : null, {
+          code: base.code || `DASH-${String(w.id).slice(-4)}`,
+          name: w.widgetName,
+          refreshRate: w.refreshInterval,
+          isActive: w.enabled,
+          filters: w.filters,
+          widgets: [{ ...first, type: w.widgetType, chartType: String(w.chartType || "").replace(" Chart", ""), metric: w.dataSource }, ...rest],
+          ...(i === 0 ? { screenSettings: { kpiDefinitions, analyticsSettings } } : {})
+        });
+      }));
 
       toast.current.show({
         severity: 'success',
@@ -379,15 +355,10 @@ const AnalyticsConfiguration = () => {
       });
 
       setTimeout(() => {
-        navigate("/master/finance/remittance");
+        navigate(MASTER_HOME);
       }, 1500);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save configuration',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to save configuration');
     }
   };
 

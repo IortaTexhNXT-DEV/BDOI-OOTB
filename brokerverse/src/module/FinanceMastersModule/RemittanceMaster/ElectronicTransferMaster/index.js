@@ -16,7 +16,10 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { Card } from "primereact/card";
-import { electronicTransferData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService from "../../../../services/remittanceService";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
+import { showError } from "../../../Remittance/shared";
+import { saveAndReturn, useMasterOptions } from "../masterRecord";
 import "./index.scss";
 
 const ElectronicTransferMaster = () => {
@@ -26,10 +29,14 @@ const ElectronicTransferMaster = () => {
   const { mode } = useParams();
   const { data } = location.state || {};
   const toast = React.useRef(null);
+  const { formatCurrency } = useFormatCurrency();
+  const banks = useMasterOptions("bank", toast);
+  const bankOptions = banks.map((b) => ({ label: b.name, value: b.value }));
+  const [transferMethods, setTransferMethods] = useState([]);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [transferQueue, setTransferQueue] = useState(electronicTransferData.transferQueue);
+  const [transferQueue, setTransferQueue] = useState([]);
   const [formData, setFormData] = useState({
     configCode: "",
     configName: "",
@@ -54,12 +61,21 @@ const ElectronicTransferMaster = () => {
     availableMethods: []
   });
 
-  const [methodLimits, setMethodLimits] = useState([
-    { method: "Wire Transfer", minAmount: 100, maxAmount: 100000, dailyLimit: 500000, charges: 25, active: true },
-    { method: "ACH", minAmount: 10, maxAmount: 50000, dailyLimit: 250000, charges: 2.5, active: true },
-    { method: "NEFT", minAmount: 0, maxAmount: 200000, dailyLimit: 1000000, charges: 2.5, active: true },
-    { method: "RTGS", minAmount: 200000, maxAmount: 10000000, dailyLimit: 50000000, charges: 25, active: true },
-  ]);
+  const [methodLimits, setMethodLimits] = useState([]);
+
+  useEffect(() => {
+    remittanceService.transferMethods()
+      .then((methods) => {
+        setTransferMethods(methods.map((m) => ({ value: m.value, label: m.label })));
+        setMethodLimits((current) => (current.length ? current : methods.map((m) => ({
+          method: m.label, minAmount: 0, maxAmount: m.limit, dailyLimit: m.limit, charges: 0, active: true
+        }))));
+      })
+      .catch((error) => showError(toast, error));
+    remittanceService.listTransfers({ status: "Pending,Approved", perPage: 200 })
+      .then((rows) => setTransferQueue(rows.map((r) => ({ ...r, referenceNo: r.reference, scheduledDate: r.scheduledDate || r.date }))))
+      .catch((error) => showError(toast, error));
+  }, []);
 
   const transferTypeOptions = [
     { label: "Domestic", value: "Domestic" },
@@ -68,12 +84,6 @@ const ElectronicTransferMaster = () => {
     { label: "SWIFT", value: "SWIFT" },
   ];
 
-  const bankOptions = [
-    { label: "Bank of America", value: "BOA" },
-    { label: "Chase Bank", value: "CHASE" },
-    { label: "Wells Fargo", value: "WF" },
-    { label: "Citibank", value: "CITI" },
-  ];
 
   const accountTypeOptions = [
     { label: "Current", value: "Current" },
@@ -111,15 +121,6 @@ const ElectronicTransferMaster = () => {
     { label: "Windows-1252", value: "Windows-1252" },
   ];
 
-  const transferMethods = [
-    { value: "NEFT", label: "NEFT" },
-    { value: "RTGS", label: "RTGS" },
-    { value: "IMPS", label: "IMPS" },
-    { value: "ACH", label: "ACH" },
-    { value: "Wire", label: "Wire Transfer" },
-    { value: "SWIFT", label: "SWIFT" },
-    { value: "SEPA", label: "SEPA Transfer" },
-  ];
 
   const items = [
     { label: "Remittance Master", url: "/master/finance/remittance" },
@@ -131,31 +132,18 @@ const ElectronicTransferMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        // Load from mock data
-        const configData = electronicTransferData.configurations.find(c => c.id === data.id) || data;
-        setFormData({
-          configCode: configData.code || "ETM-001",
-          configName: configData.name || "Domestic Wire Transfer",
-          transferType: configData.scope || "Domestic",
-          bankCode: "CHASE",
-          bankName: configData.bankDetails?.bankName || "Chase Bank",
-          accountNumber: configData.bankDetails?.accountNumber || "****5678",
-          accountType: configData.bankDetails?.accountType || "Business Checking",
-          swiftCode: "CHASUS33",
-          iban: "",
-          authType: "Username/Password",
-          encryption: "AES-256",
-          username: "admin",
-          password: "****",
-          certPath: null,
-          privateKey: null,
-          allowedIPs: ["192.168.1.1", "10.0.0.1"],
-          fileFormat: "ISO 20022 XML",
-          fileEncoding: "UTF-8",
-          includeHeader: true,
-          includeFooter: true,
-          availableMethods: [configData.transferType || "Wire Transfer", "ACH"]
-        });
+        setFormData((prev) => ({
+          ...prev,
+          transferType: data.scope || prev.transferType,
+          bankName: data.bankDetails?.bankName || "",
+          accountNumber: data.bankDetails?.accountNumber || "",
+          accountType: data.bankDetails?.accountType || null,
+          availableMethods: data.transferType ? [data.transferType] : [],
+          ...(data.form || {}),
+          configCode: data.code,
+          configName: data.name,
+        }));
+        if (data.form?.methodLimits) setMethodLimits(data.form.methodLimits);
       }
     } else {
       setFormData(prev => ({
@@ -200,49 +188,27 @@ const ElectronicTransferMaster = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-
-    try {
-      const transferData = {
-        ...formData,
-        methodLimits,
-        status: "Active"
-      };
-
-      let result;
-      if (mode === "edit") {
-        result = await mockCrudOperations.update("electronic-transfer", data.id, transferData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Electronic transfer configuration updated successfully",
-          life: 3000
-        });
-      } else {
-        result = await mockCrudOperations.create("electronic-transfer", transferData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Electronic transfer configuration created successfully",
-          life: 3000
-        });
+    const limits = methodLimits.filter((l) => l.active);
+    await saveAndReturn({
+      type: "remittance-electronic-transfer",
+      id: data?.id,
+      toast,
+      navigate,
+      record: {
+        code: formData.configCode,
+        name: formData.configName,
+        scope: formData.transferType,
+        transferType: formData.availableMethods[0] || null,
+        bankDetails: { bankName: formData.bankName, accountNumber: formData.accountNumber, accountType: formData.accountType },
+        limits: {
+          minAmount: Math.min(...limits.map((l) => Number(l.minAmount || 0))),
+          maxAmount: Math.max(0, ...limits.map((l) => Number(l.maxAmount || 0))),
+          dailyLimit: limits.reduce((sum, l) => sum + Number(l.dailyLimit || 0), 0)
+        },
+        form: { ...formData, password: undefined, privateKey: undefined, methodLimits }
       }
-
-      console.log("Electronic transfer operation result:", result);
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1000);
-    } catch (error) {
-      console.error("Save error:", error);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save electronic transfer configuration",
-        life: 3000
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    });
+    setIsLoading(false);
   };
 
   const handleCancel = () => {
@@ -688,7 +654,7 @@ const ElectronicTransferMaster = () => {
                 <Column
                   field="amount"
                   header="Amount"
-                  body={(rowData) => `$${rowData.amount.toLocaleString()}`}
+                  body={(rowData) => formatCurrency(rowData.amount)}
                   style={{ width: '15%' }}
                 />
                 <Column

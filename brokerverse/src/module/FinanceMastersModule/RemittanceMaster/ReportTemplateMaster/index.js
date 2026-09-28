@@ -14,7 +14,9 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import { reportTemplateData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { saveAndReturn } from "../masterRecord";
 import "./index.scss";
 
 const ReportTemplateMaster = () => {
@@ -27,7 +29,14 @@ const ReportTemplateMaster = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedReports, setGeneratedReports] = useState(reportTemplateData.generatedReports);
+  const [generatedReports, setGeneratedReports] = useState([]);
+
+  useEffect(() => {
+    if (!data?.code) return;
+    remittanceService.listReports()
+      .then((rows) => setGeneratedReports((rows || []).filter((r) => r.templateCode === data.code)))
+      .catch((error) => showError(toast, error));
+  }, [data]);
 
   const [formData, setFormData] = useState({
     reportCode: "",
@@ -73,20 +82,20 @@ const ReportTemplateMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        const templateData = reportTemplateData.templates.find(t => t.id === data.id) || data;
-        setFormData({
-          reportCode: templateData.code || "RPT-001",
-          reportName: templateData.name || "Daily Remittance Summary",
-          reportCategory: templateData.category || "Operational",
-          reportType: "Tabular",
-          frequency: templateData.frequency || "Daily",
-          format: templateData.format || "PDF",
-          enableSchedule: true,
-          runTime: new Date(),
-          startDate: new Date(),
-          emailRecipients: templateData.distribution?.email?.join(", ") || "",
-          outputFormats: [templateData.format || "PDF"]
-        });
+        const formats = Array.isArray(data.format) ? data.format : [data.format].filter(Boolean);
+        setFormData((prev) => ({
+          ...prev,
+          reportCategory: data.category || prev.reportCategory,
+          frequency: data.frequency || prev.frequency,
+          format: formats[0] || prev.format,
+          emailRecipients: data.distribution?.email?.join(", ") || "",
+          outputFormats: formats.length ? formats : prev.outputFormats,
+          ...(data.form || {}),
+          runTime: data.form?.runTime ? new Date(data.form.runTime) : null,
+          startDate: data.form?.startDate ? new Date(data.form.startDate) : null,
+          reportCode: data.code,
+          reportName: data.name,
+        }));
       }
     } else {
       setFormData(prev => ({
@@ -103,45 +112,22 @@ const ReportTemplateMaster = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-
-    try {
-      const reportData = {
-        ...formData,
-        status: "Active"
-      };
-
-      let result;
-      if (mode === "edit") {
-        result = await mockCrudOperations.update("report-template", data.id, reportData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Report template updated successfully",
-          life: 3000
-        });
-      } else {
-        result = await mockCrudOperations.create("report-template", reportData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Report template created successfully",
-          life: 3000
-        });
+    await saveAndReturn({
+      type: "remittance-report-template",
+      id: data?.id,
+      toast,
+      navigate,
+      record: {
+        code: formData.reportCode,
+        name: formData.reportName,
+        category: formData.reportCategory,
+        frequency: formData.frequency,
+        format: formData.outputFormats,
+        distribution: { email: formData.emailRecipients.split(",").map((e) => e.trim()).filter(Boolean) },
+        form: formData
       }
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1000);
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save report template",
-        life: 3000
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    });
+    setIsLoading(false);
   };
 
   const handleCancel = () => {

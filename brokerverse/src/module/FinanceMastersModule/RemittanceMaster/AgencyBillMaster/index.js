@@ -11,7 +11,10 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import { agencyBillData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService from "../../../../services/remittanceService";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
+import { isoDate, showError } from "../../../Remittance/shared";
+import { saveAndReturn } from "../masterRecord";
 import "./index.scss";
 
 const AgencyBillMaster = () => {
@@ -23,7 +26,24 @@ const AgencyBillMaster = () => {
   const toast = React.useRef(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [outstandingBills, setOutstandingBills] = useState(agencyBillData.outstandingBills);
+  const [outstandingBills, setOutstandingBills] = useState([]);
+  const { formatCurrency } = useFormatCurrency();
+
+  useEffect(() => {
+    const today = isoDate(new Date());
+    remittanceService.listAgencyBills({ perPage: 200 })
+      .then((rows) => setOutstandingBills((rows || [])
+        .filter((b) => !["settled", "rejected", "cancelled"].includes(b.statusCode))
+        .map((b) => ({
+          ...b,
+          billNo: b.billNumber,
+          agency: b.agencyName,
+          amount: b.billAmount,
+          balance: b.totalDue,
+          daysOverdue: b.dueDate && b.dueDate < today ? Math.floor((Date.parse(today) - Date.parse(b.dueDate)) / 86400000) : 0
+        }))))
+      .catch((error) => showError(toast, error));
+  }, []);
 
   const [formData, setFormData] = useState({
     configCode: "",
@@ -53,18 +73,18 @@ const AgencyBillMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        const configData = agencyBillData.configurations.find(c => c.id === data.id) || data;
-        setFormData({
-          configCode: configData.code || "ABL-001",
-          configName: configData.name || "Standard Agency Billing",
-          billingFrequency: configData.billingFrequency || "Monthly",
-          billDate: configData.billDate || 1,
-          dueDays: configData.dueDays || 30,
-          paymentTerms: configData.paymentTerms || "Net 30",
-          lateFeeType: configData.lateFee?.type || "Percentage",
-          lateFeeRate: configData.lateFee?.rate || 1.5,
-          gracePeriod: configData.lateFee?.gracePeriod || 5
-        });
+        setFormData((prev) => ({
+          ...prev,
+          configCode: data.code,
+          configName: data.name,
+          billingFrequency: data.billingFrequency || prev.billingFrequency,
+          billDate: data.billDate ?? prev.billDate,
+          dueDays: data.dueDays ?? prev.dueDays,
+          paymentTerms: data.paymentTerms || prev.paymentTerms,
+          lateFeeType: data.lateFee?.type || prev.lateFeeType,
+          lateFeeRate: data.lateFee?.rate ?? prev.lateFeeRate,
+          gracePeriod: data.lateFee?.gracePeriod ?? prev.gracePeriod
+        }));
       }
     } else {
       setFormData(prev => ({
@@ -81,45 +101,22 @@ const AgencyBillMaster = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-
-    try {
-      const billData = {
-        ...formData,
-        status: "Active"
-      };
-
-      let result;
-      if (mode === "edit") {
-        result = await mockCrudOperations.update("agency-bill", data.id, billData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Agency bill configuration updated successfully",
-          life: 3000
-        });
-      } else {
-        result = await mockCrudOperations.create("agency-bill", billData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Agency bill configuration created successfully",
-          life: 3000
-        });
+    await saveAndReturn({
+      type: "remittance-agency-bill",
+      id: data?.id,
+      toast,
+      navigate,
+      record: {
+        code: formData.configCode,
+        name: formData.configName,
+        billingFrequency: formData.billingFrequency,
+        billDate: formData.billDate,
+        dueDays: formData.dueDays,
+        paymentTerms: formData.paymentTerms,
+        lateFee: { type: formData.lateFeeType, rate: formData.lateFeeRate, gracePeriod: formData.gracePeriod }
       }
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1000);
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save agency bill configuration",
-        life: 3000
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    });
+    setIsLoading(false);
   };
 
   const handleCancel = () => {
@@ -246,20 +243,20 @@ const AgencyBillMaster = () => {
             <Column
               field="amount"
               header="Amount"
-              body={(rowData) => `$${rowData.amount.toLocaleString()}`}
+              body={(rowData) => formatCurrency(rowData.amount)}
               style={{ width: '12%' }}
             />
             <Column
               field="balance"
               header="Balance"
-              body={(rowData) => `$${rowData.balance.toLocaleString()}`}
+              body={(rowData) => formatCurrency(rowData.balance)}
               style={{ width: '12%' }}
             />
             <Column
               field="status"
               header="Status"
               body={(rowData) => (
-                <span className={`status-badge status-${rowData.status.toLowerCase()}`}>
+                <span className={`status-badge status-${String(rowData.status).toLowerCase().replace(/\s+/g, '-')}`}>
                   {rowData.status}
                 </span>
               )}

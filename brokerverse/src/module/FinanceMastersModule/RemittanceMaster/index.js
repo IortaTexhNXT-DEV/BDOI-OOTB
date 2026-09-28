@@ -21,6 +21,9 @@ import ToggleButton from "../../../components/ToggleButton";
 import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { TieredMenu } from "primereact/tieredmenu";
 import { Card } from "primereact/card";
+import { Toast } from "primereact/toast";
+import remittanceService, { masterService } from "../../../services/remittanceService";
+import { showError, showSuccess } from "../../Remittance/shared";
 
 const RemittanceMaster = () => {
   const { t } = useTranslation();
@@ -30,179 +33,20 @@ const RemittanceMaster = () => {
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
 
-  // Mock data for remittance masters
-  const [remittanceData] = useState([
-    {
-      id: 1,
-      code: "ARM-0001",
-      name: "Monthly Auto Remittance",
-      type: "Automated",
-      frequency: "Monthly",
-      insurers: 5,
-      status: true,
-      lastRun: "2025-09-15",
-    },
-    {
-      id: 2,
-      code: "STM-001",
-      name: "Standard Statement Template",
-      type: "Statement",
-      format: "Monthly",
-      columns: 12,
-      status: true,
-      lastUsed: "2025-09-20",
-    },
-    {
-      id: 3,
-      code: "STP-001",
-      name: "Regular Settlement",
-      type: "Settlement",
-      approvalLevels: 3,
-      limit: "500,000",
-      status: true,
-      lastUpdated: "2025-09-10",
-    },
-    {
-      id: 4,
-      code: "ARM-0002",
-      name: "Quarterly Auto Remittance",
-      type: "Automated",
-      frequency: "Quarterly",
-      insurers: 3,
-      status: false,
-      lastRun: "2025-07-01",
-    },
-    {
-      id: 5,
-      code: "REC-0001",
-      name: "Standard Reconciliation Rule",
-      type: "Reconciliation",
-      matchingRules: "4 Rules",
-      tolerance: "2.5%",
-      status: true,
-      lastUpdated: "2025-09-22",
-    },
-    {
-      id: 6,
-      code: "BFM-001",
-      name: "Standard CSV Import",
-      type: "BulkProcessing",
-      fileFormat: "CSV",
-      maxRecords: 50000,
-      status: true,
-      lastUpdated: "2025-09-21",
-    },
-    {
-      id: 7,
-      code: "SCH-0001",
-      name: "Monthly Remittance Schedule",
-      type: "Schedule",
-      frequency: "Monthly",
-      nextRun: "2025-10-01",
-      status: true,
-      lastUpdated: "2025-09-23",
-    },
-    {
-      id: 8,
-      code: "ETM-001",
-      name: "Standard Wire Transfer",
-      type: "Electronic",
-      transferType: "Domestic",
-      methods: "4 Methods",
-      status: true,
-      lastUpdated: "2025-09-24",
-    },
-    {
-      id: 9,
-      code: "AWF-001",
-      name: "Standard Approval Workflow",
-      type: "ApprovalWorkflow",
-      levels: "3 Levels",
-      pattern: "Sequential",
-      status: true,
-      lastUpdated: "2025-09-25",
-    },
-    {
-      id: 10,
-      code: "EXC-001",
-      name: "Exception Handling Master",
-      type: "Exception",
-      exceptionTypes: "7 Types",
-      autoResolve: "Enabled",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 11,
-      code: "RPT-001",
-      name: "Daily Remittance Report",
-      type: "ReportTemplate",
-      category: "Operational",
-      frequency: "Daily",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 12,
-      code: "ABL-001",
-      name: "Agency Bill Configuration",
-      type: "AgencyBill",
-      frequency: "Monthly",
-      agencies: "25 Active",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 13,
-      code: "DBL-001",
-      name: "Standard Direct Bill",
-      type: "DirectBill",
-      billMethod: "Policy-wise",
-      paymentTerms: "30 Days",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 14,
-      code: "ADJ-001",
-      name: "Standard Adjustment Config",
-      type: "Adjustment",
-      adjustmentTypes: "6 Types",
-      approvalMatrix: "Configured",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 15,
-      code: "NTF-001",
-      name: "Email Notification Template",
-      type: "Notification",
-      channels: "Email, SMS",
-      templates: "8 Active",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 16,
-      code: "HST-001",
-      name: "History Configuration",
-      type: "History",
-      retention: "24 Months",
-      archival: "Enabled",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 17,
-      code: "ANL-001",
-      name: "Executive Dashboard",
-      type: "Analytics",
-      widgets: "15 Widgets",
-      refreshRate: "5 Min",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-  ]);
+  const [remittanceData, setRemittanceData] = useState([]);
+  const toast = useRef(null);
+
+  const loadMasters = async () => {
+    try {
+      setRemittanceData(await remittanceService.masterOverview());
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
+
+  useEffect(() => {
+    loadMasters();
+  }, []);
 
   const items = [
     { label: t("financeMasters.remittanceMaster"), url: "/master/finance/remittance" },
@@ -390,9 +234,14 @@ const RemittanceMaster = () => {
     return typeRoutes[type] || baseRoute;
   };
 
-  const handleStatusChange = (rowData) => {
-    // Handle status change
-    console.log("Status changed for:", rowData);
+  const handleStatusChange = async (rowData) => {
+    try {
+      await masterService.setStatus(rowData.typeCode, rowData.id, rowData.status ? "Inactive" : "Active");
+      showSuccess(toast, `${rowData.code} ${rowData.status ? "deactivated" : "activated"}`);
+      loadMasters();
+    } catch (error) {
+      showError(toast, error);
+    }
   };
 
   const onPageChange = (event) => {
@@ -410,6 +259,7 @@ const RemittanceMaster = () => {
 
   return (
     <div className="container__remittance__master">
+      <Toast ref={toast} />
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">

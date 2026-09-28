@@ -15,7 +15,9 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { Card } from "primereact/card";
-import { scheduleMasterData, commonData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { saveAndReturn } from "../masterRecord";
 import "./index.scss";
 
 const ScheduleMaster = () => {
@@ -44,10 +46,37 @@ const ScheduleMaster = () => {
     customHolidays: []
   });
 
-  const [availableInsurers, setAvailableInsurers] = useState(commonData.insurers);
+  const [allInsurers, setAllInsurers] = useState([]);
+  const [availableInsurers, setAvailableInsurers] = useState([]);
   const [scheduledInsurers, setScheduledInsurers] = useState([]);
   const [insurerSettings, setInsurerSettings] = useState([]);
-  const [executionLogs, setExecutionLogs] = useState(scheduleMasterData.executionLogs);
+  const [executionLogs, setExecutionLogs] = useState([]);
+  const [frequencyOptions, setFrequencyOptions] = useState([]);
+
+  useEffect(() => {
+    masterService.options("insurance-company")
+      .then((rows) => setAllInsurers(rows.map((r) => ({ id: r.id, code: r.code, name: r.label }))))
+      .catch((error) => showError(toast, error));
+    masterService.definition("remittance-schedule")
+      .then((def) => setFrequencyOptions(((def.fields || []).find((f) => f.name === "frequency")?.options || []).map((v) => ({ label: v, value: v }))))
+      .catch((error) => showError(toast, error));
+    const linked = data?.linkedProcesses || [];
+    remittanceService.automatedHistory()
+      .then((rows) => setExecutionLogs(rows.filter((r) => linked.includes(r.configCode)).map((r) => ({
+        scheduleCode: r.configCode,
+        executionTime: r.executionDate,
+        duration: r.duration,
+        status: r.status,
+        recordsProcessed: r.recordsProcessed
+      }))))
+      .catch((error) => showError(toast, error));
+  }, [data]);
+
+  useEffect(() => {
+    const chosen = new Set(scheduledInsurers.map((i) => i.code));
+    setAvailableInsurers(allInsurers.filter((i) => !chosen.has(i.code)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allInsurers]);
 
   const scheduleTypeOptions = [
     { label: "Fixed Date", value: "Fixed Date" },
@@ -56,14 +85,6 @@ const ScheduleMaster = () => {
     { label: "Custom", value: "Custom" },
   ];
 
-  const frequencyOptions = [
-    { label: "Daily", value: "Daily" },
-    { label: "Weekly", value: "Weekly" },
-    { label: "Bi-Weekly", value: "Bi-Weekly" },
-    { label: "Monthly", value: "Monthly" },
-    { label: "Quarterly", value: "Quarterly" },
-    { label: "Annually", value: "Annually" },
-  ];
 
   const businessDayRuleOptions = [
     { label: "Previous Business Day", value: "Previous Business Day" },
@@ -100,45 +121,26 @@ const ScheduleMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        // Load from mock data based on id or use passed data
-        const scheduleData = scheduleMasterData.schedules.find(s => s.id === data.id) || data;
         const executionTime = new Date();
-        const cutoffTime = new Date();
-
-        if (scheduleData.time) {
-          const [hours, minutes] = scheduleData.time.split(':');
-          executionTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        if (data.time) {
+          const [hours, minutes] = String(data.time).split(':');
+          executionTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
         }
-
-        setFormData({
-          scheduleCode: scheduleData.code || "SCH-0001",
-          scheduleName: scheduleData.name || "Daily Remittance Processing",
-          isActive: scheduleData.status === "Active",
-          scheduleType: scheduleData.type === "Remittance Processing" ? "Recurring" : scheduleData.type,
-          frequency: scheduleData.frequency || "Daily",
-          executionDay: 25,
-          businessDayRule: "Previous Business Day",
-          executionTime: executionTime,
-          timeZone: scheduleData.timezone || "EST",
-          cutoffTime: cutoffTime,
-          holidayCalendar: "US Banking",
-          skipHolidays: true,
-          customHolidays: []
-        });
-
-        // Set scheduled insurers based on linked processes
-        const linkedInsurers = scheduleData.linkedProcesses
-          ? commonData.insurers.slice(0, 2)
-          : [];
-        setScheduledInsurers(linkedInsurers);
-        setInsurerSettings(linkedInsurers.map((insurer, index) => ({
-          insurerCode: insurer.code,
-          insurerName: insurer.name,
-          customDay: null,
-          leadTime: index + 2,
-          priority: index === 0 ? "High" : "Medium",
-          active: true
-        })));
+        const saved = data.form || {};
+        setFormData((prev) => ({
+          ...prev,
+          ...saved,
+          scheduleCode: data.code,
+          scheduleName: data.name,
+          isActive: data.status === true || data.status === "Active",
+          scheduleType: saved.scheduleType || (data.type === "Remittance Processing" ? "Recurring" : data.type) || null,
+          frequency: data.frequency || null,
+          executionTime,
+          cutoffTime: saved.cutoffTime ? new Date(saved.cutoffTime) : null,
+          timeZone: data.timezone || prev.timeZone,
+        }));
+        setScheduledInsurers(saved.scheduledInsurers || []);
+        setInsurerSettings(saved.insurerSettings || []);
       }
     } else {
       setFormData(prev => ({
@@ -162,50 +164,26 @@ const ScheduleMaster = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-
-    try {
-      const scheduleData = {
-        ...formData,
-        scheduledInsurers,
-        insurerSettings,
-        status: formData.isActive ? "Active" : "Inactive"
-      };
-
-      let result;
-      if (mode === "edit") {
-        result = await mockCrudOperations.update("schedule", data.id, scheduleData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Schedule updated successfully",
-          life: 3000
-        });
-      } else {
-        result = await mockCrudOperations.create("schedule", scheduleData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Schedule created successfully",
-          life: 3000
-        });
+    const time = formData.executionTime instanceof Date
+      ? `${String(formData.executionTime.getHours()).padStart(2, "0")}:${String(formData.executionTime.getMinutes()).padStart(2, "0")}`
+      : undefined;
+    await saveAndReturn({
+      type: "remittance-schedule",
+      id: data?.id,
+      toast,
+      navigate,
+      record: {
+        code: formData.scheduleCode,
+        name: formData.scheduleName,
+        isActive: formData.isActive,
+        type: formData.scheduleType,
+        frequency: formData.frequency,
+        time,
+        timezone: formData.timeZone,
+        form: { ...formData, scheduledInsurers, insurerSettings }
       }
-
-      console.log("Schedule operation result:", result);
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1000);
-    } catch (error) {
-      console.error("Save error:", error);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save schedule",
-        life: 3000
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    });
+    setIsLoading(false);
   };
 
   const handleCancel = () => {

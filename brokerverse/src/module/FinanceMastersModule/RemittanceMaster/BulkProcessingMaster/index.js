@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,7 +12,13 @@ import { Column } from "primereact/column";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { Card } from "primereact/card";
+import { Toast } from "primereact/toast";
+import { saveAndReturn } from "../masterRecord";
 import "./index.scss";
+
+const DELIMITERS = { Comma: ",", Tab: "\t", Pipe: "|", Semicolon: ";" };
+const toSnake = (v) => String(v || "").replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+const toCamel = (v) => String(v || "").replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 
 const BulkProcessingMaster = () => {
   const { t } = useTranslation();
@@ -20,6 +26,8 @@ const BulkProcessingMaster = () => {
   const location = useLocation();
   const { mode } = useParams();
   const { data } = location.state || {};
+  const toast = useRef(null);
+  const TYPE = "remittance-bulk-processing";
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -40,11 +48,7 @@ const BulkProcessingMaster = () => {
     autoApprove: false
   });
 
-  const [columnMappings, setColumnMappings] = useState([
-    { id: 1, sourceColumn: "Policy_No", targetField: "policyNumber", dataType: "Text", required: true, defaultValue: "" },
-    { id: 2, sourceColumn: "Premium_Amount", targetField: "premiumAmount", dataType: "Decimal", required: true, defaultValue: "0.00" },
-    { id: 3, sourceColumn: "Transaction_Date", targetField: "transactionDate", dataType: "Date", required: true, defaultValue: "" },
-  ]);
+  const [columnMappings, setColumnMappings] = useState([]);
 
   const fileTypeOptions = [
     { label: "CSV", value: "CSV" },
@@ -109,23 +113,27 @@ const BulkProcessingMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        setFormData({
-          formatCode: data.code || "BFM-001",
-          formatName: data.name || "Standard CSV Import",
-          fileType: "CSV",
-          delimiter: "Comma",
-          hasHeader: true,
-          sheetName: "Sheet1",
-          dateFormat: "DD/MM/YYYY",
-          maxFileSize: 100,
-          maxRecords: 50000,
-          allowDuplicates: false,
-          skipInvalid: true,
-          processingMode: "Batch",
-          batchSize: 500,
-          errorHandling: "Continue",
-          autoApprove: false
-        });
+        setFormData((prev) => ({
+          ...prev,
+          fileType: /xls/i.test(data.fileFormat) ? "Excel" : data.fileFormat || prev.fileType,
+          delimiter: Object.keys(DELIMITERS).find((k) => DELIMITERS[k] === data.delimiter) || prev.delimiter,
+          hasHeader: data.hasHeader ?? prev.hasHeader,
+          sheetName: data.sheetName || prev.sheetName,
+          maxFileSize: parseFloat(data.maxFileSize) || prev.maxFileSize,
+          maxRecords: data.maxRecords ?? prev.maxRecords,
+          errorHandling: data.errorHandling || prev.errorHandling,
+          ...(data.form || {}),
+          formatCode: data.code,
+          formatName: data.name,
+        }));
+        setColumnMappings(data.form?.columnMappings || (data.fieldMappings || []).map((m, i) => ({
+          id: i + 1,
+          sourceColumn: m.sourceField || m.sourceColumn,
+          targetField: toCamel(m.targetField),
+          dataType: "Text",
+          required: Boolean(m.required),
+          defaultValue: ""
+        })));
       }
     } else {
       setFormData(prev => ({
@@ -147,11 +155,26 @@ const BulkProcessingMaster = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving bulk processing configuration:", formData);
-    console.log("Column mappings:", columnMappings);
-    navigate("/master/finance/remittance");
-  };
+  const handleSave = () => saveAndReturn({
+    type: TYPE,
+    id: data?.id,
+    toast,
+    navigate,
+    record: {
+      code: formData.formatCode,
+      name: formData.formatName,
+      fileFormat: formData.fileType,
+      delimiter: DELIMITERS[formData.delimiter] || ",",
+      hasHeader: formData.hasHeader,
+      sheetName: formData.sheetName,
+      maxFileSize: formData.maxFileSize,
+      maxRecords: formData.maxRecords,
+      errorHandling: formData.errorHandling,
+      duplicateHandling: formData.allowDuplicates ? "Allow" : "Skip",
+      fieldMappings: columnMappings.map((m) => ({ sourceField: m.sourceColumn, targetField: toSnake(m.targetField), required: m.required })),
+      form: { ...formData, columnMappings }
+    }
+  });
 
   const handleCancel = () => {
     navigate("/master/finance/remittance");
@@ -169,8 +192,19 @@ const BulkProcessingMaster = () => {
     setColumnMappings([...columnMappings, newMapping]);
   };
 
+  // Maps the columns the remittance importer reads (policy, premium, commission, tax) that are not mapped yet.
   const autoMap = () => {
-    console.log("Auto-mapping columns based on headers...");
+    const importerFields = ["policyNumber", "premiumAmount", "commissionAmount", "taxAmount"];
+    const mapped = new Set(columnMappings.map((m) => m.targetField));
+    const added = importerFields.filter((f) => !mapped.has(f)).map((f, i) => ({
+      id: columnMappings.length + i + 1,
+      sourceColumn: targetFieldOptions.find((o) => o.value === f).label.replace(/\s+/g, ""),
+      targetField: f,
+      dataType: f === "policyNumber" ? "Text" : "Decimal",
+      required: f === "policyNumber" || f === "premiumAmount",
+      defaultValue: ""
+    }));
+    setColumnMappings([...columnMappings, ...added]);
   };
 
   const deleteMapping = (rowData) => {
@@ -222,6 +256,7 @@ const BulkProcessingMaster = () => {
 
   return (
     <div className="bulk-processing-master">
+      <Toast ref={toast} />
       <div className="page-header">
         <BreadCrumb model={items} home={home} />
       </div>

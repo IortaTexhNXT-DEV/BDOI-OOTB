@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
@@ -15,8 +15,38 @@ import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { notificationMasterData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../../services/remittanceService";
+import authService from "../../../../services/authService";
+import { showError, showSuccess } from "../../../Remittance/shared";
+import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+
+const TYPE = "remittance-notification-template";
+const toRow = (template) => ({
+  id: template.id,
+  code: template.code,
+  templateName: template.name,
+  eventType: template.trigger,
+  recipientType: template.recipientType || "Client",
+  channel: template.channel,
+  subject: template.subject || template.message || "",
+  body: template.body || template.message || "",
+  priority: template.priority || "Medium",
+  active: template.status === "Active",
+  autoSend: template.autoSend ?? true
+});
+const toRecord = (row) => ({
+  code: row.code,
+  name: row.templateName,
+  trigger: row.eventType,
+  recipientType: row.recipientType,
+  channel: row.channel,
+  subject: row.subject,
+  body: row.body,
+  priority: row.priority,
+  autoSend: row.autoSend,
+  isActive: row.active
+});
 
 const NotificationMaster = () => {
   const { t } = useTranslation();
@@ -25,20 +55,56 @@ const NotificationMaster = () => {
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
 
-  // Notification templates state from mock data
-  const [notificationTemplates, setNotificationTemplates] = useState(
-    notificationMasterData.templates.map(template => ({
-      id: template.id,
-      templateName: template.name,
-      eventType: template.trigger,
-      recipientType: "Client",
-      channel: template.channel,
-      subject: template.subject || template.message,
-      priority: "Medium",
-      active: template.status === "Active",
-      autoSend: true
-    }))
-  );
+  // Notification templates are records of the remittance-notification-template master
+  const [notificationTemplates, setNotificationTemplates] = useState([]);
+
+  const loadTemplates = () => masterService.list(TYPE)
+    .then((rows) => setNotificationTemplates((rows || []).map(toRow)))
+    .catch((error) => showError(toast, error));
+
+  useEffect(() => {
+    loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const saveTemplate = async () => {
+    try {
+      await saveRecord(TYPE, selectedTemplate.id, toRecord(selectedTemplate));
+      showSuccess(toast, `${selectedTemplate.templateName} saved`);
+      setShowTemplateDialog(false);
+      loadTemplates();
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
+
+  const deleteTemplate = async (row) => {
+    if (!window.confirm(`Delete template ${row.templateName}?`)) return;
+    try {
+      await masterService.remove(TYPE, row.id);
+      showSuccess(toast, `${row.templateName} deleted`);
+      loadTemplates();
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
+
+  const editTemplate = (row) => {
+    setSelectedTemplate({ ...row });
+    setShowTemplateDialog(true);
+  };
+
+  const setTemplateField = (field, value) => setSelectedTemplate((tpl) => ({ ...tpl, [field]: value }));
+
+  const sendTestEmail = async () => {
+    const email = authService.getUser()?.email || localStorage.getItem("USER_EMAIL");
+    try {
+      await remittanceService.sendNotification({ type: "Test", subject: "Remittance notification test", content: "Test message from the Notification Master.", recipients: [email], channel: "Email" });
+      showSuccess(toast, `Test email queued for ${email}`, "Test Email Sent");
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
 
   // Notification rules state - enhanced examples
   const [notificationRules, setNotificationRules] = useState([
@@ -161,11 +227,13 @@ const NotificationMaster = () => {
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
               tooltip="Edit"
+              onClick={() => editTemplate(rowData)}
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
               tooltip="Delete"
+              onClick={() => deleteTemplate(rowData)}
             />
           </>
         )}
@@ -203,34 +271,7 @@ const NotificationMaster = () => {
     );
   };
 
-  const handleSave = async () => {
-    try {
-      const configData = {
-        templates: notificationTemplates,
-        rules: notificationRules
-      };
-
-      await mockCrudOperations.update("notificationMaster", 1, configData);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Notification Master configuration saved successfully',
-        life: 3000
-      });
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1500);
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save configuration',
-        life: 3000
-      });
-    }
-  };
+  const handleSave = () => navigate(MASTER_HOME);
 
   const handleCancel = () => {
     navigate("/master/finance/remittance");
@@ -248,7 +289,7 @@ const NotificationMaster = () => {
         <Button
           label={t("financeMasters.save")}
           icon="pi pi-check"
-          onClick={() => setShowTemplateDialog(false)}
+          onClick={saveTemplate}
           autoFocus
         />
       )}
@@ -291,14 +332,7 @@ const NotificationMaster = () => {
                     label={t("remittance.addTemplate")}
                     icon="pi pi-plus"
                     className="p-button-primary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'info',
-                        summary: 'Info',
-                        detail: 'Add Template dialog would open here',
-                        life: 3000
-                      });
-                    }}
+                    onClick={() => editTemplate({ id: null, code: `NTF-${Date.now().toString().slice(-6)}`, templateName: "", eventType: "", recipientType: "Client", channel: "Email", subject: "", body: "", priority: "Medium", active: true, autoSend: true })}
                   />
                 </div>
               )}
@@ -414,14 +448,7 @@ const NotificationMaster = () => {
                     label={t("remittance.testEmailConfiguration")}
                     icon="pi pi-send"
                     className="p-button-secondary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'success',
-                        summary: 'Test Email Sent',
-                        detail: 'Test email sent successfully to configured address',
-                        life: 3000
-                      });
-                    }}
+                    onClick={sendTestEmail}
                   />
                 </div>
               )}
@@ -490,23 +517,6 @@ const NotificationMaster = () => {
                 </div>
               </div>
 
-              {!isViewMode && (
-                <div className="test-section mt-4">
-                  <Button
-                    label="Test SMS Configuration"
-                    icon="pi pi-mobile"
-                    className="p-button-secondary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'success',
-                        summary: 'Test SMS Sent',
-                        detail: 'Test SMS sent successfully to configured number',
-                        life: 3000
-                      });
-                    }}
-                  />
-                </div>
-              )}
             </div>
           </TabPanel>
         </TabView>
@@ -541,13 +551,15 @@ const NotificationMaster = () => {
             <div className="p-fluid p-formgrid p-grid">
               <div className="p-field p-col-12 p-md-6">
                 <label>Template Name</label>
-                <InputText value={selectedTemplate.templateName} disabled={isViewMode} />
+                <InputText value={selectedTemplate.templateName} onChange={(e) => setTemplateField("templateName", e.target.value)} disabled={isViewMode} />
               </div>
               <div className="p-field p-col-12 p-md-6">
                 <label>Event Type</label>
                 <Dropdown
                   value={selectedTemplate.eventType}
                   options={eventTypeOptions}
+                  onChange={(e) => setTemplateField("eventType", e.value)}
+                  editable
                   disabled={isViewMode}
                 />
               </div>
@@ -556,6 +568,7 @@ const NotificationMaster = () => {
                 <Dropdown
                   value={selectedTemplate.recipientType}
                   options={recipientTypeOptions}
+                  onChange={(e) => setTemplateField("recipientType", e.value)}
                   disabled={isViewMode}
                 />
               </div>
@@ -564,17 +577,20 @@ const NotificationMaster = () => {
                 <Dropdown
                   value={selectedTemplate.channel}
                   options={channelOptions}
+                  onChange={(e) => setTemplateField("channel", e.value)}
                   disabled={isViewMode}
                 />
               </div>
               <div className="p-field p-col-12">
                 <label>Subject</label>
-                <InputText value={selectedTemplate.subject} disabled={isViewMode} />
+                <InputText value={selectedTemplate.subject} onChange={(e) => setTemplateField("subject", e.target.value)} disabled={isViewMode} />
               </div>
               <div className="p-field p-col-12">
                 <label>Message Template</label>
                 <InputTextarea
                   rows={5}
+                  value={selectedTemplate.body}
+                  onChange={(e) => setTemplateField("body", e.target.value)}
                   placeholder={t("remittance.placeholderTemplateMessage")}
                   disabled={isViewMode}
                 />

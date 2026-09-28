@@ -14,8 +14,12 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import { exceptionMasterData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+
+const TYPE = "remittance-exception";
 
 const ExceptionMaster = () => {
   const { t } = useTranslation();
@@ -28,7 +32,8 @@ const ExceptionMaster = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeExceptions, setActiveExceptions] = useState(exceptionMasterData.activeExceptions);
+  const [activeExceptions, setActiveExceptions] = useState([]);
+  const [removedTypeIds, setRemovedTypeIds] = useState([]);
 
   const [formData, setFormData] = useState({
     amountVarianceThreshold: 100.00,
@@ -44,7 +49,24 @@ const ExceptionMaster = () => {
     varianceAccount: ""
   });
 
-  const [exceptionTypes, setExceptionTypes] = useState(exceptionMasterData.exceptionTypes);
+  const [exceptionTypes, setExceptionTypes] = useState([]);
+
+  const loadExceptionTypes = () => masterService.list(TYPE)
+    .then((rows) => setExceptionTypes(rows || []))
+    .catch((error) => showError(toast, error));
+
+  useEffect(() => {
+    loadExceptionTypes();
+    remittanceService.listExceptions({ status: "Open,In Progress,Escalated", perPage: 200 })
+      .then((rows) => setActiveExceptions((rows || []).map((x) => ({
+        ...x,
+        exceptionCode: x.exceptionId,
+        referenceNo: x.remittanceNo,
+        slaRemaining: `${x.age}d open`
+      }))))
+      .catch((error) => showError(toast, error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const severityOptions = [
     { label: "Critical", value: "Critical" },
@@ -85,66 +107,25 @@ const ExceptionMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        setFormData({
-          amountVarianceThreshold: 500.00,
-          percentVarianceThreshold: 2.5,
-          dateVarianceDays: 15,
-          duplicateCheckPeriod: 60,
-          autoResolveLimit: 1000.00,
-          writeOffLimit: 100.00,
-          adjustmentApprovalLimit: 5000.00,
-          exceptionHoldingAccount: "1005",
-          writeOffAccount: "4003",
-          adjustmentAccount: "4004",
-          varianceAccount: "4005"
-        });
+        if (data.form) setFormData((prev) => ({ ...prev, ...data.form }));
       }
     }
   }, [mode, data]);
 
+  // Exception types are records of the remittance-exception master: new rows are created, edited rows updated, removed rows deleted.
   const handleSave = async () => {
     setIsLoading(true);
-
     try {
-      const exceptionData = {
-        ...formData,
-        exceptionTypes,
-        status: "Active"
-      };
-
-      let result;
-      if (mode === "edit") {
-        result = await mockCrudOperations.update("exception-master", data?.id || 1, exceptionData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Exception configuration updated successfully",
-          life: 3000
-        });
-      } else {
-        result = await mockCrudOperations.create("exception-master", exceptionData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Exception configuration created successfully",
-          life: 3000
-        });
-      }
-
-      console.log("Exception operation result:", result);
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1000);
+      await Promise.all(removedTypeIds.map((id) => masterService.remove(TYPE, id)));
+      await Promise.all(exceptionTypes.map(({ id, isNew, createdAt, updatedAt, createdBy, updatedBy, ...record }) =>
+        saveRecord(TYPE, isNew ? null : id, { ...record, isActive: record.status !== "Inactive" })));
+      toast.current.show({ severity: "success", summary: "Success", detail: "Exception configuration saved", life: 3000 });
+      setTimeout(() => navigate(MASTER_HOME), 1000);
     } catch (error) {
-      console.error("Save error:", error);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save exception configuration",
-        life: 3000
-      });
+      showError(toast, error, "Failed to save exception configuration");
+      loadExceptionTypes();
     } finally {
+      setRemovedTypeIds([]);
       setIsLoading(false);
     }
   };
@@ -158,6 +139,7 @@ const ExceptionMaster = () => {
       ...exceptionTypes,
       {
         id: Date.now(),
+        isNew: true,
         code: `EXC-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
         name: "",
         category: "Data Quality",
@@ -182,6 +164,7 @@ const ExceptionMaster = () => {
   };
 
   const deleteExceptionType = (rowData) => {
+    if (!rowData.isNew) setRemovedTypeIds((ids) => [...ids, rowData.id]);
     const newTypes = exceptionTypes.filter(type => type.id !== rowData.id);
     setExceptionTypes(newTypes);
   };

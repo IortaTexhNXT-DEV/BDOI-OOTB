@@ -153,13 +153,10 @@ const AddUser = ({ action }) => {
   });
 
   const handleRoleChange = (selectedRoles) => {
+    // Mark touched without validating, then set the value with validation: validating on touch as
+    // well ran against the previous (empty) roles and left "At least one role is required" in place.
+    formik.setFieldTouched("roles", true, false);
     formik.setFieldValue("roles", selectedRoles, true);
-    formik.setFieldTouched("roles", true, true);
-    if (selectedRoles.length === 0) {
-      formik.setFieldError("roles", "At least one role is required");
-    } else {
-      formik.setFieldError("roles", undefined);
-    }
   };
 
   // Set form values when user data is loaded (for edit/view)

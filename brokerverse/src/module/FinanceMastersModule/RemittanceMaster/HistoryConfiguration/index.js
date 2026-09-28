@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
@@ -15,9 +15,13 @@ import { Calendar } from "primereact/calendar";
 import { Slider } from "primereact/slider";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import { useNavigate, useParams } from "react-router-dom";
-import { historyConfigurationData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { masterService } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+
+const TYPE = "remittance-history-config";
 
 const HistoryConfiguration = () => {
   const { t } = useTranslation();
@@ -25,26 +29,60 @@ const HistoryConfiguration = () => {
   const { mode } = useParams();
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
+  const location = useLocation();
+  const [record, setRecord] = useState(location.state?.data || null);
 
   // History retention settings from mock data
   const [retentionSettings, setRetentionSettings] = useState({
-    transactionHistory: historyConfigurationData.retention.transactionHistory / 12, // Convert months to years
-    systemLogs: historyConfigurationData.retention.errorLogs / 12,
-    auditTrails: historyConfigurationData.retention.auditLogs / 12,
-    reportHistory: 5,
-    documentStorage: historyConfigurationData.retention.documentHistory / 12,
-    backupRetention: 3
+    transactionHistory: 0,
+    systemLogs: 0,
+    auditTrails: 0,
+    reportHistory: 0,
+    documentStorage: 0,
+    backupRetention: 0
   });
 
   // Archive settings from mock data
   const [archiveSettings, setArchiveSettings] = useState({
-    autoArchive: historyConfigurationData.archival.enabled,
+    autoArchive: false,
     archiveThreshold: 90,
-    compressionEnabled: historyConfigurationData.archival.compression,
-    archiveLocation: historyConfigurationData.archival.storageLocation,
+    compressionEnabled: false,
+    archiveLocation: "",
     archiveFormat: "Compressed",
-    encryptionEnabled: historyConfigurationData.archival.encryption
+    encryptionEnabled: false
   });
+
+  // Loads the history configuration record (the one opened from the overview, else the first one).
+  useEffect(() => {
+    const apply = (cfg) => {
+      if (!cfg) return;
+      setRecord(cfg);
+      const r = cfg.retention || {};
+      setRetentionSettings((prev) => ({
+        ...prev,
+        transactionHistory: (r.transactionHistory || 0) / 12,
+        systemLogs: (r.errorLogs || 0) / 12,
+        auditTrails: (r.auditLogs || 0) / 12,
+        documentStorage: (r.documentHistory || 0) / 12,
+        ...(cfg.retentionYears || {})
+      }));
+      const a = cfg.archival || {};
+      setArchiveSettings((prev) => ({
+        ...prev,
+        autoArchive: Boolean(a.enabled),
+        compressionEnabled: Boolean(a.compression),
+        encryptionEnabled: Boolean(a.encryption),
+        archiveLocation: a.storageLocation || "",
+        archiveThreshold: a.thresholdDays ?? prev.archiveThreshold,
+        archiveFormat: a.format || prev.archiveFormat
+      }));
+      if (cfg.historyTracking) setHistoryTracking(cfg.historyTracking);
+      if (cfg.purgingRules) setPurgingRules(cfg.purgingRules);
+    };
+    if (record) apply(record);
+    else masterService.list(TYPE).then((rows) => apply((rows || [])[0])).catch((error) => showError(toast, error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // History tracking configuration
   const [historyTracking, setHistoryTracking] = useState([
@@ -234,14 +272,29 @@ const HistoryConfiguration = () => {
 
   const handleSave = async () => {
     try {
-      const configData = {
-        retentionSettings,
-        archiveSettings,
+      const months = (years) => Math.round(Number(years || 0) * 12);
+      await saveRecord(TYPE, record?.id, {
+        code: record?.code || "HIST-001",
+        name: record?.name || "Remittance History Retention",
+        retention: {
+          transactionHistory: months(retentionSettings.transactionHistory),
+          errorLogs: months(retentionSettings.systemLogs),
+          auditLogs: months(retentionSettings.auditTrails),
+          documentHistory: months(retentionSettings.documentStorage)
+        },
+        retentionYears: retentionSettings,
+        archival: {
+          ...(record?.archival || {}),
+          enabled: archiveSettings.autoArchive,
+          compression: archiveSettings.compressionEnabled,
+          encryption: archiveSettings.encryptionEnabled,
+          storageLocation: archiveSettings.archiveLocation,
+          thresholdDays: archiveSettings.archiveThreshold,
+          format: archiveSettings.archiveFormat
+        },
         historyTracking,
         purgingRules
-      };
-
-      await mockCrudOperations.update("historyConfiguration", 1, configData);
+      });
 
       toast.current.show({
         severity: 'success',
@@ -251,15 +304,10 @@ const HistoryConfiguration = () => {
       });
 
       setTimeout(() => {
-        navigate("/master/finance/remittance");
+        navigate(MASTER_HOME);
       }, 1500);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save configuration',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to save configuration');
     }
   };
 
@@ -268,22 +316,20 @@ const HistoryConfiguration = () => {
   };
 
   const handleRunPurgeRule = (ruleId) => {
-    console.log(`Running purge rule ${ruleId}`);
     toast.current.show({
       severity: 'info',
-      summary: 'Purge Rule Executed',
-      detail: `Purge rule ${ruleId} has been queued for execution`,
-      life: 3000
+      summary: 'Purge Rule',
+      detail: `Purge rule ${ruleId} runs on its configured schedule; save the configuration to apply changes`,
+      life: 4000
     });
   };
 
   const handleTestArchive = () => {
-    console.log("Testing archive configuration");
     toast.current.show({
-      severity: 'success',
-      summary: 'Archive Test Complete',
-      detail: 'Archive configuration test completed successfully',
-      life: 3000
+      severity: archiveSettings.archiveLocation ? 'info' : 'warn',
+      summary: 'Archive Configuration',
+      detail: archiveSettings.archiveLocation ? `Archive location: ${archiveSettings.archiveLocation}` : 'No archive location configured',
+      life: 4000
     });
   };
 

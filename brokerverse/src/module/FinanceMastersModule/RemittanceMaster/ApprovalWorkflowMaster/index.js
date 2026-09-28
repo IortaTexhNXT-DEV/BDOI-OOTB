@@ -15,7 +15,9 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import { approvalWorkflowData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { apiRequest, masterService } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { saveAndReturn } from "../masterRecord";
 import "./index.scss";
 
 const ApprovalWorkflowMaster = () => {
@@ -29,7 +31,29 @@ const ApprovalWorkflowMaster = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingApprovals, setPendingApprovals] = useState(approvalWorkflowData.pendingApprovals);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [roleOptions, setRoleOptions] = useState([]);
+  const [workflowPatternOptions, setWorkflowPatternOptions] = useState([]);
+
+  useEffect(() => {
+    remittanceService.listApprovals()
+      .then((rows) => setPendingApprovals(rows.map((a) => ({
+        ...a,
+        requestNo: a.referenceNo,
+        type: a.transactionType,
+        requestedBy: a.initiator,
+        requestDate: a.submissionDate,
+        currentLevel: `${a.currentLevel} of ${a.requiredLevels}`,
+        slaRemaining: `${a.slaRemaining}h`
+      }))))
+      .catch((error) => showError(toast, error));
+    masterService.definition("remittance-approval-workflow")
+      .then((def) => setWorkflowPatternOptions(((def.fields || []).find((f) => f.name === "type")?.options || []).map((v) => ({ label: v, value: v }))))
+      .catch((error) => showError(toast, error));
+    apiRequest("GET", "/roles")
+      .then((res) => setRoleOptions((res.data || []).map((r) => ({ label: r.name, value: r.name }))))
+      .catch((error) => showError(toast, error));
+  }, []);
   const [formData, setFormData] = useState({
     workflowCode: "",
     workflowName: "",
@@ -48,31 +72,14 @@ const ApprovalWorkflowMaster = () => {
     requireDelegationApproval: false
   });
 
-  const [approvalStages, setApprovalStages] = useState([
-    {
-      stageName: "Level 1 Approval",
-      approverRole: "Supervisor",
-      minAmount: 0,
-      maxAmount: 50000,
-      approvalType: "Any One",
-      slaHours: 24
-    },
-    {
-      stageName: "Level 2 Approval",
-      approverRole: "Manager",
-      minAmount: 50001,
-      maxAmount: 100000,
-      approvalType: "All Required",
-      slaHours: 48
-    }
-  ]);
+  const [approvalStages, setApprovalStages] = useState([]);
 
   const [emailTemplates, setEmailTemplates] = useState([
-    { event: "Approval Request", template: "TMPL001", recipients: ["Approver"], ccList: "", active: true },
-    { event: "Approved", template: "TMPL002", recipients: ["Initiator"], ccList: "", active: true },
-    { event: "Rejected", template: "TMPL003", recipients: ["Initiator", "Manager"], ccList: "", active: true },
-    { event: "Escalated", template: "TMPL004", recipients: ["Manager", "Next Approver"], ccList: "", active: true },
-    { event: "Reminder", template: "TMPL005", recipients: ["Approver"], ccList: "", active: true }
+    { event: "Approval Request", template: "", recipients: ["Approver"], ccList: "", active: true },
+    { event: "Approved", template: "", recipients: ["Initiator"], ccList: "", active: true },
+    { event: "Rejected", template: "", recipients: ["Initiator", "Manager"], ccList: "", active: true },
+    { event: "Escalated", template: "", recipients: ["Manager", "Next Approver"], ccList: "", active: true },
+    { event: "Reminder", template: "", recipients: ["Approver"], ccList: "", active: true }
   ]);
 
   const appliesToOptions = [
@@ -83,12 +90,6 @@ const ApprovalWorkflowMaster = () => {
     { label: "Adjustment", value: "Adjustment" }
   ];
 
-  const workflowPatternOptions = [
-    { label: "Sequential", value: "Sequential" },
-    { label: "Parallel", value: "Parallel" },
-    { label: "Hierarchical", value: "Hierarchical" },
-    { label: "Matrix", value: "Matrix" }
-  ];
 
   const approvalTypeOptions = [
     { label: "Any One", value: "Any One" },
@@ -97,13 +98,6 @@ const ApprovalWorkflowMaster = () => {
     { label: "Two of Three", value: "Two of Three" }
   ];
 
-  const roleOptions = [
-    { label: "User", value: "User" },
-    { label: "Supervisor", value: "Supervisor" },
-    { label: "Manager", value: "Manager" },
-    { label: "Finance Head", value: "Finance Head" },
-    { label: "CFO", value: "CFO" }
-  ];
 
   const eventOptions = [
     { label: "Approval Request", value: "Approval Request" },
@@ -131,38 +125,25 @@ const ApprovalWorkflowMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        // Load from mock data
-        const workflowData = approvalWorkflowData.workflows.find(w => w.id === data.id) || data;
-        setFormData({
-          workflowCode: workflowData.code || "AWF-001",
-          workflowName: workflowData.name || "Standard Approval Matrix",
-          isActive: workflowData.status === "Active",
-          appliesTo: ["Settlement", "Electronic Transfer"],
-          workflowPattern: workflowData.type || "Sequential",
-          enableEscalation: true,
-          escalationHours: 48,
-          maxEscalationLevels: 2,
-          enableReminders: true,
-          firstReminder: 24,
-          reminderFrequency: 12,
-          allowDelegation: workflowData.delegationAllowed || true,
-          allowPermanent: false,
-          maxDelegationDays: 30,
-          requireDelegationApproval: false
-        });
-
-        // Load levels from mock data
-        if (workflowData.levels) {
-          const stages = workflowData.levels.map(level => ({
-            stageName: `Level ${level.level} Approval`,
-            approverRole: level.role,
-            minAmount: level.minAmount,
-            maxAmount: level.maxAmount,
-            approvalType: level.requiredApprovals > 1 ? "All Required" : "Any One",
-            slaHours: parseInt(level.sla) || 24
-          }));
-          setApprovalStages(stages);
-        }
+        setFormData((prev) => ({
+          ...prev,
+          workflowPattern: data.type || prev.workflowPattern,
+          appliesTo: data.appliesTo || prev.appliesTo,
+          allowDelegation: data.delegationAllowed ?? prev.allowDelegation,
+          ...(data.form || {}),
+          workflowCode: data.code,
+          workflowName: data.name,
+          isActive: data.status === true || data.status === "Active",
+        }));
+        if (data.form?.emailTemplates) setEmailTemplates(data.form.emailTemplates);
+        setApprovalStages(data.form?.approvalStages || (data.levels || []).map((level) => ({
+          stageName: `Level ${level.level} Approval`,
+          approverRole: level.role,
+          minAmount: level.minAmount,
+          maxAmount: level.maxAmount,
+          approvalType: level.requiredApprovals > 1 ? "All Required" : "Any One",
+          slaHours: parseInt(level.sla, 10) || 24
+        })));
       }
     } else {
       setFormData(prev => ({
@@ -179,50 +160,30 @@ const ApprovalWorkflowMaster = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-
-    try {
-      const workflowData = {
-        ...formData,
-        approvalStages,
-        emailTemplates,
-        status: formData.isActive ? "Active" : "Inactive"
-      };
-
-      let result;
-      if (mode === "edit") {
-        result = await mockCrudOperations.update("approval-workflow", data.id, workflowData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Approval workflow updated successfully",
-          life: 3000
-        });
-      } else {
-        result = await mockCrudOperations.create("approval-workflow", workflowData);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Approval workflow created successfully",
-          life: 3000
-        });
+    await saveAndReturn({
+      type: "remittance-approval-workflow",
+      id: data?.id,
+      toast,
+      navigate,
+      record: {
+        code: formData.workflowCode,
+        name: formData.workflowName,
+        isActive: formData.isActive,
+        type: formData.workflowPattern,
+        appliesTo: formData.appliesTo,
+        delegationAllowed: formData.allowDelegation,
+        levels: approvalStages.map((stage, i) => ({
+          level: i + 1,
+          role: stage.approverRole,
+          minAmount: stage.minAmount,
+          maxAmount: stage.maxAmount,
+          sla: `${stage.slaHours} hours`,
+          requiredApprovals: stage.approvalType === "All Required" ? 2 : 1
+        })),
+        form: { ...formData, approvalStages, emailTemplates }
       }
-
-      console.log("Approval workflow operation result:", result);
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1000);
-    } catch (error) {
-      console.error("Save error:", error);
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save approval workflow",
-        life: 3000
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    });
+    setIsLoading(false);
   };
 
   const handleCancel = () => {

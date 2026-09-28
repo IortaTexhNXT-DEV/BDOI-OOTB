@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,7 +12,10 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
+import { Toast } from "primereact/toast";
+import { apiRequest } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { MasterLookup, saveAndReturn, useMasterOptions } from "../masterRecord";
 import { Card } from "primereact/card";
 import "./index.scss";
 
@@ -22,6 +25,17 @@ const ReconciliationMaster = () => {
   const location = useLocation();
   const { mode } = useParams();
   const { data } = location.state || {};
+  const toast = useRef(null);
+  const TYPE = "remittance-reconciliation-rule";
+  const [roleOptions, setRoleOptions] = useState([]);
+  const exceptionTypes = useMasterOptions("remittance-exception", toast);
+  const exceptionTypeOptions = exceptionTypes.map((o) => ({ label: o.name, value: o.name }));
+
+  useEffect(() => {
+    apiRequest("GET", "/roles")
+      .then((res) => setRoleOptions((res.data || []).map((r) => ({ label: r.name, value: r.name }))))
+      .catch((error) => showError(toast, error));
+  }, []);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -43,17 +57,7 @@ const ReconciliationMaster = () => {
     exceptionRules: []
   });
 
-  const [exceptionRules, setExceptionRules] = useState([
-    { id: 1, exceptionType: "Amount Mismatch", condition: ">5%", action: "Flag for Review", notifyRole: "Supervisor" },
-    { id: 2, exceptionType: "Missing Policy", condition: "Not Found", action: "Hold", notifyRole: "Manager" },
-  ]);
-
-  const exceptionTypeOptions = [
-    { label: "Amount Mismatch", value: "Amount Mismatch" },
-    { label: "Missing Policy", value: "Missing Policy" },
-    { label: "Duplicate Entry", value: "Duplicate Entry" },
-    { label: "Date Mismatch", value: "Date Mismatch" },
-  ];
+  const [exceptionRules, setExceptionRules] = useState([]);
 
   const actionOptions = [
     { label: "Auto-Resolve", value: "Auto-Resolve" },
@@ -62,12 +66,6 @@ const ReconciliationMaster = () => {
     { label: "Hold", value: "Hold" },
   ];
 
-  const roleOptions = [
-    { label: "User", value: "User" },
-    { label: "Supervisor", value: "Supervisor" },
-    { label: "Manager", value: "Manager" },
-    { label: "Admin", value: "Admin" },
-  ];
 
   const items = [
     { label: "Remittance Master", url: "/master/finance/remittance" },
@@ -79,23 +77,23 @@ const ReconciliationMaster = () => {
   useEffect(() => {
     if (mode === "edit" || mode === "view") {
       if (data) {
-        setFormData({
-          ruleCode: data.code || "REC-0001",
-          ruleName: data.name || "Standard Reconciliation Rule",
-          isActive: true,
-          matchByPolicy: true,
-          matchByAmount: true,
-          matchByDate: true,
-          matchByReference: false,
-          amountTolerance: 2.5,
-          dateTolerance: 5,
-          enableAutoMatch: true,
-          confidenceLevel: 90,
-          suspenseAccount: "GL-4001",
-          clearingAccount: "GL-4002",
-          differenceAccount: "GL-4003",
-          writeOffAccount: "GL-4004",
-        });
+        const criteria = data.matchingCriteria || [];
+        const byField = (name) => criteria.find((c) => c.field === name);
+        setFormData((prev) => ({
+          ...prev,
+          matchByPolicy: Boolean(byField("Policy Number")),
+          matchByAmount: Boolean(byField("Premium Amount")),
+          matchByDate: Boolean(byField("Transaction Date")),
+          matchByReference: Boolean(byField("Reference")),
+          amountTolerance: byField("Premium Amount")?.tolerance ?? prev.amountTolerance,
+          dateTolerance: byField("Transaction Date")?.rangeDays ?? prev.dateTolerance,
+          confidenceLevel: data.autoMatchThreshold ?? prev.confidenceLevel,
+          ...(data.form || {}),
+          ruleCode: data.code,
+          ruleName: data.name,
+          isActive: data.status === true || data.status === "Active",
+        }));
+        setExceptionRules(data.form?.exceptionRules || []);
       }
     } else {
       setFormData(prev => ({
@@ -117,10 +115,27 @@ const ReconciliationMaster = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving reconciliation rule:", formData);
-    navigate("/master/finance/remittance");
-  };
+  const matchingCriteria = () => [
+    formData.matchByPolicy && { field: "Policy Number", priority: 1, matchType: "Exact" },
+    formData.matchByAmount && { field: "Premium Amount", priority: 2, matchType: "Within Tolerance", tolerance: formData.amountTolerance },
+    formData.matchByDate && { field: "Transaction Date", priority: 3, matchType: "Within Range", rangeDays: formData.dateTolerance },
+    formData.matchByReference && { field: "Reference", priority: 4, matchType: "Exact" }
+  ].filter(Boolean);
+
+  const handleSave = () => saveAndReturn({
+    type: TYPE,
+    id: data?.id,
+    toast,
+    navigate,
+    record: {
+      code: formData.ruleCode,
+      name: formData.ruleName,
+      isActive: formData.isActive,
+      autoMatchThreshold: formData.confidenceLevel,
+      matchingCriteria: matchingCriteria(),
+      form: { ...formData, exceptionRules }
+    }
+  });
 
   const handleCancel = () => {
     navigate("/master/finance/remittance");
@@ -191,6 +206,7 @@ const ReconciliationMaster = () => {
         <BreadCrumb model={items} home={home} />
       </div>
 
+      <Toast ref={toast} />
       <Card className="main-card">
         <div className="card-header">
           <h3>Remittance Reconciliation Master</h3>
@@ -398,72 +414,48 @@ const ReconciliationMaster = () => {
               <div className="form-grid two-column">
                 <div className="form-field">
                   <label htmlFor="suspenseAccount">Suspense Account *</label>
-                  <div className="input-group">
-                    <InputText
-                      id="suspenseAccount"
-                      value={formData.suspenseAccount}
-                      onChange={(e) => handleInputChange('suspenseAccount', e.target.value)}
-                      disabled={mode === "view"}
-                      className="w-full"
-                    />
-                    <Button
-                      icon="pi pi-search"
-                      className="p-button-secondary"
-                      disabled={mode === "view"}
-                    />
-                  </div>
+                  <MasterLookup
+                    type="main-account"
+                    value={formData.suspenseAccount}
+                    onChange={(v) => handleInputChange("suspenseAccount", v)}
+                    disabled={mode === "view"}
+                    toast={toast}
+                    className="w-full"
+                  />
                 </div>
                 <div className="form-field">
                   <label htmlFor="clearingAccount">Clearing Account *</label>
-                  <div className="input-group">
-                    <InputText
-                      id="clearingAccount"
-                      value={formData.clearingAccount}
-                      onChange={(e) => handleInputChange('clearingAccount', e.target.value)}
-                      disabled={mode === "view"}
-                      className="w-full"
-                    />
-                    <Button
-                      icon="pi pi-search"
-                      className="p-button-secondary"
-                      disabled={mode === "view"}
-                    />
-                  </div>
+                  <MasterLookup
+                    type="main-account"
+                    value={formData.clearingAccount}
+                    onChange={(v) => handleInputChange("clearingAccount", v)}
+                    disabled={mode === "view"}
+                    toast={toast}
+                    className="w-full"
+                  />
                 </div>
                 <div className="form-field">
                   <label htmlFor="differenceAccount">Difference Account *</label>
-                  <div className="input-group">
-                    <InputText
-                      id="differenceAccount"
-                      value={formData.differenceAccount}
-                      onChange={(e) => handleInputChange('differenceAccount', e.target.value)}
-                      disabled={mode === "view"}
-                      className="w-full"
-                    />
-                    <Button
-                      icon="pi pi-search"
-                      className="p-button-secondary"
-                      disabled={mode === "view"}
-                    />
-                  </div>
+                  <MasterLookup
+                    type="main-account"
+                    value={formData.differenceAccount}
+                    onChange={(v) => handleInputChange("differenceAccount", v)}
+                    disabled={mode === "view"}
+                    toast={toast}
+                    className="w-full"
+                  />
                   <small className="help-text">For unmatched differences</small>
                 </div>
                 <div className="form-field">
                   <label htmlFor="writeOffAccount">Write-off Account *</label>
-                  <div className="input-group">
-                    <InputText
-                      id="writeOffAccount"
-                      value={formData.writeOffAccount}
-                      onChange={(e) => handleInputChange('writeOffAccount', e.target.value)}
-                      disabled={mode === "view"}
-                      className="w-full"
-                    />
-                    <Button
-                      icon="pi pi-search"
-                      className="p-button-secondary"
-                      disabled={mode === "view"}
-                    />
-                  </div>
+                  <MasterLookup
+                    type="main-account"
+                    value={formData.writeOffAccount}
+                    onChange={(v) => handleInputChange("writeOffAccount", v)}
+                    disabled={mode === "view"}
+                    toast={toast}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
