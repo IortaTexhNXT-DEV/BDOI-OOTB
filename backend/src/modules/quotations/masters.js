@@ -64,6 +64,12 @@ for (const [kind, path] of [['bi', '/biCoverage/get-bi-coverage'], ['pd', '/pdCo
   });
 }
 define({
+  method: 'GET', path: '/master/account-codes', summary: 'Account codes for a quote: active referrers (agents, sub-agents, external) as dropdown options', screen: SCREEN, middleware: canRead,
+  response: { success: true, data: [{ id: 'ref-jdelacruz', code: 'ref-jdelacruz', label: 'Juan Dela Cruz (Agent)', value: 'ref-jdelacruz', type: 'Agent' }] },
+  handler: async (_req, res) => ok(res, await many(`SELECT id, id AS code, name || ' (' || referrer_type || ')' AS label, id AS value, referrer_type AS type
+    FROM commission_referrers WHERE lower(status) = 'active' ORDER BY name`)),
+});
+define({
   method: 'GET', path: '/master/signatory/get-all-signatory', summary: 'Authorised signatories', screen: `${SCREEN} > Order summary`, middleware: canRead,
   response: { success: true, data: [{ id: 1, name: 'Maria Regina Cruz', designation: 'President & CEO' }] },
   handler: async (_req, res) => ok(res, await many("SELECT id, name, designation, signature_key AS \"signatureKey\" FROM signatories WHERE status = 'active' ORDER BY name")),

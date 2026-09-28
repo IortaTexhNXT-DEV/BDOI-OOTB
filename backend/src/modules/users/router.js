@@ -26,9 +26,11 @@ const userRow = (u) => ({
   ...publicUser(u), firstName: u.first_name, lastName: u.last_name, phone: u.phone, employeeCode: u.employee_code,
   branchCode: u.branch_code, department: u.department, designation: u.designation, reportingTo: u.reporting_to,
   mustChangePassword: u.must_change_password, passwordChangedAt: u.password_changed_at, createdAt: u.created_at, updatedAt: u.updated_at,
+  ...(u.role_names ? { roleNames: u.role_names } : {}),
 });
 const listSql = `SELECT u.*,
   COALESCE((SELECT array_agg(r.code ORDER BY r.code) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS roles,
+  COALESCE((SELECT array_agg(r.name ORDER BY r.code) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS role_names,
   '{}'::text[] AS permissions FROM users u`;
 
 const userSchema = z.object({
@@ -49,7 +51,7 @@ async function setRoles(client, userId, codes) {
 define({
   method: 'GET', path: '/', summary: 'List users (search, role, status, paging)', screen: 'Master > User Management > User', middleware: viewer,
   query: { search: 'juan', role: 'sales', status: 'active', page: 1, perPage: 10 },
-  response: { success: true, data: [{ userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['agent'], status: 'active' }], total: 1, page: 1, perPage: 10 },
+  response: { success: true, data: [{ userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['agent'], roleNames: ['Agent / Referrer'], status: 'active' }], total: 1, page: 1, perPage: 10 },
   handler: async (req, res) => {
     const pg = paging(req.query);
     const { search, role, status } = req.query;

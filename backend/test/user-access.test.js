@@ -15,8 +15,13 @@ afterAll(async () => { await pool.end(); });
 
 describe('User Access Administrator', () => {
   it('lists, creates and locks users, and reads the audit trail', async () => {
-    expect((await uaa('get', '/users')).status).toBe(200);
-    const c = await uaa('post', '/users').send({ username: 'new.sales', password: 'Technxt@1', displayName: 'New Sales', roles: ['sales'] });
+    const list = await uaa('get', '/users?search=uaa.one');
+    expect(list.status).toBe(200);
+    const me = list.body.data.find((u) => u.username === 'uaa.one');
+    expect(me.roles).toContain('user-access-admin');
+    expect(me.roleNames.length).toBe(1);
+    expect(me.roleNames[0]).not.toBe('user-access-admin');
+    const c =await uaa('post', '/users').send({ username: 'new.sales', password: 'Technxt@1', displayName: 'New Sales', roles: ['sales'] });
     expect(c.status).toBe(201);
     expect((await uaa('patch', `/users/${c.body.data.userId}/status`).send({ status: 'locked' })).status).toBe(200);
     expect((await uaa('get', '/settings/audit?entity=user')).status).toBe(200);

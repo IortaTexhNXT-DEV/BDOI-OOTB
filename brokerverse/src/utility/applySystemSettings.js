@@ -2,6 +2,9 @@ import i18n from "../i18n";
 import { setDisplayCurrency } from "./currencyConverter";
 import { DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
 import { setActiveDefaultCurrency } from "./currencyOptions";
+import { setDateFormat } from "./dateFormat";
+import { setPhoneConfig } from "./phoneFormat";
+import { setQuoteOptions } from "./quoteOptions";
 
 /**
  * Apply CSS theme variables from system settings.
@@ -61,6 +64,9 @@ export function applySystemSettings(settings = {}, options = {}) {
   const merged = { ...DEFAULT_SYSTEM_SETTINGS, ...settings };
   setDisplayCurrency(merged.displayCurrency);
   setActiveDefaultCurrency(merged.displayCurrency);
+  setDateFormat(merged.dateFormat);
+  setPhoneConfig(merged);
+  setQuoteOptions(merged);
   applyThemeColors(merged.primaryColor, merged.secondaryColor);
   applyFavicon(merged.faviconUrl);
   applyAppTitle(merged.appTitle, options);

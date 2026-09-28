@@ -37,6 +37,14 @@
         transition: background-color 0.2s, color 0.2s, border-color 0.2s,
           box-shadow 0.2s;
         border-radius: 10px !important;
+        // Keep the view / edit icons at their normal size in a narrow Action column
+        min-width: 2.5rem;
+        flex-shrink: 0;
+        svg {
+          width: 20px;
+          height: 20px;
+          flex-shrink: 0;
+        }
       }
       .p-button:focus {
         box-shadow: none !important;

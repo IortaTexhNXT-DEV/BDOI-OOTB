@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Calendar } from "primereact/calendar";
 import "./index.scss";
 import LabelWrapper from "../LabelWrapper";
+import { calendarDateFormat } from "../../utility/dateFormat";
 
 const DatePicker = ({
   id,
@@ -40,7 +41,7 @@ const DatePicker = ({
           value={calendarDate ? date : ""}
           onChange={handleChange}
           className={className}
-          dateFormat={dateFormat}
+          dateFormat={dateFormat || calendarDateFormat()}
           numberOfMonths={numberOfMonths}
           minDate={mindate}
           maxDate={maxdate}

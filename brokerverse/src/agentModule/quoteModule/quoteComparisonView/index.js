@@ -9,6 +9,7 @@ import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate, useLocation } from "react-router-dom";
 import quotationService from "../../../services/quotationService";
+import { vehicleColourLabel } from "../../../utility/quoteOptions";
 
 const QuoteDetailView = () => {
   const { t } = useTranslation();
@@ -376,7 +377,7 @@ const QuoteDetailView = () => {
 
           <div className="quote_details">
             <label className="insurance_text">Vehicle Color</label>
-            <label className="alpha_text">{quotation1.insuranceVehicleDetails?.vehicleColor || 'N/A'}</label>
+            <label className="alpha_text">{vehicleColourLabel(quotation1.insuranceVehicleDetails?.vehicleColor) || 'N/A'}</label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("agent.seatingCapacity")}</label>
@@ -406,7 +407,7 @@ const QuoteDetailView = () => {
 
           <div className="quote_details">
             <label className="insurance_text">Vehicle Color</label>
-            <label className="alpha_text">{quotation2.insuranceVehicleDetails?.vehicleColor || 'N/A'}</label>
+            <label className="alpha_text">{vehicleColourLabel(quotation2.insuranceVehicleDetails?.vehicleColor) || 'N/A'}</label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("agent.seatingCapacity")}</label>

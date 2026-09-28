@@ -5,6 +5,7 @@ import {
 } from "../../../redux/actionTypes";
 import quotationService from "../../../services/quotationService";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 
 export const quotationListDataMiddleWare = createAsyncThunk(
   QUOTATION_LIST_DATA,
@@ -41,17 +42,7 @@ export const quotationListDataMiddleWare = createAsyncThunk(
               quotation.insurancePolicyType || quotation.productType || "MOTOR",
             GrossPremium: formatCurrency(quotation.grossPremium),
             GrossPremiumValue: parseFloat(quotation.grossPremium || 0), // For sorting
-            Date: quotation.createdAt
-              ? new Date(quotation.createdAt).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })
-              : new Date().toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                }),
+            Date: formatConfiguredDate(quotation.createdAt || new Date()),
             Status: quotation.quotationStatus || quotation.status || "Draft",
             rawData: quotation, // Store full quotation data for navigation
             Actions: null, // Will be rendered by the component

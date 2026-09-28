@@ -1,5 +1,5 @@
 import { InputText } from "primereact/inputtext";
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import "./index.scss";
 
 const InputTextField = ({
@@ -8,9 +8,13 @@ const InputTextField = ({
   label,
   disabled,
   error,
+  hint,
   ...rest
 }) => {
   const [focused, setFocused] = useState(false);
+  const generatedId = useId();
+  const fieldId = rest.id || rest.inputId || `input-${generatedId.replace(/:/g, "")}`;
+  const { inputId: _inputId, ...inputProps } = rest;
 
   const handleFocus = () => {
     setFocused(true);
@@ -37,14 +41,25 @@ const InputTextField = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         disabled={disabled}
-        {...rest}
+        aria-describedby={hint ? `${fieldId}-hint` : undefined}
+        {...inputProps}
+        id={fieldId}
       />
       <label
-        htmlFor="input"
+        htmlFor={fieldId}
         className={`label ${focused || value !== "" ? "focused" : ""}`}
       >
         {label}
       </label>
+      {hint && (
+        <div
+          id={`${fieldId}-hint`}
+          className="input__hint"
+          style={{ color: "#6c737f", fontSize: "12px", marginTop: "4px" }}
+        >
+          {hint}
+        </div>
+      )}
       {error && (
         <div
           className="formik__error"

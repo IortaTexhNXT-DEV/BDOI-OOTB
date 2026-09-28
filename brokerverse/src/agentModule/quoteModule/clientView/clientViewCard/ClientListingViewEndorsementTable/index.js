@@ -13,6 +13,7 @@ import "../../../clientView/index.scss";
 import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
 import endorsementService from "../../../../../services/endorsementService";
 import { Skeleton } from "primereact/skeleton";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -157,18 +158,7 @@ const LeadListingAllTable = ({ clientId }) => {
     setSearch(value);
   };
 
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    try {
-      return new Date(value).toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      return value;
-    }
-  };
+  const formatDate = (value) => formatConfiguredDate(value, { empty: "N/A" });
 
   const handleView = (rowData) => {
     const endorsement = normalizeEndorsement(rowData);

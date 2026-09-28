@@ -56,6 +56,18 @@
       color: #fff;
       // padding-top: 16px;
       height: 2.75rem;
+      // "Create Lead" label centred vertically on the same line as its icon
+      display: flex;
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1;
+    }
+
+    .p-dropdown .p-dropdown-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .p-dropdown .p-dropdown-trigger {

@@ -986,6 +986,29 @@ class QuotationService {
     return this.request("/masters/insurance-company/options");
   }
 
+  /** Vehicle master cascade: brands, the models of a brand, the variants of a model (id or name). */
+  getVehicleBrands() {
+    return this.request("/master/vehicle/get-brands");
+  }
+
+  getVehicleModels(brand) {
+    return this.request(`/master/vehicle/get-models?brand=${encodeURIComponent(brand)}`);
+  }
+
+  getVehicleVariants(model) {
+    return this.request(`/master/vehicle/get-variants?model=${encodeURIComponent(model)}`);
+  }
+
+  /** Policy types of a product (id or code, e.g. MOTOR) from the policy type master. */
+  getPolicyTypes(productId) {
+    return this.request(`/master/policyType/policy-type?productId=${encodeURIComponent(productId)}`);
+  }
+
+  /** Account codes: active referrers (agents, sub-agents, external) as { label, value }. */
+  getAccountCodes() {
+    return this.request("/master/account-codes");
+  }
+
   /** Tax rates (decimals) from settings: { valueAddedTax, documentaryStampTax, localGovernmentTax }. */
   async getTaxRates() {
     const rows = await this.request("/settings?group=tax");

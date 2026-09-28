@@ -1,5 +1,5 @@
 import { Dropdown } from "primereact/dropdown";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useId, useMemo, useState } from "react";
 import "./index.scss";
 import SvgDownArrow from "../../../assets/agentIcon/SvgDownArrow";
 
@@ -57,6 +57,7 @@ const areDropdownPropsEqual = (prevProps, nextProps) => {
     prevProps.placeholder === nextProps.placeholder &&
     prevProps.optionLabel === nextProps.optionLabel &&
     prevProps.optionValue === nextProps.optionValue &&
+    prevProps.inputId === nextProps.inputId &&
     prevProps.onChange === nextProps.onChange &&
     areOptionsEqual(prevProps.options, nextProps.options)
   );
@@ -71,8 +72,11 @@ const DropdownFieldComponent = ({
   disabled,
   optionLabel,
   optionValue = "value",
+  inputId,
 }) => {
   const [focused, setFocused] = useState(false);
+  const generatedId = useId();
+  const fieldId = inputId || `dropdown-${generatedId.replace(/:/g, "")}`;
 
   const handleFocus = useCallback(() => {
     setFocused(true);
@@ -93,9 +97,11 @@ const DropdownFieldComponent = ({
   const hasValue =
     value !== undefined && value !== null && value !== "" && value !== false;
 
+  // A placeholder occupies the field, so the label sits above it (floated) instead of on top of it.
+  const floatLabel = focused || hasValue || !!placeholder;
   const labelClassName = useMemo(
-    () => `label ${focused || hasValue ? "focused" : ""}`,
-    [focused, hasValue]
+    () => `label ${floatLabel ? "focused" : ""}`,
+    [floatLabel]
   );
 
   return (
@@ -112,8 +118,9 @@ const DropdownFieldComponent = ({
         optionLabel={optionLabel}
         optionValue={optionValue}
         placeholder={placeholder}
+        inputId={fieldId}
       />
-      <label htmlFor="dropdown" className={labelClassName}>
+      <label htmlFor={fieldId} className={labelClassName}>
         {label}
       </label>
     </div>
