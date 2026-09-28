@@ -15,7 +15,7 @@ import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
-import { getEmployeEditMiddleWare, getEmployeViewMiddleWare, getSearchEmployeeMiddleware, getEmployeeListMiddleware } from "../store/employeeMiddleware";
+import { getEmployeEditMiddleWare, getSearchEmployeeMiddleware, getEmployeeListMiddleware } from "../store/employeeMiddleware";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 

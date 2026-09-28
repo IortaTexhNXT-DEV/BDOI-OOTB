@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -15,8 +15,9 @@ import CustomToast from "../../../../components/Toast";
 import TransactionCodeMasterViewTable from "./TransactionCodeMasterViewTable";
 import NavBar from "../../../../components/NavBar";
 import { useDispatch, useSelector } from "react-redux";
-import { postAddTransaction } from "../store/transactionCodeMasterMiddleware";
+import { getUserGroupAccess, postAddTransaction } from "../store/transactionCodeMasterMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import useTransactionCodeOptions from "../useTransactionCodeOptions";
 
 const initialValue = {
   TransactionCode: "",
@@ -34,27 +35,6 @@ const initialValue = {
   // DepartmentCode: ""
 };
 
-const BankAccountCode = [
-  { label: "1101001", value: "1101001" },
-  { label: "1101002", value: "1101002" },
-];
-const MainAccountCode = [
-  { label: "1101001", value: "1101001" },
-  { label: "1101002", value: "1101002" },
-];
-const BranchCode = [
-  { label: "101", value: "101" },
-  { label: "102", value: "102" },
-];
-const DepartmentCode = [
-  { label: "1101002", value: "1101002" },
-  { label: "1101003", value: "1101003" },
-];
-const SubAccountCode = [
-  { label: "1101001", value: "1101001" },
-  { label: "1101002", value: "1101002" },
-];
-
 const TransactionCodeMasterView = () => {
   const { t } = useTranslation();
   const { TransactioncodeList, loading } = useSelector(({ transactionCodeMasterReducer }) => {
@@ -68,6 +48,12 @@ const TransactionCodeMasterView = () => {
   });
   const toastRef = useRef(null);
   const navigate = useNavigate();
+  const codeOptions = useTransactionCodeOptions();
+  const BankAccountCode = codeOptions.basis;
+  const MainAccountCode = codeOptions.mainAccounts;
+  const SubAccountCode = codeOptions.subAccounts;
+  const BranchCode = codeOptions.branches;
+  const DepartmentCode = codeOptions.departments;
   const items = [
     {
       label: "Transaction code",
@@ -86,20 +72,20 @@ const TransactionCodeMasterView = () => {
   };
 
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    console.log(values, "values");
-    const valueWithId = {
-      ...values,
-      id: TransactioncodeList?.length + 1,
-    };
-    dispatch(postAddTransaction(valueWithId));
-    toastRef.current.showToast();
-    // {
-    setTimeout(() => {
-      navigate("/master/finance/transactioncode");
-    }, 3000);
+  useEffect(() => {
+    dispatch(getUserGroupAccess([]));
+  }, [dispatch]);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddTransaction(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate("/master/finance/transactioncode");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-
   const customValidation = (values) => {
     const errors = {};
 
@@ -252,7 +238,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.TransactionBasis}
                 options={BankAccountCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("TransactionBasis", e.value);
                   // handleAccountcode(e.value);
                 }}
@@ -277,7 +262,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.MainAccountCode}
                 options={MainAccountCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("MainAccountCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -323,7 +307,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.SubAccountCode}
                 options={SubAccountCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("SubAccountCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -368,7 +351,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.BranchCode}
                 options={BranchCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("BranchCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -411,7 +393,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.DepartmentCode}
                 options={DepartmentCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("DepartmentCode", e.value);
                   // handleAccountcode(e.value.);
                 }}

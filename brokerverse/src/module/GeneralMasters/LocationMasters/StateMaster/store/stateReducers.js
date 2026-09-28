@@ -39,7 +39,7 @@ const stateReducer = createSlice({
     builder.addCase(getStateListByIdMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.getStateListById = {};
+      state.getStateListById = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 

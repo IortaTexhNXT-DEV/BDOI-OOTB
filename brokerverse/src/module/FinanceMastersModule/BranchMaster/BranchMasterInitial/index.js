@@ -11,11 +11,12 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import ToggleButton from "../../../../components/ToggleButton";
 // import  {data} from "../BranchMasterInitial/mock"
 import SvgArrow from "../../../../assets/icons/SvgArrow";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { useMasterRecords } from "../../../GeneralMasters/common/useMasterOptions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -64,6 +65,14 @@ const Index = () => {
   const home = { label: t("financeMasters.master") };
 
   const navigate = useNavigate();
+  const records = useMasterRecords("branch", (row) => ({
+    ...row,
+    branchCode: row.BranchCode,
+    companyName: row.CompanyName,
+    manager: row.Description,
+    country: row.Country,
+    email: row.EmailID,
+  }));
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(5);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -126,7 +135,7 @@ const Index = () => {
         <div className="branch_text">Branch List</div>
         <div className="card">
           <DataTable
-            // value={data}
+            value={records}
             tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
             paginator
             rows={5}
@@ -171,7 +180,7 @@ const Index = () => {
               header="Status"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="branch" record={columnData} />}
             ></Column>
             <Column
               header="View"

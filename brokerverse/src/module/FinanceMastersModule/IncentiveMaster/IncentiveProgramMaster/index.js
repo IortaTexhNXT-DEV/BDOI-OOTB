@@ -26,7 +26,8 @@ import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
 import ToggleButton from "../../../../components/ToggleButton";
 import InputField from "../../../../components/InputField";
-import { incentiveMockData, incentiveCrudOperations } from "../../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../../services/incentiveService";
+import { isoDate, loadSettings, showError, showSuccess } from "../../../Remittance/shared";
 import "./index.scss";
 
 const IncentiveProgramMaster = () => {
@@ -37,7 +38,8 @@ const IncentiveProgramMaster = () => {
   const toast = useRef(null);
 
   // State management
-  const [programs, setPrograms] = useState(incentiveMockData.programs);
+  const [programs, setPrograms] = useState([]);
+  const [config, setConfig] = useState({ types: [], frequencies: [], metrics: [], currencies: [], defaultCurrency: "" });
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
@@ -58,11 +60,37 @@ const IncentiveProgramMaster = () => {
     targetMetric: "",
     baseTarget: 0,
     stretchTarget: 0,
-    Currency: "PHP",
+    Currency: "",
     calculationFrequency: "",
     status: "Active",
     structure: []
   });
+
+  const loadPrograms = async () => {
+    setLoading(true);
+    try {
+      setPrograms(await incentiveService.listPrograms());
+    } catch (error) {
+      showError(toast, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPrograms();
+    loadSettings()
+      .then((s) => setConfig({
+        types: s["incentive.program_types"] || [],
+        frequencies: s["incentive.calculation_frequencies"] || [],
+        metrics: Object.keys(s["incentive.metric_map"] || {}),
+        currencies: (s["currency.allowed"] || []).map((c) => c.code),
+        defaultCurrency: s["currency.default"] || ""
+      }))
+      .catch((error) => showError(toast, error));
+  }, []);
+
+  const toOptions = (values) => values.map((v) => ({ label: v, value: v }));
 
   // Options
   const statusOptions = [
@@ -73,18 +101,9 @@ const IncentiveProgramMaster = () => {
     { label: "Inactive", value: "Inactive" }
   ];
 
-  const typeOptions = [
-    { label: "All", value: "All" },
-    { label: "Target Based", value: "Target Based" },
-    { label: "Commission Based", value: "Commission Based" },
-    { label: "Hybrid", value: "Hybrid" }
-  ];
+  const typeOptions = [{ label: "All", value: "All" }, ...toOptions(config.types)];
 
-  const programTypeOptions = [
-    { label: "Target Based", value: "Target Based" },
-    { label: "Commission Based", value: "Commission Based" },
-    { label: "Hybrid", value: "Hybrid" }
-  ];
+  const programTypeOptions = toOptions(config.types);
 
   const applicableToOptions = [
     { label: "Individual Agent", value: "Individual Agent" },
@@ -93,25 +112,11 @@ const IncentiveProgramMaster = () => {
     { label: "Region", value: "Region" }
   ];
 
-  const targetMetricOptions = [
-    { label: "Premium Volume", value: "Premium Volume" },
-    { label: "Policy Count", value: "Policy Count" },
-    { label: "Renewal Rate", value: "Renewal Rate" },
-    { label: "New Business", value: "New Business" }
-  ];
+  const targetMetricOptions = toOptions(config.metrics);
 
-  const frequencyOptions = [
-    { label: "Monthly", value: "Monthly" },
-    { label: "Quarterly", value: "Quarterly" },
-    { label: "Semi-Annual", value: "Semi-Annual" },
-    { label: "Annual", value: "Annual" }
-  ];
+  const frequencyOptions = toOptions(config.frequencies);
 
-  const currencyOptions = [
-    { label: "PHP", value: "PHP" },
-    { label: "THB", value: "THB" },
-    { label: "USD", value: "USD" }
-  ];
+  const currencyOptions = toOptions(config.currencies);
 
   // Breadcrumb items
   const items = [
@@ -146,7 +151,7 @@ const IncentiveProgramMaster = () => {
     const matchesSearch =
       program.programName.toLowerCase().includes(search.toLowerCase()) ||
       program.programCode.toLowerCase().includes(search.toLowerCase()) ||
-      program.description.toLowerCase().includes(search.toLowerCase());
+      String(program.description || "").toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus = selectedStatus === "All" || program.status === selectedStatus;
     const matchesType = selectedType === "All" || program.programType === selectedType;
@@ -166,10 +171,10 @@ const IncentiveProgramMaster = () => {
       applicableTo: [],
       startDate: null,
       endDate: null,
-targetMetric: "",
-    baseTarget: 0,
-    stretchTarget: 0,
-    Currency: "PHP",
+      targetMetric: "",
+      baseTarget: 0,
+      stretchTarget: 0,
+      Currency: config.defaultCurrency,
       calculationFrequency: "",
       status: "Active",
       structure: []
@@ -204,39 +209,22 @@ targetMetric: "",
     try {
       const programData = {
         ...formData,
-        startDate: formData.startDate ? formData.startDate.toISOString().split('T')[0] : null,
-        endDate: formData.endDate ? formData.endDate.toISOString().split('T')[0] : null,
+        startDate: isoDate(formData.startDate) || null,
+        endDate: isoDate(formData.endDate) || null,
       };
 
-      let result;
       if (mode === "add") {
-        result = await incentiveCrudOperations.createProgram(programData);
-        setPrograms([...programs, result.data]);
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Incentive program created successfully",
-          life: 3000
-        });
+        const created = await incentiveService.createProgram(programData);
+        showSuccess(toast, `Incentive program ${created.programCode} created successfully`);
       } else if (mode === "edit") {
-        result = await incentiveCrudOperations.updateProgram(currentProgram.id, programData);
-        setPrograms(programs.map(p => p.id === currentProgram.id ? { ...p, ...result.data } : p));
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Incentive program updated successfully",
-          life: 3000
-        });
+        await incentiveService.updateProgram(currentProgram.id, programData);
+        showSuccess(toast, "Incentive program updated successfully");
       }
 
       setShowDialog(false);
+      await loadPrograms();
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to save incentive program",
-        life: 3000
-      });
+      showError(toast, error, "Failed to save incentive program");
     } finally {
       setLoading(false);
     }
@@ -250,21 +238,11 @@ targetMetric: "",
       accept: async () => {
         setLoading(true);
         try {
-          await incentiveCrudOperations.deleteProgram(rowData.id);
-          setPrograms(programs.filter(p => p.id !== rowData.id));
-          toast.current.show({
-            severity: "success",
-            summary: "Success",
-            detail: "Incentive program deleted successfully",
-            life: 3000
-          });
+          await incentiveService.deleteProgram(rowData.id);
+          showSuccess(toast, "Incentive program deleted successfully");
+          await loadPrograms();
         } catch (error) {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to delete incentive program",
-            life: 3000
-          });
+          showError(toast, error, "Failed to delete incentive program");
         } finally {
           setLoading(false);
         }
@@ -276,23 +254,11 @@ targetMetric: "",
     const newStatus = rowData.status === "Active" ? "Inactive" : "Active";
     setLoading(true);
     try {
-      await incentiveCrudOperations.updateProgram(rowData.id, { status: newStatus });
-      setPrograms(programs.map(p =>
-        p.id === rowData.id ? { ...p, status: newStatus } : p
-      ));
-      toast.current.show({
-        severity: "success",
-        summary: "Success",
-        detail: `Program ${newStatus.toLowerCase()} successfully`,
-        life: 3000
-      });
+      await incentiveService.updateProgram(rowData.id, { status: newStatus });
+      showSuccess(toast, `Program ${newStatus.toLowerCase()} successfully`);
+      await loadPrograms();
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to update program status",
-        life: 3000
-      });
+      showError(toast, error, "Failed to update program status");
     } finally {
       setLoading(false);
     }

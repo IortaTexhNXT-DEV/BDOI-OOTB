@@ -2,91 +2,37 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getRequest } from "../../../../utility/commonServices";
 import { APIROUTES } from "../../../../routes/apiRoutes";
 import { GET_TRANSACTION_CODE_LIST, GET_TRANSACTION_CODE_LIST_SEARCH, POST_STATUS, POST_ADD_TRANSACTION, GET_TRANSACTION_CODE_SETUP, GET_USER_GROUP_ACCESS, POST_ADD_TRANSACTION_CODE_SETUP, POST_ADD_USER_GROUP_ACCESS, PATCH_TRANSACTION_CODE_DETAILS_EDIT, GET_TRANSACTION_CODE_DETAILS_VIEW, GET_PATCH_TRANSACTION_EDIT, GET_PATCH_USER_ACCESS, POST_PATCH_USER_ACCESS } from "../../../../redux/actionTypes";
+import mastersService, { searchText } from "../../../../services/mastersService";
+import masterThunk from "../../../GeneralMasters/common/masterThunk";
+
+const TYPE = "transaction-code";
+
+let nextRowId = 1;
+const withRowId = (row) => ({ ...row, id: row.id ?? `row-${nextRowId++}` });
+
+/** Transaction code record with the user group access rows currently shown in the screen. */
+const withUserGroupAccess = (values, getState) => ({
+  ...values,
+  userGroupAccess: (getState().transactionCodeMasterReducer?.UserGroupAccessList || []).map(
+    ({ UserRole, MinimumTransaction, MaximumTransaction }) => ({ UserRole, MinimumTransaction, MaximumTransaction })
+  ),
+});
 
 
-export const getTransactioncodeListMiddleware = createAsyncThunk(
-    GET_TRANSACTION_CODE_LIST,
-    async (payload, { rejectWithValue }) => {
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
+export const getTransactioncodeListMiddleware = masterThunk(GET_TRANSACTION_CODE_LIST, (params) => mastersService.list(TYPE, params));
+
+
+
+export const getTransactioncodeListsearch = masterThunk(GET_TRANSACTION_CODE_LIST_SEARCH, (query) =>
+  mastersService.list(TYPE, { search: searchText(query) })
 );
 
 
-
-export const getTransactioncodeListsearch = createAsyncThunk(
-    GET_TRANSACTION_CODE_LIST_SEARCH,
-    async (payload, { rejectWithValue, getState }) => {
-        const textSearch = payload;
-        console.log(textSearch, "textSearch")
-        const { transactionCodeMasterReducer } = getState();
-
-        const { TransactioncodeList } = transactionCodeMasterReducer;
-        console.log(TransactioncodeList, "1234")
-
-        try {
-            const searchResults = TransactioncodeList.filter(item => {
-                return item.TransactionName.toLowerCase().includes(textSearch.toLowerCase());
-            });
-            console.log(searchResults, "searchResults")
-            return searchResults;
+export const postStatus = masterThunk(POST_STATUS, ({ id, active }) => mastersService.setStatus(TYPE, id, active));
 
 
-        } catch (error) {
-            return rejectWithValue(error?.response?.data?.error?.message);
-        }
-    },
-);
-
-
-export const postStatus = createAsyncThunk(
-    POST_STATUS,
-    async (payload, { rejectWithValue }) => {
-        try {
-            // const { data } = await postRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
-
-
-export const postAddTransaction = createAsyncThunk(
-    POST_ADD_TRANSACTION,
-    async (payload, { rejectWithValue, getState }) => {
-        console.log(payload, "payload");
-
-        let bodyTableData = {
-
-            id: payload?.id,
-            TransactionCode: payload?.TransactionCode,
-            TransactionName: payload?.TransactionName,
-            TransactionBasis: payload?.TransactionBasis,
-            Description: payload?.Description,
-            MainAccountCode: payload?.MainAccountCode,
-            MainAccountDescription: "MainAccountCode",
-            SubAccountCode: payload?.SubAccountCode,
-            SubAccountDescription: "SubAccountCode",
-            BranchCode: payload?.BranchCode,
-            BranchDescription:"BranchCode",
-            Department: payload?.Department,
-            DepartmentDescription: "DepartmentDescription",
-            DepartmentCode: payload?.DepartmentCode,
-
-        };
-        try {
-            console.log(bodyTableData, "find middleware");
-
-            return bodyTableData;
-        } catch (error) {
-            return rejectWithValue(error?.response?.data?.error?.message);
-        }
-    }
+export const postAddTransaction = masterThunk(POST_ADD_TRANSACTION, (values, { getState }) =>
+  mastersService.create(TYPE, withUserGroupAccess(values, getState))
 );
 
 
@@ -104,24 +50,13 @@ export const getTransactionCodeSetup = createAsyncThunk(
 );
 
 
-export const getUserGroupAccess = createAsyncThunk(
-    GET_USER_GROUP_ACCESS,
-    async (payload, { rejectWithValue }) => {
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const getUserGroupAccess = masterThunk(GET_USER_GROUP_ACCESS, (rows) => (Array.isArray(rows) ? rows : []).map(withRowId));
 
 
 
 export const postAddTransactionCodeSetup = createAsyncThunk(
     POST_ADD_TRANSACTION_CODE_SETUP,
     async (payload, { rejectWithValue, getState }) => {
-        console.log(payload, "payload");
 
         let bodyTableData = {
             AccountingPeriodStart: payload?.AccountingPeriodStart.toLocaleDateString("en-US", {
@@ -140,7 +75,6 @@ export const postAddTransactionCodeSetup = createAsyncThunk(
 
         };
         try {
-            console.log(bodyTableData, "find middleware");
 
             return bodyTableData;
         } catch (error) {
@@ -150,94 +84,27 @@ export const postAddTransactionCodeSetup = createAsyncThunk(
 );
 
 
-export const postAddUserGroupAccess = createAsyncThunk(
-    POST_ADD_USER_GROUP_ACCESS,
-    async (payload, { rejectWithValue, getState }) => {
-        console.log(payload, "payload");
-
-        let bodyTableData = {
-            UserRole: payload?.UserRole,
-            MinimumTransaction: payload?.MinimumTransaction,
-            MaximumTransaction: payload?.MaximumTransaction,
-        };
-        try {
-            console.log(bodyTableData, "find middleware");
-
-            return bodyTableData;
-        } catch (error) {
-            return rejectWithValue(error?.response?.data?.error?.message);
-        }
-    }
+export const postAddUserGroupAccess = masterThunk(POST_ADD_USER_GROUP_ACCESS, (row) =>
+  withRowId({
+    UserRole: row?.UserRole,
+    MinimumTransaction: row?.MinimumTransaction,
+    MaximumTransaction: row?.MaximumTransaction,
+  })
 );
 
 
-export const getTrascationcodeDetailsView = createAsyncThunk(
-    GET_TRANSACTION_CODE_DETAILS_VIEW,
-    async (payload, { rejectWithValue }) => {
-        console.log(payload, "payload")
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const getTrascationcodeDetailsView = masterThunk(GET_TRANSACTION_CODE_DETAILS_VIEW, (row) => mastersService.get(TYPE, row?.id ?? row));
 
 
-export const getpatchTrascationcodeDetailsEdit = createAsyncThunk(
-    GET_PATCH_TRANSACTION_EDIT,
-    async (payload, { rejectWithValue }) => {
-        console.log(payload, "payload")
-        try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return payload;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    },
-);
+export const getpatchTrascationcodeDetailsEdit = masterThunk(GET_PATCH_TRANSACTION_EDIT, (row) => mastersService.get(TYPE, row?.id ?? row));
 
-export const patchTrascationcodeDetailsEdit = createAsyncThunk(
-    PATCH_TRANSACTION_CODE_DETAILS_EDIT,
-    async (payload, { rejectWithValue, getState }) => {
-        console.log(payload, "payload");
-        const newArr = {
-            id: payload?.id,
-            bankBranch: payload?.bankBranch,
-            TransactionCode: payload?.TransactionCode,
-            // TransactionCode: payload?.TransactionCode,
-            TransactionName: payload?.TransactionName,
-            TransactionBasis: payload?.TransactionBasis,
-            BranchCode: payload?.BranchCode,
-            DepartmentCode: payload?.DepartmentCode,
-            MainAccountCode: payload?.MainAccountCode,
-            MainAccountDescription: payload?.MainAccountDescription,
-            SubAccountCode: payload?.SubAccountCode,
-            SubAccountDescription: payload?.SubAccountDescription,
-            BranchDescription: payload?.BranchDescription,
-            DepartmentDescription: payload?.DepartmentDescription,
-            Description: payload?.Description,
-        }
-        // const { transactionCodeMasterReducer } = getState();
-        try {
-            // const { TransactioncodeList } = transactionCodeMasterReducer;
-            // const updatedObject = TransactioncodeList.findIndex(item => item.TransactionCode === payload?.TransactionCode);
-            // console.log(updatedObject, "updatedObject")
-            // let newArr = [...TransactioncodeList]
-
-            // const { data } = await patchRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-            return newArr;
-        } catch (error) {
-            return rejectWithValue(error?.response.data.error.message);
-        }
-    }
+export const patchTrascationcodeDetailsEdit = masterThunk(PATCH_TRANSACTION_CODE_DETAILS_EDIT, (values, { getState }) =>
+  mastersService.update(TYPE, values.id, withUserGroupAccess(values, getState))
 );
 
 export const getUserEditData = createAsyncThunk(
     GET_PATCH_USER_ACCESS,
     async (payload, { rejectWithValue }) => {
-        console.log(payload, "payload")
         try {
             // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
@@ -250,7 +117,6 @@ export const getUserEditData = createAsyncThunk(
 export const patchUserRoleAccess = createAsyncThunk(
     POST_PATCH_USER_ACCESS,
     async (payload, { rejectWithValue }) => {
-        console.log(payload, "payload")
         const data = {
             id: payload?.id,
             UserRole: payload?.UserRole,

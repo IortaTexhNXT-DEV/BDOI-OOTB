@@ -11,7 +11,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { ProductService } from "./mock";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgUpload from "../../../assets/icons/SvgUpload";
@@ -26,8 +25,11 @@ import { useFormik } from "formik";
 import {
   getBankSearchList,
   patchBankDetailEdit,
+  getBankList,
 } from "./store/bankMasterMiddleware";
 import MenuData from "./MenuData";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const BankMaster = () => {
   const { t } = useTranslation();
@@ -37,6 +39,13 @@ const BankMaster = () => {
   const [currentDialog, setDialog] = useState({});
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getBankList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getBankList());
+  }, [dispatch]);
   const navigate = useNavigate();
   const menuitems = [
     { label: t("financeMasters.edit"), command: (rowData) => handleEdit(rowData) },
@@ -47,49 +56,36 @@ const BankMaster = () => {
     },
   ];
 
+  const fillBankForm = (rowData) => {
+    formik.setValues({
+      ...formik.values,
+      id: rowData?.id,
+      bankCode: rowData?.bankCode ?? "",
+      bankName: rowData?.bankName ?? "",
+      bankBranch: rowData?.bankBranch ?? "",
+      ifscCode: rowData?.ifscCode ?? "",
+      addressLine1: rowData?.AddressLine1 ?? "",
+      addressLine2: rowData?.AddressLine2 ?? "",
+      addressLine3: rowData?.AddressLine3 ?? "",
+      city: rowData?.City ?? "",
+      state: rowData?.state ?? "",
+      country: rowData?.Country ?? "",
+      mobile: rowData?.mobile ?? "",
+      fax: rowData?.Fax ?? "",
+      email: rowData?.email ?? "",
+    });
+  };
+
   const handleEdit = (rowData) => {
-    console.log(rowData, "rowData");
     setVisible(true);
     setDialog(rowData);
-    // console.log(currentDialog, "current detail")
-    formik.setFieldValue("id", rowData?.id);
-    formik.setFieldValue("bankCode", rowData?.bankCode);
-    formik.setFieldValue("bankName", rowData?.bankName);
-    formik.setFieldValue("bankBranch", rowData?.bankBranch);
-    formik.setFieldValue("ifscCode", rowData?.ifscCode);
-    formik.setFieldValue("addressLine1", "Sudharshan Building");
-    formik.setFieldValue("addressLine2", "2nd floor,chamiers Road");
-    formik.setFieldValue("addressLine3", "Nanthanam");
-    formik.setFieldValue("city", "MATI");
-    formik.setFieldValue("state", "DON SALVADOR BENEDICTO");
-    formik.setFieldValue("country", "Thailand");
-    formik.setFieldValue("mobile", rowData?.mobile);
-    formik.setFieldValue("fax", rowData?.mobile);
-    formik.setFieldValue("email", rowData?.email);
-    // or any other logic you want to perform
-    // Use the rowData as needed
-    console.log("Edit clicked for row:", rowData);
+    fillBankForm(rowData);
   };
 
   const handleView = (rowData) => {
     setVisibleview(true);
-    setDialog(rowData); // or any other logic you want to perform
-    // Use the rowData as needed
-    formik.setFieldValue("id", rowData?.id);
-    formik.setFieldValue("bankCode", rowData?.bankCode);
-    formik.setFieldValue("bankName", rowData?.bankName);
-    formik.setFieldValue("bankBranch", rowData?.bankBranch);
-    formik.setFieldValue("ifscCode", rowData?.ifscCode);
-    formik.setFieldValue("addressLine1", "Sudharshan Building");
-    formik.setFieldValue("addressLine2", "2nd floor,chamiers Road");
-    formik.setFieldValue("addressLine3", "Nanthanam");
-    formik.setFieldValue("city", "MATI");
-    formik.setFieldValue("state", "DON SALVADOR BENEDICTO");
-    formik.setFieldValue("country", "Thailand");
-    formik.setFieldValue("mobile", rowData?.mobile);
-    formik.setFieldValue("fax", rowData?.mobile);
-    formik.setFieldValue("email", rowData?.email);
-    console.log("View clicked for row:", rowData);
+    setDialog(rowData);
+    fillBankForm(rowData);
   };
 
   const [products, setProducts] = useState([]);
@@ -124,9 +120,7 @@ const BankMaster = () => {
     email: "",
   };
   const validate = (values) => {
-    console.log(values, "ggg");
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.dropdown) {
       errors.dropdown = t("financeMasters.selectAnyOne");
     }
@@ -151,7 +145,6 @@ const BankMaster = () => {
   const handleSubmit = () => {
     const formErrors = validate(formik.values);
     // setErrors(formErrors);
-    console.log(formErrors, "hfgdh");
   };
 
   const formik = useFormik({
@@ -161,17 +154,19 @@ const BankMaster = () => {
   });
   // console.log(formik.values, "asdd")
 
-  const handleUpdate = () => {
-    dispatch(patchBankDetailEdit(formik.values));
-    setVisible(false);
-    console.log(formik.values, "dddd");
-    // formik.values
+  const handleUpdate = async () => {
+    try {
+      await dispatch(patchBankDetailEdit(formik.values)).unwrap();
+      setVisible(false);
+    } catch (error) {
+      statusToast.current?.show({ severity: "error", detail: error });
+    }
   };
   // useEffect(() => {
   //   ProductService.getProductsMini().then(data => setProducts(data));
   // }, []);
 
-  const isEmpty = products.length === 0;
+  const isEmpty = !bankList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -268,6 +263,7 @@ const BankMaster = () => {
 
   return (
     <div className="overall__bankmaster__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("financeMasters.bankMaster")}</label>
@@ -378,7 +374,7 @@ const BankMaster = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="bank" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

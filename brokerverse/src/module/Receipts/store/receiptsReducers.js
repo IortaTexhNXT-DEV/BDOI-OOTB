@@ -17,7 +17,6 @@ const initialState = {
   bulkPrintData: null,
   bulkPrintLoading: false
 };
-let nextId = 3
 const receiptsReducer = createSlice({
   name: "receipts",
   initialState,

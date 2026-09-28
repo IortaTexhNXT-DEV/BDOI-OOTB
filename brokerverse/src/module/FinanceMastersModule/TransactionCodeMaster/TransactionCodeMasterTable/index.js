@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -11,16 +11,18 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
 import SvgEditIcon from "../../../../assets/icons/SvgEdit";
-import ToggleButton from "../../../../components/ToggleButton";
 import { useFormik } from "formik";
 import {
   getTransactioncodeListsearch,
   getTrascationcodeDetailsView,
   getpatchTrascationcodeDetailsEdit,
   patchTrascationcodeDetailsEdit,
+  getTransactioncodeListMiddleware,
 } from "../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import SvgEditicons from "../../../../assets/icons/SvgEditicons";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TransactionCodeMasterTable = () => {
   const { t } = useTranslation();
@@ -34,7 +36,6 @@ const TransactionCodeMasterTable = () => {
         // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
       };
     });
-  console.log(TransactioncodeList, "TransactioncodeList");
   const [products, setProducts] = useState([{ TransactionCode: "100101" }]);
   const [search, setSearch] = useState("");
 
@@ -95,13 +96,6 @@ const TransactionCodeMasterTable = () => {
     );
   };
 
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
   const [selectedRows, setSelectedRows] = useState([]);
 
   const handleView = (rowData) => {
@@ -110,7 +104,6 @@ const TransactionCodeMasterTable = () => {
   };
 
   const handleEdit = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getpatchTrascationcodeDetailsEdit(rowData));
     navigate(`/master/finance/transactioncode/transactioncodeedit`);
   };
@@ -135,8 +128,14 @@ const TransactionCodeMasterTable = () => {
     justifyContent: "center",
   };
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getTransactioncodeListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getTransactioncodeListMiddleware());
+  }, [dispatch]);
   const handleSubmit = (values) => {
-    console.log(values.search, "searchData");
     dispatch(getTransactioncodeListsearch({ textSearch: values.search }));
   };
 
@@ -145,7 +144,6 @@ const TransactionCodeMasterTable = () => {
     onSubmit: handleSubmit,
   });
   const handlecheck = (rowData) => {
-    console.log(rowData, "rowData");
     const selectedIndex = selectedRows.findIndex(
       (row) => row.id === rowData.id
     );
@@ -158,7 +156,6 @@ const TransactionCodeMasterTable = () => {
     }
 
     setSelectedRows(updatedSelectedRows);
-    console.log(updatedSelectedRows, "selected rows");
   };
 
   useEffect(() => {
@@ -169,6 +166,7 @@ const TransactionCodeMasterTable = () => {
 
   return (
     <div className="transactioncode__master__table">
+      <Toast ref={statusToast} />
       <Card className="mt-4">
         <div className="header__search__container grid">
           <form
@@ -264,7 +262,7 @@ const TransactionCodeMasterTable = () => {
               body={(rowData) => rowData.DepartmentCode?.toUpperCase()}
             ></Column>
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="transaction-code" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header="Status"
               headerStyle={{ textAlign: "center", ...headerStyle }}
               className="fieldvalue_container"

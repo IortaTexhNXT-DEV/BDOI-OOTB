@@ -106,3 +106,27 @@ export const useCurrencyCodeOptions = () => {
 
   return options;
 };
+
+/** All records of a master type (active and inactive) mapped with `toRow`, for simple list screens. */
+export const useMasterRecords = (type, toRow = (row) => row) => {
+  const [rows, setRows] = useState([]);
+  const mapRef = useRef(toRow);
+  mapRef.current = toRow;
+
+  useEffect(() => {
+    let cancelled = false;
+    mastersService
+      .list(type)
+      .then((records) => {
+        if (!cancelled) setRows(records.map((record) => mapRef.current(record)));
+      })
+      .catch(() => {
+        if (!cancelled) setRows([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [type]);
+
+  return rows;
+};

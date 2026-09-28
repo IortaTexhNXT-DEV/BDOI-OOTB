@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -13,6 +14,7 @@ import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
+import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
 
 const MiscellaneousAccountSetup = () => {
   const { t } = useTranslation();
@@ -91,13 +93,14 @@ const MiscellaneousAccountSetup = () => {
   const docTypeOptions = [];
   const sectionCodeOptions = [];
   const accrualSourceOptions = [];
-  const companyOptions = [{ label: "Insurance Corporation", value: "001" }];
-  const officeOptions = [{ label: "HEAD OFFICE - MAKATI", value: "HOF" }];
-  const departmentOptions = [{ label: "Motor", value: "10" }];
-  const mainAccountOptions = [
-    { label: "OTHER CHARGES - AUTHENTICATION FEE", value: "2-08-8-03" },
-  ];
-  const subAccountOptions = [];
+  const setupOptions = useAccountSetupOptions();
+  const { save } = useAccountSetup("MISCELLANEOUS", "Miscellaneous Account Setup", setFormData);
+  const toastRef = useRef(null);
+  const companyOptions = setupOptions.companyOptions;
+  const officeOptions = setupOptions.officeOptions;
+  const departmentOptions = setupOptions.departmentOptions;
+  const mainAccountOptions = setupOptions.mainAccountOptions;
+  const subAccountOptions = setupOptions.subAccountOptions;
   const analysisCodeOptions = [];
   const activityCodeOptions = [];
 
@@ -121,9 +124,13 @@ const MiscellaneousAccountSetup = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving miscellaneous account setup:", formData);
-    // Add save logic here
+  const handleSave = async () => {
+    try {
+      await save(formData);
+      toastRef.current.show({ severity: "success", detail: t("financeMasters.saveSuccessfully") });
+    } catch (error) {
+      toastRef.current.show({ severity: "error", detail: error.message });
+    }
   };
 
   const handleDuplicate = () => {
@@ -185,6 +192,7 @@ const MiscellaneousAccountSetup = () => {
 
   return (
     <div className="miscellaneous-account-setup">
+      <Toast ref={toastRef} />
       <div className="grid m-0">
         <div className="col-12 md:col-12 lg:col-12">
           <div className="header-section">

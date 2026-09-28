@@ -18,7 +18,7 @@ import { useFormik } from "formik";
 import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
-import countriesData from "./data";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
 import { postAddBankMiddleware, postAddBank } from '../store/bankMasterMiddleware';
 import { useDispatch, useSelector } from 'react-redux';
@@ -79,19 +79,9 @@ function AddBankMaster() {
     };
   });
 
-  const City = countriesData.city.map(city => ({
-    label: city,
-  }));
-
-  const State = countriesData.state.map(state => ({
-    label: state,
-  }));
-
-
-  const Country = countriesData.countries.map(country => ({
-    label: country,
-  }));
-
+  const City = useMasterOptions("city");
+  const State = useMasterOptions("state");
+  const Country = useMasterOptions("country");
   const home = { label: "Master" };
   const items = [
     { label: 'Bank', url: '/master/finance/bank' },
@@ -107,27 +97,18 @@ function AddBankMaster() {
   // }
 
   // const toastRef = useRef(null);
-  const handleSubmit = (values) => {
-
-    const valueWithId = {
-      ...values,
-      id: BankList?.length + 1,
-    };
-    console.log(values, "find values");
-    dispatch(postAddBankMiddleware(valueWithId))
-
-    // Handle form submission
-    console.log(values, "value");
-
-    // dispatch(postAddBank(formik.values));
-
-
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      Navigate("/master/finance/bank")
-    }, 3000);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddBankMiddleware(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        Navigate("/master/finance/bank");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
+
   // const handleSubmit = (values) => {
   //   // Handle form submission
   //   console.log(values, "find values");
@@ -385,6 +366,7 @@ function AddBankMaster() {
               }
               options={City}
               optionLabel="label"
+              optionValue="value"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
@@ -407,6 +389,7 @@ function AddBankMaster() {
               }
               options={State}
               optionLabel="label"
+              optionValue="value"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
@@ -429,6 +412,7 @@ function AddBankMaster() {
               }
               options={Country}
               optionLabel="label"
+              optionValue="value"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />

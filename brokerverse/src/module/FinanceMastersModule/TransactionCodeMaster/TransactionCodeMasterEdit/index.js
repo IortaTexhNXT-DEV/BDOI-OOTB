@@ -16,6 +16,8 @@ import { Button } from "primereact/button";
 import { patchTrascationcodeDetailsEdit } from "../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { PATCH_TRANSACTION_CODE_DETAILS_EDIT } from "../../../../redux/actionTypes";
+import useTransactionCodeOptions from "../useTransactionCodeOptions";
+import CustomToast from "../../../../components/Toast";
 
 const TransactionCodeEdit = () => {
   const { getTrascationcodeDetailsEdit, loading } = useSelector(
@@ -27,7 +29,6 @@ const TransactionCodeEdit = () => {
       };
     }
   );
-  console.log(getTrascationcodeDetailsEdit, "getTrascationcodeDetailsEdit");
 
   const toastRef = useRef(null);
   const navigate = useNavigate();
@@ -49,16 +50,20 @@ const TransactionCodeEdit = () => {
     navigate("/master/finance/transactioncode");
   };
 
-  const handleSubmit = (value) => {
-    console.log(value, "valuesvalues");
-    dispatch(patchTrascationcodeDetailsEdit(value));
-    navigate("/master/finance/transactioncode");
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchTrascationcodeDetailsEdit(value)).unwrap();
+      navigate("/master/finance/transactioncode");
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-  const [basicc, setBasiscodeData] = useState([]);
-  const [mainAccountC, setMainAccountcodeData] = useState([]);
-  const [subAcc, setSubAccountData] = useState([]);
-  const [branchC, setBranchCodeData] = useState([]);
-  const [deptC, setDeptData] = useState([]);
+  const codeOptions = useTransactionCodeOptions();
+  const basicc = codeOptions.basis;
+  const mainAccountC = codeOptions.mainAccounts;
+  const subAcc = codeOptions.subAccounts;
+  const branchC = codeOptions.branches;
+  const deptC = codeOptions.departments;
 
   const SetFormikValue = () => {
     const Basis = getTrascationcodeDetailsEdit?.TransactionBasis;
@@ -89,28 +94,7 @@ const TransactionCodeEdit = () => {
       subAccount,
       "updatedValues.TransactionBasis"
     );
-    if (Basis) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setBasiscodeData([{ label: Basis, value: Basis }]);
-    }
-    if (MainAccount) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setMainAccountcodeData([{ label: MainAccount, value: MainAccount }]);
-    }
-    if (subAccount) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setSubAccountData([{ label: subAccount, value: subAccount }]);
-    }
-    if (branchCode) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setBranchCodeData([{ label: branchCode, value: branchCode }]);
-    }
-    if (dept) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setDeptData([{ label: dept, value: dept }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
-    console.log(updatedValues, "updatedValues");
   };
 
   const formik = useFormik({
@@ -149,7 +133,7 @@ const TransactionCodeEdit = () => {
 
   return (
     <div className="transactioncode__master__Edit__view">
-      {/* <CustomToast ref={toastRef} message="Petty Cash Initiated Successfully"/> */}
+      <CustomToast ref={toastRef} />
       <div className="grid  m-0">
         <div className="col-12 md:col-12 lg:col-12">
           <div
@@ -234,7 +218,6 @@ const TransactionCodeEdit = () => {
                 value={formik.values.TransactionBasis}
                 options={basicc}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("TransactionBasis", e.value);
                   //   handleAccountcode(e.value.TransactionBasis);
                 }}
@@ -259,7 +242,6 @@ const TransactionCodeEdit = () => {
                 value={formik.values.MainAccountCode}
                 options={mainAccountC}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("MainAccountCode", e.value);
                   //   handleAccountcode(e.value.MainAccountCode);
                 }}
@@ -300,7 +282,6 @@ const TransactionCodeEdit = () => {
                 value={formik.values.SubAccountCode}
                 options={subAcc}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("SubAccountCode", e.target.value);
                 }}
                 optionLabel="label"
@@ -339,7 +320,6 @@ const TransactionCodeEdit = () => {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.BranchCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("BranchCode", e.target.value);
                 }}
                 options={branchC}
@@ -381,7 +361,6 @@ const TransactionCodeEdit = () => {
                 value={formik.values.DepartmentCode}
                 options={deptC}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("DepartmentCode", e.target.value);
                 }}
                 optionLabel="label"

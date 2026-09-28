@@ -516,7 +516,7 @@ function AddBranch({ action }) {
         </div>
       </Card>
 
-      {action != "add" && <DepartMentList
+      {action !== "add" && <DepartMentList
           action={action}
           branchCode={action === "view" ? organizationBranchView?.BranchCode : formik.values.BranchCode}
         />}

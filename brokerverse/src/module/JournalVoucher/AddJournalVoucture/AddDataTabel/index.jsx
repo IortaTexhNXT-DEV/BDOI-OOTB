@@ -17,6 +17,12 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { patchJVMiddleware } from "../../store/journalVoucherMiddleware";
+import useJvMasterData from "../../useJvMasterData";
+
+const ENTRY_TYPES = [
+  { label: "Debit", value: "Debit" },
+  { label: "Credit", value: "Credit" },
+];
 
 const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
   const [first, setFirst] = useState(0);
@@ -96,33 +102,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     display: "flex",
   };
 
-  const codeOptionsMain = [
-    { label: "Option 1", value: "Main00123" },
-    { label: "Option 2", value: "Main00124" },
-  ];
-  const codeOptionsSub = [
-    { label: "Option 1", value: "Sub00123" },
-    { label: "Option 2", value: "Sub00124" },
-  ];
-  const codeOptionsDept = [
-    { label: "Option 1", value: "Dep00123" },
-    { label: "Option 2", value: "Dep00124" },
-  ];
-  const codeOptionsBranch = [
-    { label: "Option 1", value: "Branch00123" },
-    { label: "Option 2", value: "Branch00124" },
-  ];
-
-  const codeOptionsType = [
-    { label: "Option 1", value: "Credit" },
-    { label: "Option 2", value: "Debit" },
-  ];
-  const codeCurrencyType = [
-    { label: "PHP", value: "PHP" },
-    { label: "THB", value: "THB" },
-    { label: "USD", value: "USD" },
-  ];
-
   const customValidation = (values) => {
     const errors = {};
 
@@ -173,12 +152,22 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       setFormikValues();
     }
   }, [EditID]);
-  const [mainAc, setMainAccountcodeData] = useState([]);
-  const [subAcc, setSubAccountData] = useState([]);
-  const [entrytypp, setEnteryTypeData] = useState([]);
-  const [branchh, setBranchCodeData] = useState([]);
-  const [currencyyy, setCurrencyData] = useState([]);
-  const [deptt, setDeptData] = useState([]);
+  const {
+    mainAccountsData,
+    subAccountsData,
+    branchCodesData,
+    departmentCodesData,
+    currencyCodesData,
+  } = useJvMasterData();
+  const toOptions = (rows) =>
+    rows.map((row) => ({ label: row.description, value: row.code }));
+  const describe = (rows, code) =>
+    rows.find((row) => row.code === code)?.description || "";
+  const mainAc = toOptions(mainAccountsData);
+  const entrytypp = ENTRY_TYPES;
+  const branchh = toOptions(branchCodesData);
+  const currencyyy = toOptions(currencyCodesData);
+  const deptt = toOptions(departmentCodesData);
 
   const setFormikValues = () => {
     const targetInvoice = journalVoucherPostTabelData.find(
@@ -206,30 +195,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       foreignAmount: targetInvoice?.foreignAmount || "",
     };
 
-    if (mainAcc) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setMainAccountcodeData([{ label: mainAcc, value: mainAcc }]);
-    }
-    if (subAc) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setSubAccountData([{ label: subAc, value: subAc }]);
-    }
-    if (entryT) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setEnteryTypeData([{ label: entryT, value: entryT }]);
-    }
-    if (branchC) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setBranchCodeData([{ label: branchC, value: branchC }]);
-    }
-    if (currencyC) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCurrencyData([{ label: currencyC, value: currencyC }]);
-    }
-    if (deptC) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setDeptData([{ label: deptC, value: deptC }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -256,6 +221,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     },
   });
 
+  const subAcc = toOptions(
+    subAccountsData.filter((sub) => sub.mainAccount === formik.values.mainAccount)
+  );
   return (
     <div className="journal__table__container">
       <DataTable
@@ -374,11 +342,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 // className="input__label__jv"
                 classNames="field__container"
                 label="Main Account Description"
-                value={
-                  formik.values.mainAccount
-                    ? `Main Account Description ${formik.values.mainAccount}`
-                    : ""
-                }
+                value={describe(mainAccountsData, formik.values.mainAccount)}
               />
             </div>
 
@@ -437,11 +401,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 // className="input__label__jv"
                 classNames="field__container"
                 label="Sub Account Description"
-                value={
-                  formik.values.subAccount
-                    ? `Sub Account Description ${formik.values.subAccount}`
-                    : ""
-                }
+                value={describe(subAccountsData, formik.values.subAccount)}
               />
             </div>
           </div>
@@ -474,11 +434,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 // className="input__label__jv"
                 classNames="field__container"
                 label="Branch Code Description"
-                value={
-                  formik.values.branchCode
-                    ? `Branch Code Description ${formik.values.branchCode}`
-                    : ""
-                }
+                value={describe(branchCodesData, formik.values.branchCode)}
               />
               {formik.touched.branchCodeDescription &&
                 formik.errors.branchCodeDescription && (
@@ -523,11 +479,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 // className="input__label__jv"
                 classNames="field__container"
                 label="Department Description"
-                value={
-                  formik.values.departmentCode
-                    ? `Department Description ${formik.values.departmentCode}`
-                    : ""
-                }
+                value={describe(departmentCodesData, formik.values.departmentCode)}
               />
               {formik.touched.departmentDescription &&
                 formik.errors.departmentDescription && (
@@ -572,11 +524,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 // className="input__label__jv"
                 classNames="field__container"
                 label="Currency Description"
-                value={
-                  formik.values.currencyCode
-                    ? `Currency Description ${formik.values.currencyCode}`
-                    : ""
-                }
+                value={describe(currencyCodesData, formik.values.currencyCode)}
               />
               {formik.touched.currencyDescription &&
                 formik.errors.currencyDescription && (

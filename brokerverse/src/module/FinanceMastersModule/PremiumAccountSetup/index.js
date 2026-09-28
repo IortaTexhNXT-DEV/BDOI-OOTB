@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -13,6 +14,7 @@ import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
+import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
 
 const PremiumAccountSetup = () => {
   const { t } = useTranslation();
@@ -75,32 +77,27 @@ const PremiumAccountSetup = () => {
   });
 
   // Placeholder options - replace with actual data from API
-  const companyOptions = [{ label: "Insurance Corporation", value: "001" }];
-  const officeOptions = [{ label: "HEAD OFFICE - MAKATI", value: "HOF" }];
-  const departmentOptions = [{ label: "Motor", value: "10" }];
+  const setupOptions = useAccountSetupOptions();
+  const { save } = useAccountSetup("PREMIUM", "Premium Account Setup", setFormData);
+  const toastRef = useRef(null);
+  const companyOptions = setupOptions.companyOptions;
+  const officeOptions = setupOptions.officeOptions;
+  const departmentOptions = setupOptions.departmentOptions;
   const businessTypeOptions = [
     { label: "Inward - Facultative", value: "4" },
     { label: "Inward - Fac Foreign", value: "5" },
   ];
   const businessSourceOptions = [];
-  const productCodeOptions = [
-    { label: "Machinery Breakdown", value: "4001" },
-    { label: "Loss of Profit Following MBD", value: "4008" },
-  ];
+  const productCodeOptions = setupOptions.productCodeOptions;
   const sectionOptions = [];
-  const coverOptions = [];
+  const coverOptions = setupOptions.coverOptions;
   const pasCvrIndicatorOptions = [{ label: "Others", value: "OTH" }];
   const docTypeOptions = [
     { label: "Policy", value: "2" },
     { label: "Endorsement", value: "3" },
   ];
-  const mainAccountOptions = [
-    {
-      label: "REINSURANCE PREMIUM ASSUMED - FACULTATIVE",
-      value: "4-03-1-00",
-    },
-  ];
-  const subAccountOptions = [{ label: "ENGINEERING", value: "ENG" }];
+  const mainAccountOptions = setupOptions.mainAccountOptions;
+  const subAccountOptions = setupOptions.subAccountOptions;
   const analysisCodeOptions = [];
   const activityCodeOptions = [];
 
@@ -124,9 +121,13 @@ const PremiumAccountSetup = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving premium account setup:", formData);
-    // Add save logic here
+  const handleSave = async () => {
+    try {
+      await save(formData);
+      toastRef.current.show({ severity: "success", detail: t("financeMasters.saveSuccessfully") });
+    } catch (error) {
+      toastRef.current.show({ severity: "error", detail: error.message });
+    }
   };
 
   const handleDuplicate = () => {
@@ -185,6 +186,7 @@ const PremiumAccountSetup = () => {
 
   return (
     <div className="premium-account-setup">
+      <Toast ref={toastRef} />
       <div className="grid m-0">
         <div className="col-12 md:col-12 lg:col-12">
           <div className="header-section">

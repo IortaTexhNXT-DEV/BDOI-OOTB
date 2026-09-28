@@ -64,7 +64,7 @@ const currencyMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.CurrencySearchList = {};
+        state.CurrencySearchList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,6 +13,7 @@ import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
+import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
 
 const RIClaimsAccountSetup = () => {
   const { t } = useTranslation();
@@ -75,16 +77,16 @@ const RIClaimsAccountSetup = () => {
 
   const documentTypeOptions = [{ label: "Claims", value: "4" }];
 
-  const companyOptions = [{ label: "Insurance Corporation", value: "001" }];
+  const setupOptions = useAccountSetupOptions();
+  const { save } = useAccountSetup("RI-CLAIMS", "RI Claims Account Setup", setFormData);
+  const toastRef = useRef(null);
+  const companyOptions = setupOptions.companyOptions;
 
-  const divisionOptions = [{ label: "HEAD OFFICE - MAKATI", value: "100" }];
+  const divisionOptions = setupOptions.officeOptions;
 
-  const departmentOptions = [{ label: "Motor", value: "10" }];
+  const departmentOptions = setupOptions.departmentOptions;
 
-  const productCodeOptions = [
-    { label: "Motor Private Car - Fleet", value: "1001" },
-    { label: "Motor Land Transport Operators - Non-Fleet", value: "1008" },
-  ];
+  const productCodeOptions = setupOptions.productCodeOptions;
 
   const perilClassOptions = [];
 
@@ -94,11 +96,9 @@ const RIClaimsAccountSetup = () => {
     { label: "Type 3", value: "3" },
   ];
 
-  const mainAccountOptions = [
-    { label: "LOSS RECOVERIES ON REINSURANCE CEDED", value: "4-20-2-00" },
-  ];
+  const mainAccountOptions = setupOptions.mainAccountOptions;
 
-  const subAccountOptions = [{ label: "MOTOR CAR", value: "MOT" }];
+  const subAccountOptions = setupOptions.subAccountOptions;
 
   const analysisCodeOptions = [];
   const activityCodeOptions = [];
@@ -128,9 +128,13 @@ const RIClaimsAccountSetup = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving RI-Claims account setup:", formData);
-    // Add save logic here
+  const handleSave = async () => {
+    try {
+      await save(formData);
+      toastRef.current.show({ severity: "success", detail: t("financeMasters.saveSuccessfully") });
+    } catch (error) {
+      toastRef.current.show({ severity: "error", detail: error.message });
+    }
   };
 
   const handleDuplicate = () => {
@@ -183,6 +187,7 @@ const RIClaimsAccountSetup = () => {
 
   return (
     <div className="ri-claims-account-setup">
+      <Toast ref={toastRef} />
       <div className="grid m-0">
         <div className="col-12 md:col-12 lg:col-12">
           <div className="header-section">

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,6 +13,7 @@ import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
+import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
 
 const CustomerAccountSetup = () => {
   const { t } = useTranslation();
@@ -74,11 +76,14 @@ const CustomerAccountSetup = () => {
     { label: "Reinsurance Co - Local", value: "RL" },
   ];
 
-  const companyOptions = [{ label: "Insurance Corporation", value: "001" }];
+  const setupOptions = useAccountSetupOptions();
+  const { save } = useAccountSetup("CUSTOMER", "Customer Account Setup", setFormData);
+  const toastRef = useRef(null);
+  const companyOptions = setupOptions.companyOptions;
 
-  const officeOptions = [{ label: "HEAD OFFICE - MAKATI", value: "HOF" }];
+  const officeOptions = setupOptions.officeOptions;
 
-  const departmentOptions = [{ label: "Motor", value: "10" }];
+  const departmentOptions = setupOptions.departmentOptions;
 
   const businessTypeOptions = [{ label: "Inward - Co Insurance", value: "3" }];
 
@@ -86,11 +91,9 @@ const CustomerAccountSetup = () => {
 
   const acDocTypeOptions = [{ label: "Premium Account", value: "001" }];
 
-  const mainAccountOptions = [
-    { label: "DUE FROM CEDING COMPANY - TREATY", value: "1-05-1-00" },
-  ];
+  const mainAccountOptions = setupOptions.mainAccountOptions;
 
-  const subAccountOptions = [];
+  const subAccountOptions = setupOptions.subAccountOptions;
 
   const acReceivableTypeOptions = [];
 
@@ -117,9 +120,13 @@ const CustomerAccountSetup = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving customer account setup:", formData);
-    // Add save logic here
+  const handleSave = async () => {
+    try {
+      await save(formData);
+      toastRef.current.show({ severity: "success", detail: t("financeMasters.saveSuccessfully") });
+    } catch (error) {
+      toastRef.current.show({ severity: "error", detail: error.message });
+    }
   };
 
   const handleDuplicate = () => {
@@ -171,6 +178,7 @@ const CustomerAccountSetup = () => {
 
   return (
     <div className="customer-account-setup">
+      <Toast ref={toastRef} />
       <div className="grid m-0">
         <div className="col-12 md:col-12 lg:col-12">
           <div className="header-section">

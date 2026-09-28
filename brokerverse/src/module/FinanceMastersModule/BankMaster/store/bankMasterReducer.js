@@ -22,45 +22,7 @@ import SvgArrow from "../../../../assets/icons/SvgArrow";
 const initialState = {
   loading: false,
   error: "",
-  BankList: [
-    {
-      id: 1,
-      bankCode: "BDO-SOTTO-CA",
-      bankName: "BANCO DE ORO RUFINO-SOTTO PESO CURRENT ACCOUNT",
-      bankBranch: "East Sarahburgh",
-      ifscCode: "mb78901",
-      AddressLine1: "",
-      AddressLine2: "",
-      AddressLine3: "",
-      city: "",
-      state: "",
-      status: true,
-      Country: "Thailand",
-      mobile: "+63",
-      Fax: "",
-      email: "contactus@broker.com"
-
-    },
-    {
-      id: 2,
-      bankCode: "BDOSOTTO-USD",
-      bankName: "BANGKOK BANK THB",
-      bankBranch: "East Sarahburgh",
-      ifscCode: "mb78901",
-      AddressLine1: "",
-      AddressLine2: "",
-      AddressLine3: "",
-      City: "",
-      state: "",
-      status: true,
-      Country: "Thailand",
-      mobile: "+63",
-      Fax: "",
-      email: "contactus@broker.com"
-
-    },
-  ]
-  ,
+  BankList: [],
   AccountDetailsList: [
     {
       id: 1,
@@ -114,10 +76,6 @@ const initialState = {
   getEditChequeData: {},
   postEditChequeData: {}
 };
-let nextId = 3;
-let nextId1 = 3;
-let nextId2 = 3;
-let nextId4 = 3
 
 const bankMasterReducer = createSlice({
   name: "bankMaster",
@@ -142,7 +100,7 @@ const bankMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.BankList = {};
+        state.BankList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -164,7 +122,7 @@ const bankMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.BankSearchList = {};
+        state.BankSearchList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -200,13 +158,12 @@ const bankMasterReducer = createSlice({
     // builder.addCase(
     //   postAddBankMiddleware.fulfilled, (state, action) => {
     //     state.loading = false;
-    //     const newItem2 = { ...action.payload, id: nextId++ };
+    //     const newItem2 = action.payload;
     //     state.BankList = [...state.BankList, newItem2];
     //     console.log(state.BankList, "BankList")
     //   }
     // );
     builder.addCase(postAddBankMiddleware.fulfilled, (state, action) => {
-      console.log(action.payload, 'find action.payload')
       state.loading = false;
       state.BankList = [...state.BankList, action.payload];
     });
@@ -225,7 +182,6 @@ const bankMasterReducer = createSlice({
       state.loading = true;
     });
     builder.addCase(postAddAccountDetails.fulfilled, (state, action) => {
-      console.log(action.payload, 'find action.payload')
       state.loading = false;
       state.AccountDetailsList = [...state.AccountDetailsList, action.payload];
     });
@@ -255,7 +211,7 @@ const bankMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.searchAccountDetails = {};
+        state.searchAccountDetails = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -291,9 +247,8 @@ const bankMasterReducer = createSlice({
     builder.addCase(
       postAddBank.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId2++ };
+        const newItem2 = action.payload;
         state.BankList = [...state.BankList, newItem2];
-        console.log(state.BankList, "BankList")
       }
     );
     
@@ -316,7 +271,6 @@ const bankMasterReducer = createSlice({
       patchBankDetailEdit.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(state.BankList, "state.BankList");
         const updatedIndex = state.BankList.findIndex(
           (item) => item.id === action.payload.id
         );
@@ -454,9 +408,8 @@ const bankMasterReducer = createSlice({
     builder.addCase(
       postChequeDataMiddleWare.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId4++ };
+        const newItem2 = action.payload;
         state.chequeListData = [...state.chequeListData, newItem2];
-        console.log(state.chequeListData, "chequeListData")
       }
     );
     builder.addCase(
@@ -496,7 +449,6 @@ const bankMasterReducer = createSlice({
       postChequeEditDataMiddleWare.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(state.chequeListData, "state.chequeListData");
         const updatedIndex = state.chequeListData.findIndex(
           (item) => item.id === action.payload.id
         );

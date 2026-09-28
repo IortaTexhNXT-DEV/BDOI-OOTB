@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import "./index.scss";

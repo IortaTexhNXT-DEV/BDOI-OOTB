@@ -36,15 +36,15 @@ const OpenItemsListData = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { summary, items } = useSelector(({ openitemsReducers }) => ({
+  const { summary, openItems } = useSelector(({ openitemsReducers }) => ({
     summary: openitemsReducers?.summary || [],
-    items: openitemsReducers?.items || [],
+    openItems: openitemsReducers?.items || [],
   }));
   useEffect(() => {
     dispatch(getOpenItemsListMiddleware());
   }, [dispatch]);
-  const data = toCards(LEFT_TYPES, summary, items);
-  const mock = toCards(RIGHT_TYPES, summary, items);
+  const data = toCards(LEFT_TYPES, summary, openItems);
+  const mock = toCards(RIGHT_TYPES, summary, openItems);
   const items = [{ label: t("openItems.openItems") }];
   const Initiate = { label: t("openItems.home") };
   const handleNavigate = (data) => {
