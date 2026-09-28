@@ -168,6 +168,12 @@ const PersonalDetails = () => {
   }, [policydetailedlist]);
 
   const [coverageDetails, setCoverageDetails] = useState({});
+  // the policy's current gross premium (premium total), the base of the endorsement premium change
+  const currentGrossPremium =
+    policydetailedlist?.grossPremium ??
+    policydetailedlist?.premiumTotal ??
+    policydetailedlist?.quotation?.grossPremium ??
+    "";
   const [fireEndorsementPayload, setFireEndorsementPayload] = useState(null);
 
   useEffect(() => {
@@ -244,10 +250,36 @@ const PersonalDetails = () => {
       NCD: policydetailedlist?.NCD || "",
       paymentStatus: policydetailedlist?.paymentStatus || "",
       paymentStatusChangedAt: policydetailedlist?.paymentStatusChangedAt || "",
+      // the policy's own CTPL (flat) and cover rates: re-pricing must not add covers the policy does not have
       CtplCoverageRate:
-        productConfigurator?.configuration?.ctplSetting?.[
-          policydetailedlist?.vehicleType
-        ] || "",
+        policydetailedlist?.ctplCoverageRate ??
+        quotation?.ctplCoverageRate ??
+        policydetailedlist?.ctplCoveragePremium ??
+        quotation?.ctplCoveragePremium ??
+        "",
+      RoadsideAssistanceRate:
+        policydetailedlist?.roadsideAssistanceRate ||
+        quotation?.roadsideAssistanceRate ||
+        "",
+      RoadsideAssistancePremium:
+        policydetailedlist?.roadsideAssistancePremium ||
+        quotation?.roadsideAssistancePremium ||
+        "",
+      PersonalAccidentCoverRate:
+        policydetailedlist?.personalAccidentCoverRate ||
+        quotation?.personalAccidentCoverRate ||
+        "",
+      PersonalAccidentCoverPremium:
+        policydetailedlist?.personalAccidentCoverPremium ||
+        quotation?.personalAccidentCoverPremium ||
+        "",
+      BodilyInjuryRate:
+        policydetailedlist?.bodilyInjuryRate || quotation?.bodilyInjuryRate || "",
+      PropertyDamageRate:
+        policydetailedlist?.propertyDamageRate ||
+        quotation?.propertyDamageRate ||
+        "",
+      APPARate: policydetailedlist?.APPARate || quotation?.APPARate || "",
     };
 
     setCoverageDetails(coverageDetailss);
@@ -418,7 +450,18 @@ const PersonalDetails = () => {
         payload.motorDetails = edited[2] || motorDetailsData;
       }
       if (endorsementTypeSet.has("3")) {
-        payload.coverageChanges = coverageDetails;
+        // the edited (re-priced) coverage; the premium change is new gross - the policy's current gross
+        // (positive = additional premium, negative = return premium); the server re-prices and checks it
+        const coverage = edited[3] || coverageDetails;
+        payload.coverageChanges = coverage;
+        const newGross = parseFloat(String(coverage?.Grosspremium ?? "").replace(/,/g, ""));
+        const currentGross = parseFloat(
+          String(currentGrossPremium ?? "").replace(/,/g, "")
+        );
+        if (Number.isFinite(newGross) && Number.isFinite(currentGross)) {
+          payload.premiumDelta =
+            Math.round((newGross - currentGross + Number.EPSILON) * 100) / 100;
+        }
       }
       if (endorsementTypeSet.has("4")) {
         payload.policyExtension = policyExtendDetails;
@@ -491,6 +534,7 @@ const PersonalDetails = () => {
     personalDetailsData,
     motorDetailsData,
     coverageDetails,
+    currentGrossPremium,
     policyExtendDetails,
     policydetailedlist,
     isFire,
@@ -675,6 +719,7 @@ const PersonalDetails = () => {
             productConfigurator={productConfigurator}
             coverageDetails={coverageDetails}
             setCoverageDetails={setCoverageDetails}
+            currentGrossPremium={currentGrossPremium}
           />
         )}
         {(endorsementTypeSet.has("4") || endorsementTypeSet.has("5")) && (
