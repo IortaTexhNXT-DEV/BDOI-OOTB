@@ -19,6 +19,7 @@ import { setPolicyHolderData } from "../../../../claimsModule/claimDetails/store
 import {
   getCategoriesForLob,
 } from "../../../../endorsementModule/constants/endorsementCategories";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 
 const normalizePolicyRecord = (policy) => {
   if (!policy) {
@@ -276,21 +277,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
   };
 
   // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      return date
-        .toLocaleDateString("en-US", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-        .toUpperCase();
-    } catch (error) {
-      return dateString;
-    }
-  };
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
   const onCategoryChange = (e) => {
     let _selectedCategories = [...selectedCategories];
 

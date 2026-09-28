@@ -1,10 +1,11 @@
 import { Dropdown } from "primereact/dropdown";
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import "./index.scss";
 import SvgDownArrow from "../../../assets/agentIcon/SvgDownArrow";
 
 const TableDropdownField = ({ value, onChange, options, label }) => {
   const [focused, setFocused] = useState(false);
+  const fieldId = `table-dropdown-${useId().replace(/:/g, "")}`;
 
   const handleFocus = () => {
     setFocused(true);
@@ -24,10 +25,11 @@ const TableDropdownField = ({ value, onChange, options, label }) => {
         onFocus={handleFocus}
         onBlur={handleBlur}
         dropdownIcon={<SvgDownArrow/>}
+        inputId={fieldId}
         // placeholder={focused ? '' : label}
       />
       <label
-        htmlFor="dropdown"
+        htmlFor={fieldId}
         className={`label ${focused || value ? "focused" : ""}`}
       >
         {label}

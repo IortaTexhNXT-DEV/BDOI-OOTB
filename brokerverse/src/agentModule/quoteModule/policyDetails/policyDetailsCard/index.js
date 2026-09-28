@@ -9,17 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import {
-  AccountCodes,
-  InsurancePolicyTypes,
-  ModelVariants,
-  ModelYears,
-  VehicleBrands,
-  VehicleColors,
-  VehicleModels,
-  PolicyTypes,
-  InstallmentType,
-} from "../mock";
+import { PolicyTypes, InstallmentType } from "../mock";
+import useQuoteOptions from "./useQuoteOptions";
 import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { postPolicyDetailsMiddleware } from "../store/policyDetailsMiddleware";
 import {
@@ -33,7 +24,7 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgUploadArrowIcon from "../../../../assets/icons/SvgUploadArrowIcon";
 import { VEHICLE_TYPE_OPTIONS } from "../../../../module/ProductConfigurator/PoductConfiguratorTab/ProductConfiguratorTab";
 
-const PolicyDetailsCard = ({ action, flow }) => {
+const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
   const InsuranceCompanyOptions = useInsuranceCompanyOptions();
   const { type, id: leadRefId } = useParams();
@@ -186,7 +177,7 @@ const PolicyDetailsCard = ({ action, flow }) => {
         path: `${basePath}/coveragedetails/coveragecreate/${idParam}`,
         state: payloadState,
         quotationData: policyDetailsData,
-        leadId: state?.lead?.generatedLeadId,
+        leadId: lead?.generatedLeadId || state?.lead?.generatedLeadId,
       };
       navigate("/agent/createquote/product-recommendation", {
         state: { ...propsState },
@@ -212,6 +203,20 @@ const PolicyDetailsCard = ({ action, flow }) => {
     existingPolicyDetails?.installmentType ? true : false
   );
   const [visible, setVisible] = useState(false);
+
+  const {
+    policyTypeOptions,
+    accountCodeOptions,
+    brandOptions,
+    modelOptions,
+    variantOptions,
+    modelYearOptions,
+    colourOptions,
+  } = useQuoteOptions({
+    brand: formik.values.VehicleBrand,
+    model: formik.values.VehicleModel,
+    current: formik.values,
+  });
 
   const category = leadtabledata[leadtabledata.length - 1]?.category;
 
@@ -393,7 +398,7 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.insurancePolicyType")}
               value={formik.values.InsurancePolicyType}
-              options={InsurancePolicyTypes}
+              options={policyTypeOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("InsurancePolicyType", e.value);
@@ -411,7 +416,7 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.accountCode")}
               value={formik.values.AccountCode}
-              options={AccountCodes}
+              options={accountCodeOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("AccountCode", e.value);
@@ -511,10 +516,14 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.vehicleBrand")}
               value={formik.values.VehicleBrand}
-              options={VehicleBrands}
+              options={brandOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("VehicleBrand", e.value);
+                if (e.value !== formik.values.VehicleBrand) {
+                  formik.setFieldValue("VehicleModel", "");
+                  formik.setFieldValue("ModelVariant", "");
+                }
               }}
               optionLabel="label"
             />
@@ -528,7 +537,7 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.modelYear")}
               value={formik.values.ModelYear}
-              options={ModelYears}
+              options={modelYearOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("ModelYear", e.value);
@@ -548,10 +557,13 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.vehicleModel")}
               value={formik.values.VehicleModel}
-              options={VehicleModels}
+              options={modelOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("VehicleModel", e.value);
+                if (e.value !== formik.values.VehicleModel) {
+                  formik.setFieldValue("ModelVariant", "");
+                }
               }}
               optionLabel="label"
             />
@@ -565,10 +577,14 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.modelVariant")}
               value={formik.values.ModelVariant}
-              options={ModelVariants}
+              options={variantOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("ModelVariant", e.value);
+                const seating = variantOptions.find((v) => v.value === e.value)?.seatingCapacity;
+                if (seating && !formik.values.SeatingCapacity) {
+                  formik.setFieldValue("SeatingCapacity", String(seating));
+                }
               }}
               optionLabel="label"
             />
@@ -585,7 +601,7 @@ const PolicyDetailsCard = ({ action, flow }) => {
             <DropdownField
               label={t("agent.vehicleColor")}
               value={formik.values.VehicleColor}
-              options={VehicleColors}
+              options={colourOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("VehicleColor", e.value);

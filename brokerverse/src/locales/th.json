@@ -3942,7 +3942,7 @@
     "emailRequired": "กรุณากรอกอีเมล",
     "invalidEmail": "ที่อยู่อีเมลไม่ถูกต้อง",
     "phoneRequired": "กรุณากรอกหมายเลขโทรศัพท์",
-    "invalidPhone": "หมายเลขโทรศัพท์ไม่ถูกต้อง (10 หลัก)",
+    "invalidPhone": "หมายเลขโทรศัพท์มือถือไม่ถูกต้อง",
     "atLeastOneSiValidation": "กรุณากรอกจำนวนเงินเอาประกันอย่างน้อยหนึ่งรายการ",
     "leadCreatedSuccess": "สร้างลีดสำเร็จ",
     "failedToCreateLead": "สร้างลีดไม่สำเร็จ",
@@ -4576,6 +4576,7 @@
     "type": "ประเภท:"
   },
   "leadDetail": {
+    "createQuote": "สร้างใบเสนอราคา",
     "title": "รายละเอียดลีด",
     "backToLeads": "กลับไปลีด",
     "edit": "แก้ไข",

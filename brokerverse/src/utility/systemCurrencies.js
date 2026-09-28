@@ -83,4 +83,5 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   defaultLanguage: "en",
   faviconUrl: "/favicon.ico",
   appTitle: "Brokerverse",
+  dateFormat: "DD/MM/YYYY",
 };

@@ -98,6 +98,11 @@ describe('quotations: create, premium, workflow, conversion', () => {
     expect(ins.body.data.map((i) => i.name)).toContain('SecureGuard Insurance');
     expect((await sales('get', '/master/banks/get-all-banks')).body.data.length).toBeGreaterThan(0);
     expect((await sales('get', '/master/signatory/get-all-signatory')).body.data.length).toBeGreaterThan(0);
+    const codes = await sales('get', '/master/account-codes');
+    expect(codes.status).toBe(200);
+    expect(codes.body.data.every((a) => a.value && a.label)).toBe(true);
+    const motorTypes = await sales('get', '/master/policyType/policy-type?productId=MOTOR');
+    expect(motorTypes.body.data.map((p) => p.code)).toContain('COMP');
   });
 
   it('sends for approval: e-mail with signed link, underwriting notified, PendingCustomer', async () => {

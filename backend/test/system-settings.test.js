@@ -24,6 +24,10 @@ describe('system settings', () => {
     expect(d.logoPresets.find((p) => p.id === 'bdo').builtIn).toBe(true);
     expect(d.currencies.find((c) => c.code === 'PHP').locale).toBe('en-PH');
     expect(d.logoUrl).toBeTruthy();
+    // Locale and form options the front end applies app-wide (date format, mobile numbers, quote options)
+    expect(d).toMatchObject({ dateFormat: 'DD/MM/YYYY', phoneCountryCode: '+63', mobilePattern: '^9\\d{9}$', modelYearSpan: 20 });
+    expect(d.mobileExample).toBeTruthy();
+    expect(d.vehicleColours.length).toBeGreaterThan(0);
   });
 
   it('PUT saves fields and /settings (key-value) stays consistent', async () => {

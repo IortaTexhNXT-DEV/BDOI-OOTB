@@ -4013,7 +4013,7 @@
     "emailRequired": "Email is required",
     "invalidEmail": "Invalid email address",
     "phoneRequired": "Phone Number is required",
-    "invalidPhone": "Invalid phone number (10 digits)",
+    "invalidPhone": "Invalid mobile number",
     "atLeastOneSiValidation": "At least one Sum Insured field is required",
     "leadCreatedSuccess": "Lead Created Successfully",
     "failedToCreateLead": "Failed to create lead",
@@ -4740,6 +4740,7 @@
     "type": "Type:"
   },
   "leadDetail": {
+    "createQuote": "Create Quote",
     "title": "Lead Details",
     "backToLeads": "Back to Leads",
     "edit": "Edit",

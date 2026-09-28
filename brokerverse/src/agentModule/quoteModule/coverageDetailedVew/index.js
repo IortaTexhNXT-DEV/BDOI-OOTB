@@ -13,6 +13,7 @@ import customHistory from "../../../routes/customHistory";
 import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
 import s3Service from "../../../services/s3Service";
+import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 
 const CoverageDetailedView = () => {
   const { t } = useTranslation();
@@ -395,9 +396,7 @@ const CoverageDetailedView = () => {
               <label className="insurance__text">Production Date</label>
               <label className="alpha__text">
                 {additionalPolicyData?.production
-                  ? new Date(
-                      additionalPolicyData.production
-                    ).toLocaleDateString()
+                  ? formatConfiguredDate(additionalPolicyData.production)
                   : "N/A"}
               </label>
             </div>
@@ -405,9 +404,7 @@ const CoverageDetailedView = () => {
               <label className="insurance__text">Inception Date</label>
               <label className="alpha__text">
                 {additionalPolicyData?.inception
-                  ? new Date(
-                      additionalPolicyData.inception
-                    ).toLocaleDateString()
+                  ? formatConfiguredDate(additionalPolicyData.inception)
                   : "N/A"}
               </label>
             </div>
@@ -415,9 +412,7 @@ const CoverageDetailedView = () => {
               <label className="insurance__text">Issued Date</label>
               <label className="alpha__text">
                 {additionalPolicyData?.issuedDate
-                  ? new Date(
-                      additionalPolicyData.issuedDate
-                    ).toLocaleDateString()
+                  ? formatConfiguredDate(additionalPolicyData.issuedDate)
                   : "N/A"}
               </label>
             </div>
@@ -425,7 +420,7 @@ const CoverageDetailedView = () => {
               <label className="insurance__text">Expiry Date</label>
               <label className="alpha__text">
                 {additionalPolicyData?.expiry
-                  ? new Date(additionalPolicyData.expiry).toLocaleDateString()
+                  ? formatConfiguredDate(additionalPolicyData.expiry)
                   : "N/A"}
               </label>
             </div> */}

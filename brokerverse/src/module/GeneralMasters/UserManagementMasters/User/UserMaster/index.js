@@ -231,27 +231,25 @@ const UserMaster = () => {
                   header="User Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.userName?.toUpperCase()}
                 ></Column>
                 <Column
                   field="assignedRole"
                   header="Assigned Role"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.assignedRole?.toUpperCase()}
                 ></Column>
                 <Column
                   field="email"
                   header="E-mail"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
+                  body={(rowData) => rowData.email || "-"}
                 ></Column>
                 <Column
                   field="displayName"
                   header="Display Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.displayName?.toUpperCase()}
                 ></Column>
 
                 <Column
@@ -274,6 +272,7 @@ const UserMaster = () => {
                   body={renderViewButton}
                   header="Action"
                   headerStyle={ViewheaderStyle}
+                  style={{ minWidth: "8rem" }}
                   // className="fieldvalue_container"
                   //  className="fieldvalue_container_centered"
                 ></Column>

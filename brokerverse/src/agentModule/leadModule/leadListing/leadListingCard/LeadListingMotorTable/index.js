@@ -27,6 +27,7 @@ import {
 } from "../../../Store/leadMiddleware";
 import { isFireLob, isIarLob } from "../../../../endorsementModule/constants/endorsementCategories";
 import countriesData from "../../../leadCreation/mock";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 
 const LeadListingMotorTable = ({ lob = null }) => {
   const { t } = useTranslation();
@@ -264,12 +265,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
 
   const renderDate = (rowData) => {
     // Format createdAt date as yyyy-mm-dd
-    const formatDate = (dateString) => {
-      if (!dateString) return "";
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString; // Return original if invalid date
-      return date.toISOString().split("T")[0]; // Format as yyyy-mm-dd
-    };
+    const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "" });
 
     // Use createdAt instead of DOB
     const dateValue =

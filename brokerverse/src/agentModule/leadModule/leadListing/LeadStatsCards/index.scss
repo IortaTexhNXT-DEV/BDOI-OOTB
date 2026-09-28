@@ -9,9 +9,10 @@
 
     .kpi-scroll-container {
       background-color: $main-background !important;
-      display: flex;
+      // The cards wrap / share the row so none is cut off at the right edge
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      overflow-x: auto;
       padding-bottom: 0.5rem;
       scroll-behavior: smooth;
 
@@ -36,9 +37,8 @@
     }
 
     .kpi-card {
-      min-width: 280px;
+      min-width: 0;
       padding: 1rem;
-      flex-shrink: 0;
       background: $card-background;
       border-radius: 12px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);

@@ -23,6 +23,7 @@ import {
   getPaymentSearchDataMiddleWare,
 } from "../../store/clientsMiddleware";
 import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 
 const ClientListingAllCategory = ({
   data,
@@ -267,12 +268,7 @@ const ClientListingAllCategory = ({
 
   const renderDate = (rowData) => {
     // Format createdAt date as yyyy-mm-dd
-    const formatDate = (dateString) => {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString; // Return original if invalid date
-      return date.toISOString().split('T')[0]; // Format as yyyy-mm-dd
-    };
+    const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "" });
     
     // Try multiple possible date fields
     const dateValue = rowData.createdAt || rowData.created_at || rowData.dateCreated || rowData.date_created || rowData.DateofBirth;

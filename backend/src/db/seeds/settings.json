@@ -24,6 +24,38 @@
     "label": "Date format"
   },
   {
+    "key": "general.phone_country_code",
+    "value": "+63",
+    "group": "general",
+    "label": "Phone country code"
+  },
+  {
+    "key": "general.mobile_pattern",
+    "value": "^9\\d{9}$",
+    "group": "general",
+    "label": "Mobile number pattern (national number without the leading 0 or country code)"
+  },
+  {
+    "key": "general.mobile_example",
+    "value": "0917 123 4567 or +63 917 123 4567",
+    "group": "general",
+    "label": "Mobile number hint shown on forms"
+  },
+  {
+    "key": "quote.vehicle_colours",
+    "value": ["White", "Pearl White", "Black", "Silver", "Gray", "Red", "Blue", "Green", "Brown", "Beige", "Yellow", "Orange"],
+    "group": "quote",
+    "label": "Vehicle colours offered on the quote",
+    "type": "json"
+  },
+  {
+    "key": "quote.model_year_span",
+    "value": 20,
+    "group": "quote",
+    "label": "Vehicle model years offered (years back from next year)",
+    "type": "number"
+  },
+  {
     "key": "branding.logo_url",
     "value": "",
     "group": "branding",

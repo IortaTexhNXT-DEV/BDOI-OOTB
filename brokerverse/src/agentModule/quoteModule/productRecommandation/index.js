@@ -10,6 +10,30 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { mockPlans, PRIORITY_RULES } from "./contants";
+import { VEHICLE_TYPE_OPTIONS } from "../../../module/ProductConfigurator/PoductConfiguratorTab/ProductConfiguratorTab";
+import leadService from "../../../services/leadService";
+
+/** The vehicle type is stored as its code (private_cars); rules and advisor text use its label. */
+const vehicleTypeLabel = (vehicleType) => {
+  if (!vehicleType) return vehicleType;
+  const option = VEHICLE_TYPE_OPTIONS.map((o) => o.label).find(
+    (o) => o && (o.value === vehicleType || o.label === vehicleType)
+  );
+  return option?.label || vehicleType;
+};
+
+/**
+ * The rules are written per vehicle class (PC private car, CV commercial vehicle, MCY motorcycle). The policy
+ * type now comes from the policy type master (COMP, TPL ...), so the class is derived from the vehicle type.
+ */
+const vehicleClass = ({ insurancePolicyType, vehicleType } = {}) => {
+  if (["PC", "CV", "MCY"].includes(String(insurancePolicyType || "").toUpperCase())) return insurancePolicyType;
+  const code = String(vehicleType || "").toLowerCase();
+  if (!code) return insurancePolicyType;
+  if (code.includes("private")) return "PC";
+  if (code.includes("motorcycle")) return "MCY";
+  return "CV";
+};
 
 // Priority rules for product recommendation
 
@@ -265,7 +289,13 @@ const ProductRecommendation = () => {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Get quotation data from state
-      const quotationData = state?.quotationData || null;
+      const quotationData = state?.quotationData
+        ? {
+            ...state.quotationData,
+            insurancePolicyType: vehicleClass(state.quotationData),
+            vehicleType: vehicleTypeLabel(state.quotationData.vehicleType),
+          }
+        : null;
 
       // Get recommended plan based on quotation data
       const recommendedPlanName = getRecommendedPlan(quotationData);
@@ -296,8 +326,10 @@ const ProductRecommendation = () => {
       };
 
       // Update plans with recommendation and translated content
+      // Only one plan is badged RECOMMENDED: the first (selected carrier's) plan of the recommended tier.
+      const recommendedId = mockPlans.find((p) => p.name === recommendedPlanName)?.id;
       const updatedPlans = mockPlans.map((plan) => {
-        const isRecommended = plan.name === recommendedPlanName;
+        const isRecommended = plan.id === recommendedId;
         const prefix = featureKeys[plan.name];
         const count = featureCounts[plan.name] || 0;
         const translatedFeatures = prefix
@@ -314,7 +346,11 @@ const ProductRecommendation = () => {
             ? t(`policyDetail.productRecommendation.${descKeys[plan.name]}`)
             : plan.description,
           features: translatedFeatures,
-          highlight: isRecommended ? "RECOMMENDED" : plan.highlight,
+          highlight: isRecommended
+            ? "RECOMMENDED"
+            : plan.highlight === "RECOMMENDED"
+            ? null
+            : plan.highlight,
           aiReason: isRecommended
             ? getRecommendationReason(
                 quotationData,
@@ -345,7 +381,25 @@ const ProductRecommendation = () => {
     fetchPlans();
   }, [state?.quotationData, t]);
 
-  const leadId = state?.leadId || state?.LeadId;
+  const leadRefId = useSelector(
+    ({ quotationReducers }) => quotationReducers?.currentQuoteCreation?.leadRefId
+  );
+  const [loadedLeadId, setLoadedLeadId] = useState("");
+  const stateLeadId = state?.leadId || state?.LeadId;
+  useEffect(() => {
+    if (stateLeadId || !leadRefId) return undefined;
+    let active = true;
+    leadService
+      .getLeadById(leadRefId)
+      .then((result) => {
+        if (active && result?.success) setLoadedLeadId(result.data?.generatedLeadId || "");
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [stateLeadId, leadRefId]);
+  const leadId = stateLeadId || loadedLeadId;
   const selectedCompany =
     state?.quotationData.insuranceCompanyName ||
     policydetailedlist?.insuranceCompany ||

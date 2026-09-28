@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import {
   getAdditionalRoleTabelMiddleWare,
   getAdditionalRoleViewMiddleWare,
@@ -20,7 +21,7 @@ const mapUserData = (user) => {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB");
+    return formatConfiguredDate(date, { empty: "" });
   };
 
   return {
@@ -28,8 +29,11 @@ const mapUserData = (user) => {
     id: user.userId ?? user.id,
     userName: user.username || "",
     employeeCode: user.employeeCode || user.agentProfile?.employeeCode || "N/A",
+    // Role names (as set up in Role master); the code only when a name is missing
     assignedRole:
-      Array.isArray(user.roles) && user.roles.length > 0
+      Array.isArray(user.roleNames) && user.roleNames.length > 0
+        ? user.roleNames.join(", ")
+        : Array.isArray(user.roles) && user.roles.length > 0
         ? user.roles.join(", ")
         : "No Role",
     email: user.email || "",

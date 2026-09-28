@@ -21,6 +21,7 @@ import { isFireLob, isIarLob } from "../../../../endorsementModule/constants/end
 import countriesData from "../../../leadCreation/mock";
 import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
 import "./index.scss";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 
 const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
   const { t } = useTranslation();
@@ -207,15 +208,7 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
     setRowsPerPage(event.rows);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
 
   const renderSkeleton = () => {
     return Array(6)

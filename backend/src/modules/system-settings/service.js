@@ -31,7 +31,8 @@ async function values(keys) {
 /** The settings object exactly as the front end reads it. */
 export async function getSystemSettings() {
   const keys = [...Object.values(FIELD_KEYS), 'branding.default_logo_url', 'branding.logo_presets', 'currency.allowed', 'general.languages',
-    'general.company_name', 'general.system_name', 'general.timezone', 'general.date_format', 'currency.symbol', 'currency.decimals'];
+    'general.company_name', 'general.system_name', 'general.timezone', 'general.date_format', 'currency.symbol', 'currency.decimals',
+    'general.phone_country_code', 'general.mobile_pattern', 'general.mobile_example', 'quote.vehicle_colours', 'quote.model_year_span'];
   const { map, updatedAt } = await values(keys);
   return {
     logoUrl: map['branding.logo_url'] || map['branding.default_logo_url'] || '',
@@ -50,6 +51,11 @@ export async function getSystemSettings() {
     dateFormat: map['general.date_format'],
     currencySymbol: map['currency.symbol'],
     currencyDecimals: map['currency.decimals'],
+    phoneCountryCode: map['general.phone_country_code'],
+    mobilePattern: map['general.mobile_pattern'],
+    mobileExample: map['general.mobile_example'],
+    vehicleColours: Array.isArray(map['quote.vehicle_colours']) ? map['quote.vehicle_colours'] : [],
+    modelYearSpan: map['quote.model_year_span'],
     updatedAt,
   };
 }

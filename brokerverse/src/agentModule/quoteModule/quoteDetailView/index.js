@@ -29,6 +29,7 @@ import { Toast } from "primereact/toast";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
 import { numberLocale } from "../../../utility/currencyConverter";
+import { vehicleColourLabel } from "../../../utility/quoteOptions";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -1015,7 +1016,7 @@ const QuoteDetailView = ({ action }) => {
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.vehicleColor")}</label>
                     <label className="alpha_text">
-                      {quotationData?.insuranceVehicleDetails?.[0]?.vehicleColor ||
+                      {vehicleColourLabel(quotationData?.insuranceVehicleDetails?.[0]?.vehicleColor) ||
                         "N/A"}
                     </label>
                   </div>

@@ -60,3 +60,7 @@ INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
  ('incentive.program_types', $j$["Target Based","Commission Based","Hybrid","Contest"]$j$, 'incentive', 'Incentive program types', 'json', true),
  ('incentive.calculation_frequencies', $j$["Monthly","Quarterly","Semi-Annual","Annual"]$j$, 'incentive', 'Calculation frequencies', 'json', true)
 ON CONFLICT (key) DO NOTHING;
+
+-- Group label for the quotation options (vehicle colours, model year span) on the Configuration screen
+UPDATE app_settings SET value = value || '{"quote":"Quotation"}'::jsonb
+ WHERE key = 'system.group_labels' AND jsonb_typeof(value) = 'object' AND NOT value ? 'quote';

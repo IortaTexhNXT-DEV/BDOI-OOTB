@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../utility/phoneFormat";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
@@ -139,8 +140,8 @@ const getPersonalDetailsValidation = (t) => (values) => {
   }
   if (!values.ContactNumber) {
     errors.ContactNumber = t("fireLead.phoneRequired");
-  } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-    errors.ContactNumber = t("fireLead.invalidPhone");
+  } else if (!isValidMobile(values.ContactNumber)) {
+    errors.ContactNumber = `${t("fireLead.invalidPhone")} (e.g. ${mobileHint()})`;
   }
   if (!values.HouseNo) errors.HouseNo = t("fireLead.fieldRequired");
   if (!values.Barangay) errors.Barangay = t("fireLead.fieldRequired");
@@ -263,7 +264,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         lastName: values.LastName,
         preferredName: values.PreferredName,
         emailId: values.EmailID,
-        contactNumber: values.ContactNumber,
+        contactNumber: normalizeMobile(values.ContactNumber),
         houseNo: values.HouseNo,
         barangay: values.Barangay,
         country: typeof values.Country === "object" ? values.Country?.label : values.Country,
@@ -727,6 +728,8 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.contactNumber") + "*"}
             value={personalFormik.values.ContactNumber}
             onChange={personalFormik.handleChange("ContactNumber")}
+            inputMode="tel"
+            hint={mobileHint()}
           />
           {personalFormik.touched.ContactNumber &&
             personalFormik.errors.ContactNumber && (

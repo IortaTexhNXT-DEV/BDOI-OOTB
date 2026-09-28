@@ -18,6 +18,7 @@ import { useFormik } from "formik";
 import addressService from "../../../../services/addressService";
 import { isThailand } from "../../../../utility/addressHelpers";
 import { patchClientEditMiddleWare } from "../../../quoteModule/clientListing/store/clientsMiddleware";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../../utility/phoneFormat";
 
 const initialValue = {
   CompanyName: "",
@@ -249,8 +250,8 @@ const LeadCreationCard = ({ flow, action }) => {
     // }
     if (!values.ContactNumber) {
       errors.ContactNumber = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-      errors.ContactNumber = "Invalid phone number (10 digits)";
+    } else if (!isValidMobile(values.ContactNumber)) {
+      errors.ContactNumber = `Invalid mobile number (e.g. ${mobileHint()})`;
     }
     if (!values.HouseNo) {
       errors.HouseNo = "This field is required";
@@ -349,7 +350,7 @@ const LeadCreationCard = ({ flow, action }) => {
     enableReinitialize: true, // This allows formik to reinitialize when values change
     validate: customValidation,
     onSubmit: (values) => {
-      handleclick(values);
+      handleclick({ ...values, ContactNumber: normalizeMobile(values.ContactNumber) });
     },
   });
 
@@ -497,7 +498,7 @@ const LeadCreationCard = ({ flow, action }) => {
                   }}
                   checked={formik.values.category === "Retail"}
                 />
-                <label htmlFor="ingredient1" className="labeltxt_container">
+                <label htmlFor="individual" className="labeltxt_container">
                   {t("leadCreation.individual")}
                 </label>
               </div>
@@ -512,7 +513,7 @@ const LeadCreationCard = ({ flow, action }) => {
                   }}
                   checked={formik.values.category === "Corporate"}
                 />
-                <label htmlFor="ingredient2" className="labeltxt_container">
+                <label htmlFor="company" className="labeltxt_container">
                   {t("leadCreation.company")}
                 </label>
               </div>
@@ -629,7 +630,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={() => formik.setFieldValue("gender", "Male")}
               checked={formik.values.gender === "Male"}
             />
-            <label htmlFor="ingredient1" className="labeltxt_container">
+            <label htmlFor="male" className="labeltxt_container">
               {t("leadCreation.male")}
             </label>
           </div>
@@ -641,7 +642,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={() => formik.setFieldValue("gender", "Female")}
               checked={formik.values.gender === "Female"}
             />
-            <label htmlFor="ingredient2" className="labeltxt_container">
+            <label htmlFor="female" className="labeltxt_container">
               {t("leadCreation.female")}
             </label>
           </div>
@@ -665,6 +666,8 @@ const LeadCreationCard = ({ flow, action }) => {
               label={t("leadCreation.contactNumber")}
               value={formik.values.ContactNumber}
               onChange={formik.handleChange("ContactNumber")}
+              inputMode="tel"
+              hint={mobileHint()}
             />
             {formik.touched.ContactNumber && formik.errors.ContactNumber && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -624,7 +625,7 @@ const CustomerInfo = ({ action }) => {
             <InputTextField
               label="Vehicle Color"
               value={
-                quotationDetails?.insuranceVehicleDetails?.[0]?.vehicleColor ||
+                vehicleColourLabel(quotationDetails?.insuranceVehicleDetails?.[0]?.vehicleColor) ||
                 "N/A"
               }
               disabled

@@ -41,6 +41,7 @@ import EmployeeBenefitIcon from "../../../EmployeeFlow/EmployeeBenefitIcon";
 import SvgMotor from "../../../../assets/agentIcon/SvgMotor";
 import SvgFire from "../../../../assets/agentIcon/SvgFire";
 import "./index.scss";
+import { formatDate as formatConfiguredDate } from "../../../../utility/dateFormat";
 const QuoteListingCard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -322,14 +323,7 @@ const QuoteListingCard = () => {
   };
 
   const renderDate = (rowData) => {
-    const formatDate = (dateString) => {
-      if (!dateString) return t("policyDetail.nA");
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const year = date.getFullYear();
-      return `${day} ${month} ${year}`;
-    };
+    const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: t("policyDetail.nA") });
 
     return (
       <div>
