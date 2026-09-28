@@ -86,6 +86,7 @@ define({
   request: {}, response: { success: true, data: { redirect: { referrerId: 'ref-dcruz', referrerName: 'Juan Dela Cruz' }, approvedLineCount: 2, totalNet: 2280 } },
   handler: async (req, res) => {
     const ref = await svc.getReferrer(pool, req.params.id);
+    await svc.assertPayable(ref);
     const lines = await svc.approvedLines(pool, ref.id);
     if (!lines.length) throw conflict('No approved lines to pay');
     await audit(req, { entity: 'commission_referrer', entityId: ref.id, action: 'generate-payout', after: { lines: lines.map((l) => l.id) } });
@@ -99,6 +100,7 @@ define({
     const { createCommissionVoucher } = await import('../disbursements/service.js');
     const data = await withTransaction(async (db) => {
       const ref = await svc.getReferrer(db, req.params.id);
+      await svc.assertPayable(ref);
       const lines = (await svc.approvedLines(db, ref.id)).filter((l) => req.body.lineIds.includes(l.id));
       if (lines.length !== req.body.lineIds.length) throw conflict('Some lines are not Approved or are already on a voucher');
       const d = await createCommissionVoucher(db, { referrer: ref, lines, user: req.user, status: 'paid' });

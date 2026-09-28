@@ -1141,7 +1141,7 @@ const PolicyDetailView = () => {
     {
       key: "client",
       label: t("policyDetail.clientId"),
-      value: policyDetails.ClientId || t("policyDetail.nA"),
+      value: policyDetails.ClientCode || rawPolicyData?.client?.clientCode || t("policyDetail.nA"),
       helper:
         policyDetails.ClientName ||
         rawPolicyData?.client?.fullName ||
@@ -1204,7 +1204,7 @@ const PolicyDetailView = () => {
     {
       key: "clientId",
       label: t("policyDetail.clientId"),
-      value: policyDetails.ClientId || t("policyDetail.nA"),
+      value: policyDetails.ClientCode || rawPolicyData?.client?.clientCode || t("policyDetail.nA"),
     },
     {
       key: "idCard",

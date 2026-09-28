@@ -26,10 +26,16 @@ const PolicyDetails = ({ action, flow }) => {
         <SvgLeftArrow />
         <div className="policy__container__back__btn__title">
           {flow === "lead" ? t("agent.leadIdLabel") : t("agent.clientIdLabel")} 
-          {state?.lead?.generatedLeadId ||
-            quotationData?.lead?.id ||
-            quotationData?.leadRefId ||
-            "1234567"}{" "}
+          {flow === "lead"
+            ? state?.lead?.generatedLeadId ||
+              quotationData?.lead?.generatedLeadId ||
+              quotationData?.leadRefId ||
+              ""
+            : state?.client?.clientCode ||
+              state?.clientCode ||
+              quotationData?.client?.clientCode ||
+              quotationData?.client?.generatedClientId ||
+              ""}{" "}
         </div>
       </div>
       <PolicyDetailsCard action={action} flow={flow} />

@@ -17,6 +17,19 @@ import reportsService from "../../services/reportsService";
 import "./index.scss";
 
 import { numberLocale } from "../../utility/currencyConverter";
+import { menuList } from "../../components/SideBar/list";
+import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+
+/** Quick actions of the dashboard; each is shown only when the user's roles may open its screen (same rules as the side menu). */
+const QUICK_ACTIONS = [
+  { label: "executiveDashboard.viewClaims", icon: "pi pi-file", path: "/claims/dashboard" },
+  { label: "executiveDashboard.underwriting", icon: "pi pi-check-square", path: "/underwriting/dashboard" },
+  { label: "executiveDashboard.newQuote", icon: "pi pi-plus", severity: "success", path: "/agent/createlead" },
+  { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", severity: "info", path: "/reports/operationalreports/production" },
+  { label: "executiveDashboard.policiesLabel", icon: "pi pi-briefcase", path: "/agent/policy" },
+  { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", severity: "warning", path: "/agent/home" },
+];
+
 const CHART_COLORS = [
   "#0066CC",
   "#E65100",
@@ -47,6 +60,10 @@ const ExecutiveDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
+  const [quickActions] = useState(() => {
+    const roles = getUserRoles();
+    return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles));
+  });
   const toast = useRef(null);
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [dateRange, setDateRange] = useState([
@@ -466,46 +483,24 @@ const ExecutiveDashboard = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <Card title={t("executiveDashboard.quickActions")} className="actions-card">
-          <div className="actions-grid">
-            <Button
-              label={t("executiveDashboard.viewClaims")}
-              icon="pi pi-file"
-              onClick={() => navigate("/claims/dashboard")}
-            />
-            <Button
-              label={t("executiveDashboard.underwriting")}
-              icon="pi pi-check-square"
-              onClick={() => navigate("/underwriting/dashboard")}
-            />
-            <Button
-              label={t("executiveDashboard.newQuote")}
-              icon="pi pi-plus"
-              severity="success"
-              onClick={() => navigate("/agent/createlead")}
-            />
-            <Button
-              label={t("executiveDashboard.reports")}
-              icon="pi pi-chart-bar"
-              severity="info"
-              onClick={() => navigate("/reports/operationalreports/production")}
-            />
-            <Button
-              label={t("executiveDashboard.policiesLabel")}
-              icon="pi pi-briefcase"
-              onClick={() => navigate("/agent/policy")}
-            />
-            <Button
-              label={t("executiveDashboard.analytics")}
-              icon="pi pi-chart-line"
-              severity="warning"
-              onClick={() => navigate("/agent/home")}
-            />
-          </div>
-        </Card>
-      </div>
+      {/* Quick Actions: only the screens the signed-in user's roles may open */}
+      {quickActions.length > 0 && (
+        <div className="quick-actions">
+          <Card title={t("executiveDashboard.quickActions")} className="actions-card">
+            <div className="actions-grid">
+              {quickActions.map((a) => (
+                <Button
+                  key={a.path}
+                  label={t(a.label)}
+                  icon={a.icon}
+                  severity={a.severity}
+                  onClick={() => navigate(a.path)}
+                />
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

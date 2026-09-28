@@ -17,12 +17,7 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import S3FileUpload from "../../../../components/S3FileUpload";
 import policyService from "../../../../services/policyService";
 import { useSelector } from "react-redux";
-import { getUserData } from "../../../../utility/tokenManager";
-import { receiptsService } from "../../../../services/receiptsService";
 import quotationService from "../../../../services/quotationService";
-import { buildPayLaterReceiptData } from "../../../../utility/receiptHelper";
-import collectionService from "../../../../services/collectionService";
-import accountingService from "../../../../services/accountingService";
 
 const UploadPolicyCard = ({
   state,
@@ -235,187 +230,14 @@ const UploadPolicyCard = ({
       const updateResult = await policyService.updatePolicy(existingPolicyId, updatePayload);
       const policyData = updateResult.data || resolvedPolicyData;
 
-      // Create receipt for the policy
-      const currentUser = getUserData();
-      console.log("policyData", policyData);
-      const receiptData = buildPayLaterReceiptData(policyData, {
-        clientData: policyData?.client,
-        fallbackClientId: clientId,
-        fallbackGrossPremium: grossPremium,
-        currentUserId: currentUser?.id || "system",
-      });
-
-      const receiptResult = await receiptsService.createReceipt(receiptData);
-
-      // Sync collection from receipt (for tracking overdue payments)
-      if (receiptResult.success && receiptResult.data?.receiptId) {
-        try {
-          await collectionService.syncFromReceipt(receiptResult.data.receiptId);
-        } catch (collectionError) {
-          console.error(
-            "Collection sync failed (non-blocking):",
-            collectionError
-          );
-          // Don't fail the entire flow if collection sync fails
-        }
+      // Pay later: nothing is received, so no receipt and no journal. The bill raised at issuance stays open
+      // and the payment is captured later on the policy payment screen.
+      const payLater = await policyService.recordPayLater(existingPolicyId);
+      if (!payLater.success) {
+        console.warn("Pay later could not be recorded:", payLater.error);
       }
-
-      // Create accounting entries for Pay Later payment
-      try {
-        // Get the client's internal database ID from policy data
-        const internalClientId =
-          policyData?.clientId ||
-          policyData?.client?.id ||
-          clientId;
-
-        // Parse and validate amount - handle string amounts with commas/currency symbols
-        const premiumAmount = parseFloat(
-          String(
-            policyData?.grossPremium ||
-              policyData?.GrossPremium ||
-              grossPremium ||
-              0
-          ).replace(/[^0-9.-]/g, "")
-        ) || 0;
-
-        if (!internalClientId) {
-          console.warn(
-            "⚠️ Client ID not found in policy data, skipping accounting entries"
-          );
-          alert(
-            "Policy updated but accounting entry skipped: Client ID not found"
-          );
-        } else if (!premiumAmount || premiumAmount <= 0 || isNaN(premiumAmount)) {
-          console.warn(
-            "⚠️ Invalid premium amount, skipping accounting entries:",
-            premiumAmount
-          );
-          console.warn("PolicyData grossPremium:", policyData?.grossPremium);
-          console.warn("PolicyData GrossPremium:", policyData?.GrossPremium);
-          console.warn("Component grossPremium:", grossPremium);
-          alert(
-            "Policy updated but accounting entry skipped: Invalid premium amount"
-          );
-        } else {
-          // Extract complete premium breakdown from policy data; for Fire, fallback to quotation
-          const policyGrossPremium = parseFloat(
-            String(
-              policyData?.grossPremium ||
-              policyData?.GrossPremium ||
-              quotationDetails?.firePremiumDetails?.totalPremium ||
-              quotationDetails?.grossPremium ||
-              grossPremium ||
-              0
-            ).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyNetPremium = parseFloat(
-            String(
-              policyData?.netPremium ||
-              quotationDetails?.firePremiumDetails?.totalCoverPremium ||
-              quotationDetails?.netPremium ||
-              0
-            ).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyValueAddedTax = parseFloat(
-            String(policyData?.valueAddedTax || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyDocumentaryStampTax = parseFloat(
-            String(policyData?.documentaryStampTax || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyLocalGovernmentTax = parseFloat(
-            String(policyData?.localGovernmentTax || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyAccountPremiumOthers = parseFloat(
-            String(policyData?.accountPremiumOthers || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          // Discount: policy may not have it for Fire; use quotation's firePremiumDetails.totalDiscount
-          const policyDiscount = parseFloat(
-            String(
-              policyData?.discount ||
-              policyData?.quotation?.discount ||
-              quotationDetails?.firePremiumDetails?.totalDiscount ||
-              quotationDetails?.discount ||
-              0
-            ).replace(/[^0-9.-]/g, "")
-          ) || 0;
-
-          // Validate accounting equation: grossPremium = netPremium + VAT + DST + LGT + Others - Discount
-          const calculatedTotal =
-            policyNetPremium +
-            policyValueAddedTax +
-            policyDocumentaryStampTax +
-            policyLocalGovernmentTax +
-            policyAccountPremiumOthers -
-            policyDiscount;
-          const difference = Math.abs(policyGrossPremium - calculatedTotal);
-
-          if (difference > 0.01 && policyGrossPremium > 0) {
-            const commission = policyGrossPremium - policyNetPremium;
-            console.warn("⚠️ Accounting equation warning (Pay Later):", {
-              grossPremium: policyGrossPremium,
-              netPremium: policyNetPremium,
-              valueAddedTax: policyValueAddedTax,
-              documentaryStampTax: policyDocumentaryStampTax,
-              localGovernmentTax: policyLocalGovernmentTax,
-              accountPremiumOthers: policyAccountPremiumOthers,
-              discount: policyDiscount,
-              commission,
-              calculatedTotal,
-              difference,
-            });
-          }
-
-          const accountingData = {
-            amount: premiumAmount,
-            grossPremium: policyGrossPremium,
-            netPremium: policyNetPremium,
-            valueAddedTax: policyValueAddedTax,
-            documentaryStampTax: policyDocumentaryStampTax,
-            localGovernmentTax: policyLocalGovernmentTax,
-            accountPremiumOthers: policyAccountPremiumOthers,
-            discount: policyDiscount,
-            paymentDate: new Date().toISOString(),
-            description: `Pay Later - Policy payment for policy ${
-              policyData?.policyNumber || existingPolicyId
-            }`,
-            referenceType: "Policy",
-            referenceId: existingPolicyId,
-            clientId: internalClientId, // Use internal database ID, not display ID
-            policyId: existingPolicyId,
-            policyNumber: policyData?.policyNumber,
-            isDirectBilled: policyData?.isDirectBilled || false,
-          };
-
-          console.log("📊 Sending complete premium breakdown to accounting (Pay Later):", {
-            grossPremium: accountingData.grossPremium,
-            netPremium: accountingData.netPremium,
-            valueAddedTax: accountingData.valueAddedTax,
-            commission: accountingData.grossPremium - accountingData.netPremium,
-          });
-          await accountingService.createPaymentAccountingEntry(accountingData);
-          console.log(
-            "✅ Accounting entries created successfully for Pay Later payment"
-          );
-        }
-      } catch (accountingError) {
-        console.error(
-          "❌ Failed to create accounting entries:",
-          accountingError
-        );
-        alert(
-          `Policy updated but accounting entry creation failed: ${
-            accountingError.message || "Unknown error"
-          }`
-        );
-        // Don't fail payment flow
-      }
-
-      if (receiptResult.success) {
-        navigate(`/agent/policy`, {});
-      } else {
-        alert(t("agent.receiptCreationFailed"));
-        navigate(`/agent/policy`, {});
-      }
+      console.log("Policy updated (pay later):", policyData?.policyNumber);
+      navigate(`/agent/policydetail/${existingPolicyId}`, {});
     } catch (error) {
       console.error("Failed to update policy (Pay Later):", error);
       alert(
@@ -936,7 +758,12 @@ const UploadPolicyCard = ({
           maxFileSize={10 * 1024 * 1024} // 10MB for policy documents
           multiple={false}
           showPreview={false}
+          autoUpload
           uploadPath="policy-documents"
+          onRemove={() => {
+            setPolicyDocumentUrl(null);
+            formik.setFieldValue("file", "");
+          }}
           onUploadSuccess={(url, file) => {
             console.log("=== S3 Upload Success Callback ===");
             console.log("URL param:", url);

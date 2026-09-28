@@ -15,6 +15,7 @@ const LineDetailDrawer = ({
   whtApplicable,
   line,
   onUpdated,
+  onError,
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [ratePct, setRatePct] = useState(null);
@@ -86,6 +87,7 @@ const LineDetailDrawer = ({
       onUpdated?.(payload);
     } catch (err) {
       console.error("Line action failed", err);
+      onError?.(err);
     } finally {
       setActionLoading(false);
     }

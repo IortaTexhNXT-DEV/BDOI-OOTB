@@ -127,39 +127,14 @@ const PaymentOptions = () => {
     }
   };
   useEffect(() => {
-    const fromWaitingPage = state?.fromWaitingPage;
-    const fromPolicyDetail = state?.fromPolicyDetail;
-    const fromUploadPolicy = state?.fromUploadPolicy;
-    const fromEndorsement = state?.fromEndorsement;
-
-    // Auto-proceed for quote-to-policy direct flow (no waiting page)
-    if (
-      quotationId &&
-      !policyId &&
-      !fromWaitingPage &&
-      clientData?.generatedClientId
-    ) {
-      const timer = setTimeout(() => {
-        console.log("Auto-proceeding: quote flow");
-        handleSubmit("Direct Debit");
-      }, 2000);
-      return () => clearTimeout(timer);
+    // Quote and policy flows: no simulated payment. The payment screen asks how the client pays (pay later, bank
+    // transfer, cheque, online, cash) and records it for finance to verify, so go straight there.
+    if (!fromEndorsement && (quotationId || policyId)) {
+      handleSubmit(null, { replace: true });
+      return undefined;
     }
 
-    // Auto-proceed for policy flow (from waiting page OR policy detail OR upload)
-    if (
-      policyId &&
-      (fromWaitingPage || fromPolicyDetail || fromUploadPolicy) &&
-      clientData?.generatedClientId
-    ) {
-      const timer = setTimeout(() => {
-        console.log("Auto-proceeding: policy flow");
-        handleSubmit("Direct Debit");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-
-    // Auto-proceed for endorsement payment flow
+    // Endorsement payment flow (owned by the endorsement module): unchanged
     if (
       policyId &&
       fromEndorsement &&
@@ -202,7 +177,7 @@ const PaymentOptions = () => {
     handleSubmit("Direct Debit");
   };
 
-  const handleSubmit = (paymentMethod) => {
+  const handleSubmit = (paymentMethod, navOptions = {}) => {
     // Handle endorsement payment flow differently
     if (fromEndorsement && endorsementId) {
       // For endorsement, go directly to client view after payment
@@ -219,7 +194,7 @@ const PaymentOptions = () => {
     }
 
     // Determine if this is a quote-to-policy flow or existing policy payment
-    const isQuoteFlow = !!quotationId;
+    const isQuoteFlow = !!quotationId && !policyId;
     const confirmationRoute = isQuoteFlow
       ? "/agent/quote/paymentconfirmation"
       : "/agent/policy/paymentconfirmation";
@@ -247,6 +222,7 @@ const PaymentOptions = () => {
       clientName;
 
     navigate(confirmationRoute, {
+      ...navOptions,
       state: {
         ...state,
         policyId: policyId || state?.policyId,
@@ -260,7 +236,7 @@ const PaymentOptions = () => {
         PolicyNumber: actualPolicyNumber, // Both cases for compatibility
         grossPremium: actualGrossPremium,
         GrossPremium: actualGrossPremium, // Both cases for compatibility
-        paymentMethod: paymentMethod || "Direct Debit",
+        paymentMethod: paymentMethod || null,
         isQuoteFlow: isQuoteFlow,
       },
     });
@@ -307,62 +283,6 @@ const PaymentOptions = () => {
         </div>
         <Card className="mt-4">
           <div className="table__header">{t("agent.paymentOptions")}</div>
-
-          {/* Mock Payment Mode Banner - Show for quote flow, waiting page flow, and policy detail flow */}
-          {((quotationId && !policyId && !state?.fromWaitingPage) ||
-            (policyId &&
-              (state?.fromWaitingPage || state?.fromPolicyDetail))) && (
-            <>
-              <div
-                style={{
-                  padding: "12px 20px",
-                  backgroundColor: "#fff3cd",
-                  border: "1px solid #ffc107",
-                  borderRadius: "6px",
-                  marginTop: "15px",
-                  marginBottom: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <i
-                  className="pi pi-info-circle"
-                  style={{ color: "#856404" }}
-                ></i>
-                <span style={{ fontSize: "14px", color: "#856404" }}>
-                  <strong>{t("agent.mockPaymentMode")}</strong> {t("agent.autoSelectingDirectDebit")}
-                </span>
-              </div>
-              <div
-                style={{
-                  padding: "15px",
-                  backgroundColor: "#e3f2fd",
-                  borderRadius: "6px",
-                  marginBottom: "15px",
-                  textAlign: "center",
-                }}
-              >
-                <i
-                  className="pi pi-spin pi-spinner"
-                  style={{
-                    fontSize: "1.5em",
-                    color: "#1976d2",
-                    marginRight: "10px",
-                  }}
-                ></i>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#1976d2",
-                    fontWeight: "500",
-                  }}
-                >
-                  {t("agent.autoProceedingPayment")}
-                </span>
-              </div>
-            </>
-          )}
 
           <div className="grid mt-2">
             <div className="col-6">

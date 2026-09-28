@@ -11,6 +11,7 @@ import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
 import { pick } from '../documents/tabular.js';
 import { clientFromLead } from '../clients/service.js';
 import { issuePolicy, insurerId, getPolicyRow, updatePolicy } from '../policies/service.js';
+import { assertKyc } from '../policies/kyc.js';
 import { createLead } from '../leads/service.js';
 import { premiumBreakdown } from './premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -192,6 +193,11 @@ export async function convertToPolicy(id, body, user) {
   }
   const allowed = await getSetting('quotations.convertible_statuses', ['CustomerAccepted', 'Approved']);
   if (!allowed.includes(quoteStatusOut(existing.status))) throw badRequest(`Cannot convert quotation with status "${quoteStatusOut(existing.status)}". Quote must be CustomerAccepted or Approved`);
+  // KYC and vehicle identifiers (policy.kyc_required_fields): saved on the quotation by the convert steps or sent with the request
+  const qdoc = existing.doc || {};
+  // Issuance never marks the premium paid: the bill stays open until a payment is captured and confirmed (receipts).
+  if (extra.paymentStatus && extra.paymentStatus !== 'Pending') extra.paymentStatus = 'Pending';
+  await assertKyc({ lob: existing.lob || lobOf(existing.product_type), sources: [qdoc.insuranceVehicleDetails?.[0], qdoc, extra.customerInfo, extra] });
   const result = await withTransaction(async (db) => {
     const q = (await db.query('SELECT * FROM quotes WHERE id = $1 FOR UPDATE', [existing.id])).rows[0];
     if (q.status === 'converted') throw badRequest('Quotation was converted by another request');

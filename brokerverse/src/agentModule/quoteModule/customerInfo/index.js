@@ -21,11 +21,41 @@ import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import quotationService from "../../../services/quotationService";
 import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
+import s3Service from "../../../services/s3Service";
+import { ProgressBar } from "primereact/progressbar";
+import {
+  KYC_DEFAULT_ID_TYPES,
+  KYC_DEFAULT_REQUIRED,
+  kycErrors,
+  loadKycConfig,
+  requiredKycFor,
+} from "../../../utility/kyc";
+
+const FieldError = ({ formik, name }) =>
+  formik.touched[name] && formik.errors[name] ? (
+    <div style={{ fontSize: 12, color: "red" }} className="mt-2">
+      {formik.errors[name]}
+    </div>
+  ) : null;
 
 const CustomerInfo = ({ action }) => {
-  console.log(action, "find action in customer info");
   const { t } = useTranslation();
   const [imageURL, setimageURL] = useState("");
+  const [idUploadProgress, setIdUploadProgress] = useState(null);
+  const [kycConfig, setKycConfig] = useState({
+    required: KYC_DEFAULT_REQUIRED,
+    idTypes: KYC_DEFAULT_ID_TYPES,
+  });
+
+  useEffect(() => {
+    let active = true;
+    loadKycConfig().then((cfg) => {
+      if (active) setKycConfig(cfg);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { quotationId } = useParams();
@@ -116,6 +146,8 @@ const CustomerInfo = ({ action }) => {
     // If we have quotation details with vehicle info, use those
     if (quotationDetails) {
       return {
+        IdType: quotationDetails.idType || "",
+        IdCardImage: quotationDetails.idCardImage || "",
         IdCardNumber: quotationDetails.idCardNumber || "",
         MotorNumber: quotationDetails.motorNumber || "",
         ChassisNumber: quotationDetails.chassisNumber || "",
@@ -132,25 +164,10 @@ const CustomerInfo = ({ action }) => {
     }
 
     // Fallback for edit action (backward compatibility)
-    if (action === "edit") {
-      return {
-        IdCardNumber: "",
-        MotorNumber: "8546791234",
-        ChassisNumber: "8529637412",
-        Mortgage: "",
-        CertNumber: "2583694671",
-        PlateNumber: "4568231975",
-        MVFileNumber: "1456239857",
-        AuthenCode: "3219758642",
-        Aluminium: "",
-        AirBag: "",
-        TNVS: "",
-        TruckType: "",
-      };
-    }
-
-    // Default empty values
+    // Default empty values (never pre-filled with sample identifiers)
     return {
+      IdType: "",
+      IdCardImage: "",
       IdCardNumber: "",
       MotorNumber: "",
       ChassisNumber: "",
@@ -186,6 +203,8 @@ const CustomerInfo = ({ action }) => {
 
     // Prepare customer info data
     const customerInfo = {
+      IdType: values.IdType,
+      IdCardImage: values.IdCardImage,
       IdCardNumber: values.IdCardNumber,
       MotorNumber: values.MotorNumber,
       ChassisNumber: values.ChassisNumber,
@@ -202,6 +221,8 @@ const CustomerInfo = ({ action }) => {
 
     // Prepare vehicle info for API
     const vehicleInfo = {
+      idType: values.IdType,
+      idCardImage: values.IdCardImage,
       idCardNumber: values.IdCardNumber,
       motorNumber: values.MotorNumber,
       chassisNumber: values.ChassisNumber,
@@ -287,9 +308,30 @@ const CustomerInfo = ({ action }) => {
 
   console.log("first21", postcustomerinfodata);
 
-  const handleUppendImg = (name, src) => {
-    setimageURL(src?.objectURL);
-    console.log(name, src?.objectURL, "find handleUppendImg");
+  // The ID card photo is uploaded as soon as it is chosen; the stored URL is saved on the quotation (idCardImage).
+  const handleIdCardSelected = async (file) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.current?.show({ severity: "error", summary: "File too large", detail: "The ID card photo must be 2 MB or smaller", life: 4000 });
+      return;
+    }
+    setimageURL(file.objectURL || URL.createObjectURL(file));
+    setIdUploadProgress(0);
+    try {
+      const result = await s3Service.uploadFile(file, "id-cards", (p) => setIdUploadProgress(p));
+      if (!result.success || !result.url) throw new Error(result.error || "Upload failed");
+      formik.setFieldValue("IdCardImage", result.url);
+    } catch (error) {
+      setimageURL("");
+      formik.setFieldValue("IdCardImage", "");
+      toast.current?.show({ severity: "error", summary: "ID card upload failed", detail: error.message, life: 5000 });
+    } finally {
+      setIdUploadProgress(null);
+    }
+  };
+  const handleRemoveIdCard = () => {
+    setimageURL("");
+    formik.setFieldValue("IdCardImage", "");
   };
   const handleBackNavigation = () => {
     customHistory.back();
@@ -389,12 +431,37 @@ const CustomerInfo = ({ action }) => {
     console.log("1211", updatedValues);
   };
 
+  // KYC and vehicle identifiers required for this line (policy.kyc_required_fields); the server enforces the same rule.
+  const requiredKyc = requiredKycFor(kycConfig, quotationDetails?.lob || "MOTOR");
+  const isRequired = (item) => requiredKyc.includes(item);
+  const plateOrMv = isRequired("plateOrMvFile");
+
   const formik = useFormik({
     initialValues: initialValues,
     enableReinitialize: true, // Allow form to reinitialize when quotation data loads
-    // validate: customValidation,
+    validate: (values) => kycErrors(values, requiredKyc, kycConfig.idTypes),
     onSubmit: handleSubmit,
   });
+
+  const submitWithValidation = async () => {
+    const errors = await formik.validateForm();
+    formik.setTouched(Object.fromEntries(Object.keys(formik.initialValues).map((k) => [k, true])), false);
+    if (Object.keys(errors).length) {
+      toast.current?.show({
+        severity: "warn",
+        summary: "Customer information incomplete",
+        detail: [...new Set(Object.values(errors))].join(". "),
+        life: 6000,
+      });
+      return;
+    }
+    formik.handleSubmit();
+  };
+
+  useEffect(() => {
+    if (formik.values.IdCardImage && !imageURL) setimageURL(formik.values.IdCardImage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.IdCardImage]);
 
   useEffect(() => {
     // if (action === "edit") {
@@ -509,35 +576,39 @@ const CustomerInfo = ({ action }) => {
               disabled
             />
           </div>
+          <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+            <DropdownField
+              label={`ID Type${isRequired("idType") ? " *" : ""}`}
+              options={(kycConfig.idTypes || []).map((v) => ({ label: v, value: v }))}
+              optionLabel="label"
+              value={formik.values.IdType}
+              onChange={(e) => formik.setFieldValue("IdType", e.value)}
+            />
+            <FieldError formik={formik} name="IdType" />
+          </div>
+          <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+            <InputTextField
+              label={`ID Card Number${isRequired("idNumber") ? " *" : ""}`}
+              value={formik.values.IdCardNumber}
+              onChange={formik.handleChange("IdCardNumber")}
+            />
+            <FieldError formik={formik} name="IdCardNumber" />
+          </div>
           <div class="col-12 mt-2">
-            <div className="upload__label">ID Card</div>
+            <div className="upload__label">ID Card{isRequired("idImage") ? " *" : ""}</div>
             {!imageURL ? (
               <div className="upload__card__container mt-2">
                 <div className="file_icon_selector">
                   <FileUpload
-                    url="./upload"
                     auto
                     customUpload
                     mode="basic"
-                    name="demo"
+                    name="idCard"
                     accept=".png,.jpg,.jpeg"
-                    // maxFileSize={2000000}
                     uploadHandler={(e) => {
-                      formik.setFieldValue("file", e.files[0]);
-                      handleUppendImg(
-                        e.options.props.name,
-                        e.files[0],
-                        "the data"
-                      );
+                      handleIdCardSelected(e.files[0]);
+                      e.options.clear();
                     }}
-                    // uploadHandler={(e) => {
-                    //   formik.setFieldValue("file", e.files[0]);
-                    //   handleUppendImg(
-                    //     e.options.props.name,
-                    //     e.files[0],
-                    //     "the data"
-                    //   );
-                    // }}
                   />
                   <div className="icon_click_option">
                     <SvgImageUpload />
@@ -550,21 +621,30 @@ const CustomerInfo = ({ action }) => {
               </div>
             ) : (
               <div className="upload__image__area mt-2">
-                <img src={imageURL} alt="Image" className="image__view" />
+                <img src={imageURL} alt="ID card" className="image__view" />
+                <div className="flex align-items-center gap-2 mt-2">
+                  {idUploadProgress !== null ? (
+                    <ProgressBar value={idUploadProgress} style={{ height: "0.75rem", flex: 1 }} />
+                  ) : (
+                    formik.values.IdCardImage && (
+                      <span className="text-sm text-green-600">
+                        <i className="pi pi-check-circle mr-1" />
+                        Uploaded
+                      </span>
+                    )
+                  )}
+                  <Button
+                    type="button"
+                    icon="pi pi-trash"
+                    label="Remove"
+                    className="p-button-text p-button-danger p-button-sm"
+                    disabled={idUploadProgress !== null}
+                    onClick={handleRemoveIdCard}
+                  />
+                </div>
               </div>
             )}
-            {formik.touched.file && formik.errors.file && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.file}
-              </div>
-            )}
-          </div>
-          <div class="col-12 mt-2">
-            <InputTextField
-              label="ID Card Number"
-              value={formik.values.IdCardNumber}
-              onChange={formik.handleChange("IdCardNumber")}
-            />
+            <FieldError formik={formik} name="IdCardImage" />
           </div>
 
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
@@ -638,7 +718,7 @@ const CustomerInfo = ({ action }) => {
         <div class="grid m-0">
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="Motor Number"
+              label={`Motor Number${isRequired("motorNumber") ? " *" : ""}`}
               value={formik.values.MotorNumber}
               onChange={formik.handleChange("MotorNumber")}
             />
@@ -650,7 +730,7 @@ const CustomerInfo = ({ action }) => {
           </div>
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="Chassis Number"
+              label={`Chassis Number${isRequired("chassisNumber") ? " *" : ""}`}
               value={formik.values.ChassisNumber}
               onChange={formik.handleChange("ChassisNumber")}
             />
@@ -688,7 +768,7 @@ const CustomerInfo = ({ action }) => {
           </div>
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="Plate Number"
+              label={`Plate Number${isRequired("plateNumber") ? " *" : plateOrMv ? " (or MV file no.) *" : ""}`}
               value={formik.values.PlateNumber}
               onChange={formik.handleChange("PlateNumber")}
             />
@@ -700,7 +780,7 @@ const CustomerInfo = ({ action }) => {
           </div>
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="MV File Number"
+              label={`MV File Number${isRequired("mvFileNumber") ? " *" : plateOrMv ? " (if no plate yet)" : ""}`}
               value={formik.values.MVFileNumber}
               onChange={formik.handleChange("MVFileNumber")}
             />
@@ -790,9 +870,8 @@ const CustomerInfo = ({ action }) => {
               <div className="next__btn__container">
                 <Button
                   className="next__btn"
-                  onClick={() => {
-                    formik.handleSubmit();
-                  }}
+                  disabled={idUploadProgress !== null}
+                  onClick={submitWithValidation}
                 >
                   Next
                 </Button>

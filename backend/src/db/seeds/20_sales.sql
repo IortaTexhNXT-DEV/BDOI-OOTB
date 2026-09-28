@@ -186,6 +186,9 @@ SELECT 'cm_sls_' || right(p.id, 2), p.id, p.quote_id, p.owner_user_id, p.net_pre
   round(p.net_premium * q.commission_rate, 2) - round(p.net_premium * q.commission_rate * (SELECT (value#>>'{}')::numeric FROM app_settings WHERE key = 'tax.withholding_rate'), 2),
   (SELECT value#>>'{}' FROM app_settings WHERE key = 'commission.initial_status'), to_char(p.inception_date, 'YYYY-MM'), p.created_at
 FROM policies p JOIN quotes q ON q.id = p.quote_id WHERE p.id LIKE 'pol_sls_%'
+  -- commission accrues only to producers holding a commission-earning role (commission.eligible_roles), never to an administrator
+  AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = p.owner_user_id
+    AND ro.code IN (SELECT jsonb_array_elements_text(COALESCE((SELECT value FROM app_settings WHERE key = 'commission.eligible_roles'), '["agent","sales"]'::jsonb))))
 ON CONFLICT (id) DO NOTHING;
 
 -- ---------- Sample: endorsements ----------

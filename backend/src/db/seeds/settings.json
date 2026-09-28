@@ -217,6 +217,51 @@
     "type": "number"
   },
   {
+    "key": "commission.eligible_roles",
+    "value": ["agent", "sales"],
+    "group": "commission",
+    "label": "Roles that earn commission on the policies they produce (administrators and back-office staff do not)",
+    "type": "json"
+  },
+  {
+    "key": "commission.require_bank_account",
+    "value": true,
+    "group": "commission",
+    "label": "A referrer needs a bank account on file before commission can be approved or paid out",
+    "type": "boolean"
+  },
+  {
+    "key": "policy.kyc_required_fields",
+    "value": {
+      "MOTOR": ["idType", "idNumber", "idImage", "chassisNumber", "motorNumber", "plateOrMvFile"],
+      "*": []
+    },
+    "group": "policy",
+    "label": "KYC and vehicle identifiers required to issue a policy, per line of business (* = other lines). Items: idType, idNumber, idImage, chassisNumber, motorNumber, plateNumber, mvFileNumber, plateOrMvFile",
+    "type": "json"
+  },
+  {
+    "key": "policy.kyc_id_types",
+    "value": ["PhilSys ID", "UMID", "Passport", "Driver's License", "PRC ID", "SSS ID", "GSIS ID", "TIN ID", "Postal ID", "Voter's ID", "Senior Citizen ID"],
+    "group": "policy",
+    "label": "Accepted government ID documents for customer KYC",
+    "type": "json"
+  },
+  {
+    "key": "policy.payment_capture_modes",
+    "value": ["bank-transfer", "check", "online", "cash"],
+    "group": "policy",
+    "label": "How a client can pay the premium on the policy payment screen (besides Pay later)",
+    "type": "json"
+  },
+  {
+    "key": "policy.payment_gateway_url",
+    "value": "",
+    "group": "policy",
+    "label": "Online payment gateway checkout URL (empty = no gateway; online payments are captured manually with their reference)",
+    "type": "string"
+  },
+  {
     "key": "notification.email_enabled",
     "value": false,
     "group": "notification",
