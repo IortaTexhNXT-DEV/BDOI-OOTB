@@ -1,0 +1,43 @@
+# BrokerVerse: PostgreSQL + API + web. `docker compose up --build`, then open http://localhost:8080
+# Sign in as BrokerVerse / the ADMIN_PASSWORD below, then create persona users under Master > User Management.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: brokerverse
+      POSTGRES_USER: brokerverse
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-brokerverse}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brokerverse -d brokerverse"]
+      interval: 5s
+      retries: 20
+  api:
+    build: ./backend
+    environment:
+      PORT: 8000
+      DATABASE_URL: postgres://brokerverse:${DB_PASSWORD:-brokerverse}@db:5432/brokerverse
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET to a long random string}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Technxt@1}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      SMTP_URL: ${SMTP_URL:-}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build:
+      context: ./brokerverse
+      args:
+        REACT_APP_BASE_URL: /api
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+volumes:
+  db-data:
+  uploads:

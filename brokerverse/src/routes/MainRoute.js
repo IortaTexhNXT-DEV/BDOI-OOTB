@@ -107,6 +107,9 @@ import AddAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountD
 import ViewAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/ViewAccountData";
 import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/EditAccountData";
 import SystemSettingsPage from "../module/SystemSettings";
+import ConfigurationPage from "../module/Administration/Configuration";
+import SchedulesPage from "../module/Administration/Schedules";
+import AuditTrailPage from "../module/Administration/AuditTrail";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
 import InsuranceCompany from "../module/GeneralMasters/InsuranceManagementMasters/InsuranceCompany";
@@ -974,6 +977,9 @@ const Maincomponent = () => {
             path="master/configuration/system-settings"
             element={<SystemSettingsPage />}
           />
+          <Route path="master/configuration/settings" element={<ConfigurationPage />} />
+          <Route path="master/configuration/schedules" element={<SchedulesPage />} />
+          <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
           <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 

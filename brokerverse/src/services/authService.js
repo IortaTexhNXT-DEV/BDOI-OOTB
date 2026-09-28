@@ -41,13 +41,6 @@ class AuthService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // Reduced to 8 seconds
-
-      console.log("Starting login API call...", this.baseURL);
-      console.log("BASE_URL from constant:", BASE_URL);
-      console.log(
-        "Environment REACT_APP_BASE_URL:",
-        process.env.REACT_APP_BASE_URL
-      );
       const response = await fetch(`${this.baseURL}/auth/login`, {
         method: "POST",
         headers: {

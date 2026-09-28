@@ -1,0 +1,8 @@
+[
+  {"code":"renewal-notices","name":"Renewal notices","description":"Create renewal reminders and notifications for policies expiring within the configured notice windows","cron":"0 6 * * *","handler":"renewalNotices"},
+  {"code":"policy-expiry","name":"Policy expiry","description":"Mark policies past their expiry date as expired","cron":"15 0 * * *","handler":"policyExpiry"},
+  {"code":"quote-expiry","name":"Quotation expiry","description":"Expire quotations older than the configured validity","cron":"30 0 * * *","handler":"quoteExpiry"},
+  {"code":"receivable-ageing","name":"Receivable ageing","description":"Recompute ageing buckets for open receivables and notify collections","cron":"0 7 * * *","handler":"receivableAgeing"},
+  {"code":"daily-reports","name":"Daily reports","description":"Generate the scheduled daily reports (production register, collections, claims position)","cron":"0 5 * * *","handler":"dailyReports"},
+  {"code":"email-outbox","name":"E-mail outbox","description":"Deliver queued e-mails","cron":"*/5 * * * *","handler":"emailOutbox"}
+]

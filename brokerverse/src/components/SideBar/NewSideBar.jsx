@@ -7,9 +7,8 @@ import SidebarItemCollapse from "./SideBarItemCollapse";
 import SidebarItem from "./SideBarItem";
 import { useLocation, useNavigate } from "react-router-dom";
 import findNamesByPath from "../../utility/findSidBarNames";
-import Cookies from "js-cookie";
 import { InputText } from "primereact/inputtext";
-import { roleMenuPermissions } from "../../utils/menuPermissions";
+import { filterMenuForRoles, getUserRoles } from "../../utils/menuPermissions";
 import {
   COMMISSION_VIEW_MODE_EVENT,
   getCommissionViewMode,
@@ -44,134 +43,15 @@ const NewSideBar = ({ onNavigate }) => {
     };
   }, []);
 
-  // Memoize user roles to prevent re-parsing on every render
-  const userRoles = useMemo(() => {
-    const userRole =
-      localStorage.getItem("USER_ROLE") || Cookies.get("USER_ROLE");
-    // Parse userRoles - if it's empty or null, try to parse from USER_ROLE
-    let roles = [];
-    // If USER_ROLES is empty but USER_ROLE exists, parse the comma-separated string
-    if ((!roles || roles.length === 0) && userRole) {
-      roles = userRole.split(", ").map((role) => role.trim());
-      console.log("🔧 Parsed roles from USER_ROLE string:", roles);
-    }
-    return roles;
-  }, []); // Empty dependency array - only parse once on mount - roles don't change during the session
+  // Roles do not change during a session, so read them once.
+  const userRoles = useMemo(() => getUserRoles(), []);
 
-  // Helper function to get role menu permissions
-  // NOTE: If a role is not defined here, it will have full access by default
-  const getRoleMenuPermissions = (roleKey) => {
-    return roleMenuPermissions[roleKey];
-  };
-
-  // Helper function to check if a role has access to a menu/submenu (case-insensitive)
-  const checkMenuAccess = (rolePermissions, menuName, submenuName) => {
-    // If rolePermissions is undefined (role not defined), grant all access
-    if (!rolePermissions) return true;
-
-    if (rolePermissions.all) return true;
-
-    // Normalize menu name to lowercase for matching
-    const menuKey = menuName.toLowerCase();
-    const allowedSubmenus = rolePermissions[menuKey];
-
-    if (!allowedSubmenus) return false;
-
-    if (!Array.isArray(allowedSubmenus)) return false;
-
-    return allowedSubmenus.some((allowedName) => {
-      const normalizedSubmenuName = submenuName.toLowerCase();
-      const normalizedAllowed = allowedName.toLowerCase();
-      return (
-        normalizedSubmenuName === normalizedAllowed ||
-        normalizedSubmenuName.includes(normalizedAllowed) ||
-        normalizedAllowed.includes(normalizedSubmenuName)
-      );
-    });
-  };
-
-  // Filter menu based on user role - memoized to prevent unnecessary re-renders
+  // Deny-by-default role filter shared with the route guard (utils/menuPermissions.js).
   const baseFilteredMenuList = useMemo(() => {
-    // If user has no role or is not authenticated, show only Dashboard and Login
-    if (!userRoles || userRoles.length === 0) {
-      return menuList.filter(
-        (menu) => menu.name === "Dashboard" || menu.name === "Login",
-      );
+    if (!userRoles.length) {
+      return menuList.filter((menu) => menu.name === "Dashboard");
     }
-
-    // Normalize userRoles array
-    const normalizedRoles = Array.isArray(userRoles) ? userRoles : [];
-
-    // Check if user has all-access roles (IT Admin, BA)
-    const hasAllAccess = normalizedRoles.some(
-      (role) =>
-        role &&
-        (role.toLowerCase() === "it-admin" || role.toLowerCase() === "ba"),
-    );
-
-    if (hasAllAccess) {
-      return menuList.filter((menu) => menu.name !== "Master");
-    }
-
-    // Filter menu based on user's roles
-    const filteredMenus = menuList
-      .map((menu) => {
-        // Create a copy of the menu to avoid mutating the original
-        const filteredMenu = { ...menu };
-
-        if (menu.submenu) {
-          // Filter submenus based on role access
-          const filteredSubmenus = menu.submenu
-            .map((submenu) => {
-              // Check if any of the user's roles has access to this submenu
-              const hasAccess = normalizedRoles.some((role) => {
-                if (!role) return false;
-
-                const roleKey = role.toLowerCase();
-                const menuPerms = getRoleMenuPermissions(roleKey);
-
-                // Use the new helper function for case-insensitive matching
-                return checkMenuAccess(menuPerms, menu.name, submenu.name);
-              });
-
-              return hasAccess ? submenu : null;
-            })
-            .filter((item) => item !== null);
-
-          console.log(
-            `Menu: ${menu.name}, Total submenus: ${menu.submenu.length}, Filtered Submenus:`,
-            filteredSubmenus.length,
-          );
-          if (filteredSubmenus.length > 0) {
-            console.log(
-              `  Visible submenus:`,
-              filteredSubmenus.map((s) => s.name),
-            );
-          }
-
-          // Only include menu if it has visible submenus
-          if (filteredSubmenus.length > 0) {
-            return { ...filteredMenu, submenu: filteredSubmenus };
-          }
-          return null;
-        }
-
-        // Menu without submenu - check if user has access to the whole menu
-        const hasAccess = normalizedRoles.some((role) => {
-          if (!role) return false;
-          const roleKey = role.toLowerCase();
-          const menuPerms = getRoleMenuPermissions(roleKey);
-          // If role is not defined (menuPerms is undefined), grant all access
-          if (!menuPerms) return true;
-          if (menuPerms.all) return true;
-          return menuPerms[menu.name.toLowerCase()] !== undefined;
-        });
-
-        return hasAccess ? filteredMenu : null;
-      })
-      .filter((menu) => menu !== null);
-
-    return filteredMenus;
+    return filterMenuForRoles(menuList, userRoles);
   }, [userRoles]);
 
   // Hide Agents/Referrer Accounts when Commission view is Management

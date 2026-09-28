@@ -137,7 +137,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
 
   const handleDownloadTemplate = () => {
     const templateUrl = 'https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/sample-xl/Leads-Bulk-Upload.xlsx';
-    window.open(templateUrl, '_blank');
+    window.open(templateUrl, '_blank', 'noopener,noreferrer');
   };
 
 

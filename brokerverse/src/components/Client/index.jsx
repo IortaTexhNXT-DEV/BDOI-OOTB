@@ -27,7 +27,7 @@ const Client = ({
   const encodedSubject = encodeURIComponent(subject);
   const composeEmail = () => {
     const fullGmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${encodedSubject}&body=${encodedContent}`;
-    window.open(fullGmailURL, "_blank");
+    window.open(fullGmailURL, "_blank", "noopener,noreferrer");
   };
 
   const handleSinglesubmit = async () => {

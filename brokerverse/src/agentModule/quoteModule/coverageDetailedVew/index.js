@@ -650,7 +650,8 @@ const CoverageDetailedView = () => {
                         window.open(
                           vehiclePhotoUrls[quotData.vehicleLeftSidePhoto] ||
                             quotData.vehicleLeftSidePhoto,
-                          "_blank"
+                          "_blank",
+                          "noopener,noreferrer"
                         )
                       }
                     />
@@ -682,7 +683,8 @@ const CoverageDetailedView = () => {
                         window.open(
                           vehiclePhotoUrls[quotData.vehicleRightSidePhoto] ||
                             quotData.vehicleRightSidePhoto,
-                          "_blank"
+                          "_blank",
+                          "noopener,noreferrer"
                         )
                       }
                     />
@@ -714,7 +716,8 @@ const CoverageDetailedView = () => {
                         window.open(
                           vehiclePhotoUrls[quotData.vehicleFrontSidePhoto] ||
                             quotData.vehicleFrontSidePhoto,
-                          "_blank"
+                          "_blank",
+                          "noopener,noreferrer"
                         )
                       }
                     />
@@ -746,7 +749,8 @@ const CoverageDetailedView = () => {
                         window.open(
                           vehiclePhotoUrls[quotData.vehicleRearSidePhoto] ||
                             quotData.vehicleRearSidePhoto,
-                          "_blank"
+                          "_blank",
+                          "noopener,noreferrer"
                         )
                       }
                     />

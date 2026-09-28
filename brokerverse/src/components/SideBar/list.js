@@ -144,6 +144,24 @@ export const menuList = [
         includes: ["/master/configuration/system-settings"],
       },
       {
+        id: 20,
+        name: "Configuration",
+        path: "/master/configuration/settings",
+        includes: ["/master/configuration/settings"],
+      },
+      {
+        id: 21,
+        name: "Schedules",
+        path: "/master/configuration/schedules",
+        includes: ["/master/configuration/schedules"],
+      },
+      {
+        id: 22,
+        name: "Audit Trail",
+        path: "/master/configuration/audit-trail",
+        includes: ["/master/configuration/audit-trail"],
+      },
+      {
         id: 1,
         name: "Generals",
         submenu: [

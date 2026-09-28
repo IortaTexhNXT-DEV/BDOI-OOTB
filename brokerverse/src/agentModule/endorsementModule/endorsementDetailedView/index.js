@@ -113,7 +113,7 @@ const EndorsementDetailedView = ({ action }) => {
       console.log("Opening document in new tab:", downloadUrl);
 
       // Open in new tab
-      window.open(downloadUrl, "_blank");
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Error opening document:", error);
       alert(t("endorsement.errorLoadingDocument"));

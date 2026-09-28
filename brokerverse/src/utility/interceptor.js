@@ -2,6 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "./constant";
 import { getAccessToken } from "./tokenManager";
 import { logout } from "./logout";
+import { refreshAccessToken } from "./sessionRefresh";
 
 const request = axios.create({
     baseURL: BASE_URL,
@@ -38,6 +39,15 @@ request.interceptors.request.use((config) => {
 request.interceptors.response.use(
     (response) => response,
     async (err) => {
+        const original = err.config;
+        if (err.response?.status === 401 && original && !original.__bvRetried) {
+            const token = await refreshAccessToken();
+            if (token) {
+                original.__bvRetried = true;
+                original.headers = { ...original.headers, Authorization: `Bearer ${token}` };
+                return request(original);
+            }
+        }
         if (err.response?.status === 401) {
             // Call logout API and clear data
             try {

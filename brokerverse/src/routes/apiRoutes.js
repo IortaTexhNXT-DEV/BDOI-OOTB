@@ -47,12 +47,6 @@ export const APIROUTES = {
     GET_UPLODEURL: "upload/get-url/vehicle?quoteId=",
     PATCH_VEHICLEDETAIL: "vehicalDetails/update-vehicle-details",
     PATCH_VEHICLEUPLOAD: "vehicalDetails/update-vehicle-images/",
-    GET_QUOTE_DETAIL: "quote/get-quote-details?quoteId=",
-  },
-  VECHICALQUOTEDETAIL: {
-    GET_VECHICAL_QUOTE_DETAIL: "quote/get-quote-details?quoteId=",
-    GET_UPLOAD_URL: "upload/get-url/id?quoteId=",
-    PATCH_LEAD_DATA: "lead/update-lead",
   },
   VECHICALQUOTEDETAIL: {
     GET_VECHICAL_QUOTE_DETAIL: "quote/get-quote-details?quoteId=",
@@ -95,7 +89,7 @@ export const APIROUTES = {
   },
   ENDROSEMENTLIST: {
     GET_ENDROSEMENT_LIST:
-      "endorsements/get-All-Endorsements?clientId=13&endorsementId=&perPage=5&pageNo=1",
+      "endorsements/get-All-Endorsements",
     GET_SEARCH_ENDROSEMENT_LIST: "",
   },
   CREATEENDROSMENT: {
@@ -103,7 +97,7 @@ export const APIROUTES = {
     POST_ENDROSEMENT_FORM_TWO: "",
     POST_ENDROSEMENT_FORM_THREE: "",
     POST_ENDROSEMENT_FORM_FOUR: "",
-    GET_ENDROSEMENT_FORM: "policy/get-indidual-policy-details?PolicyId=4",
+    GET_ENDROSEMENT_FORM: "policy/get-indidual-policy-details?PolicyId=",
   },
   GETENDROSEMENT: {
     GET_ENDROSEMENT_FORM_ONE: "",

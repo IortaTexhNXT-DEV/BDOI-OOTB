@@ -19,7 +19,7 @@ const resettableRootReducer = (state, action) => {
 
 const store = configureStore({
     reducer: resettableRootReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+    middleware: (getDefaultMiddleware) => process.env.NODE_ENV === 'development' ? getDefaultMiddleware().concat(logger) : getDefaultMiddleware(),
 });
 
 export const resetStore = () => {

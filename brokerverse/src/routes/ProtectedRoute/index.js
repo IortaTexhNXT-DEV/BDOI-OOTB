@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 
@@ -9,9 +9,19 @@ import { initializeGlobalToast } from "../../utility/toastUtils";
 
 import AgentNavBar from "../../agentModule/component/navBar";
 import NewSideBar from "../../components/SideBar/NewSideBar";
+import { menuList } from "../../components/SideBar/list";
+import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+
+const NotAuthorised = () => (
+  <div className="protected__layout__not-authorised" role="alert">
+    <h2>Not authorised</h2>
+    <p>Your role does not give access to this screen. Choose a screen from the menu.</p>
+  </div>
+);
 
 const ProtectedLayout = () => {
   const toastRef = useRef(null);
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -31,7 +41,6 @@ const ProtectedLayout = () => {
   // Handle mobile/tablet sidebar toggle with debouncing
   const toggleSidebar = () => {
     setSidebarOpen((prevState) => {
-      console.log("Toggling sidebar from", prevState, "to", !prevState);
       return !prevState;
     });
   };
@@ -140,7 +149,13 @@ const ProtectedLayout = () => {
           <div className="protected__layout__header">
             <AgentNavBar />
           </div>
-          {Auth() ? <Outlet /> : <Navigate to="/login" replace />}
+          {!Auth() ? (
+            <Navigate to="/login" replace />
+          ) : isPathAllowed(location.pathname, menuList, getUserRoles()) ? (
+            <Outlet />
+          ) : (
+            <NotAuthorised />
+          )}
         </div>
       </div>
     </div>

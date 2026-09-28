@@ -259,7 +259,6 @@ class DisbursementService {
 
       const url = `${this.baseURL}/disbursements/${disbursementId}`;
       console.log("Making PUT request to:", url);
-      console.log("Auth headers:", authService.getAuthHeader());
 
       const response = await fetch(url, {
         method: "PUT",
@@ -319,7 +318,6 @@ class DisbursementService {
 
       const url = `${this.baseURL}/disbursements/checkbook/${checkbookId}`;
       console.log("Making PUT request to:", url);
-      console.log("Auth headers:", authService.getAuthHeader());
 
       const response = await fetch(url, {
         method: "PUT",
@@ -377,7 +375,6 @@ class DisbursementService {
 
       const url = `${this.baseURL}/disbursements/invoice-list/${invoiceListId}`;
       console.log("Making GET request to:", url);
-      console.log("Auth headers:", authService.getAuthHeader());
 
       const response = await fetch(url, {
         method: "GET",
@@ -471,7 +468,6 @@ class DisbursementService {
 
       const url = `${this.baseURL}/disbursements/invoice-list`;
       console.log('Making POST request to:', url);
-      console.log('Auth headers:', authService.getAuthHeader());
 
       const response = await fetch(url, {
         method: 'POST',
@@ -602,7 +598,6 @@ class DisbursementService {
 
       const url = `${this.baseURL}/disbursements/${disbursementId}`;
       console.log("Making GET request to:", url);
-      console.log("Auth headers:", authService.getAuthHeader());
 
       const response = await fetch(url, {
         method: "GET",

@@ -1,3 +1,6 @@
+import "./utility/productionConsole";
+import "./utility/sessionRefresh";
+import "primeflex/primeflex.css"; // layout utilities (bundled first to keep the old cascade order; was loaded unpinned from unpkg)
 import "./i18n";
 import ReactDOM from "react-dom/client";
 import "./index.scss";

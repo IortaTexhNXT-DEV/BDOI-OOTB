@@ -19,7 +19,6 @@ class NotificationService {
         const token = getAccessToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
-          console.log("Notification API: Token found and added to headers");
         } else {
           console.warn("Notification API: No access token found");
         }

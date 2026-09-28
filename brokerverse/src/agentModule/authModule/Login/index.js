@@ -63,7 +63,6 @@ const Login = () => {
   };
 
   const handleSubmit = async (values) => {
-    console.log(values, "values");
     const startTime = performance.now();
 
     setIsLoading(true);

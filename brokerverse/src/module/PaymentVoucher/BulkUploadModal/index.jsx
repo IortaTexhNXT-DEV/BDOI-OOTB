@@ -29,7 +29,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
 
   const handleDownloadTemplate = () => {
     const templateURL = "https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/template/disbursements-bulk-upload-template+2.xlsx";
-    window.open(templateURL, "_blank");
+    window.open(templateURL, "_blank", "noopener,noreferrer");
   };
 
   const handleUpload = async () => {

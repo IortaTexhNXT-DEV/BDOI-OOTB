@@ -517,7 +517,7 @@ const PolicyDetailView = () => {
         }
       }
 
-      window.open(downloadUrl, "_blank");
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
 
       toast.current?.show({
         severity: "success",
@@ -566,7 +566,7 @@ const PolicyDetailView = () => {
       }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      window.open(url, "_blank", "noopener,noreferrer");
       toast.current?.show({
         severity: "success",
         summary: t("policyDetail.documentOpened"),
@@ -651,7 +651,7 @@ const PolicyDetailView = () => {
       );
       if (result.success && result.blob) {
         const url = window.URL.createObjectURL(result.blob);
-        window.open(url, "_blank");
+        window.open(url, "_blank", "noopener,noreferrer");
         toast.current?.show({
           severity: "success",
           summary: t("policyDetail.documentOpened"),

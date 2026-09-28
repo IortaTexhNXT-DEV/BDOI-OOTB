@@ -48,7 +48,6 @@ const NavBar = ({ Logout }) => {
   ];
 
   const Navdata = token === undefined ? login : AfterLogin;
-  console.log(token, "leo");
 
   const start = (
     <div onClick={handleclick}>

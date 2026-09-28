@@ -304,7 +304,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       }%0A%0ATotal Premium: ${formatCurrency(premiumValue)}%0A%0AFor full details, please contact your agent.`;
     }
     const whatsappUrl = `https://wa.me/?text=${quoteText}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   const dialogHeader = showInsurerForm

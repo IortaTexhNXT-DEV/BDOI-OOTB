@@ -55,7 +55,6 @@ const ApproveQuote = () => {
     // Decode token to get basic info (quotationId, etc.)
     try {
       const payload = JSON.parse(atob(tokenParam.split('.')[1]));
-      console.log('Token payload:', payload);
       setToken(tokenParam);
       setTokenPayload(payload);
       
