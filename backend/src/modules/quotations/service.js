@@ -199,7 +199,15 @@ export async function convertToPolicy(id, body, user) {
   const qdoc = existing.doc || {};
   // Issuance never marks the premium paid: the bill stays open until a payment is captured and confirmed (receipts).
   if (extra.paymentStatus && extra.paymentStatus !== 'Pending') extra.paymentStatus = 'Pending';
-  await assertKyc({ lob: existing.lob || lobOf(existing.product_type), sources: [qdoc.insuranceVehicleDetails?.[0], qdoc, extra.customerInfo, extra] });
+  // A renewal is the same client and vehicle: the expiring policy's saved ID and vehicle identifiers count,
+  // and anything entered on the convert steps (later sources) overrides them.
+  const renewedFrom = qdoc.renewedFromPolicyId
+    ? (await query('SELECT doc, details FROM policies WHERE id = $1', [qdoc.renewedFromPolicyId])).rows[0]
+    : null;
+  await assertKyc({
+    lob: existing.lob || lobOf(existing.product_type),
+    sources: [renewedFrom?.details, renewedFrom?.doc, qdoc.insuranceVehicleDetails?.[0], qdoc, extra.customerInfo, extra],
+  });
   const result = await withTransaction(async (db) => {
     const q = (await db.query('SELECT * FROM quotes WHERE id = $1 FOR UPDATE', [existing.id])).rows[0];
     if (q.status === 'converted') throw badRequest('Quotation was converted by another request');

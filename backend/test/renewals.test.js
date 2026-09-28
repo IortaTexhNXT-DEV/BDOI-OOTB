@@ -268,7 +268,10 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(acc.status).toBe(200);
     expect(acc.body.quotationStatus).toBe('CustomerAccepted');
     const old = await one('SELECT * FROM policies WHERE id = \'pol_sls_01\'');
-    const conv = await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { paymentStatus: 'Pending' } });
+    // the expiring policy holds no ID or vehicle identifiers, so issuance asks for them (policy.kyc_required_fields)
+    const refused = await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { paymentStatus: 'Pending' } });
+    expect(refused.status).toBe(400);
+    const conv = await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { paymentStatus: 'Pending', ...{ idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/renewal.jpg', chassisNumber: 'MHFXW42G5P0099999', motorNumber: '2NRX999999', plateNumber: 'NBC 1234' } } });
     expect(conv.status).toBe(201);
     const newId = conv.body.policyId;
     expect(newId).not.toBe('pol_sls_01');
@@ -311,7 +314,8 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(sent.status).toBe(200);
     expect(sent.body.sentTo).toBe('patricia.garcia@example.ph');
     expect((await request(ctx.app).post('/api/quotations/approve-by-customer').send({ token: tokenOf(sent.body.approvalUrl) })).status).toBe(200);
-    const conv = await ctx.api('post', `/quotations/${q.id}/convert-to-policy`).send({});
+    expect((await ctx.api('post', `/quotations/${q.id}/convert-to-policy`).send({})).status).toBe(400);
+    const conv = await ctx.api('post', `/quotations/${q.id}/convert-to-policy`).send({ idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/renewal.jpg', chassisNumber: 'MHFXW42G5P0099999', motorNumber: '2NRX999999', plateNumber: 'NBC 1234' });
     expect(conv.status).toBe(201);
     expect((await one('SELECT status, renewed_to FROM policies WHERE id = \'pol_crs_21\'')).renewed_to).toBe(conv.body.policyId);
     expect((await one('SELECT status FROM renewals WHERE id = \'rnw_crs_21\'')).status).toBe('renewed');
