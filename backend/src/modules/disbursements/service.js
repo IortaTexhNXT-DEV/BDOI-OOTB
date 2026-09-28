@@ -298,7 +298,8 @@ export async function createInsurerRemittance(db, b, user) {
   const apps = (await db.query(`SELECT a.*, r.amount AS rcv_amount, r.commission_amount, r.client_id, p.id AS policy_id, p.policy_number, c.client_code
     FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id
     WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND p.insurance_company_id = $1
-      AND ($2::date IS NULL OR a.applied_at::date >= $2) AND ($3::date IS NULL OR a.applied_at::date <= $3) FOR UPDATE OF a`, [insurer.id, isoDate(b.fromDate), isoDate(b.toDate)])).rows;
+      AND ($2::date IS NULL OR a.applied_at::date >= $2) AND ($3::date IS NULL OR a.applied_at::date <= $3)
+      AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, [insurer.id, isoDate(b.fromDate), isoDate(b.toDate), Array.isArray(b.policyIds) ? b.policyIds.map(String) : null])).rows;
   if (!apps.length) throw conflict(`No collected premium awaiting remittance to ${insurer.name}`);
   const d = await createDisbursement(db, { payeeType: 'Insurer', insurerName: insurer.name, transactionCode: b.transactionCode || 'REMT', criteria: 'Payall',
     transactionDescription: `Premium remittance – ${insurer.name}`, remarks: b.remarks }, user, { source: 'insurer-remittance', status: 'draft' });

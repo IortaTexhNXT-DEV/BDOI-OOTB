@@ -34,6 +34,7 @@ beforeAll(async () => {
 afterAll(async () => { await new Promise((r) => { setTimeout(r, 50); }); await pool.end(); });
 
 const binary = (res, cb) => { const chunks = []; res.on('data', (c) => chunks.push(c)); res.on('end', () => cb(null, Buffer.concat(chunks))); };
+// UTC dates; the business date (Asia/Manila) can already be tomorrow, so report ranges end at daysAgo(-1)
 const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
 const register = (who, fields, file = true) => {
   let r = as(who, 'post', '/claims');
@@ -144,19 +145,19 @@ describe('claims', () => {
     expect((await ctx.api('get', `/claims/getdocuments/${claim.id}?documentName=Nope`)).status).toBe(404);
   });
   it('builds the dashboard report and the Excel downloads', async () => {
-    const r = await ctx.api('get', `/claims/report?startDate=${daysAgo(365)}&endDate=${daysAgo(0)}&includeData=true`);
+    const r = await ctx.api('get', `/claims/report?startDate=${daysAgo(365)}&endDate=${daysAgo(-1)}&includeData=true`);
     expect(r.status).toBe(200);
     const d = r.body.data;
     expect(Object.keys(d.summary)).toEqual(expect.arrayContaining(['totalOpenClaims', 'totalAgingClaims', 'todaysClaims', 'maxClaimsByState']));
     expect(Object.keys(d.breakdown)).toEqual(expect.arrayContaining(['byType', 'byStatus', 'byLOB', 'byState', 'agingBreakdown']));
     expect(d.detailedClaims.some((c) => c.claimNumber === claim.claimNumber)).toBe(true);
     expect(d.breakdown.byType[0].count).toBeGreaterThanOrEqual(d.breakdown.byType.at(-1).count);
-    const x = await ctx.api('get', `/claims/report?startDate=${daysAgo(365)}&endDate=${daysAgo(0)}&includeData=true&format=excel`).buffer(true).parse(binary);
+    const x = await ctx.api('get', `/claims/report?startDate=${daysAgo(365)}&endDate=${daysAgo(-1)}&includeData=true&format=excel`).buffer(true).parse(binary);
     expect(x.headers['content-type']).toContain('spreadsheetml');
     expect(x.body.subarray(0, 2).toString()).toBe('PK');
-    const c = await ctx.api('get', `/claims/reports/criteria?startDate=${daysAgo(365)}&endDate=${daysAgo(0)}&criteria=Settled&reportType=json`);
+    const c = await ctx.api('get', `/claims/reports/criteria?startDate=${daysAgo(365)}&endDate=${daysAgo(-1)}&criteria=Settled&reportType=json`);
     expect(c.body.data.rows.every((row) => ['Settled', 'Closed'].includes(row.claimStatus))).toBe(true);
-    const cx = await ctx.api('get', `/claims/reports/criteria?startDate=${daysAgo(365)}&endDate=${daysAgo(0)}&criteria=Open&reportType=excel`).buffer(true).parse(binary);
+    const cx = await ctx.api('get', `/claims/reports/criteria?startDate=${daysAgo(365)}&endDate=${daysAgo(-1)}&criteria=Open&reportType=excel`).buffer(true).parse(binary);
     expect(cx.body.subarray(0, 2).toString()).toBe('PK');
   });
   it('enforces permissions per persona', async () => {

@@ -80,6 +80,39 @@ describe('remittances and approvals', () => {
   });
 });
 
+describe('settlement to money out', () => {
+  it('an approved settlement raises the insurer payment voucher for the collected premium', async () => {
+    const { rows: [pol] } = await pool.query(`SELECT p.id, p.policy_number FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id
+      JOIN insurance_companies i ON i.id = p.insurance_company_id WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND i.code = 'FPG' LIMIT 1`);
+    expect(pol).toBeTruthy();
+    const rem = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'FPG', period: '2026-09', lines: [{ policyId: pol.id }] });
+    expect(rem.status).toBe(201);
+    await ctx.api('post', '/remittance/remittances/process').send({ ids: [rem.body.data.id] });
+    const a = (await ctx.api('get', '/remittance/approvals')).body.data.find((x) => x.entityId === rem.body.data.id);
+    expect((await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' })).status).toBe(200);
+    const line = (await ctx.api('get', '/remittance/settlements/available-policies?insurerCode=FPG')).body.data.find((l) => l.remittanceId === rem.body.data.id);
+    const s = await ctx.api('post', '/remittance/settlements').send({ insurerCode: 'FPG', settlementPeriod: ['2026-09-01', '2026-09-30'], lineIds: [line.id] });
+    await ctx.api('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'bank_transfer', bankAccount: 'ACC-BDO-001' });
+    const ap = (await ctx.api('get', '/remittance/approvals?transactionType=Settlement')).body.data.find((x) => x.entityId === s.body.data.id);
+    expect((await as(fin, 'post', `/remittance/approvals/${ap.id}/approve`).send({ comments: 'Pay' })).status).toBe(200);
+    const { rows: [item] } = await pool.query('SELECT data FROM remittance_items WHERE id = $1', [s.body.data.id]);
+    expect(item.data.voucherNumber).toMatch(/^PV-/);
+    const v = await ctx.api('get', `/disbursements/${item.data.disbursementId}`);
+    expect(v.body.data).toMatchObject({ payeeType: 'Insurer', status: 'draft' });
+    expect(v.body.data.invoiceList.map((i) => i.policyNumber)).toEqual([pol.policy_number]);
+    // collected premium is now on a voucher, so it cannot be paid again
+    const again = await ctx.api('post', '/disbursements/insurer-remittance').send({ insurerName: 'FPG Insurance Co., Inc.' });
+    expect(again.status === 409 || !again.body.data.invoiceList.some((i) => i.policyNumber === pol.policy_number)).toBe(true);
+  });
+  it('a policy paid in full shows nothing outstanding on direct billing', async () => {
+    const { rows: [paid] } = await pool.query(`SELECT p.id, i.code FROM policies p JOIN insurance_companies i ON i.id = p.insurance_company_id
+      WHERE EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id) AND NOT EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id AND r.status <> 'paid') LIMIT 1`);
+    if (!paid) return;
+    const row = (await ctx.api('get', `/remittance/direct-bill/policies?insurerCode=${paid.code}`)).body.data.find((p) => p.id === paid.id);
+    if (row) expect(row.outstandingAmount).toBe(0);
+  });
+});
+
 describe('bills', () => {
   it('direct bill from eligible policies, then send', async () => {
     const pols = await ctx.api('get', '/remittance/direct-bill/policies?insurerCode=SECUREGUARD');

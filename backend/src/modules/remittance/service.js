@@ -8,6 +8,7 @@ import { getSetting } from '../../lib/settings.js';
 import { notify } from '../notifications/router.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { isoDate, nextNumber, params, round2, toNumber } from '../masters/helpers.js';
+import { createInsurerRemittance } from '../disbursements/service.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -136,6 +137,7 @@ export async function eligiblePolicies({ insurerId, agentUserId, from, to, produ
   return many(`SELECT p.id, p.policy_number, p.premium_total, p.commission_amount, p.inception_date, p.insurance_company_id, p.owner_user_id, p.details,
                  c.display_name AS insured_name, pr.name AS product_name, pr.line AS product_line,
                  COALESCE((SELECT sum(balance) FROM receivables rv WHERE rv.policy_id = p.id AND rv.status <> 'paid'), 0) AS outstanding,
+                 EXISTS (SELECT 1 FROM receivables rv WHERE rv.policy_id = p.id) AS billed,
                  (SELECT max(received_date) FROM receipts rc WHERE rc.policy_id = p.id AND rc.status <> 'cancelled') AS last_payment
                FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
                WHERE ${conds.join(' AND ')} ORDER BY p.inception_date, p.policy_number`, p.values);
@@ -145,7 +147,9 @@ const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 export const policyRow = (p) => ({
   id: p.id, policyNo: p.policy_number, insuredName: p.insured_name, product: cap(p.product_line) || p.product_name, productName: p.product_name,
   effectiveDate: p.inception_date, premium: Number(p.premium_total), commission: Number(p.commission_amount), tax: toNumber(p.details?.taxTotal, 0),
-  outstandingAmount: Number(p.outstanding) || Number(p.premium_total), lastPaymentDate: p.last_payment, billAmount: Number(p.outstanding) || Number(p.premium_total),
+  // once billed, outstanding is what is still unpaid (0 when paid in full); an unbilled policy owes its premium
+  outstandingAmount: p.billed ? Number(p.outstanding) : Number(p.premium_total), lastPaymentDate: p.last_payment,
+  billAmount: p.billed ? Number(p.outstanding) : Number(p.premium_total),
   netAmount: round2(Number(p.premium_total) - Number(p.commission_amount) - toNumber(p.details?.taxTotal, 0)),
   commissionRate: Number(p.premium_total) ? round2((Number(p.commission_amount) / Number(p.premium_total)) * 100) : 0,
 });
@@ -266,6 +270,27 @@ export async function processingHistory() {
     totalAmount: b.amount, status: b.status, duration: `${Math.max(1, Math.round((b.data.durationMs || 0) / 1000))}s` }));
 }
 
+/**
+ * An approved settlement becomes money out: the premium collected on its policies (net of commission) is put on an
+ * insurer payment voucher in Disbursement, for the finance checker to approve (cheque approval posts the journal).
+ * Premium not collected by the broker is not paid out; the settlement records that instead.
+ */
+async function raiseInsurerVoucher(c, item, lineIds, user) {
+  if (!item.insurance_company_id || !lineIds.length) return;
+  const policyIds = (await c.query('SELECT DISTINCT policy_id FROM remittance_lines WHERE id = ANY($1) AND policy_id IS NOT NULL', [lineIds.map(Number)])).rows.map((r) => r.policy_id);
+  if (!policyIds.length) return;
+  let voucher = null;
+  try {
+    voucher = await createInsurerRemittance(c, { insuranceCompanyId: item.insurance_company_id, policyIds, transactionCode: 'REMT', remarks: `Settlement ${item.reference_no}` }, user);
+  } catch (e) {
+    if (e.status !== 409) throw e; // 409: nothing collected and not yet remitted for these policies
+  }
+  const link = voucher
+    ? { disbursementId: voucher.disbursementId || voucher.id, voucherNumber: voucher.voucherNumber, voucherAmount: voucher.amount }
+    : { voucherNote: 'No collected premium awaiting remittance for these policies; no payment voucher raised' };
+  await c.query('UPDATE remittance_items SET data = data || $2 WHERE id = $1', [item.id, JSON.stringify(link)]);
+}
+
 async function applyDecision(c, a, decision, user, remarks) {
   if (a.entity === 'remittance') {
     const status = decision === 'approve' ? 'approved' : 'rejected';
@@ -285,6 +310,7 @@ async function applyDecision(c, a, decision, user, remarks) {
     if (remIds.length) await c.query('UPDATE remittances SET status = \'settled\', settled_at = now(), updated_by = $2, updated_at = now() WHERE id = ANY($1) AND status = \'approved\'', [remIds, user.id]);
     const lineIds = item.data.lineIds || [];
     if (lineIds.length) await c.query('UPDATE remittance_lines SET status = \'Settled\' WHERE id = ANY($1)', [lineIds.map(Number)]);
+    await raiseInsurerVoucher(c, item, lineIds, user);
   }
   if (item.kind === 'adjustment' && item.remittance_id) {
     const amt = toNumber(item.data.adjustmentAmount, 0);
