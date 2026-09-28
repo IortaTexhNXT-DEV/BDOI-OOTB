@@ -38,7 +38,7 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 | 16-17 | Claim refused for a loss date outside the policy period; CLM-2026-00002 registered (loss 28 Sep, collision, estimate 85,000); settlement 78,500 by carlo.claims, maker refused, approved by lisa.claims2; claims report and dashboard updated | carlo.claims, lisa.claims2 | Pass after fixes D48-D54 | 16-* |
 | 18 | Journal voucher: unbalanced refused (screen and API); JV-2026-00106 submitted and approved/posted by fe.approver; trial balance balanced | liza.finance, fe.approver | Pass after fixes D55-D56 | 18-* |
 | 19 | Schedules run: renewal notices, receivable ageing (5 updated), renewal pipeline, collection reminders (3 e-mails, 3 notifications); runs recorded | BrokerVerse | Pass (D62 cosmetic) | 19-schedules |
-| 20 | Renewal quote from the policy (net 32,005.00, gross 40,086.27) | jose.uw | Partial: quote not linked to the policy (D63, being fixed) | 20-* |
+| 20 | Renewal of POL-2025-90021: QT-2026-00003 gross 26,935.02 linked to the policy, approved by the client; issue refused until ID and vehicle identifiers entered; new term POL-2026-00002 (14/09/2026-14/09/2027), old policy Renewed; payment recorded by the underwriter left the bill open, finance confirmed OR-2026-00022; commission 1,075.25 to the original referrer | jose.uw, client, liza.finance | Pass after fixes D63, D18, D20, D71 | 20-* |
 | 21 | Persona access: menu per role, forbidden address blocked, forbidden API call 403 — 8 personas | all | Pass after fix D60 (security) — [persona_access.md](persona_access.md) | 21-* |
 | 22 | All 18 reports generated as CSV, XLSX and PDF and contain this run's transactions | BrokerVerse | Pass after fix D65 — [reports_check.md](reports_check.md) | |
 | 23 | Audit trail records logins, reports, jobs, endorsements, receipts, claims, vouchers, cheques, remittances and settlements | BrokerVerse | Pass | |
@@ -56,4 +56,4 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 
 ## Defects
 
-65 defects logged; the open ones and the fixes still to be re-tested are listed in [DEFECTS.md](DEFECTS.md).
+71 defects logged, 55 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the ones that need a business decision are D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts).
