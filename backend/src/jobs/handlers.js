@@ -12,6 +12,7 @@ const tableExists = async (t) => !!(await one('SELECT 1 FROM information_schema.
 
 export async function renewalNotices() {
   if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
+  if (!(await getSetting('notification.renewal_reminder', true))) return { skipped: 'renewal reminders are switched off (notification.renewal_reminder)' };
   const days = (await getSetting('limits.renewal_notice_days', [60, 30, 15])) || [60, 30, 15];
   const now = await today();
   let created = 0;

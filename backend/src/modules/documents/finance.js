@@ -54,7 +54,8 @@ export async function receiptsPdf(db, receipts) {
     const lines = (await db.query('SELECT * FROM receipt_lines WHERE receipt_id = $1 ORDER BY line_no', [r.id]).catch(() => ({ rows: [] }))).rows;
     specs.push(await receiptDoc(r, lines, h));
   }
-  return buildPdfBatch(specs, { title: receipts.length === 1 ? `Official Receipt ${receipts[0].receipt_number}` : 'Official Receipts' });
+  const batchTitle = (await getSetting('receipts.print_title', 'Official Receipts')) || 'Official Receipts';
+  return buildPdfBatch(specs, { title: receipts.length === 1 ? `Official Receipt ${receipts[0].receipt_number}` : batchTitle });
 }
 
 /** Payment voucher spec for one disbursement row with its invoice lines and journal lines. */

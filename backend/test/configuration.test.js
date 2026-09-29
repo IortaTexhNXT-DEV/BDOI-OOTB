@@ -212,3 +212,24 @@ describe('round2: cents, half away from zero', () => {
     expect(copies).toEqual(['lib/money.js']);
   });
 });
+
+describe('settings check script and switches that were not read', () => {
+  it('scripts/check-settings.js: every key read in code exists and only documented keys are left unread', async () => {
+    const { checkSettings } = await import('../scripts/check-settings.js');
+    const r = await checkSettings();
+    expect(r.missing).toEqual([]);
+    // product.component_kinds is a read-only list shown on Master > Configuration; the kinds themselves are fixed in code
+    expect(r.unread.map((u) => u.key)).toEqual(['product.component_kinds']);
+  });
+
+  it('the renewal notice job honours notification.renewal_reminder', async () => {
+    const { renewalNotices } = await import('../src/jobs/handlers.js');
+    await setSetting('notification.renewal_reminder', false);
+    try {
+      expect((await renewalNotices()).skipped).toMatch(/switched off/);
+    } finally {
+      await setSetting('notification.renewal_reminder', true);
+    }
+    expect((await renewalNotices()).skipped).toBeUndefined();
+  });
+});
