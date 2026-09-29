@@ -16,7 +16,7 @@ import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
-import { downloadCsv, isoDate, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
+import { calendarDateFormat, dateBody, downloadCsv, isoDate, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 
 const emptyAdjustment = {
@@ -355,7 +355,7 @@ const RemittanceAdjustments = () => {
                 body={(data) => formatCurrency(data.newAmount)}
               />
               <Column field="status" header="Status" body={statusBodyTemplate} />
-              <Column field="dueDate" header="Due Date" />
+              <Column field="dueDate" body={dateBody("dueDate")} header="Due Date" />
               <Column header="Actions" body={actionsBodyTemplate} style={{ width: '120px' }} />
             </DataTable>
 
@@ -380,7 +380,7 @@ const RemittanceAdjustments = () => {
                 body={(data) => signedAmount(Number(data.amount || 0))}
               />
               <Column field="status" header="Status" body={statusBodyTemplate} />
-              <Column field="processedDate" header="Processed Date" />
+              <Column field="processedDate" body={dateBody("processedDate")} header="Processed Date" />
               <Column field="processedBy" header="Processed By" />
             </DataTable>
           </TabPanel>
@@ -426,7 +426,7 @@ const RemittanceAdjustments = () => {
             </div>
             <div className="p-field p-col-12 p-md-6">
               <label>Effective Date *</label>
-              <Calendar
+              <Calendar dateFormat={calendarDateFormat()}
                 value={newAdjustment.effectiveDate}
                 onChange={(e) => setNewAdjustment({ ...newAdjustment, effectiveDate: e.value })}
                 placeholder="Select date"
@@ -513,7 +513,7 @@ const RemittanceAdjustments = () => {
                 </div>
                 <div className="detail-item">
                   <label>Request Date:</label>
-                  <span>{selectedAdjustment.requestDate}</span>
+                  <span>{dateBody("requestDate")(selectedAdjustment)}</span>
                 </div>
                 <div className="detail-item">
                   <label>Reason:</label>

@@ -16,11 +16,10 @@ import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Timeline } from "primereact/timeline";
 import { TabView, TabPanel } from "primereact/tabview";
 import remittanceService from "../../../services/remittanceService";
-import { downloadCsv, formatDate, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import { calendarDateFormat, downloadCsv, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 const RemittanceTracking = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -301,7 +300,7 @@ const RemittanceTracking = () => {
                   value={dateRange}
                   onChange={(e) => setDateRange(e.value)}
                   selectionMode="range"
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   placeholder="Select date range"
                 />
               </div>
@@ -346,7 +345,7 @@ const RemittanceTracking = () => {
                   </div>
                   <div className="detail-item">
                     <label>Created Date:</label>
-                    <span>{new Date(remittanceDetails.createdDate).toLocaleDateString()}</span>
+                    <span>{formatDate(remittanceDetails.createdDate)}</span>
                   </div>
                   <div className="detail-item">
                     <label>Created By:</label>
@@ -397,7 +396,7 @@ const RemittanceTracking = () => {
                     <div className="timeline-content">
                       <div className="timeline-header">
                         <strong>{item.action}</strong>
-                        <small>{new Date(item.at).toLocaleString(numberLocale())}</small>
+                        <small>{formatDateTime(item.at)}</small>
                       </div>
                       <div className="timeline-details">
                         <p>By: {item.by}</p>

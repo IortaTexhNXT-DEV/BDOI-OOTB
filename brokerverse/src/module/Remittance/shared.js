@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiRequest, masterService } from "../../services/remittanceService";
+import { calendarDateFormat, formatDate as formatConfiguredDate } from "../../utility/dateFormat";
+
+/** PrimeReact Calendar dateFormat for the configured display format (System Settings general.date_format). */
+export { calendarDateFormat };
 
 /** Reads /settings once and returns a { key: value } map. */
 export const loadSettings = async () => {
@@ -45,7 +49,21 @@ export const isoDate = (d) => {
 
 export const isoMonth = (d) => isoDate(d)?.slice(0, 7);
 
-export const formatDate = (d) => (d ? new Date(d).toLocaleDateString() : "");
+/** API timestamps come as "YYYY-MM-DD HH:MM" in UTC; read them as UTC so they show in local time. */
+const normalise = (d) => (typeof d === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(d) ? `${d.replace(" ", "T")}Z` : d);
+const hasTime = (d) => typeof d === "string" && /\d{2}:\d{2}/.test(d);
+
+/** A date in the configured display format (e.g. DD/MM/YYYY); "" when empty. */
+export const formatDate = (d) => formatConfiguredDate(normalise(d), { empty: "" });
+
+/** A date and time in the configured display format (e.g. DD/MM/YYYY HH:MM); "" when empty. */
+export const formatDateTime = (d) => formatConfiguredDate(normalise(d), { withTime: true, empty: "" });
+
+/** DataTable body for a date field: configured format, with the time when the value carries one. */
+export const dateBody = (field) => (row) => {
+  const v = row?.[field];
+  return hasTime(v) ? formatDateTime(v) : formatDate(v);
+};
 
 /** Downloads rows as a CSV file (columns: [{ field, header }]). */
 export const downloadCsv = (fileName, rows, columns) => {

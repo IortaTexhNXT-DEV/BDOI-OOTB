@@ -417,5 +417,19 @@
     "value": "DNC",
     "group": "numbering",
     "label": "Debit note collection (insurer payment) prefix"
+  },
+  {
+    "key": "leads.min_age_years",
+    "value": 18,
+    "group": "leads",
+    "label": "Minimum age (years) for a lead or client date of birth",
+    "type": "number"
+  },
+  {
+    "key": "leads.max_age_years",
+    "value": 100,
+    "group": "leads",
+    "label": "Maximum age (years) for a lead or client date of birth",
+    "type": "number"
   }
 ]

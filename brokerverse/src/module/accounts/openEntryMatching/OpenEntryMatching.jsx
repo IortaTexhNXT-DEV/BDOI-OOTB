@@ -14,6 +14,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import "./OpenEntryMatching.scss";
 import accountingService from "../../../services/accountingService";
 import useOpenItemAccounts from "./useOpenItemAccounts";
+import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 
 const OpenEntryMatching = () => {
   const { t } = useTranslation();
@@ -63,7 +64,7 @@ const OpenEntryMatching = () => {
         currency: filters.currencyCode,
       });
       if (!response.success) {
-        alert(response.error || "Failed to fetch unmatched entries");
+        notifyError(response.error || "Failed to fetch unmatched entries");
       } else {
         const entries = response.data || [];
         const debitEntries = entries.filter(
@@ -76,7 +77,7 @@ const OpenEntryMatching = () => {
         setCreditEntries(creditEntries);
       }
     } catch (error) {
-      alert("Failed to fetch unmatched entries");
+      notifyError("Failed to fetch unmatched entries");
     } finally {
       setLoading(false);
     }
@@ -84,7 +85,7 @@ const OpenEntryMatching = () => {
 
   const handleMatch = async () => {
     if (selectedDebits.length === 0 || selectedCredits.length === 0) {
-      alert(t("validation.selectOneDebitOneCredit"));
+      notifyWarn(t("validation.selectOneDebitOneCredit"));
       return;
     }
 
@@ -115,15 +116,15 @@ const OpenEntryMatching = () => {
       });
 
       if (!response.success) {
-        alert(response.error || "Failed to match entries");
+        notifyError(response.error || "Failed to match entries");
       } else {
-        alert(`Successfully matched ${response.data.length} entry pair(s)`);
+        notifySuccess(`Successfully matched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
         setSelectedCredits([]);
         handlePull();
       }
     } catch (error) {
-      alert(error.message || "Failed to match entries");
+      notifyError(error.message || "Failed to match entries");
     } finally {
       setLoading(false);
     }

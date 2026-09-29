@@ -20,6 +20,7 @@ import {
 } from "../store/mainAccoutMiddleware";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { notifyError } from "../../../../utility/dialogs";
 
 const TableData = ({ MainAccountList }) => {
   const { t } = useTranslation();
@@ -91,7 +92,7 @@ const TableData = ({ MainAccountList }) => {
       dispatch(getMainAccountDetailView(rowData));
       navigate("/master/finance/mainaccount/viewmainaccount");
     } else {
-      alert("error");
+      notifyError("error");
     }
   };
 
@@ -100,7 +101,7 @@ const TableData = ({ MainAccountList }) => {
       dispatch(getPatchMainAccountDetailEdit(rowData));
       navigate("/master/finance/mainaccount/editmainaccount");
     } else {
-      alert("error");
+      notifyError("error");
     }
   };
   const renderActionButton = (rowData) => {

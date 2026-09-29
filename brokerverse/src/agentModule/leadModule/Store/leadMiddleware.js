@@ -12,6 +12,7 @@ import {
   GET_LEAD_STATS
 } from "../../../redux/actionTypes";
 import leadService from "../../../services/leadService";
+import { toIsoDate } from "../../../utility/birthDate";
 
 export const getleadtableMiddleware = createAsyncThunk(
   GET_LEADTABLE_DATA,
@@ -56,9 +57,7 @@ export const postCreateleadMiddleware = createAsyncThunk(
         firstName: payload?.FirstName,
         lastName: payload?.LastName,
         preferredName: payload?.PreferredName,
-        DOB: payload?.DateofBirth ? 
-          (typeof payload.DateofBirth === 'string' ? payload.DateofBirth : 
-           payload.DateofBirth.toISOString().split('T')[0]) : "",
+        DOB: payload?.DateofBirth ? toIsoDate(payload.DateofBirth) : "",
         gender: payload?.gender || "Male",
         emailId: payload?.EmailID,
         contactNumber: payload?.ContactNumber,
@@ -130,9 +129,7 @@ export const patchLeadEditMiddleWare = createAsyncThunk(
         firstName: payload?.FirstName,
         lastName: payload?.LastName,
         preferredName: payload?.PreferredName,
-        DOB: payload?.DateofBirth ? 
-          (typeof payload.DateofBirth === 'string' ? payload.DateofBirth : 
-           payload.DateofBirth.toISOString().split('T')[0]) : "",
+        DOB: payload?.DateofBirth ? toIsoDate(payload.DateofBirth) : "",
         gender: payload?.gender || "Male",
         emailId: payload?.EmailID,
         contactNumber: payload?.ContactNumber,

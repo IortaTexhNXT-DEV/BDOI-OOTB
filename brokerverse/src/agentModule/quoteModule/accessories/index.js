@@ -13,6 +13,7 @@ import { postaccessoriesMiddleware } from "./store/accessoriesMiddleware";
 import { setQuoteAccessories } from "../Store/quotationReducer";
 import policyRenewalService from "../../../services/policyRenewalService";
 import leadService from "../../../services/leadService";
+import { notifyError } from "../../../utility/dialogs";
 
 const Accessories = ({ action, flow }) => {
   const { t } = useTranslation();
@@ -83,7 +84,7 @@ const Accessories = ({ action, flow }) => {
         .saveRenewalWizard(policyId, { accessories: accessoriesData })
         .then((response) => {
           if (!response.success) {
-            alert(`Could not save the renewal: ${response.error}`);
+            notifyError(`Could not save the renewal: ${response.error}`);
             return;
           }
           navigate(`/agent/renewalquote/ordersummary/${policyId}`, {

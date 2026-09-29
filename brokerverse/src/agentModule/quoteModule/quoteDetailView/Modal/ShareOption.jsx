@@ -14,6 +14,7 @@ import SvgSendToInsurerIcon from "../../../../assets/agentIcon/SvgSendToInsurerI
 import emailService from "../../../../services/emailService";
 import documentTemplateService from "../../../../services/documentTemplateService";
 import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
+import { notifyError, notifySuccess, notifyWarn } from "../../../../utility/dialogs";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
@@ -63,17 +64,17 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
     try {
       const quoteUrl = `${window.location.origin}/agent/quotedetailview/${quotationData?.quotationId}`;
       await navigator.clipboard.writeText(quoteUrl);
-      alert("Link copied to clipboard!");
+      notifySuccess("Link copied to clipboard!");
     } catch (err) {
       console.error(err);
-      alert("Failed to copy link");
+      notifyError("Failed to copy link");
     }
   };
 
   const handleDownload = async () => {
     const quotationId = quotationData?.quotationId;
     if (!quotationId) {
-      alert("Quotation ID is missing. Cannot download quote PDF.");
+      notifyError("Quotation ID is missing. Cannot download quote PDF.");
       return;
     }
     setQuotePdfLoading(true);
@@ -84,11 +85,11 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         { isFire: isFireLOB, fileName }
       );
       if (!result.success) {
-        alert(result.error || "Failed to download quote PDF.");
+        notifyError(result.error || "Failed to download quote PDF.");
       }
     } catch (err) {
       console.error("Quote PDF download error:", err);
-      alert(err?.message || "Failed to download quote PDF.");
+      notifyError(err?.message || "Failed to download quote PDF.");
     } finally {
       setQuotePdfLoading(false);
     }
@@ -104,13 +105,13 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleSendToInsurers = async () => {
     if (!selectedInsurers || selectedInsurers.length === 0) {
-      alert(t("shareOption.selectAtLeastOneCompany"));
+      notifyWarn(t("shareOption.selectAtLeastOneCompany"));
       return;
     }
 
     const quotationId = quotationData?.quotationId;
     if (!quotationId) {
-      alert("Quotation ID is missing. Cannot send quote.");
+      notifyError("Quotation ID is missing. Cannot send quote.");
       return;
     }
 
@@ -124,7 +125,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       });
 
       if (result.success) {
-        alert(
+        notifySuccess(
           result.partial
             ? t("shareOption.sentToInsurersPartial")
             : t("shareOption.sentToInsurersSuccess")
@@ -132,11 +133,11 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         resetInsurerForm();
         setModalVisible(false);
       } else {
-        alert(result.error || t("shareOption.sentToInsurersError"));
+        notifyError(result.error || t("shareOption.sentToInsurersError"));
       }
     } catch (error) {
       console.error("Send to insurers error:", error);
-      alert(t("shareOption.sentToInsurersError"));
+      notifyError(t("shareOption.sentToInsurersError"));
     } finally {
       setIsSendingToInsurers(false);
     }
@@ -144,7 +145,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleGenerateAIContent = async () => {
     if (!quotationData) {
-      alert("Quote data is not available");
+      notifyError("Quote data is not available");
       return;
     }
 
@@ -211,13 +212,13 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         setAiSubject(result.data.subject);
         setAiHtmlContent(result.data.text);
         setUseAIContent(true);
-        alert("AI content generated! Review and edit below before sending.");
+        notifySuccess("AI content generated! Review and edit below before sending.");
       } else {
-        alert(`Failed to generate AI content: ${result.error}`);
+        notifyError(`Failed to generate AI content: ${result.error}`);
       }
     } catch (error) {
       console.error("AI generation error:", error);
-      alert("An error occurred while generating AI content");
+      notifyError("An error occurred while generating AI content");
     } finally {
       setIsGeneratingAI(false);
     }
@@ -225,19 +226,19 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleSendEmail = async () => {
     if (!emailAddress) {
-      alert("Please enter an email address");
+      notifyWarn("Please enter an email address");
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailAddress)) {
-      alert("Please enter a valid email address");
+      notifyWarn("Please enter a valid email address");
       return;
     }
 
     if (!quotationData) {
-      alert("Quote data is not available");
+      notifyError("Quote data is not available");
       return;
     }
 
@@ -264,7 +265,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       }
 
       if (result.success) {
-        alert(`Quote sent successfully to ${emailAddress}!`);
+        notifySuccess(`Quote sent successfully to ${emailAddress}!`);
         setEmailAddress("");
         setCustomMessage("");
         setShowEmailForm(false);
@@ -274,11 +275,11 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         setAiHtmlContent("");
         setModalVisible(false);
       } else {
-        alert(`Failed to send email: ${result.error}`);
+        notifyError(`Failed to send email: ${result.error}`);
       }
     } catch (error) {
       console.error("Email send error:", error);
-      alert("An error occurred while sending the email");
+      notifyError("An error occurred while sending the email");
     } finally {
       setIsSending(false);
     }

@@ -10,12 +10,11 @@ import { Toast } from "primereact/toast";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
 import remittanceService, { masterService } from "../../../services/remittanceService";
-import { downloadCsv, showError, statusSeverity } from "../shared";
+import { downloadCsv, formatDateTime, showError, statusSeverity } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 const BulkProcessing = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
@@ -187,7 +186,7 @@ const BulkProcessing = () => {
                 <div className="status-info mt-3">
                   <Tag value={processedRecords[0].status}
                        severity={statusSeverity(processedRecords[0].status)} />
-                  <span className="ml-2">Processed on {new Date(processedRecords[0].processedAt).toLocaleString(numberLocale())}</span>
+                  <span className="ml-2">Processed on {formatDateTime(processedRecords[0].processedAt)}</span>
                 </div>
               </div>
             )}

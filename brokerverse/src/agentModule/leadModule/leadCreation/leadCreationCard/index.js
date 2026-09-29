@@ -19,6 +19,7 @@ import addressService from "../../../../services/addressService";
 import { isThailand } from "../../../../utility/addressHelpers";
 import { patchClientEditMiddleWare } from "../../../quoteModule/clientListing/store/clientsMiddleware";
 import { isValidMobile, mobileHint, normalizeMobile } from "../../../../utility/phoneFormat";
+import { birthDateError, birthDateRange, useAgeLimits } from "../../../../utility/birthDate";
 
 const initialValue = {
   CompanyName: "",
@@ -46,6 +47,8 @@ const initialValue = {
 
 const LeadCreationCard = ({ flow, action }) => {
   const { t } = useTranslation();
+  // D68: configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
+  const ageLimits = useAgeLimits();
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
     ({ leadReducers }) => {
@@ -274,6 +277,9 @@ const LeadCreationCard = ({ flow, action }) => {
     }
     if (!values.DateofBirth) {
       errors.DateofBirth = "This field is required";
+    } else {
+      const dobError = birthDateError(values.DateofBirth, ageLimits);
+      if (dobError) errors.DateofBirth = dobError;
     }
     if (!values.category) {
       errors.category = "This field is required";
@@ -606,6 +612,7 @@ const LeadCreationCard = ({ flow, action }) => {
             <DatepickerField
               label={t("leadCreation.dateOfBirth")}
               value={formik.values.DateofBirth}
+              {...birthDateRange(ageLimits)}
               onChange={(date) => {
                 console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);

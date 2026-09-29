@@ -12,10 +12,9 @@ import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
-import { downloadCsv, isoDate, showError, showSuccess } from "../shared";
+import { dateBody, downloadCsv, formatDateTime, isoDate, showError, showSuccess } from "../shared";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 const emptyResolution = { resolutionType: "", resolutionAmount: 0, resolutionNotes: "" };
 const SEVERITIES = ["Critical", "High", "Medium", "Low"];
 const STATUSES = ["Open", "In Progress", "Escalated", "Resolved"];
@@ -26,7 +25,7 @@ const dueBy = (row) => {
   const match = /(\d+)\s*(hour|day)/i.exec(String(row.sla || ""));
   if (!match || !row.createdAt) return "-";
   const hours = Number(match[1]) * (/day/i.test(match[2]) ? 24 : 1);
-  return new Date(new Date(row.createdAt).getTime() + hours * 3600000).toLocaleString(numberLocale());
+  return formatDateTime(new Date(new Date(row.createdAt).getTime() + hours * 3600000));
 };
 
 const RemittanceExceptions = () => {
@@ -247,7 +246,7 @@ const RemittanceExceptions = () => {
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.created")}:</label>
-                  <span>{selectedException.createdDate}</span>
+                  <span>{dateBody("createdDate")(selectedException)}</span>
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.dueBy")}:</label>

@@ -31,6 +31,7 @@ import {
   loadKycConfig,
   requiredKycFor,
 } from "../../../utility/kyc";
+import { notifyError } from "../../../utility/dialogs";
 
 const FieldError = ({ formik, name }) =>
   formik.touched[name] && formik.errors[name] ? (
@@ -99,7 +100,7 @@ const CustomerInfo = ({ action }) => {
             );
             const errorMsg = t("agent.failedToLoadQuotation", { id: quotationId });
             setQuotationLoadError(errorMsg);
-            alert(errorMsg);
+            notifyError(errorMsg);
 
             // Redirect back to quote listing after 2 seconds
             setTimeout(() => {
@@ -110,7 +111,7 @@ const CustomerInfo = ({ action }) => {
           console.error("CustomerInfo: Error loading quotation:", error);
           const errorMsg = t("agent.errorLoadingQuotation");
           setQuotationLoadError(errorMsg);
-          alert(errorMsg);
+          notifyError(errorMsg);
         } finally {
           setIsLoadingQuotation(false);
         }

@@ -29,6 +29,7 @@ DECLARE
   n int := 0;
   st text;
   ag record;
+  bill_ins int;
 BEGIN
   IF EXISTS (SELECT 1 FROM remittances WHERE data->>'seed' = 'remittance-v1') OR admin_id IS NULL THEN RETURN; END IF;
 
@@ -71,21 +72,23 @@ BEGIN
     END IF;
   END LOOP;
 
-  -- Agency bills for three agents (lines reference recent policies; amounts are the agent's placements).
+  -- Agency bills for three agents (lines reference recent policies of one insurer each; amounts are the agent's placements).
   n := 0;
   FOR ag IN SELECT id, employee_code, display_name FROM users WHERE username IN ('agent.jdelacruz', 'agent.msantos', 'agent.preyes') ORDER BY employee_code LOOP
     n := n + 1;
-    INSERT INTO remittances(remittance_number, kind, period, gross_premium, commission, tax, net_due, status, created_by, remittance_date, due_date, policy_count, currency,
+    bill_ins := (SELECT insurance_company_id FROM policies WHERE inception_date >= DATE '2026-04-01' AND insurance_company_id IS NOT NULL
+                 GROUP BY 1 HAVING count(*) >= 2 ORDER BY 1 OFFSET n - 1 LIMIT 1);
+    INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, created_by, remittance_date, due_date, policy_count, currency,
                             bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, sent_at, settled_at, data, updated_by)
-    SELECT next_number('remittance', pfx), 'agency-bill', '2026-08', sum(p.premium_total), sum(p.commission_amount), 0, sum(p.premium_total) - sum(p.commission_amount),
+    SELECT next_number('remittance', pfx), bill_ins, 'agency-bill', '2026-08', sum(p.premium_total), sum(p.commission_amount), 0, sum(p.premium_total) - sum(p.commission_amount),
            CASE n WHEN 3 THEN 'settled' ELSE 'draft' END, admin_id, DATE '2026-09-01', DATE '2026-10-01', count(*), cur, next_number('remittance_bill', bill_pfx),
            ag.id, ag.employee_code, ag.display_name, CASE n WHEN 2 THEN 5000 ELSE 0 END, 'ABL-001', '["email"]', CASE WHEN n >= 2 THEN now() - interval '20 days' END,
            CASE n WHEN 3 THEN now() - interval '5 days' END, '{"seed":"remittance-v1"}', admin_id
-    FROM (SELECT * FROM policies WHERE inception_date >= DATE '2026-04-01' ORDER BY policy_number OFFSET (n - 1) * 2 LIMIT 2) p
+    FROM (SELECT * FROM policies WHERE inception_date >= DATE '2026-04-01' AND insurance_company_id IS NOT DISTINCT FROM bill_ins ORDER BY policy_number LIMIT 2) p
     RETURNING id INTO rid;
     INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date)
     SELECT rid, p.id, p.premium_total, p.commission_amount, p.premium_total - p.commission_amount, p.policy_number, c.display_name, initcap(pr.line), 0, p.inception_date
-    FROM (SELECT * FROM policies WHERE inception_date >= DATE '2026-04-01' ORDER BY policy_number OFFSET (n - 1) * 2 LIMIT 2) p
+    FROM (SELECT * FROM policies WHERE inception_date >= DATE '2026-04-01' AND insurance_company_id IS NOT DISTINCT FROM bill_ins ORDER BY policy_number LIMIT 2) p
     LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id;
   END LOOP;
 END $$;

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import SvgRightarrow from "../../../../assets/agentIcon/SvgRightArrow";
 import policyService from "../../../../services/policyService";
 import StatusIllustration from "../../../component/StatusIllustration";
+import { notifyError } from "../../../../utility/dialogs";
 
 const PolicyApprovalCard = ({ state }) => {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ const PolicyApprovalCard = ({ state }) => {
 
     if (!resolvedPolicyId) {
       console.error('Policy ID not found in state');
-      alert(t("agent.policyIdNotFound"));
+      notifyError(t("agent.policyIdNotFound"));
       return;
     }
     

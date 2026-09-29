@@ -19,7 +19,7 @@ import { Message } from "primereact/message";
 import { RadioButton } from "primereact/radiobutton";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import reportsService from "../../../services/reportsService";
-import { isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import { calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
@@ -331,11 +331,11 @@ const DirectBillProcessing = () => {
                 </div>
                 <div className="col-12 md:col-2">
                   <label>Issued from</label>
-                  <Calendar value={periodFrom} onChange={(e) => setPeriodFrom(e.value)} dateFormat="dd/mm/yy" showIcon className="w-full" />
+                  <Calendar value={periodFrom} onChange={(e) => setPeriodFrom(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
                 </div>
                 <div className="col-12 md:col-2">
                   <label>Issued to</label>
-                  <Calendar value={periodTo} onChange={(e) => setPeriodTo(e.value)} dateFormat="dd/mm/yy" showIcon className="w-full" />
+                  <Calendar value={periodTo} onChange={(e) => setPeriodTo(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
                 </div>
                 <div className="col-12 md:col-3">
                   <label>Line of business</label>
@@ -373,11 +373,11 @@ const DirectBillProcessing = () => {
                     <div className="grid">
                       <div className="col-12 md:col-4">
                         <label>Debit note date</label>
-                        <Calendar value={dnDate} onChange={(e) => setDnDate(e.value)} dateFormat="dd/mm/yy" showIcon className="w-full" />
+                        <Calendar value={dnDate} onChange={(e) => setDnDate(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
                       </div>
                       <div className="col-12 md:col-4">
                         <label>Due date</label>
-                        <Calendar value={dueDate} onChange={(e) => setDueDate(e.value)} dateFormat="dd/mm/yy" showIcon className="w-full" placeholder="From the settings" />
+                        <Calendar value={dueDate} onChange={(e) => setDueDate(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" placeholder="From the settings" />
                       </div>
                       <div className="col-12">
                         <label>Remarks</label>
@@ -431,7 +431,7 @@ const DirectBillProcessing = () => {
             <DataTable value={notes} dataKey="id" loading={loadingNotes} paginator rows={20} stripedRows size="small" scrollable
               emptyMessage="No commission debit notes" footer={notesSummary ? `${notesTotal} debit note(s) · total ${formatCurrency(notesSummary.amount)} · outstanding ${formatCurrency(notesSummary.outstanding)}` : null}>
               <Column field="dnNumber" header="Debit Note" />
-              <Column field="dnDate" header="Date" />
+              <Column field="dnDate" body={dateBody("dnDate")} header="Date" />
               <Column field="insurerName" header="Insurer" />
               <Column field="policyCount" header="Policies" />
               <Column field="commission" header="Commission" body={money("commission")} className="text-right" />
@@ -439,7 +439,7 @@ const DirectBillProcessing = () => {
               <Column field="amount" header="Total Due" body={money("amount")} className="text-right" />
               <Column field="collectedAmount" header="Collected" body={money("collectedAmount")} className="text-right" />
               <Column field="balance" header="Balance" body={(r) => <strong>{formatCurrency(r.balance)}</strong>} className="text-right" />
-              <Column field="dueDate" header="Due" />
+              <Column field="dueDate" body={dateBody("dueDate")} header="Due" />
               <Column field="status" header="Status" body={statusTag} />
               <Column header="Actions" body={noteActions} style={{ minWidth: "12rem" }} />
             </DataTable>
@@ -511,7 +511,7 @@ const DirectBillProcessing = () => {
             <h4>Collections</h4>
             <DataTable value={viewNote.collections} size="small" stripedRows emptyMessage="No payment recorded yet">
               <Column field="collectionNumber" header="Collection" />
-              <Column field="receivedDate" header="Received" />
+              <Column field="receivedDate" body={dateBody("receivedDate")} header="Received" />
               <Column field="paymentMode" header="Mode" body={(r) => MODE_LABELS[r.paymentMode] || r.paymentMode} />
               <Column field="referenceNo" header="Reference" />
               <Column field="cashAmount" header="Cash" body={money("cashAmount")} className="text-right" />
@@ -563,7 +563,7 @@ const DirectBillProcessing = () => {
             </div>
             <div className="col-12 md:col-6">
               <label>Received on *</label>
-              <Calendar value={collect.receivedDate} onChange={(e) => setCollect({ ...collect, receivedDate: e.value })} maxDate={new Date()} dateFormat="dd/mm/yy" showIcon className="w-full" />
+              <Calendar value={collect.receivedDate} onChange={(e) => setCollect({ ...collect, receivedDate: e.value })} maxDate={new Date()} dateFormat={calendarDateFormat()} showIcon className="w-full" />
             </div>
             <div className="col-12 md:col-6">
               <label>Payment mode</label>

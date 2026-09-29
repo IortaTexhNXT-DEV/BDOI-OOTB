@@ -14,7 +14,7 @@ import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
-import { isoDate, showError, showSuccess } from "../shared";
+import { calendarDateFormat, dateBody, isoDate, showError, showSuccess } from "../shared";
 import "./index.scss";
 
 const SCHEDULE_ROUTE = "/master/finance/remittance/schedulemaster";
@@ -129,7 +129,7 @@ const SchedulingDashboard = () => {
       <div className="dashboard-grid">
         <div className="schedule-calendar">
           <Card title={t("remittance.scheduleCalendar")}>
-            <Calendar
+            <Calendar dateFormat={calendarDateFormat()}
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.value)}
               inline
@@ -158,7 +158,7 @@ const SchedulingDashboard = () => {
         <DataTable value={scheduledJobs} stripedRows loading={loading} selectionMode="single" selection={selectedJob}
           onSelectionChange={(e) => setSelectedJob(e.value)} dataKey="id">
           <Column field="name" header={t("remittance.scheduleName")} />
-          <Column field="nextRun" header={t("remittance.nextRun")} />
+          <Column field="nextRun" body={dateBody("nextRun")} header={t("remittance.nextRun")} />
           <Column field="frequency" header={t("remittance.frequency")} />
           <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
           <Column header={t("remittance.actions")} body={actionBodyTemplate} style={{ width: '150px' }} />
@@ -181,7 +181,7 @@ const SchedulingDashboard = () => {
           </div>
           <div className="p-field">
             <label>{t("remittance.nextRun")}</label>
-            <Calendar value={form.nextRun} onChange={(e) => setField("nextRun", e.value)} />
+            <Calendar dateFormat={calendarDateFormat()} value={form.nextRun} onChange={(e) => setField("nextRun", e.value)} />
           </div>
           <div className="p-field">
             <label>Time</label>

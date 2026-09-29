@@ -17,7 +17,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
 import remittanceService, { apiRequest } from "../../../services/remittanceService";
 import authService from "../../../services/authService";
-import { isoDate, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import { calendarDateFormat, dateBody, isoDate, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 
 const emptyDelegation = {
@@ -310,7 +310,7 @@ const RemittanceApproval = () => {
               <Column field="referenceNo" header={t("remittance.referenceNo")} />
               <Column field="transactionType" header={t("remittance.type")} />
               <Column field="initiator" header={t("remittance.initiatedBy")} />
-              <Column field="submissionDate" header={t("remittance.submitted")} />
+              <Column field="submissionDate" body={dateBody("submissionDate")} header={t("remittance.submitted")} />
               <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(data.amount)} />
               <Column field="description" header={t("remittance.description")} />
               <Column field="slaHours" header="SLA" body={slaBodyTemplate} />
@@ -329,7 +329,7 @@ const RemittanceApproval = () => {
 
           <TabPanel header={t("remittance.approvalHistory")}>
             <div className="filter-section mb-3">
-              <Calendar placeholder={t("remittance.dateRange")} selectionMode="range" className="mr-2"
+              <Calendar dateFormat={calendarDateFormat()} placeholder={t("remittance.dateRange")} selectionMode="range" className="mr-2"
                 value={historyFilters.range} onChange={(e) => setHistoryFilters({ ...historyFilters, range: e.value })} />
               <Dropdown placeholder={t("remittance.action")} value={historyFilters.action}
                 onChange={(e) => setHistoryFilters({ ...historyFilters, action: e.value })} options={[
@@ -346,7 +346,7 @@ const RemittanceApproval = () => {
               <Column field="transactionType" header={t("remittance.type")} />
               <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(data.amount)} />
               <Column field="action" header={t("remittance.action")} body={actionBodyTemplate} />
-              <Column field="actionDate" header={t("remittance.actionDate")} />
+              <Column field="actionDate" body={dateBody("actionDate")} header={t("remittance.actionDate")} />
               <Column field="remarks" header={t("remittance.remarks")} />
             </DataTable>
           </TabPanel>
@@ -364,8 +364,8 @@ const RemittanceApproval = () => {
 
               <DataTable value={activeDelegations} stripedRows>
                 <Column field="delegatedTo" header={t("remittance.delegatedTo")} />
-                <Column field="fromDate" header={t("remittance.fromDate")} />
-                <Column field="toDate" header={t("remittance.toDate")} />
+                <Column field="fromDate" body={dateBody("fromDate")} header={t("remittance.fromDate")} />
+                <Column field="toDate" body={dateBody("toDate")} header={t("remittance.toDate")} />
                 <Column field="transTypes" header={t("remittance.scope")} body={(d) => (d.transTypes || []).join(", ")} />
                 <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
               </DataTable>
@@ -466,13 +466,13 @@ const RemittanceApproval = () => {
             <div className="p-field p-col-12 p-md-6">
               <label>{t("remittance.delegationPeriod")} *</label>
               <div className="date-range">
-                <Calendar
+                <Calendar dateFormat={calendarDateFormat()}
                   value={delegationData.fromDate}
                   onChange={(e) => setDelegationData({ ...delegationData, fromDate: e.value })}
                   placeholder={t("remittance.fromDate")}
                   className="mr-2"
                 />
-                <Calendar
+                <Calendar dateFormat={calendarDateFormat()}
                   value={delegationData.toDate}
                   onChange={(e) => setDelegationData({ ...delegationData, toDate: e.value })}
                   placeholder={t("remittance.toDate")}

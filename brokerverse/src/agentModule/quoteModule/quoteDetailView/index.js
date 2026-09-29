@@ -32,6 +32,7 @@ import QuotationAuditTrail from "../quotationAuditTrail";
 import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
+import { confirmAction, notifyError, notifySuccess } from "../../../utility/dialogs";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -92,11 +93,11 @@ const QuoteDetailView = ({ action }) => {
             setQuotationData(result.payload);
           } else {
             console.error("❌ Failed to fetch quotation:", result.payload);
-            alert(t("quoteDetailView.failedToLoad"));
+            notifyError(t("quoteDetailView.failedToLoad"));
           }
         } catch (error) {
           console.error("❌ Error fetching quotation:", error);
-          alert(t("quoteDetailView.errorLoading"));
+          notifyError(t("quoteDetailView.errorLoading"));
         } finally {
           setIsLoading(false);
         }
@@ -426,7 +427,7 @@ const QuoteDetailView = ({ action }) => {
 
   // Submit quote to insurer
   const handleSubmitToInsurer = async () => {
-    if (!window.confirm(t("quoteDetailView.submitToInsurerConfirm"))) {
+    if (!(await confirmAction(t("quoteDetailView.submitToInsurerConfirm")))) {
       return;
     }
 
@@ -446,7 +447,7 @@ const QuoteDetailView = ({ action }) => {
       const result = await response.json();
 
       if (result.success) {
-        alert(t("quoteDetailView.quoteSubmittedToInsurer"));
+        notifySuccess(t("quoteDetailView.quoteSubmittedToInsurer"));
         // Refresh data
         const refreshed = await dispatch(
           getQuotationByIdMiddleware(quotationData.quotationId)
@@ -455,17 +456,17 @@ const QuoteDetailView = ({ action }) => {
           setQuotationData(refreshed.payload);
         }
       } else {
-        alert(t("quoteDetailView.failedMessage", { message: result.message }));
+        notifyError(t("quoteDetailView.failedMessage", { message: result.message }));
       }
     } catch (error) {
-      alert(t("quoteDetailView.errorSubmittingToInsurer"));
+      notifyError(t("quoteDetailView.errorSubmittingToInsurer"));
       console.error(error);
     }
   };
 
   // Manual status change (for SubmittedToInsurer -> Approved)
   const handleStatusChange = async (newStatus) => {
-    if (!window.confirm(t("quoteDetailView.changeStatusConfirm", { newStatus }))) {
+    if (!(await confirmAction(t("quoteDetailView.changeStatusConfirm", { newStatus })))) {
       return;
     }
 
@@ -485,7 +486,7 @@ const QuoteDetailView = ({ action }) => {
       const result = await response.json();
 
       if (response.ok) {
-        alert(t("quoteDetailView.statusUpdatedSuccess", { newStatus }));
+        notifySuccess(t("quoteDetailView.statusUpdatedSuccess", { newStatus }));
         // Refresh data
         const refreshed = await dispatch(
           getQuotationByIdMiddleware(quotationData.quotationId)
@@ -494,10 +495,10 @@ const QuoteDetailView = ({ action }) => {
           setQuotationData(refreshed.payload);
         }
       } else {
-        alert(t("quoteDetailView.failedMessage", { message: result.message || t("quoteDetailView.statusUpdateFailed") }));
+        notifyError(t("quoteDetailView.failedMessage", { message: result.message || t("quoteDetailView.statusUpdateFailed") }));
       }
     } catch (error) {
-      alert(t("quoteDetailView.errorUpdatingStatus"));
+      notifyError(t("quoteDetailView.errorUpdatingStatus"));
       console.error(error);
     }
   };

@@ -21,6 +21,7 @@ import { transformToBackendFormat } from "../utils/quotationDataTransform";
 import { calculateOrderSummary } from "../utils/premiumCalculations";
 import useTaxRates from "../utils/useTaxRates";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { notifyError } from "../../../utility/dialogs";
 
 const initialValue = {
   NETpremium: "",
@@ -145,7 +146,7 @@ const OrderSummary = () => {
       
     } catch (error) {
       console.error('Failed to save quotation:', error);
-      alert(`${t("agent.failedToSaveQuotation")}: ${error}`);
+      notifyError(`${t("agent.failedToSaveQuotation")}: ${error}`);
     } finally {
       setIsSubmitting(false);
     }

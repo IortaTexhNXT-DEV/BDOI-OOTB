@@ -20,6 +20,7 @@ import {
   getCategoriesForLob,
 } from "../../../../endorsementModule/constants/endorsementCategories";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import { notifyWarn } from "../../../../../utility/dialogs";
 
 const normalizePolicyRecord = (policy) => {
   if (!policy) {
@@ -146,7 +147,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
 
     if (!policyId) {
       console.error("No policy ID found for endorsement navigation");
-      alert("Policy ID not found. Please try again.");
+      notifyWarn("Policy ID not found. Please try again.");
       return;
     }
 
@@ -189,7 +190,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
       const policyId = policy?.policyId || policy?.id;
       if (!policyId) {
         console.error("No policy ID found for navigation");
-        alert("Policy ID not found. Please try again.");
+        notifyWarn("Policy ID not found. Please try again.");
         return;
       }
 
@@ -256,7 +257,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
       const policy = normalizePolicyRecord(selectedPolicy);
       const policyId = policy?.policyId || policy?.id;
       if (!policyId) {
-        alert("Policy ID not found. Please try again.");
+        notifyWarn("Policy ID not found. Please try again.");
         return;
       }
 

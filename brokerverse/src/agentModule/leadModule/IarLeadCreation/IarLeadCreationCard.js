@@ -41,6 +41,7 @@ import {
   makeId,
   recalculateIarPremiumDetails,
 } from "./iarConstants";
+import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -64,7 +65,7 @@ const personalDetailsInitialValue = {
   gender: "Male",
 };
 
-const getPersonalDetailsValidation = (t) => (values) => {
+const getPersonalDetailsValidation = (t, ageLimits) => (values) => {
   const errors = {};
   if (values.category === "Corporate") {
     if (!values.CompanyName) errors.CompanyName = t("fireLead.fieldRequired");
@@ -90,6 +91,7 @@ const getPersonalDetailsValidation = (t) => (values) => {
   if (!values.City) errors.City = t("fireLead.fieldRequired");
   if (!values.ZIPCode) errors.ZIPCode = t("fireLead.fieldRequired");
   if (!values.DateofBirth) errors.DateofBirth = t("fireLead.fieldRequired");
+  else if (birthDateError(values.DateofBirth, ageLimits)) errors.DateofBirth = birthDateError(values.DateofBirth, ageLimits);
   if (!values.category) errors.category = t("fireLead.fieldRequired");
   if (!values.gender) errors.gender = t("fireLead.fieldRequired");
   return errors;
@@ -127,6 +129,7 @@ const leadToPersonalFormValues = (lead) => {
 
 const IarLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
+  const ageLimits = useAgeLimits();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -186,7 +189,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       ? leadToPersonalFormValues(existingLeadFromState)
       : personalDetailsInitialValue,
     enableReinitialize: true,
-    validate: getPersonalDetailsValidation(t),
+    validate: getPersonalDetailsValidation(t, ageLimits),
     onSubmit: async (values) => {
       if (existingLeadRefId) {
         setCreatedLeadId(existingLeadRefId);
@@ -223,7 +226,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           DOB: values.DateofBirth
             ? typeof values.DateofBirth === "string"
               ? values.DateofBirth
-              : values.DateofBirth.toISOString?.().split("T")[0]
+              : toIsoDate(values.DateofBirth)
             : "",
           leadCategory: values.category || "Retail",
           gender: values.gender || "Male",
@@ -903,6 +906,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           <DatepickerField
             label={t("fireLead.dateOfBirth") + "*"}
             value={personalFormik.values.DateofBirth}
+            {...birthDateRange(ageLimits)}
             onChange={(date) =>
               personalFormik.setFieldValue("DateofBirth", date.target.value)
             }

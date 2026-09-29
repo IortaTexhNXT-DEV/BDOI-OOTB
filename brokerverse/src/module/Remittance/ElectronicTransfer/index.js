@@ -12,7 +12,7 @@ import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
-import { downloadCsv, isoDate, loadInsurerOptions, showError, showSuccess, statusSeverity } from "../shared";
+import { dateBody, downloadCsv, isoDate, loadInsurerOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 
 const emptyTransfer = { method: null, amount: 0, beneficiary: null, accountNumber: "", bankName: "", purpose: "" };
@@ -215,7 +215,7 @@ const ElectronicTransfer = () => {
           <Column field="beneficiary" header={t("remittance.beneficiary")} />
           <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(data.amount)} />
           <Column field="method" header={t("remittance.method")} />
-          <Column field="date" header={t("remittance.date")} />
+          <Column field="date" body={dateBody("date")} header={t("remittance.date")} />
           <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
           <Column header={t("remittance.actions")} body={actionBodyTemplate} style={{ width: '150px' }} />
         </DataTable>
@@ -227,7 +227,7 @@ const ElectronicTransfer = () => {
           <Column field="beneficiary" header={t("remittance.beneficiary")} />
           <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(data.amount)} />
           <Column field="method" header={t("remittance.method")} />
-          <Column field="date" header={t("remittance.date")} />
+          <Column field="date" body={dateBody("date")} header={t("remittance.date")} />
           <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
         </DataTable>
       </Card>

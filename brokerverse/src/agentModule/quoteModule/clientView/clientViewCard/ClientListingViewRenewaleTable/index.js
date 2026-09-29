@@ -15,6 +15,7 @@ import { Dialog } from "primereact/dialog";
 import { Menu } from "primereact/menu";
 import policyRenewalService from "../../../../../services/policyRenewalService";
 import { Skeleton } from "primereact/skeleton";
+import { notifyWarn } from "../../../../../utility/dialogs";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
@@ -253,7 +254,7 @@ const Index = ({ clientId, action }) => {
       const policyIdToUse = selectedRowData.policyId || selectedRowData.id || policy.policyId || policy.id;
       
       if (!policyIdToUse) {
-        alert("Policy information is missing");
+        notifyWarn("Policy information is missing");
         return;
       }
 
@@ -299,7 +300,7 @@ const Index = ({ clientId, action }) => {
       const policyIdToUse = selectedRowData.policyId || selectedRowData.id || policy.policyId || policy.id;
       
       if (!policyIdToUse) {
-        alert("Policy information is missing");
+        notifyWarn("Policy information is missing");
         return;
       }
 

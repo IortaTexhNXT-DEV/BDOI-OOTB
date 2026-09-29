@@ -18,11 +18,10 @@ import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Tag } from "primereact/tag";
 import { Timeline } from "primereact/timeline";
 import remittanceService from "../../../services/remittanceService";
-import { isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
+import { calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 const initialSettlement = () => ({
   id: null,
   settlementNo: "-",
@@ -390,7 +389,7 @@ const SettlementProcessing = () => {
                 <Calendar
                   value={settlementData.settlementDate}
                   onChange={(e) => handleInputChange("settlementDate", e.value)}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                 />
               </div>
               <div className="info-item">
@@ -454,7 +453,7 @@ const SettlementProcessing = () => {
                         value={settlementData.settlementPeriod}
                         onChange={(e) => handleInputChange("settlementPeriod", e.value)}
                         selectionMode="range"
-                        dateFormat="mm/dd/yy"
+                        dateFormat={calendarDateFormat()}
                         placeholder={t("remittance.selectPeriod")}
                         className="full-width"
                       />
@@ -613,7 +612,7 @@ const SettlementProcessing = () => {
                       <Calendar
                         value={settlementData.paymentDate}
                         onChange={(e) => handleInputChange("paymentDate", e.value)}
-                        dateFormat="mm/dd/yy"
+                        dateFormat={calendarDateFormat()}
                         className="full-width"
                       />
                     </div>
@@ -636,7 +635,7 @@ const SettlementProcessing = () => {
                             item.status === 'Draft' ? 'info' : 'secondary'
                           } />}
                         </div>
-                        <small>{new Date(item.at).toLocaleString(numberLocale())}</small>
+                        <small>{formatDateTime(item.at)}</small>
                         {item.notes && <p className="workflow-notes">{item.notes}</p>}
                       </div>
                     )}
@@ -660,7 +659,7 @@ const SettlementProcessing = () => {
                         </div>
                         <div className="status-item">
                           <label>Expected Approval:</label>
-                          <span>{new Date(approvalResult.expectedApprovalDate).toLocaleDateString()}</span>
+                          <span>{formatDate(approvalResult.expectedApprovalDate)}</span>
                         </div>
                       </>
                     )}
@@ -788,7 +787,7 @@ const SettlementProcessing = () => {
                   </div>
                   <div className="detail-item">
                     <label>Expected Date:</label>
-                    <span>{new Date(approvalResult.expectedApprovalDate).toLocaleDateString()}</span>
+                    <span>{formatDate(approvalResult.expectedApprovalDate)}</span>
                   </div>
                 </div>
                 <p className="info-message">

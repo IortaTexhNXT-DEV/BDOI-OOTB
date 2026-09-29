@@ -13,6 +13,7 @@ import "../openEntryMatching/OpenEntryMatching.scss";
 import accountingService from "../../../services/accountingService";
 import { Dropdown } from "primereact/dropdown";
 import useOpenItemAccounts from "../openEntryMatching/useOpenItemAccounts";
+import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 
 const OpenEntryUnmatching = () => {
   const { t } = useTranslation();
@@ -65,7 +66,7 @@ const OpenEntryUnmatching = () => {
       });
 
       if (!response.success) {
-        alert(response.error || "Failed to fetch matched entries");
+        notifyError(response.error || "Failed to fetch matched entries");
       } else {
         const matches = response.data || [];
         // Transform matched entries into separate debit and credit entries
@@ -85,7 +86,7 @@ const OpenEntryUnmatching = () => {
         setCreditEntries(creditEntriesList);
       }
     } catch (error) {
-      alert("Failed to fetch matched entries");
+      notifyError("Failed to fetch matched entries");
     } finally {
       setLoading(false);
     }
@@ -93,7 +94,7 @@ const OpenEntryUnmatching = () => {
 
   const handleUnmatch = async () => {
     if (selectedDebits.length === 0 || selectedCredits.length === 0) {
-      alert(t("openEntryUnmatching.pleaseSelectDebitAndCredit"));
+      notifyWarn(t("openEntryUnmatching.pleaseSelectDebitAndCredit"));
       return;
     }
 
@@ -108,22 +109,22 @@ const OpenEntryUnmatching = () => {
       ].filter((id) => id);
 
       if (matchingIds.length === 0) {
-        alert(t("openEntryUnmatching.noValidMatchingSelected"));
+        notifyWarn(t("openEntryUnmatching.noValidMatchingSelected"));
         return;
       }
 
       const response = await accountingService.unmatchEntries(matchingIds);
 
       if (!response.success) {
-        alert(response.error || t("openEntryUnmatching.failedToUnmatchEntries"));
+        notifyError(response.error || t("openEntryUnmatching.failedToUnmatchEntries"));
       } else {
-        alert(`Successfully unmatched ${response.data.length} entry pair(s)`);
+        notifySuccess(`Successfully unmatched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
         setSelectedCredits([]);
         handlePull();
       }
     } catch (error) {
-      alert(error.message || t("openEntryUnmatching.failedToUnmatchEntries"));
+      notifyError(error.message || t("openEntryUnmatching.failedToUnmatchEntries"));
     } finally {
       setLoading(false);
     }

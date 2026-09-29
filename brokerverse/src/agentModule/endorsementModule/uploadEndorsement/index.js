@@ -11,6 +11,7 @@ import DatepickerField from "../../component/datePicker";
 import { useFormik } from "formik";
 import endorsementService from "../../../services/endorsementService";
 import S3FileUpload from "../../../components/S3FileUpload";
+import { notifyError, notifyWarn } from "../../../utility/dialogs";
 
 const UploadEndorsement = () => {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ const UploadEndorsement = () => {
   // Fetch endorsement details on mount
   useEffect(() => {
     if (!endorsementId) {
-      alert(t("endorsement.endorsementIdMissing"));
+      notifyWarn(t("endorsement.endorsementIdMissing"));
       navigate(-1);
       return;
     }
@@ -60,11 +61,11 @@ const UploadEndorsement = () => {
         if (response.success) {
           setEndorsementData(response.data);
         } else {
-          alert("Failed to load endorsement: " + response.error);
+          notifyError("Failed to load endorsement: " + response.error);
         }
       } catch (error) {
         console.error("Error fetching endorsement:", error);
-        alert(t("endorsement.errorLoadingEndorsement"));
+        notifyError(t("endorsement.errorLoadingEndorsement"));
       } finally {
         setLoading(false);
       }
@@ -101,7 +102,7 @@ const UploadEndorsement = () => {
 
   const handleSubmit = async (values) => {
     if (!documentUrl) {
-      alert(t("endorsement.pleaseUploadDocument"));
+      notifyWarn(t("endorsement.pleaseUploadDocument"));
       return;
     }
 
@@ -146,7 +147,7 @@ const UploadEndorsement = () => {
       }
     } catch (error) {
       console.error("Submit error:", error);
-      alert(t("endorsement.submitFailed") + ": " + error.message);
+      notifyError(t("endorsement.submitFailed") + ": " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -336,7 +337,7 @@ const UploadEndorsement = () => {
 
               if (!uploadedUrl) {
                 console.error("Failed to extract URL:", url);
-                alert(
+                notifyWarn(
                   "File uploaded but URL could not be retrieved. Please refresh and try again."
                 );
                 return;
@@ -347,7 +348,7 @@ const UploadEndorsement = () => {
             }}
             onUploadError={(error) => {
               console.error("Endorsement document upload error:", error);
-              alert(t("endorsement.failedToUploadDocument") + ": " + error.message);
+              notifyError(t("endorsement.failedToUploadDocument") + ": " + error.message);
             }}
           />
 

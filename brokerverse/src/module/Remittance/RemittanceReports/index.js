@@ -10,7 +10,7 @@ import { RadioButton } from "primereact/radiobutton";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
-import { isoDate, isoMonth, loadInsurerOptions, loadMasterOptions, showError, showSuccess } from "../shared";
+import { calendarDateFormat, isoDate, isoMonth, loadInsurerOptions, loadMasterOptions, showError, showSuccess } from "../shared";
 import "./index.scss";
 
 const SCHEDULE_ROUTE = "/master/finance/remittance/schedulemaster";
@@ -178,7 +178,7 @@ const RemittanceReports = () => {
                 <div className="p-fluid">
                   <div className="p-field">
                     <label>{t("remittanceReports.reportPeriod")} *</label>
-                    <Calendar
+                    <Calendar dateFormat={calendarDateFormat()}
                       value={reportParams.reportPeriod}
                       onChange={(e) => setReportParams({ ...reportParams, reportPeriod: e.value })}
                       selectionMode="range"

@@ -19,11 +19,10 @@ import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { ProgressBar } from "primereact/progressbar";
 import { Message } from "primereact/message";
 import remittanceService, { masterService } from "../../../services/remittanceService";
-import { isoMonth, loadInsurerOptions, showError, showSuccess } from "../shared";
+import { formatDateTime, isoMonth, loadInsurerOptions, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 const EMAIL_PATTERN = /^[\w.-]+@([\w-]+\.)+[\w-]{2,}$/;
 const splitEmails = (text) => String(text || "").split(",").map((e) => e.trim()).filter(Boolean);
 const sum = (rows, field) => rows.reduce((s, r) => s + Number(r[field] || 0), 0);
@@ -619,7 +618,7 @@ const StatementGeneration = () => {
               <div className="file-info">
                 <p><strong>File:</strong> {generatedFile.fileName}</p>
                 <p><strong>Size:</strong> {generatedFile.fileSize}</p>
-                <p><strong>Generated:</strong> {new Date(generatedFile.generatedAt).toLocaleString(numberLocale())}</p>
+                <p><strong>Generated:</strong> {formatDateTime(generatedFile.generatedAt)}</p>
               </div>
               <div className="next-steps">
                 <p>Your statement is ready. You can:</p>

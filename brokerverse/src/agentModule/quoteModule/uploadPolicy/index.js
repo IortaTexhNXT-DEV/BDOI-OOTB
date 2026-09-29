@@ -9,6 +9,7 @@ import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { getLeadByIdMiddleware } from "../../leadModule/Store/leadMiddleware";
 import policyService from "../../../services/policyService";
 import { Card } from "primereact/card";
+import { notifyError } from "../../../utility/dialogs";
 
 const UploadPolicy = () => {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ const UploadPolicy = () => {
         setQuotationDetails(data);
       } catch (error) {
         console.error("Failed to load quotation:", error);
-        alert(t("agent.errorLoadingQuotation"));
+        notifyError(t("agent.errorLoadingQuotation"));
       } finally {
         setLoading(false);
       }

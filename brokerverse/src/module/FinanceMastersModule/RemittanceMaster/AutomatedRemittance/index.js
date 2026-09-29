@@ -13,6 +13,7 @@ import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { MasterLookup, deleteAndReturn, saveAndReturn, useMasterOptions } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
 
 const AutomatedRemittanceMaster = () => {
   const { t } = useTranslation();
@@ -110,8 +111,8 @@ const AutomatedRemittanceMaster = () => {
     }
   });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this remittance rule?")) {
+  const handleDelete = async () => {
+    if (await confirmAction("Are you sure you want to delete this remittance rule?", { danger: true })) {
       deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
     }
   };
