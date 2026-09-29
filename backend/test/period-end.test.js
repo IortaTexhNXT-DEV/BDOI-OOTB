@@ -424,3 +424,12 @@ describe('period-end jobs', () => {
     expect([200, 201]).toContain(runNow.status);
   });
 });
+
+describe('locked periods through the accounting route', () => {
+  it('reopening a period locked by the year-end close answers 409 with a clear message', async () => {
+    const { setPeriodStatus } = await import('../src/modules/accounting/service.js');
+    const { pool } = await import('../src/db/pool.js');
+    await pool.query("INSERT INTO accounting_periods(period, status) VALUES ('2019-03','locked') ON CONFLICT (period) DO UPDATE SET status = 'locked'");
+    await expect(setPeriodStatus(pool, '2019-03', 'open', 'test', { id: 'usr_test' })).rejects.toMatchObject({ status: 409 });
+  });
+});

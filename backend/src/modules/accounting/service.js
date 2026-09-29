@@ -178,6 +178,9 @@ export async function listPeriods(db) {
 
 export async function setPeriodStatus(db, period, status, remarks, user) {
   if (!/^\d{4}-\d{2}$/.test(period)) throw badRequest('period must be YYYY-MM');
+  // a period locked by the year-end close stays locked (reopen the year-end close instead)
+  const current = (await db.query('SELECT status FROM accounting_periods WHERE period = $1', [period])).rows[0];
+  if (current?.status === 'locked') throw conflict(`Period ${period} is locked by the year-end close; reverse the year-end close to change it`);
   if (status === 'closed') {
     const open = (await db.query(`SELECT count(*)::int AS n FROM journal_vouchers WHERE period = $1 AND status IN ('pending','draft','for-approval','approved')`, [period])).rows[0].n;
     if (open) throw conflict(`Period ${period} has ${open} unposted journal(s); post or cancel them before closing`);
