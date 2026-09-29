@@ -162,7 +162,7 @@ define({
 });
 define({
   method: 'POST', path: '/insurer-remittance', summary: 'Build an insurer remittance voucher from collected premium not yet remitted (net of commission)', screen: `${SCREEN} > Create Voucher (Insurer)`,
-  middleware: [...write, validate(z.object({ insuranceCompanyId: z.union([z.string(), z.number()]).optional(), insurerName: z.string().optional(), fromDate: z.string().optional(), toDate: z.string().optional(), transactionCode: z.string().optional(), remarks: z.string().optional() }))],
+  middleware: [...write, validate(z.object({ insuranceCompanyId: z.union([z.string(), z.number()]).optional(), insurerName: z.string().optional(), fromDate: z.string().optional(), toDate: z.string().optional(), transactionCode: z.string().optional(), remarks: z.string().optional(), policyIds: z.array(z.string()).optional() }))],
   request: { insurerName: 'Malayan Insurance Co., Inc.', fromDate: '2026-09-01', toDate: '2026-09-30' }, response: { success: true, data: { ...example, invoiceList: [invoiceExample] } },
   handler: async (req, res) => {
     const d = await withTransaction((db) => svc.createInsurerRemittance(db, req.body, req.user));

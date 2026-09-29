@@ -368,7 +368,7 @@ export async function paymentEntries(db, b, user) {
   const outstanding = round2(open.reduce((s, r) => s + Number(r.balance), 0));
   const toApply = round2(Math.min(amount, outstanding));
   if (toApply > 0) {
-    await applyToPolicy(db, { policy, amount: toApply, paymentMode: b.paymentMode, referenceNo: b.referenceNo, date: isoDate(b.paymentDate) || (await today()), user });
+    await applyToPolicy(db, { policy, amount: toApply, paymentMode: b.paymentMode, bankAccount: b.bankAccountCode || b.bankAccount || null, referenceNo: b.referenceNo, date: isoDate(b.paymentDate) || (await today()), user });
   }
   const ids = (await db.query('SELECT id FROM journal_vouchers WHERE policy_id = $1 AND status <> \'cancelled\' ORDER BY created_at', [policy.id])).rows.map((r) => r.id);
   return { journals: ids, applied: toApply, alreadyApplied: toApply === 0 && amount > 0, directBilled: false };

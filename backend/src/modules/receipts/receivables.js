@@ -228,15 +228,21 @@ async function applyToBill(db, ctx, amount) {
 }
 
 /**
- * Commission ratio booked on the policy's bills (commission / gross), overall and per co-insurer, so a return premium or
- * cancellation takes back commission at the rate it was earned.
+ * Ratios booked on the policy's bills: commission / gross (overall and per co-insurer) and premium taxes / gross, so a
+ * return premium or cancellation takes back commission and taxes at the rate they were booked.
  */
-async function bookedCommissionRatios(db, policyId) {
+async function bookedRatios(db, policyId) {
   const all = (await db.query(`SELECT COALESCE(sum(commission_amount), 0) AS c, COALESCE(sum(amount), 0) AS a FROM receivables
     WHERE policy_id = $1 AND status <> 'cancelled' AND booking_jv_id IS NOT NULL`, [policyId])).rows[0];
   const per = (await db.query(`SELECT rp.insurance_company_id, sum(rp.commission) AS c, sum(rp.gross) AS a FROM receivable_participants rp
     JOIN receivables r ON r.id = rp.receivable_id WHERE r.policy_id = $1 AND r.status <> 'cancelled' GROUP BY rp.insurance_company_id`, [policyId])).rows;
-  return { overall: Number(all.a) > 0 ? Number(all.c) / Number(all.a) : null, byInsurer: new Map(per.filter((x) => Number(x.a) > 0).map((x) => [x.insurance_company_id, Number(x.c) / Number(x.a)])) };
+  // premium taxes booked in their own accounts on the bills' booking journals (none when they were not split)
+  const { account } = await import('../accounting/lib/ledger.js');
+  const codes = { vat: await account('premium_vat_payable'), dst: await account('premium_dst_payable'), lgt: await account('premium_lgt_payable') };
+  const booked = (await db.query(`SELECT l.account_code, sum(l.credit) AS c FROM journal_lines l JOIN receivables r ON r.booking_jv_id = l.jv_id
+    WHERE r.policy_id = $1 AND r.status <> 'cancelled' AND l.account_code = ANY($2) GROUP BY l.account_code`, [policyId, Object.values(codes)])).rows;
+  const taxes = Object.fromEntries(Object.entries(codes).map(([k, code]) => [k, Number(all.a) > 0 ? Number(booked.find((b) => b.account_code === code)?.c || 0) / Number(all.a) : 0]));
+  return { overall: Number(all.a) > 0 ? Number(all.c) / Number(all.a) : null, byInsurer: new Map(per.filter((x) => Number(x.a) > 0).map((x) => [x.insurance_company_id, Number(x.c) / Number(x.a)])), taxes };
 }
 
 /**
@@ -256,10 +262,14 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
   }
   if (!(gross > 0)) return null;
   for (const r of open) await ensureBooked(db, r, policy, user);
-  const ratios = await bookedCommissionRatios(db, policy.id);
+  const ratios = await bookedRatios(db, policy.id);
   const given = breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null ? round2(Math.abs(num(breakdown.commissionAmount)))
     : (ratios.overall !== null && !ratios.byInsurer.size ? round2(Math.min(gross * ratios.overall, gross)) : null);
-  const taxes = { netPremium: Math.abs(num(breakdown.netPremium)) || undefined, vat: Math.abs(num(breakdown.vat)), dst: Math.abs(num(breakdown.dst)), lgt: Math.abs(num(breakdown.lgt)) };
+  const given3 = Math.abs(num(breakdown.vat)) + Math.abs(num(breakdown.dst)) + Math.abs(num(breakdown.lgt));
+  // taxes of the return: as given on the endorsement, else at the ratio booked on the bills
+  const taxes = { netPremium: Math.abs(num(breakdown.netPremium)) || undefined,
+    vat: given3 ? Math.abs(num(breakdown.vat)) : round2(gross * ratios.taxes.vat), dst: given3 ? Math.abs(num(breakdown.dst)) : round2(gross * ratios.taxes.dst),
+    lgt: given3 ? Math.abs(num(breakdown.lgt)) : round2(gross * ratios.taxes.lgt) };
   const split = await premiumSplit(db, policy, gross, taxes, 'endorsement', { commission: given, ratios: ratios.byInsurer });
   let remaining = gross;
   const credits = [];
