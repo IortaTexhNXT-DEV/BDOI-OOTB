@@ -1,4 +1,4 @@
--- Report criteria "Principle Insurance" is spelled "Principal Insurer" (persona walk 2). Saved schedules keep working:
+-- Report criteria "Principle Insurance" is spelled "Principal Insurer". Saved schedules keep working:
 -- the report engine still accepts the old value as an alias.
 UPDATE report_definitions
    SET parameters = replace(parameters::text, '"Principle Insurance"', '"Principal Insurer"')::jsonb, updated_at = now()

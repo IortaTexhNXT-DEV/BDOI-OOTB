@@ -1,4 +1,4 @@
--- Segregation of duties (D61): official receipts (cash posting) and payment verification are finance-only. Sales held
+-- Segregation of duties: official receipts (cash posting) and payment verification are finance-only. Sales held
 -- write:receipts from the original seed; it keeps read:receipts and records client payments for finance to verify
 -- (POST /policies/:id/payments).
 DELETE FROM role_permissions rp USING roles r, permissions p

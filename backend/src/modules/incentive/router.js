@@ -11,7 +11,7 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Incentive', '/incentive');
 const read = canRead('incentive');
 const write = canWrite('incentive');
-// Program set-up is master data (Master > Incentive Programs): the System Administrator, not the Accounting users who pay (D102).
+// Program set-up is master data (Master > Incentive Programs): the System Administrator, not the Accounting users who pay.
 const programWrite = canWrite('masters');
 // Producers (Sales & Marketing) see their own programs and statements with the profile permission; incentive readers may look up any agent.
 const self = canRead('incentive', 'read:profile');
@@ -118,7 +118,7 @@ define({
   handler: async (req, res) => {
     const agentId = agentFor(req);
     // A manager (finance, administrator) who is not an agent opens the screen without choosing an agent: answer with an
-    // empty statement flagged eligible: false (the screen then offers GET /incentive/agents) instead of 404 (D101).
+    // empty statement flagged eligible: false (the screen then offers GET /incentive/agents) instead of 404.
     if (!req.query.agentId && !(await svc.eligibleAgents(agentId)).length) {
       return ok(res, { ...(await svc.emptyStatement(req.query.period)), eligible: false, selectAgent: isReader(req.user) });
     }

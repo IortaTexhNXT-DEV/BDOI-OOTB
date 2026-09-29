@@ -7,7 +7,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';

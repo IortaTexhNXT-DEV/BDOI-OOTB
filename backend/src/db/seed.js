@@ -24,8 +24,8 @@ export const ROLES = [
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation'];
-// write:receipts (official receipts, cash posting, payment verification) is Accounting-only: segregation of duties (D61).
-// Least privilege (D92): the receipt register (read:receipts) is Accounting's; Sales and Operations see a policy's
+// write:receipts (official receipts, cash posting, payment verification) is Accounting-only: segregation of duties.
+// Least privilege: the receipt register (read:receipts) is Accounting's; Sales and Operations see a policy's
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
 // The System Administrator holds every permission (granted below), so it has no entry here.
 const ROLE_PERMS = {
@@ -33,7 +33,7 @@ const ROLE_PERMS = {
   processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
-  // Accounting calculates, approves (maker-checker) and pays incentives (D102); program set-up stays with the system administrator.
+  // Accounting calculates, approves (maker-checker) and pays incentives; program set-up stays with the system administrator.
   accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read'],
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer).

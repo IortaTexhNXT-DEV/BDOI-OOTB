@@ -1,5 +1,5 @@
 /**
- * Security hardening from the code review of 29 Sep 2026 (defects D81-D99): file storage, passwords, production
+ * Security hardening: file storage, passwords, production
  * configuration, log redaction, session revocation, reset codes and 2FA secrets at rest, user administration,
  * upload limits and rate limits, route registry and error bodies.
  */
@@ -60,7 +60,7 @@ beforeAll(async () => {
 afterAll(async () => { resetRateLimits(); await pool.end(); });
 
 // ------------------------------------------------------------------------------------------------ 1. file storage
-describe('file storage (D81, D82)', () => {
+describe('file storage', () => {
   it('detects file types from their signature, not from the name or the browser', () => {
     expect(detectType(PNG, 'a.jpg')).toBe('image/png');
     expect(detectType(PDF, 'x.pdf')).toBe('application/pdf');
@@ -157,7 +157,7 @@ describe('file storage (D81, D82)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 2. passwords
-describe('passwords (D83)', () => {
+describe('passwords', () => {
   it('generates a policy-compliant temporary password for a user created without one; it must be changed', async () => {
     const tp = temporaryPassword(await passwordPolicy());
     expect(policyProblems(tp, await passwordPolicy())).toEqual([]);
@@ -196,7 +196,7 @@ describe('passwords (D83)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 3. production config
-describe('production start-up check (D84)', () => {
+describe('production start-up check', () => {
   const good = { NODE_ENV: 'production', JWT_SECRET: 'a'.repeat(48), DATA_ENCRYPTION_KEY: 'b'.repeat(48), CORS_ORIGINS: 'https://app.example.ph', PUBLIC_BASE_URL: 'https://api.example.ph' };
   const problems = (env) => productionConfigProblems(buildConfig(env), env);
   it('refuses missing or default secrets, CORS * and a localhost base URL in production only', () => {
@@ -225,7 +225,7 @@ describe('production start-up check (D84)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 4. logging
-describe('log redaction (D85)', () => {
+describe('log redaction', () => {
   it('never writes bearer tokens, cookies or link tokens to the log', async () => {
     const lines = [];
     const sink = new Writable({ write(chunk, _enc, cb) { lines.push(chunk.toString()); cb(); } });
@@ -239,7 +239,7 @@ describe('log redaction (D85)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 5. sessions
-describe('sessions (D86)', () => {
+describe('sessions', () => {
   it('ends access at once on deactivation and on role change; refresh issues a token with the new roles', async () => {
     const s = await login('hd.uw', PW);
     expect((await bearer(s.body.accessToken, 'get', '/reinsurance/treaties')).status).not.toBe(401);
@@ -287,7 +287,7 @@ describe('sessions (D86)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 6. reset codes and 2FA secrets
-describe('reset codes and two-factor secrets at rest (D87)', () => {
+describe('reset codes and two-factor secrets at rest', () => {
   it('stores reset codes hashed, keeps only the latest valid, withdraws a code after too many wrong entries', async () => {
     const forgot = () => request(ctx.app).post('/api/auth/forgot-password').send({ username: 'hd.sales' });
     const lastCode = async () => (await query("SELECT body_html FROM email_outbox WHERE template = 'password-reset' AND entity_id = $1 ORDER BY id DESC LIMIT 1", [ids['hd.sales']])).rows[0].body_html.match(/<b>(\d{6})<\/b>/)[1];
@@ -340,7 +340,7 @@ describe('reset codes and two-factor secrets at rest (D87)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 8. user administration
-describe('user administration (D88)', () => {
+describe('user administration', () => {
   it('unlocks a locked account and records it', async () => {
     await query("UPDATE users SET status = 'locked', failed_logins = 5 WHERE id = $1", [ids['hd.role']]);
     const r = await bearer(tokens['hd.uaa'], 'patch', `/users/${ids['hd.role']}/status`).send({ status: 'active' });
@@ -388,7 +388,7 @@ describe('user administration (D88)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 9. DoS limits
-describe('upload and request limits (D89)', () => {
+describe('upload and request limits', () => {
   it('caps workbook decompression and import rows', () => {
     const bomb = zlib.deflateRawSync(Buffer.alloc(config.importMaxInflatedBytes + 1024));
     expect(bomb.length).toBeLessThan(1024 * 1024);
@@ -421,7 +421,7 @@ describe('upload and request limits (D89)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 10. registry
-describe('route registry (D90)', () => {
+describe('route registry', () => {
   const PUBLIC = new Set([
     'GET /version', 'POST /auth/login', 'POST /auth/login/2fa', 'POST /auth/refresh', 'POST /auth/logout', 'GET /auth/password-policy',
     'POST /auth/forgot-password', 'POST /auth/reset-password', 'POST /quotations/approve-by-customer', 'GET /quotations/approve-by-customer',
@@ -459,7 +459,7 @@ describe('route registry (D90)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 13. read scope
-describe('least-privilege reads (D92)', () => {
+describe('least-privilege reads', () => {
   it('claims officers do not list leads; sales and operations do not read the receipt register', async () => {
     const cs = await makeUser('hd.cs', ['operations']);
     expect(cs.roles).toEqual(['operations']);
@@ -484,7 +484,7 @@ describe('least-privilege reads (D92)', () => {
 });
 
 // ------------------------------------------------------------------------------------------------ 11. errors
-describe('error bodies (D91)', () => {
+describe('error bodies', () => {
   it('answers 500 with a generic message and the request id; client errors keep their message', async () => {
     const app = express();
     const logged = [];

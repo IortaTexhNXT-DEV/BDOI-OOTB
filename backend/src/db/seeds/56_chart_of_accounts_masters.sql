@@ -1,4 +1,4 @@
--- Chart of accounts mirror (D57): the Main Account / Sub Account masters used by the remittance, transaction-code and
+-- Chart of accounts mirror: the Main Account / Sub Account masters used by the remittance, transaction-code and
 -- account-setup lookups list the GL chart (accounts without a parent are main accounts, with a parent sub accounts; see
 -- 40_finance.sql). Former sample master codes that are not GL accounts are retired. Idempotent.
 INSERT INTO master_records(type_code, code, name, data, status, created_by)

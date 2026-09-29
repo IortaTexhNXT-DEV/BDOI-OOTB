@@ -152,8 +152,8 @@ limits are kept in memory per API process; with several API instances each keeps
 
 - Set `DATA_ENCRYPTION_KEY` (and check `CORS_ORIGINS`, `PUBLIC_BASE_URL`) before starting the new version.
 - On the first start the API encrypts stored two-factor secrets, withdraws unused password reset codes, and removes
-  `read:leads` from Claims Officer and `read:receipts` from Sales and Customer Services (see D92 in
-  `docs/e2e/DEFECTS.md`; grant them back under Master > User Management > Role if a site needs them).
+  `read:leads` from Claims Officer and `read:receipts` from Sales and Customer Services (migration
+  `0091_least_privilege_reads.sql`; grant them back under Master > User Management > Role if a site needs them).
 - Users created without a password now receive a random temporary password shown once to the administrator, and
   must choose their own at the first sign-in. Accounts flagged "must change password" or with a password older than
   `security.password_max_age_days` must change it before they can use the application.

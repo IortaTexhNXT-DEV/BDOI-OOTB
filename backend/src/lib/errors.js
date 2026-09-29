@@ -29,7 +29,7 @@ export function errorHandler(err, req, res, _next) {
   const raw = Number(err.status || err.statusCode) || (err.name === 'ZodError' ? 400 : 500);
   const status = err.code === 'LIMIT_FILE_SIZE' || err.code === 'LIMIT_FILE_COUNT' ? 413 : (err.name === 'MulterError' ? 400 : raw);
   const clientError = status >= 400 && status < 500;
-  // A schema failure answers "Validation failed" with one message per field (zod's own message is a JSON dump, D105).
+  // A schema failure answers "Validation failed" with one message per field (zod's own message is a JSON dump).
   const message = err.name === 'ZodError' ? 'Validation failed' : (err.message || 'Bad request');
   const body = { success: false, message: clientError ? message : 'Internal server error; quote the request id when reporting it' };
   if (err.name === 'ZodError') body.errors = err.issues?.map((i) => ({ path: i.path.join('.'), message: issueMessage(i) }));

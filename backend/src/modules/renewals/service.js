@@ -8,7 +8,7 @@ import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { renderTemplate } from '../claims/docs.js';
 import { daysBetween, round2, today, unprocessable, usersWithRole } from '../claims/util.js';

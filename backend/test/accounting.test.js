@@ -20,7 +20,7 @@ describe('accounting ledger', () => {
     m = await makePolicy({ net: 10000 });
     const body = { amount: m.gross, grossPremium: m.gross, netPremium: m.net, valueAddedTax: 1200, documentaryStampTax: 1250, localGovernmentTax: 75, paymentDate: new Date().toISOString(),
       description: `Quote payment for policy ${m.policy.policy_number}`, referenceType: 'Policy', referenceId: m.policy.id, clientId: m.client.id, policyId: m.policy.id, policyNumber: m.policy.policy_number, isDirectBilled: false };
-    // recording a payment directly is finance-only (D70); agents record it for finance to verify
+    // recording a payment directly is finance-only; agents record it for finance to verify
     expect((await ctx.as('agent')('post', '/accounting/payment-entries').send(body)).status).toBe(403);
     const r1 = await ctx.as('maker')('post', '/accounting/payment-entries').send(body);
     expect(r1.status).toBe(201);

@@ -1,4 +1,4 @@
--- Direct bill (D36) and chart of accounts (D57): Configuration screen group label, the direct-bill commission receivable
+-- Direct bill and chart of accounts: Configuration screen group label, the direct-bill commission receivable
 -- report and the new report columns (billing mode, account type / statement group). Idempotent; admin edits are kept.
 UPDATE app_settings SET value = value || '{"direct_bill":"Direct bill (commission debit notes)"}'::jsonb
  WHERE key = 'system.group_labels' AND jsonb_typeof(value) = 'object' AND NOT value ? 'direct_bill';

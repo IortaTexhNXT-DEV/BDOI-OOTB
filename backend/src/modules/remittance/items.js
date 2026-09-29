@@ -14,6 +14,7 @@ import * as masters from '../masters/service.js';
 import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
+import { VISIBLE_TO_USER } from '../notifications/service.js';
 
 const ts = (d) => (d ? new Date(d).toISOString().replace('T', ' ').slice(0, 16) : null);
 const ITEM_SELECT = `SELECT x.*, (SELECT display_name FROM users u WHERE u.id = x.created_by) AS created_by_name,
@@ -317,8 +318,8 @@ export async function sendNotification(b, user) {
 }
 
 export async function inbox(user) {
-  // same visibility as the bell: own notifications and those addressed to a permission the user holds (D119)
-  const rows = await many(`SELECT * FROM notifications WHERE (user_id = $1 OR (user_id IS NULL AND (audience IS NULL OR audience = ANY($2::text[]))))
+  // same visibility as the bell: own notifications and those addressed to a permission the user holds
+  const rows = await many(`SELECT * FROM notifications WHERE ${VISIBLE_TO_USER}
     AND (entity LIKE 'remittance%' OR entity = 'item' OR link LIKE '/finance/remittance%') ORDER BY created_at DESC LIMIT 200`, [user.id, user.permissions || []]);
   return rows.map((n) => ({ id: n.id, type: n.type === 'approval' ? 'Approval Request' : 'System Alert', subject: n.title, sender: 'Remittance System', recipientType: 'User', sentDate: ts(n.created_at),
     status: n.is_read ? 'Read' : 'Delivered', priority: n.type === 'approval' ? 'High' : 'Normal', channel: 'System', content: n.message, isRead: n.is_read, hasAttachment: false, link: n.link }));

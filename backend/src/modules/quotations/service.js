@@ -6,7 +6,7 @@ import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
 import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
 import { pick } from '../documents/tabular.js';

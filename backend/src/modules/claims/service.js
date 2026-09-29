@@ -14,7 +14,7 @@ import { formatMoney } from '../../lib/money.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { renderTemplate } from './docs.js';
 import { companyName } from '../../lib/letterhead.js';
 import { printContext, buildPdf } from '../../lib/pdf/index.js';
@@ -364,7 +364,7 @@ export async function createClaim(input, user, files) {
   return getClaim(id);
 }
 
-/** A claim cannot be reported before the loss happened (D107). Dates are ISO yyyy-mm-dd strings. */
+/** A claim cannot be reported before the loss happened. Dates are ISO yyyy-mm-dd strings. */
 function assertReportedAfterLoss(lossDate, reportedDate) {
   if (lossDate && reportedDate && String(reportedDate) < String(lossDate)) {
     throw badRequest('Validation failed', [{ path: 'reportedDate', message: `Reported date ${reportedDate} cannot be before the date of loss ${lossDate}` }]);
@@ -453,7 +453,7 @@ async function transition(row, to, user, { note, sets = {}, action } = {}) {
   await notifyParties(row, { title: `Claim ${row.claim_number}: ${labels[to]}`, message: note || `Claim ${row.claim_number} is now ${labels[to]}` });
 }
 
-/** PUT /claims/updatestatus/:id — only statuses without their own workflow step (review, close, reject). */
+/** PUT /claims/updatestatus/:id: only statuses without their own workflow step (review, close, reject). */
 export async function updateStatus(id, requested, user, note) {
   const to = await toStatusCode(requested);
   if (!to) throw badRequest(`Unknown claim status "${requested}"`);

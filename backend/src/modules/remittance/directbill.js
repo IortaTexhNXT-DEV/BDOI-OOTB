@@ -1,5 +1,5 @@
 /**
- * Direct bill (D36). The client pays the premium directly to the insurer; the broker bills the insurer for its
+ * Direct bill. The client pays the premium directly to the insurer; the broker bills the insurer for its
  * commission with a commission debit note.
  *
  * - Billing mode is stored on the policy (policies.billing_mode = broker | direct, default direct_bill.default_billing_mode).
@@ -24,7 +24,7 @@ import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { cashAccountFor, reverseJournal } from '../accounting/lib/ledger.js';
 import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';

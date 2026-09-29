@@ -24,7 +24,7 @@ describe('receipts', () => {
     const { policy, client, gross, net } = await makePolicy({ net: 20000 });
     const draft = { receiptType: 'Payment', receiptDate: new Date().toISOString(), customerCode: client.client_code, currencyCode: 'PHP',
       transactionCode: 'PAYMENT', policyRefId: policy.id, receiptStatus: 'Draft', receiptsList: [line(policy.policy_number, gross, net)] };
-    // official receipts are finance-only (D61): an agent records the payment on the policy payment screen instead
+    // official receipts are finance-only: an agent records the payment on the policy payment screen instead
     expect((await ctx.as('agent')('post', '/receipts').send(draft)).status).toBe(403);
     const c = await ctx.as('maker')('post', '/receipts').send(draft);
     expect(c.status).toBe(201);

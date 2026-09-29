@@ -9,7 +9,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { isoDate, params, round2, toNumber } from '../masters/helpers.js';
 import { createInsurerRemittance } from '../disbursements/service.js';
@@ -477,7 +477,7 @@ export async function settleRemittance(id, b, user) {
 
 /**
  * Users an approval can be delegated to: active users who hold write:remittance through a role, or an administrator role,
- * other than the caller. Accounting reads this without read:users (D106).
+ * other than the caller. Accounting reads this without read:users.
  */
 export async function approvers(user) {
   const rows = await many(`SELECT u.id, u.username, u.display_name FROM users u

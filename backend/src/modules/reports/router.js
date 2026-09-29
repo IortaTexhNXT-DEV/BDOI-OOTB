@@ -122,7 +122,7 @@ define({
 
 /* ----- filter options ----- */
 // Report filters must not depend on user administration (GET /users needs read:users): every report reader may list the
-// agents a report can be filtered by (D104).
+// agents a report can be filtered by.
 define({
   method: 'GET', path: '/filters/agents', summary: 'Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }',
   screen: 'Reports > * (Agent filter)', middleware: canRead, permissions: ['read:reports'],

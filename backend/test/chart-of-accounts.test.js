@@ -1,5 +1,5 @@
 /**
- * Chart of accounts (D57): Philippine insurance-broker chart, every account the system posts to exists and is active,
+ * Chart of accounts: Philippine insurance-broker chart, every account the system posts to exists and is active,
  * statement grouping is consistent, and re-seeding an existing database is idempotent (adds new accounts, keeps edits,
  * retires the insurer-only accounts of the earlier chart, keeps journals balanced).
  */

@@ -1,5 +1,5 @@
 /**
- * Policy premium payment capture (replaces the former mock payment).
+ * Policy premium payment capture (Policy > Payment screen).
  *
  * - "Pay later": nothing is posted; the receivable raised at issuance stays open.
  * - A payment (mode, reference, amount, date, optional proof) is recorded as a capture for finance to verify. It does

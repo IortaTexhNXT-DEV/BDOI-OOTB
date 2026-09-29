@@ -2,7 +2,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
 import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses.js';
 import { getPolicyRow, createReceivable } from '../policies/service.js';

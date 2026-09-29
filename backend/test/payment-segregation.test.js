@@ -1,5 +1,5 @@
 /**
- * Segregation of duties on premium payments (D61, D70).
+ * Segregation of duties on premium payments.
  * - Official receipts (POST /receipts), direct payment entries (POST /accounting/payment-entries) and setting the payment
  *   status (PATCH /policies/:id/payment-status, PUT paymentStatus) are finance-only.
  * - Sales, underwriting, customer services and agents record the client's payment as pending (POST /policies/:id/payments),
@@ -45,7 +45,7 @@ beforeAll(async () => {
 });
 afterAll(async () => { await pool.end(); });
 
-describe('D61: official receipts are finance-only', () => {
+describe('Official receipts are finance-only', () => {
   it('sales, underwriting, customer services and agents get 403 on POST /receipts; finance posts it', async () => {
     const p = await billedPolicy(8000, ctx.userIds.agent);
     const body = { policyId: p.policy.id, amount: 1000, paymentMode: 'cash' };
@@ -66,7 +66,7 @@ describe('D61: official receipts are finance-only', () => {
       WHERE p.code = 'write:receipts' ORDER BY r.code`);
     expect(holders.map((r) => r.code)).toEqual(['accounting', 'system-admin']);
     const sales = await q(`SELECT p.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id WHERE r.code = 'sales' AND p.module = 'receipts'`);
-    expect(sales.map((r) => r.code)).toEqual([]); // D92: the receipt register is finance-only too
+    expect(sales.map((r) => r.code)).toEqual([]); // the receipt register is finance-only too
     // an existing database seeded before the fix
     await q(`INSERT INTO role_permissions(role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p WHERE r.code = 'sales' AND p.code = 'write:receipts'`);
     const sql = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/db/migrations/0084_finance_only_receipts.sql'), 'utf8');
@@ -76,7 +76,7 @@ describe('D61: official receipts are finance-only', () => {
   });
 });
 
-describe('D70: no direct-paid path for policy editors', () => {
+describe('No direct-paid path for policy editors', () => {
   it('payment-entries, PATCH payment-status and PUT paymentStatus are refused to sales, underwriting, customer services and agents', async () => {
     const p = await billedPolicy(9000, ctx.userIds.agent);
     const entry = { amount: p.gross, clientId: p.client.id, referenceType: 'Policy', referenceId: p.policy.id, policyId: p.policy.id };

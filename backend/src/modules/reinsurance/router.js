@@ -12,7 +12,7 @@ const write = canWrite('reinsurance');
 const recoveryRead = canRead('reinsurance', 'write:claims');
 const recoveryWrite = canWrite('reinsurance', 'write:claims');
 // Reconciling reinsurer statements (premium / claims accounts) is a finance task: remittance users reconcile and resolve
-// variances and exceptions, and read the reinsurer list the statement form offers (D103). Treaties and cessions stay
+// variances and exceptions, and read the reinsurer list the statement form offers. Treaties and cessions stay
 // with reinsurance users.
 const reconRead = canRead('reinsurance', 'read:remittance', 'write:remittance');
 const reconWrite = canWrite('reinsurance', 'write:remittance');

@@ -8,7 +8,7 @@ import { today } from '../../lib/dates.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { round2 } from '../accounting/lib/http.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { ensureBooked, findPolicy } from '../receipts/receivables.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { companyName } from '../../lib/letterhead.js';

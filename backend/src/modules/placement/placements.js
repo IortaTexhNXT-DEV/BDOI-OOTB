@@ -13,7 +13,7 @@ import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { quoteStatusOut } from '../documents/statuses.js';

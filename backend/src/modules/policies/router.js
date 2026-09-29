@@ -6,7 +6,7 @@ import { audit } from '../../lib/audit.js';
 import { paging } from '../../lib/respond.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { usersWithRoles } from '../documents/common.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import * as payments from './payments.js';
 import { config } from '../../config.js';
 import { forbidden } from '../../lib/errors.js';
@@ -121,7 +121,7 @@ define({
   request: { policyNumber: 'MAL-MC-2026-0099', inception: '2026-10-01', expiry: '2027-10-01', plateNumber: 'ABC 1234', policyDocument: 'document/abc.pdf' },
   response: { ...example, success: true },
   handler: async (req, res) => {
-    // the payment status is set by payment capture / finance verification, not by a policy editor (D70)
+    // the payment status is set by payment capture / finance verification, not by a policy editor
     if (req.body.paymentStatus && !payments.canPostReceipts(req.user)) {
       const current = await svc.getPolicyRow(req.params.id);
       if (String(req.body.paymentStatus).toLowerCase() !== String(current.payment_status || '').toLowerCase()) {
