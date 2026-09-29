@@ -2,15 +2,15 @@
 from harness import *
 
 PERSONAS = [
-    ('bea.admin', 'Bea Villanueva', 'Business Administrator', 'ba'),
-    ('maria.sales', 'Maria Santos', 'Sales / Relationship Manager', 'sales'),
-    ('ramon.agent', 'Ramon Dela Cruz', 'Agent / Referrer', 'agent'),
-    ('jose.uw', 'Jose Reyes', 'Underwriter', 'underwriting'),
-    ('ana.cs', 'Ana Mercado', 'Customer Services', 'customer-services'),
-    ('carlo.claims', 'Carlo Mendoza', 'Claims Officer', 'claims'),
-    ('lisa.claims2', 'Lisa Tan', 'Claims Officer', 'claims'),
-    ('liza.finance', 'Liza Garcia', 'Finance / Accounts', 'finance'),
-    ('fe.approver', 'Felix Aquino', 'Finance / Accounts', 'finance'),
+    ('bea.admin', 'Bea Villanueva', 'System Administrator (Super Admin Access)', 'system-admin'),
+    ('maria.sales', 'Maria Santos', 'Sales & Marketing (Account Executive)', 'sales'),
+    ('ramon.agent', 'Ramon Dela Cruz', 'Sales & Marketing (Account Executive)', 'sales'),
+    ('jose.uw', 'Jose Reyes', 'Processing Team (Placement & Policy Processing)', 'processing'),
+    ('ana.cs', 'Ana Mercado', 'Operations (Client Servicing)', 'operations'),
+    ('carlo.claims', 'Carlo Mendoza', 'Claims', 'claims'),
+    ('lisa.claims2', 'Lisa Tan', 'Claims', 'claims'),
+    ('liza.finance', 'Liza Garcia', 'Accounting', 'accounting'),
+    ('fe.approver', 'Felix Aquino', 'Accounting', 'accounting'),
 ]
 PASSWORD = os.environ['PERSONA_PASSWORD']
 
@@ -30,7 +30,7 @@ def run(pg, rec):
     save = pg.get_by_role('button', name='Save')
     rec.step(pg, 'BrokerVerse', 'Add User', 'empty form', [('Save disabled until required fields are filled', save.is_disabled())])
     fill(pg, 'Username', 'x.invalid'); fill(pg, 'E-mail', 'not-an-email'); fill(pg, 'Display Name', 'Invalid'); fill(pg, 'Password', PASSWORD)
-    pg.get_by_text('Sales / Relationship Manager', exact=True).click(); pg.wait_for_timeout(300)
+    pg.get_by_text('Sales & Marketing (Account Executive)', exact=True).click(); pg.wait_for_timeout(300)
     invalid_blocked = save.is_disabled() or bool(error_texts(pg))
     if not invalid_blocked:
         save.click(); settle(pg); invalid_blocked = 'error' in (toast_text(pg) or '').lower() or bool(error_texts(pg))
@@ -50,7 +50,7 @@ def run(pg, rec):
     # duplicate
     pg.goto(BASE + '/master/generals/usermanagement/user/add'); settle(pg)
     fill(pg, 'Username', 'maria.sales'); fill(pg, 'E-mail', 'dup@brokerverse.test'); fill(pg, 'Display Name', 'Dup'); fill(pg, 'Password', PASSWORD)
-    pg.get_by_text('Sales / Relationship Manager', exact=True).first.click(); pg.get_by_role('button', name='Save').click(); settle(pg)
+    pg.get_by_text('Sales & Marketing (Account Executive)', exact=True).first.click(); pg.get_by_role('button', name='Save').click(); settle(pg)
     t = toast_text(pg)
     rec.step(pg, 'BrokerVerse', 'Add User', 'duplicate username', [('duplicate refused with a message', 'exist' in t.lower() or 'duplicate' in t.lower(), t[:80])])
     # each persona can sign in

@@ -9,14 +9,13 @@ PW = os.environ['PERSONA_PASSWORD']
 
 # user, persona, forbidden screen, forbidden API call (method, path, body)
 CASES = [
-    ('bea.admin', 'Business Administrator', None, None),
-    ('maria.sales', 'Sales / Relationship Manager', '/accounts/journalvoucher', ('POST', '/journal-vouchers', {'transactionCode': 'JV', 'entries': []})),
-    ('ramon.agent', 'Agent / Referrer', '/accounts/receipts', ('GET', '/receipts', None)),
-    ('jose.uw', 'Underwriter', '/accounts/paymentvoucher', ('POST', '/journal-vouchers', {'transactionCode': 'JV', 'entries': []})),
-    ('ana.cs', 'Customer Services', '/master/configuration/settings', ('POST', '/journal-vouchers', {'transactionCode': 'JV', 'entries': []})),
-    ('carlo.claims', 'Claims Officer', '/accounts/paymentvoucher', ('POST', '/disbursements', {})),
-    ('liza.finance', 'Finance / Accounts', '/master/configuration/settings', ('POST', '/users', {'username': 'x.blocked', 'password': 'Blocked@2026', 'displayName': 'X', 'roles': ['sales']})),
-    ('carmela.morfe', 'User Access Administrator', '/accounts/receipts', ('GET', '/policies', None)),
+    ('bea.admin', 'System Administrator (Super Admin Access)', None, None),
+    ('maria.sales', 'Sales & Marketing (Account Executive)', '/accounts/journalvoucher', ('POST', '/journal-vouchers', {'transactionCode': 'JV', 'entries': []})),
+    ('ramon.agent', 'Sales & Marketing (Account Executive)', '/accounts/receipts', ('GET', '/receipts', None)),
+    ('jose.uw', 'Processing Team (Placement & Policy Processing)', '/accounts/paymentvoucher', ('POST', '/journal-vouchers', {'transactionCode': 'JV', 'entries': []})),
+    ('ana.cs', 'Operations (Client Servicing)', '/master/configuration/settings', ('POST', '/journal-vouchers', {'transactionCode': 'JV', 'entries': []})),
+    ('carlo.claims', 'Claims', '/accounts/paymentvoucher', ('POST', '/disbursements', {})),
+    ('liza.finance', 'Accounting', '/master/configuration/settings', ('POST', '/users', {'username': 'x.blocked', 'password': 'Blocked@2026', 'displayName': 'X', 'roles': ['sales']})),
 ]
 PASSWORDS = {'carmela.morfe': os.environ.get('UAA_PASSWORD', '')}
 

@@ -1,5 +1,10 @@
 # Persona access (step 21)
 
+> Roles renamed since this run (broker terminology, migration 0140): underwriting -> processing (Processing Team),
+> customer-services -> operations, finance -> accounting, finance-manager -> accounting-manager; it-admin, ba and
+> user-access-admin merged into system-admin; the agent login role withdrawn (its users are Sales & Marketing). The
+> Underwriting Dashboard is now the Processing Dashboard (/processing/dashboard). The results below are as recorded.
+
 | User | Persona | Menu shown | Forbidden screen | Blocked | Forbidden API call | Status |
 |---|---|---|---|---|---|---|
 | bea.admin | Business Administrator | Dashboard, Product Configurator, Master, Operations, Accounts, Commission, Reinsurance, Reports | - | - | - | - |

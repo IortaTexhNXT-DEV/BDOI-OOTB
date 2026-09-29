@@ -1,5 +1,10 @@
 # BrokerVerse persona walk 2: re-test of the persona walk fixes
 
+> Roles renamed since this run (broker terminology, migration 0140): underwriting -> processing (Processing Team),
+> customer-services -> operations, finance -> accounting, finance-manager -> accounting-manager; it-admin, ba and
+> user-access-admin merged into system-admin; the agent login role withdrawn (its users are Sales & Marketing). The
+> Underwriting Dashboard is now the Processing Dashboard (/processing/dashboard). The results below are as recorded.
+
 Run on 29/09/2026 against the build served at http://127.0.0.1:5080 (`main.9ef4f42b.js` for every persona, checked at the start and end of each walk; branch `brokerverse-platform`, commit 40c29d7 with the security hardening D81-D99 and the persona-walk fixes D100-D129) and the API at http://localhost:8000/api. Chromium via Playwright, viewport 1440x900. First run: `docs/e2e/PERSONA_WALK.md` (build `main.65895c72.js`).
 
 **Method.** Same scripts as the first run, adapted to the new build: menus regenerated from the current `components/SideBar/list.js` and `utils/menuPermissions.js`; sign-in through the page with the masked password field and detection of a "change password" / two-factor step (none was met); **every non-GET API request was aborted except `POST /auth/login` and `POST /auth/refresh`** (the first run allowed all of `/auth/*`), so nothing could be saved, submitted, approved, marked read or have its password changed; a "still shows Loading..." check; report-screen controls recorded. Each persona also opened the notifications page (`/agent/notification`, reported separately, not counted in the totals). Targeted scripts re-checked the claim pages, direct-bill policy POL-2026-00003, the agent dashboard counts, every report screen and token refresh. Report Preview and Generate are `POST /reports/:code/run|generate`, so they were not clicked; the controls were checked for being enabled.
