@@ -10,8 +10,9 @@ import userService from "../../../../../services/userService";
 import { confirmAction, notifyError, notifySuccess } from "../../../../../utility/dialogs";
 import { formatDate } from "../../../../../utility/dateFormat";
 import "../../../../../agentModule/authModule/security/security.scss";
+import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
 
-const PRIVILEGED_ROLES = ["it-admin", "ba"];
+const PRIVILEGED_ROLES = ADMIN_ROLES;
 const readList = (key) => {
   try {
     const v = JSON.parse(localStorage.getItem(key) || "[]");
@@ -23,19 +24,19 @@ const readList = (key) => {
 
 /**
  * What the signed-in administrator may do to a user account (the server applies the same rules):
- * write:users is required; only an IT administrator may act on IT / business administrator accounts or on their own.
+ * write:users is required; only a System Administrator may act on a System Administrator account, and nobody changes
+ * their own access here (own password: the profile).
  */
 export const accountPermissions = (row) => {
   const roles = readList("USER_ROLES");
   const permissions = readList("USER_PERMISSIONS");
-  const isItAdmin = roles.includes("it-admin");
   const isAdmin = roles.some((r) => PRIVILEGED_ROLES.includes(r));
   const canWrite = isAdmin || permissions.includes("write:users");
   const targetRoles = row?.fullUserData?.roles || row?.roles || [];
   const privileged = targetRoles.some((r) => PRIVILEGED_ROLES.includes(r));
   const self = String(row?.id) === String(localStorage.getItem("USER_ID") || "");
   return {
-    canManage: canWrite && (isItAdmin || (!privileged && !self)),
+    canManage: canWrite && !self && (isAdmin || !privileged),
     canRead: isAdmin || permissions.includes("read:users") || permissions.includes("write:users"),
   };
 };

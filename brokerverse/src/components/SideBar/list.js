@@ -33,14 +33,14 @@ export const menuList = [
       },
       {
         id: 3,
-        name: "Underwriting Dashboard",
-        path: "/underwriting/dashboard",
-        includes: ["/underwriting/dashboard"],
-        permissions: ["read:underwriting-dashboard"],
+        name: "Processing Dashboard",
+        path: "/processing/dashboard",
+        includes: ["/processing/dashboard"],
+        permissions: ["read:processing-dashboard"],
       },
       {
         id: 4,
-        name: "Agent Dashboard",
+        name: "Sales Dashboard",
         path: "/agent/home",
         includes: ["/agent/home"],
         permissions: ["read:agent-dashboard"],
@@ -85,7 +85,7 @@ export const menuList = [
       },
       {
         id: 5,
-        name: "Underwriting Rules",
+        name: "Acceptance Rules",
         path: "/product-configurator/underwriting",
         includes: ["/product-configurator/underwriting"],
         permissions: ["read:product-underwriting"],

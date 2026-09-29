@@ -1442,9 +1442,10 @@ const Maincomponent = () => {
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
           <Route
-            path="/underwriting/dashboard"
+            path="/processing/dashboard"
             element={<UnderwritingDashboard />}
           />
+          <Route path="/underwriting/dashboard" element={<Navigate to="/processing/dashboard" replace />} />
 
           {/* // Agent Dashboard, Notification & agent profile */}
           <Route path="/agent/home" element={<Dashboard />} />

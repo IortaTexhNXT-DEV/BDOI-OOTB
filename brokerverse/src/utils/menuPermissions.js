@@ -24,24 +24,30 @@ const OPERATIONS_ALL = [
   "Payments",
 ];
 
+/** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
+export const ADMIN_ROLE = "system-admin";
+export const ADMIN_ROLES = [ADMIN_ROLE];
+
 export const roleMenuPermissions = {
-  "it-admin": { all: true },
-  ba: { all: true },
+  [ADMIN_ROLE]: { all: true },
+  // Sales & Marketing (Account Executive): prospects, leads, clients, quotation requests, renewals follow-up, own production
   sales: {
-    dashboard: ["Executive Dashboard", "Agent Dashboard"],
+    dashboard: ["Executive Dashboard", "Sales Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
     operations: OPERATIONS_ALL,
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports"],
   },
-  underwriting: {
-    dashboard: ["Underwriting Dashboard", "Executive Dashboard"],
+  // Processing Team (Placement & Policy Processing): broker slips, offer comparison, quotation / placement slips,
+  // insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates
+  processing: {
+    dashboard: ["Processing Dashboard", "Executive Dashboard"],
     "product configurator": [
       "Dashboard",
       "Product Templates",
       "Coverage Builder",
       "Rating Engine",
-      "Underwriting Rules",
+      "Acceptance Rules",
       "Document Manager",
       "Approval Workflows",
       "Market Mapping",
@@ -58,7 +64,8 @@ export const roleMenuPermissions = {
     ],
     reports: ["All Reports", "Operational Reports"],
   },
-  "customer-services": {
+  // Operations (Client Servicing): client servicing, endorsement requests, renewals, open items, documents
+  operations: {
     dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
     operations: OPERATIONS_ALL,
@@ -70,7 +77,9 @@ export const roleMenuPermissions = {
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports"],
   },
-  finance: {
+  // Accounting: billing, collection, official receipts, remittance, commission, period end, BIR. The Accounting Manager
+  // inherits Accounting (the server returns both roles), so it needs no entry of its own.
+  accounting: {
     dashboard: ["Executive Dashboard"],
     operations: ["Open Items", "Payments"],
     accounts: [
@@ -86,7 +95,7 @@ export const roleMenuPermissions = {
       "Correction JV",
       "Reversal JV",
       "Remittance",
-      // incentives are calculated, approved and paid by finance (D102)
+      // incentives are calculated, approved and paid by Accounting (D102)
       "Incentive",
       // period-end processing and BIR tax
       "Period End",
@@ -94,22 +103,10 @@ export const roleMenuPermissions = {
     ],
     master: ["Finance > Taxation", "Finance > Close Checklist"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
-    // reinsurer statement reconciliation is a finance task (D103)
+    // reinsurer statement reconciliation is an Accounting task (D103)
     reinsurance: ["Reconciliation"],
-    // the production, claims and renewal registers are not finance reports (report catalogue roles)
+    // the production, claims and renewal registers are not accounting reports (report catalogue roles)
     reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission"],
-  },
-  // Users, roles and access only; no business screens. Nested grants use "Group > Item".
-  "user-access-admin": {
-    master: ["Generals > User Management", "Audit Trail"],
-  },
-  // Agents renew their own expiring policies (Renewal Policy -> renewal quote wizard, record-scoped on the server). The
-  // renewals workspace (batches, queue, analytics, at-risk, negotiations, lapse, performance) needs the renewals
-  // permission, which the agent role does not hold (D100).
-  agent: {
-    dashboard: ["Agent Dashboard"],
-    operations: ["Home", "Leads/Prospects", "Clients", "Quotation", "Broker Slips", "Placement Slips", "Policy", "Claims", "Renewals > Renewal Policy"],
-    commission: ["Commission Dashboard"],
   },
 };
 

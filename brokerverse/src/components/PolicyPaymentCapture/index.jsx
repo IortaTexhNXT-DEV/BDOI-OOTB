@@ -24,9 +24,9 @@ const STATUS_LABEL = { submitted: "Awaiting finance verification", confirmed: "C
  * Premium payment capture for a policy bill (quote / policy payment and endorsement payment screens).
  *
  * The user records how the client pays: pay later (the bill stays open) or a payment (mode, reference, amount, date,
- * optional proof) through POST /policies/:id/payments. For sales, underwriting, customer services and agents the
- * payment is recorded as pending; finance verifies (confirm / reject) it and only then is the official receipt issued.
- * A finance user (summary.canConfirm) posts the receipt at capture and can confirm or reject pending payments here.
+ * optional proof) through POST /policies/:id/payments. For Sales & Marketing, the Processing Team and Operations the
+ * payment is recorded as pending; Accounting verifies (confirm / reject) it and only then is the official receipt issued.
+ * An Accounting user (summary.canConfirm) posts the receipt at capture and can confirm or reject pending payments here.
  *
  * Props:
  *  - policyId: the policy whose bills are paid

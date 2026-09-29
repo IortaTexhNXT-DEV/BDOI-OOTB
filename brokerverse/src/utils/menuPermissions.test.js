@@ -15,14 +15,14 @@ describe("route guard", () => {
     expect(isPathAllowed("/", menu, ["sales"])).toBe(true);
     expect(isPathAllowed("/agent/policy", menu, ["sales"])).toBe(true);
   });
-  it("allows finance into accounts", () => {
-    expect(isPathAllowed("/accounts/journalvoucher", menu, ["finance"])).toBe(true);
+  it("allows accounting into accounts", () => {
+    expect(isPathAllowed("/accounts/journalvoucher", menu, ["accounting"])).toBe(true);
   });
   it("leaves paths outside the menu open (profile, detail pages)", () => {
     expect(isPathAllowed("/profile", menu, ["sales"])).toBe(true);
   });
   it("gives administrators everything", () => {
-    expect(filterMenuForRoles(menu, ["it-admin"])).toHaveLength(3);
+    expect(filterMenuForRoles(menu, ["system-admin"])).toHaveLength(3);
   });
 });
 
@@ -62,21 +62,28 @@ describe("persona walk: menu grants match the API (D100-D104)", () => {
     },
   ];
 
-  it("agents renew their own policies but do not get the renewals workspace", () => {
-    expect(isPathAllowed("/agent/expired-policies", walkMenu, ["agent"])).toBe(true);
-    for (const p of ["/agent/renewal-batch", "/renewal/queue", "/renewal/analytics"]) {
-      expect(isPathAllowed(p, walkMenu, ["agent"])).toBe(false);
+  it("operations and processing get the renewals workspace; accounting does not", () => {
+    for (const role of ["operations", "processing", "sales"]) {
+      expect(isPathAllowed("/renewal/queue", walkMenu, [role])).toBe(true);
     }
+    expect(isPathAllowed("/renewal/queue", walkMenu, ["accounting"])).toBe(false);
   });
-  it("finance reaches incentives and reinsurance reconciliation", () => {
-    expect(isPathAllowed("/incentive/statement", walkMenu, ["finance"])).toBe(true);
-    expect(isPathAllowed("/reinsurance/reconciliation", walkMenu, ["finance"])).toBe(true);
+  it("accounting reaches incentives and reinsurance reconciliation", () => {
+    expect(isPathAllowed("/incentive/statement", walkMenu, ["accounting"])).toBe(true);
+    expect(isPathAllowed("/reinsurance/reconciliation", walkMenu, ["accounting"])).toBe(true);
   });
-  it("finance gets the finance reports and the catalogue, not the production register", () => {
-    expect(isPathAllowed("/reports/catalogue", walkMenu, ["finance"])).toBe(true);
-    expect(isPathAllowed("/reports/run/trial-balance", walkMenu, ["finance"])).toBe(true);
-    expect(isPathAllowed("/reports/operationalreports/remittance", walkMenu, ["finance"])).toBe(true);
-    expect(isPathAllowed("/reports/operationalreports/production", walkMenu, ["finance"])).toBe(false);
-    expect(isPathAllowed("/reports/catalogue", walkMenu, ["agent"])).toBe(false);
+  it("accounting gets the financial reports and the catalogue, not the production register", () => {
+    expect(isPathAllowed("/reports/catalogue", walkMenu, ["accounting"])).toBe(true);
+    expect(isPathAllowed("/reports/run/trial-balance", walkMenu, ["accounting"])).toBe(true);
+    expect(isPathAllowed("/reports/operationalreports/remittance", walkMenu, ["accounting"])).toBe(true);
+    expect(isPathAllowed("/reports/operationalreports/production", walkMenu, ["accounting"])).toBe(false);
+  });
+  it("the Accounting Manager (accounting-manager + inherited accounting) gets the accounting menu", () => {
+    expect(isPathAllowed("/incentive/statement", walkMenu, ["accounting-manager", "accounting"])).toBe(true);
+  });
+  it("withdrawn role codes (a token issued before the rename) grant nothing", () => {
+    for (const old of ["it-admin", "ba", "user-access-admin", "underwriting", "customer-services", "finance", "finance-manager", "agent"]) {
+      expect(filterMenuForRoles(walkMenu, [old])).toEqual([]);
+    }
   });
 });
