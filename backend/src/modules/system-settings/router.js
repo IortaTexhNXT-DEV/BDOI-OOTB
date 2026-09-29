@@ -17,7 +17,7 @@ const upload = memoryUpload({ files: 1 });
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 const SCREEN = 'Master > System Settings';
 const example = {
-  logoUrl: '/BDO_insure_logo.png.png', logoPresets: [{ id: 'bdo', label: 'BDO', url: '/BDO_insure_logo.png.png', builtIn: true }], displayCurrency: 'PHP',
+  logoUrl: '/bdoi/iorta-technxt.png', logoPresets: [{ id: 'iorta-technxt', label: 'iorta TechNXT (BrokerVerse)', url: '/bdoi/iorta-technxt.png', builtIn: true }], displayCurrency: 'PHP',
   primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', faviconUrl: '/favicon.ico', appTitle: 'Brokerverse',
   currencies: [{ code: 'PHP', name: 'Philippine Peso', locale: 'en-PH', region: 'Asia' }], updatedAt: '2026-09-28T00:00:00.000Z',
 };

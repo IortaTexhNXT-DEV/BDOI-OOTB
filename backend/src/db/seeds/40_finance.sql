@@ -58,7 +58,7 @@ WITH chart(code, name, account_type, parent_code, category, is_open_item, allow_
  -- ASSETS: cash and cash equivalents
  ('1101001','Cash on Hand','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Cash collections pending deposit','Cash on Hand'),
  ('1101002','Cash on Hand – Undeposited Cheques','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Cheques received and not yet deposited',NULL),
- ('1102001','Cash in Bank – Operating Account (BDO Current)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Default collection and disbursement account','Cash in Bank – BDO Current'),
+ ('1102001','Cash in Bank – Operating Account','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Default collection and disbursement account','Cash in Bank – BDO Current'),
  ('1102002','Cash in Bank – E-wallet Clearing (GCash)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','E-wallet and online collections clearing','Cash in Bank – E-wallet Clearing (GCash)'),
  ('1102003','Cash in Bank – Premium Trust Account (Clients'' Money)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Segregated account for premiums held for insurers',NULL),
  ('1102004','Cash in Bank – Payroll Account','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Payroll funding account',NULL),

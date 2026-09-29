@@ -32,8 +32,8 @@ const LANGUAGE_OPTIONS = [
 
 /** Preset theme colors — label includes hex so users can pick or type a code */
 const THEME_COLOR_PRESETS = [
-  { label: "BDO Blue — #0072d8", value: "#0072d8" },
-  { label: "BDO Navy — #004ea8", value: "#004ea8" },
+  { label: "Classic Blue — #0072d8", value: "#0072d8" },
+  { label: "Navy — #004ea8", value: "#004ea8" },
   { label: "Indigo — #6366f1", value: "#6366f1" },
   { label: "Deep Indigo — #4f46e5", value: "#4f46e5" },
   { label: "Teal — #0d9488", value: "#0d9488" },
@@ -385,7 +385,7 @@ const SystemSettingsPage = () => {
                 className="mt-2"
                 value={form.logoUrl}
                 onChange={(e) => updateField("logoUrl", e.target.value)}
-                placeholder="/BDO_insure_logo.png.png"
+                placeholder="/bdoi/iorta-technxt.png"
               />
               <div className="logo-preset-actions mt-2">
                 <Button

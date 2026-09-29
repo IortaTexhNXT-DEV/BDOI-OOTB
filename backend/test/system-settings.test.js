@@ -21,7 +21,8 @@ describe('system settings', () => {
     expect(r.status).toBe(200);
     const d = r.body.data;
     expect(d).toMatchObject({ displayCurrency: 'PHP', defaultLanguage: 'en', appTitle: 'Brokerverse', faviconUrl: '/favicon.ico' });
-    expect(d.logoPresets.find((p) => p.id === 'bdo').builtIn).toBe(true);
+    expect(d.logoPresets.find((p) => p.id === 'iorta-technxt').builtIn).toBe(true);
+    expect(d.logoPresets.find((p) => p.id === 'bdo')).toBeUndefined(); // not a built-in of the OOTB product
     expect(d.currencies.find((c) => c.code === 'PHP').locale).toBe('en-PH');
     expect(d.logoUrl).toBeTruthy();
     // Locale and form options the front end applies app-wide (date format, mobile numbers, quote options)
@@ -63,7 +64,7 @@ describe('system settings', () => {
     expect(up.url).toMatch(/\/api\/s3\/object\/logo\//);
     const file = await request(ctx.app).get(up.url.replace(/^https?:\/\/[^/]+/, ''));
     expect(file.status).toBe(200);
-    const builtIn = await ctx.api('delete', '/system-settings/logo-presets/bdo');
+    const builtIn = await ctx.api('delete', '/system-settings/logo-presets/iorta-technxt');
     expect(builtIn.status).toBe(400);
     const del = await ctx.api('delete', `/system-settings/logo-presets/${preset.id}`);
     expect(del.status).toBe(200);

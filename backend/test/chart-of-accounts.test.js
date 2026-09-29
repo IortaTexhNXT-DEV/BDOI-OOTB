@@ -99,7 +99,7 @@ describe('chart of accounts', () => {
     expect(after.length).toBe(before.length + 2);
     expect(byCode.get('4409001').name).toBe('Miscellaneous Expense');
     expect(byCode.get('4401008').name).toBe('Office Supplies Expense');
-    expect(byCode.get('1102001')).toMatchObject({ name: 'Cash in Bank – Operating Account (BDO Current)', fs_group: 'Current Assets', category: 'Cash and Cash Equivalents' });
+    expect(byCode.get('1102001')).toMatchObject({ name: 'Cash in Bank – Operating Account', fs_group: 'Current Assets', category: 'Cash and Cash Equivalents' });
     expect(byCode.get('3101001').status).toBe('inactive');
     expect(byCode.get('4101001').status).toBe('inactive');
     // a second run changes nothing
@@ -114,7 +114,7 @@ describe('chart of accounts', () => {
     expect(tb.body.data.byType.map((t) => t.accountType)).toEqual(['asset', 'liability', 'equity', 'income', 'expense']);
     const types = tb.body.data.rows.map((r) => r.accountType);
     expect(types).toEqual([...types].sort((a, b) => ['asset', 'liability', 'equity', 'income', 'expense'].indexOf(a) - ['asset', 'liability', 'equity', 'income', 'expense'].indexOf(b)));
-    expect(tb.body.data.rows.find((r) => r.accountCode === '1102001').accountName).toBe('Cash in Bank – Operating Account (BDO Current)');
+    expect(tb.body.data.rows.find((r) => r.accountCode === '1102001').accountName).toBe('Cash in Bank – Operating Account');
   });
 
   it('the Main / Sub Account masters list the GL chart', async () => {
