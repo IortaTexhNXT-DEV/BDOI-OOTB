@@ -1010,6 +1010,11 @@ class QuotationService {
   }
 
   /** Tax rates (decimals) from settings: { valueAddedTax, documentaryStampTax, localGovernmentTax }. */
+  /** Motor tariff: vehicle classes (fixed CTPL premium, own damage rate, default seats) and Auto Passenger PA limits/rate. */
+  async getMotorTariff() {
+    return this.request("/quotations/motor-tariff");
+  }
+
   async getTaxRates() {
     const rows = await this.request("/settings?group=tax");
     const rate = (key) => Number(rows.find((row) => row.key === key)?.value) || 0;

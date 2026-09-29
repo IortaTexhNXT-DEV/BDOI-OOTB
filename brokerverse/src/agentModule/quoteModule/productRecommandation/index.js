@@ -13,13 +13,14 @@ import { mockPlans, PRIORITY_RULES } from "./contants";
 import { VEHICLE_TYPE_OPTIONS } from "../../../module/ProductConfigurator/PoductConfiguratorTab/ProductConfiguratorTab";
 import leadService from "../../../services/leadService";
 
-/** The vehicle type is stored as its code (private_cars); rules and advisor text use its label. */
-const vehicleTypeLabel = (vehicleType) => {
+const slug = (s) => String(s || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+
+/** The vehicle class code of the quote (older quotes stored the label). */
+const vehicleTypeCode = (vehicleType) => {
   if (!vehicleType) return vehicleType;
-  const option = VEHICLE_TYPE_OPTIONS.map((o) => o.label).find(
-    (o) => o && (o.value === vehicleType || o.label === vehicleType)
-  );
-  return option?.label || vehicleType;
+  const s = slug(vehicleType);
+  const option = VEHICLE_TYPE_OPTIONS.find((o) => o.value === vehicleType || o.value === s || slug(o.label) === s);
+  return option?.value || vehicleType;
 };
 
 /**
@@ -28,9 +29,9 @@ const vehicleTypeLabel = (vehicleType) => {
  */
 const vehicleClass = ({ insurancePolicyType, vehicleType } = {}) => {
   if (["PC", "CV", "MCY"].includes(String(insurancePolicyType || "").toUpperCase())) return insurancePolicyType;
-  const code = String(vehicleType || "").toLowerCase();
+  const code = String(vehicleTypeCode(vehicleType) || "").toLowerCase();
   if (!code) return insurancePolicyType;
-  if (code.includes("private")) return "PC";
+  if (code === "private_cars") return "PC";
   if (code.includes("motorcycle")) return "MCY";
   return "CV";
 };
@@ -56,56 +57,14 @@ const matchesCondition = (ruleValue, actualValue) => {
   return ruleValue.toLowerCase() === actualValue.toLowerCase();
 };
 
+const ANY_EXCEPT_MCY = "Any except Motorcycles/Tricycles/Trailers";
+
+/** Rule vehicle types are class codes; the quote's vehicle type is its class code. */
 const matchesVehicleType = (ruleVehicleType, actualVehicleType) => {
-  if (!actualVehicleType) return ruleVehicleType === "Any";
   if (ruleVehicleType === "Any") return true;
-  if (ruleVehicleType === "Any except Motorcycles/Tricycles/Trailers") {
-    const excludedTypes = ["Motorcycles", "Tricycles", "Trailers"];
-    return !excludedTypes.some(
-      (type) =>
-        actualVehicleType.toLowerCase().includes(type.toLowerCase()) ||
-        type.toLowerCase() === actualVehicleType.toLowerCase()
-    );
-  }
-  if (Array.isArray(ruleVehicleType)) {
-    return ruleVehicleType.some((type) => {
-      const normalizedRuleType = type.toLowerCase();
-      const normalizedActualType = actualVehicleType.toLowerCase();
-      // Exact match
-      if (normalizedRuleType === normalizedActualType) return true;
-      // Partial match (e.g., "Heavy Trucks" matches "Heavy Trucks… over 3930 KGS")
-      if (
-        normalizedActualType.includes(normalizedRuleType) ||
-        normalizedRuleType.includes(normalizedActualType)
-      ) {
-        return true;
-      }
-      // Handle special cases
-      if (
-        normalizedRuleType.includes("heavy trucks") &&
-        normalizedActualType.includes("heavy")
-      ) {
-        return true;
-      }
-      if (
-        normalizedRuleType.includes("light/medium trucks") &&
-        (normalizedActualType.includes("light") ||
-          normalizedActualType.includes("medium"))
-      ) {
-        return true;
-      }
-      return false;
-    });
-  }
-  const normalizedRuleType = ruleVehicleType.toLowerCase();
-  const normalizedActualType = actualVehicleType.toLowerCase();
-  // Exact match
-  if (normalizedRuleType === normalizedActualType) return true;
-  // Partial match
-  return (
-    normalizedActualType.includes(normalizedRuleType) ||
-    normalizedRuleType.includes(normalizedActualType)
-  );
+  if (!actualVehicleType) return false;
+  if (ruleVehicleType === ANY_EXCEPT_MCY) return actualVehicleType !== "motorcycles_tricycles";
+  return (Array.isArray(ruleVehicleType) ? ruleVehicleType : [ruleVehicleType]).includes(actualVehicleType);
 };
 
 const matchesAgeCondition = (ageCondition, vehicleAge) => {
@@ -190,8 +149,8 @@ const getRecommendationReason = (quotationData, recommendedPlan, t) => {
   }
 
   const {
-    vehicleType,
     vehicleBrand,
+    vehicleModel,
     modelVariant,
     modelYear,
     seatingCapacity,
@@ -199,7 +158,7 @@ const getRecommendationReason = (quotationData, recommendedPlan, t) => {
 
   const vehicleAge = calculateVehicleAge(modelYear);
   const vehicleDescription =
-    [vehicleBrand, modelVariant, vehicleType].filter(Boolean).join(" ") ||
+    [vehicleBrand, vehicleModel, modelVariant].filter(Boolean).join(" ") ||
     "vehicle";
 
   if (recommendedPlan === "CTPL") {
@@ -285,15 +244,13 @@ const ProductRecommendation = () => {
     // Simulate API call to fetch plans
     const fetchPlans = async () => {
       setLoading(true);
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Get quotation data from state
       const quotationData = state?.quotationData
         ? {
             ...state.quotationData,
             insurancePolicyType: vehicleClass(state.quotationData),
-            vehicleType: vehicleTypeLabel(state.quotationData.vehicleType),
+            vehicleType: vehicleTypeCode(state.quotationData.vehicleType),
           }
         : null;
 

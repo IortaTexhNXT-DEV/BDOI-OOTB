@@ -26,6 +26,12 @@ export async function getQuoteRow(id, db = null) {
 /** Insurer named in the quote document (id, participant / company name). */
 const insurerRef = (doc) => doc.insuranceCompanyId || doc.insuranceCompanyName || doc.participantDetails?.[0]?.insuranceCompanyName || doc.InsuranceCompanyName;
 
+/** The quote document with the motor covers the server priced (CTPL tariff, Auto Passenger PA per seat). */
+const withServerCovers = (doc, b) => (b.lob !== 'MOTOR' ? doc : {
+  ...doc, vehicleType: b.vehicleType, ctplCoverageRate: b.ctplCoverageRate, ctplCoveragePremium: b.ctplCoveragePremium,
+  appaSeats: b.appaSeats, APPAtotalCoverage: b.APPAtotalCoverage, APPAcoveragePremium: b.APPAcoveragePremium,
+});
+
 /** Premium columns from a breakdown. */
 const premiumCols = (b) => ({
   sum_insured: b.totalSumInsured, premium_base: b.netPremium, vat: b.valueAddedTax, dst: b.documentaryStampTax, lgt: b.localGovernmentTax,
@@ -47,7 +53,7 @@ export async function createQuote(body, userId, db = null) {
     const data = { quote_number: number, lead_id: leadId, client_id: body.clientId || null, insurance_company_id: icId, status,
       product_type: body.productType || (b.lob === 'MOTOR' ? 'Motor' : body.productType), lob: b.lob, agent_user_id: userId, created_by: userId,
       valid_until: new Date(Date.now() + validity * 86400000).toISOString().slice(0, 10), remarks: body.remarks || null,
-      doc: JSON.stringify({ ...doc, premiumBreakdown: b }), ...premiumCols(b) };
+      doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), ...premiumCols(b) };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO quotes(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
     if (leadId) await c.query("UPDATE leads SET status = 'QuoteGenerated', updated_at = now() WHERE id = $1 AND status IN ('New','Contacted','Qualified')", [leadId]);
@@ -66,7 +72,7 @@ export async function updateQuote(id, body, userId) {
   const icId = await insurerId(null, insurerRef(doc)) || before.insurance_company_id;
   const b = await premiumBreakdown(doc, { insurerId: icId });
   const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
-    doc: JSON.stringify({ ...doc, premiumBreakdown: b }), updated_by: userId, updated_at: new Date() };
+    doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date() };
   if (body.leadRefId && body.leadRefId !== before.lead_id) data.lead_id = body.leadRefId;
   const keys = Object.keys(data);
   await query(`UPDATE quotes SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);

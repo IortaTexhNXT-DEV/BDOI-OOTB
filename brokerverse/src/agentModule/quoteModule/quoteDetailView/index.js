@@ -30,6 +30,7 @@ import QuotationAuditTrail from "../quotationAuditTrail";
 
 import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
+import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -46,6 +47,7 @@ const COVER_DESC_TO_I18N_KEY = {
 const QuoteDetailView = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const motorTariff = useMotorTariff();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { state } = useLocation();
@@ -1027,6 +1029,14 @@ const QuoteDetailView = ({ action }) => {
                         ?.seatingCapacity || "N/A"}
                     </label>
                   </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">{t("agent.vehicleType")}</label>
+                    <label className="alpha_text">
+                      {findVehicleClass(motorTariff, quotationData?.insuranceVehicleDetails?.[0]?.vehicleType)?.label ||
+                        quotationData?.insuranceVehicleDetails?.[0]?.vehicleType ||
+                        "N/A"}
+                    </label>
+                  </div>
                 </div>
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.coverageDetails")}</label>
@@ -1038,6 +1048,22 @@ const QuoteDetailView = ({ action }) => {
                             quotationData.totalSumInsured
                           ).toLocaleString(numberLocale())}.00`
                         : "N/A"}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">{t("coverageDetailsCard.ctplTariffPremium")}</label>
+                    <label className="alpha_text">
+                      {Number(quotationData?.ctplCoveragePremium)
+                        ? formatCurrency(quotationData.ctplCoveragePremium)
+                        : t("quoteDetailView.notIncluded", "Not included")}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">{t("coverageDetailsCard.autoPassengerPersonalAccident")}</label>
+                    <label className="alpha_text">
+                      {Number(quotationData?.APPAcoveragePremium)
+                        ? `${formatCurrency(Number(String(quotationData.autoPassengerPersonalAccident).replace(/,/g, "")))} x ${quotationData.appaSeats || "-"} = ${formatCurrency(quotationData.APPAtotalCoverage)} · ${formatCurrency(quotationData.APPAcoveragePremium)}`
+                        : t("quoteDetailView.notIncluded", "Not included")}
                     </label>
                   </div>
                 </div>

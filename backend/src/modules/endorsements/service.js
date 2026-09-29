@@ -94,7 +94,13 @@ async function priceCoverageChange(cc, policy) {
   }
   if (!changed) return { changed, current, next: current };
   for (const [premiumKey, basisKey] of FLAT_PREMIUMS) if (!num(input[basisKey]) && given(doc[premiumKey])) input[premiumKey] = doc[premiumKey];
-  const next = await premiumBreakdown(input);
+  // Mid-term the CTPL premium stays as issued; Auto Passenger PA is re-priced only when its limit or seats change.
+  input.insuranceVehicleDetails = doc.insuranceVehicleDetails;
+  const appaChanged = ['AutopassengerpersonalAccident', 'APPATotalCoverage', 'appaSeats'].some((k) => given(cc[k]) && num(cc[k]) !== num(doc[COVER_INPUTS[k] || k]));
+  if (given(cc.appaSeats)) input.appaSeats = cc.appaSeats;
+  const keep = { ctplCoveragePremium: num(doc.ctplCoveragePremium ?? doc.ctplCoverageRate), ctplCoverageRate: doc.ctplCoverageRate ?? '',
+    ...(appaChanged ? {} : { APPAcoveragePremium: num(doc.APPAcoveragePremium), APPAtotalCoverage: num(doc.APPAtotalCoverage) }) };
+  const next = await premiumBreakdown(input, { keep });
   return { changed, current, next: { ...next, grossPremium: round2(next.grossPremium), netPremium: round2(next.netPremium) } };
 }
 

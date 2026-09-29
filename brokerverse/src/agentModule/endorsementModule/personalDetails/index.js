@@ -714,7 +714,11 @@ const PersonalDetails = () => {
             vehicleType={
               policydetailedlist?.vehicleType ||
               policydetailedlist?.insuranceVehicleDetails?.[0]?.vehicleType ||
-              "ac_and_tourist_cars"
+              ""
+            }
+            seatingCapacity={
+              policydetailedlist?.insuranceVehicleDetails?.[0]?.seatingCapacity ||
+              policydetailedlist?.seatingCapacity
             }
             productConfigurator={productConfigurator}
             coverageDetails={coverageDetails}

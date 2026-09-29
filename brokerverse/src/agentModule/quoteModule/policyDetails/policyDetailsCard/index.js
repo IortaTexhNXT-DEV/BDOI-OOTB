@@ -22,7 +22,7 @@ import { Checkbox } from "primereact/checkbox";
 import DialogList from "./DialogList";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgUploadArrowIcon from "../../../../assets/icons/SvgUploadArrowIcon";
-import { VEHICLE_TYPE_OPTIONS } from "../../../../module/ProductConfigurator/PoductConfiguratorTab/ProductConfiguratorTab";
+import useMotorTariff, { findVehicleClass } from "../../utils/useMotorTariff";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
@@ -190,6 +190,16 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
   const formik = useFormik({
     initialValues: initialValue,
     enableReinitialize: true, // Allow form to reinitialize when quotation data changes
+    validate: (values) => {
+      // CTPL (fixed tariff) and Auto Passenger PA are priced from the vehicle class and the seats.
+      const errors = {};
+      if (!values.VehicleType) errors.VehicleType = t("agent.vehicleTypeRequired");
+      const seats = Number(values.SeatingCapacity);
+      if (!Number.isInteger(seats) || seats < 1 || seats > 99) {
+        errors.SeatingCapacity = t("agent.seatingCapacityInvalid");
+      }
+      return errors;
+    },
     onSubmit: (values) => {
       handleclick(values);
     },
@@ -203,6 +213,15 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
     existingPolicyDetails?.installmentType ? true : false
   );
   const [visible, setVisible] = useState(false);
+
+  // Insurance Commission vehicle classes from the motor tariff; older quotes stored the label, so map it to the code.
+  const motorTariff = useMotorTariff();
+  const vehicleTypeOptions = motorTariff.vehicleTypes.map(({ label, value }) => ({ label, value }));
+  useEffect(() => {
+    const cls = findVehicleClass(motorTariff, formik.values.VehicleType);
+    if (cls && cls.value !== formik.values.VehicleType) formik.setFieldValue("VehicleType", cls.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [motorTariff, formik.values.VehicleType]);
 
   const {
     policyTypeOptions,
@@ -499,10 +518,13 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
             <DropdownField
               label={t("agent.vehicleType")}
               value={formik.values.VehicleType}
-              options={VEHICLE_TYPE_OPTIONS.map((e) => e.label)}
+              options={vehicleTypeOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("VehicleType", e.value);
+                const cls = findVehicleClass(motorTariff, e.value);
+                if (cls?.defaultSeats && !formik.values.SeatingCapacity) {
+                  formik.setFieldValue("SeatingCapacity", String(cls.defaultSeats));
+                }
               }}
               optionLabel="label"
             />

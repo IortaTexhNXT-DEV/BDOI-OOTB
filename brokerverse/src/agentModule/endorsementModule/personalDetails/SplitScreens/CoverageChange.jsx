@@ -11,20 +11,19 @@ import { parseNumericValue } from "../../../quoteModule/utils/quotationDataTrans
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 import { formatNumber } from "../../../../utility/currencyConverter";
 import {
-  AutopassengerpersonalAccidentOptions,
+  amountOptions,
   BodilyInjuryOptions,
   PropertyDamageOptions,
 } from "../../../quoteModule/coverageDetails/coverageDetailsCard/mock";
+import useMotorTariff, { appaFigures, findVehicleClass } from "../../../quoteModule/utils/useMotorTariff";
 
 /** Inputs that drive the premium: a change to any of them re-prices the cover. */
 const PRICING_INPUTS = [
   "LossandDamagecoverage",
   "LossandDamagecoverageRate",
   "ActsofNatureRate",
-  "CtplCoverageRate",
   "BodilyInjury",
   "PropertyDamage",
-  "APPATotalCoverage",
   "AutopassengerpersonalAccident",
   "Discount",
   "OthersPremium",
@@ -61,7 +60,7 @@ const withStoredAmount = (options, stored) => {
  * rates (defaults for BI / PD / APPA), flat premiums kept where a cover has no sum insured or rate, taxes at the
  * configured rates, each rounded to cents.
  */
-const priceCoverage = (details, taxRates, fallbackOwnDamageRate) => {
+const priceCoverage = (details, taxRates, fallbackOwnDamageRate, appaTerms = {}) => {
   const odRate = details.LossandDamagecoverageRate || fallbackOwnDamageRate || "";
   const c = computeAllPremiums({
     lossAndDamageCoverage: details.LossandDamagecoverage,
@@ -74,9 +73,9 @@ const priceCoverage = (details, taxRates, fallbackOwnDamageRate) => {
     bodilyInjuryRate: details.BodilyInjuryRate,
     propertyDamage: details.PropertyDamage,
     propertyDamageRate: details.PropertyDamageRate,
-    APPAtotalCoverage: details.APPATotalCoverage,
-    APPARate: details.APPARate,
     autoPassengerPersonalAccident: details.AutopassengerpersonalAccident,
+    appaSeats: appaTerms.seats,
+    appaRatePercent: appaTerms.tariff?.appa?.ratePercent,
   });
   // a cover without a basis keeps the premium the policy has for it
   const keep = (basis, computed, existing) =>
@@ -84,7 +83,12 @@ const priceCoverage = (details, taxRates, fallbackOwnDamageRate) => {
   const aon = keep(details.ActsofNatureRate, c.actsOfNaturePremium, details.ActsofNaturepremium);
   const bi = keep(details.BodilyInjury, c.bodilyInjuryCoveragePremium, details.BodilyInjuryCoveragePremium);
   const pd = keep(details.PropertyDamage, c.propertyDamageCoveragePremium, details.PropertyDamageCoveragePremium);
-  const appa = keep(details.APPATotalCoverage, c.APPAcoveragePremium, details.APPAcoveragePremium);
+  // CTPL stays as issued; Auto Passenger PA keeps its premium unless its limit per person changes (as the server does).
+  const appaChanged =
+    parseNumericValue(details.AutopassengerpersonalAccident) !== parseNumericValue(appaTerms.issuedPerPerson);
+  const appaNew = appaFigures(appaTerms.tariff, details.AutopassengerpersonalAccident, appaTerms.seats);
+  const appa = appaChanged ? appaNew.premium : details.APPAcoveragePremium;
+  const appaTotal = appaChanged ? appaNew.total : details.APPATotalCoverage;
   const ra = keep(details.RoadsideAssistanceRate, c.roadsideAssistancePremium, details.RoadsideAssistancePremium);
   const pac = keep(details.PersonalAccidentCoverRate, c.personalAccidentCoverPremium, details.PersonalAccidentCoverPremium);
   const net = round2(
@@ -105,8 +109,14 @@ const priceCoverage = (details, taxRates, fallbackOwnDamageRate) => {
     ActsofNaturepremium: money(parseNumericValue(aon)),
     BodilyInjuryCoveragePremium: money(parseNumericValue(bi)),
     PropertyDamageCoveragePremium: money(parseNumericValue(pd)),
+    APPATotalCoverage: money(parseNumericValue(appaTotal)),
     APPAcoveragePremium: money(parseNumericValue(appa)),
-    TotalSumInsured: c.totalSumInsured,
+    TotalSumInsured: money(
+      parseNumericValue(details.LossandDamagecoverage) +
+        parseNumericValue(details.BodilyInjury) +
+        parseNumericValue(details.PropertyDamage) +
+        parseNumericValue(appaTotal)
+    ),
     NETpremium: money(net),
     ValueAddedTax: money(vat),
     DocumentaryStampTax: money(dst),
@@ -120,6 +130,7 @@ const priceCoverage = (details, taxRates, fallbackOwnDamageRate) => {
 const CoverageChange = ({
   disabled,
   vehicleType,
+  seatingCapacity,
   productConfigurator,
   coverageDetails,
   setCoverageDetails,
@@ -130,6 +141,10 @@ const CoverageChange = ({
 }) => {
   const { t } = useTranslation();
   const premiumRates = productConfigurator?.configuration?.premiumRates;
+  const motorTariff = useMotorTariff();
+  const vehicleClassInfo = findVehicleClass(motorTariff, vehicleType);
+  const vehicleCode = vehicleClassInfo?.value || vehicleType;
+  const appaSeats = Number(seatingCapacity) || vehicleClassInfo?.defaultSeats || 0;
   // same tax source as the quotation: the product template, else app_settings (tax.vat_rate / dst_rate / lgt_rate)
   const settingsTaxRates = useTaxRates();
   const taxRates = useMemo(
@@ -150,14 +165,18 @@ const CoverageChange = ({
     if (!policyKey) return; // policy not loaded yet
     if (loadedRef.current.policy !== policyKey) {
       // the policy's own figures stand until the user edits a pricing input
-      loadedRef.current = { policy: policyKey, key };
+      loadedRef.current = { policy: policyKey, key, appa: coverageDetails.AutopassengerpersonalAccident };
       pricedKeyRef.current = key;
       return;
     }
     if (key === pricedKeyRef.current) return;
     pricedKeyRef.current = key;
     setCoverageDetails(
-      priceCoverage(coverageDetails, taxRates, premiumRates?.[vehicleType])
+      priceCoverage(coverageDetails, taxRates, premiumRates?.[vehicleCode], {
+        tariff: motorTariff,
+        seats: appaSeats,
+        issuedPerPerson: loadedRef.current.appa,
+      })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [policyKey, key]);
@@ -166,7 +185,11 @@ const CoverageChange = ({
   useEffect(() => {
     if (!policyKey || pricedKeyRef.current === loadedRef.current.key) return;
     setCoverageDetails(
-      priceCoverage(coverageDetails, taxRates, premiumRates?.[vehicleType])
+      priceCoverage(coverageDetails, taxRates, premiumRates?.[vehicleCode], {
+        tariff: motorTariff,
+        seats: appaSeats,
+        issuedPerPerson: loadedRef.current.appa,
+      })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taxRates]);
@@ -186,7 +209,7 @@ const CoverageChange = ({
   const bodilyInjury = withStoredAmount(BodilyInjuryOptions, coverageDetails.BodilyInjury);
   const propertyDamage = withStoredAmount(PropertyDamageOptions, coverageDetails.PropertyDamage);
   const appa = withStoredAmount(
-    AutopassengerpersonalAccidentOptions,
+    amountOptions(motorTariff.appa.limits),
     coverageDetails.AutopassengerpersonalAccident
   );
 
@@ -239,12 +262,10 @@ const CoverageChange = ({
           />
         </div>
         <div className="col-12 mt-2">
-          <InputTextField
-            disabled={disabled}
-            label={t("endorsement.ctplCoverageRate", "CTPL Coverage Rate")}
-            value={text(coverageDetails.CtplCoverageRate)}
-            keyfilter="num"
-            onChange={(e) => setField("CtplCoverageRate", e.target.value)}
+          {/* CTPL is a fixed tariff premium: it stays as issued for the rest of the term. */}
+          <CalculaitionTextInputs
+            label={t("endorsement.ctplPremiumAsIssued", "CTPL premium (as issued)")}
+            value={text(coverageDetails.CtplCoverageRate) || "-"}
           />
         </div>
         <div className={half}>

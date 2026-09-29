@@ -12,6 +12,7 @@ import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { getClient, toClient } from '../clients/service.js';
 import { toQuote } from './shape.js';
 import { premiumBreakdown } from './premium.js';
+import { motorTariff } from './motorTariff.js';
 import { ownRecord, withScope, assertVisible } from '../../lib/scope.js';
 import * as svc from './service.js';
 import mastersRouter from './masters.js';
@@ -39,6 +40,12 @@ async function listHandler(req, res) {
 define({
   method: 'GET', path: '/', summary: 'List quotations (leadRefId, search, lob, productType, status; paging)', screen: SCREEN, middleware: canRead,
   query: { page: 1, pageSize: 10, leadRefId: 'ld_1', search: 'QT-2026', lob: 'FIRE' }, response: { success: true, data: [example], page: 1, pageSize: 10, total: 1 }, handler: listHandler,
+});
+define({
+  method: 'GET', path: '/motor-tariff', summary: 'Motor tariff from the Product Configurator: vehicle classes with the fixed CTPL premium, own damage rate and default seats; Auto Passenger PA limits and rate',
+  screen: `${SCREEN} > Policy details / Coverage details`, middleware: canRead,
+  response: { success: true, data: { templateCode: 'MOT-003-2025', vehicleTypes: [{ value: 'private_cars', label: 'Private cars', defaultSeats: 5, ctplPremium: 560, ownDamageRate: 2 }], appa: { limits: [50000, 100000], ratePercent: 0.1 } } },
+  handler: async (_req, res) => res.json({ success: true, data: await motorTariff() }),
 });
 define({
   method: 'GET', path: '/stats', summary: 'Quotation KPIs (optionally for one lead)', screen: `${SCREEN} (stats cards)`, middleware: canRead, query: { leadRefId: 'ld_1' },

@@ -1,12 +1,14 @@
 /**
  * Server-side premium calculation mirroring the quote wizard (agentModule/quoteModule/utils/premiumCalculations.js):
- * cover premium = sum insured x rate / 100 (CTPL is a flat amount); flat BI / PD / PA premiums come from the coverages
- * master when an id is given; net premium = sum of cover premiums (Fire / IAR use the premium details they send);
+ * cover premium = sum insured x rate / 100; for motor, CTPL is the fixed tariff premium of the vehicle class and Auto
+ * Passenger PA is limit per person x seats x rate (motorTariff.js); flat BI / PD premiums come from the coverages master
+ * when an id is given; net premium = sum of cover premiums (Fire / IAR use the premium details they send);
  * taxes (VAT, DST, LGT, FST) use app_settings rates and the per-LOB tax set; gross = net + taxes + others - discount.
  */
 import { one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { num, round2, lobOf } from '../documents/common.js';
+import { motorFixedCovers } from './motorTariff.js';
 
 const RATE_COVERS = [
   // [premium field, sum-insured field, rate field, default-rate key]
@@ -16,9 +18,8 @@ const RATE_COVERS = [
   ['personalAccidentCoverPremium', 'lossAndDamageCoverage', 'personalAccidentCoverRate'],
   ['bodilyInjuryCoveragePremium', 'bodilyInjury', 'bodilyInjuryRate', 'bodilyInjuryRate'],
   ['propertyDamageCoveragePremium', 'propertyDamage', 'propertyDamageRate', 'propertyDamageRate'],
-  ['APPAcoveragePremium', 'APPAtotalCoverage', 'APPARate', 'APPARate'],
 ];
-const MASTER_COVERS = [['biCoverageId', 'bodilyInjuryCoveragePremium', 'bodilyInjury'], ['pdCoverageId', 'propertyDamageCoveragePremium', 'propertyDamage'], ['paCoverageId', 'APPAcoveragePremium', 'APPAtotalCoverage']];
+const MASTER_COVERS = [['biCoverageId', 'bodilyInjuryCoveragePremium', 'bodilyInjury'], ['pdCoverageId', 'propertyDamageCoveragePremium', 'propertyDamage']];
 
 /** Cover premiums: computed from rates where a rate is given, from the coverages master for ids, else as sent. */
 async function coverPremiums(v) {
@@ -30,7 +31,6 @@ async function coverPremiums(v) {
     const rate = v[rateField] !== undefined && v[rateField] !== '' ? num(v[rateField]) : (defKey && v[field] === undefined ? num(defaults[defKey]) : null);
     out[field] = rate !== null && si > 0 ? round2((si * rate) / 100) : round2(num(v[field]));
   }
-  out.ctplCoveragePremium = round2(num(v.ctplCoverageRate ?? v.ctplCoveragePremium));
   for (const [idField, premiumField, siField] of MASTER_COVERS) {
     if (!v[idField]) continue;
     const c = await one('SELECT amount, premium FROM coverages WHERE id = $1', [Number(v[idField])]);
@@ -47,9 +47,15 @@ export async function taxRates(lob) {
   return { valueAddedTax: await rate('vat'), documentaryStampTax: await rate('dst'), localGovernmentTax: await rate('lgt'), fireServiceTax: await rate('fst') };
 }
 
-/** Commission rate: explicit on the quote, else the insurer's rate, else commission.default_rate. */
+/**
+ * Commission rate: explicit on the quote, else the brokerage % of the commission rule chosen on the order summary
+ * (commissionDetails.brokeragePct, the rate the commission lines use), else the insurer's rate, else
+ * commission.default_rate.
+ */
 async function commissionRate(v, insurerId) {
   if (v.commissionRate !== undefined && v.commissionRate !== '') { const r = num(v.commissionRate); return r > 1 ? r / 100 : r; }
+  const brokerage = num(v.commissionDetails?.brokeragePct);
+  if (brokerage > 0) return brokerage / 100;
   if (insurerId) {
     const ic = await one('SELECT commission_rate FROM insurance_companies WHERE id = $1', [insurerId]);
     if (ic?.commission_rate != null) return Number(ic.commission_rate);
@@ -57,10 +63,21 @@ async function commissionRate(v, insurerId) {
   return Number(await getSetting('commission.default_rate', 0));
 }
 
-/** Full breakdown for a quotation document (numbers rounded to 2 decimals). */
-export async function premiumBreakdown(v, { insurerId = null } = {}) {
+/**
+ * Full breakdown for a quotation document (numbers rounded to 2 decimals). `keep` holds motor fixed covers to carry
+ * over unchanged (an endorsement keeps the CTPL and APPA premiums the policy was issued with).
+ */
+export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}) {
   const lob = lobOf(v.lob, v.productType, v.insurancePolicyType);
   const { premiums: covers, amounts } = await coverPremiums(v);
+  let motor = {};
+  if (lob === 'MOTOR') {
+    motor = await motorFixedCovers(keep ? { ...v, includeCTPL: false, autoPassengerPersonalAccident: keep.APPAcoveragePremium === undefined ? v.autoPassengerPersonalAccident : '' } : v);
+    if (keep) motor = { ...motor, ...keep };
+    covers.ctplCoveragePremium = round2(num(motor.ctplCoveragePremium));
+    covers.APPAcoveragePremium = round2(num(motor.APPAcoveragePremium));
+    amounts.APPAtotalCoverage = num(motor.APPAtotalCoverage);
+  }
   let net = Object.values(covers).reduce((s, x) => s + num(x), 0);
   if (lob !== 'MOTOR') {
     const fire = v.firePremiumDetails || v.iarPremiumDetails || {};
@@ -75,12 +92,13 @@ export async function premiumBreakdown(v, { insurerId = null } = {}) {
   const others = round2(num(v.accountPremiumOthers));
   const discount = round2(num(v.discount));
   const gross = Math.max(0, round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + others - discount));
-  const si = (k) => num(v[k]) || num(amounts[k]);
+  const si = (k) => (k in amounts ? num(amounts[k]) : num(v[k]));
   const sumInsured = round2(num(v.totalSumInsured) || si('lossAndDamageCoverage') + si('bodilyInjury') + si('propertyDamage') + si('APPAtotalCoverage')
     || num((v.fireRiskDetails || {}).totalSumInsured));
   const cRate = await commissionRate(v, insurerId);
   return {
-    lob, ...covers, netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,
+    lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, appaSeats: motor.appaSeats ?? null,
+      APPAtotalCoverage: amounts.APPAtotalCoverage, APPARate: motor.APPARate ?? null } : {}), netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,
     totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate),
     currency: await getSetting('currency.default', 'PHP'),
   };

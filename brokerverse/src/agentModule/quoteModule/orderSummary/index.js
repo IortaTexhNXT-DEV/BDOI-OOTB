@@ -53,6 +53,7 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
     modelVariant: currentQuoteCreation.policyDetails?.modelVariant,
     vehicleColor: currentQuoteCreation.policyDetails?.vehicleColor,
     seatingCapacity: currentQuoteCreation.policyDetails?.seatingCapacity,
+    vehicleType: currentQuoteCreation.policyDetails?.vehicleType,
     coInsurance: currentQuoteCreation.policyDetails?.isCoInsurance,
 
     // From coverageDetails - camelCase only
@@ -65,6 +66,15 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
     actsOfNatureRate: currentQuoteCreation.coverageDetails?.actsOfNatureRate,
     actsOfNaturePremium:
       currentQuoteCreation.coverageDetails?.actsOfNaturePremium,
+    // CTPL (fixed tariff), roadside assistance and personal accident cover as chosen on Coverage Details
+    includeCTPL: currentQuoteCreation.coverageDetails?.includeCTPL,
+    ctplCoverageRate: currentQuoteCreation.coverageDetails?.ctplCoverageRate,
+    ctplCoveragePremium: currentQuoteCreation.coverageDetails?.ctplCoveragePremium,
+    roadsideAssistanceRate: currentQuoteCreation.coverageDetails?.roadsideAssistanceRate,
+    roadsideAssistancePremium: currentQuoteCreation.coverageDetails?.roadsideAssistancePremium,
+    personalAccidentCoverRate: currentQuoteCreation.coverageDetails?.personalAccidentCoverRate,
+    personalAccidentCoverPremium: currentQuoteCreation.coverageDetails?.personalAccidentCoverPremium,
+    appaSeats: currentQuoteCreation.coverageDetails?.appaSeats,
     bodilyInjury: currentQuoteCreation.coverageDetails?.bodilyInjury,
     bodilyInjuryCoveragePremium:
       currentQuoteCreation.coverageDetails?.bodilyInjuryCoveragePremium,
@@ -512,6 +522,15 @@ const OrderSummary = ({ action, flow }) => {
           actsOfNaturePremium:
             quotationData.ActsofNaturepremium ||
             quotationData.actsOfNaturePremium,
+          // CTPL is priced by the server from the vehicle class tariff
+          includeCTPL: quotationData.includeCTPL,
+          ctplCoverageRate: quotationData.ctplCoverageRate,
+          ctplCoveragePremium: quotationData.ctplCoveragePremium,
+          roadsideAssistanceRate: quotationData.roadsideAssistanceRate,
+          roadsideAssistancePremium: quotationData.roadsideAssistancePremium,
+          personalAccidentCoverRate: quotationData.personalAccidentCoverRate,
+          personalAccidentCoverPremium: quotationData.personalAccidentCoverPremium,
+          appaSeats: quotationData.appaSeats,
           bodilyInjury:
             quotationData.BodilyInjury || quotationData.bodilyInjury,
           bodilyInjuryCoveragePremium:
@@ -568,12 +587,12 @@ const OrderSummary = ({ action, flow }) => {
                   {
                     vehicleType:
                       quotationData.vehicleType || quotationData.VehicleType,
-                    vehicleBrand: quotationData.VehicleBrand,
-                    modelYear: quotationData.ModelYear,
-                    vehicleModel: quotationData.VehicleModel,
-                    modelVariant: quotationData.ModelVariant,
-                    vehicleColor: quotationData.VehicleColor,
-                    seatingCapacity: quotationData.SeatingCapacity,
+                    vehicleBrand: quotationData.vehicleBrand || quotationData.VehicleBrand,
+                    modelYear: quotationData.modelYear || quotationData.ModelYear,
+                    vehicleModel: quotationData.vehicleModel || quotationData.VehicleModel,
+                    modelVariant: quotationData.modelVariant || quotationData.ModelVariant,
+                    vehicleColor: quotationData.vehicleColor || quotationData.VehicleColor,
+                    seatingCapacity: quotationData.seatingCapacity || quotationData.SeatingCapacity,
                   },
                 ]
               : []),

@@ -106,6 +106,8 @@ const quotationSlice = createSlice({
           quotation.participantDetails?.[0]?.insuranceCompanyName || "",
         insurancePolicyType: quotation.insurancePolicyType || "",
         accountCode: quotation.accountCode || "",
+        vehicleType:
+          quotation.insuranceVehicleDetails?.[0]?.vehicleType || quotation.vehicleType || "",
         vehicleBrand:
           quotation.insuranceVehicleDetails?.[0]?.vehicleBrand || "",
         modelYear: quotation.insuranceVehicleDetails?.[0]?.modelYear || "",
@@ -129,6 +131,14 @@ const quotationSlice = createSlice({
           quotation.lossAndDamageCoveragePremium || "",
         actsOfNatureRate: quotation.actsOfNatureRate || "",
         actsOfNaturePremium: quotation.actsOfNaturePremium || "",
+        includeCTPL: Boolean(quotation.includeCTPL ?? Number(quotation.ctplCoverageRate)),
+        ctplCoverageRate: quotation.ctplCoverageRate || "",
+        ctplCoveragePremium: quotation.ctplCoveragePremium || "",
+        roadsideAssistanceRate: quotation.roadsideAssistanceRate || "",
+        roadsideAssistancePremium: quotation.roadsideAssistancePremium || "",
+        personalAccidentCoverRate: quotation.personalAccidentCoverRate || "",
+        personalAccidentCoverPremium: quotation.personalAccidentCoverPremium || "",
+        appaSeats: quotation.appaSeats || "",
         bodilyInjury: quotation.bodilyInjury || "",
         bodilyInjuryCoveragePremium:
           quotation.bodilyInjuryCoveragePremium || "",

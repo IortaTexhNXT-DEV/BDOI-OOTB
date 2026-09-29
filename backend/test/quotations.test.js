@@ -40,19 +40,19 @@ describe('quotations: create, premium, workflow, conversion', () => {
     leadId = lead.body.leadId;
     const r = await sales('post', '/quotations').send({
       leadRefId: leadId, productType: 'Motor', insurancePolicyType: 'PC', lossAndDamageCoverage: '1,000,000', lossAndDamageCoverageRate: '1.5', actsOfNatureRate: '0.5',
-      bodilyInjury: '200000', propertyDamage: '200000', APPAtotalCoverage: '250000', participantDetails: [{ insuranceCompanyName: 'Malayan Insurance Co., Inc.' }],
-      insuranceVehicleDetails: [{ vehicleBrand: 'Toyota', vehicleModel: 'Vios', modelYear: '2025' }], quotationStatus: 'Approved',
+      bodilyInjury: '200000', propertyDamage: '200000', autoPassengerPersonalAccident: '50,000', participantDetails: [{ insuranceCompanyName: 'Malayan Insurance Co., Inc.' }],
+      insuranceVehicleDetails: [{ vehicleBrand: 'Toyota', vehicleModel: 'Vios', modelYear: '2025', vehicleType: 'private_cars', seatingCapacity: '5' }], quotationStatus: 'Approved',
     });
     expect(r.status).toBe(201);
     expect(r.body.quotationId).toMatch(/^qt_/);
     expect(r.body.quotationNumber).toMatch(/^QT-\d{4}-\d{5}$/);
     expect(r.body.quotationStatus).toBe('Draft');
-    // 15,000 + 5,000 + BI 2,000 + PD 2,000 + APPA 1,250 (default rates from settings)
-    expect(r.body.netPremium).toBe(25250);
+    // 15,000 + 5,000 + BI 2,000 + PD 2,000 + Auto Passenger PA 250 (50,000 x 5 seats x 0.1% from the motor tariff)
+    expect(r.body.netPremium).toBe(24250);
     const [vat, dst, lgt] = await Promise.all(['vat', 'dst', 'lgt'].map(async (k) => Number((await q("SELECT value#>>'{}' AS v FROM app_settings WHERE key = $1", [`tax.${k}_rate`]))[0].v)));
-    expect(r.body.grossPremium).toBeCloseTo(25250 * (1 + vat + dst + lgt), 1);
+    expect(r.body.grossPremium).toBeCloseTo(24250 * (1 + vat + dst + lgt), 1);
     expect(r.body.insuranceCompanyName).toBe('Malayan Insurance Co., Inc.');
-    expect(r.body.commissionAmount).toBeCloseTo(25250 * 0.15, 2);
+    expect(r.body.commissionAmount).toBeCloseTo(24250 * 0.15, 2);
     quoteId = r.body.quotationId;
     const l = await sales('get', `/leads/${leadId}`);
     expect(l.body.status).toBe('QuoteGenerated');

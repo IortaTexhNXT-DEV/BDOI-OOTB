@@ -2627,7 +2627,9 @@
     "orderSummarySubtitle": "Order summary subtitle",
     "quoteCreatedSuccess": "Quote created success",
     "selectInsuranceCompany": "Select Insurance Company",
-    "updateQuote": "Update quote"
+    "updateQuote": "Update quote",
+    "vehicleTypeRequired": "Choose the vehicle type (it sets the CTPL tariff premium)",
+    "seatingCapacityInvalid": "Enter the seating capacity (1 to 99), including the driver"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -4452,7 +4454,7 @@
     "bodilyInjuryCoveragePremium": "Bodily Injury Coverage Premium",
     "propertyDamage": "Property Damage",
     "propertyDamageCoveragePremium": "Property Damage Coverage Premium",
-    "autoPassengerPersonalAccident": "Auto passenger personal Accident",
+    "autoPassengerPersonalAccident": "Auto Passenger PA - limit per person",
     "appaTotalCoverage": "APPA Total Coverage",
     "appaCoveragePremium": "APPA Coverage Premium",
     "totalSumInsured": "Total Sum Insured",
@@ -4461,7 +4463,11 @@
     "override": "Override",
     "save": "Save",
     "back": "Back",
-    "next": "Next"
+    "next": "Next",
+    "includeCtpl": "Include CTPL (Compulsory Third Party Liability)",
+    "ctplTariffPremium": "CTPL premium (Insurance Commission tariff)",
+    "ctplNeedsVehicleType": "Choose the vehicle type on Policy Details to price CTPL",
+    "appaSeats": "Seats covered (driver and passengers)"
   },
   "finance": {
     "monthly": "Monthly",
@@ -4676,7 +4682,8 @@
     "sendForCustomerApproval": "Send for Customer Approval",
     "waitingForCustomerApproval": "Waiting for customer approval",
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
-    "errorSendingQuoteForApproval": "Error sending quote for approval"
+    "errorSendingQuoteForApproval": "Error sending quote for approval",
+    "notIncluded": "Not included"
   },
   "policyList": {
     "title": "Policies",

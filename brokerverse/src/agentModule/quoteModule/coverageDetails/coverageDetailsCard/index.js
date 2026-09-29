@@ -11,11 +11,7 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import customHistory from "../../../../routes/customHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
-import {
-  AutopassengerpersonalAccidentOptions,
-  BodilyInjuryOptions,
-  PropertyDamageOptions,
-} from "./mock";
+import { amountOptions, BodilyInjuryOptions, PropertyDamageOptions } from "./mock";
 import {
   postcoverageDetailsMiddleware,
 } from "../store/coverageDetailsMiddleware";
@@ -24,10 +20,10 @@ import {
   computeAllPremiums,
   calculatePremiumBreakdown,
 } from "../../utils/premiumCalculations";
-import { APPATotalCoverageOptions } from "../../../endorsementModule/personalDetails/mock";
 import policyService from "../../../../services/policyService";
 import policyRenewalService from "../../../../services/policyRenewalService";
 import useTaxRates from "../../utils/useTaxRates";
+import useMotorTariff, { appaFigures, findVehicleClass } from "../../utils/useMotorTariff";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 
 const CoverageDetailsCard = ({
@@ -38,6 +34,12 @@ const CoverageDetailsCard = ({
   installmentType,
 }) => {
   const { t } = useTranslation();
+  // Motor tariff (Product Configurator): fixed CTPL premium per vehicle class, Auto Passenger PA limits and rate.
+  const motorTariff = useMotorTariff();
+  const AutopassengerpersonalAccidentOptions = useMemo(
+    () => amountOptions(motorTariff.appa.limits),
+    [motorTariff]
+  );
   const normalizeDropdownValue = (value, options) => {
     if (value === undefined || value === null || value === "") {
       return value;
@@ -117,30 +119,14 @@ const CoverageDetailsCard = ({
       AutopassengerpersonalAccidentOptions
     );
 
-    const normalizedAPPATotalCoverage = normalizeDropdownValue(
-      keepOrFallback(
-        rawValues?.APPATotalCoverage,
-        renewalCoverageData?.APPATotalCoverage,
-        APPATotalCoverageOptions?.[0]?.value
-      ),
-      APPATotalCoverageOptions
-    );
+    const normalizedAPPATotalCoverage = appaFigures(
+      motorTariff,
+      normalizedAutopassengerAccident,
+      appaSeats
+    ).total;
 
-    const sanitizedCTPLRate = includeCTPL
-      ? keepOrFallback(
-          rawValues?.CtplCoverageRate,
-          renewalCoverageData?.CtplCoverageRate,
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] || ""
-        )
-      : "";
-
-    const sanitizedCTPLPremium = includeCTPL
-      ? keepOrFallback(
-          rawValues?.CtplCoverageRate,
-          renewalCoverageData?.CtplCoverageRate,
-          ""
-        )
-      : "";
+    // CTPL is the tariff premium of the vehicle class; it cannot be edited on the quote.
+    const sanitizedCTPLRate = includeCTPL ? ctplTariffPremium : "";
 
     const sanitizedActOfNatureRate = includeAON
       ? keepOrFallback(
@@ -244,15 +230,28 @@ const CoverageDetailsCard = ({
   );
 
   useEffect(() => {
+    if (!motorTariff.templateCode) return;
     dispatch(
       fetchProductTemplateByIdMiddleware({
-        templateCode: "MOT-003-2025",
+        templateCode: motorTariff.templateCode,
       })
     );
-  }, [flow]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, motorTariff.templateCode]);
 
+  // Vehicle class code (older quotes stored the label), its CTPL tariff premium and the seats for Auto Passenger PA.
+  const vehicleClassInfo = findVehicleClass(
+    motorTariff,
+    currentQuoteCreation?.policyDetails?.vehicleType
+  );
   const vehicleType =
-    currentQuoteCreation?.policyDetails?.vehicleType || "ac_and_tourist_cars";
+    vehicleClassInfo?.value || currentQuoteCreation?.policyDetails?.vehicleType || "";
+  const ctplTariffPremium =
+    vehicleClassInfo?.ctplPremium != null ? vehicleClassInfo.ctplPremium.toFixed(2) : "";
+  const appaSeats =
+    Number(currentQuoteCreation?.policyDetails?.seatingCapacity) ||
+    vehicleClassInfo?.defaultSeats ||
+    0;
 
   const isEditMode = currentQuoteCreation?.isEditMode || false;
   const existingCoverageDetails = currentQuoteCreation?.coverageDetails;
@@ -287,7 +286,7 @@ const CoverageDetailsCard = ({
         PersonalAccidentCoverpremium:
           existingCoverageDetails.personalAccidentCoverPremium || "",
         CtplCoverageRate:
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
+          ctplTariffPremium,
         ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
         BodilyInjury: existingCoverageDetails.bodilyInjury || "",
         BodilyInjuryCoveragePremium:
@@ -315,7 +314,7 @@ const CoverageDetailsCard = ({
       PersonalAccidentCoverRate: "",
       PersonalAccidentCoverpremium: "",
       CtplCoverageRate:
-        productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
+        ctplTariffPremium,
       BodilyInjury: "",
       BodilyInjuryCoveragePremium: "",
       PropertyDamage: "",
@@ -325,7 +324,7 @@ const CoverageDetailsCard = ({
       APPACoveragePremium: "",
       TotalSumInsured: "",
     };
-  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType]);
+  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType, ctplTariffPremium]);
 
   // Configured tax rates (app settings) so the gross shown here matches the order summary.
   const settingsTaxRates = useTaxRates();
@@ -344,8 +343,9 @@ const CoverageDetailsCard = ({
     () =>
       isEditMode && Boolean(existingCoverageDetails?.personalAccidentCoverRate)
   );
+  // CTPL is offered on every new motor quote; the agent unticks it when the client already has CTPL.
   const [includeCTPL, setIncludeCTPL] = useState(() =>
-    Boolean(initialFormikValues?.CtplCoverageRate)
+    isEditMode ? Boolean(existingCoverageDetails?.ctplCoverageRate) : true
   );
   useEffect(() => {
     // The renewal flow sets these from the renewal prefill.
@@ -359,13 +359,15 @@ const CoverageDetailsCard = ({
     setIncludePersonalAccident(
       isEditMode && Boolean(existingCoverageDetails?.personalAccidentCoverRate)
     );
-    setIncludeCTPL(Boolean(initialFormikValues?.CtplCoverageRate));
+    setIncludeCTPL(
+      isEditMode ? Boolean(existingCoverageDetails?.ctplCoverageRate) : true
+    );
   }, [
     isEditMode,
     existingCoverageDetails?.actsOfNatureRate,
     existingCoverageDetails?.roadsideAssistanceRate,
     existingCoverageDetails?.personalAccidentCoverRate,
-    initialFormikValues?.CtplCoverageRate,
+    existingCoverageDetails?.ctplCoverageRate,
     flow,
   ]);
   // Initialize renewalDataLoaded to true if it's a renewal flow to prevent auto-calculate
@@ -390,7 +392,10 @@ const CoverageDetailsCard = ({
       actsOfNaturePremium: includeActsOfNature
         ? values.ActsofNaturepremium
         : "",
-      ctplCoverageRate: includeCTPL ? values.CtplCoverageRate : "",
+      includeCTPL,
+      ctplCoverageRate: includeCTPL ? ctplTariffPremium : "",
+      ctplCoveragePremium: includeCTPL ? ctplTariffPremium : "",
+      appaSeats,
       roadsideAssistanceRate: includeRoadsideAssistance
         ? values.RoadsideAssistanceRate
         : "",
@@ -497,7 +502,7 @@ const CoverageDetailsCard = ({
       actsOfNatureRate: includeActsOfNature
         ? formik.values.ActsofNatureRate
         : "0",
-      ctplCoverageRate: includeCTPL ? formik.values.CtplCoverageRate : "0",
+      ctplCoverageRate: includeCTPL ? ctplTariffPremium : "0",
       roadsideAssistanceRate: includeRoadsideAssistance
         ? formik.values.RoadsideAssistanceRate
         : "0",
@@ -506,9 +511,10 @@ const CoverageDetailsCard = ({
         : "0",
       bodilyInjury: formik.values.BodilyInjury,
       propertyDamage: formik.values.PropertyDamage,
-      APPAtotalCoverage: formik.values.APPATotalCoverage,
       autoPassengerPersonalAccident:
         formik.values.AutopassengerpersonalAccident,
+      appaSeats,
+      appaRatePercent: motorTariff.appa.ratePercent,
     });
 
     // Calculate full premium breakdown including taxes and gross premium
@@ -563,6 +569,7 @@ const CoverageDetailsCard = ({
           : "",
         BodilyInjuryCoveragePremium: computed.bodilyInjuryCoveragePremium,
         PropertyDamageCoveragePremium: computed.propertyDamageCoveragePremium,
+        APPATotalCoverage: computed.APPAtotalCoverage,
         APPACoveragePremium: computed.APPAcoveragePremium,
         TotalSumInsured: computed.totalSumInsured,
         // Add tax and gross premium values to form
@@ -609,6 +616,11 @@ const CoverageDetailsCard = ({
 
       formik.setValues(sanitizedValues);
     }
+  };
+
+  const handleCTPLToggle = (checked) => {
+    setIncludeCTPL(checked);
+    formik.setFieldValue("CtplCoverageRate", checked ? ctplTariffPremium : "");
   };
 
   const handleRoadsideAssistanceToggle = (checked) => {
@@ -689,7 +701,7 @@ const CoverageDetailsCard = ({
           productConfigurator?.configuration?.premiumRates?.acts_of_nature ||
           "",
         CtplCoverageRate:
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
+          ctplTariffPremium,
         ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
         BodilyInjury: existingCoverageDetails.bodilyInjury || "",
         BodilyInjuryCoveragePremium:
@@ -712,7 +724,7 @@ const CoverageDetailsCard = ({
       LossandDamagecoveragepremium: "",
       ActsofNatureRate: "",
       CtplCoverageRate:
-        productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
+        ctplTariffPremium,
       ActsofNaturepremium: "",
       RoadsideAssistanceRate: "",
       RoadsideAssistancepremium: "",
@@ -819,10 +831,8 @@ const CoverageDetailsCard = ({
           mapped.LossandDamagecoverageRate ||
           productConfigurator?.configuration?.premiumRates?.[vehicleType] ||
           "",
-        CtplCoverageRate:
-          mapped.CtplCoverageRate ||
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] ||
-          "",
+        // A renewal is a new term: CTPL (if the expiring policy had it) at today's tariff.
+        CtplCoverageRate: mapped.CtplCoverageRate ? ctplTariffPremium : "",
         BodilyInjury: mapped.BodilyInjury
           ? normalizeDropdownValue(mapped.BodilyInjury, BodilyInjuryOptions)
           : "",
@@ -915,17 +925,27 @@ const CoverageDetailsCard = ({
         </div>
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("coverageDetailsCard.ctplCoverageRate")}
-              value={formik.values.CtplCoverageRate}
-              onChange={formik.handleChange("CtplCoverageRate")}
-            />
-            {formik.touched.CtplCoverageRate &&
-              formik.errors.CtplCoverageRate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.CtplCoverageRate}
-                </div>
-              )}
+            <div className="flex align-items-center gap-2 mb-2">
+              <Checkbox
+                inputId="include-ctpl"
+                checked={includeCTPL}
+                onChange={(e) => handleCTPLToggle(e.checked)}
+              />
+              <label htmlFor="include-ctpl" className="m-0">
+                {t("coverageDetailsCard.includeCtpl")}
+              </label>
+            </div>
+            {includeCTPL && (
+              <CalculaitionTextInputs
+                label={t("coverageDetailsCard.ctplTariffPremium")}
+                value={ctplTariffPremium ? formatNumber(ctplTariffPremium) : "-"}
+              />
+            )}
+            {includeCTPL && !ctplTariffPremium && (
+              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                {t("coverageDetailsCard.ctplNeedsVehicleType")}
+              </div>
+            )}
           </div>
         </div>
         <div className="grid m-0 mt-2">
@@ -1189,38 +1209,24 @@ const CoverageDetailsCard = ({
 
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("coverageDetailsCard.appaTotalCoverage")}
-              value={formik.values.APPATotalCoverage}
-              onChange={formik.handleChange("APPATotalCoverage")}
+            <CalculaitionTextInputs
+              label={t("coverageDetailsCard.appaSeats")}
+              value={appaSeats || "-"}
             />
-            {formik.touched.APPATotalCoverage &&
-              formik.errors.APPATotalCoverage && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.APPATotalCoverage}
-                </div>
-              )}
           </div>
           <div className="col-12 md:col-6 lg:col-6">
-            {isOverRide ? (
-              <InputTextField
-                label={t("coverageDetailsCard.appaCoveragePremium")}
-                value={formik.values.APPACoveragePremium}
-                onChange={formik.handleChange("APPACoveragePremium")}
-              />
-            ) : (
-              <CalculaitionTextInputs
-                label={t("coverageDetailsCard.appaCoveragePremium")}
-                value={formik.values.APPACoveragePremium}
-                onChange={formik.handleChange("APPACoveragePremium")}
-              />
-            )}
-            {formik.touched.APPACoveragePremium &&
-              formik.errors.APPACoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.APPACoveragePremium}
-                </div>
+            <CalculaitionTextInputs
+              label={t("coverageDetailsCard.appaTotalCoverage")}
+              value={formatNumber(
+                appaFigures(motorTariff, formik.values.AutopassengerpersonalAccident, appaSeats).total
               )}
+            />
+          </div>
+          <div className="col-12 md:col-6 lg:col-6">
+            <CalculaitionTextInputs
+              label={t("coverageDetailsCard.appaCoveragePremium")}
+              value={formik.values.APPACoveragePremium}
+            />
           </div>
         </div>
         <div className="grid m-0 mt-2">

@@ -1,8 +1,9 @@
+// vehicleType: Insurance Commission vehicle class codes (motor tariff), "Any" or "Any except Motorcycles/Tricycles/Trailers".
 export const PRIORITY_RULES = [
   {
     priority: 1,
     policyType: "MCY",
-    vehicleType: ["Motorcycles", "Tricycles", "Trailers"],
+    vehicleType: ["motorcycles_tricycles"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",
@@ -13,7 +14,7 @@ export const PRIORITY_RULES = [
   {
     priority: 2,
     policyType: "CV",
-    vehicleType: ["Taxi", "PUJ", "Mini Bus"],
+    vehicleType: ["taxi_puj_and_mini_bus"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",
@@ -24,7 +25,7 @@ export const PRIORITY_RULES = [
   {
     priority: 3,
     policyType: "CV",
-    vehicleType: ["PUB", "tourist Bus"],
+    vehicleType: ["pub_and_tourist_bus"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",
@@ -35,7 +36,7 @@ export const PRIORITY_RULES = [
   {
     priority: 4,
     policyType: "CV",
-    vehicleType: ["Heavy Trucks"],
+    vehicleType: ["heavy_trucks"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",
@@ -46,7 +47,7 @@ export const PRIORITY_RULES = [
   {
     priority: 5,
     policyType: "CV",
-    vehicleType: ["Light/Medium trucks"],
+    vehicleType: ["light_medium_trucks"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",
@@ -57,7 +58,7 @@ export const PRIORITY_RULES = [
   {
     priority: 6,
     policyType: "PC",
-    vehicleType: ["Private cars"],
+    vehicleType: ["private_cars"],
     brand: ["BMW"],
     modelVariant: ["X5"],
     seating: "Any",
@@ -68,7 +69,7 @@ export const PRIORITY_RULES = [
   {
     priority: 7,
     policyType: "PC",
-    vehicleType: ["AC and Tourist Cars"],
+    vehicleType: ["ac_and_tourist_cars"],
     brand: ["BMW"],
     modelVariant: ["X5"],
     seating: "Any",
@@ -79,7 +80,7 @@ export const PRIORITY_RULES = [
   {
     priority: 8,
     policyType: "PC",
-    vehicleType: ["Private cars"],
+    vehicleType: ["private_cars"],
     brand: ["Toyota", "Ford", "Honda"],
     modelVariant: ["Camry", "Fusion", "Accord"],
     seating: "Any",
@@ -90,7 +91,7 @@ export const PRIORITY_RULES = [
   {
     priority: 9,
     policyType: "PC",
-    vehicleType: ["AC and Tourist Cars"],
+    vehicleType: ["ac_and_tourist_cars"],
     brand: ["Toyota", "Ford", "Honda"],
     modelVariant: ["Camry", "Fusion", "Accord"],
     seating: "Any",
@@ -101,7 +102,7 @@ export const PRIORITY_RULES = [
   {
     priority: 10,
     policyType: "PC",
-    vehicleType: ["Private cars"],
+    vehicleType: ["private_cars"],
     brand: ["Toyota", "Ford", "Honda"],
     modelVariant: ["Camry", "Fusion", "Accord"],
     seating: "Any",
@@ -112,7 +113,7 @@ export const PRIORITY_RULES = [
   {
     priority: 11,
     policyType: "PC",
-    vehicleType: ["AC and Tourist Cars"],
+    vehicleType: ["ac_and_tourist_cars"],
     brand: ["Toyota", "Ford", "Honda"],
     modelVariant: ["Camry", "Fusion", "Accord"],
     seating: "Any",
@@ -123,7 +124,7 @@ export const PRIORITY_RULES = [
   {
     priority: 12,
     policyType: "PC",
-    vehicleType: ["Private cars"],
+    vehicleType: ["private_cars"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",
@@ -134,7 +135,7 @@ export const PRIORITY_RULES = [
   {
     priority: 13,
     policyType: "PC",
-    vehicleType: ["AC and Tourist Cars"],
+    vehicleType: ["ac_and_tourist_cars"],
     brand: "Any",
     modelVariant: "Any",
     seating: "Any",

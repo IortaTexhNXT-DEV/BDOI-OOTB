@@ -333,5 +333,12 @@
     "group": "reports",
     "label": "Generated report retention (days)",
     "type": "number"
+  },
+  {
+    "key": "motor.pricing_template_code",
+    "value": "MOT-003-2025",
+    "group": "premium",
+    "label": "Product Configurator template holding the motor tariff (vehicle classes, CTPL tariff premiums, own damage rates, Auto Passenger PA limits and rate)",
+    "type": "string"
   }
 ]

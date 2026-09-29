@@ -19,33 +19,8 @@ export const computeAllPremiums = (values) => {
   const aonRate = parseNumericValue(values.actsOfNatureRate);
   const aonPremium = calculatePremium(ldCoverage, aonRate);
 
-  // CTPL Premium is a FLAT RATE, not a percentage of coverage
-  // IMPORTANT: The ctplCoverageRate value (e.g., "957.88") IS the premium itself
-  // CTPL is NOT calculated as: (coverage * rate) / 100
-  // Backend uses: ctplSetting[vehicleType] directly (see premium-calculator.js)
-  const ctplRateValue = parseNumericValue(values.ctplCoverageRate || 0);
-  const ctplPremium = ctplRateValue.toFixed(2);
-  
-  // Validate CTPL premium is reasonable (flat rates are typically 200-2000 THB)
-  // If CTPL > 10,000, it was likely calculated incorrectly as a percentage
-  if (ctplRateValue > 10000) {
-    console.warn(
-      `⚠️ [computeAllPremiums] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
-      `CTPL should be a flat rate (typically 200-2000 THB). ` +
-      `If this value was calculated as a percentage of coverage, it's incorrect. ` +
-      `CTPL rate from config: ${values.ctplCoverageRate}`
-    );
-  }
-  
-  // Log CTPL calculation for debugging
-  if (ctplRateValue > 0) {
-    console.log("[computeAllPremiums] CTPL Premium (flat rate):", {
-      ctplCoverageRate: values.ctplCoverageRate,
-      ctplPremium,
-      note: "CTPL is a flat rate, not calculated as percentage",
-      validation: ctplRateValue <= 10000 ? "✓ Reasonable" : "⚠️ Unusually high",
-    });
-  }
+  // CTPL: the fixed Insurance Commission tariff premium of the vehicle class (motor tariff), not sum insured x rate.
+  const ctplPremium = parseNumericValue(values.ctplCoverageRate || 0).toFixed(2);
 
   // Roadside Assistance Premium (also based on Loss & Damage coverage)
   const raRate = parseNumericValue(values.roadsideAssistanceRate);
@@ -65,11 +40,11 @@ export const computeAllPremiums = (values) => {
   const pdRate = parseNumericValue(values.propertyDamageRate) || 1.0; // Default 1% if not specified
   const pdPremium = calculatePremium(pdCoverage, pdRate);
 
-  // APPA Premium
-  const appaCoverage = parseNumericValue(values.APPAtotalCoverage);
+  // Auto Passenger Personal Accident: limit per person x seats (driver and passengers) x tariff rate.
   const appaPerPerson = parseNumericValue(values.autoPassengerPersonalAccident);
-  const appaRate = parseNumericValue(values.APPARate) || 0.5; // Default 0.5% if not specified
-  const appaPremium = calculatePremium(appaCoverage, appaRate);
+  const appaSeats = parseNumericValue(values.appaSeats);
+  const appaCoverage = appaPerPerson * appaSeats;
+  const appaPremium = calculatePremium(appaCoverage, parseNumericValue(values.appaRatePercent));
 
   // Total Sum Insured
   const totalSumInsured = ldCoverage + biCoverage + pdCoverage + appaCoverage;
@@ -83,6 +58,7 @@ export const computeAllPremiums = (values) => {
     personalAccidentCoverPremium: pacPremium,
     bodilyInjuryCoveragePremium: biPremium,
     propertyDamageCoveragePremium: pdPremium,
+    APPAtotalCoverage: appaCoverage.toFixed(2),
     APPAcoveragePremium: appaPremium,
     totalSumInsured: totalSumInsured.toFixed(2),
   };

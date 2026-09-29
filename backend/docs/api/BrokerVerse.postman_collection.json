@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (552 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (553 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -27482,6 +27482,55 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"quotation1\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    }\n  },\n  \"quotation2\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    }\n  },\n  \"aiInsights\": {\n    \"summary\": \"...\",\n    \"keyDifferences\": [],\n    \"pricingAnalysis\": {},\n    \"recommendation\": {}\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Motor tariff from the Product Configurator: vehicle classes with the fixed CTPL premium, own damage rate and default seats; Auto Passenger PA limits and rate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/motor-tariff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                "motor-tariff"
+              ]
+            },
+            "description": "Motor tariff from the Product Configurator: vehicle classes with the fixed CTPL premium, own damage rate and default seats; Auto Passenger PA limits and rate\n\nFront-end touchpoint: Operations > Quotation > Policy details / Coverage details\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/motor-tariff",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    "motor-tariff"
+                  ]
+                },
+                "description": "Motor tariff from the Product Configurator: vehicle classes with the fixed CTPL premium, own damage rate and default seats; Auto Passenger PA limits and rate\n\nFront-end touchpoint: Operations > Quotation > Policy details / Coverage details\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"templateCode\": \"MOT-003-2025\",\n    \"vehicleTypes\": [\n      {\n        \"value\": \"private_cars\",\n        \"label\": \"Private cars\",\n        \"defaultSeats\": 5,\n        \"ctplPremium\": 560,\n        \"ownDamageRate\": 2\n      }\n    ],\n    \"appa\": {\n      \"limits\": [\n        50000,\n        100000\n      ],\n      \"ratePercent\": 0.1\n    }\n  }\n}"
             }
           ]
         },
