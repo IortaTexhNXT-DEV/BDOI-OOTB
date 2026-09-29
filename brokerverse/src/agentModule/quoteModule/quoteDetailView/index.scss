@@ -1,0 +1,162 @@
+.overall__quotedetails__view__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 0;
+    }
+  }
+  .header_title {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+  }
+  .table_header {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    // padding: 1.5rem;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+  }
+  .quote_details {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 8px 0px;
+    justify-content: space-between;
+    display: flex;
+    padding: 0 1.5rem;
+  }
+  .sub_title {
+    margin: 16px 0;
+  }
+  .policy_text {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    align-items: center;
+    display: flex;
+    background-color: #f8f8f8;
+    height: 45px;
+    padding: 0 1.5rem;
+  }
+  .insurance_details {
+    margin: 10px 0px;
+    justify-content: space-between;
+    display: flex;
+  }
+  .insurance_text {
+    color: #6c737f;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 10px 0;
+  }
+  .alpha_text {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 10px 0;
+  }
+  .gross_text {
+    color: #0072d8;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    padding-bottom: 24px;
+  }
+  .gross_count {
+    color: #0072d8;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 10px 0;
+  }
+
+  .policy_button {
+    color: #fff;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    justify-content: space-between;
+    gap: 5%;
+  }
+  .button_component {
+    align-items: flex-end;
+    justify-content: flex-end;
+    display: flex;
+    gap: 24px;
+    margin: 24px 0px;
+  }
+
+  .download_button {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    margin-left: 10px;
+  }
+
+  .p-button {
+    margin: 0;
+    display: inline-flex;
+    cursor: pointer;
+    user-select: none;
+    align-items: center;
+    vertical-align: bottom;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    padding: 8px 16px;
+    border-radius: 6px;
+    gap: 10px;
+  }
+  .left_arrow {
+    display: flex;
+    gap: 10px;
+    width: max-content;
+  }
+  .left_arrow_text {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  .qdv-iar-schedule-wrap {
+    padding: 0 1.5rem 1rem;
+  }
+
+  .qdv-iar-schedule-table {
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 13px;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+    th {
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .qdv-iar-section-row td {
+      background: #f9fafb;
+    }
+  }
+
+  .qdv-iar-help {
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+}

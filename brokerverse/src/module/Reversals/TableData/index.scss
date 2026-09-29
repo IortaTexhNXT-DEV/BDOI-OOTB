@@ -1,0 +1,124 @@
+.reversal__table__container {
+  padding: 1.25rem;
+  .reversal__table__main {
+    thead {
+      tr {
+        th {
+          border: 0 !important;
+          padding: 0 !important;
+        }
+        .p-column-header-content {
+          .p-column-title {
+            color: #111927;
+            font-family: "Nunito", Arial, sans-serif;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+            padding: 1rem 1rem;
+            width: 100%;
+          }
+        }
+      }
+    }
+    tbody {
+      tr {
+        td {
+          color: #111927;
+          font-family: "Nunito", Arial, sans-serif;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: normal;
+          padding: 1rem 1rem !important;
+        }
+      }
+    }
+    .p-paginator-first,
+    .p-paginator .p-paginator-prev,
+    .p-paginator .p-paginator-next,
+    .p-paginator .p-paginator-last {
+      background-color: transparent;
+      border: 0 none;
+      color: #2e2e2e;
+      min-width: 0.5rem;
+      height: 3rem;
+      margin: 0.143rem;
+      transition: box-shadow 0.2s;
+      border-radius: 50%;
+    }
+    .p-paginator-bottom {
+      border-width: 0;
+      justify-content: flex-end;
+      span {
+        color: #2e2e2e !important;
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+      .table__selector {
+        text-align: center;
+        flex: 1 0;
+        .pagedropdown_container {
+          border: none;
+          margin: 0 !important;
+          background-color: #fafafa;
+        }
+      }
+    }
+    // @media only screen and (min-width: 768px) and (max-width: 991px) {
+    //   thead {
+    //     tr {
+    //       th {
+    //         padding: 0.5rem 0.5rem;
+    //       }
+    //       .p-column-header-content {
+    //         .p-column-title {
+    //           font-size: 12px;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   tbody {
+    //     tr {
+    //       td {
+    //         font-size: 12px;
+    //       }
+    //     }
+    //   }
+    //   .p-paginator-bottom {
+    //     span {
+    //       font-size: 12px;
+    //     }
+    //   }
+    // }
+    // @media only screen and (min-width: 992px) and (max-width: 1440px) {
+    //   thead {
+    //     tr {
+    //       th {
+    //         padding: 0.5rem 0.5rem;
+    //       }
+    //       .p-column-header-content {
+    //         .p-column-title {
+    //           font-size: 14px;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   tbody {
+    //     tr {
+    //       td {
+    //         font-size: 14px;
+    //       }
+    //     }
+    //   }
+    //   .p-paginator-bottom {
+    //     span {
+    //       font-size: 14px;
+    //     }
+    //   }
+    // }
+  }
+}

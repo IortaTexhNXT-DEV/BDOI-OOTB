@@ -1,0 +1,188 @@
+.claim-detail-container {
+  padding: 1rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  .detail-card {
+    height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      margin: 0 0 1.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #333;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 1rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .label {
+        flex: 0 0 40%;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .value {
+        flex: 0 0 60%;
+        color: #333;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .co-insurance-settlement-section {
+    .co-insurance-settlement-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 1rem;
+
+      h3 {
+        margin: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+    }
+
+    .co-insurance-settlement-section__title {
+      color: #6b7280;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  }
+
+  .co-insurance-policy-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .co-insurance-settlement-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: none;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      padding: 0.75rem 0.65rem;
+      text-align: left;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    th {
+      color: #9ca3af;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: #111927;
+      font-weight: 400;
+    }
+
+    .insurer-cell {
+      font-weight: 600;
+    }
+
+    .numeric {
+      text-align: right;
+    }
+
+    .settlement {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    th.settlement {
+      color: #16a34a;
+    }
+
+    .total-row td {
+      font-weight: 700;
+      border-bottom: none;
+    }
+  }
+
+  .role-pill,
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .role-pill--lead {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .role-pill--co {
+    background: #e5f5ff;
+    color: #3730a3;
+  }
+
+  .status-pill {
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+
+  .status-pill--settled {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .co-insurance-settlement-note {
+    margin-top: 0.75rem;
+    color: #3b82f6;
+    font-size: 0.75rem;
+    font-style: italic;
+    line-height: 1.4;
+  }
+}

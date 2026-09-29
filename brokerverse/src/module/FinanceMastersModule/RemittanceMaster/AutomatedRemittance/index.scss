@@ -1,0 +1,300 @@
+@import "../../../../Color.scss";
+
+.container__automated__remittance__master {
+  padding: 20px;
+  min-height: calc(100vh - 60px);
+
+  .top__container {
+    padding: 0 0 20px 0;
+
+    .back__button {
+      background: transparent;
+      border: none;
+      color: $grey;
+      padding: 8px;
+      margin-right: 12px;
+      cursor: pointer;
+
+      &:hover {
+        color: $primary-blue;
+      }
+    }
+
+    .page__title {
+      color: #111927;
+      font-size: 30px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      font-family: "Nunito", Arial, sans-serif;
+      display: inline;
+    }
+
+    .mode-badge {
+      background: $primary-blue;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 20px;
+    }
+
+    .breadCrums__view__reversal {
+      border: none;
+      padding: 1px 0;
+      margin-top: 10px;
+    }
+
+    .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+      color: #000;
+      font-size: 16px;
+      font-weight: 500;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+
+    .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+      color: #b1b1b1 !important;
+    }
+  }
+
+  .content__container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+
+    .p-tabview {
+      .p-tabview-nav {
+        background: $default-background-grey;
+        border: none;
+
+        .p-tabview-nav-link {
+          border: none;
+          border-radius: 8px 8px 0 0;
+
+          &.p-highlight {
+            background: white;
+            color: $primary-blue;
+            font-weight: 600;
+          }
+
+          &:not(.p-highlight) {
+            background: transparent;
+            color: $grey;
+          }
+        }
+      }
+
+      .p-tabview-panels {
+        background: white;
+        border: none;
+        padding: 0;
+      }
+    }
+
+    .tab-content {
+      padding: 20px 0;
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: $dark-grey;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid $light-grey;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 30px;
+
+        &.three-column {
+          grid-template-columns: repeat(3, 1fr);
+
+          @media (max-width: 1024px) {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        &.two-column {
+          grid-template-columns: repeat(2, 1fr);
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        label {
+          font-size: 14px;
+          color: $dark-grey;
+          font-weight: 500;
+
+          &.required::after {
+            content: " *";
+            color: $dark-red;
+          }
+
+          .help-text {
+            display: block;
+            font-size: 12px;
+            color: $grey;
+            font-weight: normal;
+            margin-top: 2px;
+          }
+        }
+
+        .full-width {
+          width: 100%;
+        }
+
+        .p-inputtext,
+        .p-dropdown,
+        .p-inputnumber-input {
+          padding: 10px 12px;
+          border: 1px solid $light-grey;
+          border-radius: 6px;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-blue;
+            box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
+          }
+
+          &:disabled {
+            background: $default-background-grey;
+            color: $grey;
+            cursor: not-allowed;
+          }
+        }
+
+        .p-dropdown {
+          display: flex;
+          align-items: center;
+        }
+
+        &.checkbox-field {
+          justify-content: center;
+        }
+
+        .checkbox-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding-top: 24px;
+
+          .p-checkbox {
+            width: 20px;
+            height: 20px;
+
+            .p-checkbox-box {
+              width: 20px;
+              height: 20px;
+              border: 2px solid $light-grey;
+              border-radius: 4px;
+
+              &.p-highlight {
+                background: $primary-blue;
+                border-color: $primary-blue;
+              }
+            }
+          }
+
+          .checkbox-label {
+            font-size: 14px;
+            color: $dark-grey;
+            cursor: pointer;
+            user-select: none;
+          }
+        }
+
+        .input-with-button {
+          display: flex;
+          gap: 8px;
+
+          .p-inputtext {
+            flex: 1;
+          }
+
+          .lookup-button {
+            background: $primary-blue;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+              background: darken($primary-blue, 10%);
+            }
+
+            svg {
+              width: 18px;
+              height: 18px;
+              fill: white;
+            }
+          }
+        }
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid $light-grey;
+
+      button {
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &.save-button {
+          background: $primary-blue;
+          color: white;
+
+          &:hover {
+            background: darken($primary-blue, 10%);
+          }
+        }
+
+        &.delete-button {
+          background: $dark-red;
+          color: white;
+
+          &:hover {
+            background: darken($dark-red, 10%);
+          }
+        }
+
+        &.close-button {
+          background: transparent;
+          color: $grey;
+          border: 1px solid $light-grey;
+
+          &:hover {
+            background: $default-background-grey;
+          }
+        }
+      }
+    }
+  }
+}

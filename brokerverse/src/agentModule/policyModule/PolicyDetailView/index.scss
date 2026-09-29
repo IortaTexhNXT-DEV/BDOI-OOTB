@@ -1,0 +1,911 @@
+$mobile-sm: 480px;
+$tablet-sm: 768px;
+$tablet-md: 1024px;
+
+@mixin mobile-sm {
+  @media (max-width: #{$mobile-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-sm {
+  @media (max-width: #{$tablet-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-md {
+  @media (max-width: #{$tablet-md - 1px}) {
+    @content;
+  }
+}
+
+.policy-detail-container {
+  background: #f5f7fb;
+  min-height: 100vh;
+  padding: 2rem 2.5rem;
+
+  @include tablet-sm {
+    padding: 1.5rem;
+  }
+
+  @include mobile-sm {
+    padding: 1rem;
+  }
+
+  .policy-detail-view {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  .policy-header {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 18px 36px rgba(31, 45, 61, 0.08);
+
+    @include tablet-md {
+      flex-direction: column;
+      padding: 1.75rem;
+    }
+
+    @include mobile-sm {
+      padding: 1.25rem;
+      gap: 1.25rem;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .header-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: none;
+    background: #eef8ff;
+    color: #1f3a8a;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    &:hover {
+      background: #e5f5ff;
+      color: #1e40af;
+    }
+  }
+
+  .header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f172a;
+
+      @include mobile-sm {
+        font-size: 1.65rem;
+      }
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+  }
+
+  .header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.9rem;
+    background: #f8fafc;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: #334155;
+
+    &--status {
+      padding: 0.4rem 0.75rem;
+      background: transparent;
+    }
+  }
+
+  .meta-icon {
+    font-size: 0.95rem;
+    color: #475569;
+  }
+
+  .breadcrumb {
+    padding: 0;
+
+    .p-breadcrumb {
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+
+    .p-menuitem-text {
+      color: #475569;
+      font-weight: 500;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+
+    .p-button {
+      min-width: 9rem;
+      font-weight: 600;
+    }
+  }
+
+  .policy-highlights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+
+    @include tablet-md {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @include mobile-sm {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .highlight-card {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border-radius: 16px;
+    padding: 1.35rem;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+    }
+
+    &--success {
+      background: linear-gradient(135deg, #ecfdf5, #ffffff);
+    }
+
+    &--warning {
+      background: linear-gradient(135deg, #fff7ed, #ffffff);
+    }
+
+    .highlight-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .highlight-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .highlight-helper {
+      font-size: 0.85rem;
+      color: #475569;
+    }
+  }
+
+  .policy-content {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(280px, 1.15fr);
+    gap: 1.75rem;
+
+    @include tablet-md {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .policy-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .policy-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .policy-section {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.75rem;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.06);
+
+    @include mobile-sm {
+      padding: 1.25rem;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+
+      @include mobile-sm {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    .section-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+
+      h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .section-subtitle {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+    }
+
+    .section-actions {
+      display: inline-flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+
+      .p-button {
+        min-width: 8rem;
+      }
+    }
+  }
+
+  .section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+
+    &--single {
+      grid-template-columns: 1fr;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.5rem 0;
+    }
+
+    .info-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08rem;
+    }
+
+    .info-value {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #0f172a;
+
+      &--emphasis {
+        font-size: 1.05rem;
+        color: #047857;
+      }
+
+      .p-button.p-button-link {
+        padding: 0;
+      }
+    }
+
+    .info-helper {
+      font-size: 0.8rem;
+      color: #475569;
+    }
+  }
+
+  .info-empty {
+    font-size: 0.9rem;
+    color: #94a3b8;
+  }
+
+  .media-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .media-block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+
+      h4 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      span {
+        font-size: 0.85rem;
+        color: #64748b;
+      }
+    }
+
+    .vehicle-gallery {
+      width: 100%;
+
+      .p-galleria-content {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+      }
+
+      .vehicle-gallery-image {
+        width: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .vehicle-gallery-thumbnail {
+        width: 100%;
+        display: block;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .accessory-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    h4 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+  }
+
+  .premium-breakdown {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 1.25rem;
+
+    .breakdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid #e2e8f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &.is-total {
+        background: #ecfdf5;
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .breakdown-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .breakdown-annotation {
+      color: #2563eb;
+      font-size: 0.75rem;
+    }
+
+    .breakdown-amount {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+
+      &.is-total {
+        font-size: 1.1rem;
+        color: #047857;
+      }
+    }
+  }
+
+  .policy-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sidebar-section {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.6rem;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+
+    @include mobile-sm {
+      padding: 1.3rem;
+    }
+
+    .section-header {
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 1rem;
+      padding-bottom: 0.9rem;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0f172a;
+      }
+    }
+
+    .section-icon {
+      font-size: 1.2rem;
+      color: #2563eb;
+    }
+  }
+
+  .payment-description {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  .payment-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .document-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    .p-button {
+      @include tablet-md {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @include tablet-md {
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+  }
+
+  .document-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .document-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+
+    @include tablet-md {
+      gap: 0.75rem;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    @include tablet-sm {
+      align-items: stretch;
+      width: 100%;
+      gap: 0.75rem;
+    }
+  }
+
+  .document-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1 1 240px;
+
+    @include tablet-md {
+      flex: 1 1 100%;
+    }
+
+    .document-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .document-meta {
+      font-size: 0.8rem;
+      color: #64748b;
+      word-break: break-word;
+    }
+  }
+
+  .document-item-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+
+    .p-button {
+      min-height: 36px;
+      padding: 0.35rem 0.75rem;
+      font-weight: 600;
+      max-width: 100%;
+
+      &.p-button-text {
+        color: #5b6bff;
+
+        &:hover {
+          color: #3b4bff;
+        }
+      }
+
+      .p-button-icon-left {
+        margin-right: 0.35rem;
+      }
+    }
+
+    @include tablet-md {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+
+      .p-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @include tablet-sm {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.4rem;
+    }
+
+    @include mobile-sm {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .endorsement-section {
+    .endorsement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .endorsement-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      background: #f9fbfd;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      @include mobile-sm {
+        padding: 1rem;
+      }
+    }
+
+    .endorsement-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .endorsement-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .endorsement-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+    }
+
+    .endorsement-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .endorsement-empty-state {
+      padding: 1.25rem;
+      text-align: center;
+      background: #f8fafc;
+      border: 1px dashed #cbd5f5;
+      border-radius: 12px;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+  }
+
+  .policy-state {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.05);
+
+    h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      color: #0f172a;
+    }
+
+    p {
+      margin: 0;
+      color: #475569;
+      max-width: 420px;
+    }
+  }
+
+  .document-preview-dialog {
+    width: 92vw !important;
+    max-width: 1280px;
+
+    @include tablet-sm {
+      width: 96vw !important;
+    }
+
+    .p-dialog-content {
+      height: 85vh;
+      min-height: 480px;
+      padding: 0;
+    }
+  }
+
+  .document-preview-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .document-preview-empty {
+    padding: 2rem;
+    text-align: center;
+    color: #64748b;
+  }
+
+  .policy-section.co-insurance-ratios-section {
+    .section-heading {
+      gap: 0.5rem;
+
+      h3 {
+        font-size: 1.15rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #e11d48;
+      }
+    }
+
+    .section-actions {
+      .p-button {
+        min-width: unset;
+      }
+    }
+
+    .co-insurance-ratios-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      background: #e11d48;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .co-insurance-policy-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      background: #ffe4e6;
+      color: #e11d48;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .co-insurance-ratios-table {
+      .p-datatable-wrapper {
+        overflow: visible;
+      }
+
+      .p-datatable-thead > tr > th,
+      .p-datatable-tbody > tr > td {
+        padding: 0.85rem 1rem 0.85rem 0;
+      }
+
+      .p-datatable-thead > tr > th:last-child,
+      .p-datatable-tbody > tr > td:last-child {
+        padding-right: 0;
+      }
+
+      .p-datatable-thead > tr > th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .p-datatable-tbody > tr > td {
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        color: #0f172a;
+        font-size: 0.95rem;
+      }
+
+      .p-datatable-tbody > tr.co-insurance-total-row > td {
+        border-bottom: none;
+        border-top: 1px solid #e2e8f0;
+        font-weight: 700;
+        padding-top: 1rem;
+      }
+
+      .p-datatable-tbody > tr.co-insurance-total-row > td:nth-child(3) {
+        color: #16a34a;
+      }
+    }
+
+    .co-insurance-status {
+      color: #64748b;
+      font-weight: 600;
+
+      &--active {
+        color: #16a34a;
+      }
+    }
+  }
+}
+
+/* Document preview dialog - root level so it applies when Dialog is portaled to body */
+.document-preview-dialog,
+.p-dialog.document-preview-dialog {
+  width: 92vw !important;
+  max-width: 1280px !important;
+
+  @media (max-width: 767px) {
+    width: 96vw !important;
+  }
+
+  .p-dialog-content {
+    height: 85vh !important;
+    min-height: 520px !important;
+    padding: 0 !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .document-preview-frame {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 480px !important;
+    border: none;
+    flex: 1;
+  }
+}

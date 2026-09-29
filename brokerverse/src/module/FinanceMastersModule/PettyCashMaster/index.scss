@@ -1,0 +1,293 @@
+.container__petty__cash {
+    .add__icon__title__petty{
+        color: #111927;
+        font-size: 30px;
+        font-weight: 600;
+        font-family: "Nunito", Arial, sans-serif;
+        display: flex;
+        align-items: center;
+    }
+
+    .breadCrums__view__reversal__petty {
+        border: none;
+        padding: 0;
+        font-family: "Nunito", Arial, sans-serif;
+        color: #111927;
+        font-size: 16px !important;
+        font-weight: 600;
+
+
+    }
+    .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+        // color: #4b5563;
+        color: #000;
+        font-size: 16px;
+        font-weight: 500;
+        font-family: "Nunito", Arial, sans-serif;
+    }
+
+    .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+        color: #B1B1B1;
+    }
+
+    .item__color__petty {
+        border: none;
+        padding: 0;
+        font-family: "Nunito", Arial, sans-serif;
+        color: red !important;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .add__icon__alighn__petty{
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        
+
+        .upload__icon__view__petty {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            // background-color: #0072d8;
+            border: 1px solid #0072d8;
+            height: 45px;
+            // width: 140px;
+            border-radius: 30px;
+            color: #000;
+            font-family: "Nunito", Arial, sans-serif;
+            padding: 0 20px;
+            cursor: pointer;
+            margin: 0 10px;
+
+            .upload__icon__petty {
+                display: flex;
+                justify-content: flex-end;
+                align-items: flex-end;
+                font-family: "Nunito", Arial, sans-serif;
+                padding: 0 5px;
+            }
+
+            .upload__text__petty {
+                color: #0072d8 !important;
+                font-size: 18px;
+                font-weight: 500;
+                background-color: transparent;
+                border-color: transparent;
+                font-family: "Nunito", Arial, sans-serif;
+                padding: 0 5px;
+            }
+
+        }
+
+        .add__icon__view__petty {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            background-color: #0072d8;
+            height: 45px;
+            // width: 140px;
+            border-radius: 30px;
+            color: #fff;
+            font-family: "Nunito", Arial, sans-serif;
+            padding: 0 20px;
+            cursor: pointer;
+
+            .add__icon__petty {
+                display: flex;
+                justify-content: flex-end;
+                align-items: flex-end;
+                padding: 0 5px;
+                font-family: "Nunito", Arial, sans-serif;
+            }
+
+            .add__text__petty {
+                color: #FFF !important;
+                font-size: 18px;
+                font-weight: 500;
+                background-color: transparent;
+                border-color: transparent;
+                font-family: "Nunito", Arial, sans-serif;
+                padding: 0 5px;
+            }
+
+        }
+
+    }
+    .sub__container__petty {
+        // box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+        // border-radius: 10px;
+        background: #ffffff;
+        color: #4b5563;
+        box-shadow: none !important;
+        border-radius: 6px !important;
+        // fill: #fff !important;
+        // stroke-width: 1px !important;
+        // stroke: #fff !important;
+        filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+        .sort__filter__view__petty {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            border: 0.5px solid #d1d5db !important;
+            border-radius: 10px !important;
+            position: relative;
+            width: 100% !important;
+
+
+        }
+
+        .sort__by__text__petty {
+            font-family: "Nunito", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: left;
+            color: #0072d8;
+            cursor: pointer;
+
+        }
+
+        .input__sub__account__petty{
+            width: 100% !important;
+            position: relative;
+            border-radius: 10px;
+        }
+
+        .table__view__petty {
+            color: #000;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sort__by__data {
+            box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+            border-radius: 10px;
+            margin: 10px 5px 0 5px;
+            padding: 15px;
+            z-index: 1000;
+            position: absolute;
+            top: 46%;
+            width: 140px;
+            cursor: pointer;
+
+        }
+        .searchinput_left__petty{
+            width: 100%;
+            border-radius: 8px;
+        }
+    
+        .searchiput_container__petty{
+            // background-color: red;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    
+        .searchIcon__view__input__petty {
+            display: flex;
+            // justify-content: center;
+            align-items: center;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            height: 45px;
+            color: #B1B1B1;
+        }
+    
+        .p-inputtext {
+            border-color: transparent;
+            height: 40px;
+        }
+    
+        .p-inputtext:enabled:focus {
+            outline: 0 none;
+            outline-offset: 0;
+            box-shadow: 0 0 0 0.2rem transparent;
+            border-color: transparent;
+        }
+    
+        .p-inputtext::placeholder {
+            font-family: "Nunito", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            text-align: left;
+            color: #B1B1B1;
+            margin-left: 10px;
+    
+        }
+    
+        .p-placeholder {
+            font-family: "Nunito", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            text-align: left;
+            color: #B1B1B1;
+            margin-left: 10px;
+    
+        }
+        .main__tabel__title__petty {
+            font-family: "Nunito", Arial, sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 24px;
+            letter-spacing: 0em;
+            text-align: left;
+            color: #111927 !important;
+    
+        }
+    
+
+    }
+    .card__container {
+        background: #fff;
+        filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08));
+        padding: 10px 0;
+        border-radius: 10px;
+        margin: 30px 0;
+      }
+    
+      .input__field__reversal {
+        color: #111927;
+        width: 100%;
+        border-radius: 10px;
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        .p-dropdown-label {
+          color: #111927;
+          font-family: "Nunito", Arial, sans-serif;
+          font-size: 14px;
+          font-weight: 400;
+        }
+      }
+      .input__field__reversal__inactive {
+        color: #b1b1b1;
+        width: 100%;
+        border-radius: 10px;
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        .p-component:disabled {
+          opacity: 1 !important;
+        }
+      }
+    
+      .input__label__reversal {
+        color: #111927 !important;
+        font-size: 16px !important;
+        font-style: normal !important;
+        font-weight: 500 !important;
+        line-height: normal !important;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+      .input__label__reversal__inactive {
+        color: #b1b1b1 !important;
+        font-size: 16px !important;
+        font-style: normal !important;
+        font-weight: 500 !important;
+        line-height: normal !important;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+}
+

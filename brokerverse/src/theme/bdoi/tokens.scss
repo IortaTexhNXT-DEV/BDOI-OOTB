@@ -1,0 +1,59 @@
+// BDOI design tokens for iNXT BrokerVerse, from the BDO Style Guide (ITG User Experience Design).
+// Colours, type and spacing are defined here once; bdoi.scss and the screens use the tokens.
+
+// Brand digital colours
+$brand-navy: #004ea8; // Header Blue: table heads, section bars, navigation text
+$brand-blue: #0072d8; // CTA Blue: primary buttons, links, active items
+$brand-blue-600: #005fb4; // CTA hover / pressed
+$brand-blue-050: #e5f5ff; // Background Blue: highlights, alternate rows, active menu item
+$brand-field-blue: #99c1e7; // Text Field Blue: input borders
+$brand-gold: #fdb913; // Yellow: accents (active tab bar), used sparingly
+$brand-gold-600: #e0a100;
+$brand-gold-050: #fff4d6;
+
+// Neutrals (never pure black)
+$color-bg: #f6f6f6; // Dirty White: page background behind white cards
+$color-surface: #ffffff;
+$color-heading: #2e2e2e; // Near Black
+$color-text: #4b4b4b; // Dark Grey
+$color-text-muted: #656565; // Base Grey
+$color-placeholder: #919191; // Medium Grey
+$color-border: #e4e4e4; // dividers and borders
+$color-border-strong: #c2c2c1; // Light Grey: separators, disabled fills
+
+$color-success: #1d7f4e;
+$color-danger: #d32f2f;
+$color-warning: #8a5a00;
+
+// Typography: Nunito, Arial as the approved fallback
+$font-heading: "Nunito", Arial, sans-serif;
+$font-body: "Nunito", Arial, sans-serif;
+
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$shadow-sm: 0 1px 3px rgba(46, 46, 46, 0.06);
+$shadow-md: 0 4px 16px rgba(46, 46, 46, 0.08);
+$focus-ring: 0 0 0 3px rgba(0, 114, 216, 0.35);
+
+$control-height: 44px;
+$header-height: 72px;
+$sidebar-width: 280px;
+
+:root {
+  --brand-navy: #{$brand-navy};
+  --brand-blue: #{$brand-blue};
+  --brand-blue-600: #{$brand-blue-600};
+  --brand-blue-050: #{$brand-blue-050};
+  --brand-field-blue: #{$brand-field-blue};
+  --brand-gold: #{$brand-gold};
+  --color-bg: #{$color-bg};
+  --color-surface: #{$color-surface};
+  --color-heading: #{$color-heading};
+  --color-text: #{$color-text};
+  --color-text-muted: #{$color-text-muted};
+  --color-placeholder: #{$color-placeholder};
+  --color-border: #{$color-border};
+  --font-heading: #{$font-heading};
+  --font-body: #{$font-body};
+}

@@ -1,0 +1,160 @@
+.schedule-master {
+  padding: 1rem;
+
+  .page-header {
+    margin-bottom: 1rem;
+  }
+
+  .main-card {
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #dee2e6;
+
+      h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #495057;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+
+    .form-section {
+      padding: 1rem;
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 600;
+
+        svg {
+          width: 8px;
+          height: 8px;
+        }
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 1.5rem;
+
+        &.three-column {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        &.two-column {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        &.single-column {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        label {
+          font-weight: 500;
+          color: #495057;
+          font-size: 0.9rem;
+        }
+
+        &.checkbox-field {
+          flex-direction: row;
+          align-items: center;
+        }
+
+        .help-text {
+          color: #6c757d;
+          font-size: 0.85rem;
+          margin-top: 0.25rem;
+        }
+      }
+
+      .insurer-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem;
+
+        .insurer-code {
+          font-weight: 600;
+          color: #007bff;
+        }
+
+        .insurer-name {
+          flex: 1;
+          color: #495057;
+        }
+
+        .insurer-type {
+          color: #6c757d;
+          font-size: 0.9rem;
+        }
+      }
+
+      .editable-cells-table {
+        .p-datatable-tbody {
+          tr {
+            td {
+              padding: 0.5rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .p-tabview {
+    .p-tabview-nav {
+      background: transparent;
+      border-bottom: 2px solid #dee2e6;
+
+      .p-tabview-nav-link {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        font-weight: 500;
+
+        &:focus {
+          box-shadow: none;
+        }
+      }
+
+      .p-highlight .p-tabview-nav-link {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+      }
+    }
+
+    .p-tabview-panels {
+      background: transparent;
+      padding: 1rem 0;
+    }
+  }
+
+  .p-picklist {
+    .p-picklist-header {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    .p-picklist-list {
+      border: 1px solid #dee2e6;
+    }
+  }
+}

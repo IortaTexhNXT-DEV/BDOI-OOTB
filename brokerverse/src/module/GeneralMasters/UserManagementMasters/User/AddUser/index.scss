@@ -1,0 +1,206 @@
+.add__user__container{
+    .add__sub__title {
+      color: #111927;
+      font-size: 30px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      // margin-left: 10px;
+    }
+  
+    .p-tabview .p-tabview-panels {
+      background: #ffffff;
+      padding: 0rem !important;
+      border: 0 none;
+      color: #4b5563;
+      border-bottom-right-radius: 6px;
+      border-bottom-left-radius: 6px;
+  }
+    .breadCrums__view__add__screen {
+      border: none;
+      padding: 0;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #111927;
+      font-size: 16px;
+      font-weight: 500;
+      margin: 4px 0 10px 0px;
+    }
+    .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+      color: #b1b1b1;
+    }
+  
+    .add__account__sub__container {
+      box-shadow: rgba(241, 244, 247, 0.3) 0px 1px 2px 0px,
+        rgba(169, 174, 179, 0.15) 0px 2px 6px 2px;
+      border-radius: 20px;
+  
+      .dropdown__add__sub {
+        width: 100%;
+        margin: 6px 0;
+        border-radius: 10px;
+      }
+  
+      .label__sub__add {
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 16px !important;
+        font-weight: 500;
+        line-height: 19px;
+        letter-spacing: 0em;
+        text-align: left;
+      }
+    }
+    .calender_container_claim {
+      position: relative;
+      width: 100% !important;
+      .calender_icon_claim {
+        position: absolute;
+        right: 16px;
+        bottom: 8px;
+        z-index: 1;
+      }
+    }
+    .calender_field_claim {
+      width: 100% !important;
+      border-radius: 10px;
+      .p-inputtext {
+        margin: 6px 0 0 0;
+        border-radius: 5px;
+        height: 3.125rem;
+      }
+      .p-inputtext::placeholder {
+        color: "red";
+      }
+      button {
+        position: absolute;
+        background-color: transparent;
+        right: 6px;
+        border: 0;
+        top: 18px;
+        z-index: 2;
+        svg.p-icon {
+          display: none;
+        }
+      }
+    }
+    .btn__view__Add {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      .save__add__btn {
+        height: 40px;
+        // width: 130px;
+        background-color: #0072d8;
+        border-radius: 30px;
+        font-size: 20px;
+        font-family: 500;
+        color: #fff;
+      }
+    }
+    .custom-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      z-index: 1;
+    }
+    .p-calendar .p-inputtext {
+      flex: 1 1 auto;
+      width: 1%;
+      border-right-style: hidden;
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+      border-color: #d1d5db;
+    }
+    .p-button.p-button-icon-only {
+      width: 3rem;
+      padding: 0.75rem 0;
+      color: #0072d8;
+      background: #fff;
+      border-left-style: hidden;
+      border-color: #d1d5db;
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      cursor: pointer;
+    }
+    .label_header {
+      color: #111927;
+      font-size: 30px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      margin-left: 10px;
+    }
+    .calender__container {
+      border-radius: 30px;
+      background-color: #fff !important;
+      margin-top: 10px;
+    }
+    .calenderlable__container {
+      color: #000;
+      margin-bottom: 8px;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+  
+      font-weight: 500;
+    }
+    .custom-modal {
+      background-color: #fff;
+      overflow-y: auto;
+      position: relative;
+      width: 22%;
+      border-radius: 20px;
+      height: 200px;
+      display: grid;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+  
+    .popup__icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .popup__text {
+      color: #111927;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 500;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+    .popup__token__text {
+      color: #29ce00;
+    }
+  
+    .modal-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+  
+    .modal-body {
+      color: #fff;
+    } .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+      background: #ffffff;
+      border-color: #0072d8;
+      color: #0072d8;
+     font-size:16px ;
+     font-weight: 500;
+  }
+  .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    border:none;
+    font-size:16px ;
+    font-weight: 400;
+  }
+  }
+  

@@ -1,0 +1,19 @@
+.formik__error {
+  color: red;
+  font-size: 10px;
+  display: flex;
+  justify-content: flex-start;
+  margin-left: 12px;
+  margin-top: 5px;
+}
+.custom__dropdown__controller__over {
+  .p-dropdown {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+      box-shadow 0.2s;
+    border-radius: 6px;
+    margin-top: 0.5rem !important;
+    width: 100% !important;
+  }
+}

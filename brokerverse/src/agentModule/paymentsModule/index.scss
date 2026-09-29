@@ -1,0 +1,148 @@
+.payment__dashboard__container {
+  .payment__heading {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    padding-bottom: 32px;
+  }
+  .paymentCard_container {
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.07);
+  }
+  .header_search_container {
+    display: grid;
+  }
+  .p-tabview .p-tabview-nav {
+    background: #ffffff;
+    border: none !important;
+  }
+  // .payment__paid__fieldcard{
+
+  // }
+  .payment__paid__titlefieldcard {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .payment__paid__subtitlefieldcard {
+    color: #6c737f;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .payment__paid__pricefieldcard {
+    color: #000;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .payment__paidfieldcard {
+    color: #0b815a;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 18px;
+    background: rgba(16, 185, 129, 0.12);
+    text-align: center;
+    padding: 4px 10px;
+  }
+
+  .payment__paidfieldcard__red {
+    color: #c1622a;
+    background: #fef2e1;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 18px;
+
+    text-align: center;
+    padding: 4px 10px;
+  }
+  .payment__paidfieldcard__blue {
+    color: #167594;
+    font-family: "Nunito", Arial, sans-serif;
+    background: #d9edf3;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 18px;
+    background: rgba(16, 185, 129, 0.12);
+    text-align: center;
+    padding: 4px 10px;
+  }
+
+  .payment__overall__fieldcard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f2f4f7;
+    padding-top: 20px;
+    padding-bottom: 16px;
+  }
+  .sorbyfilter_container {
+    border: none;
+  }
+  .payment__cardlisting {
+    display: grid;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .paymentcard_eachcontainer {
+    // height: 180px;
+    // width:260px;
+    border-radius: 20px;
+    border: 0.3px solid rgba(17, 25, 39, 0.1);
+    background: #fff;
+    margin-bottom: 18px;
+    text-align: center;
+    // box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.07);
+  }
+  .price__listing {
+    margin: 14px 0px;
+    color: #000;
+  }
+  .p-tabview .p-tabview-panels {
+    background: #ffffff;
+    padding: 1.25rem 0rem !important;
+    // border-top: 1px solid #E5E7EB;
+    color: #4b5563;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+  }
+  .paginator__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0px !important;
+  }
+  .pagedropdown_container {
+    border: none;
+    // background-color: ;
+  }
+  .payment_pending {
+    color: #6c737f;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    font-weight: 500 !important;
+  }
+  .sorbyfilter__style {
+    height: 100%;
+    border-color: #d1d5db;
+    width: 100%;
+    margin: 0px !important;
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+
+    .p-dropdown-label {
+      padding: 0 8px !important;
+      display: flex;
+      align-items: center;
+    }
+  }
+}

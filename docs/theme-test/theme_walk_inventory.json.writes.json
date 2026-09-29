@@ -1,0 +1,7 @@
+[
+ [
+  "POST",
+  "http://localhost:8000/api/s3/presigned-download-urls",
+  "{\"urls\":[\"https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/vehicle-photos/left/Vehicle-Left-side-1787643356323-98yfxu.png\",\"https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/vehicle-photos/right/Vehicle-Right-side-1787643362308-86iy21."
+ ]
+]

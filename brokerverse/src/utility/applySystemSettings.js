@@ -1,0 +1,69 @@
+import i18n from "../i18n";
+import { setDisplayCurrency } from "./currencyConverter";
+import { DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
+import { setActiveDefaultCurrency } from "./currencyOptions";
+
+/**
+ * Apply CSS theme variables from system settings.
+ */
+export function applyThemeColors(primaryColor, secondaryColor) {
+  const root = document.documentElement;
+  const primary = primaryColor || DEFAULT_SYSTEM_SETTINGS.primaryColor;
+  const secondary = secondaryColor || DEFAULT_SYSTEM_SETTINGS.secondaryColor;
+  root.style.setProperty("--bv-primary", primary);
+  root.style.setProperty("--bv-secondary", secondary);
+  root.style.setProperty("--bv-primary-hover", secondary);
+}
+
+/**
+ * Update favicon link in document head.
+ */
+export function applyFavicon(faviconUrl) {
+  const href = faviconUrl || DEFAULT_SYSTEM_SETTINGS.faviconUrl;
+  let link = document.querySelector("link[rel='icon']");
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "icon";
+    document.head.appendChild(link);
+  }
+  link.href = href;
+}
+
+/**
+ * Set document title from app title (login / generic pages).
+ * Authenticated pages may append more in App.js.
+ */
+export function applyAppTitle(appTitle, { authenticated, userName } = {}) {
+  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.appTitle;
+  if (authenticated) {
+    document.title = `${base} - Dashboard | ${userName || "User"}`;
+  } else {
+    document.title = `${base} - Login`;
+  }
+}
+
+/**
+ * Apply default language only when user has no saved preference.
+ */
+export function applyDefaultLanguage(defaultLanguage) {
+  const saved = localStorage.getItem("i18nextLng");
+  if (saved) return;
+  const lng = defaultLanguage || DEFAULT_SYSTEM_SETTINGS.defaultLanguage;
+  if (lng && i18n.language !== lng) {
+    i18n.changeLanguage(lng);
+  }
+}
+
+/**
+ * Apply all runtime effects from system settings payload.
+ */
+export function applySystemSettings(settings = {}, options = {}) {
+  const merged = { ...DEFAULT_SYSTEM_SETTINGS, ...settings };
+  setDisplayCurrency(merged.displayCurrency);
+  setActiveDefaultCurrency(merged.displayCurrency);
+  applyThemeColors(merged.primaryColor, merged.secondaryColor);
+  applyFavicon(merged.faviconUrl);
+  applyAppTitle(merged.appTitle, options);
+  applyDefaultLanguage(merged.defaultLanguage);
+  return merged;
+}

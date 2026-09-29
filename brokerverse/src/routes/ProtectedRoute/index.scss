@@ -1,0 +1,219 @@
+@import "../../styles/responsive.scss";
+@import "../../Color.scss";
+
+.protected__layout__container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+
+  .protected__layout__header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .protected__layout__sidebar__container {
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-width: 280px;
+    max-width: 280px;
+    background-color: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 5;
+
+    @include tablet-md {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      height: 100vh;
+      z-index: 1000;
+      background: #ffffff;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+      min-width: 240px;
+      max-width: 240px;
+
+      &.mobile-open {
+        left: 0;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    @include tablet-sm {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      height: 100vh;
+      z-index: 1000;
+      background: #ffffff;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+      min-width: 280px;
+      max-width: 280px;
+
+      &.mobile-open {
+        left: 0;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+      }
+    }
+
+    // Close button for mobile/tablet sidebar
+    .sidebar-close-btn {
+      display: none;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      z-index: 1001;
+      transition: all 0.2s ease;
+
+      @include tablet-md {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @include tablet-sm {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+      }
+
+      .pi {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .protected__layout__content__space {
+    display: flex;
+    flex: 1;
+    min-width: 0; // Prevent flex item from overflowing
+
+    .main__content {
+      flex: 1;
+      padding: 10px 60px;
+
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background-color: $main-background;
+      min-width: 0; // Prevent flex item from overflowing
+
+      @include tablet-md {
+        padding: 10px 40px;
+        width: 100%;
+      }
+
+      @include tablet-sm {
+        padding: 10px 20px;
+        width: 100%;
+      }
+
+      @include mobile-sm {
+        padding: 10px 15px;
+      }
+    }
+  }
+
+  // Mobile/tablet overlay for sidebar
+  .mobile-overlay {
+    display: none;
+
+    @include tablet-md {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+
+      &.active {
+        display: block;
+      }
+    }
+
+    @include tablet-sm {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+
+      &.active {
+        display: block;
+      }
+    }
+  }
+
+  // Mobile/tablet navigation toggle
+  .mobile-nav-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: #ffffff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    min-width: 48px;
+    min-height: 48px;
+
+    @include tablet-md {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @include tablet-sm {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @include mobile-sm {
+      top: 15px;
+      left: 15px;
+      padding: 10px;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    &:hover {
+      background: #2a3547;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .p-button-icon {
+      font-size: 1.2rem;
+
+      @include mobile-sm {
+        font-size: 1.1rem;
+      }
+    }
+  }
+}

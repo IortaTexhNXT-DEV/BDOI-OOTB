@@ -1,0 +1,75 @@
+.container__line_business_master {
+  .main__account__title {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .breadCrums__view__reversal {
+    border: none;
+    padding: 1px 0;
+  }
+  .p-breadcrumb-list {
+    margin:20px 0px !important;
+  }
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1 !important;
+  }
+  .main__btn__action {
+    color: #fff;
+    background-color: #0072d8;
+    border-radius: 30px;
+    padding: 6px 20px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+  }
+  .main__btn__action__upload {
+    border-radius: 30px;
+    border: 1px solid #0072d8;
+    background: #fff;
+    padding: 6px 20px;
+    color: #0072d8;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+  }
+  // @media only screen and (min-width: 768px) and (max-width: 991px) {
+  //   .main__account__title {
+  //     font-size: 26px;
+  //   }
+  //   .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+  //     font-size: 12px;
+  //   }
+  //   .main__btn__action {
+  //     font-size: 14px;
+  //   }
+  //   .main__btn__action__upload {
+  //     font-size: 14px;
+  //   }
+  // }
+
+  // @media only screen and (min-width: 992px) and (max-width: 1440px) {
+  //   .main__account__title {
+  //     font-size: 28px;
+  //   }
+  //   .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+  //     font-size: 14px;
+  //   }
+  //   .main__btn__action {
+  //     font-size: 16px;
+  //   }
+  //   .main__btn__action__upload {
+  //     font-size: 16px;
+  //   }
+  // }
+}

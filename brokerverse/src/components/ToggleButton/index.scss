@@ -1,0 +1,106 @@
+.toggle__container{
+label {
+    pointer-events: none;
+  }
+
+  .input {
+    display: none;
+  }
+
+  .input:checked + .toggle-wrapper > .selector {
+    left: calc(100% - 22px);
+    background-color: #48c99e;
+  }
+
+  .input:checked ~ .toggle-wrapper .active-text {
+    display: none;
+    left: auto;
+    right: 10px;
+  }
+
+  .input:not(:checked) ~ .toggle-wrapper .inactive-text {
+    display: none;
+    left: 10px;
+    right: auto;
+    top: 17px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 10px;
+    
+    font-weight: 500;
+  }
+  .input:not(:checked) ~ .toggle-wrapper .active-text {
+    display: block;
+    left: 40%;
+    right: auto;
+    top: 17px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 10px;
+    
+    font-weight: 500;
+  }
+
+  .toggle-wrapper {
+    position: relative;
+    width: 75px;
+    height: 25px;
+    background-color: red;
+    border-radius: 999px;
+    margin: auto;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 8px 14px 0 rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    box-sizing: border-box;
+    margin:0px 
+  }
+
+  .selector {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 50.5%;
+    left: 4%;
+    transform: translateY(-50%);
+    background-color: #ee5f39;
+    transition: left 0.25s ease;
+    border-radius: 50%;
+  }
+
+  .active-text {
+    position: absolute;
+    top: 70%;
+    transform: translateY(-100%);
+    transition: all 0.25s ease;
+    white-space: nowrap;
+   
+    color: #ef0000;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 10px;
+    
+    font-weight: 500;
+  }
+
+  .inactive-text {
+    position: absolute;
+    top: 74%;
+    transform: translateY(-100%);
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    font-size: 10px;
+    color: #008836;
+  }
+  .input:checked ~ .toggle-wrapper {
+    border-radius: 50px;
+    border: 1px solid #48c99e;
+    background: #e2f6ef;
+  }
+
+  .input:not(:checked) ~ .toggle-wrapper {
+    border-radius: 50px;
+    border: 1px solid #f36156;
+    background: #f2dedc;
+  }
+}

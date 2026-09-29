@@ -1,0 +1,239 @@
+{
+  "feature_id": "H4",
+  "feature_name": "Retention Analytics",
+  "description": "Analytics dashboard for monitoring renewal rates, identifying at-risk policies, and tracking retention performance",
+  "mvp_scope": {
+    "included": [
+      "Retention rate dashboards",
+      "At-risk policy identification",
+      "Lapse prediction",
+      "Performance metrics by agent/product",
+      "Trend analysis",
+      "Retention cost analysis"
+    ],
+    "excluded": [
+      "Predictive ML models",
+      "Complex segmentation",
+      "Real-time analytics",
+      "External data integration"
+    ]
+  },
+  "screens": {
+    "retention_dashboard": {
+      "name": "Retention Analytics Dashboard",
+      "purpose": "Monitor and analyze policy retention metrics",
+      "navigation": "/renewal/analytics",
+      "components": {
+        "kpi_cards": {
+          "metrics": [
+            {
+              "name": "Overall Retention Rate",
+              "current": "82%",
+              "target": "85%",
+              "trend": "+2.3%",
+              "period": "YTD"
+            },
+            {
+              "name": "Premium Retention",
+              "current": "PHP 45.2M",
+              "target": "PHP 50M",
+              "trend": "+5.1%",
+              "period": "YTD"
+            },
+            {
+              "name": "At-Risk Policies",
+              "count": 127,
+              "value": "PHP 8.3M",
+              "percentage": "15%",
+              "alert_level": "warning"
+            },
+            {
+              "name": "Average Renewal Time",
+              "days": 21,
+              "target": 15,
+              "trend": "-3 days",
+              "status": "improving"
+            }
+          ]
+        },
+        "charts_section": {
+          "charts": [
+            {
+              "type": "line_chart",
+              "title": "Monthly Retention Trend",
+              "metrics": ["Retention Rate", "Target", "Previous Year"],
+              "period": "Last 12 months"
+            },
+            {
+              "type": "bar_chart",
+              "title": "Retention by Product Line",
+              "categories": ["Motor", "Fire", "Marine", "Personal Accident", "Health"],
+              "metrics": ["Current Year", "Previous Year"]
+            },
+            {
+              "type": "funnel_chart",
+              "title": "Renewal Pipeline",
+              "stages": ["Due for Renewal", "Quote Sent", "Under Negotiation", "Renewed", "Lapsed"]
+            },
+            {
+              "type": "heatmap",
+              "title": "Retention by Agent & Month",
+              "dimensions": ["Agent", "Month"],
+              "metric": "Retention Rate"
+            }
+          ]
+        },
+        "filters": {
+          "options": [
+            {"field": "date_range", "type": "date_range"},
+            {"field": "product_line", "type": "multiselect"},
+            {"field": "branch", "type": "dropdown"},
+            {"field": "agent", "type": "multiselect"},
+            {"field": "client_segment", "type": "dropdown"}
+          ]
+        }
+      }
+    },
+    "at_risk_analysis": {
+      "name": "At-Risk Policy Analysis",
+      "purpose": "Identify and manage policies with high lapse probability",
+      "navigation": "/renewal/at-risk",
+      "components": {
+        "risk_scoring": {
+          "factors": [
+            {"factor": "Payment History", "weight": 25, "indicator": "Late payments"},
+            {"factor": "Claims Experience", "weight": 20, "indicator": "High claims ratio"},
+            {"factor": "Premium Increase", "weight": 20, "indicator": ">15% increase"},
+            {"factor": "Client Engagement", "weight": 15, "indicator": "No contact in 6 months"},
+            {"factor": "Competitive Pressure", "weight": 10, "indicator": "Competitor quotes requested"},
+            {"factor": "Policy Age", "weight": 10, "indicator": "First renewal"}
+          ]
+        },
+        "at_risk_grid": {
+          "columns": [
+            "Policy Number",
+            "Client Name",
+            "Product",
+            "Expiry Date",
+            "Premium",
+            "Risk Score",
+            "Risk Factors",
+            "Assigned To",
+            "Action Plan",
+            "Status"
+          ],
+          "color_coding": [
+            {"range": "0-30", "color": "green", "label": "Low Risk"},
+            {"range": "31-60", "color": "yellow", "label": "Medium Risk"},
+            {"range": "61-100", "color": "red", "label": "High Risk"}
+          ],
+          "actions": [
+            "Assign to Retention Team",
+            "Create Action Plan",
+            "Apply Retention Offer",
+            "Schedule Client Meeting",
+            "Update Status"
+          ]
+        },
+        "action_plans": {
+          "templates": [
+            {
+              "risk_level": "High",
+              "plan": "Immediate manager call + Special discount + Extended payment terms"
+            },
+            {
+              "risk_level": "Medium",
+              "plan": "Personalized email + Loyalty benefits highlight + Follow-up call"
+            },
+            {
+              "risk_level": "Low",
+              "plan": "Standard renewal notice + Early bird discount offer"
+            }
+          ]
+        }
+      }
+    },
+    "performance_tracking": {
+      "name": "Retention Performance Tracking",
+      "purpose": "Track team and individual retention performance",
+      "navigation": "/renewal/performance",
+      "components": {
+        "leaderboard": {
+          "type": "ranking_table",
+          "columns": [
+            "Rank",
+            "Agent/Team",
+            "Policies Renewed",
+            "Retention Rate",
+            "Premium Retained",
+            "Target Achievement",
+            "Trend"
+          ],
+          "period_selector": ["Month", "Quarter", "Year"]
+        },
+        "individual_scorecard": {
+          "metrics": [
+            "Personal Retention Rate",
+            "Policies at Risk",
+            "Successfully Retained",
+            "Average Discount Given",
+            "Client Satisfaction Score"
+          ],
+          "comparison": "vs Team Average"
+        },
+        "insights": {
+          "sections": [
+            {
+              "title": "Top Performers",
+              "metric": "Agents with >90% retention"
+            },
+            {
+              "title": "Improvement Areas",
+              "metric": "Products with declining retention"
+            },
+            {
+              "title": "Best Practices",
+              "metric": "Successful retention strategies"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "data_model": {
+    "retention_metrics": {
+      "metric_id": "string",
+      "period": "string",
+      "retention_rate": "percentage",
+      "policies_renewed": "number",
+      "policies_lapsed": "number",
+      "premium_retained": "number",
+      "premium_lost": "number",
+      "average_discount": "percentage"
+    },
+    "at_risk_policy": {
+      "policy_id": "string",
+      "risk_score": "number",
+      "risk_factors": "array",
+      "probability_of_lapse": "percentage",
+      "recommended_actions": "array",
+      "assigned_agent": "string",
+      "action_status": "enum"
+    },
+    "retention_action": {
+      "action_id": "string",
+      "policy_id": "string",
+      "action_type": "string",
+      "action_date": "date",
+      "outcome": "enum",
+      "notes": "text"
+    }
+  },
+  "business_rules": [
+    "Risk scores updated daily based on latest data",
+    "Policies with risk score >60 automatically flagged for retention team",
+    "Retention rate targets set quarterly",
+    "Premium retention weighted higher than policy count retention",
+    "Client segmentation based on lifetime value and premium size"
+  ]
+}

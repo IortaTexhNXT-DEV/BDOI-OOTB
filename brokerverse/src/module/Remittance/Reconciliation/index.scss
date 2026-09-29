@@ -1,0 +1,165 @@
+.reconciliation-process {
+  padding: 1rem;
+
+  .header-section {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin-bottom: 1rem;
+      color: #495057;
+    }
+
+    .status-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+
+      .status-card {
+        .p-card-body {
+          padding: 1rem;
+          text-align: center;
+
+          .status-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+          }
+
+          .status-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+
+  .reconciliation-workspace {
+    display: grid;
+    grid-template-columns: 35% 30% 35%;
+    gap: 1rem;
+    min-height: 500px;
+
+    .left-panel, .right-panel, .center-panel {
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 1rem;
+      background: #fff;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #dee2e6;
+
+      h4 {
+        margin: 0;
+        color: #495057;
+      }
+
+      .panel-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+
+    .center-panel {
+      .matching-controls {
+        padding: 1rem;
+
+        h4 {
+          margin-bottom: 1rem;
+          color: #495057;
+        }
+
+        .control-field {
+          margin-bottom: 1rem;
+
+          label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #495057;
+            font-weight: 500;
+          }
+        }
+
+        .selection-info {
+          padding: 1rem;
+          background: #f8f9fa;
+          border-radius: 4px;
+          margin: 1rem 0;
+
+          div {
+            margin-bottom: 0.5rem;
+            color: #495057;
+
+            &.difference {
+              color: #dc3545;
+              font-weight: 600;
+            }
+          }
+        }
+
+        .p-button {
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+
+  .exceptions-section, .history-section {
+    padding: 1rem;
+
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+  }
+
+  .p-tabview {
+    .p-tabview-nav {
+      background: transparent;
+      border-bottom: 2px solid #dee2e6;
+
+      .p-tabview-nav-link {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        font-weight: 500;
+
+        &:focus {
+          box-shadow: none;
+        }
+      }
+
+      .p-highlight .p-tabview-nav-link {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+      }
+    }
+
+    .p-tabview-panels {
+      background: #f8f9fa;
+      padding: 1rem;
+    }
+  }
+
+  .p-datatable {
+    .p-datatable-header {
+      background: transparent;
+      border: none;
+    }
+
+    .p-datatable-tbody {
+      tr {
+        td {
+          padding: 0.5rem;
+        }
+      }
+    }
+  }
+}

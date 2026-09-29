@@ -1,0 +1,120 @@
+.overall_leadedit_container {
+  .innerlead_container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+
+    .arrowlabel_txt {
+      color: #111927;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+    }
+  }
+
+  .client__container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    .client__profile__title {
+      color: #000;
+      font-family: "Nunito", Arial, sans-serif !important;
+      font-size: 34px !important;
+      font-weight: 600 !important;
+      line-height: 51px !important;
+    }
+
+    .client__profile__id {
+      color: #000;
+      font-family: "Nunito", Arial, sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 400 !important;
+      line-height: 24px !important;
+    }
+
+    .client__svg__container {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .edit__card_overall_container {
+    .p-card {
+      background: #ffffff;
+      color: #111927;
+      box-shadow: none !important;
+      border-radius: 20px !important;
+      fill: #fff !important;
+      filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+      margin-top: 10px;
+    }
+
+    .p-card .p-card-title {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 36px;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #111927;
+    }
+
+    .category__container {
+      display: flex;
+      gap: 10px;
+
+      .category__text {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        font-family: "Nunito", Arial, sans-serif;
+        color: #6c737f;
+      }
+
+      .category__id {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        font-family: "Nunito", Arial, sans-serif;
+        color: #111927;
+      }
+    }
+    .labeltxt_container {
+      color: #111927 !important;
+      margin-left: 6px !important;
+      font-family: "Nunito", Arial, sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 400 !important;
+    }
+    .save_continue_conatiner {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin: 10px 0px;
+      padding: 8px 0px;
+      .btn_lable_container {
+        color: #111927;
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+      }
+      .btnsave_lable_container {
+        color: #fff;
+        font-family: "Nunito", Arial, sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+        border-radius: 6px;
+      }
+      .btn_lable_save_container {
+        .p-button-label {
+          font-family: "Nunito", Arial, sans-serif !important;
+          font-size: 16px !important;
+          font-weight: 400 !important;
+          line-height: 24px !important;
+        }
+      }
+    }
+  }
+}

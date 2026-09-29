@@ -1,0 +1,319 @@
+.pettycash__management {
+  @layer primereact {
+    .p-tabview .p-tabview-nav {
+      background: #ffffff;
+      border: 1px solid #fff !important;
+      border-top-width: 1px;
+      border-right-width: 1px;
+      border-bottom-width: 1px;
+      border-left-width: 1px;
+      border-width: 0 0 2px 0;
+    }
+  }
+  .p-breadcrumb-list {
+    padding: 4px 0;
+  }
+  .btn__container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  // .add__btn{
+  //   color: #fff;
+  //   font-size: 14px;
+  //   font-weight: 500 !important;
+  //   background-color: #0072d8;
+  //   border-radius: 60px !important;
+  //   // height: 45px;
+  //   // width: 120px;
+  //   margin: 10px;
+  //   font-family: "Nunito", Arial, sans-serif;
+  // }
+  .correction__print__btn {
+    color: #0072d8;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: transparent;
+    border-radius: 30px;
+    height: 45px;
+    width: 153px;
+    font-family: "Nunito", Arial, sans-serif;
+    margin: 10px;
+  }
+
+  justify-content: center;
+  max-width: 100% !important;
+  .pettycash__title {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+  .p-tabmenu .p-tabmenu-nav {
+    border: 5px solid transparent;
+    // border-width: 0 0 5px 0;
+  }
+  .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
+    border-width: 2;
+    color: #0072d8;
+  }
+  .sidebar {
+    width: 100%;
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .breadCrums {
+    margin: 20px 0px;
+    border: none;
+    font-weight: 500;
+    color: #000;
+    font-size: 16px;
+  }
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    // color: #4b5563;
+    color: #000;
+    font-size: 16px;
+    font-weight: 400;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .input__filed {
+    width: 100%;
+    margin: 12px 0;
+    border-radius: 10px;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .input__label {
+    color: #111927;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    // margin: 12px 0;
+  }
+
+  .button__view__corrections {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 4%;
+    // margin: 50px 0;
+    .correction__btn {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      background-color: #0072d8;
+      border-radius: 30px;
+      height: 45px;
+      width: 153px;
+      margin: 10px;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+  }
+  .table__view {
+    width: 100%;
+  }
+  .tabel__Dropdown {
+    border: none;
+    border-color: #fff;
+    width: 100%;
+  }
+
+  .input__view {
+    padding-top: 0;
+    padding-bottom: 0;
+    // margin: 5px 10px;
+  }
+
+  .input__view .col-12 {
+    width: 100% !important;
+  }
+  .input__view__request {
+    padding-top: 0;
+    padding-bottom: 0;
+    // margin: 5px 10px;
+  }
+
+  .input__view__request .col-12 {
+    width: 100% !important;
+  }
+  .custom-modal-overlay_create {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    z-index: 1;
+  }
+
+  .custommodal_create {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px 10px;
+    position: relative;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+
+    height: 30%;
+  }
+  .header_search_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .searchinput_left {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .sorbyfilter_container {
+      // gap:10px;
+      height: 46px;
+      border-color: #d1d5db;
+      width: 100%;
+      border-radius: 10px;
+    }
+    .fieldvalue_container {
+      font-size: 16px !important;
+      font-family: "Nunito", Arial, sans-serif !important;
+      font-weight: 400;
+    }
+    span.p-button-label.p-c {
+      font-size: 16px;
+    }
+    .sorbyfilter_container svg {
+      width: 40px;
+      height: 40px;
+      border: none !important;
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .sorbyfilter_container {
+      background: #fff !important;
+      color: #0072d8 !important;
+      margin-top: 0px !important;
+    }
+  }
+  .company__title {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+  .breadCrums {
+    padding: 0;
+    border: none !important;
+    font-weight: 400;
+    color: #000;
+    font-size: 16px;
+  }
+  .p-breadcrumb {
+    background: #ffffff;
+    border: none !important;
+    border-radius: 6px;
+    padding: 0rem;
+    margin-top: 1rem;
+  }
+  .add__btn {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500 !important;
+    background-color: #0072d8;
+    border-radius: 60px !important;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin: 10px;
+    font-family: "Nunito", Arial, sans-serif;
+    column-gap: 0.4rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+}
+
+@media screen and (min-width: 320px) {
+  .pettycash__title {
+    color: #111927;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+}
+@media screen and (min-width: 767px) {
+  .pettycash__title {
+    color: #111927;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+}
+@media screen and (min-width: 1024px) {
+  .input__view.lg-col-2-5 {
+    width: 19% !important;
+  }
+  .input__view__request.lg-col-2-5 {
+    width: 20% !important;
+  }
+  .pettycash__title {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+}
+@media screen and (min-width: 768px) {
+  .md\:col-5 {
+    flex: 0 0 auto;
+    padding: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    width: 40.6667% !important;
+  }
+}
+.p-button-label {
+  font-weight: 500 !important;
+  font-size: 16px !important;
+}
+// .p-card.p-component.mt-1 {
+//   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px !important;
+// }
+// .p-card.p-component.mt-4 {
+//   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px !important;
+// }
+@layer primereact {
+  .p-card {
+    background: #ffffff;
+    color: #4b5563;
+    box-shadow: none !important;
+    // border-radius: 6px !important;
+    fill: #fff !important;
+    // stroke-width: 1px !important;
+    // stroke: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    // margin-top: 10px;
+  }
+}
+.p-datatable .p-datatable-tbody > tr > td {
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  border-width: 0 0 1px 0;
+  padding: 1rem 0;
+}
+.p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+  color: #b1b1b1 !important;
+}

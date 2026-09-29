@@ -1,0 +1,64 @@
+{
+  "short_name": "INXT Broker",
+  "name": "INXT Broker Suite - Insurance Management",
+  "description": "Comprehensive insurance broker management system for the Philippines market. Manage policies, claims, quotes, and clients efficiently.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "icon-192.png?v=2",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png?v=2",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-180.png?v=2",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-152.png?v=2",
+      "type": "image/png",
+      "sizes": "152x152",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-120.png?v=2",
+      "type": "image/png",
+      "sizes": "120x120",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-76.png?v=2",
+      "type": "image/png",
+      "sizes": "76x76",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-60.png?v=2",
+      "type": "image/png",
+      "sizes": "60x60",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/login",
+  "display": "standalone",
+  "theme_color": "#1e3a5f",
+  "background_color": "#f8f9fa",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["business", "finance", "productivity"],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

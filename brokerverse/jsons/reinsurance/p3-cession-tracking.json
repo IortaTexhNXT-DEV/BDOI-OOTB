@@ -1,0 +1,108 @@
+{
+  "feature_id": "P3",
+  "feature_name": "Cession Tracking",
+  "description": "Track and manage policy cessions to reinsurers with detailed allocation and reporting",
+  "implementation_priority": "HIGH",
+  "screens": [
+    {
+      "name": "Cession Dashboard",
+      "path": "/reinsurance/cessions",
+      "purpose": "Monitor all cessions across treaties",
+      "features": [
+        "Real-time cession tracking",
+        "Treaty utilization overview",
+        "Pending confirmations",
+        "Exception alerts",
+        "Quick actions menu"
+      ]
+    },
+    {
+      "name": "Cession Processing",
+      "path": "/reinsurance/cession/process",
+      "purpose": "Process new cessions and modifications",
+      "features": [
+        "Automatic treaty allocation",
+        "Manual override capability",
+        "Multi-treaty distribution",
+        "Facultative placement option",
+        "Validation and warnings"
+      ]
+    },
+    {
+      "name": "Bordereau Generation",
+      "path": "/reinsurance/bordereau",
+      "purpose": "Generate premium and claims bordereaux",
+      "features": [
+        "Monthly/quarterly bordereau creation",
+        "Multiple format support (Excel, PDF)",
+        "Automatic data compilation",
+        "Reinsurer-specific formats",
+        "Electronic submission"
+      ]
+    }
+  ],
+  "cession_workflow": [
+    {
+      "step": 1,
+      "action": "Policy Underwriting",
+      "description": "New policy or renewal created"
+    },
+    {
+      "step": 2,
+      "action": "Treaty Evaluation",
+      "description": "System checks applicable treaties"
+    },
+    {
+      "step": 3,
+      "action": "Cession Calculation",
+      "description": "Calculate cession percentage and premium"
+    },
+    {
+      "step": 4,
+      "action": "Allocation",
+      "description": "Allocate to treaty or facultative"
+    },
+    {
+      "step": 5,
+      "action": "Confirmation",
+      "description": "Send to reinsurer for confirmation"
+    },
+    {
+      "step": 6,
+      "action": "Accounting",
+      "description": "Update financial records"
+    }
+  ],
+  "tracking_metrics": [
+    "Cession ratio by line of business",
+    "Treaty utilization percentage",
+    "Facultative placement rate",
+    "Average confirmation time",
+    "Premium ceded vs retained",
+    "Commission earned"
+  ],
+  "philippines_specific": [
+    "NRCP mandatory cessions",
+    "Catastrophe accumulation tracking",
+    "Local reinsurer preferences",
+    "IC reporting requirements",
+    "PHP and USD dual currency support"
+  ],
+  "bordereau_types": [
+    {
+      "type": "Premium Bordereau",
+      "frequency": "Monthly",
+      "contents": ["Policy details", "Premium amounts", "Commission", "Cession percentage"]
+    },
+    {
+      "type": "Claims Bordereau",
+      "frequency": "Quarterly",
+      "contents": ["Claim details", "Loss amounts", "Recovery status", "Reserve updates"]
+    },
+    {
+      "type": "Cash Call",
+      "frequency": "As needed",
+      "contents": ["Large loss notifications", "Immediate funding requests"]
+    }
+  ]
+}

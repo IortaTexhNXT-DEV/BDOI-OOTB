@@ -1,0 +1,1 @@
+export { ReinsuranceAnalytics as default } from '../ReinsuranceScreens';

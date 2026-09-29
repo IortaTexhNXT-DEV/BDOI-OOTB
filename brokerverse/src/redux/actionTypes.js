@@ -1,0 +1,524 @@
+export const LOGIN = "login/LOGIN";
+export const LOGOUT = "login/LOGOUT";
+export const GET_JOURNAL_VOUCHER = "journalvoucher/GET_JOURNAL_VOUCHER";
+export const GET_PAYMENT_VOUCHER = "journalvoucher/GET_PAYMENT_VOUCHER";
+
+export const GET_PETTY_CASH_VOUCHER_INITIAT_TABLE =
+  "pettycashinitiat/GET_PETTY_CASH_VOUCHER_INITIAT_TABLE";
+export const GET_PETTY_CASH_VOUCHER_INITIAT_SEARCH =
+  "pettycashinitiat/GET_PETTY_CASH_VOUCHER_INITIAT_SEARCH";
+export const POST_PETTY_CASH_VOUCHER_INITIAT =
+  "pettycashinitiat/POST_PETTY_CASH_VOUCHER_INITIAT";
+export const GET_PETTY_CASH_VOUCHER_INITIAT_VIEW =
+  "pettycashinitiat/GET_PETTY_CASH_VOUCHER_INITIAT_VIEW";
+
+export const GET_DISBURSMENT_VOUCHER_LIST =
+  "pettyCashDisbursment/GET_DISBURSMENT_VOUCHER_LIST";
+export const GET_DISBURSMENT_VOUCHER_SEARCH =
+  "pettyCashDisbursment/GET_DISBURSMENT_VOUCHER_SEARCH";
+export const POST_ADD_DISBURSMENT_VOUCHER =
+  "pettycashDisbursment/POST_ADD_DISBURSMENT_VOUCHER";
+export const GET_ADD_DISBURSMENT_TABLE_VOUCHER =
+  "pettycashDisbursment/GET_ADD_DISBURSMENT_TABLE_VOUCHER";
+export const GET_ADD_DISBURSMENT_REQUEST_TABLE_VOUCHER =
+  "pettycashDisbursment/GET_ADD_DISBURSMENT_REQUEST_TABLE_VOUCHER";
+export const POST_EDIT_DISBURSMENT_VOUCHER =
+  "pettycashDisbursment/POST_EDIT_DISBURSMENT_VOUCHER";
+export const GET_VIEW_DISBURSMENT_VOUCHER =
+  "pettycashDisbursment/GET_VIEW_DISBURSMENT_VOUCHER";
+export const GET_DISBURSMENT_REQUEST_PATCH_DATA =
+  "pettycashDisbursment/GET_DISBURSMENT_REQUEST_PATCH_DATA";
+export const POST_DISBURSMENT_REQUEST_PATCH_DATA =
+  "pettycashDisbursment/POST_DISBURSMENT_REQUEST_PATCH_DATA";
+export const POST_DISBURSMENT_REQUEST =
+  "pettycashDisbursment/POST_DISBURSMENT_REQUEST";
+export const GET_DISBURSMENT_VIEW_DATA =
+  "pettycashDisbursment/GET_DISBURSMENT_VIEW_DATA";
+
+export const GET_REQUEST_VOUCHER_LIST =
+  "pettyCashrequest/GET_REQUEST_VOUCHER_LIST";
+export const GET_REQUEST_VOUCHER_SEARCH =
+  "pettyCashrequest/GET_REQUEST_VOUCHER_SEARCH";
+export const POST_ADD_REQUEST_VOUCHER =
+  "pettyCashrequest/POST_ADD_REQUEST_VOUCHER";
+export const GET_ADD_REQUEST_TABLE_VOUCHER =
+  "pettyCashrequest/GET_ADD_REQUEST_TABLE_VOUCHER";
+export const POST_EDIT_REQUEST_VOUCHER =
+  "pettyCashrequest/POST_EDIT_REQUEST_VOUCHER";
+
+export const GET_RECEIPT_VOUCHER_LIST =
+  "pettyCashReceipt/GET_RECEIPT_VOUCHER_LIST";
+export const GET_RECEIPT_VOUCHER_SEARCH =
+  "pettyCashReceipt/GET_RECEIPT_VOUCHER_SEARCH";
+export const POST_ADD_RECEIPT_VOUCHER =
+  "pettyCashReceipt/POST_ADD_RECEIPT_VOUCHER";
+export const GET_ADD_RECEIPT_TABLE_VOUCHER =
+  "pettyCashReceipt/GET_ADD_RECEIPT_TABLE_VOUCHER";
+export const GET_VIEW_RECEIPT_VOUCHER =
+  "pettyCashReceipt/GET_VIEW_RECEIPT_VOUCHER";
+
+export const GET_REPLENISH_VOUCHER_LIST =
+  "pettyCashReplenish/GET_REPLENISH_VOUCHER_LIST";
+export const GET_REPLENISH_VOUCHER_SEARCH =
+  "pettyCashReplenish/GET_REPLENISH_VOUCHER_SEARCH";
+export const POST_ADD_REPLENISH_VOUCHER =
+  "pettyCashReplenish/POST_ADD_REPLENISH_VOUCHER";
+export const GET_ADD_REPLENISH_TABLE_VOUCHER =
+  "pettyCashReplenish/GET_ADD_REPLENISH_TABLE_VOUCHER";
+export const GET_VIEW_REPLENISH_VOUCHER =
+  "pettyCashReplenish/GET_VIEW_REPLENISH_VOUCHER";
+
+export const GET_PAYMENT_VOUCHER_BY_ID =
+  "journalvoucher/GET_PAYMENT_VOUCHER_BY_ID";
+// export const GET_COMMISSION="commission/GET_COMMISSION";
+// export const GET_TAXATION="taxation/GET_TAXATION";
+// export const GET_SUB__ACCOUNT="subaccount/GET_SUB__ACCOUNT";
+// export const POST_ADD_PETTY_CASH="pettycash/POST_ADD_PETTY_CASH";
+// export const GET_JOURNAL_VOUCHER = "journalvoucher/GET_JOURNAL_VOUCHER";
+export const GET_POST_TABEL_JOURNAL_VOUCHER =
+  "journalvoucher/GET_POST_TABEL_JOURNAL_VOUCHER";
+
+// export const GET_PAYMENT_VOUCHER = "journalvoucher/GET_PAYMENT_VOUCHER";
+// export const GET_PAYMENT_VOUCHER_BY_ID =
+//   "journalvoucher/GET_PAYMENT_VOUCHER_BY_ID";
+export const PATCH_PAYMENT_STATUS_BY_ID =
+  "paymentvoucher/PATCH_PAYMENT_STATUS_BY_ID";
+export const POST_PAYMENT_VOUCHER_CREATE_DATA =
+  "paymentvoucher/POST_PAYMENT_VOUCHER_CREATE_DATA";
+export const GET_CHECK_BOOK_DETAILS = "paymentvoucher/GET_CHECK_BOOK_DETAILS";
+export const GET_PAYMENT_CHECKBOK_DETAILS =
+  "paymentvoucher/GET_PAYMENT_CHECKBOK_DETAILS";
+export const PATCH_INVOICE_LIST_DETAILS =
+  "paymentvoucher/GET_PAYMENT_CHECKBOK_DETAILS";
+export const SEARCH_PAYMENT_VOUCHER = "paymentvoucher/SEARCH_PAYMENT_VOCHER";
+export const FILTER_PAYMENT_VOUCHER = "paymentvoucher/FILTER_PAYMENT_VOUCHER";
+
+export const GET_COMMISSION = "commission/GET_COMMISSION";
+export const GET_TAXATION = "taxation/GET_TAXATION";
+export const GET_SUB__ACCOUNT = "subaccount/GET_SUB__ACCOUNT";
+export const POST_ADD_PETTY_CASH = "pettycash/POST_ADD_PETTY_CASH";
+
+export const GET_COMMISSION_BY_ID = "commission/GET_COMMISSION_BY_ID";
+export const GET_COMMISSION_SEARCH_LIST =
+  "commission/GET_COMMISSION_SEARCH_LIST";
+export const POST_COMMISSION = "commission/POST_COMMISSION";
+export const GET_COMMISSION_VIEW = "commission/GET_COMMISSION_VIEW";
+export const PATCH_COMMISSION_EDIT = "commission/PATCH_COMMISSION_EDIT";
+export const GET_PATCH_COMMISSION_EDIT = "commission/GET_PATCH_COMMISSION_EDIT";
+export const GET_COMMISSION_SHARING = "commission/GET_COMMISSION_SHARING";
+export const POST_ADD_SHARINGRATE_COMMISSION =
+  "commission/POST_ADD_SHARINGRATE_COMMISSION";
+export const GET_PATCH_COMMISSION_EDIT_POPUP =
+  "commission/GET_PATCH_COMMISSION_EDIT_POPUP";
+export const ADD_LEVEL_PATCH_COMMISSION_EDIT_POPUP =
+  "commission/ADD_LEVEL_PATCH_COMMISSION_EDIT_POPUP";
+export const GET_COMMISSION_POPUP_VIEW = "commission/GET_COMMISSION_POPUP_VIEW";
+
+export const GET_TAXATION_BY_ID = "taxation/GET_TAXATION_BY_ID";
+export const GET_TAXATION_SEARCH_LIST = "taxation/GET_TAXATION_SEARCH_LIST";
+export const POST_TAXATION = "taxation/POST_TAXATION";
+export const GET_TAXATION_VIEW = "taxation/GET_TAXATION_VIEW";
+export const PATCH_TAXATION_EDIT = "taxation/PATCH_TAXATION_EDIT";
+export const GET_PATCH_TAXATION_EDIT = "taxation/GET_PATCH_TAXATION_EDIT";
+
+export const GET_PETTY_CASH_BY_ID = "pettycash/GET_PETTY_CASH_BY_ID";
+export const GET_PETTY_CASH_SEARCH_LIST =
+  "pettycash/GET_PETTY_CASH_SEARCH_LIST";
+export const POST_PETTY_CASH = "pettycash/POST_PETTY_CASH";
+export const GET_PETTY_CASH_VIEW = "pettycash/GET_PETTY_CASH_VIEW";
+export const PATCH_PETTY_CASH_EDIT = "pettycash/PATCH_PETTY_CASH_EDIT";
+export const GET_PATCH_PETTY_CASH_EDIT = "pettycash/GET_PATCH_PETTY_CASH_EDIT";
+export const GET_SUB__ACCOUNT_BY_ID = "subaccount/GET_SUB__ACCOUNT_BY_ID";
+
+export const GET_TRANSACTION_CODE_LIST =
+  "transaction/GET_TRANSACTION_CODE_LIST";
+export const GET_TRANSACTION_CODE_LIST_SEARCH =
+  "transaction/GET_TRANSACTION_CODE_LIST_SEARCH";
+export const POST_STATUS = "transaction/POST_STATUS";
+export const POST_ADD_TRANSACTION = "transaction/POST_ADD_TRANSACTION";
+export const GET_TRANSACTION_CODE_SETUP =
+  "transaction/GET_TRANSACTION_CODE_SETUP";
+export const GET_USER_GROUP_ACCESS = "transaction/GET_USER_GROUP_ACCESS";
+export const POST_ADD_TRANSACTION_CODE_SETUP =
+  "transaction/POST_TRANSACTION_CODE_SETUP";
+export const POST_ADD_USER_GROUP_ACCESS = "transaction/POST_USER_GROUP_ACCESS";
+export const GET_TRANSACTION_CODE_DETAILS_VIEW =
+  "transaction/GET_TRANSACTION_CODE_DETAILS_VIEW";
+export const PATCH_TRANSACTION_CODE_DETAILS_EDIT =
+  "transaction/PATCH_TRANSACTION_CODE_DETAILS_EDIT";
+export const GET_PATCH_TRANSACTION_EDIT =
+  "transaction/GET_PATCH_TRANSACTION_EDIT";
+export const GET_PATCH_USER_ACCESS = "transaction/GET_PATCH_USER_ACCESS";
+export const POST_PATCH_USER_ACCESS = "transaction/POST_PATCH_USER_ACCESS";
+export const GET_CURRENCY_LIST = "currency/GET_CURRENCY_LIST";
+export const GET_CURRENCY_SEARCH_LIST = "currency/GET_CURRENCY_SEARCH_LIST";
+export const POST_CURRENCY_STATUS = "currency/POST_CURRENCY_STATUS";
+export const GET_CURRENCY_DETAIL_VIEW = "currency/GET_CURRENCY_DETAIL_VIEW";
+export const POST_ADD_CURRENCY = "currency/POST_ADD_CURRENCY";
+export const PATCH_CURRENCY_DETAIL_EDIT = "currency/PATCH_CURRENCY_DETAIL_EDIT";
+export const GET_CURRENCY_DETAIL_EDIT = "currency/GET_CURRENCY_DETAIL_EDIT";
+
+export const GET_EXCHANGE_LIST = "exchange/GET_EXCHANGE_LIST";
+export const GET_EXCHANGE_SEARCH_LIST = "exchange/GET_EXCHANGE_SEARCH_LIST";
+export const POST_EXCHANGE_STATUS = "exchange/POST_EXCHANGE_STATUS";
+export const GET_EXCHANGE_DETAIL_VIEW = "exchange/GET_EXCHANGE_DETAIL_VIEW";
+export const GET_ADD_EXCHANGE = "exchange/GET_ADD_EXCHANGE";
+export const PATCH_EXCHANGE_DETAIL_EDIT = "exchange/PATCH_EXCHANGE_DETAIL_EDIT";
+export const GET_EXCHANGE_EDIT = "exchange/GET_EXCHANGE_EDIT";
+
+export const GET_BANK_LIST = "bank/GET_BANK_LIST";
+export const GET_BANK_SEARCH_LIST = "bank/GET_BANK_SEARCH_LIST";
+export const POST_BANK_STATUS = "bank/POST_BANK_STATUS";
+export const POST_ADD_BANK = "bank/POST_ADD_BANK";
+export const GET_BANK_DETAIL_VIEW = "bank/GET_BANK_DETAIL_VIEW";
+export const GET_ADD_BANK = "bank/GET_ADD_BANK";
+export const PATCH_BANK_DETAIL_EDIT = "bank/PATCH_BANK_DETAIL_EDIT";
+export const POST_ADD_ACCOUNT_DETAILS = "bank/POST_ADD_ACCOUNT_DETAILS";
+export const GET_ADD_VIEW = "bank/GET_ADD_VIEW";
+export const GET_Account_PATCH_VIEW = "bank/GET_Account_PATCH_VIEW";
+export const GET_PATCH_VIEW = "bank/GET_PATCH_VIEW";
+export const GET_CHEQUE_LIST = "bank/GET_CHEQUE_LIST";
+export const POST_CHEQUE_DATA = "bank/POST_CHEQUE_DATA";
+export const GET_CHEQUE_EDIT_DATA = "bank/GET_CHEQUE_EDIT_DATA";
+export const POST_CHEQUE_EDIT_DATA = "bank/POST_CHEQUE_EDIT_DATA";
+export const GET_ACCOUNT_DETAILS_SEARCH_LIST =
+  "bank/GET_ACCOUNT_DETAILS_SEARCH_LIST";
+
+export const GET_ACCOUNT_CATEGORY_LIST =
+  "accountCategory/GET_ACCOUNT_CATEGORY_LIST";
+export const GET_ACCOUNT_CATEGORY_SEARCH_LIST =
+  "accountCategory/GET_ACCOUNT_CATEGORY_SEARCH_LIST";
+export const POST_ACCOUNT_CATEGORY_STATUS =
+  "accountCategory/POST_ACCOUNT_CATEGORY_STATUS";
+export const GET_ACCOUNT_CATEGORY_DETAIL_VIEW =
+  "accountCategory/GET_ACCOUNT_CATEGORY_DETAIL_VIEW";
+export const GET_ADD_ACCOUNT_CATEGORY =
+  "accountCategory/GET_ADD_ACCOUNT_CATEGORY";
+export const GET_ACCOUNT_CATEGORY_DETAIL_EDIT =
+  "accountCategory/GET_ACCOUNT_CATEGORY_DETAIL_EDIT";
+export const PATCH_ACCOUNT_CATEGORY_DETAIL_EDIT =
+  "accountCategory/PATCH_ACCOUNT_CATEGORY_DETAIL_EDIT";
+
+export const GET_MAIN_ACCOUNT_LIST = "mainAccout/GET_MAIN_ACCOUNT_LIST";
+export const GET_MAIN_ACCOUNT_SEARCH_LIST =
+  "mainAccout/GET_MAIN_ACCOUNT_SEARCH_LIST";
+export const POST_MAIN_ACCOUNT_STATUS = "mainAccout/POST_MAIN_ACCOUNT_STATUS";
+export const GET_MAIN_ACCOUNT_DETAIL_VIEW =
+  "mainAccout/GET_MAIN_ACCOUNT_DETAIL_VIEW";
+export const GET_ADD_MAIN_ACCOUNT = "mainAccout/GET_ADD_MAIN_ACCOUNT";
+export const PATCH_MAIN_ACCOUNT_DETAIL_EDIT =
+  "mainAccout/PATCH_MAIN_ACCOUNT_DETAIL_EDIT";
+export const GET_MAIN_ACCOUNT_VIEW = "mainAccout/GET_MAIN_ACCOUNT_VIEW";
+export const GET_PATCH_MAIN_ACCOUNT_DETAIL_EDIT =
+  "mainAccout/GET_PATCH_MAIN_ACCOUNT_DETAIL_EDIT";
+export const GET_SUB_ACCOUNT_SEARCH_LIST =
+  "subaccount/GET_SUB_ACCOUNT_SEARCH_LIST";
+export const POST_SUB__ACCOUNT = "subaccount/POST_SUB__ACCOUNT";
+export const GET_SUB__ACCOUNT_VIEW = "subaccount/GET_SUB__ACCOUNT_VIEW";
+export const PATCH_SUB__ACCOUNT_EDIT = "subaccount/PATCH_SUB__ACCOUNT_EDIT";
+export const GET_PATCH_SUB_ACCOUNT_EDIT =
+  "subaccount/GET_PATCH_SUB_ACCOUNT_EDIT";
+
+export const GET_RECEIPT_DETAILS = "receipts/GET_RECEIPT_DETAILS";
+export const GET_RECEIPT_SEARCH = "receipts/GET_RECEIPT_SEARCH";
+export const GET_RECEIPT_FILTER = "receipts/GET_RECEIPT_FILTER";
+export const GET_PAYMENT_DETAILS = "receipts/GET_PAYMENT_DETAILS";
+export const GET_DRAFT_RECEIPTS = "receipts/GET_DRAFT_RECEIPTS";
+
+export const GET_RECEIPT_DETAILS_BY_ID = "receipts/GET_RECEIPT_DETAILS_BY_ID";
+export const GET_RECEIPT_BY_ID = "receipts/GET_RECEIPT_BY_ID";
+export const GET_RECEIVABLE_TABLE = "receipts/GET_RECEIVABLE_TABLE";
+export const POST_ADD_RECEIPTS = "receipts/POST_ADD_RECEIPTS";
+export const POST_PAYMENT_DETAILS = "receipts/POST_PAYMENT_DETAILS";
+export const PATCH_RECEIPT_EDIT = "receipts/PATCH_RECEIPT_EDIT";
+export const POST_CREATE_RECEIPT = "receipts/POST_CREATE_RECEIPT";
+export const UPDATE_RECEIPT = "receipts/UPDATE_RECEIPT";
+
+export const GET_JOURNAL_VOUCHER_BY_ID =
+  "journalvoucher/GET_JOURNAL_VOUCHER_BY_ID";
+export const GET_JOURNAL_VOUCHER_SEARCH_LIST =
+  "journalvoucher/GET_JOURNAL_VOUCHER_SEARCH_LIST";
+export const POST_JOURNAL_VOUCHER = "journalvoucher/POST_JOURNAL_VOUCHER";
+export const POST_ADD_JOURNAL_VOUCHER =
+  "journalvoucher/POST_ADD_JOURNAL_VOUCHER";
+export const POST_APPROVE_JOURNAL_VOUCHER =
+  "journalvoucher/POST_APPROVE_JOURNAL_VOUCHER";
+export const GET_JOURNAL_VOUCHER_VIEW =
+  "journalvoucher/GET_JOURNAL_VOUCHER_VIEW";
+export const PATCH_JOURNAL_VOUCHER_EDIT =
+  "journalvoucher/PATCH_JOURNAL_VOUCHER_EDIT";
+export const DELETE_JOURNAL_VOUCHER = "journalvoucher/DELETE_JOURNAL_VOUCHER";
+export const GET_JOURNAL_VOUCHER_HISTORY = "journalvoucher/GET_JOURNAL_VOUCHER_HISTORY";
+export const GET_JOURNAL_VOUCHER_DETAILS = "journalvoucher/GET_JOURNAL_VOUCHER_DETAILS";
+
+export const GET_CORRECTION_JV_LIST = "correction/GET_CORRECTION_JV_LIST";
+export const POST_CORRECTION_JV = "correction/POST_CORRECTION_JV";
+export const GET_CORRECTION_JV_VIEW = "correction/GET_CORRECTION_JV_VIEW";
+export const PATCH_CORRECTION_JV_EDIT = "correction/PATCH_CORRECTION_JV_EDIT";
+export const GET_PATCH_CORRECTION_JV_EDIT =
+  "correction/GET_PATCH_CORRECTION_JV_EDIT";
+
+export const GET_REVERSAL_JV_LIST = "reversal/GET_REVERSAL_JV_LIST";
+export const POST_REVERSAL_JV = "reversal/POST_REVERSAL_JV";
+export const GET_REVERSAL_JV_VIEW = "reversal/GET_REVERSAL_JV_VIEW";
+export const PATCH_REVERSAL_JV_EDIT = "reversal/PATCH_REVERSAL_JV_EDIT";
+export const GET_DESIGNATION_DETAILS = "designation/GET_DESIGNATION_DETAILS";
+export const GET_DESIGNATION_BY_ID = "designation/GET_DESIGNATION_BY_ID";
+export const POST_ADD_DESIGNATION = "designation/POST_ADD_DESIGNATION";
+export const PATCH_DESIGNATION_EDIT = "designation/PATCH_DESIGNATION_EDIT";
+export const GET_SERACH_DESIGANTION = "designation/GET_SERACH_DESIGANTION";
+export const GET_DESIGNATION_VIEW = "designation/GET_DESIGNATION_VIEW";
+export const GET_DESIGNATION_EDIT = "designation/GET_DESIGNATION_EDIT";
+
+export const GET_EMPLOYEE_DETAILS = "employee/GET_EMPLOYEE_DETAILS";
+export const GET_EMPLOYEE_BY_ID = "employee/GET_EMPLOYEE_BY_ID";
+export const POST_ADD_EMPLOYEE = "employee/POST_ADD_EMPLOYEE";
+export const PATCH_EMPLOYEE_EDIT = "employee/PATCH_EMPLOYEE_EDIT";
+export const GET_SERACH_EMPLOYEE = "employee/GET_SERACH_EMPLOYEE";
+export const GET_VIEW_EMPLOYEE = "employee/GET_VIEW_EMPLOYEE";
+export const GET_EDIT_EMPLOYEE = "employee/GET_EDIT_EMPLOYEE";
+
+export const GET_HIERARCHY_DETAILS = "hierarchy/GET_HIERARCHY_DETAILS";
+export const GET_HIERARCHY_BY_ID = "hierarchy/GET_HIERARCHY_BY_ID";
+export const POST_ADD_HIERARCHY = "hierarchy/POST_ADD_HIERARCHY";
+export const PATCH_HIERARCHY_EDIT = "hierarchy/PATCH_HIERARCHY_EDIT";
+export const GET_SERACH_HIERARCHY = "hierarchy/GET_SERACH_HIERARCHY";
+export const GET_HIERARCHY_VIEW_DETAILS =
+  "hierarchy/GET_HIERARCHY_VIEW_DETAILS";
+export const GET_HIERARCHY_PATCH_DETAILS =
+  "hierarchy/GET_HIERARCHY_PATCH_DETAILS";
+
+export const GET_ROLE_DETAILS = "role/GET_ROLE_DETAILS";
+export const GET_ROLE_BY_ID = "role/GET_ROLE_BY_ID";
+export const POST_ADD_ROLE = "role/POST_ADD_ROLE";
+export const PATCH_ROLE_EDIT = "role/PATCH_ROLE_EDIT";
+export const GET_SERACH_ROLE = "role/GET_SERACH_ROLE";
+export const GET_VIEW_ROLE = "role/GET_VIEW_ROLE";
+export const GET_PATCH_ROLE = "role/GET_PATCH_ROLE";
+
+export const GET_USER_DETAILS = "user/GET_USER_DETAILS";
+export const GET_USER_BY_ID = "user/GET_USER_BY_ID";
+export const POST_ADD_USER = "user/POST_ADD_USER";
+export const PATCH_USER_EDIT = "user/PATCH_USER_EDIT";
+export const GET_SERACH_USER = "user/GET_SERACH_USER";
+export const GET_ADD_BRANCH_USER = "user/GET_SERACH_ROLE";
+export const GET_USER_DATA_VIEW = "user/GET_USER_DATA_VIEW";
+export const GET_USER_DATA_EDIT = "user/GET_USER_DATA_EDIT";
+export const GET_MAIN_BRANCH_ACCESS_VIEW = "user/GET_MAIN_BRANCH_ACCESS_VIEW";
+export const GET_MAIN_BRANCH_VIEW = "user/GET_MAIN_BRANCH_VIEW";
+export const POST_MAIN_BRANCH_VIEW = "user/POST_MAIN_BRANCH_VIEW";
+export const GET_ADDITIONAL_ROLE_TABEL = "user/GET_ADDITIONAL_ROLE_TABEL";
+export const GET_ADDITIONAL_ROLE_VIEW = "user/GET_ADDITIONAL_ROLE_VIEW";
+export const POST_ADDITIONAL_ROLE = "user/POST_ADDITIONAL_ROLE";
+
+export const GET_BRANCH_DETAILS = "branch/GET_BRANCH_DETAILS";
+export const GET_BRANCH_BY_ID = "branch/GET_BRANCH_BY_ID";
+export const POST_ADD_BRANCH = "branch/POST_ADD_BRANCH";
+export const PATCH_BRANCH_EDIT = "branch/PATCH_BRANCH_EDIT";
+export const GET_SERACH_BRANCH = "branch/GET_SERACH_BRANCH";
+export const GET_ORGANIZATION_BRANCH_VIEW =
+  "branch/GET_ORGANIZATION_BRANCH_VIEW";
+export const GET_DEPARTMENT_LUST_DETAILS = "branch/GET_DEPARTMENT_LUST_DETAILS";
+export const POST_ADD_DEPARTMENT = "branch/POST_ADD_DEPARTMENT";
+export const GET_DEPARTMENT_VIEW = "branch/GET_DEPARTMENT_VIEW";
+export const GET_PATCH_BRANCH_EDIT = "branch/GET_PATCH_BRANCH_EDIT";
+export const POST_PATCH_DEPARTMENT_EDIT = "branch/POST_PATCH_DEPARTMENT_EDIT";
+export const GET_PATCH_DEPARTMENT_EDIT = "branch/GET_PATCH_DEPARTMENT_EDIT";
+
+export const GET_COMPANY_DETAILS = "company/GET_COMPANY_DETAILS";
+export const GET_COMPANY_BY_ID = "company/GET_COMPANY_BY_ID";
+export const POST_ADD_COMPANY = "company/POST_ADD_COMPANY";
+export const PATCH_COMPANY_EDIT = "company/PATCH_COMPANY_EDIT";
+export const GET_SERACH_COMPANY = "company/GET_SERACH_COMPANY";
+export const GET_COMPANY_VIEW = "company/GET_COMPANY_VIEW";
+export const GET_COMPANY_EDIT = "company/GET_COMPANY_EDIT";
+
+export const GET_CITY_DETAILS = "city/GET_CITY_DETAILS";
+export const GET_CITY_BY_ID = "city/GET_CITY_BY_ID";
+export const POST_ADD_CITY = "city/POST_ADD_CITY";
+export const PATCH_CITY_EDIT = "city/PATCH_CITY_EDIT";
+export const GET_SERACH_CITY = "city/GET_SERACH_CITY";
+
+export const GET_STATE_DETAILS = "state/GET_STATE_DETAILS";
+export const GET_STATE_BY_ID = "state/GET_STATE_BY_ID";
+export const POST_ADD_STATE = "state/POST_ADD_STATE";
+export const PATCH_STATE_EDIT = "state/PATCH_STATE_EDIT";
+export const GET_SERACH_STATE = "state/GET_SERACH_STATE";
+
+export const GET_COUNTRY_DETAILS = "country/GET_COUNTRY_DETAILS";
+export const GET_COUNTRY_BY_ID = "country/GET_COUNTRY_BY_ID";
+export const POST_ADD_COUNTRY = "country/POST_ADD_COUNTRY";
+export const PATCH_COUNTRY_EDIT = "country/PATCH_COUNTRY_EDIT";
+export const GET_SERACH_COUNTRY = "country/GET_SERACH_COUNTRY";
+
+export const GET_INSURANCE_COMPANY_SEARCH_LIST =
+  "insurancecompany/GET_INSURANCE_COMPANY_SEARCH_LIST";
+export const GET_INSURANCE_COMPANY_LIST =
+  "insurancecompany/GET_INSURANCE_COMPANY_LIST";
+export const POST_INSURANCE_COMPANY_DATA =
+  "insurancecompany/POST_INSURANCE_COMPANY_DATA";
+export const PATCH_INSURANCE_COMPANY_DATA =
+  "insurancecompany/PATCH_INSURANCE_COMPANY_DATA";
+export const GET_INSURANCE_VIEW = "insurancecompany/GET_INSURANCE_VIEW";
+export const GET_INSURANCE_PATCH_DATA =
+  "insurancecompany/GET_INSURANCE_PATCH_DATA";
+
+export const GET_INSURANCE_LIST_OF_BUSINESS_SEARCH_LIST =
+  "insurancecompany/ GET_INSURANCE_LIST_OF_BUSINESS_SEARCH_LIST";
+export const GET_INSURANCE_LIST_OF_BUSINESS_LIST =
+  "insurancecompany/GET_INSURANCE_LIST_OF_BUSINESS_LIST";
+export const POST_INSURANCE_LIST_OF_BUSINESS_DATA =
+  "insurancecompany/POST_INSURANCE_LIST_OF_BUSINESS_DATA";
+export const PATCH_INSURANCE_LIST_OF_BUSINESS_DATA =
+  "insurancecompany/PATCH_INSURANCE_LIST_OF_BUSINESS_DATA";
+
+export const GET_INSURANCE_PRODUCT_SEARCH_LIST =
+  "insurancecompany/GET_INSURANCE_PRODUCT_SEARCH_LIST";
+export const GET_INSURANCE_PRODUCT_LIST =
+  "insurancecompany/GET_INSURANCE_PRODUCT_LIST";
+export const POST_INSURANCE_PRODUCT_DATA =
+  "insurancecompany/POST_INSURANCE_PRODUCT_DATA";
+export const PATCH_INSURANCE_PRODUCT_DATA =
+  "insurancecompany/PATCH_INSURANCE_PRODUCT_DATA";
+
+export const GET_INSURANCE_POLICY_TYPE_SEARCH_LIST =
+  "insurancecompany/GET_INSURANCE_POLICY_TYPE_SEARCH_LIST";
+export const GET_INSURANCE_POLICY_TYPE_LIST =
+  "insurancecompany/GET_INSURANCE_POLICY_TYPE_LIST";
+export const POST_INSURANCE_POLICY_TYPE_DATA =
+  "insurancecompany/POST_INSURANCE_POLICY_TYPE_DATA";
+export const PATCH_INSURANCE_POLICY_TYPE_DATA =
+  "insurancecompany/PATCH_INSURANCE_POLICY_TYPE_DATA";
+
+export const GET_INSURANCE_COVER_SEARCH_LIST =
+  "insurancecompany/GET_INSURANCE_COVER_SEARCH_LIST";
+export const GET_INSURANCE_COVER_LIST =
+  "insurancecompany/GET_INSURANCE_COVER_LIST";
+export const POST_INSURANCE_COVER_DATA =
+  "insurancecompany/POST_INSURANCE_COVER_DATA";
+export const PATCH_INSURANCE_COVER_DATA =
+  "insurancecompany/PATCH_INSURANCE_COVER_DATA";
+
+export const GET_INSURANCE_SIGNATORIES_SEARCH_LIST =
+  "insurancecompany/GET_INSURANCE_SIGNATORIES_SEARCH_LIST";
+export const GET_INSURANCE_SIGNATORIES_LIST =
+  "insurancecompany/GET_INSURANCE_SIGNATORIES_LIST";
+export const POST_INSURANCE_SIGNATORIES_DATA =
+  "insurancecompany/POST_INSURANCE_SIGNATORIES_DATA";
+export const PATCH_INSURANCE_SIGNATORIES_DATA =
+  "insurancecompany/PATCH_INSURANCE_SIGNATORIES_DATA";
+
+export const GET_INSURANCE_VEHICLE_SEARCH_LIST =
+  "insurancecompany/GET_INSURANCE_VEHICLE_SEARCH_LIST";
+export const GET_INSURANCE_VEHICLE_LIST =
+  "insurancecompany/GET_INSURANCE_VEHICLE_LIST";
+export const POST_INSURANCE_VEHICLE_DATA =
+  "insurancecompany/POST_INSURANCE_VEHICLE_DATA";
+export const PATCH_INSURANCE_VEHICLE_DATA =
+  "insurancecompany/PATCH_INSURANCE_VEHICLE_DATA";
+///AGENT MODULE///
+
+//lead (Agent Module)
+
+export const POST_CREATELEAD_DATA = "leadcreatedata/POST_CREATELEAD_DATA";
+export const POST_FIRE_CREATELEAD_DATA = "leadcreatedata/POST_FIRE_CREATELEAD_DATA";
+export const GET_LEAD_LIST_DATA = "leadtabledata/GET_LEAD_LIST_DATA";
+export const GET_LEADTABLE_DATA = "leadtabledata/GET_LEADTABLE_DATA";
+export const PATCH_LEADEDIT_DATA = "leadeditdata/PATCH_LEADEDIT_DATA";
+export const GET_LEAD_EDIT_DATA = "leadeditdata/GET_LEAD_EDIT_DATA";
+export const DELETE_LEAD_DATA = "leaddeletedata/DELETE_LEAD_DATA";
+export const GET_LEAD_STATS = "leadstats/GET_LEAD_STATS";
+export const GET_PAYMENTTABLE_DATA = "paymenttabledata/GET_PAYMENTTABLE_DATA";
+export const GET_PAYMENTTABLE_PENDING_DATA =
+  "paymenttabledata/GET_PAYMENTTABLE_PENDING_DATA";
+export const GET_PAYMENTTABLE_REWING_DATA =
+  "paymenttabledata/GET_PAYMENTTABLE_REWING_DATA";
+export const POST_PAYMENT_DATA = "paymentcreatedata/POST_PAYMENT_DATA";
+export const GET_PAYMENT_SEARCH = "paymentcreatedata/GET_PAYMENT_SEARCH";
+export const GET_PAYMENT_PAID_SEARCH =
+  "paymentcreatedata/GET_PAYMENT_PAID_SEARCH";
+export const GET_PAYMENT_PENDING_SEARCH =
+  "paymentcreatedata/GET_PAYMENT_PENDING_SEARCH";
+export const POST_INFORMATION_DATA = "customerdata/POST_INFORMATION_DATA";
+export const POST_UPLOADPOLICY_DATA = "uploadpolicy/POST_UPLOADPOLICY_DATA";
+export const PATCH_INFORMATION_DATA = "patchinformation/PATCH_INFORMATION_DATA";
+
+export const GET_ENDROSEMENT_VIEW_DATA =
+  "endrosementView/GET_ENDROSEMENT_VIEW_DATA";
+
+export const POST_SETTLEMENT_CLAIM_DATA =
+  "claimsettlement/ POST_SETTLEMENT_CLAIM_DATA";
+
+//  export const  POST_SETTLEMENT_CLAIM_DATA ="claimsettlement/ POST_SETTLEMENT_CLAIM_DATA"
+
+export const GET_CLAIM_DETAILS_VIEW_DATA =
+  "claimdetails/GET_CLAIM_DETAILS_VIEW_DATA";
+export const POST_CLAIM_DETAILS_DATA = "claimdetails/POST_CLAIM_DETAILS_DATA";
+
+export const POST_SENT_MAIL_DATA = "sendmail/POST_SENT_MAIL_DATA";
+export const STORE_CLAIM_RESPONSE_DATA = "sendmail/STORE_CLAIM_RESPONSE_DATA";
+export const POST_ADJUSTER_SUBMISSION_DATA =
+  "adjustersubmission/POST_ADJUSTER_SUBMISSION_DATA";
+export const GET_CLAIM_DETAILS_DATA =
+  "adjustersubmission/GET_CLAIM_DETAILS_DATA";
+export const GET_CLAIM_DATA = "claimtabeldaya/GET_CLAIM_DATA";
+export const GET_CLAIM_DATA_SEARCH_LIST =
+  "claimtabeldataGET_CLAIM_DATA_SEARCH_LIST";
+export const GET_CLAIM_SETTLE_DATA = "claimsettlement/GET_CLAIM_SETTLE_DATA";
+export const GET_CLAIM_DOCUMENT_UPLOAD_DATA =
+  "claimdocumentupload/GET_CLAIM_DOCUMENT_UPLOAD_DATA";
+
+export const GET_POLICY_DETAILED_DATA =
+  "policydetailedview/GET_POLICY_DETAILED_DATA";
+
+export const POST_UPLOAD_ENDROSMENT = "uploadendrosemnt/POST_UPLOAD_ENDROSMENT";
+
+export const GET_QUOTETABLE_DATA = "quote/GET_QUOTETABLE_DATA";
+export const GET_QUOTE_SEARCH = "quote/GET_QUOTE_SEARCH";
+
+export const GET_ENDORSEMENT_DATA_SEARCH_LIST =
+  "endorsement/GET_ENDORSEMENT_DATA_SEARCH_LIST";
+export const GET_ENDORSEMENT_DATA = "endorsement/GET_ENDORSEMENT_DATA";
+
+export const GET_POLICY_DATA = "policy/GET_POLICY_DATA";
+export const GET_POLICY_DATA_SEARCH_LIST = "policy/GET_POLICY_DATA_SEARCH_LIST";
+
+export const GET_RENEWAL_DATA_SEARCH_LIST =
+  "renewal/GET_RENEWAL_DATA_SEARCH_LIST";
+export const GET_RENEWAL_DATA = "renewal/GET_RENEWAL_DATA";
+
+export const GET_EXPIRING_SEARCH = "expiring/GET_EXPIRING_SEARCH";
+export const GET_EXPIRINGTABLE_DATA = "expiring/GET_EXPIRINGTABLE_DATA";
+
+export const GET_QUOTEPENDINGTABLE_DATA =
+  "quotepending/GET_QUOTEPENDINGTABLE_DATA";
+export const GET_QUOTEPENDING_SEARCH = "quotepending/GET_QUOTEPENDING_SEARCH";
+
+export const GET_RENEWALREQUEST_SEARCH =
+  "renewalrequest/GET_RENEWALREQUEST_SEARCH";
+export const GET_RENEWALREQUESTTABLE_DATA =
+  "renewalrequest/GET_RENEWALREQUESTTABLE_DATA";
+export const GET_EDIT_REQUEST = "editrequest/GET_EDIT_REQUEST";
+export const POST_UPDATE_REQUEST_VOUCHER =
+  "updaterequest/POST_UPDATE_REQUEST_VOUCHER";
+export const PATCH_UPDATE_COMPANYDATA =
+  "patchupdatedata/PATCH_UPDATE_COMPANYDATA";
+
+export const CLIAM_LIST_DATA = "claims/CLIAM_LIST_DATA";
+export const CLAIM_SEARCH_DATA = "claims/CLAIM_SEARCH_DATA";
+export const POLICY_LIST_DATA = "policy/POLICY_LIST_DATA";
+export const POLICY_SEARCH_DATA = "policy/POLICY_SEARCH_DATA";
+export const POLICY_DETAILS_DATA = "policy/POLICY_DETAILS_DATA";
+export const QUOTATION_LIST_DATA = "quotation/QUOTATION_LIST_DATA";
+export const QUOTATION_SEARCH_DATA = "quotation/QUOTATION_SEARCH_DATA";
+export const GET_EDIT_PROFILE = "profile/GET_EDIT_PROFILE";
+export const GET_PROFILE_DETAILS = "profile/GET_PROFILE_DETAILS";
+export const PATCH_PROFILE_EDIT = "profile/ PATCH_PROFILE_EDIT";
+export const GET_LEAD_COMPANY_DATA = "company getdata/GET_LEAD_COMPANY_DATA";
+
+export const GET_POLICY_RENEWAL_COVERAGE =
+  "policy-renewal/GET_POLICY_RENEWAL_COVERAGE";
+export const GET_POLICY_RENEWAL_COVERAGE_SUCCESS =
+  "policy-renewal/GET_POLICY_RENEWAL_COVERAGE_SUCCESS";
+export const GET_POLICY_RENEWAL_COVERAGE_FAILURE =
+  "policy-renewal/GET_POLICY_RENEWAL_COVERAGE_FAILURE";

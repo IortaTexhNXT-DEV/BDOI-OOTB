@@ -1,0 +1,106 @@
+.endorsement__personal__detail__change__container {
+  .customer__info__main__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+
+  .before__upload__action {
+    display: grid;
+    justify-content: center;
+    padding: 24px 0;
+    gap: 4px;
+  }
+  .upload__caption {
+    color: #0072d8;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .customer__info__back__btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .icon__container {
+      display: flex;
+      align-items: center;
+    }
+    .customer__info__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .customer__info__quote__title {
+      color: #111927;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+  .customer__info__title {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 34px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+  .customer__info__subtitle {
+    color: #111927;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .back__next__btn__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .next__btn__container {
+    .p-button {
+      color: #ffffff;
+      background: #0072d8;
+      border: 1px solid #0072d8;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #ffffff;
+    }
+  }
+
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .text__area__container {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+  }
+}

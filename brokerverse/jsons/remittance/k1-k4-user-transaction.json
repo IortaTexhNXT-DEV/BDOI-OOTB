@@ -1,0 +1,900 @@
+{
+  "remittance_user_transactions": {
+    "k1_automated_remittance_execution": {
+      "featureId": "K1-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Automated Remittance Processing",
+      "screenCode": "FIN_TRN_REM_001",
+      "menuPath": "Finance > Remittance > Automated Processing > Execute",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER"],
+      "headerSection": {
+        "layout": "info-bar",
+        "fields": [
+          {
+            "label": "Current Date",
+            "value": "systemDate",
+            "type": "date",
+            "readonly": true
+          },
+          {
+            "label": "Last Run",
+            "value": "lastRunDate",
+            "type": "datetime",
+            "readonly": true
+          },
+          {
+            "label": "Pending Batches",
+            "value": "pendingCount",
+            "type": "number",
+            "readonly": true,
+            "highlight": true
+          },
+          {
+            "label": "User",
+            "value": "currentUser",
+            "type": "text",
+            "readonly": true
+          }
+        ]
+      },
+      "mainSection": {
+        "layout": "split-view",
+        "leftPanel": {
+          "title": "Scheduled Remittances",
+          "width": "60%",
+          "gridColumns": [
+            {
+              "field": "select",
+              "header": "",
+              "type": "checkbox",
+              "width": "5%"
+            },
+            {
+              "field": "scheduleCode",
+              "header": "Schedule Code",
+              "width": "15%"
+            },
+            {
+              "field": "insurerName",
+              "header": "Insurer",
+              "width": "25%"
+            },
+            {
+              "field": "scheduledDate",
+              "header": "Scheduled For",
+              "width": "15%",
+              "format": "date"
+            },
+            {
+              "field": "policyCount",
+              "header": "Policies",
+              "width": "10%",
+              "align": "center"
+            },
+            {
+              "field": "estimatedAmount",
+              "header": "Est. Amount",
+              "width": "15%",
+              "align": "right",
+              "format": "currency"
+            },
+            {
+              "field": "status",
+              "header": "Status",
+              "width": "15%",
+              "type": "status-badge",
+              "statusColors": {
+                "Ready": "green",
+                "Processing": "blue",
+                "On Hold": "orange",
+                "Error": "red"
+              }
+            }
+          ],
+          "features": {
+            "selectable": true,
+            "sortable": true,
+            "filterable": true
+          }
+        },
+        "rightPanel": {
+          "title": "Execution Details",
+          "width": "40%",
+          "sections": [
+            {
+              "sectionTitle": "Selected Summary",
+              "fields": [
+                {
+                  "fieldName": "Total Selected",
+                  "fieldId": "totalSelected",
+                  "value": "0",
+                  "readonly": true
+                },
+                {
+                  "fieldName": "Total Amount",
+                  "fieldId": "totalAmount",
+                  "value": "0.00",
+                  "format": "currency",
+                  "readonly": true
+                },
+                {
+                  "fieldName": "Total Policies",
+                  "fieldId": "totalPolicies",
+                  "value": "0",
+                  "readonly": true
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Processing Options",
+              "fields": [
+                {
+                  "fieldName": "Processing Date",
+                  "fieldId": "processingDate",
+                  "type": "date",
+                  "defaultValue": "currentDate",
+                  "required": true
+                },
+                {
+                  "fieldName": "Override Cut-off",
+                  "fieldId": "overrideCutoff",
+                  "type": "checkbox",
+                  "defaultValue": false
+                },
+                {
+                  "fieldName": "Send Notifications",
+                  "fieldId": "sendNotifications",
+                  "type": "checkbox",
+                  "defaultValue": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "actionSection": {
+        "position": "bottom-center",
+        "buttons": [
+          {
+            "label": "Validate",
+            "action": "validate",
+            "type": "secondary",
+            "icon": "check"
+          },
+          {
+            "label": "Process Selected",
+            "action": "processSelected",
+            "type": "primary",
+            "icon": "play",
+            "confirmation": true,
+            "conditional": "hasSelection"
+          },
+          {
+            "label": "Schedule for Later",
+            "action": "scheduleLater",
+            "type": "secondary",
+            "icon": "clock",
+            "conditional": "hasSelection"
+          },
+          {
+            "label": "View History",
+            "action": "viewHistory",
+            "type": "link",
+            "icon": "history"
+          }
+        ]
+      }
+    },
+    "k2_remittance_tracking": {
+      "featureId": "K2-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Remittance Tracking",
+      "screenCode": "FIN_TRN_REM_002",
+      "menuPath": "Finance > Remittance > Tracking > View Status",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER", "VIEWER"],
+      "searchSection": {
+        "layout": "horizontal",
+        "collapsible": true,
+        "fields": [
+          {
+            "fieldName": "Remittance No",
+            "fieldId": "remittanceNo",
+            "type": "text",
+            "width": "20%"
+          },
+          {
+            "fieldName": "Insurer",
+            "fieldId": "insurerCode",
+            "type": "dropdown",
+            "source": "insurerMaster",
+            "width": "20%"
+          },
+          {
+            "fieldName": "Date Range",
+            "fieldId": "dateRange",
+            "type": "date-range",
+            "defaultValue": "currentMonth",
+            "width": "25%"
+          },
+          {
+            "fieldName": "Status",
+            "fieldId": "status",
+            "type": "dropdown",
+            "options": ["All", "Draft", "Pending", "Processed", "Completed"],
+            "defaultValue": "All",
+            "width": "15%"
+          },
+          {
+            "buttons": [
+              {
+                "label": "Search",
+                "action": "search",
+                "type": "primary",
+                "icon": "search"
+              },
+              {
+                "label": "Clear",
+                "action": "clear",
+                "type": "link"
+              }
+            ],
+            "width": "20%"
+          }
+        ]
+      },
+      "dashboardCards": {
+        "layout": "horizontal",
+        "cards": [
+          {
+            "title": "Total Remittances",
+            "value": "totalCount",
+            "icon": "document",
+            "color": "blue",
+            "trend": "+5%"
+          },
+          {
+            "title": "Pending Processing",
+            "value": "pendingAmount",
+            "format": "currency",
+            "icon": "clock",
+            "color": "orange"
+          },
+          {
+            "title": "Completed Today",
+            "value": "completedToday",
+            "icon": "check",
+            "color": "green"
+          },
+          {
+            "title": "Requires Action",
+            "value": "requiresAction",
+            "icon": "alert",
+            "color": "red",
+            "clickable": true
+          }
+        ]
+      },
+      "gridSection": {
+        "title": "Remittance List",
+        "columns": [
+          {
+            "field": "remittanceNo",
+            "header": "Remittance No",
+            "width": "12%",
+            "type": "link",
+            "linkAction": "viewDetails"
+          },
+          {
+            "field": "remittanceDate",
+            "header": "Date",
+            "width": "10%",
+            "format": "date"
+          },
+          {
+            "field": "insurerCode",
+            "header": "Insurer Code",
+            "width": "10%"
+          },
+          {
+            "field": "insurerName",
+            "header": "Insurer Name",
+            "width": "18%"
+          },
+          {
+            "field": "policyCount",
+            "header": "Policies",
+            "width": "8%",
+            "align": "center"
+          },
+          {
+            "field": "grossAmount",
+            "header": "Gross Amount",
+            "width": "12%",
+            "align": "right",
+            "format": "currency"
+          },
+          {
+            "field": "commission",
+            "header": "Commission",
+            "width": "10%",
+            "align": "right",
+            "format": "currency"
+          },
+          {
+            "field": "netAmount",
+            "header": "Net Amount",
+            "width": "12%",
+            "align": "right",
+            "format": "currency",
+            "bold": true
+          },
+          {
+            "field": "status",
+            "header": "Status",
+            "width": "8%",
+            "type": "status-badge"
+          }
+        ],
+        "rowActions": [
+          {
+            "icon": "view",
+            "tooltip": "View",
+            "action": "view",
+            "always": true
+          },
+          {
+            "icon": "edit",
+            "tooltip": "Edit",
+            "action": "edit",
+            "conditional": "status=Draft"
+          },
+          {
+            "icon": "process",
+            "tooltip": "Process",
+            "action": "process",
+            "conditional": "status=Pending"
+          },
+          {
+            "icon": "print",
+            "tooltip": "Print",
+            "action": "print",
+            "always": true
+          }
+        ],
+        "features": {
+          "pagination": true,
+          "pageSize": 20,
+          "exportable": true,
+          "exportFormats": ["Excel", "PDF", "CSV"]
+        }
+      },
+      "bulkActions": {
+        "position": "above-grid",
+        "conditional": "hasSelection",
+        "actions": [
+          {
+            "label": "Process Selected",
+            "action": "bulkProcess",
+            "icon": "process",
+            "requireConfirmation": true
+          },
+          {
+            "label": "Export Selected",
+            "action": "bulkExport",
+            "icon": "download"
+          }
+        ]
+      }
+    },
+    "k3_statement_generation": {
+      "featureId": "K3-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Generate Remittance Statement",
+      "screenCode": "FIN_TRN_REM_003",
+      "menuPath": "Finance > Remittance > Statements > Generate",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER"],
+      "wizardSteps": [
+        {
+          "stepId": "selection",
+          "stepLabel": "Selection",
+          "stepNumber": 1,
+          "sections": [
+            {
+              "sectionTitle": "Statement Parameters",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Statement Type",
+                  "fieldId": "statementType",
+                  "type": "dropdown",
+                  "source": "statementTemplateMaster",
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Period",
+                  "fieldId": "period",
+                  "type": "month-picker",
+                  "required": true,
+                  "defaultValue": "previousMonth",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Insurer Selection",
+              "layout": "single-column",
+              "fields": [
+                {
+                  "fieldName": "Selection Type",
+                  "fieldId": "selectionType",
+                  "type": "radio-group",
+                  "options": [
+                    {"value": "all", "label": "All Insurers"},
+                    {"value": "specific", "label": "Select Insurers"},
+                    {"value": "group", "label": "Insurer Group"}
+                  ],
+                  "defaultValue": "all"
+                },
+                {
+                  "fieldName": "Select Insurers",
+                  "fieldId": "selectedInsurers",
+                  "type": "multiselect-grid",
+                  "source": "insurerMaster",
+                  "conditional": "selectionType=specific",
+                  "columns": ["Code", "Name", "Type"],
+                  "searchable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "stepId": "preview",
+          "stepLabel": "Preview",
+          "stepNumber": 2,
+          "sections": [
+            {
+              "sectionTitle": "Statement Preview",
+              "type": "preview-pane",
+              "previewData": {
+                "header": {
+                  "companyName": "dynamicValue",
+                  "statementPeriod": "dynamicValue",
+                  "generatedDate": "currentDate"
+                },
+                "summaryTable": {
+                  "totalPolicies": "calculated",
+                  "totalPremium": "calculated",
+                  "totalCommission": "calculated",
+                  "netAmount": "calculated"
+                },
+                "detailGrid": {
+                  "type": "sample",
+                  "rows": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "stepId": "generate",
+          "stepLabel": "Generate",
+          "stepNumber": 3,
+          "sections": [
+            {
+              "sectionTitle": "Output Options",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Output Format",
+                  "fieldId": "outputFormat",
+                  "type": "checkbox-group",
+                  "options": [
+                    {"value": "pdf", "label": "PDF", "checked": true},
+                    {"value": "excel", "label": "Excel"},
+                    {"value": "xml", "label": "XML"}
+                  ],
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Delivery Options",
+                  "fieldId": "deliveryOptions",
+                  "type": "checkbox-group",
+                  "options": [
+                    {"value": "download", "label": "Download", "checked": true},
+                    {"value": "email", "label": "Email to Insurers"},
+                    {"value": "archive", "label": "Archive"}
+                  ],
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Email Settings",
+              "conditional": "deliveryOptions.includes(email)",
+              "fields": [
+                {
+                  "fieldName": "Email Template",
+                  "fieldId": "emailTemplate",
+                  "type": "dropdown",
+                  "source": "emailTemplates",
+                  "defaultValue": "default_statement"
+                },
+                {
+                  "fieldName": "Additional Recipients",
+                  "fieldId": "additionalRecipients",
+                  "type": "tag-input",
+                  "placeholder": "Enter email addresses"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "wizardActions": {
+        "position": "bottom",
+        "buttons": [
+          {
+            "label": "Previous",
+            "action": "previousStep",
+            "type": "secondary",
+            "conditional": "currentStep>1"
+          },
+          {
+            "label": "Next",
+            "action": "nextStep",
+            "type": "primary",
+            "conditional": "currentStep<3"
+          },
+          {
+            "label": "Generate",
+            "action": "generate",
+            "type": "success",
+            "conditional": "currentStep=3",
+            "confirmation": true
+          },
+          {
+            "label": "Cancel",
+            "action": "cancel",
+            "type": "link"
+          }
+        ]
+      }
+    },
+    "k4_insurer_settlement": {
+      "featureId": "K4-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Insurer Settlement",
+      "screenCode": "FIN_TRN_REM_004",
+      "menuPath": "Finance > Remittance > Settlement > Process Settlement",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER"],
+      "headerSection": {
+        "layout": "four-column",
+        "fields": [
+          {
+            "fieldName": "Settlement No",
+            "fieldId": "settlementNo",
+            "type": "text",
+            "readonly": true,
+            "autoGenerated": true,
+            "format": "SET-{YYYY}-{00000}",
+            "width": "25%"
+          },
+          {
+            "fieldName": "Settlement Date",
+            "fieldId": "settlementDate",
+            "type": "date",
+            "required": true,
+            "defaultValue": "currentDate",
+            "width": "25%"
+          },
+          {
+            "fieldName": "Type",
+            "fieldId": "settlementType",
+            "type": "dropdown",
+            "source": "settlementParameterMaster",
+            "required": true,
+            "width": "25%"
+          },
+          {
+            "fieldName": "Status",
+            "fieldId": "status",
+            "type": "text",
+            "readonly": true,
+            "defaultValue": "Draft",
+            "statusColor": true,
+            "width": "25%"
+          }
+        ]
+      },
+      "bodySection": {
+        "tabs": [
+          {
+            "tabId": "details",
+            "tabLabel": "Settlement Details",
+            "sections": [
+              {
+                "sectionTitle": "Insurer Information",
+                "layout": "three-column",
+                "fields": [
+                  {
+                    "fieldName": "Insurer Code",
+                    "fieldId": "insurerCode",
+                    "type": "dropdown",
+                    "source": "insurerMaster",
+                    "required": true,
+                    "onChange": "loadInsurerDetails",
+                    "width": "33%"
+                  },
+                  {
+                    "fieldName": "Insurer Name",
+                    "fieldId": "insurerName",
+                    "type": "text",
+                    "readonly": true,
+                    "width": "33%"
+                  },
+                  {
+                    "fieldName": "Period",
+                    "fieldId": "settlementPeriod",
+                    "type": "date-range",
+                    "required": true,
+                    "width": "33%"
+                  }
+                ]
+              },
+              {
+                "sectionTitle": "Policy Details",
+                "type": "editable-grid",
+                "toolbar": [
+                  {
+                    "label": "Add Policies",
+                    "action": "addPolicies",
+                    "icon": "plus"
+                  },
+                  {
+                    "label": "Import",
+                    "action": "import",
+                    "icon": "upload"
+                  },
+                  {
+                    "label": "Calculate",
+                    "action": "calculate",
+                    "icon": "calculator"
+                  }
+                ],
+                "columns": [
+                  {
+                    "field": "policyNo",
+                    "header": "Policy No",
+                    "width": "12%",
+                    "editable": true,
+                    "required": true
+                  },
+                  {
+                    "field": "insuredName",
+                    "header": "Insured",
+                    "width": "18%",
+                    "readonly": true
+                  },
+                  {
+                    "field": "product",
+                    "header": "Product",
+                    "width": "10%",
+                    "readonly": true
+                  },
+                  {
+                    "field": "premium",
+                    "header": "Premium",
+                    "width": "12%",
+                    "align": "right",
+                    "editable": true,
+                    "type": "decimal"
+                  },
+                  {
+                    "field": "commissionRate",
+                    "header": "Comm %",
+                    "width": "8%",
+                    "align": "center",
+                    "editable": true,
+                    "type": "percentage"
+                  },
+                  {
+                    "field": "commission",
+                    "header": "Commission",
+                    "width": "12%",
+                    "align": "right",
+                    "readonly": true,
+                    "calculated": true
+                  },
+                  {
+                    "field": "tax",
+                    "header": "Tax",
+                    "width": "10%",
+                    "align": "right",
+                    "editable": true
+                  },
+                  {
+                    "field": "netAmount",
+                    "header": "Net Amount",
+                    "width": "13%",
+                    "align": "right",
+                    "readonly": true,
+                    "calculated": true,
+                    "bold": true
+                  },
+                  {
+                    "field": "actions",
+                    "header": "",
+                    "width": "5%",
+                    "type": "row-actions",
+                    "actions": ["delete"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tabId": "adjustments",
+            "tabLabel": "Adjustments",
+            "sections": [
+              {
+                "sectionTitle": "Adjustment Details",
+                "layout": "two-column",
+                "fields": [
+                  {
+                    "fieldName": "Previous Balance",
+                    "fieldId": "previousBalance",
+                    "type": "decimal",
+                    "readonly": true,
+                    "lookupButton": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Credit Notes",
+                    "fieldId": "creditNotes",
+                    "type": "decimal",
+                    "defaultValue": 0.00,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Debit Notes",
+                    "fieldId": "debitNotes",
+                    "type": "decimal",
+                    "defaultValue": 0.00,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Other Adjustments",
+                    "fieldId": "otherAdjustments",
+                    "type": "decimal",
+                    "defaultValue": 0.00,
+                    "width": "50%"
+                  }
+                ]
+              },
+              {
+                "sectionTitle": "Notes",
+                "fields": [
+                  {
+                    "fieldName": "Adjustment Remarks",
+                    "fieldId": "remarks",
+                    "type": "textarea",
+                    "rows": 4,
+                    "width": "100%"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tabId": "payment",
+            "tabLabel": "Payment",
+            "sections": [
+              {
+                "sectionTitle": "Payment Information",
+                "layout": "two-column",
+                "fields": [
+                  {
+                    "fieldName": "Payment Method",
+                    "fieldId": "paymentMethod",
+                    "type": "dropdown",
+                    "options": ["Bank Transfer", "Check", "NEFT", "RTGS", "Wire Transfer"],
+                    "required": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Bank Account",
+                    "fieldId": "bankAccount",
+                    "type": "dropdown",
+                    "source": "bankAccountMaster",
+                    "conditional": "paymentMethod!=Check",
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Reference No",
+                    "fieldId": "referenceNo",
+                    "type": "text",
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Payment Date",
+                    "fieldId": "paymentDate",
+                    "type": "date",
+                    "defaultValue": "currentDate",
+                    "width": "50%"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "summarySection": {
+        "title": "Settlement Summary",
+        "layout": "summary-box",
+        "fields": [
+          {
+            "label": "Total Premium",
+            "value": "totalPremium",
+            "format": "currency"
+          },
+          {
+            "label": "Total Commission",
+            "value": "totalCommission",
+            "format": "currency"
+          },
+          {
+            "label": "Total Tax",
+            "value": "totalTax",
+            "format": "currency"
+          },
+          {
+            "label": "Adjustments",
+            "value": "totalAdjustments",
+            "format": "currency"
+          },
+          {
+            "label": "Net Settlement",
+            "value": "netSettlement",
+            "format": "currency",
+            "highlight": true
+          }
+        ]
+      },
+      "actionButtons": {
+        "position": "bottom-right",
+        "buttons": [
+          {
+            "label": "Save Draft",
+            "action": "saveDraft",
+            "type": "secondary"
+          },
+          {
+            "label": "Submit for Approval",
+            "action": "submitApproval",
+            "type": "primary",
+            "conditional": "status=Draft",
+            "requireValidation": true
+          },
+          {
+            "label": "Approve",
+            "action": "approve",
+            "type": "success",
+            "conditional": "status=Pending&&hasApprovalRights"
+          },
+          {
+            "label": "Print",
+            "action": "print",
+            "type": "secondary"
+          },
+          {
+            "label": "Cancel",
+            "action": "cancel",
+            "type": "link"
+          }
+        ]
+      }
+    }
+  }
+}

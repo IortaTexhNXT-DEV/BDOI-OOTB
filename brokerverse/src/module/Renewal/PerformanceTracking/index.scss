@@ -1,0 +1,739 @@
+@import "../../../Color.scss";
+
+.container__performance__tracking__master {
+  padding: 20px;
+  min-height: calc(100vh - 60px);
+
+  .top__container {
+    padding: 0 0 20px 0;
+    margin-bottom: 20px;
+
+    .page__title {
+      font-size: 30px;
+      font-weight: 600;
+      color: #111927;
+      margin: 0 0 20px 0;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+  }
+
+  .content-container {
+    .filters-section {
+      margin-bottom: 20px;
+
+      .p-card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+        .filters-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr) auto;
+          gap: 20px;
+          align-items: flex-end;
+
+          @media (max-width: 1200px) {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+
+          .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            label {
+              font-size: 14px;
+              color: $dark-grey;
+              font-weight: 500;
+            }
+
+            .p-dropdown,
+            .p-calendar {
+              .p-inputtext {
+                padding: 10px 12px;
+                border: 1px solid $light-grey;
+                border-radius: 6px;
+
+                &:focus {
+                  outline: none;
+                  border-color: $primary-blue;
+                  box-shadow: 0 0 0 3px rgba($primary-blue, 0.1);
+                }
+              }
+            }
+
+            .p-dropdown {
+              border: 1px solid $light-grey;
+              border-radius: 6px;
+            }
+          }
+
+          .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+
+            .p-button {
+              padding: 10px 20px;
+
+              &:not(.p-button-secondary) {
+                background: $primary-blue;
+                border: none;
+
+                &:hover:enabled {
+                  background: darken($primary-blue, 10%);
+                }
+              }
+
+              &.p-button-secondary {
+                background: white;
+                color: $grey;
+                border: 1px solid $light-grey;
+
+                &:hover:enabled {
+                  background: $default-background-grey;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .kpi-overview {
+      margin-bottom: 24px;
+
+      .p-card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+        .kpi-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+
+          h3 {
+            color: $primary-blue;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+          }
+
+          .p-badge {
+            background: $primary-blue;
+            font-size: 11px;
+          }
+        }
+
+        .kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+
+          @media (max-width: 1200px) {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+
+          .kpi-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: $default-background-grey;
+            border-radius: 8px;
+
+            .kpi-visual {
+              .p-knob {
+                margin: 0;
+              }
+            }
+
+            .kpi-details {
+              flex: 1;
+
+              .kpi-category {
+                display: block;
+                font-size: 14px;
+                color: $grey;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-bottom: 8px;
+              }
+
+              .kpi-values {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .achieved {
+                  font-size: 18px;
+                  font-weight: 700;
+                  color: $dark-grey;
+                }
+
+                .target {
+                  font-size: 12px;
+                  color: $grey;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .performance-charts {
+      margin-bottom: 24px;
+
+      .p-tabview {
+        .p-tabview-nav {
+          background: transparent;
+          border-bottom: 2px solid $light-grey;
+
+          .p-tabview-nav-link {
+            border: none;
+            background: transparent;
+            color: $grey;
+            font-weight: 600;
+            padding: 16px 24px;
+
+            &:hover {
+              background: $default-background-grey;
+              color: $primary-blue;
+            }
+          }
+
+          .p-highlight {
+            .p-tabview-nav-link {
+              color: $primary-blue;
+              border-bottom: 2px solid $primary-blue;
+            }
+          }
+        }
+
+        .p-tabview-panels {
+          background: transparent;
+          padding: 20px 0;
+        }
+      }
+
+      .charts-container {
+        .trend-chart {
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+          .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+
+            h3 {
+              color: $primary-blue;
+              font-size: 18px;
+              font-weight: 600;
+              margin: 0;
+            }
+
+            .p-badge {
+              background: $primary-blue;
+              font-size: 11px;
+            }
+          }
+        }
+
+        .charts-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 20px;
+
+          @media (max-width: 1024px) {
+            grid-template-columns: 1fr;
+          }
+
+          .comparison-chart,
+          .product-chart {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+            .chart-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+
+              h3 {
+                color: $primary-blue;
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+              }
+
+              .p-badge {
+                background: $primary-blue;
+                font-size: 11px;
+              }
+            }
+          }
+
+          .leaderboard-card,
+          .product-metrics {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+            .chart-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+
+              h3 {
+                color: $primary-blue;
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+              }
+            }
+
+            .leaderboard-table,
+            .product-table {
+              .p-datatable-thead {
+                background: $default-background-grey;
+
+                th {
+                  border: none;
+                  font-weight: 600;
+                  color: $dark-grey;
+                  padding: 12px;
+                  font-size: 13px;
+                }
+              }
+
+              .p-datatable-tbody {
+                tr {
+                  &:hover {
+                    background: lighten($default-background-grey, 50%);
+                  }
+
+                  td {
+                    border: none;
+                    padding: 12px;
+                    font-size: 14px;
+
+                    .rank-cell {
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 50%;
+                      font-weight: 700;
+
+                      &.gold {
+                        background: linear-gradient(135deg, #FFD700, #FFA500);
+                        color: white;
+                      }
+
+                      &.silver {
+                        background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+                        color: white;
+                      }
+
+                      &.bronze {
+                        background: linear-gradient(135deg, #CD7F32, #B87333);
+                        color: white;
+                      }
+
+                      &.default {
+                        background: $default-background-grey;
+                        color: $grey;
+                        font-size: 12px;
+                      }
+
+                      .rank-icon {
+                        font-size: 16px;
+                      }
+                    }
+
+                    .agent-cell {
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+
+                      .agent-avatar {
+                        background: $primary-blue;
+                        color: white;
+                        font-size: 14px;
+                        font-weight: 600;
+                      }
+
+                      .agent-info {
+                        .agent-name {
+                          display: block;
+                          font-weight: 600;
+                          color: $dark-grey;
+                        }
+
+                        .agent-team {
+                          display: block;
+                          font-size: 12px;
+                          color: $grey;
+                        }
+                      }
+                    }
+
+                    .rate-cell {
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+
+                      .rate-progress {
+                        width: 60px;
+                        height: 8px;
+
+                        &.success .p-progressbar-value {
+                          background: $green;
+                        }
+
+                        &.info .p-progressbar-value {
+                          background: $primary-blue;
+                        }
+
+                        &.warning .p-progressbar-value {
+                          background: #F59E0B;
+                        }
+
+                        &.danger .p-progressbar-value {
+                          background: $dark-red;
+                        }
+                      }
+
+                      .rate-value {
+                        font-weight: 600;
+
+                        &.success {
+                          color: $green;
+                        }
+
+                        &.info {
+                          color: $primary-blue;
+                        }
+
+                        &.warning {
+                          color: #F59E0B;
+                        }
+
+                        &.danger {
+                          color: $dark-red;
+                        }
+                      }
+                    }
+
+                    .premium-cell {
+                      .premium-amount {
+                        display: block;
+                        font-weight: 600;
+                        color: $dark-grey;
+                      }
+
+                      .premium-policies {
+                        display: block;
+                        font-size: 12px;
+                        color: $grey;
+                      }
+                    }
+
+                    .product-rate-cell {
+                      text-align: center;
+
+                      .rate {
+                        display: block;
+                        font-weight: 600;
+                        color: $primary-blue;
+                      }
+
+                      .avg-premium {
+                        display: block;
+                        font-size: 11px;
+                        color: $grey;
+                      }
+                    }
+
+                    .p-tag {
+                      padding: 4px 8px;
+                      border-radius: 12px;
+                      font-size: 11px;
+                      font-weight: 600;
+
+                      &.p-tag-success {
+                        background: lighten($green, 40%);
+                        color: $green;
+                      }
+
+                      &.p-tag-warning {
+                        background: lighten(#F59E0B, 40%);
+                        color: darken(#F59E0B, 20%);
+                      }
+
+                      &.p-tag-danger {
+                        background: lighten($dark-red, 40%);
+                        color: $dark-red;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .scorecard-container {
+        .scorecard-table {
+          margin-bottom: 24px;
+
+          .p-datatable-thead {
+            background: $default-background-grey;
+
+            th {
+              border: none;
+              font-weight: 600;
+              color: $dark-grey;
+              padding: 12px;
+              font-size: 13px;
+            }
+          }
+
+          .p-datatable-tbody {
+            tr {
+              &:hover {
+                background: lighten($default-background-grey, 50%);
+              }
+
+              td {
+                border: none;
+                padding: 16px 12px;
+                font-size: 14px;
+
+                .kpi-achievement {
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+
+                  .p-progressbar {
+                    flex: 1;
+                    height: 8px;
+                    background: $light-grey;
+
+                    &.success .p-progressbar-value {
+                      background: $green;
+                    }
+
+                    &.info .p-progressbar-value {
+                      background: $primary-blue;
+                    }
+
+                    &.warning .p-progressbar-value {
+                      background: #F59E0B;
+                    }
+
+                    &.danger .p-progressbar-value {
+                      background: $dark-red;
+                    }
+                  }
+
+                  .achievement-text {
+                    font-size: 12px;
+                    color: $grey;
+                    white-space: nowrap;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .scorecard-summary {
+          .p-card {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+            .summary-header {
+              margin-bottom: 20px;
+
+              h3 {
+                color: $primary-blue;
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+              }
+            }
+
+            .summary-metrics {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 20px;
+
+              @media (max-width: 768px) {
+                grid-template-columns: 1fr;
+              }
+
+              .summary-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 16px;
+                background: $default-background-grey;
+                border-radius: 8px;
+
+                .metric-label {
+                  font-size: 12px;
+                  color: $grey;
+                  text-transform: uppercase;
+                  font-weight: 600;
+                  margin-bottom: 8px;
+                }
+
+                .metric-value {
+                  font-size: 20px;
+                  font-weight: 700;
+
+                  &.success {
+                    color: $green;
+                  }
+
+                  &.info {
+                    color: $primary-blue;
+                  }
+
+                  &.primary {
+                    color: $primary-blue;
+                  }
+
+                  &.warning {
+                    color: #F59E0B;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .performance-insights {
+      .p-card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+        .insights-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+
+          h3 {
+            color: $primary-blue;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+          }
+
+          .p-badge {
+            background: $green;
+            font-size: 11px;
+          }
+        }
+
+        .insights-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+
+          @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+          }
+
+          .insight-item {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+
+            .insight-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              flex-shrink: 0;
+
+              .pi {
+                font-size: 18px;
+                color: white;
+              }
+            }
+
+            .insight-content {
+              flex: 1;
+
+              h4 {
+                color: $dark-grey;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 8px 0;
+              }
+
+              p {
+                color: $grey;
+                font-size: 14px;
+                margin: 0;
+                line-height: 1.5;
+              }
+            }
+
+            &.positive {
+              background: lighten($green, 45%);
+              border-left-color: $green;
+
+              .insight-icon {
+                background: $green;
+              }
+            }
+
+            &.warning {
+              background: lighten(#F59E0B, 45%);
+              border-left-color: #F59E0B;
+
+              .insight-icon {
+                background: #F59E0B;
+              }
+            }
+
+            &.info {
+              background: lighten($primary-blue, 45%);
+              border-left-color: $primary-blue;
+
+              .insight-icon {
+                background: $primary-blue;
+              }
+            }
+
+            &.success {
+              background: lighten($green, 45%);
+              border-left-color: $green;
+
+              .insight-icon {
+                background: $green;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

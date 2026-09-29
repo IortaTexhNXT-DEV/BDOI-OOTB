@@ -1,0 +1,196 @@
+{
+  "features": [
+    {
+      "feature_id": "P6",
+      "feature_name": "Reinsurance Reporting",
+      "description": "Comprehensive reporting for reinsurance operations",
+      "screens": [
+        {
+          "name": "Report Center",
+          "path": "/reinsurance/reports",
+          "purpose": "Central hub for all reinsurance reports",
+          "report_types": [
+            "Treaty Performance Reports",
+            "Cession Statements",
+            "Premium Bordereaux",
+            "Claims Bordereaux",
+            "Profitability Analysis",
+            "Capacity Utilization",
+            "Recovery Status"
+          ]
+        },
+        {
+          "name": "Bordereau Generator",
+          "path": "/reinsurance/reports/bordereau",
+          "purpose": "Generate and submit bordereaux",
+          "features": [
+            "Template management",
+            "Automated data extraction",
+            "Multi-format export",
+            "Electronic submission",
+            "Submission tracking"
+          ]
+        }
+      ],
+      "standard_reports": [
+        {
+          "name": "Monthly Premium Bordereau",
+          "frequency": "Monthly",
+          "recipients": ["All treaty reinsurers"],
+          "format": ["Excel", "PDF"]
+        },
+        {
+          "name": "Quarterly Claims Report",
+          "frequency": "Quarterly",
+          "recipients": ["Treaty and facultative reinsurers"],
+          "format": ["Excel", "PDF"]
+        },
+        {
+          "name": "Annual Treaty Review",
+          "frequency": "Annual",
+          "recipients": ["Management", "Reinsurers"],
+          "format": ["PowerPoint", "PDF"]
+        }
+      ]
+    },
+    {
+      "feature_id": "P7",
+      "feature_name": "Reinsurance Reconciliation",
+      "description": "Reconcile reinsurance transactions and accounts",
+      "screens": [
+        {
+          "name": "Reconciliation Dashboard",
+          "path": "/reinsurance/reconciliation",
+          "purpose": "Monitor reconciliation status and exceptions",
+          "features": [
+            "Pending reconciliations",
+            "Exception management",
+            "Variance analysis",
+            "Auto-matching status",
+            "Manual intervention queue"
+          ]
+        },
+        {
+          "name": "Account Reconciliation",
+          "path": "/reinsurance/reconciliation/accounts",
+          "purpose": "Reconcile reinsurer statements",
+          "features": [
+            "Statement upload and parsing",
+            "Automatic matching",
+            "Variance identification",
+            "Adjustment processing",
+            "Sign-off workflow"
+          ]
+        }
+      ],
+      "reconciliation_types": [
+        {
+          "type": "Premium Reconciliation",
+          "frequency": "Monthly",
+          "tolerance": "1%",
+          "auto_match_rate": "85%"
+        },
+        {
+          "type": "Claims Reconciliation",
+          "frequency": "Quarterly",
+          "tolerance": "0.5%",
+          "auto_match_rate": "75%"
+        },
+        {
+          "type": "Commission Reconciliation",
+          "frequency": "Monthly",
+          "tolerance": "0%",
+          "auto_match_rate": "90%"
+        }
+      ]
+    },
+    {
+      "feature_id": "P8",
+      "feature_name": "Reinsurance Analytics",
+      "description": "Advanced analytics for reinsurance optimization",
+      "screens": [
+        {
+          "name": "Analytics Dashboard",
+          "path": "/reinsurance/analytics",
+          "purpose": "Executive dashboard for reinsurance metrics",
+          "widgets": [
+            "Treaty Utilization Gauge",
+            "Loss Ratio Trends",
+            "Retention Optimization",
+            "Recovery Performance",
+            "Cost-Benefit Analysis",
+            "Catastrophe Exposure"
+          ]
+        },
+        {
+          "name": "Performance Analytics",
+          "path": "/reinsurance/analytics/performance",
+          "purpose": "Detailed performance analysis",
+          "features": [
+            "Treaty profitability analysis",
+            "Line of business performance",
+            "Reinsurer comparison",
+            "Historical trend analysis",
+            "Predictive modeling"
+          ]
+        }
+      ],
+      "key_metrics": [
+        {
+          "metric": "Gross-to-Net Ratio",
+          "target": "Optimal 60-70%",
+          "calculation": "Net Premium / Gross Premium"
+        },
+        {
+          "metric": "Reinsurance Cost Ratio",
+          "target": "<30%",
+          "calculation": "RI Premium / Gross Premium"
+        },
+        {
+          "metric": "Recovery Ratio",
+          "target": ">85%",
+          "calculation": "Recovered / Claimed"
+        },
+        {
+          "metric": "Treaty ROI",
+          "target": ">15%",
+          "calculation": "(Commission + Recovery - Premium) / Premium"
+        }
+      ],
+      "analytics_features": [
+        "What-if scenario modeling",
+        "Retention optimization calculator",
+        "Catastrophe accumulation analysis",
+        "Treaty renewal recommendations",
+        "Risk concentration heatmaps"
+      ]
+    }
+  ],
+  "philippines_regulatory_reporting": [
+    {
+      "report": "IC Annual Statement - Schedule F",
+      "description": "Reinsurance transactions summary",
+      "frequency": "Annual",
+      "deadline": "March 31"
+    },
+    {
+      "report": "Quarterly Reinsurance Report",
+      "description": "Treaty utilization and recoveries",
+      "frequency": "Quarterly",
+      "deadline": "30 days after quarter end"
+    },
+    {
+      "report": "Catastrophe Event Report",
+      "description": "Major event claims and recoveries",
+      "frequency": "As needed",
+      "deadline": "Within 7 days of event"
+    }
+  ],
+  "integration_requirements": [
+    "Real-time data from Policy and Claims modules",
+    "Financial integration for accounting entries",
+    "Document management for treaty documents",
+    "Notification system for alerts and deadlines",
+    "External reinsurer portals for data exchange"
+  ]
+}

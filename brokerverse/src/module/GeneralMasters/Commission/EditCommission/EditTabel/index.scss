@@ -1,0 +1,203 @@
+.petty__cash__table__container {
+    .action__button {
+        background: transparent;
+        border: none;
+    }
+    .centercontent{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .p-datatable .p-datatable-thead > tr > th {
+        text-align: left;
+        padding: 1rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-width: 0 0 1px 0;
+        font-weight: 500;
+        color: #111927;
+        background: #f9fafb;
+        transition: box-shadow 0.2s;
+        font-size: 16px !important;
+    }
+    .p-datatable .p-datatable-tbody > tr > td {
+        text-align: left;
+        border: 1px solid #e5e7eb;
+        border-width: 0 0 1px 0;
+        font-size: 16px;
+        font-weight: 400;
+        font-family: "Nunito", Arial, sans-serif;
+        color: #111927;
+    }
+
+
+    .reversal__table__main {
+        tr {
+            height: 50px;
+        }
+
+        thead {
+            tr {
+                th {
+                    border: 0 !important;
+                }
+
+                .p-column-header-content {
+                    justify-content: center;
+
+                    .p-column-title {
+                        color: #111927;
+                        font-family: "Nunito", Arial, sans-serif;
+                        font-size: 16px;
+                        font-style: normal;
+                        font-weight: 500;
+                        line-height: normal;
+                    }
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                td {
+                    color: #111927;
+                    font-family: "Nunito", Arial, sans-serif;
+                    font-size: 16px;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: normal;
+                    text-align: center !important;
+                }
+            }
+        }
+
+        .p-paginator-first,
+        .p-paginator .p-paginator-prev,
+        .p-paginator .p-paginator-next,
+        .p-paginator .p-paginator-last {
+            background-color: transparent;
+            border: 0 none;
+            color: #2e2e2e;
+            min-width: 0.5rem;
+            height: 3rem;
+            margin: 0.143rem;
+            transition: box-shadow 0.2s;
+            border-radius: 50%;
+        }
+
+        .p-paginator-bottom {
+            border-width: 0;
+            justify-content: flex-end;
+
+            span {
+                color: #2e2e2e !important;
+                font-family: "Nunito", Arial, sans-serif;
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+            }
+
+            .table__selector {
+                padding-right: 25%;
+
+                .pagedropdown_container {
+                    border: none;
+                    margin: 0 !important;
+                }
+            }
+        }
+
+        @media only screen and (min-width: 768px) and (max-width: 991px) {
+            thead {
+                tr {
+                    th {
+                        padding: 0.5rem 0.5rem;
+                    }
+
+                    .p-column-header-content {
+                        .p-column-title {
+                            font-size: 12px;
+                        }
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    td {
+                        font-size: 12px;
+                    }
+                }
+            }
+
+            .p-paginator-bottom {
+                span {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        @media only screen and (min-width: 992px) and (max-width: 1440px) {
+            thead {
+                tr {
+                    th {
+                        padding: 0.5rem 0.5rem;
+                    }
+
+                    .p-column-header-content {
+                        .p-column-title {
+                            font-size: 14px;
+                        }
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    td {
+                        font-size: 14px;
+                    }
+                }
+            }
+
+            .p-paginator-bottom {
+                span {
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+    .p-paginator .p-paginator-first,
+    .p-paginator .p-paginator-prev,
+    .p-paginator .p-paginator-next,
+    .p-paginator .p-paginator-last {
+        background-color: transparent;
+        border: 0 none;
+        color: #2e2e2e;
+        min-width: 0.5rem;
+        height: 3rem;
+        margin: 0.143rem;
+        transition: box-shadow 0.2s;
+        border-radius: 50%;
+    }
+}
+.p-datatable .p-datatable-thead > tr > th {
+    text-align: left;
+    padding: 1rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-width: 0 0 1px 0;
+    font-weight: 500;
+    color: #111927;
+    background: #f9fafb;
+    transition: box-shadow 0.2s;
+    font-size: 16px !important;
+}
+.p-datatable .p-datatable-tbody > tr > td {
+    text-align: left;
+    border: 1px solid #e5e7eb;
+    border-width: 0 0 1px 0;
+    font-size: 16px;
+    font-weight: 400;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #111927;
+}

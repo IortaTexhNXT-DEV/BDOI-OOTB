@@ -1,0 +1,74 @@
+.risk-mapping-list,
+.risk-mapping-detail {
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  .p-datatable .p-datatable-tbody > tr.cursor-pointer:hover {
+    background: #f8fafc;
+  }
+
+  .iar-section-add-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    label {
+      margin-bottom: 0.5rem;
+    }
+
+    .p-dropdown,
+    .p-inputtext,
+    .p-inputnumber {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .p-inputnumber-input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  .iar-deferred-callout {
+    width: 100%;
+    box-sizing: border-box;
+    background: #faf6ee;
+    border: 1px solid #e8dfd0;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+
+    &__title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #8a7355;
+      margin-bottom: 0.5rem;
+    }
+
+    &__intro {
+      margin: 0 0 0.75rem;
+      color: #4b5563;
+      font-size: 0.925rem;
+      line-height: 1.45;
+    }
+
+    &__list {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #374151;
+      font-size: 0.925rem;
+      line-height: 1.5;
+
+      li + li {
+        margin-top: 0.4rem;
+      }
+
+      strong {
+        color: #1f2937;
+      }
+    }
+  }
+}

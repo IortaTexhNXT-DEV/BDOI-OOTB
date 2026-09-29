@@ -1,0 +1,73 @@
+const Productdata = [
+  {
+    id: 1,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 0,
+    action: "",
+  },
+  {
+    id: 2,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 1,
+    action: "",
+  },
+  {
+    id: 3,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 0,
+    action: "",
+  },
+  {
+    id: 4,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 1,
+    action: "",
+  },
+  {
+    id: 5,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 0,
+    action: "",
+  },
+  {
+    id: 6,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 1,
+    action: "",
+  },
+  {
+    id: 7,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 0,
+    action: "",
+  },
+  {
+    id: 8,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 1,
+    action: "",
+  },
+  {
+    id: 9,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 0,
+    action: "",
+  },
+  {
+    id: 10,
+    accountCategoryCode: "AC00123",
+    accountCategoryName: "Debtor",
+    status: 0,
+    action: "",
+  },
+];
+export default Productdata;

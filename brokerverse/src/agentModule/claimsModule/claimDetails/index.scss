@@ -1,0 +1,139 @@
+.claim__details__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .claim__details__container__titles {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+  .next_but_container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: 10px;
+  }
+
+  .claim__details__container__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .claim__details__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .claim__details__card__container__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927 !important;
+  }
+  .check__box__container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    .check__box__container__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927 !important;
+    }
+  }
+  .claim__details__card__sub__title {
+    font-size: 24px;
+    font-weight: 400;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 36px;
+    color: #111927 !important;
+  }
+
+  .co-insurance-info-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 20px 20px;
+
+    .co-insurance-info-section__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .claim__details__card__sub__title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 28px;
+      }
+    }
+
+    .co-insurance-info-icon {
+      color: #3b82f6;
+      font-size: 1rem;
+      cursor: help;
+    }
+
+    .co-insurance-info-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      &__label {
+        font-size: 14px;
+        font-weight: 400;
+        font-family: "Nunito", Arial, sans-serif;
+        line-height: 20px;
+        color: #9ca3af;
+      }
+
+      &__value {
+        font-size: 16px;
+        font-weight: 600;
+        font-family: "Nunito", Arial, sans-serif;
+        line-height: 24px;
+        color: #111927;
+      }
+    }
+
+    .co-insurance-policy-yes-pill {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 20px;
+    }
+  }
+
+  .claim__write__field {
+    width: 100%;
+    height: 266px;
+    // padding-top: 30px;
+
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 24px;
+    color: #111927;
+    border-radius: 10px;
+  }
+}

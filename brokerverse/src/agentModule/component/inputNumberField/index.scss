@@ -1,0 +1,36 @@
+@import "../inputText/index.scss";
+
+// PrimeReact InputNumber - match InputTextField height and styling
+.inputfield__container .p-inputnumber,
+.inputfield__container__changed .p-inputnumber {
+  width: 100%;
+  display: block;
+
+  .p-inputnumber-input {
+    height: 4rem;
+    padding-top: 30px;
+    width: 100% !important;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 24px;
+    color: #111927;
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+
+    &:focus {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0.1rem #e5e7eb;
+      border-color: #e5e7eb;
+    }
+  }
+}
+
+.inputfield__container__changed .p-inputnumber .p-inputnumber-input {
+  border: 1px solid #0072d8 !important;
+
+  &:focus {
+    border-color: #0072d8;
+  }
+}

@@ -1,0 +1,206 @@
+.container__system__settings {
+  .add__icon__title {
+    color: #111927;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .breadCrums__view__reversal {
+    border: none;
+    padding: 0;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #111927;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .add__icon__alighn {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+
+    .btn__container {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    .save__btn {
+      background-color: #0072d8;
+      border-color: #0072d8;
+      border-radius: 30px;
+      height: 40px;
+      min-width: 110px;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+
+      &:enabled:hover {
+        background-color: #005fb4;
+        border-color: #005fb4;
+      }
+    }
+  }
+
+  .sub__account__sub__container {
+    box-shadow: 0px 0px 20px 0px #00000014;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .main__tabel__title {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #111927;
+    text-align: left;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-family: "Nunito", Arial, sans-serif;
+      font-weight: 500;
+      color: #4b5563;
+      font-size: 0.9rem;
+    }
+
+    .p-dropdown {
+      width: 100%;
+    }
+
+    .p-inputtext:not(.hex-input) {
+      width: 100%;
+    }
+  }
+
+  .logo-preview,
+  .favicon-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+
+    img {
+      max-height: 64px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .favicon-preview img {
+    max-height: 32px;
+  }
+
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+
+    .p-colorpicker,
+    .p-colorpicker-preview {
+      flex: 0 0 auto;
+      width: 2rem !important;
+      height: 2rem !important;
+      min-width: 2rem !important;
+    }
+
+    .hex-input,
+    .p-inputtext.hex-input {
+      flex: 1 1 auto;
+      min-width: 7.5rem;
+      width: 7.5rem;
+      max-width: 10rem;
+      font-family: ui-monospace, "Cascadia Code", "Courier New", monospace;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  .hex-hint {
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    flex-shrink: 0;
+  }
+
+  .logo-preset-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .add-logo-btn {
+      background-color: #0072d8;
+      border-color: #0072d8;
+
+      &:enabled:hover {
+        background-color: #005fb4;
+        border-color: #005fb4;
+      }
+    }
+  }
+
+  .add-logo-dialog-body {
+    .field label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+      color: #4b5563;
+    }
+  }
+
+  .dialog-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .link-clear-file {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #0072d8;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: inherit;
+  }
+
+  .theme-preview {
+    min-height: 72px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+}

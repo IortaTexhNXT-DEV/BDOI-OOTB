@@ -1,0 +1,451 @@
+.container__subaccount {
+  // justify-content: center;
+  .add__icon__title__taxation {
+    color: #111927;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .empty-table-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 2%;
+    padding-bottom: 2%;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .no__data__found {
+    color: #b1b1b1;
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+  }
+
+  .breadCrums__view__reversal__taxation {
+    border: none;
+    padding: 0;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #111927;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .dropdown__add__sub {
+    width: 100%;
+    margin: 6px 0;
+    border-radius: 10px;
+    font-weight: 500 !important;
+  }
+
+  .label__sub__add {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 16px !important;
+    font-weight: 500;
+    line-height: 19px;
+    letter-spacing: 0em;
+    text-align: left;
+  }
+
+  .dropdown__container {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    margin: 10px 0px;
+  }
+
+  .dialog_fields {
+    background-color: red;
+    width: 100%;
+  }
+
+  .eye__btn {
+    color: #ffffff;
+    background: #ffff !important;
+    border: 1px solid #fff !important;
+    padding: 0.25rem 0.75rem !important;
+    font-size: 1rem !important;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+      box-shadow 0.2s;
+    border-radius: 10px !important;
+  }
+
+  .p-button:focus {
+    box-shadow: none !important;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1;
+  }
+
+  .add__icon__alighn__taxation {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+
+    .add__icon__view__taxation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #0072d8;
+      height: 40px;
+      width: 110px;
+      border-radius: 30px;
+      color: #fff;
+      font-family: "Nunito", Arial, sans-serif;
+
+      .add__icon__taxation {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        // padding-left: 10px;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+
+      .add__text__taxation {
+        color: #fff !important;
+        font-size: 16px;
+        font-weight: 500;
+        background-color: transparent;
+        border-color: transparent;
+        font-family: "Nunito", Arial, sans-serif;
+      }
+    }
+  }
+
+  .sub__account__sub__container__taxation {
+    box-shadow: 0px 0px 20px 0px #00000014;
+    border-radius: 20px;
+    margin-top: 14px;
+
+    .sort__filter__view__taxation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 0.5px solid #d1d5db !important;
+      // border-color: #0072d8 !important;
+      border-radius: 5px !important;
+    }
+
+    .sort__by__text__taxation {
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: left;
+      color: #0072d8 !important;
+    }
+
+    .input__sub__account__taxation {
+      width: 100% !important;
+      position: relative;
+    }
+  }
+
+  .main__tabel__title__taxation {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+    letter-spacing: 0em;
+    text-align: left;
+  }
+
+  .fieldvalue_container {
+    padding: 1rem 6px !important;
+  }
+
+  .addbutton_container__taxation {
+    background-color: #0072d8;
+    border-radius: 60px;
+    width: 100px !important;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+  }
+
+  .filterbutton_container__taxation {
+    display: flex;
+    // justify-content:center;
+    align-items: center;
+    margin: 16px 0px;
+    gap: 20px;
+  }
+
+  .overallfilter_container__taxation {
+    display: flex;
+    align-items: self-start;
+    justify-content: space-between;
+  }
+
+  .overallcard_container__taxation {
+    width: 1236px;
+    height: 700px;
+  }
+
+  .searchinput_left__taxation {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .searchiput_container__taxation {
+    // background-color: red;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .searchIcon__view__input__taxation {
+    display: flex;
+    // justify-content: center;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    height: 45px;
+    color: #b1b1b1;
+  }
+
+  .p-inputtext {
+    border-color: transparent;
+    height: 40px;
+  }
+
+  .p-inputtext:enabled:focus {
+    outline: 0 none;
+    outline-offset: 0;
+    box-shadow: 0 0 0 0.2rem transparent;
+    border-color: transparent;
+  }
+
+  .p-inputtext::placeholder {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
+    color: #b1b1b1;
+    margin-left: 10px;
+  }
+
+  .p-placeholder {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
+    color: #b1b1b1;
+    margin-left: 10px;
+  }
+
+  .sorbyfilter_container__taxation {
+    flex-direction: row-reverse;
+    // gap:10px;
+    height: 46px;
+    border-color: #d1d5db;
+    width: 85%;
+    margin-left: 8px;
+  }
+
+  .sort__by__text__taxation {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    color: #0072d8;
+  }
+
+  // .pagedropdown_container{
+  //     margin-right: 30%;
+  //     border-style: hidden;
+  //     background-color: #FAFAFA;
+  // }
+  .p-paginator-first,
+  .p-paginator .p-paginator-prev,
+  .p-paginator .p-paginator-next,
+  .p-paginator .p-paginator-last {
+    background-color: transparent;
+    border: 0 none;
+    color: #2e2e2e;
+    min-width: 0.5rem;
+    height: 3rem;
+    margin: 0.143rem;
+    transition: box-shadow 0.2s;
+    border-radius: 50%;
+  }
+
+  .p-paginator-bottom {
+    border-width: 0;
+    justify-content: flex-end;
+
+    span {
+      color: #2e2e2e !important;
+      font-family: "Nunito", Arial, sans-serif;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .table__selector {
+      padding-right: 30%;
+
+      .pagedropdown_container {
+        border: none;
+        margin: 0 !important;
+      }
+    }
+  }
+
+  .header_search_container__taxation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .fieldvalue_container__taxation {
+    font-size: 14px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 400;
+  }
+
+  .fieldvalue_container.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.p-multiselect {
+  display: inline-flex;
+  user-select: none;
+  cursor: pointer;
+  width: 100% !important;
+  margin-top: 8px;
+}
+
+.fieldAccountCode__container {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: "Nunito", Arial, sans-serif;
+}
+
+.add__btn {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500 !important;
+  background-color: #0072d8;
+  border-radius: 60px !important;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin: 10px;
+  font-family: "Nunito", Arial, sans-serif;
+  column-gap: 0.4rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.main_acc_text {
+  color: #111927 !important;
+
+  font-family: "Nunito", Arial, sans-serif !important;
+  font-size: 16px !important;
+
+  font-weight: 500 !important;
+}
+
+.upload__btn {
+  color: #0072d8;
+  font-size: 18px;
+  font-weight: 500 !important;
+  background-color: #fff;
+  border-radius: 60px !important;
+  // padding-right: 1rem;
+  // padding-left: 1rem;
+  // padding-top: 0.5rem;
+  // padding-bottom: 0.5rem;
+  margin: 10px;
+  font-family: "Nunito", Arial, sans-serif;
+  column-gap: 0.4rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-color: #0072d8;
+  padding: 8px 10px;
+}
+
+.btn__container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .searchIcon__view__taxation {
+    position: absolute;
+    top: 50%;
+    left: 28%;
+  }
+}
+
+@media screen and (min-width: 767px) {
+  .search__filter__view__taxation {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .sort__filter__view__taxation {
+    height: 45px;
+    width: 100px;
+  }
+
+  .searchIcon__view__taxation {
+    position: absolute;
+    top: 34%;
+    left: 28%;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .sort__filter__view__taxation {
+    height: 45px;
+    width: 150px;
+  }
+
+  .searchIcon__view__taxation {
+    position: absolute;
+    top: 37%;
+    left: 22%;
+  }
+
+  .searchIcon__view__taxation {
+    position: absolute;
+    top: 37%;
+    left: 22%;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .sort__filter__view__taxation {
+    height: 45px;
+    width: 170px;
+  }
+
+  .searchIcon__view__ {
+    position: absolute;
+    top: 29%;
+    left: 21%;
+  }
+}

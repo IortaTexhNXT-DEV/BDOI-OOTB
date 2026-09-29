@@ -1,0 +1,32 @@
+export const GET_DASHBOARD_DATA = "agent/get/GET_DASHBOARD_DATA";
+export const GET_UPCOMMING_OPEN_ITEMS_LIST =
+  "agent/get/GET_UPCOMMING_OPEN_ITEMS_LIST";
+export const POST_UPCOMMING_OPEN_ITEMS_LIST =
+  "agent/post/POST_UPCOMMING_OPEN_ITEMS_LIST";
+export const GET_CLIENTS_LIST = "agent/get/GET_CLIENTS_LIST";
+export const GET_CLIENTS_SEARCH_LIST = "agent/GET_CLIENTS_SEARCH_LIST";
+export const GET_OPEN_ITEMS = "agent/get/GET_OPEN_ITEMS";
+export const GET_CLIENT_EDIT_DATA = "agent/GET_CLIENT_EDIT_DATA";
+export const PATCH_CLIENTEDIT_DATA = "agent/PATCH_CLIENTEDIT_DATA";
+export const GET_ACTIVITY_TRACKER_CALENDER =
+  "agent/get/GET_ACTIVITY_TRACKER_CALENDER";
+export const POST_OPEN_ITEMS = "agent/post/POST_OPEN_ITEMS";
+export const GET_UPCOMING_EVENT = "agent/get/GET_UPCOMING_EVENT";
+export const GET_POLICY_EXPIRATION = "agent/get/GET_POLICY_EXPIRATION";
+export const GET_POLICY_EXPIRATION_SEARCH =
+  "agent/get/GET_POLICY_EXPIRATION_SEARCH";
+export const POST_POLICY_DETAILS = "agent/post/POST_POLICY_DETAILS";
+export const POST_COVERAGE_DETAILS = "agent/post/POST_COVERAGE_DETAILS";
+export const POST_ACCESSORIES = "agent/post/POST_ACCESSORIES";
+export const POST_ORDER_SUMMARY = "agent/post/POST_ORDER_SUMMARY";
+export const PATCH_PERSONAL_DETAILS = "agent/patch/PATCH_PERSONAL_DETAILS";
+export const GET_PERSONAL_DETAILS = "agent/get/GET_PERSONAL_DETAILS";
+export const GET_PAYMENT_SEARCH = "agent/get/GET_PAYMENT_SEARCH";
+export const GET_ENDORSEMENT_POLICY_DETAILS =
+  "endorsement/get/GET_ENDORSEMENT_POLICY_DETAILS";
+
+export const POST_POLICY_RENEWAL_COVERAGE =
+  "policy-renewal/POST_POLICY_RENEWAL_COVERAGE";
+
+export const POST_ADD_MODLE = "postdata/POST_ADD_MODLE";
+export const GET_MODLE_DETAILS = "getmodledata/GET_MODLE_DETAILS";

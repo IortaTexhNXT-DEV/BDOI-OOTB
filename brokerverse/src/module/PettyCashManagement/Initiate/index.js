@@ -1,0 +1,62 @@
+import React from "react";
+import { useTranslation } from "react-i18next";
+import "../../PettyCashManagement/index.scss";
+import { BreadCrumb } from "primereact/breadcrumb";
+import SvgDot from "../../../assets/icons/SvgDot";
+import InitiateTable from "./InitiateTable";
+import { Button } from "primereact/button";
+import SvgAdd from "../../../assets/icons/SvgAdd";
+import { useNavigate } from "react-router";
+import NavBar from "../../../components/NavBar";
+
+const Initiate = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const items = [
+    { label: t("pettyCash.pettyCashManagement"), to: "Petty Cash Management" },
+    {
+      label: t("pettyCash.pettyCashInitiate"),
+      to: "/accounts/pettycash/pettycashcodeinitiate",
+    },
+  ];
+  const Initiate = { label: t("pettyCash.accounts") };
+
+  const handleClick = () => {
+    navigate("/accounts/pettycash/pettycashcodeinitiate/initiate");
+  };
+
+  return (
+    <div className="pettycash__management">
+      <div className="grid  m-0">
+        <div className="col-12 md:col-6 lg:col-6">
+          <div className="pettycash__title">{t("pettyCash.pettyCashInitiate")}</div>
+          <div>
+            <BreadCrumb
+              model={items}
+              home={Initiate}
+              className="breadCrums"
+              separatorIcon={<SvgDot color={"#000"} />}
+            />
+          </div>
+        </div>
+        <div className="col-12 md:col-6 lg:col-6">
+          <div className="btn__container">
+            <Button
+              label={t("pettyCash.initiate")}
+              icon={<SvgAdd color={"#fff"} />}
+              className="add__btn"
+              onClick={() => {
+                handleClick();
+              }}
+            />
+          </div>
+        </div>
+      </div>
+      <div>
+        <InitiateTable />
+      </div>
+    </div>
+  );
+};
+
+export default Initiate;

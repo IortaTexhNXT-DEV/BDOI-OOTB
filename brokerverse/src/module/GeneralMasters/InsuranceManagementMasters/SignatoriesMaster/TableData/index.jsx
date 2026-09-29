@@ -1,0 +1,188 @@
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import "./index.scss";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
+import SvgEdit from "../../../../../assets/icons/SvgEdits";
+import SvgTable from "../../../../../assets/icons/SvgTable";
+import { InputSwitch } from "primereact/inputswitch";
+import ToggleButton from "../../../../../components/ToggleButton";
+import { useSelector, useDispatch } from "react-redux";
+import { useFormik } from "formik";
+import { getSearchInsuranceSignatoriesMiddleware } from "../store/insuranceSignatoriesMiddleware";
+
+const TableData = ({ navigate }) => {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const { InsuranceSignatoriesList, loading, SearchTableList } = useSelector(
+    ({ insuranceSignatoriesReducers }) => {
+      return {
+        loading: insuranceSignatoriesReducers?.loading,
+        InsuranceSignatoriesList:
+          insuranceSignatoriesReducers?.InsuranceSignatoriesList,
+        SearchTableList: insuranceSignatoriesReducers?.SearchTableList,
+      };
+    }
+  );
+
+  const emptyTableIcon = (
+    <div>
+      <div className="empty-table-icon">
+        <SvgTable />
+      </div>
+      <div className="no__data__found">No data entered</div>
+    </div>
+  );
+  const template2 = {
+    layout:
+      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
+    RowsPerPageDropdown: (options) => {
+      const dropdownOptions = [
+        { label: 5, value: 5 },
+        { label: 10, value: 10 },
+        { label: 20, value: 20 },
+        { label: 120, value: 120 },
+      ];
+
+      return (
+        <div className="table__selector">
+          <React.Fragment>
+            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
+              {t("generalMasters.rowCount")}{" "}
+            </span>
+            <Dropdown
+              value={options.value}
+              className="pagedropdown_container"
+              options={dropdownOptions}
+              onChange={options.onChange}
+            />
+          </React.Fragment>
+        </div>
+      );
+    },
+  };
+  const renderActionButton = (rowData) => {
+    return (
+      <div className="action__button__container">
+        <Button
+          icon={<SvgIconeye />}
+          onClick={() => handleView(rowData.id)}
+          className="action__button p-0"
+        />
+        <Button
+          icon={<SvgEdit />}
+          onClick={() => handleEdit(rowData.id)}
+          className="action__button p-0 w-auto"
+        />
+      </div>
+    );
+  };
+
+  const handleView = (id) => {
+    navigate(`/master/generals/insurancemanagement/signatories/view/${id}`);
+  };
+  const handleEdit = (id) => {
+    navigate(`/master/generals/insurancemanagement/signatories/edit/${id}`);
+  };
+  const handleSubmit = (values) => {
+    dispatch(
+      getSearchInsuranceSignatoriesMiddleware({ textSearch: values.search })
+    );
+  };
+  const formik = useFormik({
+    initialValues: { search: "" },
+    onSubmit: handleSubmit,
+  });
+  useEffect(() => {
+    if (formik.values.search !== "") {
+      dispatch(
+        getSearchInsuranceSignatoriesMiddleware({
+          textSearch: formik.values.search,
+        })
+      );
+    }
+  }, [formik.values.search]);
+
+  return (
+    <div className="signatories__master__table__container">
+      <div className="grid m-0 header_search_container">
+        <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
+          <span className="p-input-icon-left w-full">
+            <i className="pi pi-search" />
+            <InputText
+              placeholder="Search By Signatories Code"
+              className="searchinput__field"
+              value={formik.values.search}
+              onChange={formik.handleChange("search")}
+            />
+          </span>
+        </div>
+        <div className="p-0 col-12">
+          <div className="table__title">Signatories List</div>
+        </div>
+      </div>
+      <DataTable
+        value={
+          formik.values.search !== ""
+            ? SearchTableList
+            : InsuranceSignatoriesList
+        }
+        paginator
+        rows={5}
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        currentPageReportTemplate="{first} - {last} of {totalRecords}"
+        paginatorTemplate={template2}
+        className="reversal__table__main"
+        emptyMessage={emptyTableIcon}
+        scrollable={true}
+        scrollHeight="40vh"
+      >
+        <Column
+          field="signatoriesCode"
+          header="Signatories Code"
+          className="fieldvalue_container"
+          sortable
+          body={(rowData) => rowData.signatoriesCode?.toUpperCase()}
+        ></Column>
+        <Column
+          field="signatoryName"
+          header="Signatory Name"
+          className="fieldvalue_container"
+          body={(rowData) => rowData.signatoryName?.toUpperCase()}
+        ></Column>
+        <Column
+          field="modifiedby"
+          header="Modified by"
+          className="fieldvalue_container"
+          body={(rowData) => rowData.modifiedby?.toUpperCase()}
+        ></Column>
+        <Column
+          field="modifiedOn"
+          header="Modified On"
+          className="fieldvalue_container"
+        ></Column>
+        <Column
+          field="status"
+          header="status"
+          className="fieldvalue_container"
+          body={(columnData) => <ToggleButton id={columnData.id} />}
+        ></Column>
+        <Column
+          style={{
+            padding: "20px 1rem 17px 0px",
+          }}
+          field="id"
+          body={renderActionButton}
+          header="Action"
+          className="fieldvalue_container"
+        ></Column>
+      </DataTable>
+    </div>
+  );
+};
+
+export default TableData;

@@ -1,0 +1,101 @@
+.policy__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    margin-top: 10px;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .policy__container__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+
+  .policy__container__back__btn__container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+
+    .policy__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+
+  .policy__details__card__container {
+    .policy__details__card__container__title {
+      font-size: 34px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 51px;
+      color: #111927 !important;
+    }
+
+    .policy__details__card__container__sub__title {
+      font-size: 24px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 36px;
+      color: #111927;
+    }
+
+    .policy__details__card__sub__title {
+      font-size: 24px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 36px;
+      color: #111927;
+    }
+
+    .policy__details__card__btn__container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      margin-top: 1rem;
+      .p-button {
+        color: #ffffff;
+        background: #0072d8;
+        border: 1px solid #0072d8;
+        padding: 8px 16px 8px 16px;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 400;
+        font-family: "Nunito", Arial, sans-serif;
+        line-height: 24px;
+        color: #ffffff;
+      }
+    }
+  }
+  .heading__details_add {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+  .heading__details_text {
+    font-size: 12;
+    padding: 30;
+    color: red;
+  }
+  .heading__details_upload {
+    background-color: #0072d8;
+    display: flex;
+    gap: 14px;
+    padding: 30 !important;
+  }
+}

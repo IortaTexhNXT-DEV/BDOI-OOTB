@@ -1,0 +1,115 @@
+body .css-dip3t8 {
+    background-color:#ffffff;
+    .menu{
+        background-color:#ffffff !important;
+        // color: red !important;
+
+    }
+    .css-1tqrhto >.ps-menu-button:hover {
+        background-color: #ffffff;
+    }
+    
+.ps-open {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+  .css-ewdv3l {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+    .menu__list{
+        
+    }
+    .menu__text{
+       text-align: center !important;
+       margin-left: 4px;
+    }
+    .css-z5rm24 {
+        background-color: #ffffff;
+    }
+    /* ResponsiveDrawer.css */
+
+/* ResponsiveDrawer.css */
+
+.hamburger-icon {
+    display: none;
+    cursor: pointer;
+    padding: 10px;
+  }
+  
+  .bar {
+    width: 30px;
+    height: 3px;
+    background-color: #fff;
+    margin: 6px 0;
+  }
+  
+  /* Media query for screens with a maximum width of 768px */
+  .css-12w9als {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: "Nunito", Arial, sans-serif !important;
+}
+  
+  
+}
+@media (max-width: 768px) {
+    .hamburger-icon {
+      display: block;
+    }
+  }
+  .ps-menu-button.ps-open {
+    color: #fff !important;
+  }
+  .ps-menu-button {
+    color: #9DA4AE !important;
+  }
+  .ps-menu-button:focus-visible {
+    outline: none !important; 
+    border: none !important; 
+  }
+  // .ps-menu-button :hover{
+  //   color: #9DA4AE !important;
+  // }
+  .css-qgt4cf >.ps-menu-button:hover {
+    background-color: #ffffff !important;
+}
+  .css-11xthqp >.ps-menu-button:hover {
+    background-color: #ffffff !important;
+}
+  .css-x3jz15 > .ps-menu-button:hover {
+    background-color: #ffffff !important;
+  }
+  .css-1ffbfs > .ps-menu-button:hover {
+    background-color: #ffffff !important;
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  .css-x3jz15 >.ps-menu-button {
+    margin-left: 48px !important;
+    padding-left: 0px !important;
+  }
+  .css-1ffbfs >.ps-menu-button {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 50px;
+    -webkit-text-decoration: none;
+    text-decoration: none;
+    color: inherit;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding-right: 20px;
+    padding-left: 59px !important;
+}
