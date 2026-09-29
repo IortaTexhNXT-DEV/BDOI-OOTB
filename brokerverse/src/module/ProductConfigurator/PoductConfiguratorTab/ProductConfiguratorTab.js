@@ -5,6 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import { RadioButton } from "primereact/radiobutton";
+import MotorTariffEditor from "./MotorTariffEditor";
 
 export const VEHICLE_TYPE_OPTIONS = [
   { label: "AC and Tourist Cars", value: "ac_and_tourist_cars" },
@@ -271,7 +272,6 @@ const ProductConfiguratorTab = ({
   const {
     riskInformation = {},
     premiumRates = {},
-    ctplSetting = {},
     taxes = {},
     ratingFactor = {},
   } = selectedTemplate?.configuration;
@@ -747,19 +747,6 @@ const ProductConfiguratorTab = ({
     });
   };
 
-  const handleCTPLSettingChange = (field, value) => {
-    setSelectedTemplate({
-      ...selectedTemplate,
-      configuration: {
-        ...(selectedTemplate?.configuration || {}),
-        ctplSetting: {
-          ...(selectedTemplate?.configuration?.ctplSetting || {}),
-          [field]: value,
-        },
-      },
-    });
-  };
-
   const handleTaxesAndFeesChange = (field, value) => {
     setSelectedTemplate({
       ...selectedTemplate,
@@ -1032,24 +1019,14 @@ const ProductConfiguratorTab = ({
 
           {renderCustomFieldsForSection("premiumRates", "addOnCoverage")}
         </TabPanel>
-        <TabPanel header="CTPL setting">
-          <div className="mt-4">
-            <h4>CTPL Premium by Vehicle Type </h4>
-            <div className="formgrid grid">
-              {CTPL_PREMIUM_BY_VEHICLE_TYPE_INPUT_OPTIONS.map((option) => (
-                <div key={option.key} className="field col-12 lg:col-6">
-                  <label className={LABEL_CLASS}>{option.label}</label>
-                  <InputText
-                    className={INPUT_CLASS}
-                    value={ctplSetting[option?.key] ?? option.value}
-                    onChange={(e) => {
-                      handleCTPLSettingChange(option?.key, e.target.value);
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+        <TabPanel header="CTPL & Auto PA">
+          <MotorTariffEditor
+            configuration={selectedTemplate?.configuration || {}}
+            fallbackClasses={CTPL_PREMIUM_BY_VEHICLE_TYPE_INPUT_OPTIONS}
+            labelClass={LABEL_CLASS}
+            inputClass={INPUT_CLASS}
+            onChange={(configuration) => setSelectedTemplate({ ...selectedTemplate, configuration })}
+          />
 
           {renderCustomFieldsForSection("ctplSetting", "ctplPremium")}
         </TabPanel>

@@ -88,3 +88,31 @@ describe('Saved quotation', () => {
     expect(Number(row.premium_base)).toBe(24000 + 250);
   });
 });
+
+describe('Tariff maintained in the Product Configurator', () => {
+  const template = async () => (await pool.query("SELECT id, config FROM product_templates WHERE template_code = 'MOT-003-2025'")).rows[0];
+
+  it('refuses invalid amounts, seats and duplicate class codes', async () => {
+    const t = await template();
+    const r = await ctx.api('put', `/product-configurator/products/${t.id}`).send({ configuration: {
+      ...t.config, ctplSetting3Year: { ...t.config.ctplSetting3Year, motorcycles_tricycles: 'abc' },
+      vehicleClasses: [...t.config.vehicleClasses, { code: 'private_cars', label: 'Duplicate', seats: 2.5 }], appaSetting: { limits: [0], ratePercent: -1 } } });
+    expect(r.status).toBe(400);
+    const paths = r.body.errors.map((e) => e.path);
+    expect(paths).toEqual(expect.arrayContaining(['configuration.ctplSetting3Year.motorcycles_tricycles', `configuration.vehicleClasses.${t.config.vehicleClasses.length}.code`,
+      `configuration.vehicleClasses.${t.config.vehicleClasses.length}.seats`, 'configuration.appaSetting.ratePercent', 'configuration.appaSetting.limits']));
+  });
+
+  it('offers a 3-year CTPL and a new vehicle class once they are configured', async () => {
+    const t = await template();
+    const r = await ctx.api('put', `/product-configurator/products/${t.id}`).send({ configuration: {
+      ...t.config, ctplSetting3Year: { ...t.config.ctplSetting3Year, motorcycles_tricycles: '650.40' },
+      vehicleClasses: [...t.config.vehicleClasses, { code: 'e_trikes', label: 'E-trikes', seats: 3 }], ctplSetting: { ...t.config.ctplSetting, e_trikes: '320.40' } } });
+    expect(r.status).toBe(200);
+    const tariff = (await ctx.api('get', '/quotations/motor-tariff')).body.data;
+    expect(tariff.vehicleTypes.find((v) => v.value === 'motorcycles_tricycles').ctplPremium3Year).toBe(650.4);
+    expect(tariff.vehicleTypes.find((v) => v.value === 'e_trikes')).toMatchObject({ label: 'E-trikes', defaultSeats: 3, ctplPremium: 320.4 });
+    const m = await price(motor({ includeCTPL: true, ctplTermYears: 3, ...vehicle('motorcycles_tricycles', '2') }));
+    expect(m.body.data).toMatchObject({ ctplCoveragePremium: 650.4, ctplTermYears: 3 });
+  });
+});

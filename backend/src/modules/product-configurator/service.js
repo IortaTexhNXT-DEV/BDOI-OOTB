@@ -73,6 +73,37 @@ const TEMPLATE_FIELDS = {
 const JSON_COLS = new Set(['config', 'features', 'insurers', 'tags']);
 const NUM_COLS = new Set(['base_rate', 'min_premium', 'max_premium', 'commission_rate']);
 
+/**
+ * Motor tariff checks (vehicle classes, CTPL 1-year / 3-year amounts, Auto Passenger PA): amounts are non-negative
+ * numbers, seats whole numbers, class codes unique. A blank 3-year amount means the class has no 3-year CTPL.
+ */
+function motorTariffErrors(cfg) {
+  const errors = [];
+  const amount = (v) => v === undefined || v === null || v === '' || (Number.isFinite(Number(String(v).replace(/,/g, ''))) && Number(String(v).replace(/,/g, '')) >= 0);
+  if (cfg.vehicleClasses !== undefined) {
+    if (!Array.isArray(cfg.vehicleClasses)) errors.push({ path: 'configuration.vehicleClasses', message: 'vehicleClasses must be a list' });
+    else {
+      const codes = new Set();
+      cfg.vehicleClasses.forEach((c, i) => {
+        if (!c?.code || !/^[a-z0-9_]+$/.test(c.code)) errors.push({ path: `configuration.vehicleClasses.${i}.code`, message: 'Class code is required (lower-case letters, digits, _)' });
+        else if (codes.has(c.code)) errors.push({ path: `configuration.vehicleClasses.${i}.code`, message: `Class code ${c.code} is used twice` });
+        codes.add(c?.code);
+        if (!String(c?.label || '').trim()) errors.push({ path: `configuration.vehicleClasses.${i}.label`, message: 'Class name is required' });
+        if (c?.seats !== undefined && c.seats !== '' && !(Number.isInteger(Number(c.seats)) && Number(c.seats) > 0)) errors.push({ path: `configuration.vehicleClasses.${i}.seats`, message: 'Seats must be a whole number above 0' });
+      });
+    }
+  }
+  for (const key of ['ctplSetting', 'ctplSetting3Year']) {
+    for (const [code, v] of Object.entries(cfg[key] || {})) if (!amount(v)) errors.push({ path: `configuration.${key}.${code}`, message: 'CTPL amount must be a number of 0 or more' });
+  }
+  if (cfg.appaSetting !== undefined) {
+    const a = cfg.appaSetting || {};
+    if (!amount(a.ratePercent)) errors.push({ path: 'configuration.appaSetting.ratePercent', message: 'Auto Passenger PA rate must be a number of 0 or more' });
+    if (a.limits !== undefined && !(Array.isArray(a.limits) && a.limits.every((x) => amount(x) && Number(x) > 0))) errors.push({ path: 'configuration.appaSetting.limits', message: 'Auto Passenger PA limits must be amounts above 0' });
+  }
+  return errors;
+}
+
 async function templateValues(body, partial) {
   const errors = [];
   const required = ['templateCode', 'name', 'category', 'lineOfBusiness', 'effectiveDate', 'status'];
@@ -93,6 +124,7 @@ async function templateValues(body, partial) {
     vals[col] = JSON_COLS.has(col) ? JSON.stringify(v ?? (col === 'insurers' || col === 'tags' ? [] : {})) : v;
   }
   if (vals.effective_date && vals.expiry_date && vals.expiry_date < vals.effective_date) errors.push({ path: 'expiryDate', message: 'Expiry date must be after the effective date' });
+  if (body.configuration && typeof body.configuration === 'object') errors.push(...motorTariffErrors(body.configuration));
   if (errors.length) throw badRequest('Validation failed', errors);
   return vals;
 }

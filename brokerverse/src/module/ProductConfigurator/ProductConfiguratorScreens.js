@@ -32,7 +32,7 @@ import s3Service from "../../services/s3Service";
 import ProductConfiguratorTab from "./PoductConfiguratorTab/ProductConfiguratorTab";
 import { fetchProductTemplateByIdMiddleware } from "./store/productConfiguratorMiddleware";
 import { clearProductTemplate } from "./store/productConfiguratorSlice";
-
+import { cleanMotorTariff } from "./PoductConfiguratorTab/MotorTariffEditor";
 import { numberLocale } from "../../utility/currencyConverter";
 /** Product templates as dropdown options for attaching a component to a product. */
 const useProductOptions = () => {
@@ -303,6 +303,7 @@ export const ProductTemplateManager = () => {
       if (selectedTemplate?.id) {
         await productConfiguratorService.updateProductTemplate({
           ...selectedTemplate,
+          configuration: cleanMotorTariff(selectedTemplate.configuration),
           ...payload,
         });
       } else {
@@ -317,8 +318,16 @@ export const ProductTemplateManager = () => {
           : t("productTemplateManager.templateSaved"),
       });
       setShowDialog(false);
-      setSelectedTemplate(null);
-      dispatch(clearProductTemplate());
+      if (selectedTemplate?.id) {
+        // an update stays on the template (as saved), so the user can keep working on it
+        setSelectedTemplate({
+          ...selectedTemplate,
+          configuration: cleanMotorTariff(selectedTemplate.configuration),
+        });
+      } else {
+        setSelectedTemplate(null);
+        dispatch(clearProductTemplate());
+      }
       loadTemplates();
     } catch (error) {
       toast.current?.show({
