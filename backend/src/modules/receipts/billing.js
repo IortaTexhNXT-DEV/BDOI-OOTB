@@ -1,38 +1,19 @@
-/** Billing statements (SOA-style PDFs) for a policy, an endorsement or a renewal. */
-import { getSetting } from '../../lib/settings.js';
+/** Billing statements (PDF on the shared document engine) for a policy, an endorsement or a renewal. */
 import { notFound } from '../../lib/errors.js';
-import { makePdf, padRow } from '../accounting/lib/files.js';
-import { round2, today } from '../accounting/lib/http.js';
+import { buildPdf } from '../../lib/pdf/index.js';
+import { round2 } from '../accounting/lib/http.js';
 import { findPolicy } from './receivables.js';
+import { billingStatementDoc } from '../documents/finance.js';
+import { humanize } from '../../lib/pdf/format.js';
 
-const fmt = (n) => round2(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-async function header(policy, kind) {
-  const company = ((await getSetting('general.company_name')) ?? '');
-  const currency = await getSetting('currency.default', 'PHP');
-  return { title: `${company} – ${kind} Billing Statement`, lines: [
-    `Statement date : ${(await today())}`, `Policy number  : ${policy.policy_number}`, `Insured        : ${policy.client_name || ''} (${policy.client_code || ''})`,
-    `Insurer        : ${policy.insurer_name || ''}`, `Product        : ${policy.product_name || ''}`, `Period         : ${policy.inception_date} to ${policy.expiry_date}`,
-    `Currency       : ${policy.currency || currency}`, ''] };
-}
-
-async function receivableLines(db, policyId, sources) {
-  const rows = (await db.query('SELECT * FROM receivables WHERE policy_id = $1 AND source = ANY($2) ORDER BY created_at', [policyId, sources])).rows;
-  const w = [16, 12, 14, 14, 14, 10];
-  const out = [padRow(['Bill no.', 'Due date', 'Amount', 'Paid', 'Balance', 'Status'], w), '-'.repeat(86)];
-  for (const r of rows) out.push(padRow([r.bill_number, r.due_date, fmt(r.amount), fmt(Number(r.amount) - Number(r.balance)), fmt(r.balance), r.status], w));
-  const bal = rows.reduce((s, r) => s + Number(r.balance), 0);
-  out.push('', `Total amount due: ${fmt(bal)}`);
-  return { out, rows };
-}
+const bills = async (db, policyId, sources) => (await db.query('SELECT * FROM receivables WHERE policy_id = $1 AND source = ANY($2) ORDER BY created_at', [policyId, sources])).rows;
+const client = async (db, id) => (id ? (await db.query('SELECT * FROM clients WHERE id = $1', [id])).rows[0] || null : null);
 
 export async function policyStatement(db, policyRef) {
   const p = await findPolicy(db, policyRef);
   if (!p) throw notFound('Policy not found');
-  const h = await header(p, 'Policy');
-  const { out, rows } = await receivableLines(db, p.id, ['policy', 'receipt', 'manual']);
-  const body = rows.length ? out : [`Gross premium: ${fmt(p.premium_total)}`, 'No bills raised yet for this policy.'];
-  return { fileName: `policy-billing-statement-${p.policy_number}.pdf`, pdf: makePdf(h.title, [...h.lines, ...body]) };
+  const spec = await billingStatementDoc('Policy', { policy: p, bills: await bills(db, p.id, ['policy', 'receipt', 'manual']), client: await client(db, p.client_id) });
+  return { fileName: `policy-billing-statement-${p.policy_number}.pdf`, pdf: buildPdf(spec) };
 }
 
 async function resolveEndorsement(db, id) {
@@ -58,18 +39,20 @@ export async function endorsementPreview(db, id) {
 
 export async function endorsementStatement(db, id) {
   const { endorsement, policy } = await resolveEndorsement(db, id);
-  const h = await header(policy, 'Endorsement');
-  const { out } = await receivableLines(db, policy.id, ['endorsement']);
-  const e = endorsement ? [`Endorsement    : ${endorsement.endorsement_number || endorsement.id} (${endorsement.endorsement_type})`, `Premium change : ${fmt(endorsement.premium_delta)}`, ''] : [];
-  return { fileName: `endorsement-billing-statement-${endorsement?.endorsement_number || policy.policy_number}.pdf`, pdf: makePdf(h.title, [...h.lines, ...e, ...out]) };
+  const extra = (f) => (endorsement ? [['Endorsement no.', endorsement.endorsement_number || endorsement.id], ['Type', humanize(endorsement.endorsement_type)], ['Effective date', f.date(endorsement.effective_date)],
+    ['Premium change', f.ccy(endorsement.premium_delta, policy.currency)], ['Status', humanize(endorsement.status)]] : []);
+  const spec = await billingStatementDoc('Endorsement', { policy, bills: await bills(db, policy.id, ['endorsement']), extra, number: endorsement?.endorsement_number, client: await client(db, policy.client_id),
+    unbilled: { label: 'Premium change', amount: Number(endorsement?.premium_delta || 0) } });
+  return { fileName: `endorsement-billing-statement-${endorsement?.endorsement_number || policy.policy_number}.pdf`, pdf: buildPdf(spec) };
 }
 
 export async function renewalStatement(db, policyRef) {
   const p = await findPolicy(db, policyRef);
   if (!p) throw notFound('Policy not found');
-  const h = await header(p, 'Renewal');
   const rn = (await db.query('SELECT * FROM renewals WHERE policy_id = $1 ORDER BY created_at DESC LIMIT 1', [p.id])).rows[0];
-  const { out, rows } = await receivableLines(db, p.id, ['renewal']);
-  const r = rn ? [`Renewal due    : ${rn.due_date}`, `Current premium: ${fmt(rn.premium_old ?? p.premium_total)}`, `Renewal premium: ${fmt(rn.premium_new ?? p.premium_total)}`, ''] : [`Renewal premium: ${fmt(p.premium_total)}`, ''];
-  return { fileName: `renewal-billing-statement-${p.policy_number}.pdf`, pdf: makePdf(h.title, [...h.lines, ...r, ...(rows.length ? out : [])]) };
+  const extra = (f) => (rn ? [['Renewal due', f.date(rn.due_date)], ['Current premium', f.ccy(rn.premium_old ?? p.premium_total, p.currency)], ['Renewal premium', f.ccy(rn.premium_new ?? p.premium_total, p.currency)]]
+    : [['Renewal premium', f.ccy(p.premium_total, p.currency)]]);
+  const spec = await billingStatementDoc('Renewal', { policy: p, bills: await bills(db, p.id, ['renewal']), extra, client: await client(db, p.client_id),
+    unbilled: { label: 'Renewal premium', amount: Number(rn?.premium_new ?? p.premium_total) } });
+  return { fileName: `renewal-billing-statement-${p.policy_number}.pdf`, pdf: buildPdf(spec) };
 }

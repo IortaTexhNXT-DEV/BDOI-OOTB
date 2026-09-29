@@ -7,7 +7,7 @@ import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { many, one } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
 import { buildPdf, sendPdf } from './pdf.js';
-import { quoteDoc, policyScheduleDoc, receiptDoc } from './templates.js';
+import { quoteDoc, policyScheduleDoc, receiptDoc, printablePolicy } from './templates.js';
 import { quoteById } from '../quotations/service.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { ownRecord } from '../../lib/scope.js';
@@ -17,7 +17,8 @@ const readQuotes = [requireAuth, requirePermission('read:quotations')];
 const readPolicies = [requireAuth, requirePermission('read:policies')];
 
 const policyPdf = async (req, res) => {
-  const p = toPolicy(await getPolicyRow(req.params.id));
+  const row = await getPolicyRow(req.params.id);
+  const p = await printablePolicy(toPolicy(row), row);
   sendPdf(res, buildPdf(await policyScheduleDoc(p)), `policy-schedule-${p.policyNumber}.pdf`);
 };
 const quotePdf = async (req, res) => {

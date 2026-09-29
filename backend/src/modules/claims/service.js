@@ -13,7 +13,10 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
-import { buildPdf, renderTemplate } from './docs.js';
+import { renderTemplate } from './docs.js';
+import { companyName } from '../../lib/letterhead.js';
+import { printContext, buildPdf } from '../../lib/pdf/index.js';
+import { formatDate } from '../../lib/pdf/format.js';
 import { daysBetween, nextNumber, parseJsonField, round2, storeUpload, toBool, toDate, toNum, today, unprocessable, usersWithRole } from './util.js';
 
 export const STATUSES = ['registered', 'in-review', 'pending-approval', 'approved', 'settled', 'closed', 'rejected'];
@@ -216,18 +219,20 @@ async function notifyParties(claim, { title, message, type = 'info', extraUsers 
   }
 }
 
-async function docVars(r) {
+async function docVars(r, printFmt = null) {
   const currency = await getSetting('currency.default', 'PHP');
+  const df = printFmt || { dateFormat: (await getSetting('general.date_format', 'DD/MM/YYYY')) || 'DD/MM/YYYY' };
+  const date = (v) => (v ? formatDate(v, df) : '');
   const fmt = (n) => (n == null ? '-' : Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
   const labels = await statusLabels();
   return {
     claimNumber: r.claim_number, policyNumber: r.policy_number, insuredName: r.policy_info?.policyHolderName || r.client_name || '',
     insurerName: r.insurer_name || '', lob: r.lob || '', status: labels[r.status] || r.status,
-    lossDate: r.loss_date, lossTime: r.loss_time || '', reportedDate: r.reported_date,
+    lossDate: date(r.loss_date), lossTime: r.loss_time || '', reportedDate: date(r.reported_date),
     lossPlace: [r.loss_address, r.loss_city, r.loss_province].filter(Boolean).join(', '), lossType: r.loss_type || '',
     currency, estimate: fmt(r.estimate_amount), approvedAmount: fmt(r.approved_amount), settledAmount: fmt(r.settled_amount ?? r.settlement?.settlementAmount),
     settlementType: r.settlement?.settlementType || '', slaDays: await getSetting('claims.sla_days', 20),
-    companyName: ((await getSetting('general.company_name')) ?? ''),
+    companyName: await companyName(),
   };
 }
 
@@ -483,9 +488,49 @@ export async function claimDocument(id, documentName) {
   const templates = (await getSetting('claims.documents', {})) || {};
   const key = Object.keys(templates).find((k) => k.toLowerCase() === String(documentName).toLowerCase());
   if (!key) throw notFound(`Document "${documentName}" is not available for this claim`);
-  const vars = await docVars(row);
-  const pdf = buildPdf({ title: key, subtitle: `${vars.companyName} - generated ${await today()}`, lines: templates[key].map((l) => renderTemplate(l, vars, { html: false })) });
+  const ctx = await printContext();
+  const vars = await docVars(row, ctx.format);
+  const lines = (Array.isArray(templates[key]) ? templates[key] : String(templates[key]).split('\n')).map((l) => renderTemplate(l, vars, { html: false }));
+  const pdf = buildPdf({ ...ctx, ...claimDocSpec(key, lines, vars, ctx) });
   return { buffer: pdf, contentType: 'application/pdf', fileName: `${key}.pdf` };
+}
+
+/**
+ * A claim document from its template lines: runs of "Label: value" lines become a details grid, other lines
+ * paragraphs; a "Signature: ____" line becomes a signature block. Letters, discharge vouchers and data sheets get the
+ * signature lines they need.
+ */
+export function claimDocSpec(title, lines, vars, ctx = {}) {
+  const sections = [];
+  let rows = [];
+  let signatures = [];
+  const flush = () => { if (rows.length) sections.push({ rows, columns: rows.length > 4 ? 2 : 1 }); rows = []; };
+  for (const raw of lines) {
+    const l = String(raw).trim();
+    if (!l) { flush(); continue; }
+    if (/^signature\b/i.test(l) || /_{4,}/.test(l)) {
+      flush();
+      signatures = [...signatures, ...l.split(/\s{2,}/).map((x) => x.replace(/[:_\s]+$/g, '').replace(/_+/g, '').trim()).filter(Boolean).map((x) => (/^signature$/i.test(x) ? 'Signature over printed name' : x))];
+      continue;
+    }
+    if (/^[^:.]{2,40}:$/.test(l)) continue; // a label whose placeholder is empty
+    const m = /^([^:.]{2,40}):\s+(.+)$/.exec(l);
+    const sentence = m && m[2].split(/\s+/).length > 8 && /[.!?]$/.test(m[2]);
+    if (m && !sentence) { if (!/^([A-Z]{3}\s*)?-$/.test(m[2].trim())) rows.push([m[1], m[2]]); } else { flush(); sections.push({ text: l }); }
+  }
+  flush();
+  const company = ctx.letterhead?.name || vars.companyName || '';
+  if (/acknowledg/i.test(title)) signatures = [{ label: 'Claims Department', name: company }];
+  else if (/discharge/i.test(title)) signatures = [{ label: 'Insured / claimant', name: vars.insuredName }, { label: 'Witness' }, { label: `For ${company}`.trim() }];
+  else if (!signatures.length && /data sheet/i.test(title)) signatures = [{ label: 'Prepared by' }, { label: 'Reviewed by' }];
+  const meta = [['Claim no.', vars.claimNumber], ['Policy no.', vars.policyNumber], ['Insured', vars.insuredName], ['Insurer', vars.insurerName]].filter(([, v]) => v);
+  const isLetter = /letter/i.test(title);
+  return {
+    title, number: vars.claimNumber, dateLine: `Date ${formatDate(new Date(), ctx.format)}`,
+    meta: isLetter ? meta : [],
+    sections: [...(isLetter && vars.insuredName ? [{ text: `Dear ${vars.insuredName},` }] : []), ...sections,
+      ...(isLetter ? [{ text: `Sincerely,` }] : []), ...(signatures.length ? [{ signatures, perRow: Math.min(3, signatures.length) }] : [])],
+  };
 }
 
 // ---------------------------------------------------------------- reports

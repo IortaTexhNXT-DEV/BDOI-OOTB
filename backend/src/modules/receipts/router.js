@@ -8,7 +8,8 @@ import { ok, created } from '../../lib/respond.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { isoDate, pageParams, sendList, sendNoData } from '../accounting/lib/http.js';
-import { makePdf, padRow, storeFile } from '../accounting/lib/files.js';
+import { storeFile } from '../accounting/lib/files.js';
+import { receiptsPdf } from '../documents/finance.js';
 import { excelDate, readSheet } from '../accounting/lib/sheet.js';
 import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
@@ -63,7 +64,7 @@ define({
   handler: async (req, res) => ok(res, await svc.listOpenReceivables(pool, await withScope(req))),
 });
 define({
-  method: 'GET', path: '/printReceipt', summary: 'Print receipts (one receiptId, or customer-code and date range) to a PDF download URL', screen: `${SCREEN} > Bulk print / Print`, middleware: read,
+  method: 'GET', path: '/printReceipt', summary: 'Print official receipts, one per page (one receiptId, or customer-code and date range) to a PDF download URL', screen: `${SCREEN} > Bulk print / Print`, middleware: read,
   query: { customerCodeFrom: 'CL-2026-00001', customerCodeTo: 'CL-2026-00099', createdAtFrom: '2026-09-01', createdAtTo: '2026-09-30' },
   response: { success: true, message: 'Receipts exported', data: { url: 'http://host/api/s3/object/print/…pdf?exp=1767225600&sig=...', filename: 'receipts.pdf', count: 2 } },
   handler: async (req, res) => {
@@ -75,11 +76,7 @@ define({
       AND ($2::text IS NULL OR customer_code >= $2) AND ($3::text IS NULL OR customer_code <= $3) AND ($4::date IS NULL OR received_date >= $4) AND ($5::date IS NULL OR received_date <= $5)
       AND ${own} ORDER BY customer_code, received_date`, params)).rows;
     if (!rows.length) { sendNoData(res, 'No receipts found for the selected filters'); return; }
-    const w = [16, 14, 11, 26, 16, 13, 10];
-    const lines = [padRow(['Receipt', 'Customer', 'Date', 'Received from', 'Policy', 'Amount', 'Status'], w), '-'.repeat(112),
-      ...rows.map((r) => padRow([r.receipt_number, r.customer_code, r.received_date, r.customer_name, r.policy_number, Number(r.amount).toFixed(2), r.receipt_status], w))];
-    const title = `${((await getSetting('general.company_name')) ?? '')} – ${await getSetting('receipts.print_title', 'Official Receipts')}`;
-    const file = await storeFile(pool, { category: 'print', fileName: rows.length === 1 ? `${rows[0].receipt_number}.pdf` : 'receipts.pdf', contentType: 'application/pdf', buffer: makePdf(title, lines), entity: 'receipt', entityId: rows.length === 1 ? rows[0].id : null, userId: req.user.id });
+    const file = await storeFile(pool, { category: 'print', fileName: rows.length === 1 ? `${rows[0].receipt_number}.pdf` : 'receipts.pdf', contentType: 'application/pdf', buffer: await receiptsPdf(pool, rows), entity: 'receipt', entityId: rows.length === 1 ? rows[0].id : null, userId: req.user.id });
     ok(res, { url: file.url, filename: file.fileName, key: file.key, count: rows.length }, 'Receipts exported');
   },
 });

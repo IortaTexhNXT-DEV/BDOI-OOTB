@@ -1,6 +1,6 @@
 /**
- * Dependency-free document output used by the claims and renewals modules:
- * template rendering, a one-page text PDF, CSV and a minimal XLSX (stored ZIP of SpreadsheetML parts).
+ * Dependency-free document output used by the claims and renewals modules: template rendering, CSV and a minimal
+ * XLSX (stored ZIP of SpreadsheetML parts). PDFs are made by the shared engine in lib/pdf.
  */
 
 const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -12,42 +12,6 @@ export function renderTemplate(template, vars, { html = true } = {}) {
     if (v === undefined || v === null) return '';
     return html ? escHtml(v) : String(v);
   });
-}
-
-// ---------- PDF ----------
-const pdfText = (s) => String(s).replace(/[^\x20-\x7E]/g, '?').replace(/([\\()])/g, '\\$1');
-function wrap(line, width = 92) {
-  const out = [];
-  let cur = '';
-  for (const word of String(line).split(/\s+/)) {
-    if ((cur + ' ' + word).trim().length > width) { if (cur) out.push(cur); cur = word; } else cur = (cur + ' ' + word).trim();
-  }
-  out.push(cur);
-  return out;
-}
-
-/** Build a single-page A4 PDF with a bold title, an optional subtitle and wrapped text lines. */
-export function buildPdf({ title, subtitle = '', lines = [] }) {
-  const body = lines.flatMap((l) => (l === '' ? [''] : wrap(l))).slice(0, 60);
-  let content = `BT /F2 16 Tf 50 790 Td (${pdfText(title)}) Tj ET\n`;
-  if (subtitle) content += `BT /F1 10 Tf 50 772 Td (${pdfText(subtitle)}) Tj ET\n`;
-  let y = 740;
-  for (const l of body) { content += `BT /F1 11 Tf 50 ${y} Td (${pdfText(l)}) Tj ET\n`; y -= 16; }
-  const objects = [
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>',
-    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
-    `<< /Length ${Buffer.byteLength(content, 'latin1')} >>\nstream\n${content}endstream`,
-  ];
-  let pdf = '%PDF-1.4\n';
-  const offsets = [];
-  objects.forEach((o, i) => { offsets.push(Buffer.byteLength(pdf, 'latin1')); pdf += `${i + 1} 0 obj\n${o}\nendobj\n`; });
-  const xref = Buffer.byteLength(pdf, 'latin1');
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`;
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
-  return Buffer.from(pdf, 'latin1');
 }
 
 // ---------- CSV ----------
