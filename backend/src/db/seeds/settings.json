@@ -302,7 +302,7 @@
   },
   {
     "key": "notification.from_address",
-    "value": "no-reply@brokerverse.local",
+    "value": "BrokerVerse <connect@iortatechnxt.com>",
     "group": "notification",
     "label": "E-mail sender"
   },

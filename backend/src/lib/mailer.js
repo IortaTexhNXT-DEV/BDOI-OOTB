@@ -29,7 +29,7 @@ export async function sendQueuedEmails() {
   let sent = 0;
   for (const m of rows) {
     try {
-      await t.sendMail({ from: await getSetting('notification.from_address', 'no-reply@brokerverse.local'), to: m.to_address, cc: m.cc || undefined, subject: m.subject, html: m.body_html });
+      await t.sendMail({ from: await getSetting('notification.from_address', 'BrokerVerse <connect@iortatechnxt.com>'), to: m.to_address, cc: m.cc || undefined, subject: m.subject, html: m.body_html });
       await query('UPDATE email_outbox SET status = \'sent\', sent_at = now(), attempts = attempts + 1 WHERE id = $1', [m.id]);
       sent += 1;
     } catch (e) {

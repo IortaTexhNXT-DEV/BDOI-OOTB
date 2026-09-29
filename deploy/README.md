@@ -44,8 +44,15 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   - `ADMIN_PASSWORD`: the first password of the `BrokerVerse` administrator (must meet the password rules: 8+
     characters, upper and lower case, digit, symbol). **Do not reuse any password used during development or shared
     in chats or documents.**
-- [ ] SMTP account for e-mail (quote approval links, password reset codes, reminders): `SMTP_URL`, e.g.
-  `smtps://user:password@smtp.example.com:465`.
+- [ ] E-mail (quote approval links, password reset codes, reminders) goes through Office 365:
+  `smtp.office365.com`, port 587 with STARTTLS, mailbox `connect@iortatechnxt.com`. Set
+  `SMTP_URL=smtp://connect%40iortatechnxt.com:<mailbox-password>@smtp.office365.com:587` in the secret store (URL-encode
+  special characters in the password). In the Microsoft 365 admin centre, turn on Authenticated SMTP for that mailbox; if
+  the tenant enforces multi-factor sign-in, use an app password. The sender is `BrokerVerse <connect@iortatechnxt.com>`
+  (Master > Configuration > Notification > E-mail sender); Office 365 refuses any other sender for this mailbox.
+- [ ] After the first start, switch on "Send e-mails" (Master > Configuration > Notification) and send a test: Forgot
+  password for an administrator should deliver a reset code within a minute (Master > Schedules > E-mail outbox runs
+  every 5 minutes; "Run now" sends at once).
 
 ## 2. Backend
 
