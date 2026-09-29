@@ -13,7 +13,6 @@ import { pendingMigrations } from '../db/migrate.js';
 // before migrations and seed, ready once they are applied, and not ready again when it starts shutting down.
 let started = true;
 export const setReady = (value) => { started = Boolean(value); };
-export const isStarted = () => started;
 
 // Once every migration file is applied the answer cannot change while this process runs (files are fixed at build).
 let migrationsDone = false;

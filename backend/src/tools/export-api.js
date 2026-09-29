@@ -12,7 +12,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { config } from '../config.js';
 import { ROUTES } from '../lib/registry.js';
 import { writeXlsx } from './xlsx.js';
-import { toCsv } from './csv.js';
+import { toCsv } from '../lib/csv.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, '..', '..');

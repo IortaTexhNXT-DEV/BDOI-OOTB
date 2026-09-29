@@ -11,10 +11,10 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { today } from '../../lib/dates.js';
+import { today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { notify } from '../notifications/router.js';
-import { num, round2, renderTemplate, emailTemplate, toDate } from '../documents/common.js';
+import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { clientFromLead, createClientInTx } from '../clients/service.js';
@@ -27,7 +27,6 @@ import { getSlipRow, participantsFromOffers, riskFromSlip, assertParty, partyNam
 
 export const PLACEMENT_STATUSES = ['draft', 'sent', 'bound', 'declined', 'cancelled', 'issued'];
 const LABELS = { draft: 'Draft', sent: 'SentToInsurer', bound: 'Bound', declined: 'Declined', cancelled: 'Cancelled', issued: 'PolicyIssued' };
-const money = (v) => num(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMonth(x.getUTCMonth() + m); return x.toISOString().slice(0, 10); };
 
 const SELECT = `SELECT p.*, row_to_json(l.*) AS lead_row, c.display_name AS client_name, ic.name AS insurer_name, q.quote_number, q.status AS quote_status,
@@ -100,8 +99,8 @@ const premiumCols = (b) => ({ sum_insured: b.totalSumInsured, premium_base: b.ne
 const colsTotals = (c) => ({ sumInsured: c.sum_insured, premium: c.premium_base, taxes: taxesOf(c), premiumTotal: c.premium_total, commissionAmount: c.commission_amount });
 
 async function period(body, fallbackInception = null) {
-  const inception = toDate(body.inceptionDate || body.inception) || fallbackInception || await today();
-  const expiry = toDate(body.expiryDate || body.expiry) || addMonths(inception, Number(await getSetting('policies.default_term_months', 12)));
+  const inception = isoDate(body.inceptionDate || body.inception) || fallbackInception || await today();
+  const expiry = isoDate(body.expiryDate || body.expiry) || addMonths(inception, Number(await getSetting('policies.default_term_months', 12)));
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
   return { inception, expiry };
 }
@@ -128,7 +127,7 @@ async function fromQuote(db, body, user) {
   let parts = body.participants?.length ? await normaliseParticipants(body.participants, { db }) : await participantInputs('quote', q.id, db);
   if (!parts.length && q.insurance_company_id) parts = [{ insuranceCompanyId: q.insurance_company_id, sharePercent: 100, isLead: true, commissionRate: null, insurerReference: null }];
   if (!parts.length) throw badRequest('The quotation names no insurer: add the participating insurer(s)');
-  const { inception, expiry } = await period(body, toDate(q.doc?.inception || q.doc?.inceptionDate || q.doc?.policyStartDate));
+  const { inception, expiry } = await period(body, isoDate(q.doc?.inception || q.doc?.inceptionDate || q.doc?.policyStartDate));
   const doc = { ...(q.doc || {}), valueAddedTax: Number(q.vat), documentaryStampTax: Number(q.dst), localGovernmentTax: Number(q.lgt), fireServiceTax: Number(q.fst),
     discount: Number(q.discount), accountPremiumOthers: Number(q.others) };
   return {
@@ -258,9 +257,9 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   for (const x of p.participants.filter((r) => r.status !== 'confirmed' && (!insurerIds || insurerIds.map(Number).includes(Number(r.insuranceCompanyId))))) {
     if (!x.insurerEmail) { failed.push({ insurer: x.insuranceCompanyName, reason: 'No contact e-mail on the insurer record' }); continue; }
     const v = { companyName: company, placementNumber: p.placementNumber, insuredName: p.insuredName || '', productType: p.productType || p.lob, currency: p.currency,
-      period: `${p.inceptionDate} to ${p.expiryDate}`, sumInsured: money(p.sumInsured), insurerName: x.insuranceCompanyName, sharePercent: x.sharePercent,
-      role: x.isLead ? 'lead insurer' : 'co-insurer', shareSumInsured: money(x.sumInsured), sharePremium: money(x.premium), sharePremiumTotal: money(x.premiumTotal) };
-    const emailId = await queueEmail({ to: x.insurerEmail, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'placement_order', entity: 'placement', entityId: p.id });
+      period: `${p.inceptionDate} to ${p.expiryDate}`, sumInsured: amountText(p.sumInsured), insurerName: x.insuranceCompanyName, sharePercent: x.sharePercent,
+      role: x.isLead ? 'lead insurer' : 'co-insurer', shareSumInsured: amountText(x.sumInsured), sharePremium: amountText(x.premium), sharePremiumTotal: amountText(x.premiumTotal) };
+    const emailId = await queueEmail({ to: x.insurerEmail, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'placement_order', entity: 'placement', entityId: p.id });
     sent.push({ insurer: x.insuranceCompanyName, email: x.insurerEmail, emailId });
   }
   if (!sent.length && failed.length) throw badRequest(`No insurer could be e-mailed: ${failed.map((f) => `${f.insurer} (${f.reason})`).join('; ')}`);

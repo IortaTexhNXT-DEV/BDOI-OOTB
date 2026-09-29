@@ -314,8 +314,8 @@ export async function submitCalculation(batchId, user) {
 export async function decideCalculation(batchId, action, b, user) {
   const c = await calcRow(batchId);
   if (c.status !== 'Pending Approval') throw conflict(`Batch is ${c.status}; only batches pending approval can be ${action}d`);
-  assertChecker({ user }, c.submitted_by, 'calculation batch');
-  assertChecker({ user }, c.created_by, 'calculation batch');
+  await assertChecker(user, c.submitted_by, 'calculation batch');
+  await assertChecker(user, c.created_by, 'calculation batch');
   await withTransaction(async (tx) => {
     if (action === 'approve') {
       await tx.query('UPDATE incentive_calculations SET status = \'Approved\', approved_by = $2, approval_date = now(), updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);

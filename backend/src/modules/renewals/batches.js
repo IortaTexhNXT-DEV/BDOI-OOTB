@@ -2,10 +2,11 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { round2, toDate } from '../claims/util.js';
+import { round2 } from '../claims/util.js';
 import { enqueue, registerJobType } from './queue.js';
 import { ensureRenewal, sendNotice } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { businessDate } from '../../lib/dates.js';
 
 export const QUEUE = 'renewal-notices';
 export const JOB_TYPE = 'renewal-batch-notices';
@@ -47,8 +48,8 @@ async function policiesByCriteria(c = {}, limit) {
   const where = ['p.status IN (\'active\', \'issued\', \'expired\')', 'p.renewed_to IS NULL'];
   const params = [];
   const add = (sql, ...vals) => { let s = sql; for (const v of vals) { params.push(v); s = s.replace('?', `$${params.length}`); } where.push(s); };
-  if (c.expiryDateFrom) add('p.expiry_date >= ?::date', await toDate(c.expiryDateFrom));
-  if (c.expiryDateTo) add('p.expiry_date <= ?::date', await toDate(c.expiryDateTo));
+  if (c.expiryDateFrom) add('p.expiry_date >= ?::date', await businessDate(c.expiryDateFrom));
+  if (c.expiryDateTo) add('p.expiry_date <= ?::date', await businessDate(c.expiryDateTo));
   if (c.insuranceCompanyName) add('ic.name ILIKE ?', `%${c.insuranceCompanyName}%`);
   if (c.productType) add('(pr.name ILIKE ? OR pr.code ILIKE ? OR pr.line ILIKE ?)', `%${c.productType}%`, c.productType, c.productType);
   if (c.premiumMin != null && c.premiumMin !== '') add('p.premium_total >= ?', Number(c.premiumMin));

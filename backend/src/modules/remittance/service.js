@@ -576,7 +576,7 @@ export async function sendBill(id, b, user) {
     const currency = r.currency || (await getSetting('currency.default', 'PHP'));
     const vars = { billNumber: r.bill_number, billDate: r.remittance_date, currency, amount: round2(Number(r.net_due) + Number(r.previous_balance)).toLocaleString('en-US', { minimumFractionDigits: 2 }),
       dueDate: r.due_date, companyName: await companyName() };
-    await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.bill_email_subject'), vars), html: renderTemplate(await getSetting('remittance.bill_email_body'), vars),
+    await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.bill_email_subject'), vars, { html: false }), html: renderTemplate(await getSetting('remittance.bill_email_body'), vars),
       template: 'remittance-bill', entity: 'remittance', entityId: r.id });
   }
   await query('UPDATE remittances SET sent_at = now(), delivery_method = $2, updated_by = $3, updated_at = now() WHERE id = $1', [r.id, JSON.stringify(b.deliveryMethod || r.delivery_method || ['email']), user.id]);

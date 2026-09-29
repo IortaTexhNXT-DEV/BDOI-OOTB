@@ -210,7 +210,7 @@ define({
     const t = await emailTemplate(policy ? 'policy_issued' : 'share_quote');
     const v = { customerName: policy?.insuredName || q.lead_row?.first_name || 'Customer', quotationNumber: q.quote_number, policyNumber: policy?.policyNumber || '',
       grossPremium: Number(q.premium_total).toLocaleString('en-US', { minimumFractionDigits: 2 }), currency: q.currency, productType: q.product_type || q.lob, message: '' };
-    const id = await queueEmail({ to, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: policy ? 'policy_issued' : 'share_quote', entity: policy ? 'policy' : 'quotation', entityId: policy?.id || q.id });
+    const id = await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: policy ? 'policy_issued' : 'share_quote', entity: policy ? 'policy' : 'quotation', entityId: policy?.id || q.id });
     await audit(req, { entity: 'quotation', entityId: q.id, action: 'email-customer', after: { to, emailId: id, policyId: policy?.id } });
     res.json({ success: true, message: 'E-mail queued', data: { to, emailId: id } });
   },

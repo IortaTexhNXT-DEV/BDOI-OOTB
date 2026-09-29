@@ -55,10 +55,3 @@ export function allocate(total, weights) {
   return floor.map((c) => (sign * c) / 100);
 }
 
-/** Per-participant shares of several amounts: { key: total } -> [{ key: share }...] in participant order. */
-export function splitAmounts(parts, totals) {
-  const weights = parts.map((p) => p.share);
-  const out = parts.map(() => ({}));
-  for (const [k, v] of Object.entries(totals)) allocate(Number(v) || 0, weights).forEach((x, i) => { out[i][k] = x; });
-  return out;
-}

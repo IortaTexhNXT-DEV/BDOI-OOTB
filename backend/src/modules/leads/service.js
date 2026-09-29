@@ -2,11 +2,12 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
-import { toDate, lobOf } from '../documents/common.js';
+import { lobOf } from '../documents/common.js';
 import { pick } from '../documents/tabular.js';
 import { quoteStatusIn } from '../documents/statuses.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { isoDate } from '../../lib/dates.js';
 
 /** Fields the lead screens send, mapped to columns. Anything else is kept in `extra`. */
 const FIELD_MAP = {
@@ -42,7 +43,7 @@ function columnsFrom(body) {
   for (const [k, c] of Object.entries(FIELD_MAP)) if (body[k] !== undefined) cols[c] = body[k] === '' ? null : body[k];
   if (body.emailId === undefined && body.email !== undefined) cols.email = body.email || null;
   if (body.contactNumber === undefined && body.mobileNumber !== undefined) cols.phone = body.mobileNumber || null;
-  if (body.DOB !== undefined) cols.birth_date = toDate(body.DOB);
+  if (body.DOB !== undefined) cols.birth_date = isoDate(body.DOB);
   if (body.lob !== undefined) cols.lob = lobOf(body.lob);
   const extra = Object.fromEntries(Object.entries(body).filter(([k]) => !KNOWN.has(k)));
   return { cols, extra };

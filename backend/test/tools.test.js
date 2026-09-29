@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { writeXlsx, colLetter } from '../src/tools/xlsx.js';
 import { buildReportPdf } from '../src/lib/pdf/index.js';
-import { toCsv } from '../src/tools/csv.js';
+import { toCsv } from '../src/lib/csv.js';
 import { collectRoutes } from '../src/tools/export-api.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

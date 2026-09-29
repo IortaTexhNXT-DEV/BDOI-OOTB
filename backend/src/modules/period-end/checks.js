@@ -5,7 +5,6 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { round2 } from '../../lib/money.js';
-import { addDays } from '../../lib/dates.js';
 import { iso, monthEnd, monthStart } from './fiscal.js';
 
 const OPEN_JV = ['pending', 'draft', 'for-approval', 'approved'];
@@ -102,5 +101,3 @@ export async function blockingFailures(db, p) {
   const items = (await checklistItems(db)).filter((i) => i.item_type === 'auto' && i.severity === 'blocking');
   return (await runChecks(db, p, items)).filter((r) => r.status === 'failed');
 }
-
-export const nextDay = (d) => addDays(iso(d), 1);

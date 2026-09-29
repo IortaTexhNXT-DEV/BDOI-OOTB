@@ -1,12 +1,10 @@
 /** Small helpers shared by the claims and renewals modules. */
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
-import { config } from '../../config.js';
-import { businessDate } from '../../lib/dates.js';
 import { HttpError } from '../../lib/errors.js';
 import { many, query } from '../../db/pool.js';
 import { detectType } from '../uploads/fileTypes.js';
+import { newKey, resolveKey } from '../uploads/storage.js';
 
 export const unprocessable = (message, details) => new HttpError(422, message, details);
 
@@ -22,16 +20,12 @@ export const toNum = (v) => (v === undefined || v === null || v === '' || Number
 export { round2 } from '../../lib/money.js';
 export { today } from '../../lib/dates.js';
 
-/** Normalise a date input (YYYY-MM-DD or ISO timestamp) to YYYY-MM-DD in the configured time zone. */
-export async function toDate(v) {
-  return v ? businessDate(v) : null;
-}
 export const daysBetween = (a, b) => Math.round((new Date(`${b}T00:00:00Z`) - new Date(`${a}T00:00:00Z`)) / 86400000);
 
 /** Store an uploaded (multer memory) file on disk and register it in documents. */
 export async function storeUpload(file, { category, entity, entityId, userId }) {
-  const key = `${entity}/${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
-  const full = path.join(config.uploadDir, key);
+  const key = newKey(entity, file.originalname || category);
+  const full = resolveKey(key);
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, file.buffer);
   await query(`INSERT INTO documents(storage_key, file_name, content_type, size_bytes, category, entity, entity_id, uploaded_by, status)

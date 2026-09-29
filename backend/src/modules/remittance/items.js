@@ -271,7 +271,7 @@ export async function generateStatement(b, user) {
   await insertItemNoTx({ kind: 'statement', referenceNo: ref, amount: totals.netAmount, status: 'Generated', data, userId: user.id });
   if (Array.isArray(b.emailTo) && b.emailTo.length) {
     const vars = { period, fileName, downloadUrl: saved.url, companyName: await companyName() };
-    const subject = renderTemplate(await getSetting('remittance.statement_email_subject'), vars);
+    const subject = renderTemplate(await getSetting('remittance.statement_email_subject'), vars, { html: false });
     const html = renderTemplate(await getSetting('remittance.statement_email_body'), vars);
     for (const to of b.emailTo) await queueEmail({ to, subject, html, template: 'remittance-statement', entity: 'remittance_statement', entityId: ref });
   }

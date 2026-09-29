@@ -2,24 +2,11 @@
  * Dependency-free document output used by the claims and renewals modules: template rendering, CSV and a minimal
  * XLSX (stored ZIP of SpreadsheetML parts). PDFs are made by the shared engine in lib/pdf.
  */
+import { csvCell } from '../../lib/csv.js';
 
-const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-/** Replace {{name}} placeholders; values are HTML-escaped unless html === false. */
-export function renderTemplate(template, vars, { html = true } = {}) {
-  return String(template ?? '').replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, k) => {
-    const v = vars[k];
-    if (v === undefined || v === null) return '';
-    return html ? escHtml(v) : String(v);
-  });
-}
+export { renderTemplate } from '../../lib/template.js';
 
 // ---------- CSV ----------
-const csvCell = (v) => {
-  if (v === null || v === undefined) return '';
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-};
 export const toCsv = (columns, rows) => [columns.map((c) => csvCell(c.header)).join(','), ...rows.map((r) => columns.map((c) => csvCell(r[c.key])).join(','))].join('\n');
 
 // ---------- XLSX ----------

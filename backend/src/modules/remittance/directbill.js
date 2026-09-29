@@ -34,6 +34,7 @@ import { formatMoney } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { companyName } from '../../lib/letterhead.js';
+import { addDays } from '../../lib/dates.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -348,12 +349,6 @@ export async function listDebitNotes(qs, pg) {
   return { rows: rows.map(debitNoteOut), total: t.n, summary: { count: t.n, amount: round2(t.amount), outstanding: round2(t.outstanding) } };
 }
 
-const addDays = (date, days) => {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-
 /**
  * Raise a commission debit note to an insurer for unbilled items: itemIds (or policyIds) selected on screen, else every
  * unbilled item of the insurer booked in the period. submit=true sends it for approval at once.
@@ -476,7 +471,7 @@ export async function sendDebitNote(id, body, user) {
   if (!to) throw badRequest('Validation failed', [{ path: 'email', message: `${dn.insurerName} has no e-mail address; enter one` }]);
   const vars = { dnNumber: dn.dnNumber, insurerName: dn.insurerName, amount: `${dn.currency} ${dn.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
     dueDate: dn.dueDate, companyName: await companyName() };
-  await queueEmail({ to, subject: renderTemplate(await getSetting('direct_bill.email_subject'), vars),
+  await queueEmail({ to, subject: renderTemplate(await getSetting('direct_bill.email_subject'), vars, { html: false }),
     html: renderTemplate(await getSetting('direct_bill.email_body'), vars), template: 'commission-debit-note', entity: 'commission_debit_note', entityId: dn.id });
   await one('UPDATE commission_debit_notes SET sent_to = $2, sent_at = now(), updated_by = $3, updated_at = now() WHERE id = $1 RETURNING id', [dn.id, to, user.id]);
   return { ...(await getDebitNote(dn.id)), emailedTo: to };

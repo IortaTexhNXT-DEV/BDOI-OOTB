@@ -11,13 +11,13 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { renderTemplate } from '../claims/docs.js';
-import { daysBetween, round2, toDate, today, unprocessable, usersWithRole } from '../claims/util.js';
+import { daysBetween, round2, today, unprocessable, usersWithRole } from '../claims/util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
+import { addDays, businessDate } from '../../lib/dates.js';
 
 export const OPEN = ['pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'];
 const NOTICE_STATUS = ['notice-1', 'notice-2', 'final-notice'];
-const addDays = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 const addYears = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCFullYear(x.getUTCFullYear() + n); return x.toISOString().slice(0, 10); };
 
 // ---------------------------------------------------------------- read model
@@ -199,8 +199,8 @@ export async function captureRenewal(id, input) {
   const params = [before.id];
   const set = (col, v) => { params.push(v); sets.push(`${col} = $${params.length}`); };
   for (const [k, col] of Object.entries(CAPTURE)) if (input[k] !== undefined) set(col, JSON.stringify(input[k]));
-  if (input.effectiveDate) set('effective_date', await toDate(input.effectiveDate));
-  if (input.expiryDate) set('expiry_date', await toDate(input.expiryDate));
+  if (input.effectiveDate) set('effective_date', await businessDate(input.effectiveDate));
+  if (input.expiryDate) set('expiry_date', await businessDate(input.expiryDate));
   if (input.remarks !== undefined) set('remarks', input.remarks);
   if (input.priority) set('priority', input.priority);
   const gross = Number(input.orderSummary?.grossPremium ?? input.premiumBreakdown?.grossPremium ?? input.coverageDetails?.grossPremium);
@@ -331,7 +331,7 @@ export async function addActivity(id, user, input) {
   const r = await loadRow(id);
   const a = await withTransaction(async (db) => {
     await db.query('UPDATE renewals SET contact_attempts = contact_attempts + 1, last_contact_at = now(), updated_at = now() WHERE id = $1', [r.id]);
-    return activity(db, r.id, user, { type: input.type, method: input.method, description: input.description, outcome: input.outcome, nextAction: input.nextAction, followUpDate: input.followUpDate ? await toDate(input.followUpDate) : null, details: input.details || {} });
+    return activity(db, r.id, user, { type: input.type, method: input.method, description: input.description, outcome: input.outcome, nextAction: input.nextAction, followUpDate: input.followUpDate ? await businessDate(input.followUpDate) : null, details: input.details || {} });
   });
   return activityApi(a);
 }
@@ -371,8 +371,8 @@ export async function completeRenewal(id, user, input = {}) {
   const allowed = makerChecker ? ['approved'] : ['quoted', 'approved'];
   if (!allowed.includes(r.status)) throw conflict(makerChecker ? `Renewal must be approved before it is completed (current: ${r.status})` : `Renewal must be quoted before it is completed (current: ${r.status})`);
   const premium = round2(input.premium ?? r.premium_new ?? r.premium_old ?? r.premium_total);
-  const inception = (await toDate(input.inceptionDate)) || r.effective_date || addDays(r.policy_expiry, 1);
-  const expiry = (await toDate(input.expiryDate)) || r.expiry_date || addDays(addYears(inception, 1), -1);
+  const inception = (await businessDate(input.inceptionDate)) || r.effective_date || addDays(r.policy_expiry, 1);
+  const expiry = (await businessDate(input.expiryDate)) || r.expiry_date || addDays(addYears(inception, 1), -1);
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
   const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { unique: { table: 'policies', column: 'policy_number' } });
   const commission = r.premium_total > 0 ? round2((r.commission_amount / r.premium_total) * premium) : 0;

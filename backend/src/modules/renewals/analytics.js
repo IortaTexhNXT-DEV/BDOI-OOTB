@@ -1,9 +1,10 @@
 /** Read models for the Operations > Renewals workspace screens (queue, at-risk, negotiations, lapse, performance, approvals). */
 import { many, one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
-import { round2, today, daysBetween, toDate } from '../claims/util.js';
+import { round2, today, daysBetween } from '../claims/util.js';
 import { BASE, OPEN, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { businessDate } from '../../lib/dates.js';
 
 /** Renewal queue with the dashboard counters (total, due within renewals.due_soon_days, at risk, in grace period). */
 export async function renewalQueue(q, pg) {
@@ -88,8 +89,8 @@ export async function lapsed() {
 
 /** Retention KPIs over renewals due in [from, to]: renewal rate, premium retention, cycle time, by product, by agent, monthly trend. */
 export async function performance(q) {
-  const to = (await toDate(q.to)) || await today();
-  const from = (await toDate(q.from)) || `${Number(to.slice(0, 4)) - 1}${to.slice(4)}`;
+  const to = (await businessDate(q.to)) || await today();
+  const from = (await businessDate(q.from)) || `${Number(to.slice(0, 4)) - 1}${to.slice(4)}`;
   const rows = await many(`SELECT r.status, r.due_date, r.premium_old, r.premium_new, r.created_at, r.renewed_at, pr.line, pr.name AS product,
       COALESCE(u.display_name, 'Unassigned') AS agent
     FROM renewals r JOIN policies p ON p.id = r.policy_id LEFT JOIN products pr ON pr.id = p.product_id
@@ -143,7 +144,7 @@ export async function listCampaigns() {
 export async function createCampaign(input, user) {
   const number = await nextDocumentNumber('campaign', { unique: { table: 'winback_campaigns', column: 'campaign_number' } });
   const c = await one(`INSERT INTO winback_campaigns(campaign_number, name, target_segment, start_date, end_date, discount_pct, budget, offers, created_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`, [number, input.campaignName, input.targetSegment || null, await toDate(input.startDate), await toDate(input.endDate),
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`, [number, input.campaignName, input.targetSegment || null, await businessDate(input.startDate), await businessDate(input.endDate),
     input.discount ?? 0, input.budget ?? 0, JSON.stringify(input.offers || []), user?.username ?? null]);
   return campaignApi(c, await campaignStats(c));
 }

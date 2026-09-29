@@ -3,7 +3,7 @@ import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/router.js';
-import { toDate, num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
+import { num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
 import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses.js';
 import { getPolicyRow, createReceivable } from '../policies/service.js';
 import { publicUrl } from '../uploads/storage.js';
@@ -11,6 +11,7 @@ import { premiumBreakdown } from '../quotations/premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
+import { isoDate } from '../../lib/dates.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -154,7 +155,7 @@ export async function createEndorsement(body, userId) {
     const number = await nextDocumentNumber('endorsement', { db, unique: { table: 'endorsements', column: 'endorsement_number' } });
     return (await db.query(`INSERT INTO endorsements(endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks,
         endorsement_type_ids, is_cancel, cancellation_type, created_by) VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
-    [number, policy.id, policy.client_id, type, JSON.stringify(changes), round2(delta), toDate(effectiveDate) || toDate(new Date()), remarks || null,
+    [number, policy.id, policy.client_id, type, JSON.stringify(changes), round2(delta), isoDate(effectiveDate) || isoDate(new Date()), remarks || null,
       JSON.stringify(ids), isCancel, cancellationType || (isCancel ? 'FULL' : null), userId])).rows[0];
   });
   return getEndorsementRow(r.id);
@@ -189,7 +190,7 @@ export async function sendToCustomer(id, userId, cancel) {
     const v = { customerName: client.display_name, endorsementNumber: e.endorsement_number, policyNumber: e.policy_number,
       premiumDelta: Number(e.premium_delta).toFixed(2), currency: await getSetting('currency.default', 'PHP'), companyName: await companyName(),
       action: cancel ? 'cancellation' : 'endorsement' };
-    await queueEmail({ to: client.email, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'endorsement_customer', entity: 'endorsement', entityId: e.id });
+    await queueEmail({ to: client.email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'endorsement_customer', entity: 'endorsement', entityId: e.id });
   }
   await query('UPDATE endorsements SET status = $2, sent_at = now(), sent_by = $3, updated_by = $3, updated_at = now() WHERE id = $1', [e.id, target, userId]);
   return { before: e, after: await getEndorsementRow(e.id), emailedTo: client?.email || null };
@@ -241,7 +242,7 @@ export async function completeEndorsement(body, userId) {
   if (['completed', 'cancelled', 'rejected'].includes(e0.status)) throw badRequest(`Endorsement is already ${endorsementStatusOut(e0.status)}`);
   const completion = {
     policyNumber: body.policyNumber || e0.policy_number, insurerEndorsementNumber: body.endorsementNumber || null,
-    productionDate: toDate(body.productionDate), inceptionDate: toDate(body.inceptionDate), issuedDate: toDate(body.issuedDate), expiryDate: toDate(body.expiryDate), notes: body.notes || '',
+    productionDate: isoDate(body.productionDate), inceptionDate: isoDate(body.inceptionDate), issuedDate: isoDate(body.issuedDate), expiryDate: isoDate(body.expiryDate), notes: body.notes || '',
   };
   const policy = await withTransaction(async (db) => {
     const e = (await db.query('SELECT * FROM endorsements WHERE id = $1 FOR UPDATE', [e0.id])).rows[0];

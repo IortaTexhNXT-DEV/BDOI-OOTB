@@ -19,8 +19,9 @@ import { renderTemplate } from './docs.js';
 import { companyName } from '../../lib/letterhead.js';
 import { printContext, buildPdf } from '../../lib/pdf/index.js';
 import { formatDate } from '../../lib/pdf/format.js';
-import { daysBetween, parseJsonField, round2, storeUpload, toBool, toDate, toNum, today, unprocessable, usersWithRole } from './util.js';
+import { daysBetween, parseJsonField, round2, storeUpload, toBool, toNum, today, unprocessable, usersWithRole } from './util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { businessDate } from '../../lib/dates.js';
 
 export const STATUSES = ['registered', 'in-review', 'pending-approval', 'approved', 'settled', 'closed', 'rejected'];
 export const PLACEHOLDER_REFS = new Set(['POLICY-001', 'LEAD-001', 'QUOTE-001', '']);
@@ -322,12 +323,12 @@ async function saveFiles(files, claimId, user) {
 /** Register a claim (POST /claims). Enforces the acceptance controls; sends PLA and notifications. */
 export async function createClaim(input, user, files) {
   const policy = await resolvePolicy(input);
-  const lossDate = await toDate(input.dateOfIncident || input.lossDate);
+  const lossDate = await businessDate(input.dateOfIncident || input.lossDate);
   if (!lossDate) throw badRequest('dateOfIncident (date of loss) is required');
   const problems = await acceptanceCheck(policy, lossDate);
   if (problems.length) throw unprocessable(`Claim not accepted: ${problems.map((p) => p.message).join('; ')}`, problems);
 
-  const reported = (await toDate(input.reportedDate)) || await today();
+  const reported = (await businessDate(input.reportedDate)) || await today();
   assertReportedAfterLoss(lossDate, reported);
   const sla = Number(await getSetting('claims.sla_days', 20));
   const driver = parseJsonField(input.driverDetails, {});
@@ -390,9 +391,9 @@ export async function updateClaim(id, input, user, files) {
   };
   for (const [field, col] of Object.entries(EDITABLE)) if (input[field] !== undefined && input[field] !== '') set(col, input[field], field);
   if (input.estimatedClaimAmount !== undefined && input.estimatedClaimAmount !== '') set('estimate_amount', toNum(input.estimatedClaimAmount), 'estimatedClaimAmount');
-  if (input.reportedDate) set('reported_date', await toDate(input.reportedDate), 'reportedDate');
+  if (input.reportedDate) set('reported_date', await businessDate(input.reportedDate), 'reportedDate');
   if (input.dateOfIncident) {
-    const lossDate = await toDate(input.dateOfIncident);
+    const lossDate = await businessDate(input.dateOfIncident);
     if (lossDate !== before.loss_date && await getSetting('claims.validate_loss_date', true)
       && (lossDate < before.inception_date || lossDate > before.expiry_date)) {
       throw unprocessable(`Date of loss ${lossDate} is outside the policy period ${before.inception_date} to ${before.expiry_date}`);
@@ -400,8 +401,8 @@ export async function updateClaim(id, input, user, files) {
     set('loss_date', lossDate, 'dateOfIncident');
   }
   if (input.reportedDate || input.dateOfIncident) {
-    const loss = input.dateOfIncident ? await toDate(input.dateOfIncident) : before.loss_date;
-    const reported = input.reportedDate ? await toDate(input.reportedDate) : before.reported_date;
+    const loss = input.dateOfIncident ? await businessDate(input.dateOfIncident) : before.loss_date;
+    const reported = input.reportedDate ? await businessDate(input.reportedDate) : before.reported_date;
     assertReportedAfterLoss(loss, reported);
   }
   if (input.handlerUserId) set('handler_user_id', await pickHandler(input.handlerUserId), 'handlerUserId');
@@ -482,8 +483,8 @@ export async function settleClaim(id, input, user, files) {
   const amount = toNum(input.settlementAmount);
   const settlement = {
     ...(row.settlement || {}), settlementType: input.settlementType || row.settlement?.settlementType || null,
-    settlementIssueDate: (await toDate(input.settlementIssueDate)) || row.settlement?.settlementIssueDate || null,
-    settlementDate: (await toDate(input.settlementDate)) || row.settlement?.settlementDate || null,
+    settlementIssueDate: (await businessDate(input.settlementIssueDate)) || row.settlement?.settlementIssueDate || null,
+    settlementDate: (await businessDate(input.settlementDate)) || row.settlement?.settlementDate || null,
   };
   settlement.paidThroughBroker = throughBroker(input, row.settlement);
   if (input.payee) settlement.payee = String(input.payee);
@@ -613,8 +614,8 @@ const countBy = (items, fn, key) => {
 
 /** Claims dashboard (GET /claims/report): summary, breakdowns, ageing and optionally the detailed rows. */
 export async function claimsReport({ startDate, endDate, includeData, [SCOPE]: scope = null }) {
-  const start = (await toDate(startDate)) || `${new Date().getFullYear()}-01-01`;
-  const end = (await toDate(endDate)) || await today();
+  const start = (await businessDate(startDate)) || `${new Date().getFullYear()}-01-01`;
+  const end = (await businessDate(endDate)) || await today();
   const ctx = await readContext();
   const claims = (await reportRows(start, end, scope)).map((r) => ({ ...toApi(r, ctx.labels, ctx.todayStr, ctx.open), state: r.loss_province || r.client_state || 'Unknown', city: r.loss_city || r.client_city || '' }));
   const open = claims.filter((c) => c.isOpen);
@@ -653,8 +654,8 @@ export const REPORT_COLUMNS = [
 
 /** Rows for the Operational Reports > Claims criteria (All | Open | Settled | Rejected | Aging). */
 export async function criteriaRows({ startDate, endDate, criteria = 'All', [SCOPE]: scope = null }) {
-  const start = (await toDate(startDate)) || '1900-01-01';
-  const end = (await toDate(endDate)) || await today();
+  const start = (await businessDate(startDate)) || '1900-01-01';
+  const end = (await businessDate(endDate)) || await today();
   const ctx = await readContext();
   const all = (await reportRows(start, end, scope)).map((r) => ({ ...toApi(r, ctx.labels, ctx.todayStr, ctx.open), state: r.loss_province || r.client_state || '', city: r.loss_city || r.client_city || '' }));
   const c = String(criteria).toLowerCase();

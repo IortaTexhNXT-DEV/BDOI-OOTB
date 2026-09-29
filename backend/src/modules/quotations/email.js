@@ -9,7 +9,7 @@ import { audit } from '../../lib/audit.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { many } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
-import { renderTemplate, emailTemplate, num } from '../documents/common.js';
+import { renderTemplate, emailTemplate, amountText } from '../documents/common.js';
 import { getQuoteRow } from './service.js';
 import { ownRecord } from '../../lib/scope.js';
 import { companyName } from '../../lib/letterhead.js';
@@ -17,13 +17,12 @@ import { companyName } from '../../lib/letterhead.js';
 const { router, define } = moduleRouter('E-mail', '/email');
 const SCREEN = 'Operations > Quotation > Quote detail > Share';
 const canSend = [requireAuth, requirePermission('write:quotations')];
-const money = (v) => num(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 async function quoteVars(q, extra = {}) {
   return {
     companyName: await companyName(), quotationNumber: q.quote_number, productType: q.product_type || q.lob,
     customerName: [q.lead_row?.first_name, q.lead_row?.last_name].filter(Boolean).join(' ') || q.lead_row?.company_name || 'Customer',
-    grossPremium: money(q.premium_total), netPremium: money(q.premium_base), sumInsured: money(q.sum_insured), currency: q.currency,
+    grossPremium: amountText(q.premium_total), netPremium: amountText(q.premium_base), sumInsured: amountText(q.sum_insured), currency: q.currency,
     validUntil: q.valid_until || '', insurerName: q.insurer_name || '', ...extra,
   };
 }
@@ -36,11 +35,11 @@ define({
     const { context = {}, recipient = {} } = req.body || {};
     const t = await emailTemplate('share_quote');
     const v = { companyName: await companyName(), customerName: recipient.name || 'Customer', quotationNumber: context.quotationNumber || '',
-      productType: context.productType || '', grossPremium: money(context.grossPremium), netPremium: money(context.netPremium),
+      productType: context.productType || '', grossPremium: amountText(context.grossPremium), netPremium: amountText(context.netPremium),
       currency: await getSetting('currency.default', 'PHP'), message: context.customMessage || '', insurerName: context.insuranceCompany || '', validUntil: context.expiryDate || '' };
     const html = renderTemplate(t.html, v);
     const text = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '').trim();
-    res.json({ success: true, data: { subject: renderTemplate(t.subject, v), previewText: text.slice(0, 140), html, text } });
+    res.json({ success: true, data: { subject: renderTemplate(t.subject, v, { html: false }), previewText: text.slice(0, 140), html, text } });
   },
 });
 define({
@@ -63,7 +62,7 @@ define({
     const q = await getQuoteRow(req.body.quotationData.quotationId || req.body.quotationData.id || req.body.quotationData.quotationNumber);
     const t = await emailTemplate('share_quote');
     const v = await quoteVars(q, { message: req.body.message || '' });
-    const id = await queueEmail({ to: req.body.to, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'share_quote', entity: 'quotation', entityId: q.id });
+    const id = await queueEmail({ to: req.body.to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'share_quote', entity: 'quotation', entityId: q.id });
     await audit(req, { entity: 'quotation', entityId: q.id, action: 'share-quote', after: { to: req.body.to, emailId: id } });
     res.json({ success: true, message: `Quote shared with ${req.body.to}`, data: { emailId: id, to: req.body.to } });
   },
@@ -83,7 +82,7 @@ define({
         OR lower(short_name) = lower($1) LIMIT 1`, [String(ref)]);
       if (!ic?.contact_email) { failed.push({ insurer: String(ref), reason: ic ? 'No contact e-mail on the insurer record' : 'Insurer not found in the master' }); continue; }
       const v = await quoteVars(q, { insurerName: ic.name });
-      const id = await queueEmail({ to: ic.contact_email, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'insurer_submission', entity: 'quotation', entityId: q.id });
+      const id = await queueEmail({ to: ic.contact_email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'insurer_submission', entity: 'quotation', entityId: q.id });
       sent.push({ insurer: ic.name, email: ic.contact_email, emailId: id });
     }
     await audit(req, { entity: 'quotation', entityId: q.id, action: 'share-to-insurers', after: { sent: sent.map((s) => s.insurer), failed } });
