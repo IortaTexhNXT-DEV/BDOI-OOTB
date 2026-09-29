@@ -315,8 +315,11 @@ function resolveTarget(callPath, file) {
     if (callee.property.name === "open" && verb && METHODS.includes(verb.toUpperCase())) {
       return { kind: "xhr", pathIndex: 1, prefix: "", method: verb.toUpperCase() };
     }
-    if (method && callee.object.type === "Identifier" && /^(request|api|client|axios|http|instance)$/i.test(callee.object.name)) {
-      return { kind: "axios", pathIndex: 0, prefix: callee.object.name === "axios" ? "" : BASE, method };
+    // request.get(url), axios.get(url) and this.api.get(url) on an axios instance
+    const client = callee.object.type === "Identifier" ? callee.object.name
+      : callee.object.type === "MemberExpression" && callee.object.object.type === "ThisExpression" && !callee.object.computed ? callee.object.property.name : "";
+    if (method && /^(request|api|client|axios|http|instance)$/i.test(client)) {
+      return { kind: "axios", pathIndex: 0, prefix: client === "axios" ? "" : BASE, method };
     }
   }
   return undefined;
@@ -518,9 +521,15 @@ function collectCalls(topSegments) {
       if (!argPath || !argPath.node) continue;
       argPath.traverse({ TemplateLiteral(t) { consumed.add(t.node); } });
       consumed.add(argPath.node);
-      // Inside a helper the path is one of the helper's own parameters: not a call site.
+      // Inside a request helper that takes the whole path (request(path)) the path is not a call site; its callers are.
+      // A helper that puts a parameter into one segment (list(kind) => get(`/${kind}`)) is often called through a
+      // service object, which this check does not follow, so its call is recorded here with the value unknown.
       const fn = callPath.getFunctionParent();
-      const inHelper = fn && entry.helpers[functionName(fn)] && entry.functions.some((f) => f.path === fn);
+      const fnName = fn ? functionName(fn) : "";
+      const isHelper = fn && entry.helpers[fnName] && entry.functions.some((f) => f.path === fn);
+      // a generic request method (this.request(path)) takes the whole path; a service method puts a value in one segment
+      const wholePath = isHelper && evaluate(argPath, fn).some((v) => /[^/]\u0002\d+\u0003/.test(v.split("?")[0]) || /^\u0002/.test(v));
+      const inHelper = isHelper && wholePath;
       const raw = evaluate(argPath, inHelper ? fn : undefined);
       if (inHelper && raw.some((v) => v.includes("\u0002"))) continue;
       const method = callMethod(target, callPath).method;
