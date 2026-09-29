@@ -31,7 +31,6 @@ const ClientListingAllCategory = ({
   paymentSearchList,
 }) => {
   const { t } = useTranslation();
-  console.log(data, "data");
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("Name");
@@ -287,7 +286,6 @@ const ClientListingAllCategory = ({
   const handleViewAction = (rowData) => {
     // Use the actual client ID from the database
     const clientId = rowData.id || rowData.clientId || rowData.LeadID;
-    console.log('Navigating to client view with ID:', clientId, 'Row data:', rowData);
     navigate(`/agent/clientview/${clientId}`);
   };
 

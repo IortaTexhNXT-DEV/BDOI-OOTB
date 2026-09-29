@@ -17,6 +17,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import accountingService from "../../../services/accountingService";
 import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const EntryTypeBadge = ({ entryType }) => {
   const { t } = useTranslation();
@@ -222,7 +223,7 @@ const AccountingQuery = () => {
         );
       }
     } catch (error) {
-      console.error("Error searching accounting entries:", error);
+      logger.error("Error searching accounting entries:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -295,7 +296,7 @@ const AccountingQuery = () => {
         );
       }
     } catch (error) {
-      console.error("Error exporting accounting entries:", error);
+      logger.error("Error exporting accounting entries:", error);
       toast.current?.show({
         severity: "error",
         summary: "Export Failed",

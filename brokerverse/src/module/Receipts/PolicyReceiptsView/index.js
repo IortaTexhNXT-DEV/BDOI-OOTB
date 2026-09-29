@@ -84,7 +84,6 @@ function PolicyReceipts() {
         t("common.success")
       );
     } catch (error) {
-      console.error("Error printing receipt:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
         t("common.error")
@@ -135,7 +134,6 @@ function PolicyReceipts() {
         t("common.success")
       );
     } catch (error) {
-      console.error("Error printing selected receipt items:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
         t("common.error")

@@ -30,7 +30,6 @@ const ClientListingCompanyCategory = ({
   paymentSearchList,
 }) => {
   const { t } = useTranslation();
-  console.log(clientListTable?.company);
   const companyData = clientListTable?.filter(
     (item) => item.category === "Corporate"
   );

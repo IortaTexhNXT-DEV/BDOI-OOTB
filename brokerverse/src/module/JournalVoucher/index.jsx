@@ -67,12 +67,10 @@ const JournalVoucher = () => {
   const isInitialMount = useRef(true);
 
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
   const dispatch = useDispatch();
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchPolicyList");
     dispatch(getJournalVoucherSearchList({ textSearch: values.search }));
   };
 

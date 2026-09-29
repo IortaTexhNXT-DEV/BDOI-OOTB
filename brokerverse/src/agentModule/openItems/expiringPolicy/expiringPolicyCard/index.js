@@ -33,7 +33,6 @@ const ExpiringPolicyCard = () => {
 
   const { expiringtabledata, expiringSearchList, loading } = useSelector(
     ({ agentExpiringMainReducers }) => {
-      console.log(agentExpiringMainReducers, "find mainred");
       return {
         loading: agentExpiringMainReducers?.loading,
         expiringtabledata: agentExpiringMainReducers?.expiringtabledata,
@@ -41,7 +40,6 @@ const ExpiringPolicyCard = () => {
       };
     }
   );
-  console.log(expiringSearchList, "find1");
 
   // const [globalFilter, setGlobalFilter] = useState("policy Number");
   const policy = [
@@ -230,7 +228,6 @@ const ExpiringPolicyCard = () => {
 
     const backgroundColor =
       colors[parseInt(index) % colors.length] || "#CCCCCC";
-    console.log(parseInt(index) % colors.length, "find");
 
     return (
       <Avatar

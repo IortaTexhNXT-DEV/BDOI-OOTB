@@ -90,10 +90,6 @@ const AddJournalVocture = () => {
       };
     }
   );
-  console.log(
-    journalVoucherPostTabelData.entryType,
-    "journalVoucherPostTabelData"
-  );
 
   const customValidation = (values) => {
     const errors = {};
@@ -254,7 +250,6 @@ const AddJournalVocture = () => {
   };
   const [newDataTable, setnewDataTable] = useState([]);
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
 

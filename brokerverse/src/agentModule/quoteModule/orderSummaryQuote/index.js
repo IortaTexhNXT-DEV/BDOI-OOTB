@@ -145,7 +145,6 @@ const OrderSummary = () => {
       }, 2000);
       
     } catch (error) {
-      console.error('Failed to save quotation:', error);
       notifyError(`${t("agent.failedToSaveQuotation")}: ${error}`);
     } finally {
       setIsSubmitting(false);
@@ -308,7 +307,6 @@ const OrderSummary = () => {
               value={formik.values.AuthorizedSignature}
               options={signatoryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);
               }}
               optionLabel="label"

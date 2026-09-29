@@ -1,14 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_CLAIM_DATA, GET_CLAIM_DATA_SEARCH_LIST } from "../../../../../../redux/actionTypes";
 
-
-
-
 export const getClaimTabelData = createAsyncThunk(
     GET_CLAIM_DATA,
     async (payload, { rejectWithValue, getState }) => {
         const { correctionJVMainReducers } = getState();
-        console.log(correctionJVMainReducers, "data");
         const { correctionJVList } = correctionJVMainReducers;
         const filteredData = correctionJVList.filter((item) => item.id === 1);
 
@@ -44,7 +40,6 @@ export const getClaimTabelData = createAsyncThunk(
 export const getClaimTabelSearchList = createAsyncThunk(
     GET_CLAIM_DATA_SEARCH_LIST,
     async ({ field, value }, { rejectWithValue, getState }) => {
-        console.log(field, value, "kkkk");
         const { claimTabelMainReducers } = getState();
         const { claimListData } = claimTabelMainReducers;
         function filterClaimListByField(claimListData, field, value) {
@@ -68,15 +63,10 @@ export const getClaimTabelSearchList = createAsyncThunk(
         }
         try {
             const filteredClaimList = filterClaimListByField(claimListData, field, value);
-            console.log(filteredClaimList, "filteredClaimList");
             return filteredClaimList;
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error?.message);
         }
     }
 );
-
-
-
-
 

@@ -19,7 +19,6 @@ import { getPettyCashSearchList } from "./store/pettyCashMasterMiddleWare";
 const PettyCashMaster = ({ response }) => {
   const translation = useTranslation();
   const t = translation.t;
-  console.log(response, "response");
   const [visible, setVisible] = useState(false);
   const [newDataTable, setnewDataTable] = useState([]);
   const [search, setSearch] = useState("");
@@ -33,7 +32,6 @@ const PettyCashMaster = ({ response }) => {
   };
 
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
   const handlePolicy = () => {
@@ -48,7 +46,6 @@ const PettyCashMaster = ({ response }) => {
   ];
   const dispatch = useDispatch();
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchPolicyList");
     // dispatch(getPettyCashSearchList({ textSearch: values.search }));
   };
 
@@ -72,7 +69,6 @@ const PettyCashMaster = ({ response }) => {
       };
     }
   );
-  console.log(pettyCashSearchList, "pettyCashSearchList");
 
   useEffect(() => {
     if (search?.length > 0) {

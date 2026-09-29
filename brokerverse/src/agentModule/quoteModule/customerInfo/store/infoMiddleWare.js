@@ -5,7 +5,6 @@ import {
     POST_INFORMATION_DATA,PATCH_INFORMATION_DATA
 } from "../../../../redux/actionTypes";
 
-
 export const postinformationMiddleWare = createAsyncThunk(
     POST_INFORMATION_DATA,
     async (payload, { rejectWithValue, getState }) => {
@@ -23,26 +22,19 @@ export const postinformationMiddleWare = createAsyncThunk(
         TNVS: payload?.TNVS,
         TruckType:payload?.TruckType
       };
-      console.log(payload, "find add datas in midd");
   
       try {
         // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
         return bodyTableData;
-        console.log(bodyTableData, "find add datas in midd1");
       } catch (error) {
         return rejectWithValue(error?.response.data.error.message);
       }
     }
   );
 
-
-
   export const patchinformationMiddleWare = createAsyncThunk(
     PATCH_INFORMATION_DATA,
     async (payload, { rejectWithValue, getState }) => {
-      
-      console.log(payload, "find patch midd");
-  
       try {
         // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
         return payload;

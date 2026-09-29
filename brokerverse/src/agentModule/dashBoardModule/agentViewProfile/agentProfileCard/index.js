@@ -12,7 +12,6 @@ const AgentProfileCard = () => {
   const [formAction, setFormAction] = useState("view");
   const { profileData, profileEditData, loading, total } = useSelector(
     ({ profileReducers }) => {
-      console.log(profileReducers, "find profileReducers");
       return {
         loading: profileReducers?.loading,
         profileData: profileReducers?.profileData,
@@ -23,7 +22,6 @@ const AgentProfileCard = () => {
       };
     }
   );
-  console.log(profileData, "find profileEditData");
 
   const initialValue = {
     firstName: "",
@@ -117,7 +115,6 @@ const AgentProfileCard = () => {
 
   const toastRef = useRef(null);
   const handleSubmit = (value) => {
-    console.log(value, "find value");
     dispatch(patchProfileEditMiddleware(value));
     setFormAction("view");
   };

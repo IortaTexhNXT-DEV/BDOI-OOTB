@@ -104,7 +104,7 @@ const RemittanceExceptions = () => {
     if (assignee && selectedException) startException(selectedException, assignee);
   };
 
-  // the report is a CSV of the listed exceptions; say so when there is nothing to put in it (D105)
+  // the report is a CSV of the listed exceptions; say so when there is nothing to put in it
   const exportRows = (rows, name) => {
     if (!rows?.length) {
       toast.current?.show({ severity: "info", summary: t("remittance.createReport"), detail: "There are no exceptions to include in the report.", life: 4000 });

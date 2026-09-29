@@ -173,7 +173,6 @@ export const getViewMainBranchUser = createAsyncThunk(
 export const postViewMainBranchUser = createAsyncThunk(
   POST_MAIN_BRANCH_VIEW,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
     const data = {
       branchCode: payload?.branchCode,
       branchName: "branchName",
@@ -217,7 +216,6 @@ export const getAdditionalRoleViewMiddleWare = createAsyncThunk(
 export const postAdditionalRoleViewMiddleWare = createAsyncThunk(
   POST_ADDITIONAL_ROLE,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
     const data = {
       id: payload?.id,
       RoleCode: payload?.RoleCode,

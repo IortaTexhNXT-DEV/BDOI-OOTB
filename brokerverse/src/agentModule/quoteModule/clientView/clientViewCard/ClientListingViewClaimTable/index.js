@@ -187,52 +187,19 @@ const LeadListingAllTable = ({ clientId }) => {
       setError(null);
 
       try {
-        console.log("=== FETCHING CLAIMS FOR CLIENT ===");
-        console.log("Client ID:", clientId);
-        console.log("=== END FETCHING CLAIMS FOR CLIENT ===");
-
         const response = await claimsService.getClaims({ clientId });
         if (!active) {
           return;
         }
 
-        console.log("=== CLAIMS API RESPONSE ===");
-        console.log("Response:", response);
-        console.log("Success:", response.success);
-        console.log("Data:", response.data);
-        console.log("=== END CLAIMS API RESPONSE ===");
-
         if (response.success) {
           const rawClaims = response.data || [];
-          console.log("=== RAW CLAIMS DATA ===");
-          console.log("Raw claims count:", rawClaims.length);
-          if (rawClaims.length > 0) {
-            console.log("First raw claim:", rawClaims[0]);
-            console.log("First claim ID fields:", {
-              id: rawClaims[0].id,
-              claimId: rawClaims[0].claimId,
-              claimNumber: rawClaims[0].claimNumber,
-              claimRefId: rawClaims[0].claimRefId,
-            });
-          }
-          console.log("=== END RAW CLAIMS DATA ===");
 
           const normalized = rawClaims
             .map(normalizeClaimRecord)
             .filter(Boolean);
           setClaims(normalized);
           setFilteredClaims(normalized);
-          console.log("=== NORMALIZED CLAIMS ===");
-          console.log("Normalized Claims:", normalized);
-          if (normalized.length > 0) {
-            console.log("First normalized claim ID fields:", {
-              id: normalized[0].id,
-              claimId: normalized[0].claimId,
-              claimNumber: normalized[0].claimNumber,
-              claimRefId: normalized[0].claimRefId,
-            });
-          }
-          console.log("=== END NORMALIZED CLAIMS ===");
         } else {
           throw new Error(response.error || "Failed to load claims");
         }
@@ -240,7 +207,6 @@ const LeadListingAllTable = ({ clientId }) => {
         if (!active) {
           return;
         }
-        console.error("Claims fetch error", err);
         setError(err.message || "Failed to fetch claims");
         setClaims([]);
         setFilteredClaims([]);
@@ -366,38 +332,14 @@ const LeadListingAllTable = ({ clientId }) => {
     const status = claim.status?.toUpperCase();
     const claimId = claim.id || claim.claimId;
 
-    console.log("=== CLAIM ID VALIDATION ===");
-    console.log("Raw claim object:", claim);
-    console.log("claim.id:", claim.id);
-    console.log("claim.claimId:", claim.claimId);
-    console.log("claim.claimNumber:", claim.claimNumber);
-    console.log("Final claimId for navigation:", claimId);
-    console.log("=== END CLAIM ID VALIDATION ===");
-
     // Validate that we have a proper claim ID (not claim number)
     if (!claimId) {
-      console.error("No valid claim ID found for navigation");
-      console.log("Available claim fields:", {
-        id: claim.id,
-        claimId: claim.claimId,
-        claimNumber: claim.claimNumber,
-        claimRefId: claim.claimRefId,
-      });
       notifyError("Unable to navigate: No valid claim ID found");
       return;
     }
 
     // Check if the claimId looks like a claim number (contains "CLAIM-" or similar patterns)
     if (claimId.includes("CLAIM-") || claimId.includes("Motor-")) {
-      console.error("Claim ID appears to be a claim number, not a database ID");
-      console.log("Claim ID:", claimId);
-      console.log("This looks like a claim number, not a database ID");
-      console.log("Available fields:", {
-        id: claim.id,
-        claimId: claim.claimId,
-        claimNumber: claim.claimNumber,
-        claimRefId: claim.claimRefId,
-      });
       notifyError(
         "Unable to navigate: Claim ID appears to be a claim number instead of database ID"
       );
@@ -405,38 +347,11 @@ const LeadListingAllTable = ({ clientId }) => {
     }
 
     // Extract policy holder name and claim number for Redux
-    console.log("=== CLAIM DATA FIELD ANALYSIS (CLIENT VIEW) ===");
-    console.log("All claim fields:", Object.keys(claim));
-    console.log(
-      "Policy object fields:",
-      claim?.policy ? Object.keys(claim.policy) : "No policy object"
-    );
-    console.log(
-      "Lead object fields:",
-      claim?.lead ? Object.keys(claim.lead) : "No lead object"
-    );
-    console.log("Normalized policy holder name:", claim?.policyHolderName);
-    console.log("=== END CLAIM DATA FIELD ANALYSIS (CLIENT VIEW) ===");
 
     const policyHolderName = claim?.policyHolderName || "Loading...";
 
     const claimNumber =
       claim?.claimNumber || claim?.claim_number || "Loading...";
-
-    console.log("=== CLAIM TABLE NAVIGATION ===");
-    console.log("Claim Data:", claim);
-    console.log("Status:", status);
-    console.log("Claim ID (for navigation):", claimId);
-    console.log("Claim Number (for display):", claimNumber);
-    console.log("Client ID:", clientId);
-    console.log("Policy Holder Name:", policyHolderName);
-    console.log("Available ID fields:", {
-      id: claim.id,
-      claimId: claim.claimId,
-      claimNumber: claim.claimNumber,
-      claimRefId: claim.claimRefId,
-    });
-    console.log("=== END CLAIM TABLE NAVIGATION ===");
 
     // Save claim data to Redux for future pages
     dispatch(

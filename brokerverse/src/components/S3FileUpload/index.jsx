@@ -5,6 +5,7 @@ import { Button } from 'primereact/button';
 import { ProgressBar } from 'primereact/progressbar';
 import { Toast } from 'primereact/toast';
 import s3Service from '../../services/s3Service';
+import logger from "../../utility/logger";
 
 let nextId = 0;
 
@@ -62,7 +63,6 @@ const S3FileUpload = ({
       if (onUploadSuccess) onUploadSuccess(result.url, fileData.file, result);
       return result.url;
     } catch (error) {
-      console.error(`Failed to upload ${fileData.name}:`, error);
       patchFile(fileData.id, { uploading: false, error: error.message || 'Upload failed' });
       showToast('error', 'Upload Failed', `${fileData.name}: ${error.message}`);
       if (onUploadError) onUploadError(error, fileData.file);
@@ -127,7 +127,7 @@ const S3FileUpload = ({
         const urlParts = fileData.url.split('/');
         await s3Service.deleteFile(urlParts.slice(-2).join('/'));
       } catch (error) {
-        console.warn('Stored file could not be deleted:', error);
+        logger.warn('Stored file could not be deleted:', error);
       }
     }
     if (fileData.preview) URL.revokeObjectURL(fileData.preview);

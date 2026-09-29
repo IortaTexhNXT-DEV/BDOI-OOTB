@@ -3,6 +3,7 @@
  */
 
 import { parseNumericValue, calculatePremium } from "./quotationDataTransform";
+import logger from "../../../utility/logger";
 
 /**
  * Compute all premium values based on coverage details
@@ -178,19 +179,6 @@ export const calculateOrderSummary = (
     accountPremiumOthers: "0.00", // Can be set separately if needed
   };
 
-  console.log("[calculateOrderSummary] Calculation result:", {
-    netPremium: result.netPremium,
-    taxes: {
-      VAT: result.valueAddedTax,
-      DST: result.documentaryStampTax,
-      LGT: result.localGovernmentTax,
-    },
-    NCD: result.NCD,
-    discount: result.discount,
-    grossPremium: result.grossPremium,
-    sumInsured: sumInsured > 0 ? sumInsured.toFixed(2) : "N/A",
-  });
-
   return result;
 };
 
@@ -253,7 +241,7 @@ const validatePremiumCalculation = ({
   const difference = Math.abs(grossPremium - calculatedTotal);
 
   if (difference > 0.01 && grossPremium > 0) {
-    console.warn(`⚠️ [${context}] Accounting equation mismatch:`, {
+    logger.warn(`[${context}] Accounting equation mismatch:`, {
       grossPremium,
       netPremium,
       valueAddedTax,
@@ -279,7 +267,7 @@ const validatePremiumCalculation = ({
       rateIssues.push(`LGT rate seems like percentage (${taxRates.localGovernmentTax}), should be decimal`);
     }
     if (rateIssues.length > 0) {
-      console.warn(`⚠️ [${context}] Tax rate validation issues:`, rateIssues);
+      logger.warn(`[${context}] Tax rate validation issues:`, rateIssues);
     }
   }
 
@@ -287,8 +275,8 @@ const validatePremiumCalculation = ({
   if (sumInsured && sumInsured > 0) {
     const premiumRatio = (grossPremium / sumInsured) * 100;
     if (premiumRatio > 10) {
-      console.warn(
-        `⚠️ [${context}] Gross Premium (${grossPremium}) is ${premiumRatio.toFixed(2)}% of Sum Insured (${sumInsured}). This seems unusually high (>10%). Expected range: 1-5%.`
+      logger.warn(
+        `[${context}] Gross Premium (${grossPremium}) is ${premiumRatio.toFixed(2)}% of Sum Insured (${sumInsured}). This seems unusually high (>10%). Expected range: 1-5%.`
       );
     }
   }
@@ -297,21 +285,13 @@ const validatePremiumCalculation = ({
   if (ctplPremium !== undefined && ctplPremium !== null) {
     const ctplNum = typeof ctplPremium === 'string' ? parseFloat(ctplPremium) : ctplPremium;
     if (ctplNum > 10000) {
-      console.warn(
-        `⚠️ [${context}] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
+      logger.warn(
+        `[${context}] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
         `CTPL should be a flat rate (typically 200-2000 THB). ` +
         `This may indicate CTPL was incorrectly calculated as a percentage of coverage.`
       );
     }
   }
-
-  // Log tax rates for debugging
-  console.log(`[${context}] Tax rates used:`, {
-    valueAddedTax: taxRates?.valueAddedTax,
-    documentaryStampTax: taxRates?.documentaryStampTax,
-    localGovernmentTax: taxRates?.localGovernmentTax,
-    source: "productConfigurator",
-  });
 };
 
 /**
@@ -428,19 +408,6 @@ export const calculatePremiumBreakdown = (
     discount: discount.toFixed(2),
     grossPremium: Math.max(0, grossPremium).toFixed(2),
   };
-
-  console.log("[calculatePremiumBreakdown] Calculation result:", {
-    netPremium: result.netPremium,
-    taxes: {
-      VAT: result.valueAddedTax,
-      DST: result.documentaryStampTax,
-      LGT: result.localGovernmentTax,
-    },
-    others: result.accountPremiumOthers,
-    discount: result.discount,
-    grossPremium: result.grossPremium,
-    sumInsured: sumInsured > 0 ? sumInsured.toFixed(2) : "N/A",
-  });
 
   return result;
 };

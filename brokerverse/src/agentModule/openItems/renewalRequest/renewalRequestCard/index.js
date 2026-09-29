@@ -30,7 +30,6 @@ const RenewalRequestCard = () => {
 
   const { renewalrequesttabledata, renewalrequestSearchList, loading } =
     useSelector(({ agentRenewalrequestMainReducers }) => {
-      console.log(agentRenewalrequestMainReducers, "find main");
       return {
         loading: agentRenewalrequestMainReducers?.loading,
         renewalrequesttabledata:
@@ -241,7 +240,6 @@ const RenewalRequestCard = () => {
 
     const backgroundColor =
       colors[parseInt(index) % colors.length] || "#CCCCCC";
-    console.log(parseInt(index) % colors.length, "find");
 
     return (
       <Avatar

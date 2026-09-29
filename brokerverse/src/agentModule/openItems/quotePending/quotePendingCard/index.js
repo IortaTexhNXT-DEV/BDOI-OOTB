@@ -30,7 +30,6 @@ const QuotePendingCard = () => {
 
   const { quotependingtabledata, quotependingSearchList, loading } =
     useSelector(({ agentQuotependingMainReducers }) => {
-      console.log(agentQuotependingMainReducers, "find quote");
       return {
         loading: agentQuotependingMainReducers?.loading,
         quotependingtabledata:
@@ -242,7 +241,6 @@ const QuotePendingCard = () => {
 
     const backgroundColor =
       colors[parseInt(index) % colors.length] || "#CCCCCC";
-    console.log(parseInt(index) % colors.length, "find");
 
     return (
       <Avatar

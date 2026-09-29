@@ -39,13 +39,10 @@ const CQOrderSummary = ({ action, flow }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  console.log(state, "ades")
   const handleclick = (values) => {
-    console.log(values, "valuesleo");
     dispatch(postOrderSummaryMiddleware(values));
     toastRef.current.showToast();
     setTimeout(() => {
-      console.log(action, "find ");
       if (action === "post") {
         // navigate("/agent/quotedetailedit");
         navigate("/agent/quotedetailview", { state: state });
@@ -82,7 +79,6 @@ const CQOrderSummary = ({ action, flow }) => {
   const handleLeadNavigation = () => {
     navigate("/agent/leadlisting");
   };
-  console.log(flow, "find test");
   return (
     <div className="order__summary__container">
       <CustomToast ref={toastRef} message={t("employeeBenefit.quoteCreatedSuccess")} />
@@ -175,7 +171,6 @@ const CQOrderSummary = ({ action, flow }) => {
               value={formik.values.AuthorizedSignature}
               options={signatoryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);
               }}
               optionLabel="label"
@@ -185,8 +180,6 @@ const CQOrderSummary = ({ action, flow }) => {
               }
             />
           </div>
-
-
 
           <div class="col-12 md:col-6 lg:col-6 xl:col-6">
             <div class="grid">

@@ -43,17 +43,8 @@ const CQquoteDetails = ({ action }) => {
     };
   });
 
-  console.log(
-    PolicyDetails,
-    CoverageDetails,
-    OrderSummary,
-    createleaddata,
-    "Alldata"
-  );
-
   const handleclick = () => {
     navigate('/agent/employee-benefit/policy-waiting-for-policy')
-    console.log(action, "find initial logic");
     // if (action == "view") {
     //   navigate(`/agent/convertpolicy/customerinfo/view/${12}`, { state: state });
     // }

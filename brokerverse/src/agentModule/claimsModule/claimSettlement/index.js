@@ -17,6 +17,7 @@ import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionM
 import claimsService from "../../../services/claimsService";
 import SettlementCash from "./SettlementCash";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const ClaimSettlement = () => {
   const { t } = useTranslation();
@@ -76,14 +77,10 @@ const ClaimSettlement = () => {
   // Fetch claim details on component mount
   useEffect(() => {
     if (claimId) {
-      console.log("=== DISPATCHING GET CLAIM DETAILS ===");
-      console.log("Dispatching getClaimDetails with ID:", claimId);
       dispatch(getClaimDetails(claimId));
-      console.log("=== END DISPATCHING GET CLAIM DETAILS ===");
     }
   }, [dispatch, claimId]);
 
-  console.log(claimDetails, "endrosementViewData");
   const handleNavigation = () => {
     navigate(`/agent/clientview/${claimDetails?.data?.policy?.clientId}`);
   };
@@ -93,7 +90,7 @@ const ClaimSettlement = () => {
   };
   const handleAcknowledgmentsubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
@@ -107,8 +104,6 @@ const ClaimSettlement = () => {
       );
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -120,11 +115,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -134,7 +129,7 @@ const ClaimSettlement = () => {
 
   const handleClaimsDischargeVouchersubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
@@ -148,8 +143,6 @@ const ClaimSettlement = () => {
       );
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -161,11 +154,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -175,7 +168,7 @@ const ClaimSettlement = () => {
 
   const handleClaimsDatasheetubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
@@ -189,8 +182,6 @@ const ClaimSettlement = () => {
       );
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -202,11 +193,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -216,24 +207,17 @@ const ClaimSettlement = () => {
 
   const handleFIRSubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
     // Set loading state
     setDownloadLoading((prev) => ({ ...prev, fir: true }));
 
-    console.log("=== DOWNLOADING FIR DOCUMENT ===");
-    console.log("Claim ID:", claimId);
-    console.log("Document Name: FIR");
-    console.log("=== END DOWNLOADING FIR DOCUMENT ===");
-
     try {
       const result = await claimsService.getClaimDocuments(claimId, "FIR");
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -245,11 +229,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state

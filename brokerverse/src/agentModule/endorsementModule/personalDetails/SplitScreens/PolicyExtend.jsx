@@ -162,10 +162,6 @@ const PolicyExtend = ({
         ToDate: formatDateForSubmit(formik.values.ToDate),
       };
 
-      console.log(
-        "PolicyExtend - calling onSectionSubmitted with payload:",
-        payload
-      );
       onSectionSubmitted(index, payload);
     }
 

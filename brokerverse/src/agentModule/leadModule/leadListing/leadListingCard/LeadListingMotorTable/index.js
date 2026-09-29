@@ -28,6 +28,7 @@ import {
 import { isFireLob, isIarLob } from "../../../../endorsementModule/constants/endorsementCategories";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";
+import logger from "../../../../../utility/logger";
 
 const LeadListingMotorTable = ({ lob = null }) => {
   const { t } = useTranslation();
@@ -190,7 +191,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
     if (leadId) {
       navigate(`/agent/leaddetail/${leadId}`);
     } else {
-      console.error("No leadId found for viewing details");
+      logger.error("No leadId found for viewing details");
     }
   };
 
@@ -292,7 +293,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
     if (leadId) {
       navigate(`/agent/quotelisting?leadRefId=${leadId}`);
     } else {
-      console.error("No leadId found for viewing quotations");
+      logger.error("No leadId found for viewing quotations");
       navigate("/agent/quotelisting");
     }
   };
@@ -300,7 +301,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
   const handleEdit = (rowData) => {
     const leadId = rowData.leadId || rowData.id;
     if (!leadId) {
-      console.error("No leadId found for editing");
+      logger.error("No leadId found for editing");
       return;
     }
     dispatch(getLeadByIdMiddleware(leadId));

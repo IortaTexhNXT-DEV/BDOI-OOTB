@@ -31,7 +31,6 @@ import AddDialog from "./AddDialog";
 import { useLocation, useParams } from "react-router-dom";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
 
-
 const initialValue = {
     Date: new Date(),
     TransactionCode: "",
@@ -165,7 +164,6 @@ const EditRequestForm = ({ action }) => {
         },
     });
 
-
     const totalAmount = AddRequestTable.reduce(
         (total, item) => total + (parseFloat(item.Amount) || 0),
         0
@@ -194,7 +192,6 @@ const EditRequestForm = ({ action }) => {
                     </div>
                 </div>
             </div>
-
 
             <Card className="mt-4">
                 <div className="grid mt-1">
@@ -278,7 +275,6 @@ const EditRequestForm = ({ action }) => {
                             value={formik.values.RequesterName}
                             options={codedata}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("RequesterName", e.value);
                             }} optionValue={"label"}
                             optionLabel="label"
@@ -301,8 +297,6 @@ const EditRequestForm = ({ action }) => {
                     </div>
                 </div>
             </Card>
-
-
 
             <>
                 <Card className="mt-6">
@@ -388,7 +382,6 @@ const EditRequestForm = ({ action }) => {
                     </div>
                 </div>
             </>
-
 
             <div className="grid  mt-4">
                 <div className="col-12 md:col-12 lg:col-12">

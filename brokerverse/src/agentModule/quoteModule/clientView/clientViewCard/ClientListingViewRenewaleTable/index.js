@@ -17,6 +17,7 @@ import policyRenewalService from "../../../../../services/policyRenewalService";
 import { Skeleton } from "primereact/skeleton";
 import { notifyWarn } from "../../../../../utility/dialogs";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import logger from "../../../../../utility/logger";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
@@ -142,7 +143,6 @@ const Index = ({ clientId, action }) => {
           return;
         }
 
-        console.error("Renewal fetch error", fetchError);
         setError(fetchError.message || "Failed to fetch renewals");
         setRenewalPolicy([]);
         setFilteredRenewals([]);
@@ -216,7 +216,6 @@ const Index = ({ clientId, action }) => {
   };
   const handleTypes = () => {
     let result = [];
-    console.log(selectedCategories, "out 1");
     if (selectedCategories.some((obj) => obj.key === "personaldetail")) {
       result.push("1");
     }
@@ -229,7 +228,6 @@ const Index = ({ clientId, action }) => {
     if (selectedCategories.some((obj) => obj.key === "ploicyextend")) {
       result.push("4");
     }
-    console.log(result, "out");
     return result;
   };
   const navigate = useNavigate();
@@ -247,7 +245,7 @@ const Index = ({ clientId, action }) => {
   const handleMenuClick = (menuItem) => {
     if (menuItem == "view") {
       if (!selectedRowData) {
-        console.error("No row data selected");
+        logger.error("No row data selected");
         return;
       }
 
@@ -293,7 +291,7 @@ const Index = ({ clientId, action }) => {
     }
     if (menuItem == "renewal") {
       if (!selectedRowData) {
-        console.error("No row data selected for renewal");
+        logger.error("No row data selected for renewal");
         return;
       }
 
@@ -321,7 +319,6 @@ const Index = ({ clientId, action }) => {
       });
     }
     // Handle the menu item click here
-    console.log(`${menuItem} clicked`);
   };
 
   const onCategoryChange = (e) => {

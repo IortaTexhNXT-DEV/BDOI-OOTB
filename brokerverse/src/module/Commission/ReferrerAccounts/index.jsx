@@ -6,6 +6,7 @@ import { Column } from "primereact/column";
 import CommissionService from "../../../services/commissionService";
 import { formatBaht } from "../utils/formatBaht";
 import "./style.scss";
+import logger from "../../../utility/logger";
 
 const ReferrerAccounts = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const ReferrerAccounts = () => {
       setSummary(data?.summary || summary);
       setReferrers(data?.referrers || []);
     } catch (err) {
-      console.error("Failed to load referrer accounts", err);
+      logger.error("Failed to load referrer accounts", err);
       setReferrers([]);
     } finally {
       setLoading(false);

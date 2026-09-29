@@ -5,13 +5,14 @@ import "./index.scss";
 import SvgWhatsAppIcon from "../../../../assets/agentIcon/SvgWhatsAppIcon";
 import SvgDownloadIcon from "../../../../assets/agentIcon/SvgDownloadIcon";
 import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
+import logger from "../../../../utility/logger";
 
 const ShareOption = ({ modalVisible, setModalVisible }) => {
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
   return (

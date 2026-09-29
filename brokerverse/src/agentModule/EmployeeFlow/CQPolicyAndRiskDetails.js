@@ -33,7 +33,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
     const InsuranceCompanyOptions = useInsuranceCompanyOptions();
     const { t } = useTranslation();
     const { type } = useParams();
-    console.log(action, type, "action111");
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const initialValue = {
@@ -53,10 +52,8 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
         LimitPerPerson: "",
         LimitPerOccurrence: "",
         Remarks: "",
-
     };
     const handleclick = (values) => {
-        console.log(action, "action");
         dispatch(postPolicyDetailsMiddleware(values));
         {
             action === "quotedetails"
@@ -140,10 +137,8 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
     {/* //changes */ }
     const [checked, setChecked] = useState(false);
     const [paychecked, setPayChecked] = useState(false);
-    console.log(formik.values.PaymentType, "check")
     const [products, setProducts] = useState([]);
     const [visible, setVisible] = useState(false);
-
 
     const { TableList, leadtabledata, loading } = useSelector(
         ({ policydetailreducer, leadReducers }) => {
@@ -155,7 +150,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
             };
         }
     );
-    console.log("checkget2", leadtabledata[leadtabledata.length - 1]?.category);
 
     const category = leadtabledata[leadtabledata.length - 1]?.category
 
@@ -263,7 +257,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.InsuranceCompanyName}
                             options={InsuranceCompanyOptions}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("InsuranceCompanyName", e.value);
                             }}
                             optionLabel="label"
@@ -271,7 +264,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
 
                     </div>
                 </div>
-
 
                 {checked &&
                     <div>
@@ -298,8 +290,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                     </div>
                 }
 
-
-
                 <div className="grid mt-2">
                     <div className="col-12 md:col-6 lg:col-6">
                         <DropdownField
@@ -307,7 +297,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.InsurancePolicyType}
                             options={InsurancePolicyTypes}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("InsurancePolicyType", e.value);
                             }}
                             optionLabel="label"
@@ -325,7 +314,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.AccountCode}
                             options={AccountCodes}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("AccountCode", e.value);
                             }}
                             optionLabel="label"
@@ -344,7 +332,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.PaymentType}
                             options={PolicyTypes}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("PaymentType", e.value);
                             }}
                             optionLabel="label"
@@ -373,7 +360,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                                 value={formik.values.InstallmentType}
                                 options={InstallmentType}
                                 onChange={(e) => {
-                                    console.log(e.value);
                                     formik.setFieldValue("InstallmentType", e.value);
                                 }}
                                 optionLabel="label"
@@ -388,8 +374,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                     </div>
                 }
 
-
-
                 <div className="policy__details__card__sub__title mt-2">
                     Employees Details
                 </div>
@@ -401,7 +385,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.VehicleBrand}
                             options={VehicleBrands}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("VehicleBrand", e.value);
                             }}
                             optionLabel="label"
@@ -475,7 +458,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.ModelYear}
                             options={ModelYears}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("ModelYear", e.value);
                             }}
                             optionLabel="label"

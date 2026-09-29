@@ -32,7 +32,7 @@ const STATUS_FILTERS = ["All", "Draft", "Pending Approval", "Open", "Partially C
 const MODE_LABELS = { "bank-transfer": "Bank transfer", check: "Cheque", cash: "Cash", card: "Card", gcash: "GCash", online: "Online" };
 
 /**
- * Remittance > Direct Bill Processing (D36).
+ * Remittance > Direct Bill Processing.
  * Direct bill: the client pays the premium directly to the insurer; the broker raises a commission debit note to the
  * insurer. Finance selects an insurer and a period, sees the direct-bill policies with their commission, VAT and total
  * due, raises a numbered debit note (maker-checker approval), prints / e-mails it and records the insurer's payments

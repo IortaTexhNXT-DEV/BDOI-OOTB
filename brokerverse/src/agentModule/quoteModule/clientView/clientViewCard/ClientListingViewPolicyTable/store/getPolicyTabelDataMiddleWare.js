@@ -1,14 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_POLICY_DATA, GET_POLICY_DATA_SEARCH_LIST } from "../../../../../../redux/actionTypes";
 
-
-
-
 export const getPolicyTabelData = createAsyncThunk(
     GET_POLICY_DATA,
     async (payload, { rejectWithValue, getState }) => {
         const { correctionJVMainReducers } = getState();
-        console.log(correctionJVMainReducers, "data");
         const { correctionJVList } = correctionJVMainReducers;
         const filteredData = correctionJVList.filter((item) => item.id === 1);
 
@@ -44,7 +40,6 @@ export const getPolicyTabelData = createAsyncThunk(
 export const getPolicyTabelSearchList = createAsyncThunk(
     GET_POLICY_DATA_SEARCH_LIST,
     async ({ field, value }, { rejectWithValue, getState }) => {
-        console.log(field, value, "kkkk");
         const { policyTabelMainReducers } = getState();
         const { policyListData } = policyTabelMainReducers;
         function filterEndorsementListByField(endorsementListData, field, value) {
@@ -64,15 +59,10 @@ export const getPolicyTabelSearchList = createAsyncThunk(
         }
         try {
             const filteredEndorsementList = filterEndorsementListByField(policyListData, field, value);
-            console.log(filteredEndorsementList, "filteredEndorsementList");
             return filteredEndorsementList;
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error?.message);
         }
     }
 );
-
-
-
-
 

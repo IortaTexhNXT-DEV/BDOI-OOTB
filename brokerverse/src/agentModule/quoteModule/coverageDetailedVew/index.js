@@ -18,6 +18,7 @@ import s3Service from "../../../services/s3Service";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import { Dialog } from "primereact/dialog";
 import placementService from "../../../services/placementService";
+import logger from "../../../utility/logger";
 
 const CoverageDetailedView = () => {
   const { t } = useTranslation();
@@ -71,10 +72,6 @@ const CoverageDetailedView = () => {
         );
         if (result.success) {
           setQuotationData(result.data);
-          console.log(
-            "Coverage View: Quotation loaded successfully:",
-            result.data
-          );
         } else {
           toast.current?.show({
             severity: "error",
@@ -84,7 +81,7 @@ const CoverageDetailedView = () => {
           });
         }
       } catch (error) {
-        console.error("Error fetching quotation:", error);
+        logger.error("Error fetching quotation:", error);
         toast.current?.show({
           severity: "error",
           summary: t("common.error"),
@@ -119,16 +116,14 @@ const CoverageDetailedView = () => {
       }
 
       try {
-        console.log("Fetching presigned URLs for vehicle photos...");
         const result = await s3Service.getPresignedDownloadUrls(photoUrls);
         if (result.success) {
           setVehiclePhotoUrls(result.data);
-          console.log("Vehicle photo presigned URLs fetched successfully");
         } else {
-          console.error("Failed to fetch presigned URLs:", result.error);
+          logger.error("Failed to fetch presigned URLs:", result.error);
         }
       } catch (error) {
-        console.error("Error fetching vehicle photo presigned URLs:", error);
+        logger.error("Error fetching vehicle photo presigned URLs:", error);
       }
     };
 
@@ -154,7 +149,7 @@ const CoverageDetailedView = () => {
           setExistingPolicy(response.data.data[0]);
         }
       } catch (error) {
-        console.error(
+        logger.error(
           "Failed to resolve existing policy for coverage view:",
           error
         );
@@ -225,10 +220,6 @@ const CoverageDetailedView = () => {
 
     // Check if policy already exists (loaded by useEffect)
     if (existingPolicy) {
-      console.log(
-        "✅ Policy already exists, navigating to policy approval:",
-        existingPolicy.policyId
-      );
       // Navigate directly to policy approval page
       navigate("/agent/policyapproval", {
         state: {
@@ -249,10 +240,6 @@ const CoverageDetailedView = () => {
     // No existing policy - proceed with conversion
     try {
       setIsProcessing(true);
-
-      console.log("=== SENDING TO INSURANCE COMPANY ===");
-      console.log("Quotation ID:", resolvedQuotationId);
-      console.log("Creating client and policy with Pending payment status...");
 
       // Prepare the complete policy data
       const policyPayload = {
@@ -288,28 +275,19 @@ const CoverageDetailedView = () => {
 
         setExistingPolicy(policyRecord);
 
-        console.log("Policy created successfully:", {
-          policyId: createdPolicyId,
-          clientId: createdClientId,
-          leadId: quotData?.leadRefId,
-        });
-
         // Send email to customer and insurance company
         try {
-          console.log("Sending policy quote email to customer...");
           const emailResult = await quotationService.emailPolicyQuoteToCustomer(
             resolvedQuotationId,
             createdPolicyId
           );
 
-          if (emailResult.success) {
-            console.log("Email sent successfully");
-          } else {
-            console.warn("Email failed but continuing:", emailResult.error);
+          if (!emailResult.success) {
+            logger.warn("Email failed but continuing:", emailResult.error);
           }
         } catch (emailError) {
-          console.error("Failed to send email (non-blocking):", emailError);
-          // Don't fail the entire flow if email fails
+          // The policy is issued; a failed e-mail must not stop the flow.
+          logger.error("Failed to send email (non-blocking):", emailError);
         }
 
         toast.current?.show({
@@ -339,7 +317,7 @@ const CoverageDetailedView = () => {
         throw new Error(result.error || t("coverageDetailsReview.failedToCreateClientPolicy"));
       }
     } catch (error) {
-      console.error("Send to insurance company error:", error);
+      logger.error("Send to insurance company error:", error);
       toast.current?.show({
         severity: "error",
         summary: t("common.error"),
@@ -352,16 +330,6 @@ const CoverageDetailedView = () => {
   };
 
   const handleProceedToPayment = () => {
-    console.log("=== PROCEEDING TO PAYMENT ===");
-    console.log("Quotation ID:", resolvedQuotationId);
-    console.log("All collected data:", {
-      customerInfo,
-      vehiclePhotos,
-      additionalPolicyData,
-      quotation: quotationData,
-    });
-    console.log("===========================");
-
     // Navigate to payment options with all collected data
     navigate(`/agent/quote/paymentoptions/${resolvedQuotationId}`, {
       state: {

@@ -90,7 +90,6 @@ const BankChequeMaster = () => {
     navigate("/master/finance/bankcheque/addbankcheque");
   };
   const handleArrowClick = (data) => {
-    console.log("first", data);
     navigate("/master/finance/bankcheque/bankchequedetails");
   };
   const handleEditClick = () => {

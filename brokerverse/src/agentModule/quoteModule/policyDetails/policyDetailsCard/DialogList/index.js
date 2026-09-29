@@ -38,15 +38,12 @@ const DialogList = ({ setVisible, visible }) => {
   );
   const dispatch = useDispatch();
   const handleclick = (values) => {
-
-    console.log(values, "action");
     setVisible(false)
     formik.resetForm()
     const valueWithId = {
       ...values,
       id: TableList?.length + 1,
     };
-    console.log(valueWithId, "action with valuesP")
     dispatch(postModleDetailsMiddleware(valueWithId));
     // {
     //   action === "quotedetails"
@@ -55,7 +52,6 @@ const DialogList = ({ setVisible, visible }) => {
     // }
   };
 
-
   const formik = useFormik({
     initialValues: initialValue,
     // validate: customValidation,
@@ -63,7 +59,6 @@ const DialogList = ({ setVisible, visible }) => {
       handleclick(values);
     },
   });
-
 
   return (
     <div>
@@ -75,7 +70,6 @@ const DialogList = ({ setVisible, visible }) => {
               value={formik.values.ParticipantName}
               options={InsurancePolicycontainer}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("ParticipantName", e.value);
               }}
               optionLabel="label"
@@ -91,7 +85,6 @@ const DialogList = ({ setVisible, visible }) => {
               value={formik.values.SumInsuredcurrency}
               options={pesoTypes}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("SumInsuredcurrency", e.value);
               }}
               optionLabel="label"
@@ -104,7 +97,6 @@ const DialogList = ({ setVisible, visible }) => {
               value={formik.values.Premiumcurrencys}
               options={PremiumCurrency}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("Premiumcurrencys", e.value);
               }}
               optionLabel="label"
@@ -132,7 +124,6 @@ const DialogList = ({ setVisible, visible }) => {
             {t("common.save")}
           </Button>
         </div>
-
 
       </Dialog>
     </div>

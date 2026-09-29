@@ -38,7 +38,6 @@ const PaidListTabelData = () => {
       paymentPaidSearchList: agentPaymentMainReducers?.paymentPaidSearchList,
     };
   });
-  console.log(paymentPaidSearchList, "paymentPaidSearchList  ");
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("PolicyNumber");

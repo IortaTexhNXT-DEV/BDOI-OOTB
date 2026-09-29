@@ -27,8 +27,6 @@ class BillingService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-      console.log(`Generating billing statement for policy: ${policyId}`);
-
       const response = await fetch(
         `${this.baseURL}/billing-statement/policy/${policyId}/generate`,
         {
@@ -73,7 +71,6 @@ class BillingService {
         },
       };
     } catch (error) {
-      console.error("Generate policy billing statement error:", error);
       return {
         success: false,
         error:
@@ -128,7 +125,6 @@ class BillingService {
         data: data,
       };
     } catch (error) {
-      console.error("Preview endorsement billing error:", error);
       return {
         success: false,
         error:
@@ -163,10 +159,6 @@ class BillingService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-      console.log(
-        `Generating endorsement billing statement for ${useEndorsementId ? "endorsement" : "policy"}: ${id}`
-      );
 
       const response = await fetch(
         `${this.baseURL}/billing-statement/endorsement/${id}/generate`,
@@ -212,7 +204,6 @@ class BillingService {
         },
       };
     } catch (error) {
-      console.error("Generate endorsement billing statement error:", error);
       return {
         success: false,
         error:
@@ -240,10 +231,6 @@ class BillingService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-      console.log(
-        `Generating renewal billing statement for policy: ${policyId}`
-      );
 
       const response = await fetch(
         `${this.baseURL}/billing-statement/renewal/${policyId}/generate`,
@@ -289,7 +276,6 @@ class BillingService {
         },
       };
     } catch (error) {
-      console.error("Generate renewal billing statement error:", error);
       return {
         success: false,
         error:

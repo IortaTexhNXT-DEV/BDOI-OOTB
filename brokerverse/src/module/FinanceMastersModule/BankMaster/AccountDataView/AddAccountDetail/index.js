@@ -55,7 +55,6 @@ function AddAccountDetail() {
       AccountDetailsList: bankMasterReducer?.AccountDetailsList,
     };
   });
-  console.log(AccountDetailsList, "AccountDetailsList");
 
   const customValidation = (values) => {
     const errors = {};

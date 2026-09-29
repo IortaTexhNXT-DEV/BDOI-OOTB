@@ -19,6 +19,7 @@ import policyService from "../../../../services/policyService";
 import { useSelector } from "react-redux";
 import quotationService from "../../../../services/quotationService";
 import { notifyError, notifyWarn } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 
 const UploadPolicyCard = ({
   state,
@@ -98,7 +99,7 @@ const UploadPolicyCard = ({
           setResolvedPolicyData(response.data);
         }
       } catch (error) {
-        console.error(
+        logger.error(
           "Failed to fetch policy details for upload screen:",
           error
         );
@@ -177,7 +178,6 @@ const UploadPolicyCard = ({
     const quotationId = propQuotationId || urlQuotationId || detailsQuotationId;
 
     if (!quotationId) {
-      console.error("❌ Quotation ID not found");
       notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
@@ -194,9 +194,6 @@ const UploadPolicyCard = ({
     }
 
     try {
-      console.log("=== PAY LATER FLOW ===");
-      console.log("Updating existing policy:", existingPolicyId);
-
       // Update the existing policy with new details
       const updatePayload = {
         policyNumber: additionalPolicyData.policyNumber,
@@ -235,12 +232,10 @@ const UploadPolicyCard = ({
       // and the payment is captured later on the policy payment screen.
       const payLater = await policyService.recordPayLater(existingPolicyId);
       if (!payLater.success) {
-        console.warn("Pay later could not be recorded:", payLater.error);
+        logger.warn("Pay later could not be recorded:", payLater.error);
       }
-      console.log("Policy updated (pay later):", policyData?.policyNumber);
       navigate(`/agent/policydetail/${existingPolicyId}`, {});
     } catch (error) {
-      console.error("Failed to update policy (Pay Later):", error);
       notifyError(
         `Error: ${error.message || "Failed to process. Please try again."}`
       );
@@ -313,7 +308,6 @@ const UploadPolicyCard = ({
     const quotationId = propQuotationId || urlQuotationId || detailsQuotationId;
 
     if (!quotationId) {
-      console.error("❌ Quotation ID not found");
       notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
@@ -359,14 +353,12 @@ const UploadPolicyCard = ({
         paymentStatus: "Pending",
       });
     } catch (error) {
-      console.error("Failed to update policy with uploaded details:", error);
+      logger.error("Failed to update policy with uploaded details:", error);
     }
 
     // Prepare complete policy data for payment flow
     const completePolicyForPayment =
       resolvedPolicyData || state?.policyData || {};
-
-    // Log premium data for verification
 
     navigate(`/agent/policy/paymentoptions/${existingPolicyId}`, {
       state: {
@@ -776,11 +768,6 @@ const UploadPolicyCard = ({
             formik.setFieldValue("file", "");
           }}
           onUploadSuccess={(url, file) => {
-            console.log("=== S3 Upload Success Callback ===");
-            console.log("URL param:", url);
-            console.log("File param:", file);
-            console.log("URL type:", typeof url);
-
             // Extract URL from various possible formats
             let documentUrl = null;
 
@@ -793,24 +780,16 @@ const UploadPolicyCard = ({
                 url.url || url.data?.url || url.key || url.data?.key;
             }
 
-            console.log("Final extracted URL:", documentUrl);
-
             if (!documentUrl) {
-              console.error(
-                "❌ Failed to extract URL. Full object:",
-                JSON.stringify(url, null, 2)
-              );
               notifyError(t("agent.uploadUrlFailed"));
               return;
             }
 
-            console.log("✅ Setting policy document URL:", documentUrl);
             setPolicyDocumentUrl(documentUrl);
             formik.setFieldValue("file", documentUrl);
             setShowUploadError(false);
           }}
           onUploadError={(error) => {
-            console.error("Policy document upload error:", error);
             notifyError(t("agent.uploadFailed") + ": " + error.message);
           }}
         />

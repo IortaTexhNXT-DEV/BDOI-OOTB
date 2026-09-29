@@ -33,6 +33,7 @@ import { Toast } from "primereact/toast";
 import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const CONVERTED = "Converted";
 
@@ -244,10 +245,10 @@ const PolicyReceipts = () => {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -255,12 +256,6 @@ const PolicyReceipts = () => {
 
     fetchClients();
   }, []);
-
-  // Handle bulk print response
-  useEffect(() => {
-    if (bulkPrintData && bulkPrintData.success) {
-    }
-  }, [bulkPrintData]);
 
   // Handle bulk print error from Redux state - only when there's an actual error from bulk print operation
   useEffect(() => {
@@ -530,9 +525,9 @@ const PolicyReceipts = () => {
         });
       }
     } catch (error) {
-      console.error("Bulk print error:", error);
-      console.error("Error type:", typeof error);
-      console.error("Error structure:", JSON.stringify(error, null, 2));
+      logger.error("Bulk print error:", error);
+      logger.error("Error type:", typeof error);
+      logger.error("Error structure:", JSON.stringify(error, null, 2));
 
       // Only handle non-"No data found" errors here
       // "No data found" errors are handled by the Redux state useEffect
@@ -609,7 +604,7 @@ const PolicyReceipts = () => {
           }}
         >
           <span style={{ color: "#1976d2", fontWeight: "500" }}>
-            📋 {t("accounts.receipts.filteredByPolicyId")} {policyId}
+            {t("accounts.receipts.filteredByPolicyId")} {policyId}
           </span>
           <button
             onClick={() => navigate("/accounts/receipts")}

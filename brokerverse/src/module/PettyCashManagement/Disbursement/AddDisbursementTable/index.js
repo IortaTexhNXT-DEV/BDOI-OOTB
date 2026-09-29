@@ -23,7 +23,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 
 const initialValue = {
-
   PettycashCode: "",
   RequestNumber: "",
   RequesterName: "",
@@ -88,7 +87,6 @@ const AddDisbursementTable = () => {
     }, 2000);
   };
 
-
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -109,11 +107,9 @@ const AddDisbursementTable = () => {
 
   const handlehide = () => {
     setVisible(false)
-    console.log("first8", formAction)
     // // {formAction === "add" &&  }
     // formik.resetForm()
   }
-
 
   const handleBack = () => {
     navigate("/accounts/pettycash/adddisbursement");
@@ -148,7 +144,6 @@ const AddDisbursementTable = () => {
     // if (formAction === "Edit") {
     dispatch(getPatchDisbursementData(data))
     // }
-    console.log(data, "sata");
     setformAction("Edit");
     setModuleData({ ...data });
     setVisible(true);
@@ -157,7 +152,6 @@ const AddDisbursementTable = () => {
     setformAction("Add");
     setaddVisible(true);
     formik.resetForm()
-
   };
   const validate = (values) => {
     const errors = {};
@@ -175,7 +169,6 @@ const AddDisbursementTable = () => {
 
   const handleSubmit = (value) => {
     // alert("hii")
-    console.log(value, "valuevalue");
     if (formAction === "Edit") {
       dispatch(postPatchDisbursementData(value));
       setVisible(false);
@@ -207,9 +200,6 @@ const AddDisbursementTable = () => {
     initialValues: initialValue,
     onSubmit: handleSubmit
   });
-
-
-
 
   const { expenseAccounts, subAccounts } = usePettyCashOptions();
   const AddDisbursmentRequestTable = useSelector(
@@ -246,7 +236,6 @@ const AddDisbursementTable = () => {
       Departmentcode: getPatchDisbursment?.Departmentcode,
       TotalAmount: getPatchDisbursment?.TotalAmount,
       Date: getPatchDisbursment?.Date,
-
     };
     if (RequestNumberData) {
       setRequestNumberOptionData([{ label: RequestNumberData, value: RequestNumberData }])
@@ -265,15 +254,11 @@ const AddDisbursementTable = () => {
   };
 
   useEffect(() => {
-    console.log("first9",formAction)
 if(formAction === "Edit" ){
   SetFormikValue();
 }
-    
 
   }, [getPatchDisbursment]);
-
-
 
   const template2 = {
     layout:
@@ -498,7 +483,6 @@ if(formAction === "Edit" ){
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 // value={formAction === "Add" ? formik.values.RequestNumber : formAction === "Edit" && formik.values.RequestNumber}
                 options={formAction === "Edit" ? RequestNumberOptionData : item
-
                 }
                 value={formik.values.RequestNumber}
                 disabled={formAction === "Edit" ? true : false}
@@ -650,8 +634,6 @@ if(formAction === "Edit" ){
         </div>
       </Dialog>
 
-
-
       {/* add */}
 
       <Dialog
@@ -682,7 +664,6 @@ if(formAction === "Edit" ){
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 // value={formAction === "Add" ? formik.values.RequestNumber : formAction === "Edit" && formik.values.RequestNumber}
                 options={formAction === "Edit" ? RequestNumberOptionData : item
-
                 }
                 value={formik.values.RequestNumber}
                 disabled={formAction === "Edit" ? true : false}

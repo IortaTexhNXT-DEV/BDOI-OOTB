@@ -40,7 +40,6 @@ const ClaimDocumentUpload = () => {
       value: claimDocumentUploadData.country,
     },
   ];
-  console.log(claimDocumentUploadData, "claimDocumentUploadData");
   const Navigate = useNavigate();
   const clientId =
     location.state?.clientId || claimDocumentUploadData?.clientId;

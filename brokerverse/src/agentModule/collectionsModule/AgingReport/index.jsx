@@ -10,6 +10,7 @@ import { Column } from "primereact/column";
 import { useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const AgingReport = () => {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ const AgingReport = () => {
         setReportData(result.data);
       }
     } catch (error) {
-      console.error("Load aging report error:", error);
+      logger.error("Load aging report error:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),

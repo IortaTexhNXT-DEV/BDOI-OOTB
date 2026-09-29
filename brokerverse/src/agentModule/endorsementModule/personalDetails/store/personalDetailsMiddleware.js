@@ -28,7 +28,6 @@ export const getEndorsementPolicyDetailsMiddleware = createAsyncThunk(
     } catch (error) {
       const message =
         error?.message || "Failed to fetch policy endorsement details";
-      console.error("Endorsement policy details middleware error:", message);
       return rejectWithValue(message);
     }
   }

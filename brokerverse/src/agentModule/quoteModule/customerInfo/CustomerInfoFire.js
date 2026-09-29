@@ -19,6 +19,7 @@ import quotationService from "../../../services/quotationService";
 import placementService from "../../../services/placementService";
 
 import { numberLocale } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 const CustomerInfoFire = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -71,7 +72,7 @@ const CustomerInfoFire = ({ action }) => {
         const response = await leadService.getLeadById(quotationDetails.leadRefId);
         if (response.success) setLeadData(response.data);
       } catch (error) {
-        console.error("Error fetching lead data:", error);
+        logger.error("Error fetching lead data:", error);
       }
     };
     fetchLeadData();
@@ -183,7 +184,7 @@ const CustomerInfoFire = ({ action }) => {
         });
       }, 500);
     } catch (error) {
-      console.error("Failed to convert quotation to policy:", error);
+      logger.error("Failed to convert quotation to policy:", error);
       toast.current?.show({
         severity: "error",
         summary: t("common.error"),

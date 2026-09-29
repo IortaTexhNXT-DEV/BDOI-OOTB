@@ -13,13 +13,12 @@ import {
 } from "../../../redux/actionTypes";
 import leadService from "../../../services/leadService";
 import { toIsoDate } from "../../../utility/birthDate";
+import logger from "../../../utility/logger";
 
 export const getleadtableMiddleware = createAsyncThunk(
   GET_LEADTABLE_DATA,
   async (params = {}, { rejectWithValue }) => {
     try {
-      console.log('Fetching leads with params:', params);
-      
       const result = await leadService.getAllLeads(params);
       
       if (result.success) {
@@ -33,7 +32,6 @@ export const getleadtableMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error('Get leads middleware error:', error);
       return rejectWithValue(error?.message || 'Failed to fetch leads');
     }
   }
@@ -49,8 +47,6 @@ export const getLeadDataMiddleware = createAsyncThunk(
 export const postCreateleadMiddleware = createAsyncThunk(
   POST_CREATELEAD_DATA,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload, "find add datas in midd");
-    
     try {
       // Transform the form data to match the API payload structure
       const apiPayload = {
@@ -78,13 +74,11 @@ export const postCreateleadMiddleware = createAsyncThunk(
             const userData = JSON.parse(localStorage.getItem('user') || '{}');
             return userData?.username || userData?.name || userData?.employeeCode || "admin";
           } catch (error) {
-            console.warn('Error getting user data from localStorage:', error);
+            logger.warn('Error getting user data from localStorage:', error);
             return "admin";
           }
         })() // Dynamic user from localStorage
       };
-
-      console.log("API Payload:", apiPayload);
 
       // Call the actual API service
       const result = await leadService.createLead(apiPayload);
@@ -95,7 +89,6 @@ export const postCreateleadMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Create lead middleware error:", error);
       return rejectWithValue(error?.message || "Failed to create lead");
     }
   }
@@ -112,7 +105,6 @@ export const postFireCreateleadMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Create Fire lead middleware error:", error);
       return rejectWithValue(error?.message || "Failed to create Fire lead");
     }
   }
@@ -121,8 +113,6 @@ export const postFireCreateleadMiddleware = createAsyncThunk(
 export const patchLeadEditMiddleWare = createAsyncThunk(
   PATCH_LEADEDIT_DATA,
   async ({ leadId, payload }, { rejectWithValue, getState }) => {
-    console.log('Updating lead:', leadId, 'with payload:', payload);
-    
     try {
       // Transform the form data to match the API payload structure
       const apiPayload = {
@@ -150,13 +140,11 @@ export const patchLeadEditMiddleWare = createAsyncThunk(
             const userData = JSON.parse(localStorage.getItem('user') || '{}');
             return userData?.username || userData?.name || userData?.employeeCode || "admin";
           } catch (error) {
-            console.warn('Error getting user data from localStorage:', error);
+            logger.warn('Error getting user data from localStorage:', error);
             return "admin";
           }
         })() // Dynamic user from localStorage
       };
-
-      console.log("Update API Payload:", apiPayload);
 
       // Call the actual API service
       const result = await leadService.updateLead(leadId, apiPayload);
@@ -167,7 +155,6 @@ export const patchLeadEditMiddleWare = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Update lead middleware error:", error);
       return rejectWithValue(error?.message || 'Failed to update lead');
     }
   }
@@ -175,10 +162,8 @@ export const patchLeadEditMiddleWare = createAsyncThunk(
 export const getPaymentSearchDataMiddleWare = createAsyncThunk(
   GET_PAYMENT_SEARCH,
   async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "data find");
     const { leadReducers } = getState();
     const { leadtabledata } = leadReducers;
-    console.log(leadReducers, "leadReducers");
 
     function filterPaymentsByField(data, field, value) {
       const lowercasedValue = value.toLowerCase();
@@ -201,7 +186,6 @@ export const getPaymentSearchDataMiddleWare = createAsyncThunk(
         field,
         value
       );
-      console.log(filteredPayments, "filteredPayments");
       return filteredPayments;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);
@@ -212,7 +196,6 @@ export const getPaymentSearchDataMiddleWare = createAsyncThunk(
 export const getLeadEditDataMiddleWare = createAsyncThunk(
   GET_LEAD_EDIT_DATA,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
     try {
       return payload;
     } catch (error) {
@@ -224,7 +207,6 @@ export const getLeadEditDataMiddleWare = createAsyncThunk(
 export const getleadcompanydataMiddleware = createAsyncThunk(
   GET_LEAD_COMPANY_DATA,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
     try {
       return payload;
     } catch (error) {
@@ -237,8 +219,6 @@ export const getLeadByIdMiddleware = createAsyncThunk(
   'GET_LEAD_BY_ID',
   async (leadId, { rejectWithValue }) => {
     try {
-      console.log('Fetching lead by ID:', leadId);
-      
       const result = await leadService.getLeadById(leadId);
       
       if (result.success) {
@@ -247,7 +227,6 @@ export const getLeadByIdMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error('Get lead by ID middleware error:', error);
       return rejectWithValue(error?.message || 'Failed to fetch lead');
     }
   }
@@ -257,8 +236,6 @@ export const deleteLeadMiddleware = createAsyncThunk(
   DELETE_LEAD_DATA,
   async (leadId, { rejectWithValue }) => {
     try {
-      console.log('Deleting lead:', leadId);
-      
       const result = await leadService.deleteLead(leadId);
       
       if (result.success) {
@@ -267,7 +244,6 @@ export const deleteLeadMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error('Delete lead middleware error:', error);
       return rejectWithValue(error?.message || 'Failed to delete lead');
     }
   }
@@ -277,8 +253,6 @@ export const getLeadStatsMiddleware = createAsyncThunk(
   GET_LEAD_STATS,
   async (filters = {}, { rejectWithValue }) => {
     try {
-      console.log('Fetching lead statistics with filters:', filters);
-      
       const result = await leadService.getLeadStats(filters);
       
       if (result.success) {
@@ -287,7 +261,6 @@ export const getLeadStatsMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error('Get lead stats middleware error:', error);
       return rejectWithValue(error?.message || 'Failed to fetch lead statistics');
     }
   }

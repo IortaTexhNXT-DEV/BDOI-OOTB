@@ -125,7 +125,6 @@ const OpenItems = () => {
     navigate("/agent/payments");
   };
   const handleDateSelect = (info) => {
-    console.log("Selected dates:", info.start, info.end);
   };
   const handleHomeNavigation = () => {
     navigate("/");

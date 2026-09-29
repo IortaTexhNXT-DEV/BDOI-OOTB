@@ -40,7 +40,6 @@ function PolicyReceipts() {
   const { t } = useTranslation();
   const location = useLocation();
   const totalFC = location.state?.totalFC;
-  console.log("totalFC", totalFC)
   const toastRef = useRef(null);
   const [selectedProducts, setSelectedProducts] = useState(false);
   const [products, setProducts] = useState("Approve");
@@ -75,7 +74,6 @@ function PolicyReceipts() {
   };
 
   const validate = (values) => {
-    console.log(values, "sss");
     const errors = {};
 
     if (!values.bankcode) {
@@ -133,7 +131,6 @@ function PolicyReceipts() {
           navigate("/accounts/receipts");
         }, 1000);
       } catch (error) {
-        console.error("Error printing receipt:", error);
         showErrorMessage(
           error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
           t("common.error")
@@ -205,12 +202,10 @@ function PolicyReceipts() {
     options.find((option) => option.value === value)?.label || "";
 
   // const setFormikValues = (totalFC) => {
-
   //   const updatedValues = {
   //     totalPayment: totalFC,
 
   //   };
-
 
   //   formik.setValues({ ...formik.values, ...updatedValues });
   // };
@@ -218,7 +213,6 @@ function PolicyReceipts() {
   // useEffect(() => {
   //   setFormikValues()
   // }, [])
-
 
   const headerStyle = {
     fontSize: 16,

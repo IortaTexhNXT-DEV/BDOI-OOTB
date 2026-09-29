@@ -175,7 +175,6 @@ const QuoteListingCard = () => {
         })
       );
     } catch (error) {
-      console.error("Failed to delete quotations:", error);
       notifyError(t("quoteListing.failedToDeleteQuotations", { error: error?.message || error }));
     }
   };
@@ -448,8 +447,6 @@ const QuoteListingCard = () => {
 
   const handleEdit = async (rowData) => {
     try {
-      console.log("Editing quotation:", rowData.quotationId);
-
       // First, clear any existing quote creation state
       dispatch(clearCurrentQuoteCreation());
 
@@ -459,8 +456,6 @@ const QuoteListingCard = () => {
       );
 
       if (result.type.endsWith("/fulfilled")) {
-        console.log("Quotation details fetched:", result.payload);
-
         const quotationData = result.payload;
         const isIarLOB =
           quotationData?.productType === "Industrial All Risks" ||
@@ -485,13 +480,11 @@ const QuoteListingCard = () => {
           `/agent/editquote/policydetails/quotedetails/${rowData.quotationId}`
         );
       } else if (result.type.endsWith("/rejected")) {
-        console.error("Failed to fetch quotation details:", result.payload);
         notifyError(
           t("quoteListing.failedToFetchQuotationError", { error: result.payload || "Unknown error" })
         );
       }
     } catch (error) {
-      console.error("Unexpected error:", error);
       notifyError(t("quoteListing.unexpectedErrorFetching"));
     }
   };
@@ -504,8 +497,6 @@ const QuoteListingCard = () => {
       );
 
       if (!confirmConvert) return;
-
-      console.log("Converting quotation to policy:", rowData.quotationId);
 
       const isIarLOB =
         rowData.productType === "Industrial All Risks" ||
@@ -525,7 +516,6 @@ const QuoteListingCard = () => {
         state: { quotation: rowData },
       });
     } catch (error) {
-      console.error("Unexpected error:", error);
       notifyError(t("quoteListing.unexpectedErrorConverting"));
     }
   };
@@ -539,18 +529,15 @@ const QuoteListingCard = () => {
 
       if (result.type.endsWith("/fulfilled")) {
         const quotationData = result.payload;
-        console.log("Full quotation data fetched for view:", quotationData);
 
         // Navigate to quote detail view with full data
         navigate("/agent/quotedetailview", {
           state: { quotationData: quotationData },
         });
       } else {
-        console.error("Failed to fetch quotation details:", result.payload);
         notifyError(t("quoteListing.failedToLoadQuotation"));
       }
     } catch (error) {
-      console.error("Error fetching quotation details:", error);
       notifyError(t("quoteListing.errorLoadingQuotation"));
     }
   };

@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "primereact/button";
 import "./index.scss";
+import logger from "../../utility/logger";
 
 /**
  * Catches rendering errors in a screen so one faulty screen shows a clear message instead of a blank
@@ -24,7 +25,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     // eslint-disable-next-line no-console
-    console.error("Screen error", error, info?.componentStack);
+    logger.error("Screen error", error, info?.componentStack);
   }
 
   render() {

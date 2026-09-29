@@ -72,11 +72,6 @@ class PolicyService {
       }
       if (filters.lob) params.append("lob", filters.lob);
 
-      console.log(
-        `Fetching policies - Page: ${page}, PageSize: ${pageSize}, Filters:`,
-        filters
-      );
-
       const response = await fetch(
         `${this.baseURL}/policies?${params.toString()}`,
         {
@@ -99,14 +94,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Policies API response:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get policies error:", error);
       return {
         success: false,
         error:
@@ -155,7 +148,6 @@ class PolicyService {
         data,
       };
     } catch (error) {
-      console.error("Update policy error:", error);
       return {
         success: false,
         error:
@@ -183,8 +175,6 @@ class PolicyService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log(`Fetching policy details for: ${policyId}`);
-
       const response = await fetch(`${this.baseURL}/policies/${policyId}`, {
         method: "GET",
         headers: {
@@ -204,14 +194,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Policy details API response:", data);
 
       return {
         success: true,
         data,
       };
     } catch (error) {
-      console.error("Get policy details error:", error);
       return {
         success: false,
         error:
@@ -283,7 +271,7 @@ class PolicyService {
       id: apiPolicy.policyId,
       policyId: apiPolicy.policyId,
 
-      // Client information (FIXED)
+      // Client information
       ClientId: client.clientId || apiPolicy.clientId || "N/A",
       // Client code shown to users (CL-2026-00001); ClientId stays the internal id used for API calls
       ClientCode:
@@ -297,7 +285,7 @@ class PolicyService {
       clientId: apiPolicy.clientId,
       client: client,
 
-      // Payment status (FIXED)
+      // Payment status
       Payment: apiPolicy.paymentStatus || "Pending",
       paymentStatus: apiPolicy.paymentStatus,
 
@@ -400,7 +388,6 @@ class PolicyService {
         data: data,
       };
     } catch (error) {
-      console.error("Get policy endorsement details error:", error);
       return {
         success: false,
         error:
@@ -494,7 +481,6 @@ class PolicyService {
         coverage: transformedCoverage,
       };
     } catch (error) {
-      console.error("Get policy renewal coverage error:", error);
       return {
         success: false,
         error:
@@ -553,7 +539,6 @@ class PolicyService {
         message: responseData?.message || "",
       };
     } catch (error) {
-      console.error("Create policy renewal error:", error);
       return {
         success: false,
         error:
@@ -639,14 +624,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Payment status updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update payment status error:", error);
       return {
         success: false,
         error: error.message || "Failed to update payment status",
@@ -699,7 +682,6 @@ class PolicyService {
         message: responseData?.message || "",
       };
     } catch (error) {
-      console.error("Update policy renewal error:", error);
       return {
         success: false,
         error:
@@ -846,8 +828,6 @@ class PolicyService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
 
-      console.log("Uploading policies file:", file.name);
-
       const formData = new FormData();
       formData.append("file", file);
 
@@ -869,14 +849,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Policies bulk upload completed:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Bulk upload policies error:", error);
       return {
         success: false,
         error:

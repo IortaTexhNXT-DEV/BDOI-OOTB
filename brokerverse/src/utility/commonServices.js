@@ -8,11 +8,9 @@ export const getRequest = async (url, params) => {
 };
 
 export const postRequest = async (url, payload, params) => {
-  console.log("first");
   const res = await request.post(url, payload, {
     params,
   });
-  console.log(res, "=======>");
   return res;
 };
 

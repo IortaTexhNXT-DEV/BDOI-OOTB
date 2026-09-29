@@ -9,6 +9,7 @@ import {
 import "./style.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
+import logger from "../../../utility/logger";
 
 const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
 
@@ -32,7 +33,7 @@ const CommissionDashboard = () => {
       const res = await CommissionService.getDashboard();
       setData(res?.data || res);
     } catch (err) {
-      console.error("Failed to load commission dashboard", err);
+      logger.error("Failed to load commission dashboard", err);
       setData(null);
     } finally {
       setLoading(false);

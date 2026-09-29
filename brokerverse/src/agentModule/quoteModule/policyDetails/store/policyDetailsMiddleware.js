@@ -6,8 +6,6 @@ import {
 export const postPolicyDetailsMiddleware = createAsyncThunk(
   POST_POLICY_DETAILS,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload, "find add datas in leo");
-
     try {
       // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
@@ -20,8 +18,6 @@ export const postPolicyDetailsMiddleware = createAsyncThunk(
 export const postModleDetailsMiddleware = createAsyncThunk(
   POST_ADD_MODLE,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "postAddCountryMiddleware");
-
     const dataTable = {
       id: payload?.id,
       ParticipantName: payload?.ParticipantName,
@@ -31,7 +27,6 @@ export const postModleDetailsMiddleware = createAsyncThunk(
       premium: payload?.premium,
       sumInsured: payload?.sumInsured
     }
-    console.log(dataTable, "dataTable")
     try {
       // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return dataTable;

@@ -20,7 +20,6 @@ const TaxationDetails = () => {
       taxationView: taxationMainReducers?.taxationView,
     };
   });
-  console.log(taxationView.effectiveFrom, "taxationView");
   const navigate = useNavigate();
   const items = [
     { label: t("financeMasters.taxationMaster"), url: "/master/finance/taxation" },

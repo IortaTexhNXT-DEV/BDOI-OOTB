@@ -45,7 +45,6 @@ const UserGroupAccess = () => {
   const handleEdit = (columnData) => {
     setShowEdit(true);
     dispatch(getUserEditData(columnData));
-    console.log(columnData, "columnData");
   };
   const navigate = useNavigate();
   const isEmpty = products.length === 0;
@@ -143,7 +142,6 @@ const UserGroupAccess = () => {
   });
 
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const headerStyle = {

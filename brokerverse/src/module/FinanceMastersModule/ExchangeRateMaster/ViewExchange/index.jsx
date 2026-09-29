@@ -41,7 +41,6 @@ function ViewExchange() {
       };
     }
   );
-  console.log(ExchangeDetailView.EffectiveFrom, "ExchangeDetailView");
   const [date, setDate] = useState(null);
   const Navigate = useNavigate();
   const [departmentcode, setDepartmentCode] = useState(null);
@@ -103,7 +102,6 @@ function ViewExchange() {
   const effectiveFromDate = ExchangeDetailView.EffectiveFrom;
   const effectiveToDate = ExchangeDetailView.EffectiveTo;
 
-  console.log(effectiveFromDate, effectiveToDate, "effectiveToDate");
   const formik = useFormik({
     initialValues: initialValues,
     validate: customValidation,

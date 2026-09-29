@@ -27,6 +27,7 @@ import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import mastersService from "../../../services/mastersService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 function Bankdetailselection() {
   const { t } = useTranslation();
@@ -105,18 +106,17 @@ function Bankdetailselection() {
               })
             );
             setCheckbookList(transformedCheckbooks);
-            console.log("Transformed checkbook data:", transformedCheckbooks);
           }
         } else {
-          console.error("Failed to fetch invoice list:", result.error);
+          logger.error("Failed to fetch invoice list:", result.error);
         }
       } catch (error) {
-        console.error("Error fetching checkbook details:", error);
+        logger.error("Error fetching checkbook details:", error);
       } finally {
         setLoading(false);
       }
     } else {
-      console.warn("No invoice IDs selected");
+      logger.warn("No invoice IDs selected");
       setLoading(false);
     }
   };
@@ -271,9 +271,6 @@ function Bankdetailselection() {
   useEffect(() => {
     if (actionToast != null) {
       toastRef.current.showToast();
-      {
-        setTimeout(() => {}, 3000);
-      }
     }
   }, [actionToast]);
 
@@ -331,7 +328,7 @@ function Bankdetailselection() {
           );
         }
       } catch (error) {
-        console.error("Error approving agent payout:", error);
+        logger.error("Error approving agent payout:", error);
         toastRef.current?.showToast(
           "error",
           t("common.error"),
@@ -342,7 +339,7 @@ function Bankdetailselection() {
     }
 
     if (!selectedProducts || !selectedProducts.rawData) {
-      console.error("No checkbook selected");
+      logger.error("No checkbook selected");
       return;
     }
     const checkbookData = selectedProducts.rawData;
@@ -386,7 +383,7 @@ function Bankdetailselection() {
           });
 
         if (!disbursementUpdateResult.success) {
-          console.error(
+          logger.error(
             "Failed to update disbursement:",
             disbursementUpdateResult.error
           );
@@ -426,7 +423,7 @@ function Bankdetailselection() {
           setTotalAmount("");
           await fetchCheckbookDetails();
         } else {
-          console.error("Failed to update checkbook:", result.error);
+          logger.error("Failed to update checkbook:", result.error);
           toastRef.current?.showToast({
             severity: "error",
             summary: t("common.error"),

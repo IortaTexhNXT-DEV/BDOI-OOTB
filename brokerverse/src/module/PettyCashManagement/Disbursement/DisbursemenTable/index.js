@@ -42,7 +42,6 @@ const DisbursementTable = () => {
     }
   );
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(
@@ -113,7 +112,6 @@ const DisbursementTable = () => {
   const handleView = (rowData) => {
     dispatch(getDisbursmentViewMiddleware(rowData));
     // dispatch(getDisbursmentSearchMiddleware(rowData));
-    console.log("View clicked:", rowData);
     navigate("/accounts/pettycash/disbursementdetailview");
   };
   const headerStyle = {

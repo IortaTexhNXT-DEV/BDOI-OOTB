@@ -115,19 +115,12 @@ export const transformToBackendFormat = (
   // Add participant details - handle both single insurer and co-insurance scenarios
 
   if (policyDetails?.isCoInsurance) {
-    console.log(
-      "✅ Co-insurance enabled: Building participant array with primary + co-insurers"
-    );
-
     // Build participant array with PRIMARY insurer first
     const participants = [];
 
     // Add primary insurer from form field
     if (policyDetails.insuranceCompanyName) {
       const primaryShare = policyDetails.primarySharePercentage || "50";
-      console.log(
-        `  → Adding primary insurer: ${policyDetails.insuranceCompanyName} (${primaryShare}%)`
-      );
 
       participants.push({
         insuranceCompanyName: policyDetails.insuranceCompanyName,
@@ -137,18 +130,10 @@ export const transformToBackendFormat = (
         sharePercentage: primaryShare,
         isLead: true, // the primary insurer is the lead of the co-insurance (validated on the server)
       });
-    } else {
-      console.log(
-        "  ⚠️ Warning: Co-insurance enabled but no primary insuranceCompanyName provided"
-      );
     }
 
     // Add co-insurers from participant table
     if (policyDetails.participantDetails?.length > 0) {
-      console.log(
-        `  → Adding ${policyDetails.participantDetails.length} co-insurer(s) from participant table`
-      );
-
       const coInsurers = policyDetails.participantDetails.map((p, index) => {
         const coInsurer = {
           insuranceCompanyName:
@@ -162,29 +147,16 @@ export const transformToBackendFormat = (
           premiumCurrency: p.premiumCurrency || p.Premiumcurrencys || defaultCurrency(),
           sharePercentage: p.sharePercentage || p.Sharepercentage || null,
         };
-        console.log(
-          `    [${index}] ${coInsurer.insuranceCompanyName} - ${coInsurer.sharePercentage}%`
-        );
         return coInsurer;
       });
 
       participants.push(...coInsurers);
-    } else {
-      console.log(
-        "  ⚠️ Warning: Co-insurance enabled but no co-insurers in participant table"
-      );
     }
 
     quotationData.participantDetails = participants;
-    console.log(`  ✓ Total participants: ${participants.length}`);
   } else {
     // Single insurer (no co-insurance)
     if (policyDetails?.insuranceCompanyName) {
-      console.log(
-        "✅ Single insurance: Creating participant from insuranceCompanyName:",
-        policyDetails.insuranceCompanyName
-      );
-
       quotationData.participantDetails = [
         {
           insuranceCompanyName: policyDetails.insuranceCompanyName,
@@ -195,14 +167,8 @@ export const transformToBackendFormat = (
           isLead: true,
         },
       ];
-    } else {
-      console.log(
-        "⚠️ No insuranceCompanyName found - participantDetails will be empty or undefined"
-      );
     }
   }
-
-  console.log("Final participantDetails:", quotationData.participantDetails);
 
   return quotationData;
 };

@@ -41,7 +41,6 @@ const initialValues = {
 };
 
 function EditAccountDetail({ action }) {
-  console.log(action, "action");
   // const [visible, setVisible] = useState(false);
 
   const { AccountPatchDetailView, loading, chequeListData, getEditChequeData } =
@@ -53,7 +52,6 @@ function EditAccountDetail({ action }) {
         getEditChequeData: bankMasterReducer?.getEditChequeData,
       };
     });
-  console.log(chequeListData, "chequeListData");
   const navigate = useNavigate();
   const [date, setDate] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState(false);
@@ -164,7 +162,6 @@ function EditAccountDetail({ action }) {
   ];
   const home = { label: "Master" };
   const handleSubmit = (value) => {
-    console.log(value, "columnData");
     // setVisible(true);
     dispatch(postPatchAccountDetailEdit(value));
     navigate("/master/finance/bank/accountdataview");
@@ -172,7 +169,6 @@ function EditAccountDetail({ action }) {
 
   const [accType, setAccType] = useState([]);
 
-  console.log(accType, "accType");
   const setFormikValues = () => {
     const AccountTypeData = AccountPatchDetailView?.AccountType;
     const updatedValues = {
@@ -184,7 +180,6 @@ function EditAccountDetail({ action }) {
       MainAccountDescription: AccountPatchDetailView?.MainAccountDescription,
       TransactionLimit: AccountPatchDetailView?.TransactionLimit,
     };
-    console.log(updatedValues, "uu");
     if (AccountTypeData) {
       formik.setValues({ ...formik.values, ...updatedValues });
       setAccType([{ label: AccountTypeData, value: AccountTypeData }]);
@@ -200,7 +195,6 @@ function EditAccountDetail({ action }) {
     },
   });
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     setFormikValues();
   }, [AccountPatchDetailView]);
@@ -239,7 +233,6 @@ function EditAccountDetail({ action }) {
   };
   const handleEditData = (data) => {
     setVisibleEdit(true);
-    console.log(data, "dataa");
     dispatch(getChequeEditDataMiddleWare(data));
   };
 

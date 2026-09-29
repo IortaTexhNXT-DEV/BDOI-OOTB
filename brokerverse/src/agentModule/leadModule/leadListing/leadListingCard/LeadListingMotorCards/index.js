@@ -22,6 +22,7 @@ import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
 import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";
+import logger from "../../../../../utility/logger";
 
 const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
   const { t } = useTranslation();
@@ -142,7 +143,7 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
       await dispatch(getLeadByIdMiddleware(leadId));
       navigate(`/agent/leaddetail/${leadId}`);
     } catch (error) {
-      console.error("Error fetching lead details:", error);
+      logger.error("Error fetching lead details:", error);
     }
   };
 
@@ -163,7 +164,7 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
       }
       navigate(`/agent/leadedit/${leadId}`);
     } catch (error) {
-      console.error("Error editing lead:", error);
+      logger.error("Error editing lead:", error);
     }
   };
 
@@ -230,7 +231,7 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
     if (leadId) {
       navigate(`/agent/quotelisting?leadRefId=${leadId}`);
     } else {
-      console.error("No leadId found for viewing quotations");
+      logger.error("No leadId found for viewing quotations");
       navigate("/agent/quotelisting");
     }
   };

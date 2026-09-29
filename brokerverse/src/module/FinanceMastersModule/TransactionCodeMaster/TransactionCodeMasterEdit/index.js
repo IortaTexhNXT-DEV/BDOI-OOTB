@@ -89,11 +89,6 @@ const TransactionCodeEdit = () => {
       DepartmentDescription:
         getTrascationcodeDetailsEdit?.DepartmentDescription || "",
     };
-    console.log(
-      updatedValues.SubAccountCode,
-      subAccount,
-      "updatedValues.TransactionBasis"
-    );
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 

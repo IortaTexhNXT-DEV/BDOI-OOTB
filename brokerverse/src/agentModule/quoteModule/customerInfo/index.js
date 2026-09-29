@@ -32,6 +32,7 @@ import {
 } from "../../../utility/kyc";
 import { notifyError } from "../../../utility/dialogs";
 import useMasterOptions from "../../../module/GeneralMasters/common/useMasterOptions";
+import logger from "../../../utility/logger";
 
 const FieldError = ({ formik, name }) =>
   formik.touched[name] && formik.errors[name] ? (
@@ -77,10 +78,6 @@ const CustomerInfo = ({ action }) => {
   useEffect(() => {
     const loadQuotation = async () => {
       if (quotationId) {
-        console.log(
-          "CustomerInfo: Loading quotation details for ID:",
-          quotationId
-        );
         setIsLoadingQuotation(true);
         setQuotationLoadError(null);
 
@@ -90,16 +87,8 @@ const CustomerInfo = ({ action }) => {
           );
 
           if (result.type.endsWith("/fulfilled")) {
-            console.log(
-              "CustomerInfo: Quotation loaded successfully:",
-              result.payload
-            );
             setQuotationDetails(result.payload);
           } else {
-            console.error(
-              "CustomerInfo: Failed to load quotation:",
-              result.payload
-            );
             const errorMsg = t("agent.failedToLoadQuotation", { id: quotationId });
             setQuotationLoadError(errorMsg);
             notifyError(errorMsg);
@@ -110,7 +99,6 @@ const CustomerInfo = ({ action }) => {
             }, 2000);
           }
         } catch (error) {
-          console.error("CustomerInfo: Error loading quotation:", error);
           const errorMsg = t("agent.errorLoadingQuotation");
           setQuotationLoadError(errorMsg);
           notifyError(errorMsg);
@@ -127,17 +115,15 @@ const CustomerInfo = ({ action }) => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (quotationDetails?.leadRefId) {
-        console.log("Fetching lead data for leadRefId:", quotationDetails.leadRefId);
         try {
           const response = await leadService.getLeadById(quotationDetails.leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -193,8 +179,6 @@ const CustomerInfo = ({ action }) => {
   );
 
   const handleSubmit = async (values) => {
-    console.log(values, "find full datas");
-
     if (!quotationId) {
       toast.current?.show({
         severity: "error",
@@ -291,7 +275,7 @@ const CustomerInfo = ({ action }) => {
         });
       }, 1000);
     } catch (error) {
-      console.error("Failed to save vehicle information:", error);
+      logger.error("Failed to save vehicle information:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -309,8 +293,6 @@ const CustomerInfo = ({ action }) => {
       };
     }
   );
-
-  console.log("first21", postcustomerinfodata);
 
   // The ID card photo is uploaded as soon as it is chosen; the stored URL is saved on the quotation (idCardImage).
   const handleIdCardSelected = async (file) => {
@@ -415,7 +397,6 @@ const CustomerInfo = ({ action }) => {
   }, [action, postcustomerinfodata]);
 
   const setFormikValues = (data) => {
-    console.log(data, "find data");
     // const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
       MotorNumber: data?.MotorNumber,
@@ -432,7 +413,6 @@ const CustomerInfo = ({ action }) => {
     };
 
     formik.setValues({ ...formik.values, ...updatedValues });
-    console.log("1211", updatedValues);
   };
 
   // KYC and vehicle identifiers required for this line (policy.kyc_required_fields); the server enforces the same rule.

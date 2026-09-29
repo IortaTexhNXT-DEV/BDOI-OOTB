@@ -74,7 +74,6 @@ const journalVoucherReducer = createSlice({
         transactionNumber: transactionNumber++,
       };
       state.journalVoucherList = [...state.journalVoucherList, newItem2];
-      console.log(state.journalVoucherList, "state.journalVoucherList ");
     });
     builder.addCase(postTCJournalVoucher.rejected, (state, action) => {
       state.loading = false;
@@ -89,8 +88,6 @@ const journalVoucherReducer = createSlice({
       state.loading = true;
     });
     builder.addCase(getJournalVoucherSearchList.fulfilled, (state, action) => {
-      console.log(state.journalVoucherSearchList, "dataasd");
-
       state.loading = false;
       state.journalVoucherSearchList = action.payload;
     });
@@ -155,7 +152,6 @@ const journalVoucherReducer = createSlice({
     builder.addCase(getJournalVoucherViewData.fulfilled, (state, action) => {
       state.loading = false;
       state.journalVoucherView = action.payload;
-      console.log(state.journalVoucherView, "state.journalVoucherView ");
     });
     builder.addCase(getJournalVoucherViewData.rejected, (state, action) => {
       state.loading = false;
@@ -170,7 +166,6 @@ const journalVoucherReducer = createSlice({
     });
     builder.addCase(getJournalVoucherHistory.fulfilled, (state, action) => {
       state.loading = false;
-      console.log("Journal Voucher History fulfilled payload:", action.payload);
       state.journalVoucherList = action.payload.data || [];
       state.pagination = action.payload.pagination || {
         page: 1,
@@ -178,7 +173,6 @@ const journalVoucherReducer = createSlice({
         total: 0,
         totalPages: 0,
       };
-      console.log("Updated pagination state:", state.pagination);
     });
     builder.addCase(getJournalVoucherHistory.rejected, (state, action) => {
       state.loading = false;
@@ -192,7 +186,6 @@ const journalVoucherReducer = createSlice({
     });
     builder.addCase(getJournalVoucherDetails.fulfilled, (state, action) => {
       state.loading = false;
-      console.log("Journal Voucher Details fulfilled payload:", action.payload);
       state.journalVoucherPostTabelData = action.payload.data || [];
       state.journalVoucherDetailsPagination = action.payload.pagination || {
         page: 1,
@@ -207,10 +200,6 @@ const journalVoucherReducer = createSlice({
           ...action.payload.voucherInfo,
         };
       }
-      console.log(
-        "Updated journal voucher details pagination state:",
-        state.journalVoucherDetailsPagination
-      );
     });
     builder.addCase(getJournalVoucherDetails.rejected, (state, action) => {
       state.loading = false;

@@ -21,8 +21,6 @@ import SvgEdit from "../../assets/icons/SvgEdits";
 import { Navigate, useNavigate } from "react-router-dom"; 
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 
-
-
 const CQEmployeeBulkUpload = ({ action, flow, }) => {
     const { t } = useTranslation();
     const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
@@ -63,7 +61,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
         },
     };
 
-
     const formik = useFormik({
         initialValues: {
             EmployeeID: '',
@@ -89,8 +86,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
             if (!values.SumInsured.trim()) errors.SumInsured = t("employeeBenefit.sumInsuredRequired");
             if (!values.Remarks.trim()) errors.Remarks = t("employeeBenefit.remarksRequired");
 
-
-
             if (Object.keys(errors).length > 0) {
                 formik.setErrors(errors);
                 return;
@@ -98,12 +93,10 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
 
             setEmployeeList(prevList => [...prevList, values]);
 
-            console.log("Submitted Values:", values);
             setShowAddEmployeeModal(false);
             formik.resetForm();
         }
     });
-
 
     const renderEmployeeID = (rowData) => (
         <div className="category__text">{rowData.EmployeeID?.toUpperCase()}</div>
@@ -119,7 +112,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
     const renderSerialNumber = (rowData, { rowIndex }) => (
         <div className="category__text">{rowIndex + 1}</div>
     );
-
 
     const ViewheaderStyle = {
         textalign: "center",
@@ -150,7 +142,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
         justifyContent: "center",
         alignItem: "center",
     };
-
 
     const handleDummyUpload = () => {
         const dummyData = [
@@ -264,8 +255,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                         {action === "quotedetails" ? "Edit Quote" : "Create Quote"}
                     </div>
 
-
-
                     <div
                         style={{
                             display: 'flex',
@@ -312,7 +301,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             }}
                         />
                     </div>
-
 
                 </div>
 
@@ -372,7 +360,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
 
                 <div >
 
-
                     {/* <div className="bottom__button__wrapper">
                         <div style={{color:'black'}} className="bottom__button__wrapper">
                             Back
@@ -397,7 +384,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             className="next__button"
                         />
                     </div>
-
 
                 </div>
 
@@ -456,7 +442,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.DateofBirth}</div>
                             )}
                         </div>
-
 
                         <div className="field">
                             <label>Gender*</label>
@@ -560,7 +545,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                     const file = e.target.files[0];
                                     if (file) {
                                         setSelectedFileName(file.name);
-                                        console.log("Uploaded file:", file);
                                     }
                                 }}
                             />
@@ -587,7 +571,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 <div style={{ fontSize: '12px', color: '#666' }}>Only .csv files allowed</div>
                             </div>
                         </div>
-
 
                         <div style={{ textAlign: 'right' }}>
                             <Button

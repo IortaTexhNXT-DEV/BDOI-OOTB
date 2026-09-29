@@ -21,16 +21,12 @@ const TransactionCodeSetupTable = () => {
     return {
       loading: transactionCodeMasterReducer?.loading,
       TransactionCodeSetup: transactionCodeMasterReducer?.TransactionCodeSetup,
-    
-
     };
   });
-  console.log(TransactionCodeSetup, "TransactionCodeSetup")
   const [products, setProducts] = useState([]);
   const [show, setShow] = useState(false);
   const dispatch = useDispatch()
- 
- 
+
   const handleClick = () => {
     setShow(!show);
   };
@@ -64,11 +60,9 @@ const TransactionCodeSetupTable = () => {
             </React.Fragment>
         );
     },
-   
 };
 
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const headerStyle = {
@@ -113,11 +107,9 @@ const TransactionCodeSetupTable = () => {
     onSubmit: (values) => {
       // Handle form submission
        handleSubmit(values);
-
     },
     // onSubmit: handleSubmit
   });
-
 
   return (
     <div className="transactioncode__master__table_view">

@@ -29,7 +29,7 @@ import BranchDetailsView from "../module/FinanceMastersModule/BranchMaster/Branc
 import CompanyMaster from "../module/FinanceMastersModule/CompanyMaster";
 import CurrencyMaster from "../module/FinanceMastersModule/CurrencyMaster";
 import ExchangeRateMaster from "../module/FinanceMastersModule/ExchangeRateMaster";
-// Main / Sub Account masters are the GL chart of accounts (D57)
+// Main / Sub Account masters are the GL chart of accounts
 import ChartOfAccounts from "../module/FinanceMastersModule/ChartOfAccounts";
 import PettyCashMaster from "../module/FinanceMastersModule/PettyCashMaster";
 import PaymentDetails from "../module/Receipts/PaymentDetails";

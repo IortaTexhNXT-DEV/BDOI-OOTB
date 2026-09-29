@@ -40,7 +40,6 @@ class EndorsementService {
         data: data,
       };
     } catch (error) {
-      console.error('Create endorsement error:', error);
       return {
         success: false,
         error:
@@ -80,7 +79,6 @@ class EndorsementService {
         data: data,
       };
     } catch (error) {
-      console.error('Get endorsement error:', error);
       return {
         success: false,
         error:
@@ -122,7 +120,6 @@ class EndorsementService {
         data: data,
       };
     } catch (error) {
-      console.error('Upload document error:', error);
       return {
         success: false,
         error:
@@ -163,7 +160,6 @@ class EndorsementService {
         data: data,
       };
     } catch (error) {
-      console.error('Complete endorsement error:', error);
       return {
         success: false,
         error:
@@ -230,7 +226,6 @@ class EndorsementService {
         },
       };
     } catch (error) {
-      console.error('Endorsement fetch error:', error);
       return {
         success: false,
         error:

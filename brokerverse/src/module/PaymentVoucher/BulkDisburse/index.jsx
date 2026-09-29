@@ -12,6 +12,7 @@ import CommissionService from "../../../services/commissionService";
 import disbursementService from "../../../services/disbursementService";
 import { formatBaht } from "../../Commission/utils/formatBaht";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const BulkDisburse = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const BulkDisburse = () => {
       setSummary(data?.summary || null);
       setSelected([]);
     } catch (err) {
-      console.error("Failed to load agents ready to pay", err);
+      logger.error("Failed to load agents ready to pay", err);
       setAgents([]);
       toast.current?.show({
         severity: "error",

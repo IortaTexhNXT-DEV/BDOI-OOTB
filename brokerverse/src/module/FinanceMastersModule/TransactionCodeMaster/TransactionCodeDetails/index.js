@@ -25,7 +25,6 @@ const TransactionCodeDetails = () => {
         // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
       };
     });
-  console.log(TrascationcodeDetailsView, "hddgdg");
   const toastRef = useRef(null);
   const navigate = useNavigate();
   const items = [
@@ -73,11 +72,6 @@ const TransactionCodeDetails = () => {
       value: TrascationcodeDetailsView?.DepartmentCode,
     },
   ];
-
-  console.log(
-    TrascationcodeDetailsView?.TransactionBasis,
-    "TrascationcodeDetailsView?.TransactionCode"
-  );
 
   const validate = () => { };
 
@@ -222,7 +216,6 @@ const TransactionCodeDetails = () => {
                 value={TrascationcodeDetailsView.MainAccountCode}
                 options={MainAccountCodeOptions}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("MainAccountCode", e.value);
                   //   handleAccountcode(e.value.MainAccountCode);
                 }}

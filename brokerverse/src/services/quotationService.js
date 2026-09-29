@@ -16,9 +16,6 @@ class QuotationService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("Creating quotation with data:", quotationData);
-      console.log("Auth header:", authService.getAuthHeader());
-
       const response = await fetch(`${this.baseURL}/quotations`, {
         method: "POST",
         headers: {
@@ -37,14 +34,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation created successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Create quotation error:", error);
       return {
         success: false,
         error:
@@ -107,7 +102,6 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotations fetched successfully:", data);
 
       return {
         success: true,
@@ -117,7 +111,6 @@ class QuotationService {
         total: data.total || 0,
       };
     } catch (error) {
-      console.error("Get quotations error:", error);
       return {
         success: false,
         error:
@@ -137,8 +130,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log("Fetching quotation by ID:", quotationId);
 
       const response = await fetch(
         `${this.baseURL}/quotations/${quotationId}`,
@@ -160,14 +151,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get quotation by ID error:", error);
       return {
         success: false,
         error:
@@ -188,13 +177,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log(
-        "Updating quotation:",
-        quotationId,
-        "with data:",
-        quotationData
-      );
 
       const response = await fetch(
         `${this.baseURL}/quotations/${quotationId}`,
@@ -217,14 +199,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update quotation error:", error);
       return {
         success: false,
         error:
@@ -244,8 +224,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log("Deleting quotation:", quotationId);
 
       const response = await fetch(
         `${this.baseURL}/quotations/${quotationId}`,
@@ -267,14 +245,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation deleted successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Delete quotation error:", error);
       return {
         success: false,
         error:
@@ -294,8 +270,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
-
-      console.log("Uploading quotations file:", file.name);
 
       const formData = new FormData();
       formData.append("file", file);
@@ -320,14 +294,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotations bulk upload completed:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Bulk upload quotations error:", error);
       return {
         success: false,
         error:
@@ -347,8 +319,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      console.log("Validating quotation for conversion:", quotationId);
 
       // Fetch quotation details
       const result = await this.getQuotationById(quotationId);
@@ -385,7 +355,6 @@ class QuotationService {
         quotation: quotation,
       };
     } catch (error) {
-      console.error("Validate quotation for conversion error:", error);
       return {
         valid: false,
         error:
@@ -413,8 +382,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // Longer timeout for conversion
-
-      console.log("Converting quotation to policy:", quotationId);
 
       // Fire LOB API expects: insuredName, paymentStatus, inception, expiry
       const body =
@@ -462,14 +429,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation converted to policy successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Convert quotation to policy error:", error);
       return {
         success: false,
         code: error.code,
@@ -555,7 +520,6 @@ class QuotationService {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error("Send for approval error:", error);
       const isAbort = error.name === "AbortError";
       return {
         success: false,
@@ -577,8 +541,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log(`Updating quotation status: ${quotationId} to ${status}`);
 
       const response = await fetch(
         `${this.baseURL}/quotations/${quotationId}/status`,
@@ -605,14 +567,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation status updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update quotation status error:", error);
       return {
         success: false,
         error: error.message || "Failed to update quotation status",
@@ -638,8 +598,6 @@ class QuotationService {
         ...(filters.productType && { productType: filters.productType }),
       });
 
-      console.log("Fetching quotations by status:", status);
-
       const response = await fetch(
         `${this.baseURL}/quotations/by-status/${status}?${queryParams}`,
         {
@@ -662,14 +620,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotations by status fetched:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get quotations by status error:", error);
       return {
         success: false,
         error:
@@ -696,8 +652,6 @@ class QuotationService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      console.log("Updating quotation vehicle info:", quotationId, vehicleInfo);
-
       const response = await fetch(
         `${this.baseURL}/quotations/${quotationId}/vehicle-info`,
         {
@@ -721,14 +675,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation vehicle info updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update quotation vehicle info error:", error);
       return {
         success: false,
         error:
@@ -748,8 +700,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-      console.log("Emailing policy quote to customer:", quotationId);
 
       const response = await fetch(
         `${this.baseURL}/quotations/${quotationId}/send-mail-policy-quote/customer?policyId=${policyId}`,
@@ -773,14 +723,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Policy quote email sent successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Email policy quote error:", error);
       return {
         success: false,
         error:
@@ -801,8 +749,6 @@ class QuotationService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-      console.log("Comparing quotations:", quotationId1, quotationId2);
 
       const response = await fetch(
         `${this.baseURL}/quotations/compare?quotationId1=${quotationId1}&quotationId2=${quotationId2}`,
@@ -826,14 +772,12 @@ class QuotationService {
       }
 
       const result = await response.json();
-      console.log("Quotations compared successfully:", result);
 
       return {
         success: true,
         data: result.data,
       };
     } catch (error) {
-      console.error("Compare quotations error:", error);
       return {
         success: false,
         error:
@@ -861,8 +805,6 @@ class QuotationService {
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`;
 
-      console.log("Fetching quotation stats from:", url);
-
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -882,14 +824,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation stats fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get quotation stats error:", error);
       return {
         success: false,
         error:
@@ -917,11 +857,6 @@ class QuotationService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("=== GET QUOTATION AUDIT TRAIL ===");
-      console.log("Quotation ID:", quotationId);
-      console.log("Sort Order:", sortOrder);
-      console.log("=== END GET QUOTATION AUDIT TRAIL ===");
-
       const response = await fetch(
         `${this.baseURL}/quotations/audit-trail/${quotationId}?sort=${sortOrder}`,
         {
@@ -944,14 +879,12 @@ class QuotationService {
       }
 
       const data = await response.json();
-      console.log("Quotation audit trail fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get quotation audit trail error:", error);
       return {
         success: false,
         error:

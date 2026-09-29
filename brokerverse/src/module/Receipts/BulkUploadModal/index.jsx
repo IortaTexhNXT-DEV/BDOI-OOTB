@@ -66,15 +66,11 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     try {
       const result = await receiptsService.bulkUploadReceipts(selectedFile);
 
-      console.log('Bulk upload result:', result);
-
       if (result.success) {
         const apiResponse = result.data;
-        console.log('Upload data (API response):', apiResponse);
         
         // Handle the API response structure
         const data = apiResponse.data || apiResponse;
-        console.log('Nested data:', data);
         
         // Store the upload result to show processing status
         setUploadResult(data);

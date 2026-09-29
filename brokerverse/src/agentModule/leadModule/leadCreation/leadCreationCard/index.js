@@ -47,7 +47,7 @@ const initialValue = {
 
 const LeadCreationCard = ({ flow, action }) => {
   const { t } = useTranslation();
-  // D68: configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
+  // Configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
   const ageLimits = useAgeLimits();
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
@@ -137,8 +137,6 @@ const LeadCreationCard = ({ flow, action }) => {
       try {
         const result = await dispatch(postCreateleadMiddleware(valueWithId));
 
-        console.log(result, "result");
-
         if (result.type.endsWith("/fulfilled")) {
           // Success case - use the leadId from the API response
           const createdLeadId = result.payload?.leadId || result.payload?.id;
@@ -171,7 +169,6 @@ const LeadCreationCard = ({ flow, action }) => {
           showErrorToast(errorMsg);
         }
       } catch (error) {
-        console.error("Unexpected error:", error);
         const errorMsg =
           error?.response?.data?.error ||
           error?.message ||
@@ -203,7 +200,6 @@ const LeadCreationCard = ({ flow, action }) => {
             }, 2000);
           } else if (result.type.endsWith("/rejected")) {
             // Error case
-            console.error("Lead update failed:", result.payload);
             const errorMsg = extractErrorMessage(
               result,
               "Failed to update lead. Please try again."
@@ -211,7 +207,6 @@ const LeadCreationCard = ({ flow, action }) => {
             showErrorToast(errorMsg);
           }
         } catch (error) {
-          console.error("Unexpected error:", error);
           const errorMsg =
             error?.response?.data?.error ||
             error?.message ||
@@ -614,7 +609,6 @@ const LeadCreationCard = ({ flow, action }) => {
               value={formik.values.DateofBirth}
               {...birthDateRange(ageLimits)}
               onChange={(date) => {
-                console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);
               }}
             />

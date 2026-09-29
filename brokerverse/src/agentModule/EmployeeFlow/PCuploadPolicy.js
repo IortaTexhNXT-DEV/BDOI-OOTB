@@ -19,8 +19,6 @@ import { postUploadPolicyMiddleWare } from "../quoteModule/uploadPolicy/store/up
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 import "./index.scss"
 
-
-
 const PCuploadPolicy = ({ state }) => {
   const { t } = useTranslation();
   const [imageURL, setimageURL] = useState();
@@ -30,7 +28,6 @@ const PCuploadPolicy = ({ state }) => {
 
   const handleSubmit = (value) => {
     toastRef.current.showToast();
-    console.log("122", value)
     dispatch(postUploadPolicyMiddleWare(value));
     setTimeout(() => {
       navigate("/agent/employee-benefit/client-policy-details", { state: state });
@@ -80,7 +77,6 @@ const PCuploadPolicy = ({ state }) => {
   const [expiryDateData, setExpieyDateData] = useState("")
   const handleUppendImg = (name, src) => {
     setimageURL(src.objectURL);
-    console.log(name, src.objectURL, "find handleUppendImg");
   };
   const handleBackNavigation = () => {
     customHistory.back();
@@ -88,7 +84,6 @@ const PCuploadPolicy = ({ state }) => {
   const handleLeadNavigation = () => {
     navigate(-1)
   };
-  console.log(imageURL, "imageURL");
 
   const formik = useFormik({
     initialValues:
@@ -125,7 +120,6 @@ const PCuploadPolicy = ({ state }) => {
       <div className="no__data__found" style={{ textAlign: 'center' }}>{t("employeeBenefit.noDataEntered")}</div>
     </div>
   );
-  console.log("checkget", TableList)
 
   let flow = "nonrenewal"
   return (
@@ -170,7 +164,6 @@ sumInsured
             <Column header={t("employeeBenefit.premium")} field="premium" style={{ paddingLeft: 20 }}></Column>
           </DataTable>
         </div>
-
 
         <div className="grid mt-2">
 

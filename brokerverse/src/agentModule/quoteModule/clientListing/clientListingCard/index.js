@@ -8,7 +8,6 @@ import ClientListingCompanyCategory from "./ClientListingCompanyCategory";
 import { useSelector } from "react-redux";
 import { ProgressSpinner } from "primereact/progressspinner";
 
-
 const ClientListingCard = () => {
   const { t } = useTranslation();
   const { clientListTable, paymentSearchList, loading, error } = useSelector(({ clientsReducers, agentPaymentMainReducers }) => {
@@ -19,7 +18,6 @@ const ClientListingCard = () => {
       error: clientsReducers?.error,
     };
   });
-  console.log(clientListTable, "clientListTable");
   
   return (
     <div className="lead__listing__card__container mt-4">

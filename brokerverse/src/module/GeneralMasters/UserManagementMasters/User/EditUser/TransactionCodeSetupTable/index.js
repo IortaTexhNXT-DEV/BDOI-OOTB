@@ -33,7 +33,6 @@ const TransactionCodeSetupTable = ({ action }) => {
   const [show, setShow] = useState(false);
   const [showView, setShowView] = useState(false);
 
-
   const item = [
     {
       label: show ? "Branch1" : showView && mainUserViewData.branchCode,
@@ -97,13 +96,11 @@ const TransactionCodeSetupTable = ({ action }) => {
     },
   };
 
-
   const handleSubmit = () => {
     dispatch(postViewMainBranchUser(formik.values))
     setShow(false)
     formik.resetForm()
   }
-
 
   const headerStyle = {
     fontSize: 16,
@@ -147,7 +144,6 @@ const TransactionCodeSetupTable = ({ action }) => {
   const dispatch = useDispatch()
   const handleView = (rowData) => {
     dispatch(getViewMainBranchUser(rowData))
-    console.log(rowData, "rowData");
     setShowView(true)
     // dispatch(getUserViewDataMiddleWare(rowData))
     // navigate("/accounts/pettycash/PettyCashCodeDetails")
@@ -166,8 +162,6 @@ const TransactionCodeSetupTable = ({ action }) => {
     },
   ];
 
-
-
   const ViewheaderStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -179,10 +173,7 @@ const TransactionCodeSetupTable = ({ action }) => {
     justifyContent: "center",
   };
 
-
-
   const renderViewButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div >
         <Button
@@ -198,7 +189,6 @@ const TransactionCodeSetupTable = ({ action }) => {
       </div>
     );
   };
-
 
   return (
     <div className="transactioncode__master__table_view">
@@ -285,7 +275,6 @@ const TransactionCodeSetupTable = ({ action }) => {
       >
         <div className="grid mt-1">
 
-
         </div>
         <div className="grid mt-1">
           <div className="col-12 md:col-6 lg-col-6 ">
@@ -342,7 +331,6 @@ const TransactionCodeSetupTable = ({ action }) => {
         
       >
         <div className="grid mt-1">
-
 
         </div>
         <div className="grid mt-1">

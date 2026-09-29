@@ -100,15 +100,8 @@ const ProtectedLayout = () => {
     };
   }, []);
 
-  // Add debug logging for sidebar state changes
-  useEffect(() => {
-    console.log("Sidebar state changed:", sidebarOpen);
-    console.log("Window width:", window.innerWidth);
-  }, [sidebarOpen]);
-
   const Auth = () => {
     const user = isAuthenticated();
-    console.log(user, "user");
 
     return !!user;
   };

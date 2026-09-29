@@ -59,7 +59,6 @@ export const quotationListDataMiddleWare = createAsyncThunk(
         return rejectWithValue(result.error || "Failed to fetch quotations");
       }
     } catch (error) {
-      console.error("Quotation list middleware error:", error);
       return rejectWithValue(error?.message || "Failed to fetch quotations");
     }
   }
@@ -68,10 +67,8 @@ export const quotationListDataMiddleWare = createAsyncThunk(
 export const quotationSearchListDataMiddleWare = createAsyncThunk(
   QUOTATION_SEARCH_DATA,
   async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "data find");
     const { quotationMainReducers } = getState();
     const { quotationListData } = quotationMainReducers;
-    console.log(quotationMainReducers, "quotationMainReducers");
 
     function filterPaymentsByField(data, field, value) {
       const lowercasedValue = value.toLowerCase();
@@ -94,7 +91,6 @@ export const quotationSearchListDataMiddleWare = createAsyncThunk(
         field,
         value
       );
-      console.log(filteredPayments, "filteredPayments");
       return filteredPayments;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);

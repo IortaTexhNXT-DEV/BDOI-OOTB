@@ -15,7 +15,6 @@ const DisbursementDetailviewTable = () => {
       };
     }
   );
-  console.log(AddDisbursmentTable, "AddDisbursmentTable");
   const isEmpty = AddDisbursmentTable.length === 0;
   const emptyTableIcon = (
     <div className="empty-table-icon">

@@ -231,7 +231,6 @@ const LeadListingAllTable = ({
     setNavAction(rowData.Payment);
     setSelectedPolicy(rowData);
 
-    console.log(rowData, "rowData from policy table policy table");
     setdisableOption(
       rowData.Payment === "Pending" || rowData.Payment === "Reviewing"
     );
@@ -398,12 +397,6 @@ const LeadListingAllTable = ({
       command: () => handleMenuClick("reminder"),
       disabled: disableOption,
     });
-
-    console.log(
-      "Final menu items for policy:",
-      rowData.policyNumber,
-      menuItems.map((m) => m.label)
-    );
 
     return (
       <div

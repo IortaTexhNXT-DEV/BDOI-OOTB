@@ -37,7 +37,6 @@ const initialValue = {
 };
 
 export const EmployeeCreationCard = ({ flow, action }) => {
-  console.log(flow, action, "datata");
   const { loading, leadtabledata, getEditLeadData, getClientEditData } =
     useSelector(({ leadReducers, clientsReducers }) => {
       return {
@@ -47,7 +46,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
         getClientEditData: clientsReducers?.getClientEditData,
       };
     });
-  console.log(getClientEditData, "getClientEditData");
   // const [ingredient, setIngredient] = useState("");
   const [show, setShow] = useState(false);
   const toastRef = useRef(null);
@@ -60,7 +58,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
         ...values,
         id: leadtabledata?.length + 1,
       };
-      console.log(values, "values");
       dispatch(postCreateleadMiddleware(valueWithId));
       toastRef.current.showToast();
       setTimeout(() => {
@@ -256,7 +253,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     if (action === "edit") {
       setFormikValues();
@@ -400,7 +396,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
               label="Date of Birth*"
               value={formik.values.DateofBirth}
               onChange={(date) => {
-                console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);
               }}
             />
@@ -410,7 +405,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
     value={formik.values.DateofBirth}
     maxDate={new Date(2005, 11, 31)}
     onChange={(date) => {
-        
         const selectedDate = new Date(date);
         
         if (selectedDate.getFullYear() === 2024) {
@@ -527,7 +521,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
               value={formik.values.Country}
               options={action === "post" ? Country : countryDataOption}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("Country", e.value);
               }}
               optionLabel="label"
@@ -544,7 +537,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
               value={formik.values.Province}
               options={action === "post" ? State : stateDataOption}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("Province", e.value);
               }}
               optionLabel="label"
@@ -564,7 +556,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
               value={formik.values.City}
               options={action === "post" ? City : cityDataOption}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("City", e.value);
               }}
               optionLabel="label"

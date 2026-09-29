@@ -313,7 +313,6 @@ const Dashboard = () => {
             {search
               ? ClientTableSearchList
               : clientListTable.map((data, index) => {
-                  console.log(data, "find data is coming");
                   return (
                     <div
                       className="dialog__existingclient__carddata"

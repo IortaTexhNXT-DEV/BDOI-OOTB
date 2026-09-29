@@ -34,6 +34,7 @@ import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 import { confirmAction, notifyError, notifySuccess } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
+import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -73,15 +74,11 @@ const QuoteDetailView = ({ action }) => {
     const fetchQuotation = async () => {
       // If we already have data from navigation, don't fetch
       if (quotationData) {
-        console.log("=== USING QUOTATION DATA FROM NAVIGATION ===");
-        console.log("Quotation data:", quotationData);
         return;
       }
 
       // If we have a quotation ID, fetch the data
       if (quotationIdFromParams) {
-        console.log("=== FETCHING QUOTATION FROM API ===");
-        console.log("Quotation ID:", quotationIdFromParams);
         setIsLoading(true);
 
         try {
@@ -90,14 +87,11 @@ const QuoteDetailView = ({ action }) => {
           );
 
           if (result.type.endsWith("/fulfilled")) {
-            console.log("✅ Quotation fetched successfully:", result.payload);
             setQuotationData(result.payload);
           } else {
-            console.error("❌ Failed to fetch quotation:", result.payload);
             notifyError(t("quoteDetailView.failedToLoad"));
           }
         } catch (error) {
-          console.error("❌ Error fetching quotation:", error);
           notifyError(t("quoteDetailView.errorLoading"));
         } finally {
           setIsLoading(false);
@@ -222,8 +216,6 @@ const QuoteDetailView = ({ action }) => {
     return toPct(settingsTaxRates?.[key] || 0);
   };
 
-  console.log(calculatedPremiums, "calculatedPremiums --- QUOTE DETAIL VIEW");
-
   const { PolicyDetails, loading, currentLeadDetails } = useSelector(
     ({ policyDetailsReducer, leadReducer }) => {
       return {
@@ -266,7 +258,7 @@ const QuoteDetailView = ({ action }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch related policy:", error);
+      logger.error("Failed to fetch related policy:", error);
     } finally {
       setCheckingPolicy(false);
     }
@@ -336,8 +328,6 @@ const QuoteDetailView = ({ action }) => {
       });
       return;
     }
-
-    console.log("Starting policy conversion flow for quotation:", quotationId);
 
     const convertIsIar = isIarLob(quotationData?.productType);
     const convertIsFire =
@@ -428,7 +418,7 @@ const QuoteDetailView = ({ action }) => {
         detail: t("quoteDetailView.errorSendingQuoteForApproval"),
         life: 3000,
       });
-      console.error(error);
+      logger.error(error);
     }
   };
 
@@ -467,7 +457,6 @@ const QuoteDetailView = ({ action }) => {
       }
     } catch (error) {
       notifyError(t("quoteDetailView.errorSubmittingToInsurer"));
-      console.error(error);
     }
   };
 
@@ -506,7 +495,6 @@ const QuoteDetailView = ({ action }) => {
       }
     } catch (error) {
       notifyError(t("quoteDetailView.errorUpdatingStatus"));
-      console.error(error);
     }
   };
 

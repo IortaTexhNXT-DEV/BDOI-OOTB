@@ -24,11 +24,8 @@ const UserGroupAccess = () => {
       loading: transactionCodeMasterReducer?.loading,
       UserGroupAccessList: transactionCodeMasterReducer?.UserGroupAccessList,
       // TransactioncodeListsearch: transactionCodeMasterReducer?.TransactioncodeListsearch,
-
-
     };
   });
-  console.log(UserGroupAccessList, "UserGroupAccessList")
   const [products, setProducts] = useState([]);
   const [show, setShow] = useState(false);
 
@@ -86,14 +83,12 @@ const UserGroupAccess = () => {
   };
 
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const [showEdit, setShowEditData] = useState(false)
   const handleEdit = (columnData) => {
     setShowEditData(true)
     dispatch(getUserEditData(columnData))
-    console.log(columnData, "columnData");
   }
   const headerStyle = {
     fontSize: 16,
@@ -145,7 +140,6 @@ const UserGroupAccess = () => {
     onSubmit: (values) => {
       // Handle form submission
       handleSubmit(values);
-
     },
     // onSubmit: handleSubmit
   });
@@ -204,7 +198,6 @@ const UserGroupAccess = () => {
             body={(columnData) => (
               <div onClick={() => handleEdit(columnData)} style={{ display: 'flex', justifyContent: 'space-between', cursor: "pointer" }}>
 
-
                 <SvgEditIcon />
               </div>
             )}
@@ -238,7 +231,6 @@ const UserGroupAccess = () => {
               value={formik.values.UserRole}
               options={BankAccountCode}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("UserRole", e.value);
                 // handleAccountcode(e.value);
               }}

@@ -257,7 +257,6 @@ const LeadListing = () => {
         throw new Error(result.error || t("leads.reportFailedDetail"));
       }
     } catch (error) {
-      console.error("Generate report error:", error);
       toast.current.show({
         severity: "error",
         summary: t("leads.reportFailed"),

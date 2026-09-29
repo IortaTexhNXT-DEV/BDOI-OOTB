@@ -10,6 +10,7 @@ import { getLeadByIdMiddleware } from "../../leadModule/Store/leadMiddleware";
 import policyService from "../../../services/policyService";
 import { Card } from "primereact/card";
 import { notifyError } from "../../../utility/dialogs";
+import logger from "../../../utility/logger";
 
 const UploadPolicy = () => {
   const { t } = useTranslation();
@@ -58,7 +59,6 @@ const UploadPolicy = () => {
         ).unwrap();
         setQuotationDetails(data);
       } catch (error) {
-        console.error("Failed to load quotation:", error);
         notifyError(t("agent.errorLoadingQuotation"));
       } finally {
         setLoading(false);
@@ -95,7 +95,7 @@ const UploadPolicy = () => {
           setPolicyData(response.data.data[0]);
         }
       } catch (error) {
-        console.error("Failed to resolve policy for upload screen:", error);
+        logger.error("Failed to resolve policy for upload screen:", error);
       }
     };
 

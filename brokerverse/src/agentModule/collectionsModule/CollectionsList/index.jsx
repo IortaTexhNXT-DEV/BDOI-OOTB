@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const CollectionsList = () => {
   const { t } = useTranslation();
@@ -84,7 +85,7 @@ const CollectionsList = () => {
         setTotalRecords(result.pagination.total);
       }
     } catch (error) {
-      console.error("Load collections error:", error);
+      logger.error("Load collections error:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -106,12 +107,6 @@ const CollectionsList = () => {
   };
 
   const onSort = (event) => {
-    console.log("Sort event:", event);
-    console.log("Current lazyState sortField:", lazyState.sortField);
-    console.log("Current lazyState sortOrder:", lazyState.sortOrder);
-    console.log("New sortField:", event.sortField);
-    console.log("New sortOrder:", event.sortOrder);
-
     // If clicking the same field, toggle the sort order
     let newSortOrder = event.sortOrder;
     if (lazyState.sortField === event.sortField) {
@@ -123,8 +118,6 @@ const CollectionsList = () => {
         newSortOrder = 1; // Start with ascending
       }
     }
-
-    console.log("Final sortOrder:", newSortOrder);
 
     setLazyState({
       ...lazyState,
@@ -241,7 +234,7 @@ const CollectionsList = () => {
         });
       }
     } catch (error) {
-      console.error("Send reminders error:", error);
+      logger.error("Send reminders error:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",

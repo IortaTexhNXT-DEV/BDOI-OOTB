@@ -5,6 +5,7 @@ import { InputNumber } from "primereact/inputnumber";
 import CommissionService from "../../../services/commissionService";
 import { formatBaht } from "../utils/formatBaht";
 import { currencySymbol } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 
 const stepDate = (value) => value || "—";
 
@@ -87,7 +88,7 @@ const LineDetailDrawer = ({
       const payload = res?.data || res;
       onUpdated?.(payload);
     } catch (err) {
-      console.error("Line action failed", err);
+      logger.error("Line action failed", err);
       onError?.(err);
     } finally {
       setActionLoading(false);

@@ -5,7 +5,7 @@ import { APP_DIALOG_TAG, registerAppToast } from "../../utility/dialogs";
 
 /**
  * The application's shared toast and confirmation dialog, mounted once in App.js. utility/dialogs (notify*, confirmAction)
- * shows messages and confirmations through them instead of the browser's native alert / confirm boxes (D44).
+ * shows messages and confirmations through them instead of the browser's native alert / confirm boxes.
  */
 const AppDialogs = () => {
   const toastRef = useRef(null);

@@ -138,7 +138,6 @@ const LeadListingAllTable = ({ clientId }) => {
         if (!active) {
           return;
         }
-        console.error("Endorsement fetch error", fetchError);
         setError(fetchError.message || "Failed to fetch endorsements");
         setEndorsementData([]);
         setFilteredData([]);
@@ -194,7 +193,6 @@ const LeadListingAllTable = ({ clientId }) => {
 
     const statusUpper = status?.toUpperCase();
     const paymentUpper = payment?.toUpperCase();
-   
 
     if (statusUpper === "REJECTED") {
       navigate(`/agent/endorsement/rejected/${endorsementRef}`, {

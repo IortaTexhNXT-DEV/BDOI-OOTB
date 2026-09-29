@@ -7,7 +7,6 @@ import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const ReplenishtDetailViewTable = ({ AddReplenishTable }) => {
   const isEmpty = AddReplenishTable.length === 0;
-  console.log(AddReplenishTable, "AddReplenishTable");
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />

@@ -29,7 +29,7 @@ const buildDashboardDetails = (home, policies) => ({
   userDetails: {
     name: localStorage.getItem("USER_NAME") || "",
     totalLeads: home.funnel?.leads ?? 0,
-    // premium and client figures come from the server, over the same book as the lists (D118)
+    // premium and client figures come from the server, over the same book as the lists
     totalClients: home.clients ?? new Set(policies.map((p) => p.clientId).filter(Boolean)).size,
     policySold: home.funnel?.policies ?? 0,
     earnedCommission: (home.commission?.paid || 0) + (home.commission?.unpaid || 0),

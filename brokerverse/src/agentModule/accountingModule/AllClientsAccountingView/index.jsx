@@ -17,6 +17,7 @@ import { Paginator } from "primereact/paginator";
 import accountingService from "../../../services/accountingService";
 import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const EntryTypeBadge = ({ entryType, t }) => {
   const getEntryTypeConfig = (type) => {
@@ -185,7 +186,7 @@ const AllClientsAccountingView = () => {
         );
       }
     } catch (error) {
-      console.error("Error fetching all clients accounting:", error);
+      logger.error("Error fetching all clients accounting:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -303,7 +304,7 @@ const AllClientsAccountingView = () => {
         life: 3000,
       });
     } catch (error) {
-      console.error("Error exporting data:", error);
+      logger.error("Error exporting data:", error);
       toast.current?.show({
         severity: "error",
         summary: "Export Failed",

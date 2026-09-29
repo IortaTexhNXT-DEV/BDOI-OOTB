@@ -30,11 +30,8 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const navigate = useNavigate();
   const handleNavigate = (rowData) => {
-    console.log(rowData, "rowData");
-
     // setVisibleEdit(true)
   };
-  console.log(journalVoucherPostTabelData, "jv");
 
   const onPageChange = (event) => {
     setFirst(event.first);
@@ -78,7 +75,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
 
   const handleEdit = (rowData) => {
     setEditID(rowData?.id);
-    console.log("first10", rowData?.id);
     setVisibleEdit(true);
   };
 
@@ -139,7 +135,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
   const dispatch = useDispatch();
   const [EditID, setEditID] = useState(null);
   const handleSubmit = (values) => {
-    console.log(values, "find values in formik");
     // keep the local amount in step with an edited foreign amount (same rate the line was entered with)
     const original = (Array.isArray(journalVoucherPostTabelData) ? journalVoucherPostTabelData : []).find((r) => r.id === EditID) || {};
     const oldForeign = parseFloat(original.foreignAmount);
@@ -151,7 +146,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       localAmount: Number.isFinite(newForeign) ? (newForeign * rate).toFixed(2) : values.localAmount,
       id: EditID,
     };
-    console.log(valueWithId, "find values in formik");
     dispatch(patchJVMiddleware(valueWithId));
     setVisibleEdit(false);
   };
@@ -182,7 +176,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     const targetInvoice = journalVoucherPostTabelData.find(
       (item) => item.id === EditID
     );
-    console.log(targetInvoice, "find data");
     const mainAcc = targetInvoice?.mainAccount;
     const subAc = targetInvoice?.subAccount;
     const entryT = targetInvoice?.entryType;

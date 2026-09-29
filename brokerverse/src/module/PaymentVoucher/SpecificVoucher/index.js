@@ -28,6 +28,7 @@ import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 function SpecificVoucher() {
   const { t } = useTranslation();
@@ -70,7 +71,7 @@ function SpecificVoucher() {
 
     const result = await disbursementService.getDisbursementById(disbursementId);
     if (!result.success) {
-      console.error("Failed to fetch disbursement for customerCode:", result.error);
+      logger.error("Failed to fetch disbursement for customerCode:", result.error);
       return null;
     }
 
@@ -143,7 +144,7 @@ function SpecificVoucher() {
   useEffect(() => {
     const fetchDisbursementDetails = async () => {
       if (!disbursementId) {
-        console.warn("No disbursement ID found in URL params");
+        logger.warn("No disbursement ID found in URL params");
         setLoading(false);
         return;
       }
@@ -192,7 +193,7 @@ function SpecificVoucher() {
             }));
             setInvoiceListData(transformedData);
           } else {
-            console.error("Failed to fetch agent invoice lines:", result.error);
+            logger.error("Failed to fetch agent invoice lines:", result.error);
           }
         } else {
           const insurerVoucher = voucherInvoicesOnly && payeeType === "Insurer";
@@ -245,7 +246,7 @@ function SpecificVoucher() {
               setInvoiceListData(transformedData);
             }
           } else {
-            console.error(
+            logger.error(
               "Failed to fetch invoice list by customer code:",
               result.error
             );
@@ -258,7 +259,7 @@ function SpecificVoucher() {
           }
         }
       } catch (error) {
-        console.error("Error fetching disbursement details:", error);
+        logger.error("Error fetching disbursement details:", error);
       } finally {
         setLoading(false);
       }
@@ -273,9 +274,7 @@ function SpecificVoucher() {
     }
   }, [EditID]);
   const setFormikValues = () => {
-    console.log("find action");
     const targetInvoice = invoiceListData.find((item) => item.id === EditID);
-    console.log(targetInvoice, "find data");
     const fcAmount = targetInvoice?.fcamount;
     const discount = targetInvoice?.discount;
     const vat = targetInvoice?.vat;
@@ -303,9 +302,6 @@ function SpecificVoucher() {
     };
     dispatch(patchpaymentVocherInvoiceListMiddleware(valueWithId));
     toastRef.current.showToast();
-    {
-      setTimeout(() => {}, 3000);
-    }
     setVisible(false);
   };
 

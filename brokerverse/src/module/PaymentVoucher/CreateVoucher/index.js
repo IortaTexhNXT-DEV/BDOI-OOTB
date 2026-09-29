@@ -28,6 +28,7 @@ import clientService from "../../../services/clientService";
 import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
 import { calendarDateFormat } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const initialValues = {
   VoucherDate: new Date(),
@@ -126,7 +127,7 @@ function Createvoucher() {
           }))
         );
       } catch (error) {
-        console.error("Error fetching referrers:", error);
+        logger.error("Error fetching referrers:", error);
         setReferrerOptions([]);
       } finally {
         setReferrersLoading(false);
@@ -144,10 +145,10 @@ function Createvoucher() {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -195,7 +196,7 @@ function Createvoucher() {
       }
     } catch (error) {
       if (requestId !== policyFilterRequestIdRef.current) return;
-      console.error("Error fetching policies:", error);
+      logger.error("Error fetching policies:", error);
       setPolicyOptions([]);
     } finally {
       if (requestId === policyFilterRequestIdRef.current) {
@@ -395,7 +396,7 @@ function Createvoucher() {
         state: { disbursementData },
       });
     } catch (error) {
-      console.error("Error creating disbursement:", error);
+      logger.error("Error creating disbursement:", error);
       toast.current?.show({
         severity: "error",
         summary: t("common.error"),

@@ -64,14 +64,6 @@ const SidebarItemCollapse = ({
   }, [isTopLevel, item?.submenu, currentPathname]);
 
   const handleToggleCollapse = (e) => {
-    console.log("🔴 SidebarItemCollapse handleToggleCollapse:", {
-      menuName: item?.name,
-      isTopLevel,
-      currentExpanded: isExpandedState,
-      willToggleTo: !isExpandedState,
-      hasEvent: !!e,
-      timestamp: new Date().toISOString(),
-    });
     // Stop event propagation to prevent bubbling
     if (e) {
       e.stopPropagation();
@@ -130,21 +122,11 @@ const SidebarItemCollapse = ({
       const hasMatch = checkSubmenuMatch(item.submenu);
 
       if (hasMatch) {
-        console.log(
-          "🟡 SidebarItemCollapse - Auto-expanding nested menu:",
-          item?.name,
-          "because path matches",
-        );
         setLocalExpanded(true);
       } else {
         // Only collapse if it was auto-expanded (don't collapse if user manually expanded it)
         // We can't easily track manual vs auto expansion, so we'll keep it expanded if it was already expanded
         // This prevents flickering when navigating between pages
-        console.log(
-          "🟡 SidebarItemCollapse - Nested menu:",
-          item?.name,
-          "does not match current path",
-        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -239,10 +239,6 @@ const NewSideBar = ({ onNavigate }) => {
       // If Dashboard is matched but path doesn't match Dashboard-specific paths,
       // find a more specific match by checking all menus
       if (topLevelMenuName === "Dashboard" && !isDashboardPath) {
-        console.log(
-          "🟠 NewSideBar - Dashboard matched but path doesn't match Dashboard paths, finding better match",
-        );
-
         // Find all menu matches (excluding Dashboard's "/" match)
         const allMenuMatches = [];
         baseFilteredMenuList.forEach((menu) => {
@@ -282,26 +278,11 @@ const NewSideBar = ({ onNavigate }) => {
             current.matchLength > prev.matchLength ? current : prev,
           );
           topLevelMenuName = bestMatch.menuName;
-          console.log("🟠 NewSideBar - Found more specific match:", {
-            originalMatch: "Dashboard",
-            betterMatch: bestMatch,
-            timestamp: new Date().toISOString(),
-          });
         } else {
           // No better match found, collapse Dashboard
-          console.log(
-            "🟠 NewSideBar - No better match found, collapsing Dashboard",
-          );
           topLevelMenuName = null;
         }
       }
-
-      console.log("🟠 NewSideBar - Auto-expanding menu based on path:", {
-        path: currentPath,
-        pathArrayData,
-        topLevelMenuName,
-        timestamp: new Date().toISOString(),
-      });
 
       // Update expanded menu based on current path
       setExpandedMenu((currentExpanded) => {
@@ -313,9 +294,6 @@ const NewSideBar = ({ onNavigate }) => {
       });
     } else {
       // If no match found, collapse all menus
-      console.log(
-        "🟠 NewSideBar - No menu match found for path, collapsing all menus",
-      );
       setExpandedMenu((currentExpanded) => {
         if (currentExpanded !== null) {
           return null;

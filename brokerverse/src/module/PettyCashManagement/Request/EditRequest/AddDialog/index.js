@@ -7,14 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { postEditRequestMiddleware} from "../../store/pettyCashRequestMiddleware";
 import { Dialog } from "primereact/dialog";
 
-
 const initialValues = {
     Narration: "",
     Amount: "",
-   
   };
-  
-
 
 const AddDialog = ({visible,setVisible}) => {
     const dispatch = useDispatch();
@@ -27,18 +23,15 @@ const AddDialog = ({visible,setVisible}) => {
         if (!values.Amount) {
           errors.Amount = "This field is required";
         }
-        
-        
+
         return errors;
       };
-
 
       const handleSubmit = (value) => {
         // const valueWithId = {
         //     ...value,
         //     id: editrequestDetails?.length + 1,
         // };
-        console.log("first12", value)
         dispatch(postEditRequestMiddleware(value));
         setVisible(false)
         formik.setFieldValue("Narration",);

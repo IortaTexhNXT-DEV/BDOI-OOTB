@@ -42,6 +42,7 @@ import {
 } from "./iarConstants";
 import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
 import useTaxRates from "../../quoteModule/utils/useTaxRates";
+import logger from "../../../utility/logger";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -789,7 +790,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         if (status) setQuotationStatus(status);
       }
     } catch (err) {
-      console.warn("Failed to fetch quotation status:", err);
+      logger.warn("Failed to fetch quotation status:", err);
     }
   }, [createdQuotationId]);
 

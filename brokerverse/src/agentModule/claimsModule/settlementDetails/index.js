@@ -19,6 +19,7 @@ import { postSettlementClaimMiddleware } from "./Store/claimSettlementMiddleware
 import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import claimsService from "../../../services/claimsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 
 const initialValues = {
   settlementType: "",
@@ -201,7 +202,7 @@ const SettlementDetails = () => {
 
   const handleSubmit = async (values) => {
     if (!claimId) {
-      console.error("No claim ID available for settlement");
+      logger.error("No claim ID available for settlement");
       return;
     }
 

@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
 import InitialsAvatar from "../InitialsAvatar";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const AgentNavBar = () => {
   const menuRight = useRef(null);
@@ -36,15 +37,11 @@ const AgentNavBar = () => {
   const userEmail = localStorage.getItem("USER_EMAIL") || "user@example.com";
   const currentLanguage = (i18n.language && i18n.language.startsWith("th")) ? "th" : "en";
 
-  // Debug logging
-  console.log("NavBar - Unread Count:", unreadCount);
-  console.log("NavBar - Notifications:", notifications);
-
   const handleLogOut = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout failed:", error);
+      logger.error("Logout failed:", error);
       // Fallback: clear data and redirect
       navigate("/login");
     }

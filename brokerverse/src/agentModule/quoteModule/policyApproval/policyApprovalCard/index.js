@@ -7,6 +7,7 @@ import SvgRightarrow from "../../../../assets/agentIcon/SvgRightArrow";
 import policyService from "../../../../services/policyService";
 import StatusIllustration from "../../../component/StatusIllustration";
 import { notifyError } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 
 const PolicyApprovalCard = ({ state }) => {
   const { t } = useTranslation();
@@ -19,10 +20,6 @@ const PolicyApprovalCard = ({ state }) => {
   const policyData = state?.policyData;
 
   const handlePolicyReceived = async () => {
-    console.log('=== POLICY RECEIVED - PROCEEDING TO PAYMENT ===');
-    console.log('Policy ID:', policyId);
-    console.log('Quotation ID:', quotationId);
-    
     let resolvedPolicyId = policyId;
     let resolvedPolicyData = policyData;
 
@@ -35,12 +32,11 @@ const PolicyApprovalCard = ({ state }) => {
           resolvedPolicyData = policyRecord;
         }
       } catch (error) {
-        console.error('Failed to resolve policy ID on waiting page:', error);
+        logger.error('Failed to resolve policy ID on waiting page:', error);
       }
     }
 
     if (!resolvedPolicyId) {
-      console.error('Policy ID not found in state');
       notifyError(t("agent.policyIdNotFound"));
       return;
     }
@@ -54,10 +50,7 @@ const PolicyApprovalCard = ({ state }) => {
       policyData: resolvedPolicyData,
       fromWaitingPage: true, // This MUST be true for auto-payment flow
     };
-    
-    console.log('Final navigation state:', navigationState);
-    console.log('fromWaitingPage is:', navigationState.fromWaitingPage);
-    
+
     navigate(`/agent/uploadpolicy/${quotationId || ''}`, {
       state: navigationState,
     });

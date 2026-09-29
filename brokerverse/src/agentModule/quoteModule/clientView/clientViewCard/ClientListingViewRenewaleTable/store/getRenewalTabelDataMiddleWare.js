@@ -1,14 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { GET_RENEWAL_DATA, GET_RENEWAL_DATA_SEARCH_LIST } from "../../../../../../redux/actionTypes";
 
-
-
-
 export const getRenewalTabelData = createAsyncThunk(
     GET_RENEWAL_DATA,
     async (payload, { rejectWithValue, getState }) => {
         const { correctionJVMainReducers } = getState();
-        console.log(correctionJVMainReducers, "data");
         const { correctionJVList } = correctionJVMainReducers;
         const filteredData = correctionJVList.filter((item) => item.id === 1);
 
@@ -44,7 +40,6 @@ export const getRenewalTabelData = createAsyncThunk(
 export const getRenewalTabelSearchList = createAsyncThunk(
     GET_RENEWAL_DATA_SEARCH_LIST,
     async ({ field, value }, { rejectWithValue, getState }) => {
-        console.log(field, value, "kkkk");
         const { renewalTabelMainReducers } = getState();
         const { renewalListData } = renewalTabelMainReducers;
         function filterEndorsementListByField(endorsementListData, field, value) {
@@ -64,15 +59,10 @@ export const getRenewalTabelSearchList = createAsyncThunk(
         }
         try {
             const filteredEndorsementList = filterEndorsementListByField(renewalListData, field, value);
-            console.log(filteredEndorsementList, "filteredEndorsementList");
             return filteredEndorsementList;
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error?.message);
         }
     }
 );
-
-
-
-
 

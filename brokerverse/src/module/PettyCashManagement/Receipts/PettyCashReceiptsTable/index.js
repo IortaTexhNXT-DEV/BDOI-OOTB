@@ -136,7 +136,6 @@ const PettyCashReceiptsTable = () => {
   ];
 
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(

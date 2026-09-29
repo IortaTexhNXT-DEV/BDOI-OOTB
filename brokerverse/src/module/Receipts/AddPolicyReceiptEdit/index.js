@@ -32,6 +32,7 @@ import disbursementService from "../../../services/disbursementService";
 import documentTemplateService from "../../../services/documentTemplateService";
 import { getUserData } from "../../../utility/tokenManager";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 function PolicyReceipts() {
   const { t } = useTranslation();
@@ -185,21 +186,18 @@ function PolicyReceipts() {
     );
   };
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     setEditedData(rowData);
     setFormikValues(rowData);
     setVisiblePopup(true);
   };
 
   const handleAddNewPayment = () => {
-    console.log("[ADD PAYMENT] Creating new payment entry");
-
-    // BUG #3 FIX: Get data from LAST entry (most recent payment) to pre-fill tax/fee details
+    // Tax and fee details are pre-filled from the most recent payment.
     // This provides better UX as user doesn't need to re-enter DST, LGT, VAT, etc.
     const lastEntry = allReceiptsList[allReceiptsList.length - 1] || {};
     const templateData = lastEntry;
 
-    // BUG #20 FIX: Calculate REMAINING unpaid amount by considering all previous payments
+    // Remaining unpaid amount after all previous payments.
     // Sum up all paid amounts from existing entries for the same policy
     const policyNumber =
       customerData.policyNumber || templateData.policies || "";
@@ -232,7 +230,6 @@ function PolicyReceipts() {
     setVisiblePopup(true);
   };
   const setFormikValues = (rowData) => {
-    console.log(rowData.fcAmount, "find action");
     const policy = rowData?.policies;
     const id = rowData?.id;
     const netPremium = rowData?.netPremium;
@@ -279,13 +276,10 @@ function PolicyReceipts() {
   };
 
   const handleSubmit = (values) => {
-    // Task 1: Log edited values
-
     dispatch(patchReceipEditMiddleware(values));
     setHasUnsavedChanges(true); // Mark as unsaved - payment staged locally
 
     setVisiblePopup(false);
-    console.log(values, "find checking");
   };
 
   const formik = useFormik({
@@ -311,7 +305,7 @@ function PolicyReceipts() {
       return;
     }
 
-    // ✅ FIX: Capture pendingTotals BEFORE approval (before state changes)
+    // Capture pendingTotals BEFORE approval (before state changes)
     // After approval, selectedRows become "Paid" and pendingTotals will be recalculated without them
     const capturedPendingTotals = { ...pendingTotals };
 
@@ -323,7 +317,7 @@ function PolicyReceipts() {
     // Proceed with approval
 
     // Prepare the receipt data for update API
-    // Task 3: Ensure all numeric fields are strings for consistency
+    // Numeric fields are sent as strings.
     const receiptData = {
       receiptType: customerData.receiptType || undefined,
       receiptDate: new Date().toISOString(),
@@ -347,11 +341,11 @@ function PolicyReceipts() {
         // Get the paid amount (might have been edited via dialog)
         const itemPaid = parseFloat(item.paid || "0");
 
-        // BUG FIX: Use lcAmount (gross premium including taxes), not netPremium
+        // lcAmount is the gross premium including taxes (not netPremium).
         // lcAmount = netPremium + dst + lgt + vat + other - discounts
         const itemGrossPremium = parseFloat(item.lcAmount || "0");
 
-        // BUG FIX: Calculate CUMULATIVE unpaid by summing ALL payments up to this point
+        // Cumulative unpaid: sum of all payments up to this entry.
         // Each receiptsList item represents ONE payment for the same policy
         // unPaid should show: grossPremium - sum(all payments up to and including this one)
         const cumulativePaid = allReceiptsList
@@ -360,7 +354,6 @@ function PolicyReceipts() {
 
         const itemUnpaid = Math.max(0, itemGrossPremium - cumulativePaid);
 
-
         const isSavedLine =
           item.receiptListId && !String(item.receiptListId).startsWith("payment-");
         return {
@@ -368,7 +361,7 @@ function PolicyReceipts() {
           policies: item.policies,
           netPremium: String(item.netPremium || "0.00"),
           paid: String(itemPaid.toFixed(2)), // Use edited paid value
-          unPaid: String(itemUnpaid.toFixed(2)), // ✅ CUMULATIVE: netPremium - sum(all paid up to this point)
+          unPaid: String(itemUnpaid.toFixed(2)), // cumulative: netPremium - sum(all paid up to this point)
           discounts: String(item.discounts || "0.00"),
           dst: String(item.dst || "0.00"),
           lgt: String(item.lgt || "0.00"),
@@ -429,7 +422,7 @@ function PolicyReceipts() {
             ? selectedTotals.totalLcAmount
             : selectedTotals.totalPaid;
 
-        // ✅ FIX: Calculate lcAmount properly - sum all lcAmount values from selected rows
+        // Calculate lcAmount properly - sum all lcAmount values from selected rows
         const totalLcAmount = selectedRows.reduce((sum, item) => {
           return sum + parseFloat(item.lcAmount || "0");
         }, 0);
@@ -437,12 +430,12 @@ function PolicyReceipts() {
         // Map paylater payment data to invoice list fields
         const invoiceListData = {
           customerCode: customerCode || null,
-          payables: selectedTotals.totalPaid.toFixed(2), // ✅ FIX: Use selected items' paid amounts
-          outstanding: (capturedPendingTotals.unPaid || 0).toFixed(2), // ✅ FIX: Use captured value with fallback
+          payables: selectedTotals.totalPaid.toFixed(2), // Use selected items' paid amounts
+          outstanding: (capturedPendingTotals.unPaid || 0).toFixed(2), // Use captured value with fallback
           fcAmount: "0.00", // Foreign currency amount
-          lcAmount: totalLcAmount.toFixed(2), // ✅ FIX: Use sum of selected items' lcAmount
+          lcAmount: totalLcAmount.toFixed(2), // Use sum of selected items' lcAmount
           excess: "0.00",
-          balAmount: (capturedPendingTotals.unPaid || 0).toFixed(2), // ✅ FIX: Use captured value with fallback
+          balAmount: (capturedPendingTotals.unPaid || 0).toFixed(2), // Use captured value with fallback
           vat: selectedTotals.totalVat.toFixed(2), // VAT amount
           wht: "0.00", // Withholding tax (if applicable)
           totalAmount: selectedTotals.totalLcAmount > 0 ? selectedTotals.totalLcAmount.toFixed(2) : selectedTotals.totalPaid.toFixed(2), // Total payment amount
@@ -452,22 +445,15 @@ function PolicyReceipts() {
           createdBy: currentUser?.id,
         };
 
-
         const invoiceListResult =
           await disbursementService.createInvoiceList(invoiceListData);
 
-        if (invoiceListResult.success) {
-          console.log(
-            "✅ Invoice list created successfully for paylater payment"
-          );
-        } else {
+        if (!invoiceListResult.success) {
           throw new Error(
             invoiceListResult.error || "Failed to create invoice list"
           );
         }
       } catch (error) {
-        console.error("Error creating invoice list:", error);
-        // ✅ FIX: Extract error message properly
         const errorMessage = error?.message || error?.toString() || t("accounts.addReceiptEdit.failedToCreateInvoiceList");
         showErrorMessage(errorMessage, t("common.error"));
       }
@@ -481,7 +467,6 @@ function PolicyReceipts() {
       const updatedReceipt = await dispatch(
         getReceiptByIdMiddleware(customerData.receiptId)
       ).unwrap();
-
 
       // Update the receivableTableList with fresh data from backend
       // This ensures the UI shows the correct paid/unpaid amounts
@@ -530,7 +515,7 @@ function PolicyReceipts() {
           Math.abs(calculatedTotal - updatedGrossPremium) < 0.01; // Allow for floating point precision
 
         if (!mathCheck) {
-          console.warn(
+          logger.warn(
             "[MATH ERROR] Paid + Unpaid does not equal Gross Premium!",
             {
               expected: updatedGrossPremium,
@@ -541,11 +526,9 @@ function PolicyReceipts() {
         }
       }
 
-
       // Show the Print button instead of redirecting
       setShowPrintButton(true);
     } catch (error) {
-      console.error("Error approving receipt:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToApproveReceipt"),
         t("common.error")
@@ -576,7 +559,6 @@ function PolicyReceipts() {
 
       showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
     } catch (error) {
-      console.error("Error printing receipt:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
         t("common.error")
@@ -619,7 +601,6 @@ function PolicyReceipts() {
 
       showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
     } catch (error) {
-      console.error("Error printing selected receipt items:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
         t("common.error")
@@ -1193,13 +1174,6 @@ function PolicyReceipts() {
                   formik.setFieldValue("paid", e.target.value);
                   formik.setFieldValue("unPaid", calculatedUnpaid.toFixed(2));
 
-                  console.log("[EDIT DIALOG] Paid changed:", {
-                    originalPaid,
-                    originalUnpaid,
-                    entryBalance,
-                    newPaid: newPaidValue,
-                    calculatedUnpaid: calculatedUnpaid.toFixed(2),
-                  });
                 }}
                 error={formik.errors.paid}
                 classNames="field__container"

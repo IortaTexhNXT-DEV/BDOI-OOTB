@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import { refreshAccessToken } from "../utility/sessionRefresh";
+import logger from "../utility/logger";
 
 /**
  * Authentication Service
@@ -305,7 +306,7 @@ class AuthService {
 
           clearTimeout(timeoutId);
         } catch (apiError) {
-          console.warn("Logout API call failed:", apiError);
+          logger.warn("Logout API call failed:", apiError);
           // Continue with local logout even if API fails
         }
       }
@@ -330,7 +331,6 @@ class AuthService {
 
       return { success: true };
     } catch (error) {
-      console.error("Logout error:", error);
       // Even if there's an error, clear ALL local data
       localStorage.clear(); // Clear everything for clean logout
       this.clearAuthCache();
@@ -381,7 +381,6 @@ class AuthService {
         data: data,
       };
     } catch (error) {
-      console.error("Token refresh error:", error);
       this.logout();
       return {
         success: false,

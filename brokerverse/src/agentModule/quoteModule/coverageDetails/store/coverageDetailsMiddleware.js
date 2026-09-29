@@ -86,10 +86,6 @@ const buildCoverageDetailsPayload = (formValues = {}) => {
     totalSumInsured: formValues?.totalSumInsured || formValues?.TotalSumInsured,
   };
 
-  console.log("=== BUILD COVERAGE DETAILS PAYLOAD ===");
-  console.log("Input formValues keys:", Object.keys(formValues));
-  console.log("Output payload:", payload);
-
   return payload;
 };
 
@@ -98,11 +94,6 @@ const buildRenewalRequestPayload = (formValues = {}, existingRecord = null) => {
   // If formValues has coverageDetails property, use it; otherwise treat formValues itself as coverage data
   const coverageSource = formValues.coverageDetails || formValues;
   const coverageDetails = buildCoverageDetailsPayload(coverageSource);
-
-  console.log("=== BUILD RENEWAL REQUEST PAYLOAD ===");
-  console.log("Input formValues:", formValues);
-  console.log("Coverage source:", coverageSource);
-  console.log("Built coverageDetails:", coverageDetails);
 
   const payload = {};
 
@@ -165,8 +156,6 @@ const extractExistingRenewalRecord = (state) => {
 export const postcoverageDetailsMiddleware = createAsyncThunk(
   POST_COVERAGE_DETAILS,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload, "find add datas in leomax");
-
     try {
       // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
@@ -193,11 +182,6 @@ export const submitRenewalCoverageMiddleware = createAsyncThunk(
       const requestPayload = buildRenewalRequestPayload(
         formValues,
         existingRecord
-      );
-
-      console.log(
-        "requestPayload from submitRenewalCoverageMiddleware:",
-        requestPayload
       );
 
       const apiResponse = renewalId
@@ -233,7 +217,6 @@ export const submitRenewalCoverageMiddleware = createAsyncThunk(
         isUpdate: Boolean(renewalId),
       };
     } catch (error) {
-      console.error("Submit policy renewal coverage error:", error);
       return rejectWithValue({
         success: false,
         error: error?.message || "Failed to submit policy renewal coverage",
@@ -258,7 +241,6 @@ export const getPolicyRenewalCoverageMiddleware = createAsyncThunk(
 
       return response;
     } catch (error) {
-      console.error("Policy renewal coverage middleware error:", error);
       return rejectWithValue({
         error: error.message || "Failed to fetch policy renewal coverage",
         success: false,

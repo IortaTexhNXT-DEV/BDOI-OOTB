@@ -122,10 +122,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
         );
         return;
       }
-
-      console.log(
-        `✅ Share validation passed: Primary ${primaryShare}% + Co-insurers ${coInsurerShares}% = ${totalShare}%`
-      );
     }
 
     // Store leadRefId in Redux if not already set
@@ -322,7 +318,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.InsuranceCompanyName}
               options={InsuranceCompanyOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("InsuranceCompanyName", e.value);
               }}
               optionLabel="label"
@@ -420,7 +415,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.InsurancePolicyType}
               options={policyTypeOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("InsurancePolicyType", e.value);
               }}
               optionLabel="label"
@@ -438,7 +432,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.AccountCode}
               options={accountCodeOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AccountCode", e.value);
               }}
               optionLabel="label"
@@ -457,7 +450,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.PaymentType}
               options={PolicyTypes}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("PaymentType", e.value);
               }}
               optionLabel="label"
@@ -495,7 +487,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
                 value={formik.values.InstallmentType}
                 options={InstallmentType}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("InstallmentType", e.value);
                 }}
                 optionLabel="label"
@@ -541,7 +532,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.VehicleBrand}
               options={brandOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("VehicleBrand", e.value);
                 if (e.value !== formik.values.VehicleBrand) {
                   formik.setFieldValue("VehicleModel", "");
@@ -562,7 +552,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.ModelYear}
               options={modelYearOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("ModelYear", e.value);
               }}
               optionLabel="label"
@@ -582,7 +571,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.VehicleModel}
               options={modelOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("VehicleModel", e.value);
                 if (e.value !== formik.values.VehicleModel) {
                   formik.setFieldValue("ModelVariant", "");
@@ -602,7 +590,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.ModelVariant}
               options={variantOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("ModelVariant", e.value);
                 const seating = variantOptions.find((v) => v.value === e.value)?.seatingCapacity;
                 if (seating && !formik.values.SeatingCapacity) {
@@ -626,7 +613,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               value={formik.values.VehicleColor}
               options={colourOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("VehicleColor", e.value);
               }}
               optionLabel="label"

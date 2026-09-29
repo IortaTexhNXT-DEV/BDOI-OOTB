@@ -88,7 +88,6 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
       };
     }
   );
-  console.log(policydetailedlist, "find policydetailedlist");
 
   const formik = useFormik({
     initialValues: initialValues,

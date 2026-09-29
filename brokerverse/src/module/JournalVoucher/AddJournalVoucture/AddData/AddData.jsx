@@ -103,8 +103,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       journalVoucherMainReducers?.journalVoucherPostTabelData || []
   );
 
-  console.log(journalVoucherPostTabelData, "journalVoucherPostTabelData");
-
   // Helper functions to get descriptions
   const getMainAccountDescription = (code) => {
     const account = mainAccountsData.find((acc) => acc.code === code);
@@ -147,7 +145,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
   };
 
   const handleSubmit = (values) => {
-    console.log("first11", formik.values);
     dispatch(postAddJournalVoucher(formik.values));
   };
 
@@ -170,7 +167,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
     validate: customValidation,
     onSubmit: (values) => {
       // Handle form submission
-      console.log(values, "qwerty");
       handleSubmit(values);
       formik.resetForm();
       handleUpdate(values);

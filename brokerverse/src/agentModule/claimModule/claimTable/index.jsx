@@ -16,6 +16,7 @@ import claimsService from "../../../services/claimsService";
 import { setPolicyHolderData } from "../../claimsModule/claimDetails/store/claimDetailsReducers";
 import { notifyError } from "../../../utility/dialogs";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -172,7 +173,7 @@ const ClaimTable = () => {
     if (claimId) {
       navigate(`/agent/claimaudittrail/${claimId}`);
     } else {
-      console.error("No claimId found for audit trail");
+      logger.error("No claimId found for audit trail");
     }
   };
 
@@ -338,7 +339,6 @@ const ClaimTable = () => {
       }
     } catch (err) {
       setError("An error occurred while fetching claims");
-      console.error("Error fetching claims:", err);
     } finally {
       setLoading(false);
     }
@@ -389,7 +389,7 @@ const ClaimTable = () => {
         state: lob ? { lob, productType: lob } : undefined,
       });
     } else {
-      console.error("No claimId found for viewing details");
+      logger.error("No claimId found for viewing details");
     }
   };
 
@@ -429,30 +429,12 @@ const ClaimTable = () => {
 
       // Validate that we have a proper claim ID (not claim number)
       if (!claimId) {
-        console.error("No valid claim ID found for navigation");
-        console.log("Available claim fields:", {
-          id: claim.id,
-          claimId: claim.claimId,
-          claimNumber: claim.claimNumber,
-          claimRefId: claim.claimRefId,
-        });
         notifyError("Unable to navigate: No valid claim ID found");
         return;
       }
 
       // Check if the claimId looks like a claim number (contains "CLAIM-" or similar patterns)
       if (claimId.includes("CLAIM-") || claimId.includes("Motor-")) {
-        console.error(
-          "Claim ID appears to be a claim number, not a database ID"
-        );
-        console.log("Claim ID:", claimId);
-        console.log("This looks like a claim number, not a database ID");
-        console.log("Available fields:", {
-          id: claim.id,
-          claimId: claim.claimId,
-          claimNumber: claim.claimNumber,
-          claimRefId: claim.claimRefId,
-        });
         notifyError(
           "Unable to navigate: Claim ID appears to be a claim number instead of database ID"
         );
@@ -460,30 +442,11 @@ const ClaimTable = () => {
       }
 
       // Extract policy holder name and claim number for Redux
-      console.log("=== CLAIM DATA FIELD ANALYSIS ===");
-      console.log("All claim fields:", Object.keys(claim));
-      console.log(
-        "Policy object fields:",
-        claim?.policy ? Object.keys(claim.policy) : "No policy object"
-      );
-      console.log(
-        "Lead object fields:",
-        claim?.lead ? Object.keys(claim.lead) : "No lead object"
-      );
-      console.log("Normalized policy holder name:", claim?.policyHolderName);
-      console.log("=== END CLAIM DATA FIELD ANALYSIS ===");
 
       const policyHolderName = claim?.policyHolderName || "Loading...";
 
       const claimNumber =
         claim?.claimNumber || claim?.claim_number || "Loading...";
-
-      console.log("=== CLAIM TABLE NAVIGATION (PROCESSING/PENDING) ===");
-      console.log("Claim Data:", claim);
-      console.log("Policy Holder Name:", policyHolderName);
-      console.log("Claim Number:", claimNumber);
-      console.log("Policy Number:", claim.policyNumber);
-      console.log("=== END CLAIM TABLE NAVIGATION ===");
 
       // Save claim data to Redux for future pages
       dispatch(
@@ -513,28 +476,12 @@ const ClaimTable = () => {
 
     // Validate that we have a proper claim ID (not claim number)
     if (!claimId) {
-      console.error("No valid claim ID found for navigation");
-      console.log("Available claim fields:", {
-        id: claim.id,
-        claimId: claim.claimId,
-        claimNumber: claim.claimNumber,
-        claimRefId: claim.claimRefId,
-      });
       notifyError("Unable to navigate: No valid claim ID found");
       return;
     }
 
     // Check if the claimId looks like a claim number (contains "CLAIM-" or similar patterns)
     if (claimId.includes("CLAIM-") || claimId.includes("Motor-")) {
-      console.error("Claim ID appears to be a claim number, not a database ID");
-      console.log("Claim ID:", claimId);
-      console.log("This looks like a claim number, not a database ID");
-      console.log("Available fields:", {
-        id: claim.id,
-        claimId: claim.claimId,
-        claimNumber: claim.claimNumber,
-        claimRefId: claim.claimRefId,
-      });
       notifyError(
         "Unable to navigate: Claim ID appears to be a claim number instead of database ID"
       );
@@ -542,30 +489,11 @@ const ClaimTable = () => {
     }
 
     // Extract policy holder name and claim number for Redux
-    console.log("=== CLAIM DATA FIELD ANALYSIS (DEFAULT) ===");
-    console.log("All claim fields:", Object.keys(claim));
-    console.log(
-      "Policy object fields:",
-      claim?.policy ? Object.keys(claim.policy) : "No policy object"
-    );
-    console.log(
-      "Lead object fields:",
-      claim?.lead ? Object.keys(claim.lead) : "No lead object"
-    );
-    console.log("Normalized policy holder name:", claim?.policyHolderName);
-    console.log("=== END CLAIM DATA FIELD ANALYSIS (DEFAULT) ===");
 
     const policyHolderName = claim?.policyHolderName || "Loading...";
 
     const claimNumber =
       claim?.claimNumber || claim?.claim_number || "Loading...";
-
-    console.log("=== CLAIM TABLE NAVIGATION (DEFAULT) ===");
-    console.log("Claim Data:", claim);
-    console.log("Policy Holder Name:", policyHolderName);
-    console.log("Claim Number:", claimNumber);
-    console.log("Policy Number:", claim.policyNumber);
-    console.log("=== END CLAIM TABLE NAVIGATION ===");
 
     // Save claim data to Redux for future pages
     dispatch(

@@ -46,14 +46,12 @@ const Index = () => {
       };
     }
   );
-  console.log(AccountDetailsList, "AccountDetailsList");
   const dispatch = useDispatch();
   const handleView = (columnData) => {
     dispatch(getAccountDetailsView(columnData));
     navigate("/master/finance/bank/accountdataview/viewaccountdetail");
   };
   const handleEdit = (columnData) => {
-    console.log(columnData, "columnData");
     dispatch(getPatchAccountDetailsView(columnData));
     navigate("/master/finance/bank/accountdataview/editaccountdetail");
   };
@@ -135,7 +133,6 @@ const Index = () => {
     setRows(event.rows);
   };
   const isEmpty = AccountDetailsList?.length === 0 || "undefined";
-  console.log("first", AccountDetailsList);
   const emptyTableIcon = (
     <div>
       <div className="empty-table-icon">

@@ -23,10 +23,8 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
             UserGroupAccessList: transactionCodeMasterReducer?.UserGroupAccessList,
             // TransactioncodeListsearch: transactionCodeMasterReducer?.TransactioncodeListsearch,
             getUserAccessData: transactionCodeMasterReducer?.getUserAccessData
-
         };
     });
-
 
     const dispatch = useDispatch()
     const initialValues = {
@@ -85,9 +83,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
         setFormikValues();
     }, [getUserAccessData]);
 
-
     const handleView = (rowData) => {
-        console.log("View clicked:", rowData);
         // navigate("/accounts/pettycash/PettyCashCodeDetails")
     };
     const headerStyle = {
@@ -99,10 +95,8 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
         border: "none",
     };
 
-
     return (
         <div className="transactioncode__master__tableedit_UserGroupAccess">
-
 
             <Dialog
                 header="Edit User Group Access"

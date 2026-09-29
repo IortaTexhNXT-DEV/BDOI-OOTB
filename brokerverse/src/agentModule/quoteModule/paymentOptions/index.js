@@ -72,10 +72,6 @@ const PaymentOptions = () => {
     policydetailedlist?.quotation?.grossPremium ||
     "0.00";
 
-  // Log data completeness for debugging
-
-  console.log(clientData, "clientData");
-
   const displayTitle = useMemo(() => {
     const parts = [];
 
@@ -121,7 +117,6 @@ const PaymentOptions = () => {
       const payload = response.data?.data || response.data;
       setClientData(payload);
     } else {
-      console.log(response.error, "error");
       setClientData(null);
     }
   };
@@ -141,7 +136,6 @@ const PaymentOptions = () => {
       clientData?.generatedClientId
     ) {
       const timer = setTimeout(() => {
-        console.log("Auto-proceeding: endorsement payment");
         handleSubmit("Direct Debit");
       }, 2000);
       return () => clearTimeout(timer);
@@ -158,7 +152,6 @@ const PaymentOptions = () => {
   ]);
 
   const handleUppendImg = (name, src) => {
-    console.log(name, src, "find handleUppendImg");
     setuploadImage(src?.objectURL);
   };
   const handleMOdalOpen = () => {
@@ -198,21 +191,19 @@ const PaymentOptions = () => {
       ? "/agent/quote/paymentconfirmation"
       : "/agent/policy/paymentconfirmation";
 
-    // FIX: Ensure we have complete policy data for policy payment flow
+    // The policy payment flow needs the complete policy record.
     const completePolicyData = isQuoteFlow
       ? policyData
       : policydetailedlist || policyData;
 
-    // FIX: Extract policy number correctly (never use ID as fallback)
+    // Policy number only; the id is not a policy number.
     const actualPolicyNumber =
       completePolicyData?.policyNumber ||
       state?.policyNumber ||
       state?.PolicyNumber;
 
-    // FIX: Extract gross premium correctly
     const actualGrossPremium = completePolicyData?.grossPremium || grossPremium;
 
-    // FIX: Extract client ID correctly
     const actualClientId = completePolicyData?.clientId || clientId;
 
     const actualClientName =

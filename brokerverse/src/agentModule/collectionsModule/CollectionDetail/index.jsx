@@ -12,6 +12,7 @@ import collectionService from "../../../services/collectionService";
 import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const CollectionDetail = () => {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ const CollectionDetail = () => {
         setCollection(result.data);
       }
     } catch (error) {
-      console.error("Load collection details error:", error);
+      logger.error("Load collection details error:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -65,7 +66,6 @@ const CollectionDetail = () => {
     setShowFollowUpModal(true);
   };
   const handleSendEmail = async (body) => {
-    console.log("send email");
     setLoadingFollowUp(true);
     const sendEmail = await collectionService.sendEmail(collection.id, {
       notes: body,

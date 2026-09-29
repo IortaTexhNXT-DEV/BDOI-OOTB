@@ -33,6 +33,7 @@ import {
 import clientService from "../../services/clientService";
 import BulkUploadModal from "./BulkUploadModal";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
+import logger from "../../utility/logger";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -152,14 +153,10 @@ const Index = () => {
       createdAtTo: dateTo.toISOString().split("T")[0], // Format as YYYY-MM-DD
     };
 
-    console.log("Disbursement bulk print filters:", filters);
-
     try {
       const result = await dispatch(
         bulkPrintDisbursementsMiddleware(filters)
       ).unwrap();
-
-      console.log("Bulk print result:", result);
 
       if (result.success && result.data.url) {
         toast.current?.show({
@@ -219,7 +216,6 @@ const Index = () => {
         setDateFrom(yesterday);
         setDateTo(new Date());
       } else {
-        console.log("Bulk print failed - no URL in result:", result);
         toast.current?.show({
           severity: "error",
           summary: t("common.error"),
@@ -230,7 +226,7 @@ const Index = () => {
         });
       }
     } catch (error) {
-      console.error("Bulk print error:", error);
+      logger.error("Bulk print error:", error);
 
       // Extract error information from various error structures
       let errorPayload = null;
@@ -403,10 +399,10 @@ const Index = () => {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }

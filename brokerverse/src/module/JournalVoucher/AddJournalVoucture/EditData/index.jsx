@@ -130,7 +130,6 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
 
   const handleSubmit = (values) => {
     // Handle form submission
-    console.log(values, "find values");
   };
 
   const formik = useFormik({

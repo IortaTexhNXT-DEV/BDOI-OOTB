@@ -1,5 +1,5 @@
 /**
- * In-app replacements for the browser's native window.alert / window.confirm (D44).
+ * In-app replacements for the browser's native window.alert / window.confirm.
  *
  * <AppDialogs /> (components/AppDialogs, mounted once in App.js) registers the application toast and renders the shared
  * PrimeReact <ConfirmDialog tagKey={APP_DIALOG_TAG} />. Screens that mount their own <ConfirmDialog /> (no tagKey) are not
@@ -9,6 +9,7 @@ import { confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import i18n from "../i18n";
+import logger from "./logger";
 
 export const APP_DIALOG_TAG = "app-dialog";
 
@@ -50,7 +51,7 @@ export const notify = (severity, message) => {
   } else {
     // the app shell is not mounted (e.g. unit tests): keep the message visible in the console
     // eslint-disable-next-line no-console
-    console.warn(`[${severity}] ${detail}`);
+    logger.warn(`[${severity}] ${detail}`);
   }
 };
 

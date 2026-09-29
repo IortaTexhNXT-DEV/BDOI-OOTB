@@ -56,13 +56,11 @@ const RequestTable = () => {
   const isEmpty = !RequestList?.length;
 
   const handleViewer = (columnData) => {
-    console.log("columnData", columnData);
     // dispatch(getAccountDetailsView(columnData));
     dispatch(geteditrequestMiddleware(columnData));
     navigate(`/accounts/pettycash/editrequestform/view/${columnData?.id}`);
   };
   const handleEdit = (rowData) => {
-    console.log(rowData?.id, "rowData");
     // dispatch(getPatchAccountDetailsView(columnData));
     dispatch(geteditrequestMiddleware(rowData));
     navigate(`/accounts/pettycash/editrequestform/edit/${rowData?.id}`);
@@ -120,7 +118,6 @@ const RequestTable = () => {
   const menu = useRef(null);
 
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     navigate("/accounts/pettycash/PettyCashCodeDetails");
   };
   const headerStyle = {

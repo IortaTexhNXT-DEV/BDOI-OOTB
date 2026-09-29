@@ -89,8 +89,6 @@ const receiptsReducer = createSlice({
       (state, action) => {
         state.loading = false;
         state.companyView = action.payload;
-        console.log( state.companyView = action.payload," state.companyView = action.payload;");
-   
       }
     );
     builder.addCase(
@@ -102,7 +100,6 @@ const receiptsReducer = createSlice({
       }
     );
 
-    
     builder.addCase(getCompanyEditData.pending, (state) => {
       state.loading = true;
     });
@@ -122,7 +119,6 @@ const receiptsReducer = createSlice({
       }
     );
 
-  
     builder.addCase(patchCompanyEditMiddleware.pending, (state) => {
       state.loading = true;
     });

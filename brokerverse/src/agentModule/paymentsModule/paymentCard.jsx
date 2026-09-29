@@ -21,17 +21,12 @@ const PaymentCard = ({  dataSearch, status,setStatus }) => {
   useEffect(()=>{
     setStatus(status)
   },[status])
-  console.log(paymentSearchList, "paymentSearchList");
   const navigate = useNavigate();
-  
 
   const filteredData =
     paymenttabledata &&
     paymenttabledata
       .filter((val) => val.status === status)
-
-
-
 
   const handleAction = (status) => {
     if (status === "PAID") {

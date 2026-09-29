@@ -73,7 +73,6 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       await navigator.clipboard.writeText(quoteUrl);
       notifySuccess("Link copied to clipboard!");
     } catch (err) {
-      console.error(err);
       notifyError("Failed to copy link");
     }
   };
@@ -95,7 +94,6 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         notifyError(result.error || "Failed to download quote PDF.");
       }
     } catch (err) {
-      console.error("Quote PDF download error:", err);
       notifyError(err?.message || "Failed to download quote PDF.");
     } finally {
       setQuotePdfLoading(false);
@@ -143,7 +141,6 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         notifyError(result.error || t("shareOption.sentToInsurersError"));
       }
     } catch (error) {
-      console.error("Send to insurers error:", error);
       notifyError(t("shareOption.sentToInsurersError"));
     } finally {
       setIsSendingToInsurers(false);

@@ -35,7 +35,6 @@ const UserGroupAccess = () => {
       mainAdditionalViewData: userReducers?.mainAdditionalViewData,
     };
   });
-  console.log(mainAdditionalViewData, "mainAdditionalViewData");
   const [products, setProducts] = useState([]);
   const [show, setShow] = useState(false);
   const [showView, setShowView] = useState(false);
@@ -160,7 +159,6 @@ const UserGroupAccess = () => {
   };
 
   const renderViewButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div className="center-content">
         <Button
@@ -180,7 +178,6 @@ const UserGroupAccess = () => {
   const handleView = (rowData) => {
     dispatch(getAdditionalRoleViewMiddleWare(rowData));
     setShowView(true);
-    console.log("View clicked:", rowData);
     // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   // const headerStyle = {

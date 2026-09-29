@@ -13,15 +13,8 @@ const SidebarItem = ({
   const { t } = useTranslation();
 
   const handleItemClick = (path, event) => {
-    console.log("🟣 SidebarItem handleItemClick:", {
-      path,
-      itemName: item?.name,
-      hasEvent: !!event,
-      timestamp: new Date().toISOString(),
-    });
     if (event) {
       event.stopPropagation();
-      console.log("🟣 SidebarItem - Event propagation stopped");
     }
     Navigate(path);
     // Close sidebar on mobile/tablet after navigation
@@ -67,12 +60,6 @@ const SidebarItem = ({
     return matches && isInPathArray;
   }, [item?.includes, item?.name, currentPathname, pathArrayData]);
 
-  console.log(isPathIncluded, "find isPathIncluded in text color", item?.name, {
-    currentPath: currentPathname,
-    itemIncludes: item?.includes,
-    pathArrayData,
-  });
-
   return (
     <li>
       <div
@@ -108,12 +95,6 @@ const SidebarItem = ({
         <span
           className={"singleitemname__container"}
           onClick={(e) => {
-            console.log("🟣 SidebarItem span onClick:", {
-              path: item.path,
-              itemName: item?.name,
-              hasEvent: !!e,
-              timestamp: new Date().toISOString(),
-            });
             handleItemClick(item.path, e);
           }}
           style={{

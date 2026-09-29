@@ -62,7 +62,6 @@ class UserService {
         pagination: data.pagination || {},
       };
     } catch (error) {
-      console.error("Get users error:", error);
       return {
         success: false,
         error: error.name === "AbortError" ? "Request timeout" : error.message,
@@ -105,7 +104,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Get user by ID error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch user",
@@ -148,7 +146,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Create user error:", error);
       return {
         success: false,
         error: error.message || "Failed to create user",
@@ -191,7 +188,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Update user error:", error);
       return {
         success: false,
         error: error.message || "Failed to update user",
@@ -232,7 +228,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Delete user error:", error);
       return {
         success: false,
         error: error.message || "Failed to delete user",
@@ -275,7 +270,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Update password error:", error);
       return {
         success: false,
         error: error.message || "Failed to update password",
@@ -315,7 +309,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Get user stats error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch user stats",

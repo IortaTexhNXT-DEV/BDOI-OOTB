@@ -16,6 +16,7 @@ import { useFormik } from "formik";
 import { postSendData } from "./store/sendMailMiddleWare";
 import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import { setPolicyHolderData } from "../claimDetails/store/claimDetailsReducers";
+import logger from "../../../utility/logger";
 
 const SendMail = () => {
   const { t } = useTranslation();
@@ -48,7 +49,6 @@ const SendMail = () => {
   // Get dispatch for Redux actions
   const dispatch = useDispatch();
   const handleUppendImg = (name, src) => {
-    console.log(name, src, "find handleUppendImg");
     setuploadImage(src?.objectURL);
     // const file = src.files[0];
     // console.log(file,"file");
@@ -67,18 +67,9 @@ const SendMail = () => {
   const policyNumber = claimDetailsViewData?.policyNumber || "N/A";
   const policyHolderName = claimDetailsViewData?.PolicyHolderName || "N/A";
 
-  // Console logs to verify data extraction
-  console.log("=== SEND MAIL POLICY DATA ===");
-  console.log("Claim Details View Data:", claimDetailsViewData);
-  console.log("Extracted Policy Number:", policyNumber);
-  console.log("Extracted Policy Holder Name:", policyHolderName);
-  console.log("=== END SEND MAIL POLICY DATA ===");
-
   // Store policy holder data in Redux for future pages
   useEffect(() => {
     if (policyHolderName && policyNumber) {
-      console.log("=== DISPATCHING POLICY HOLDER DATA TO REDUX ===");
-      console.log("Storing in Redux:", { policyHolderName, policyNumber });
       dispatch(
         setPolicyHolderData({
           policyHolderName,
@@ -86,7 +77,6 @@ const SendMail = () => {
           claimNumber: "", // Will be updated when claim is created
         })
       );
-      console.log("=== END DISPATCHING POLICY HOLDER DATA TO REDUX ===");
     }
   }, [dispatch, policyHolderName, policyNumber]);
 
@@ -116,18 +106,8 @@ const SendMail = () => {
     try {
       const result = await dispatch(postSendData(formik.values));
 
-      console.log("=== REDUX ACTION RESULT DEBUG ===");
-      console.log("Result Type:", result.type);
-      console.log("Result Payload:", result.payload);
-      console.log("Result Meta:", result.meta);
-      console.log("=== END REDUX ACTION RESULT DEBUG ===");
-
       if (result.type === "sendmail/POST_SENT_MAIL_DATA/fulfilled") {
         // Success - navigate to next page with claim data
-        console.log("=== NAVIGATING TO NEXT PAGE ===");
-        console.log("API Response Result:", result.payload);
-        console.log("Response Data:", result.payload.data);
-        console.log("Claim Data:", result.payload.data?.claim);
 
         // Extract claim data from nested response structure
         const claimData =
@@ -136,10 +116,6 @@ const SendMail = () => {
           claimData.id || claimData.claimId || claimData.claim_id || null;
         const claimNumber =
           claimData.claimNumber || claimData.claim_number || claimData.id;
-
-        console.log("Extracted Claim ID:", claimId);
-        console.log("Extracted Claim Number:", claimNumber);
-        console.log("=== END NAVIGATING TO NEXT PAGE ===");
 
         // Update Redux with claim number
         dispatch(
@@ -184,11 +160,9 @@ const SendMail = () => {
         });
       } else {
         // Handle other cases
-        console.log("Unexpected result type:", result.type);
-        console.log("Result payload:", result.payload);
       }
     } catch (error) {
-      console.error("Error submitting claim:", error);
+      logger.error("Error submitting claim:", error);
     }
   };
   const formik = useFormik({

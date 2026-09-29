@@ -17,16 +17,13 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
         return {
             loading: commissionMianReducers?.loading,
             popupEditData: commissionMianReducers?.popupEditData
-
         };
     });
-    console.log(popupEditData.sharingRate, "popupEditData")
 
     const codeOptionsMain = [
         { label: "Option 1", value: "Main00123" },
         { label: "Option 2", value: "Main00124" },
     ];
-
 
     const customValidation = (values) => {
         const errors = {};
@@ -39,14 +36,12 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
             errors.sharingRate = t("validation.fieldRequired");
         }
 
-
         return errors;
     };
     const dispatch=useDispatch()
     const handleSubmit = (value) => {
         dispatch(addLevelPatchEditPopup(value))
         setShowEditPopup(false);
-        console.log(value, "valuedata");
     }
     const [levetOptionData, setLevelOptionData]=useState([])
 
@@ -70,7 +65,6 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
         initialValues: {
             level: "",
             sharingRate: "",
-
         },
         validate: customValidation,
         onSubmit:handleSubmit
@@ -140,8 +134,6 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
 
                 </div>
 
-
-
                 <div
                     className="col-12 save__popup__jv"
                     style={{
@@ -164,5 +156,4 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
 };
 
 export default EditCommissionPopup;
-
 

@@ -55,7 +55,6 @@ const QuoteDetailView = () => {
         setInsights(comparisonNotes);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching comparison:', err);
         setError(t("agent.unexpectedErrorComparison"));
         setLoading(false);
       }

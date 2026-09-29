@@ -52,7 +52,6 @@ const DataTabelJV = ({
 
   const dispatch = useDispatch();
   const handleView = (rowData) => {
-    console.log(rowData.id, "rowdata");
     dispatch(getJournalVoucherViewData(rowData));
     // const serializedData = JSON.stringify(rowData);
     navigate(`/accounts/journalvoucher/detailsjournalvocture/${rowData.id}`);

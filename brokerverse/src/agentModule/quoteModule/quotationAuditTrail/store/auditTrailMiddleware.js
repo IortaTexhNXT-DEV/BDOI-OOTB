@@ -7,6 +7,7 @@ import {
   GET_QUOTATION_DETAILS_SUCCESS,
   GET_QUOTATION_DETAILS_FAILURE,
 } from "./auditTrailActionTypes";
+import logger from "../../../../utility/logger";
 
 // Get audit trail for a specific quotation
 export const getQuotationAuditTrail = (quotationId, sortOrder = "desc") => {
@@ -20,7 +21,6 @@ export const getQuotationAuditTrail = (quotationId, sortOrder = "desc") => {
       );
 
       if (result.success) {
-        console.log("Audit trail data received:", result.data);
         dispatch({
           type: GET_QUOTATION_AUDIT_TRAIL_SUCCESS,
           payload: result.data.data || result.data || [],
@@ -32,7 +32,7 @@ export const getQuotationAuditTrail = (quotationId, sortOrder = "desc") => {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error("Error fetching audit trail:", error);
+      logger.error("Error fetching audit trail:", error);
       dispatch({
         type: GET_QUOTATION_AUDIT_TRAIL_FAILURE,
         payload: error.message,
@@ -50,7 +50,6 @@ export const getQuotationDetails = (quotationId) => {
       const result = await quotationService.getQuotationById(quotationId);
 
       if (result.success) {
-        console.log("Quotation details received:", result.data);
         dispatch({
           type: GET_QUOTATION_DETAILS_SUCCESS,
           payload: result.data.data || result.data || {},
@@ -59,7 +58,7 @@ export const getQuotationDetails = (quotationId) => {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error("Error fetching quotation details:", error);
+      logger.error("Error fetching quotation details:", error);
       dispatch({
         type: GET_QUOTATION_DETAILS_FAILURE,
         payload: error.message,

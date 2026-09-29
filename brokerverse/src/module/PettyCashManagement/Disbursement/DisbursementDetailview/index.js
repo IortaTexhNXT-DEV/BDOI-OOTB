@@ -34,8 +34,6 @@ const DisbursementDetailview = () => {
     }
   );
 
-  console.log(getViewDisbursment, "getViewDisbursment");
-
   const items = [
     {
       label: t("pettyCash.pettyCashLabel"),

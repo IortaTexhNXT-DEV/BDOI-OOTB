@@ -75,7 +75,6 @@ const ModalData = ({ visible, setVisible, handleUpdate, setEditID,correctionJVLi
   const dispatch=useDispatch()
   const handleSubmit = (values) => {
     // Handle form submission
-    console.log(values, "find values");
     dispatch(patchCorrectionJVEdit())
   };
   const formik = useFormik({

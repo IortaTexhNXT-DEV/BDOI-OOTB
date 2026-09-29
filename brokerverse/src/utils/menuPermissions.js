@@ -95,7 +95,7 @@ export const roleMenuPermissions = {
       "Correction JV",
       "Reversal JV",
       "Remittance",
-      // incentives are calculated, approved and paid by Accounting (D102)
+      // incentives are calculated, approved and paid by Accounting
       "Incentive",
       // period-end processing and BIR tax
       "Period End",
@@ -105,7 +105,7 @@ export const roleMenuPermissions = {
     ],
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
-    // reinsurer statement reconciliation is an Accounting task (D103)
+    // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)
     reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission"],

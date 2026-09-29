@@ -20,7 +20,6 @@ const PolicyDetailsReducer = createSlice({
   initialState,
   reducers: {
     deleteCoInsurer: (state, action) => {
-      console.log('Deleting co-insurer with id:', action.payload);
       state.TableList = state.TableList.filter(item => item.id !== action.payload);
     },
     clearTableList: (state) => {
@@ -28,7 +27,6 @@ const PolicyDetailsReducer = createSlice({
     }
   },
   extraReducers: (builder) => {
-
     //postPolicyDetailsMiddleware
 
     builder.addCase(postPolicyDetailsMiddleware.pending, (state) => {
@@ -60,7 +58,6 @@ const PolicyDetailsReducer = createSlice({
       state.loading = true;
     });
     builder.addCase(postModleDetailsMiddleware.fulfilled, (state, action) => {
-      console.log(action.payload, 'find action.payload')
       state.loading = false;
       state.TableList = [...state.TableList, action.payload];
     });
@@ -69,8 +66,6 @@ const PolicyDetailsReducer = createSlice({
       //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
-
-
   },
 });
 

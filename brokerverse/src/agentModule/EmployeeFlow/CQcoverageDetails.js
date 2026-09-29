@@ -34,7 +34,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
     }
   );
 
-  console.log(CoverageDetails, "find CoverageDetails");
   useEffect(() => {
     if (action === "coveragedetail") {
       setFormikValuesPatch();
@@ -60,7 +59,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
   }, []);
 
   const handleclick = (values) => {
-    console.log(action, "action1");
     dispatch(postcoverageDetailsMiddleware(values));
     {
       action === "coveragedetail"
@@ -149,7 +147,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
   return (
     <div className="coverage__details__card__container mt-4">
 
-
        <div className="order__summary__main__title">
                 {flow === "renewal" ? t("employeeBenefit.client") : t("employeeBenefit.leads")}
             </div>
@@ -179,7 +176,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
                value={covers[0].value}
               options={covers}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("BodilyInjury", e.value);
               }}
               optionLabel="label"
@@ -196,7 +192,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               value={formik.values.BodilyInjury}
               options={PremiumOPtions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("BodilyInjury", e.value);
               }}
               optionLabel="label"
@@ -247,9 +242,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               /> : <CalculaitionTextInputs
                 label={t("employeeBenefit.medicalCoveragePremium")}
                 value={
-                   
                     formik.values.LossandDamagecoveragepremium
-                    
                 }
                 onChange={formik.handleChange("LossandDamagecoveragepremium")}
               />
@@ -318,7 +311,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               value={formik.values.BodilyInjury}
               options={BodilyInjuryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("BodilyInjury", e.value);
               }}
               optionLabel="label"
@@ -334,14 +326,12 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               label={t("employeeBenefit.anyOneOccurrenceLimitCoveragePremium")}
               // value={formik.values.LossandDamagecoverageRate}
               value={ formik.values.BodilyInjuryCoveragePremium
-                  
               }
               onChange={formik.handleChange("BodilyInjuryCoveragePremium")}
             /> : <CalculaitionTextInputs
               label={t("employeeBenefit.anyOneOccurrenceLimitCoveragePremium")}
               // value={formik.values.BodilyInjuryCoveragePremium}
               value={ formik.values.BodilyInjuryCoveragePremium
-                 
               }
               onChange={formik.handleChange("BodilyInjuryCoveragePremium")}
             />
@@ -360,7 +350,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               value={formik.values.PropertyDamage}
               options={PropertyDamageOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("PropertyDamage", e.value);
               }}
               optionLabel="label"

@@ -37,8 +37,6 @@ const Payments = () => {
   const [endrosementModal, setEndrosementModal] = useState(false);
 
   const renderPaymentStatus = (rowData) => {
-    console.log(rowData, "rowData");
-
     return <div>{rowData?.payment}</div>;
   };
   const handleMenuToggle = (event, menuRef) => {
@@ -104,7 +102,6 @@ const Payments = () => {
     if (menuItem == "endrosement") {
       setEndrosementModal(true);
     }
-    console.log(`${menuItem} clicked`);
   };
 
   const renderEditButton = (rowData) => {

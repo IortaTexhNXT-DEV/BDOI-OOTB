@@ -34,7 +34,7 @@ const EndorsementDetailedView = ({ action }) => {
     endorsementTypeIds.includes(5) ||
     endorsementData?.isCancelPolicy === true;
 
-  // Payment is due only for additional premium (D45). No change: nothing to pay. A return premium (negative change on
+  // Payment is due only for additional premium. No change: nothing to pay. A return premium (negative change on
   // a non-cancellation endorsement) is refunded by finance through a client refund payment voucher, not collected here.
   const premiumDelta = Number(endorsementData?.premiumDelta ?? endorsementData?.summary?.premiumDelta ?? 0) || 0;
   const paymentDue = !isCancelled && premiumDelta > 0;
@@ -54,7 +54,6 @@ const EndorsementDetailedView = ({ action }) => {
             notifyError(t("endorsement.failedToLoadEndorsement") + " " + (response.error || ""));
           }
         } catch (error) {
-          console.error("Error fetching endorsement:", error);
           notifyError(t("endorsement.errorLoadingEndorsement"));
         } finally {
           setLoading(false);
@@ -104,26 +103,19 @@ const EndorsementDetailedView = ({ action }) => {
         documentUrl.includes("s3.") ||
         documentUrl.includes("amazonaws.com")
       ) {
-        console.log("Fetching presigned URL for S3 document:", documentUrl);
-
         // Get presigned URL using the batch endpoint
         const urlMap = await s3Service.getPresignedDownloadUrls([documentUrl]);
 
         if (urlMap.success && urlMap.data[documentUrl]) {
           downloadUrl = urlMap.data[documentUrl];
-          console.log("Presigned URL obtained successfully");
         } else {
-          console.error("Failed to get presigned URL:", urlMap);
           throw new Error(urlMap.error || "Failed to generate download URL");
         }
       }
 
-      console.log("Opening document in new tab:", downloadUrl);
-
       // Open in new tab
       window.open(downloadUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      console.error("Error opening document:", error);
       notifyError(t("endorsement.errorLoadingDocument"));
     } finally {
       setDocumentLoading(false);

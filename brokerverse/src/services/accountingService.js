@@ -59,7 +59,6 @@ class AccountingService {
         message: data.message || "Client ledger view retrieved successfully",
       };
     } catch (error) {
-      console.error("Client ledger fetch error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch client ledger",
@@ -146,7 +145,6 @@ class AccountingService {
         ...result,
       };
     } catch (error) {
-      console.error("Payment accounting entry error:", error);
       throw error;
     }
   }
@@ -204,7 +202,6 @@ class AccountingService {
         message: data.message || "Policy ledger view retrieved successfully",
       };
     } catch (error) {
-      console.error("Policy ledger fetch error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch policy ledger",
@@ -269,7 +266,6 @@ class AccountingService {
           data.message || "Policy accounting entries retrieved successfully",
       };
     } catch (error) {
-      console.error("Policy entries fetch error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch policy entries",
@@ -332,7 +328,6 @@ class AccountingService {
         message: data.message || "Accounting entries retrieved successfully",
       };
     } catch (error) {
-      console.error("Accounting entries query error:", error);
       return {
         success: false,
         error: error.message || "Failed to query accounting entries",
@@ -396,7 +391,6 @@ class AccountingService {
           data.message || "All clients accounting data retrieved successfully",
       };
     } catch (error) {
-      console.error("All clients accounting fetch error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch all clients accounting",
@@ -439,7 +433,6 @@ class AccountingService {
         message: data.message || "Transaction posted successfully",
       };
     } catch (error) {
-      console.error("Post transaction error:", error);
       return {
         success: false,
         error: error.message || "Failed to post transaction",
@@ -481,7 +474,6 @@ class AccountingService {
         message: data.message || "Transaction reversed successfully",
       };
     } catch (error) {
-      console.error("Reverse transaction error:", error);
       return {
         success: false,
         error: error.message || "Failed to reverse transaction",
@@ -521,7 +513,6 @@ class AccountingService {
         message: data.message || "Transaction cancelled successfully",
       };
     } catch (error) {
-      console.error("Cancel transaction error:", error);
       return {
         success: false,
         error: error.message || "Failed to cancel transaction",
@@ -564,7 +555,6 @@ class AccountingService {
         message: data.message || "Transactions posted successfully",
       };
     } catch (error) {
-      console.error("Bulk post transactions error:", error);
       return {
         success: false,
         error: error.message || "Failed to bulk post transactions",
@@ -647,7 +637,6 @@ class AccountingService {
         message: "Accounting entries exported successfully",
       };
     } catch (error) {
-      console.error("Export accounting entries error:", error);
       return {
         success: false,
         error: error.message || "Failed to export accounting entries",
@@ -739,7 +728,6 @@ class AccountingService {
         message: data.message || "Unmatched entries retrieved successfully",
       };
     } catch (error) {
-      console.error("Unmatched entries fetch error:", error);
       return {
         success: false,
         error: error.message || "Failed to get unmatched entries",
@@ -772,7 +760,6 @@ class AccountingService {
         message: data.message || "Entries matched successfully",
       };
     } catch (error) {
-      console.error("Match entries error:", error);
       return {
         success: false,
         error: error.message || "Failed to match entries",
@@ -807,7 +794,6 @@ class AccountingService {
         message: data.message || "Matched entries retrieved successfully",
       };
     } catch (error) {
-      console.error("Matched entries fetch error:", error);
       return {
         success: false,
         error: error.message || "Failed to get matched entries",
@@ -843,7 +829,6 @@ class AccountingService {
         message: data.message || "Entries unmatched successfully",
       };
     } catch (error) {
-      console.error("Unmatch entries error:", error);
       return {
         success: false,
         error: error.message || "Failed to unmatch entries",

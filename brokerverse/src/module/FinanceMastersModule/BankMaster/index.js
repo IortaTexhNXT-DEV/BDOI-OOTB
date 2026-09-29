@@ -95,7 +95,6 @@ const BankMaster = () => {
       BankSearchList: bankMasterReducer?.BankSearchList,
     };
   });
-  useEffect(() => {}, [bankList]);
   // useEffect(() => {
   //   console.log(currentDialog, "ads")
   //   if(Object.keys(currentDialog).length>0){
@@ -382,8 +381,7 @@ const BankMaster = () => {
 
             <Column
               body={(rowData) => (
-                console.log(rowData, "rowDataaa"),
-                (<MenuData menuitems={menuitems} rowData={rowData} />)
+                <MenuData menuitems={menuitems} rowData={rowData} />
                 // <div className="card flex justify-content-center">
                 //   <TieredMenu
                 //     model={menuitems.map((item) => ({

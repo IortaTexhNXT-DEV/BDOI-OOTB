@@ -31,7 +31,6 @@ export const showLogoutSuccessMessage = () => {
     document.body.appendChild(tempToastElement);
     
     // This is a fallback - in practice, the global toast should be used
-    console.log('Logout successful - redirecting to login...');
   }
 };
 

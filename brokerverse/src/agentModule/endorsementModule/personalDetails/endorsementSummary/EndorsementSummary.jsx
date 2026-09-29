@@ -25,6 +25,7 @@ import { numberLocale } from "../../../../utility/currencyConverter";
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 import { getTaxRates } from "../../../quoteModule/utils/premiumCalculations";
 import { confirmAction, notifyError } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -124,7 +125,7 @@ const EndorsementSummary = ({ action }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch related policy:", error);
+      logger.error("Failed to fetch related policy:", error);
     } finally {
       setCheckingPolicy(false);
     }
@@ -163,16 +164,10 @@ const EndorsementSummary = ({ action }) => {
       );
 
       if (!validation.isValid) {
-        console.warn("⚠️ [EndorsementSummary] Accounting equation mismatch:", {
+        logger.warn("[EndorsementSummary] Accounting equation mismatch:", {
           ...validation.breakdown,
           calculatedTotal: validation.calculatedTotal,
           difference: validation.difference,
-          endorsementId: state?.endorsementId,
-        });
-      } else {
-        console.log("✅ [EndorsementSummary] Accounting equation validates correctly:", {
-          ...validation.breakdown,
-          calculatedTotal: validation.calculatedTotal,
           endorsementId: state?.endorsementId,
         });
       }
@@ -335,7 +330,6 @@ const EndorsementSummary = ({ action }) => {
     } catch (error) {
       setIsSending(false);
       notifyError(t("endorsementSummary.errorSending"));
-      console.error(error);
     } finally {
       setIsSending(false);
     }

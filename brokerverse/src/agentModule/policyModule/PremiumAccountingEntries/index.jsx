@@ -12,6 +12,7 @@ import { Tag } from "primereact/tag";
 import accountingService from "../../../services/accountingService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 // Cell components for DataTable
 const DebitCreditCell = ({ debitCredit }) => {
@@ -213,7 +214,7 @@ const PremiumAccountingEntries = () => {
         throw new Error(response.error || "Failed to fetch policy entries");
       }
     } catch (error) {
-      console.error("Error fetching policy entries:", error);
+      logger.error("Error fetching policy entries:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),

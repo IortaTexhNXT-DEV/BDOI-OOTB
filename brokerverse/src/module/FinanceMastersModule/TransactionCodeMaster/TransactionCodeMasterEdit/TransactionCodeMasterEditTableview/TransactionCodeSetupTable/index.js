@@ -21,11 +21,8 @@ const TransactionCodeSetupTable = () => {
     return {
       loading: transactionCodeMasterReducer?.loading,
       TransactionCodeSetup: transactionCodeMasterReducer?.TransactionCodeSetup,
-
-
     };
   });
-  console.log(TransactionCodeSetup, "TransactionCodeSetup")
   const [products, setProducts] = useState([]);
   const [show, setShow] = useState(false);
 
@@ -97,7 +94,6 @@ const TransactionCodeSetupTable = () => {
   }
 
   const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
     // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const headerStyle = {
@@ -134,7 +130,6 @@ const TransactionCodeSetupTable = () => {
     // },
     onSubmit: handleSubmit
   });
-
 
   return (
     <div className="transactioncode__master__table_edit">

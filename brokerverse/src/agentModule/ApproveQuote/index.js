@@ -41,7 +41,6 @@ const ApproveQuote = () => {
       // Fetch full quotation details in preview mode
       fetchQuotationPreview(tokenParam);
     } catch (e) {
-      console.error('Error decoding token:', e);
       setError(t('approveQuote.invalidLink'));
       setLoading(false);
     }
@@ -61,14 +60,11 @@ const ApproveQuote = () => {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ Fetched quote preview:', result);
         setQuotationData(result);
       } else {
-        console.error('Failed to fetch quote preview:', result.message);
         setError(result.message || t('approveQuote.failedToLoad'));
       }
     } catch (error) {
-      console.error('Error fetching quote preview:', error);
       setError(t('approveQuote.failedToLoad'));
     } finally {
       setLoading(false);
@@ -90,8 +86,6 @@ const ApproveQuote = () => {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ Quote approved successfully!');
-        console.log('Full quotation data from backend:', result);
         setApproved(true);
         // Backend returns full quotation with all details and premium values
         setQuotationData(result);
@@ -100,7 +94,6 @@ const ApproveQuote = () => {
       }
     } catch (error) {
       setError(t('approveQuote.failedToApprove'));
-      console.error(error);
     } finally {
       setApproving(false);
     }

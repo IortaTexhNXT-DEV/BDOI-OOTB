@@ -30,8 +30,6 @@ export const useNotifications = (initialParams = {}) => {
           ...params,
         });
 
-        // Debug logs removed for production
-
         // Handle different response structures - API returns {success: true, data: {notifications: [], pagination: {}, unreadCount: 0}}
         const notificationsData =
           response.data?.data?.notifications ||
@@ -57,7 +55,6 @@ export const useNotifications = (initialParams = {}) => {
       } catch (err) {
         const errorMessage = err.message || "Failed to fetch notifications";
         setError(errorMessage);
-        console.error("Error fetching notifications:", err);
 
         // If it's a 500 error, show a more user-friendly message
         if (err.message?.includes("500")) {
@@ -94,7 +91,6 @@ export const useNotifications = (initialParams = {}) => {
       showSuccessMessage("Notification marked as read");
     } catch (err) {
       showErrorMessage("Failed to mark notification as read");
-      console.error("Error marking notification as read:", err);
     }
   }, []);
 
@@ -128,7 +124,6 @@ export const useNotifications = (initialParams = {}) => {
         );
       } catch (err) {
         showErrorMessage("Failed to mark notifications as read");
-        console.error("Error marking notifications as read:", err);
       }
     },
     [notifications]
@@ -153,7 +148,6 @@ export const useNotifications = (initialParams = {}) => {
       showSuccessMessage("All notifications marked as read");
     } catch (err) {
       showErrorMessage("Failed to mark all notifications as read");
-      console.error("Error marking all notifications as read:", err);
     }
   }, []);
 
@@ -181,7 +175,6 @@ export const useNotifications = (initialParams = {}) => {
         showSuccessMessage("Notification deleted");
       } catch (err) {
         showErrorMessage("Failed to delete notification");
-        console.error("Error deleting notification:", err);
       }
     },
     [notifications]
@@ -211,7 +204,6 @@ export const useNotifications = (initialParams = {}) => {
         showSuccessMessage(`${notificationIds.length} notifications deleted`);
       } catch (err) {
         showErrorMessage("Failed to delete notifications");
-        console.error("Error deleting notifications:", err);
       }
     },
     [notifications]

@@ -371,7 +371,6 @@ const ProductRecommendation = () => {
   };
 
   const handleNextNavigation = (selectedPlan) => {
-    console.log(state, "Product Recommendation State", selectedPlan);
     navigate(state.path, state.state);
   };
 

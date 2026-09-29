@@ -83,7 +83,6 @@ const LeadListingAllTable = () => {
   };
 
   const handleEdit = (rowData) => {
-    console.log("Editing quotation:", rowData);
     const quotationId = rowData.id;
     const rawData = rowData.rawData || rowData;
     const productType =
@@ -115,8 +114,6 @@ const LeadListingAllTable = () => {
   };
 
   const handleViewDetail = (rowData) => {
-    console.log("Viewing quotation detail:", rowData);
-
     // Navigate to read-only detail view
     navigate("/agent/quotedetailview", {
       state: {

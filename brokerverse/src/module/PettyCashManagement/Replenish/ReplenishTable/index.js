@@ -103,7 +103,6 @@ const PettyCashReplenishTable = () => {
 
   const handleView = (rowData) => {
     dispatch(getViewReplenishMiddleware(rowData));
-    console.log("View clicked:", rowData);
     navigate("/accounts/pettycash/replenishtdetailview");
   };
   const headerStyle = {
@@ -147,7 +146,6 @@ const PettyCashReplenishTable = () => {
   ];
 
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(

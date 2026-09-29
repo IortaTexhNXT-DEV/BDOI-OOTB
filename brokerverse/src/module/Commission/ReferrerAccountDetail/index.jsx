@@ -10,6 +10,7 @@ import CommissionService from "../../../services/commissionService";
 import { formatBaht } from "../utils/formatBaht";
 import LineDetailDrawer from "./LineDetailDrawer";
 import "./style.scss";
+import logger from "../../../utility/logger";
 
 const ReferrerAccountDetail = () => {
   const { id } = useParams();
@@ -36,7 +37,7 @@ const ReferrerAccountDetail = () => {
       const res = await CommissionService.getReferrerAccount(id);
       setDetail(res?.data || res);
     } catch (err) {
-      console.error("Failed to load referrer detail", err);
+      logger.error("Failed to load referrer detail", err);
       setDetail(null);
     } finally {
       setLoading(false);

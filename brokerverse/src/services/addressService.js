@@ -30,7 +30,6 @@ class AddressService {
       const data = await response.json();
       return { success: true, data: Array.isArray(data) ? data : data?.data ?? data };
     } catch (error) {
-      console.error("getCountries error:", error);
       return { success: false, error: error.message || "Failed to fetch countries" };
     }
   }
@@ -60,7 +59,6 @@ class AddressService {
       const data = await response.json();
       return { success: true, data: Array.isArray(data) ? data : data?.data ?? data };
     } catch (error) {
-      console.error("getProvincesByCountry error:", error);
       return { success: false, error: error.message || "Failed to fetch provinces" };
     }
   }
@@ -90,7 +88,6 @@ class AddressService {
       const data = await response.json();
       return { success: true, data: Array.isArray(data) ? data : data?.data ?? data };
     } catch (error) {
-      console.error("getCitiesByProvince error:", error);
       return { success: false, error: error.message || "Failed to fetch cities" };
     }
   }
@@ -120,7 +117,6 @@ class AddressService {
       const data = await response.json();
       return { success: true, data: Array.isArray(data) ? data : data?.data ?? data };
     } catch (error) {
-      console.error("getDistrictsByCity error:", error);
       return { success: false, error: error.message || "Failed to fetch districts" };
     }
   }
@@ -154,7 +150,6 @@ class AddressService {
       const list = Array.isArray(data) ? data : data?.data ?? (data ? [data] : []);
       return { success: true, data: list };
     } catch (error) {
-      console.error("getPostalCodeLookup error:", error);
       return { success: false, error: error.message || "Postal code lookup failed" };
     }
   }

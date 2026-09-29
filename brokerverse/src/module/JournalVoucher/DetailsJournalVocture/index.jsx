@@ -218,7 +218,6 @@ const DetailsJournalVocture = () => {
   const [newDataTable, setnewDataTable] = useState([]);
   const [visible, setVisible] = useState(false);
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
 
@@ -247,7 +246,6 @@ const DetailsJournalVocture = () => {
   const handleSubmit = (values) => {
     dispatch(getJournalVoucherViewData());
     // Handle form submission
-    console.log(values, "valuesuuu");
     // setVisible(false);
     // setVisiblePopup(true);
   };
