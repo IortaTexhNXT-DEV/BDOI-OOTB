@@ -12,7 +12,8 @@ Source format (manual_source.md), one block per blank-line-separated paragraph:
     ![Caption](name)     screenshot images/name.jpg with a numbered caption
     > **Tip:** text      call-out box (Tip / Note = blue, Important / Caution = yellow)
     \\pagebreak           page break
-Brand: Header Blue #004ea8, CTA Blue #0072d8, Background Blue #e5f5ff, Yellow #fdb913, font Nunito.
+Brand: BrokerVerse by iorta TechNXT. Header Blue #004ea8, CTA Blue #0072d8, Background Blue #e5f5ff, accent Yellow
+#fdb913, font Nunito; iorta TechNXT logo on the cover.
 """
 import os
 import re
@@ -36,11 +37,11 @@ IMAGES = os.path.join(ROOT, 'images')
 SOURCE = os.path.join(HERE, 'manual_source.md')
 OUT_DOCX = os.path.join(ROOT, 'BrokerVerse_User_Manual.docx')
 OUT_PDF = os.path.join(ROOT, 'BrokerVerse_User_Manual.pdf')
-LOGO_BDO = os.path.join(REPO, 'brokerverse', 'public', 'bdoi', 'bdo-insure.png')
 LOGO_IORTA = os.path.join(REPO, 'brokerverse', 'public', 'bdoi', 'iorta-technxt.png')
 
-TITLE = 'BrokerVerse — BIBS · BDOI Broker System'
-SUBTITLE = 'User Manual'
+PRODUCT = 'BrokerVerse'
+TITLE = 'BrokerVerse User Manual'
+TAGLINE = 'Insurance broking platform'
 VERSION = 'Version 1.0'
 DATE = '29 September 2026'
 FONT = 'Nunito'
@@ -207,8 +208,8 @@ def cover(doc):
     sec = doc.sections[0]
     sec.different_first_page_header_footer = True
     p = doc.add_paragraph(); p.paragraph_format.space_after = Pt(30)
-    if os.path.exists(LOGO_BDO):
-        p.add_run().add_picture(LOGO_BDO, width=Cm(6.2))
+    if os.path.exists(LOGO_IORTA):
+        p.add_run().add_picture(LOGO_IORTA, width=Cm(6.2))
     band = doc.add_table(rows=1, cols=1)
     band.alignment = WD_TABLE_ALIGNMENT.CENTER
     c = band.rows[0].cells[0]
@@ -216,17 +217,17 @@ def cover(doc):
     table_borders(band, color=HEX_BLUE, size=4)
     fixed_layout(band, [CONTENT_W])
     p = c.paragraphs[0]
-    r = p.add_run('BrokerVerse'); set_font(r, size=40, bold=True, color=RGBColor(0xFF, 0xFF, 0xFF))
+    r = p.add_run(PRODUCT); set_font(r, size=40, bold=True, color=RGBColor(0xFF, 0xFF, 0xFF))
     p.paragraph_format.space_after = Pt(2)
-    p = c.add_paragraph(); r = p.add_run('BIBS · BDOI Broker System'); set_font(r, size=18, color=RGBColor(0xFF, 0xFF, 0xFF))
+    p = c.add_paragraph(); r = p.add_run(TAGLINE); set_font(r, size=18, color=RGBColor(0xFF, 0xFF, 0xFF))
     p.paragraph_format.space_after = Pt(18)
-    p = c.add_paragraph(); r = p.add_run(SUBTITLE); set_font(r, size=28, bold=True, color=RGBColor(0xFD, 0xB9, 0x13))
-    p = c.add_paragraph(); r = p.add_run('Philippine insurance broking platform — end-to-end guide for every user role')
+    p = c.add_paragraph(); r = p.add_run('User Manual'); set_font(r, size=28, bold=True, color=RGBColor(0xFD, 0xB9, 0x13))
+    p = c.add_paragraph(); r = p.add_run('Out-of-the-box insurance broking for the Philippines — end-to-end guide for every user role')
     set_font(r, size=12, color=RGBColor(0xE5, 0xF5, 0xFF))
     p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(26)
-    rows = [('Product', TITLE), ('Document', 'User Manual'), ('Version', VERSION), ('Date', DATE),
+    rows = [('Product', 'BrokerVerse (out-of-the-box)'), ('Document', TITLE), ('Version', VERSION), ('Date', DATE),
             ('Audience', 'Business users, approvers and administrators of BrokerVerse'),
-            ('Classification', 'Internal — for BDO Insurance Brokers, Inc. staff and partners')]
+            ('Classification', 'Internal — BrokerVerse customers and partners')]
     t = doc.add_table(rows=len(rows), cols=2)
     fixed_layout(t, [Cm(4), CONTENT_W - Cm(4)])
     table_borders(t, color='C9D6E3', size=4)
@@ -239,10 +240,7 @@ def cover(doc):
         pb = b.paragraphs[0]; rb = pb.add_run(v); set_font(rb, size=10, color=TEXT)
     p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(80)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    r = p.add_run('Powered by  '); set_font(r, size=11, color=GREY)
-    if os.path.exists(LOGO_IORTA):
-        p.add_run().add_picture(LOGO_IORTA, height=Cm(1.3))
-    p = doc.add_paragraph(); r = p.add_run('iorta TechNXT'); set_font(r, size=9, color=GREY)
+    r = p.add_run('Powered by iorta TechNXT'); set_font(r, size=11, color=GREY)
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
 
@@ -254,7 +252,7 @@ def header_footer(doc):
     for pos in (Cm(8.255), Cm(16.51), Emu(2971800), Emu(5943600)):
         tabs.add_tab_stop(pos, WD_TAB_ALIGNMENT.CLEAR)
     tabs.add_tab_stop(CONTENT_W, WD_TAB_ALIGNMENT.RIGHT)
-    r = hp.add_run('BrokerVerse — BIBS · BDOI Broker System'); set_font(r, size=8.5, bold=True, color=BLUE)
+    r = hp.add_run(PRODUCT + ' — ' + TAGLINE); set_font(r, size=8.5, bold=True, color=BLUE)
     r = hp.add_run('\tUser Manual · ' + VERSION); set_font(r, size=8.5, color=GREY)
     para_border(hp, 'bottom', HEX_YELLOW, 8, 4)
     fp = sec.footer.paragraphs[0]
@@ -468,8 +466,9 @@ def build_docx(path):
     sec.header_distance, sec.footer_distance = Cm(1.0), Cm(1.0)
     setup_styles(doc)
     cp = doc.core_properties
-    cp.title = 'BrokerVerse — BIBS · BDOI Broker System User Manual'
-    cp.subject = 'User manual'; cp.author = 'iorta TechNXT'; cp.keywords = 'BrokerVerse, BIBS, BDOI, user manual'
+    cp.title = TITLE
+    cp.subject = 'BrokerVerse user manual — ' + TAGLINE; cp.author = 'iorta TechNXT'
+    cp.keywords = 'BrokerVerse, iorta TechNXT, insurance broking, user manual'; cp.category = 'User manual'
     cover(doc)
     header_footer(doc)
     toc(doc)

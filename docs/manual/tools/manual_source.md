@@ -2,7 +2,7 @@
 
 ## Purpose
 
-BrokerVerse (BIBS · BDOI Broker System) is the insurance broking platform of BDO Insurance Brokers, Inc. It runs the whole broking cycle for Philippine non-life business in one place: prospects, quotations, policies, billing and collection, commission, remittance to insurers, direct-bill commission debit notes, endorsements, claims, renewals, reinsurance, incentives and reports.
+BrokerVerse is an out-of-the-box insurance broking platform from iorta TechNXT. It runs the whole broking cycle of a Philippine non-life broker in one place: prospects, quotations, policies, billing and collection, commission, remittance to insurers, direct-bill commission debit notes, endorsements, claims, renewals, reinsurance, incentives and reports.
 
 This manual explains how to use every module, step by step. It also explains what happens behind each step: the numbers the system issues, the ledger entries it posts, the approvals it asks for and the reports that pick the transaction up.
 
@@ -32,7 +32,7 @@ Chapter 20 has a one-page quick guide for each persona. Read it first, then go t
 | 29/09/2026 | Dates use the configured format DD/MM/YYYY. |
 | Maker / checker | The maker enters a transaction. A different user, the checker, approves it. |
 
-> **Tip:** Screenshots were taken from the live system with sample data on 29 September 2026. Your screens show your own data, and your menu shows only the items your role may open.
+> **Tip:** Screenshots were taken from a BrokerVerse system loaded with sample data on 29 September 2026. Your screens show your own data, your own logo and name if your administrator has set them in System Settings, and your menu shows only the items your role may open.
 
 > **Note:** Numbered steps tell you exactly what to do. Text after a step tells you what the system does in return.
 
@@ -40,15 +40,23 @@ Chapter 20 has a one-page quick guide for each persona. Read it first, then go t
 
 You sign in with your own user ID and password. Never share a user ID. Every action is recorded against it in the audit trail.
 
-![The sign-in page](intro-login)
+![The sign-in page, with the user ID filled in and the password hidden](intro-login)
 
 1. Open the BrokerVerse address that your administrator gave you in a web browser (Chrome, Edge or Firefox).
 2. Optional: choose your language in the list at the top right (**English** or **ภาษาไทย**).
 3. In **User ID**, type your user name, for example `maria.sales`.
-4. In **Password**, type your password.
+4. In **Password**, type your password. The password is hidden; select the eye icon to show it while you type, and select it again to hide it.
 5. Select **Login**.
 
 The system opens your landing screen. Administrators land on the Executive Dashboard. Other roles land on their own home screen or on the first screen their role may open.
+
+Depending on your account, one more step can follow the password:
+
+| Step | When it appears | See |
+|---|---|---|
+| **Two-step verification** | Two-factor authentication is on for your user. | *Two-factor authentication* below |
+| **Set up two-step verification** | Your role requires two-factor authentication and you have not set it up yet. | *Two-factor authentication* below |
+| **Change password** | You sign in for the first time with a temporary password, an administrator has reset your password, or your password is older than 90 days. | *Change your password* below |
 
 ### Password rules
 
@@ -57,31 +65,94 @@ The system opens your landing screen. Administrators land on the Executive Dashb
 | Minimum length | 8 characters | `security.password_min_length` |
 | Must contain | an upper-case letter, a lower-case letter, a digit and a symbol | `security.password_require_*` |
 | Password history | the last 5 passwords cannot be reused | `security.password_history_count` |
-| Maximum age | 90 days | `security.password_max_age_days` |
+| Maximum age | 90 days; after that you must choose a new password when you sign in | `security.password_max_age_days` |
 
-A User Access Administrator sets the first password when your user is created. To change or reset a password, ask a User Access Administrator (see Chapter 18).
+Every screen where you choose a password lists these rules under the new password and ticks each rule as soon as your new password meets it.
+
+### Change your password
+
+A new user receives a temporary password from the User Access Administrator. At the first sign-in with it, the system asks for a new password before anything else. The same happens after an administrator resets your password and when your password is older than the maximum age.
+
+![Change password at sign-in: the rules are ticked as the new password meets them (example values)](sec-signin-change)
+
+1. In **Current password**, type the password you signed in with.
+2. In **New password**, type your new password and check that every rule is ticked.
+3. In **Confirm new password**, type the new password again.
+4. Select **Change password and continue**. You are signed in.
+
+To change your password at any other time:
+
+1. Select your initials at the top right, then **Change password**.
+2. Fill in **Current password**, **New password** and **Confirm new password**.
+3. Select **Change password**.
+
+![Profile menu > Change password (example values)](sec-change-password)
+
+The system signs you out on every other computer or browser where you are signed in. Your current session continues.
+
+### Forgot your password
+
+1. On the sign-in page, select **Forgot password?**.
+2. Type your **User ID or e-mail address** and select **Send code**. If the account exists and has an e-mail address, the system e-mails a 6-digit verification code to it. The message is the same whether or not the account exists.
+3. Type the **Verification code (from the e-mail)**, the **New password** and **Confirm new password**, then select **Reset password**.
+4. Select **Back to sign in** and sign in with the new password.
+
+![Forgot password: request a code](sec-forgot-request)
+
+![Forgot password: code and new password (example values)](sec-forgot-reset)
+
+- The code is valid for 15 minutes (`security.reset_code_minutes`). A new code replaces the previous one; use **Send a new code** if the code has expired.
+- After 5 wrong codes the code is withdrawn (`security.reset_code_max_attempts`). Request a new one.
+- Resetting the password signs you out everywhere.
+- If your user has no e-mail address, ask a User Access Administrator to reset your password (Chapter 18).
 
 ### Failed sign-ins and locked accounts
 
 - A wrong user ID or password shows a message under the **Login** button. Check Caps Lock and try again.
 - After 5 failed attempts in a row the account is locked (`limits.max_login_attempts`). The message reads **Account locked. Contact the administrator**.
 - The system also limits sign-in attempts to 10 in 5 minutes from one computer and for one user name (`security.login_rate_limit`). Wait five minutes before you try again.
-- A User Access Administrator unlocks your account by switching its status back to active, or by setting a new password.
+- A User Access Administrator unlocks your account with the **Unlock** action on the user list (Chapter 18).
 
 ### Two-factor authentication
 
-The server supports a second sign-in step with an authenticator app, per role (`security.require_2fa_roles`). No role requires it at present, and the sign-in page does not yet show the code step. Do not add roles to this setting until the code step is available on the sign-in page.
+Two-factor authentication (two-step verification) adds a 6-digit code from an authenticator app on your phone, for example Google Authenticator or Microsoft Authenticator, to the password. You can turn it on for your own user. The IT Administrator can make it compulsory for roles (`security.require_2fa_roles`; no role requires it in the standard configuration).
+
+**Turn on two-factor authentication**
+
+1. Select your initials at the top right, then **Two-factor authentication**. The dialog shows whether two-step verification is on or off.
+2. Select **Turn on**.
+3. Install an authenticator app on your phone if you do not have one.
+4. In the app, add an account and type the **setup key** shown on the screen (the copy icon copies it). On the phone itself you can instead open the link **open the key in the authenticator app**.
+5. Type the 6-digit code that the app now shows in **Authentication code** and select **Turn on**.
+
+![Profile menu > Two-factor authentication: status](sec-2fa-status)
+
+![Turning on two-factor authentication: setup key and code (example key)](sec-2fa-enrol)
+
+> **Note:** BrokerVerse does not show a QR code. Type the setup key into the app, or open the link on the phone.
+
+**Sign in with two-factor authentication**
+
+After the password, the sign-in page asks for the **Authentication code**. Open the authenticator app, type the current 6-digit code and select **Verify**. The code changes every 30 seconds; the page waits 5 minutes for it (`security.two_factor_challenge_minutes`). Select **Back to sign in** to start again.
+
+![Sign-in: two-step verification code (example code)](sec-signin-2fa)
+
+If your role requires two-factor authentication and you have not set it up, the sign-in page shows **Set up two-step verification** after the password. Follow the same steps as above; when the code is accepted you are signed in.
+
+![Sign-in: required set-up of two-step verification (example key)](sec-signin-enrol)
+
+To turn two-factor authentication off, open **Two-factor authentication** from the profile menu, select **Turn off** and enter a current code. A role that requires it cannot turn it off. If you lose your phone, ask a User Access Administrator to turn two-step verification off for your user; you then set it up again.
 
 ### Automatic sign-out
 
 If you do nothing for 30 minutes, the system signs you out (`limits.session_idle_minutes`). One minute before, a warning appears at the top of the screen. Move the mouse or press a key to stay signed in. Unsaved entries on the screen are lost when you are signed out, so save your work before you leave your desk.
 
+While you work, the system renews your session in the background. Your session also ends when your password is changed or reset, when your user is deactivated, or when your roles change. The sign-in page then says *Your session has ended … Please sign in again.*
+
 ### Signing out
 
 1. Select your initials at the top right of the screen.
 2. Select **Logout**.
-
-> **Important:** The **Forgot password?** link on the sign-in page is not active in this release. Ask a User Access Administrator to reset your password.
 
 ## The screen layout
 
@@ -89,31 +160,31 @@ If you do nothing for 30 minutes, the system signs you out (`limits.session_idle
 
 | Area | What it does |
 |---|---|
-| Logo and system name | BDO Insure logo and "BIBS · BDOI Broker System". |
+| Logo and system name | The logo and name set in **Master > System Settings**. The standard installation shows the iorta TechNXT logo and the name BrokerVerse. |
 | **Search menu...** | Type part of a screen name, for example *receipt*. The list shows every matching screen with its menu path. Select one to open it. |
 | Sidebar menu | The modules your role may use. Select a module to open its items. Items with an arrow open a further list. |
-| Language | Switch the screen language between English and Thai. |
+| Language | Switch the screen language between English and Thai (the languages configured in System Settings that have a translation). |
 | Notification bell | The number shows unread notifications. Select the bell to see the latest ones. |
-| Profile (your initials) | **Profile**, **Help** and **Logout**. |
+| Profile (your initials) | **Profile**, **Change password**, **Two-factor authentication**, **Help** and **Logout**. |
 | Work area | The screen you opened, with its title and breadcrumb (for example *Home • Policy*). |
 
 ![Menu search: typing "receipt" lists every screen with that word](intro-menu-search)
 
 ### Notifications
 
-The system sends you a notification when something needs your attention: a quotation to review, a claim registered on your policy, an approval waiting for you, a premium overdue, a renewal notice sent.
+The system sends you a notification when something needs your attention: a quotation to review, a claim registered on your policy, an approval waiting for you, a premium overdue, a renewal notice sent. Approval requests go only to the users who may approve them (for example journal vouchers to finance), and amounts are shown in pesos, for example ₱ 85,000.00.
 
 ![Notification panel opened from the bell](intro-notifications)
 
 1. Select the bell. The panel shows the latest notifications with their type (Approval, Reminder, Notification) and time.
-2. Select **See More** to open the full list on the **Notification** page.
+2. Select **See More** to open the full list on the **Notification** page. Every role may open it.
 3. Select the **X** on a notification to remove it from the panel.
 
 ![The Notification page](intro-notification-page)
 
 ### Your profile
 
-Select your initials, then **Profile**, to see your name, e-mail address and contact details. Select **Edit Profile** to correct them.
+Select your initials, then **Profile**, to see your name, e-mail address and contact details. Select **Edit Profile** to correct them. The same menu holds **Change password** and **Two-factor authentication** (see *Signing in*).
 
 ![The profile menu](intro-profile-menu)
 
@@ -136,17 +207,17 @@ Your role decides which menus you see and which screens you may open. The server
 |---|---|---|---|
 | IT Administrator (BrokerVerse) | IT Administrator (it-admin) | All menus | Settings, schedules and integrations. Cannot approve own transactions. |
 | Business Administrator (bea.admin) | Business Administrator (ba) | All menus | Products, rates, masters, treaties, incentive programmes. |
-| Sales / Relationship Manager (maria.sales) | sales | Dashboard (Executive, Agent), Product Configurator (Dashboard, Templates), Operations (all), Commission Dashboard, Operational Reports | Maker for quotations; earns commission on own production. |
-| Agent / Referrer (ramon.agent) | agent | Agent Dashboard, Operations (Home, Leads, Clients, Quotation, Policy, Claims, Renewals), Commission Dashboard | Sees only own book. Maker for quotations. |
-| Underwriter (jose.uw) | underwriting | Underwriting and Executive Dashboards, Product Configurator (all), Operations (all), Reinsurance (all), Operational Reports | Notified of quotations sent for approval; checker for renewal terms. |
-| Customer Services (ana.cs) | customer-services | Executive Dashboard, Product Configurator (Dashboard, Templates), Operations (all), Operational Reports | Endorsements; can capture leads and quotations. |
-| Claims Officer (carlo.claims, lisa.claims2) | claims | Claims Dashboard, Operations (Home, Clients, Policy, Claims), Reinsurance > Claims Recovery, Operational Reports | One officer submits a settlement, another approves it. |
-| Finance / Accounts (liza.finance, fe.approver) | finance | Executive Dashboard, Operations (Open Items, Payments), Accounts (all), Commission (all), Reinsurance > Reconciliation, Financial and Operational Reports | One user makes vouchers, JVs, remittances and debit notes; another approves them. |
+| Sales / Relationship Manager (maria.sales) | sales | Dashboard (Executive, Agent), Product Configurator (Dashboard, Templates), Operations (all), Commission Dashboard, Reports (All Reports, Operational Reports) | Maker for quotations; earns commission on own production. |
+| Agent / Referrer (ramon.agent) | agent | Agent Dashboard, Operations (Home, Leads, Clients, Quotation, Policy, Claims, Renewals > Renewal Policy), Commission Dashboard | Sees only own book. Maker for quotations. |
+| Underwriter (jose.uw) | underwriting | Underwriting and Executive Dashboards, Product Configurator (all), Operations (all), Reinsurance (all), Reports (All Reports, Operational Reports) | Notified of quotations sent for approval; checker for renewal terms. |
+| Customer Services (ana.cs) | customer-services | Executive Dashboard, Product Configurator (Dashboard, Templates), Operations (all), Reports (All Reports, Operational Reports) | Endorsements; can capture leads and quotations. |
+| Claims Officer (carlo.claims, lisa.claims2) | claims | Claims Dashboard, Operations (Home, Clients, Policy, Claims), Reinsurance > Claims Recovery, Reports (All Reports, Operational Reports) | One officer submits a settlement, another approves it. |
+| Finance / Accounts (liza.finance, fe.approver) | finance | Executive Dashboard, Operations (Open Items, Payments), Accounts (all, including Incentive), Commission (all), Reinsurance > Reconciliation, Reports (All Reports, Financial Reports, Operational Reports > Remittance and Broker Commission) | One user makes vouchers, JVs, remittances, debit notes and incentive calculations; another approves them. |
 | User Access Administrator (carmela.morfe) | user-access-admin | Master > User Management and Audit Trail only | Users, roles and access reviews; no business data. |
 
 ![A menu reduced to the role: the Agent / Referrer sidebar](persona-ramon.agent)
 
-If you type the address of a screen your role may not open, the system shows **Not authorised**. Choose a screen from your menu instead.
+If you type the address of a screen your role may not open, the system shows **Not authorised**. Choose a screen from your menu instead. Buttons that lead to a screen your role may not open (for example **Create Lead** for claims officers) are not shown.
 
 ![Not authorised: a User Access Administrator opening Accounts > Receipts](intro-not-authorised)
 
@@ -163,7 +234,7 @@ If you type the address of a screen your role may not open, the system shows **N
 | Date of birth | Must be a past date. The age must be within the configured range (18 to 100 years by default). |
 | TIN | Required for corporate prospects (Tax Identification Number of the company). |
 | Government ID (KYC) | PhilSys ID, UMID, Passport, Driver's License, PRC ID, SSS ID, GSIS ID, TIN ID, Postal ID, Voter's ID or Senior Citizen ID (`policy.kyc_id_types`). |
-| Taxes on premium | VAT 12%, documentary stamp tax (DST) 12.5%, local government tax (LGT) 0.75%; fire service tax (FST) 2% for fire and IAR (`premium.taxes_by_lob`). |
+| Taxes on premium | VAT 12%, documentary stamp tax (DST) 12.5%, local government tax (LGT) 0.75%; fire service tax (FST) 2% for fire and IAR (`tax.*`, `premium.taxes_by_lob`). Screens and the server use the same configured rates. |
 | Withholding tax | 5% on agent commission (individual), 10% for external / company referrers; the insurer withholds 10% expanded withholding tax on direct-bill commission (BIR Form 2307). |
 
 # The end-to-end business flow
@@ -178,7 +249,7 @@ A policy passes through the same steps every time. Each step is done by a differ
 | 1 | Lead | The prospect is recorded with contact details and address. Number LD-. | Agent, sales, customer services | Operations > Leads/Prospects |
 | 2 | Quotation | Vehicle, cover and insurer are chosen; the system prices the premium and taxes. Number QT-. | Agent, sales, underwriter | Operations > Leads/Prospects > Create Quote |
 | 3 | Customer approval | The client receives an e-mail link and accepts the quotation online. Underwriting is notified. | Client; underwriter informed | Public approval page |
-| 4 | Policy issue | KYC, vehicle identifiers and photos are recorded; billing mode is chosen (broker billed or direct bill); the insurer's policy is uploaded. Number POL-, client code CL-. | Agent, sales, underwriter | Convert Policy, Upload Policy |
+| 4 | Policy issue | KYC, vehicle identifiers and photos are recorded; the billing mode (broker billed or direct bill) is chosen on the **Send to Insurance Company** step; the insurer's policy is uploaded. Number POL-, client code CL-. | Agent, sales, underwriter | Convert Policy, Upload Policy |
 | 5 | Billing | Broker billed: a premium bill INV- with its booking journal and a collection item. Direct bill: commission receivable from the insurer. Commission is accrued for the referrer. | System | Automatic at issue |
 | 6 | Payment capture | The client's payment is recorded (pay later, bank transfer, cheque, online, cash) for finance to verify. | Agent, sales, underwriter | Policy > Payment |
 | 7 | Receipt | Finance posts the official receipt OR- against the open bill. The bill becomes Partial or Paid. | Finance | Accounts > Receipts |
@@ -188,7 +259,7 @@ A policy passes through the same steps every time. Each step is done by a differ
 | 10 | Endorsement | A change to the policy (personal details, vehicle, cover, extension, cancellation) is recorded. Additional premium is billed. Number END-. | Customer services, agent, sales | Operations > Policy > ... > Endorsement |
 | 11 | Claim | A loss is registered, adjusted and settled; a second claims officer approves the settlement. Number CLM-. | Claims officers | Operations > Policy > ... > Claim, Operations > Claims |
 | 12 | Renewal | Policies enter the renewal pipeline 90 days before expiry; notices go out at 60, 30 and 15 days; a renewal quotation becomes the new term. | Underwriter, sales, agent; schedules | Operations > Renewals |
-| 13 | Reports | Every step above appears in the dashboards and in the 19 reports. | Everyone, by role | Dashboard, Reports |
+| 13 | Reports | Every step above appears in the dashboards and in the 19 catalogue reports. | Everyone, by role | Dashboard, Reports > All Reports |
 
 ## Maker-checker points
 
@@ -206,7 +277,7 @@ Maker-checker means that the person who enters a transaction cannot approve it. 
 | Direct-bill debit note | Finance user who raises it | Another finance user | built-in |
 | Renewal terms | Renewal maker | Underwriter | `renewals.maker_checker` |
 | Reinsurance treaty | Creator | Another user | `reinsurance.treaty_requires_approval` |
-| Incentive calculation batch | Finance maker | Another user | built-in |
+| Incentive calculation batch | Finance user who calculates | Another finance user | built-in |
 
 ## The money trail of a broker-billed policy
 
@@ -284,9 +355,11 @@ The top of the dashboard shows the key performance indicators against the target
 To use the dashboard:
 
 1. Choose **Dashboard > Executive Dashboard**.
-2. In the period list, choose **This Month**, **This Quarter** or **This Year**. The figures and charts refresh.
+2. In the period list, choose **This Month**, **This Quarter** or **This Year**. The figures and charts refresh, and the date field shows the period, for example *01/09/2026 - 29/09/2026*.
 3. To download the Production Register for a date range, choose the dates in the date field, then select **Export Report**. The file downloads as Excel (XLSX).
 4. Scroll down for the charts and tables.
+
+The periods are calendar periods in Philippine time: **This Month** runs from the 1st of the month to today, **This Quarter** from the first day of the calendar quarter, **This Year** from 1 January. The change shown on each card compares the period with the whole previous period (for example the whole of August). Figures described as "last N days" stay rolling.
 
 ![Executive Dashboard: trends, product lines, regions, products and agents](dash-exec-2)
 
@@ -300,7 +373,7 @@ To use the dashboard:
 | Claims Status Distribution, Customer Segmentation | Claims by status and clients by segment. |
 | Quick Actions | Shortcuts to screens your role may open (for example New Quote, Policies, Reports). |
 
-> **Note:** The **Settings** button on the dashboard header has no function in this release. Targets are maintained in Master > Configuration, group *dashboard*.
+The **Settings** button on the dashboard header opens **Master > System Settings**; it is shown only to roles that may open that screen. Targets are maintained in **Master > Configuration**, group *Dashboard*.
 
 ## Claims Dashboard
 
@@ -334,7 +407,7 @@ The underwriting workbench lists quotations in progress as submissions.
 
 ![Agent Dashboard for Ramon Dela Cruz (own book only)](dash-agent)
 
-The Agent Dashboard is the home screen of agents and sales staff. It shows only your own book.
+The Agent Dashboard is the home screen of agents and sales staff. For an agent it counts the same book as the lists: the leads, clients, quotations and policies the agent owns or created.
 
 | Item | What it shows |
 |---|---|
@@ -343,7 +416,7 @@ The Agent Dashboard is the home screen of agents and sales staff. It shows only 
 | Commission (chart) | Commission by month for the year you choose. |
 | Upcoming events | Your follow-ups from the activity monitor. |
 | Earned Commission | Commission earned on your policies, net of withholding tax once paid. |
-| Collected Premium, Receivables, Gross Premium | Premium on your policies: collected, still due, and total. |
+| Collected Premium, Receivables, Gross Premium | Premium billed on your policies: collected (posted receipts), still due, and total. Direct-bill policies are not included, because their premium is paid to the insurer. |
 
 # Leads and prospects
 
@@ -443,20 +516,22 @@ Who uses it: agents (own clients only), sales, customer services, claims officer
 ![Operations > Clients](client-list)
 
 1. Choose **Operations > Clients**.
-2. Use the tabs **All**, **Retail** or **Corporate**, or type a name in the search box.
-3. The list shows the name and client code, category, date, number of policies and status (Active or Expired).
+2. Use the tabs **All**, **Individual** or **Corporate**, or type a name in the search box.
+3. The list shows the name and client code, client type (Individual or Corporate), **Client Since** or date of birth, number of **Policies** and **Latest Policy Status**.
 4. Select the arrow at the end of the row to open the client.
 
 ## The client 360 view
 
 ![Client view with the Policy, Claim, Renewal and Endorsement tabs](client-view)
 
+The header shows the client code (CL-).
+
 | Tab | What you see and do |
 |---|---|
 | Policy | The client's policies with premium, dates, product and payment status. Open a policy, or use the row actions for a claim or an endorsement. |
 | Claim | The client's claims with status. |
 | Renewal | Renewals due and quoted. |
-| Endorsement | The client's endorsements with their status and payment status. |
+| Endorsement | The client's endorsements (END- numbers) with their type (for example Coverage Change), status and payment status. |
 
 To correct a client's name, address or contact details on an issued policy, use a **Personal Details Change** endorsement (Chapter 8). The change is then recorded against the policy and sent to the insurer.
 
@@ -541,7 +616,7 @@ The system shows three tiers for the chosen insurer: **CTPL**, **Basic** and **C
 | Brand-new vehicle: 3-year CTPL | For a brand-new vehicle registered for 3 years with LTO. Replaces the 1-year CTPL amount. | Offered only for classes with a 3-year tariff (private cars ₱ 1,660.40). |
 | Include Acts of Nature Coverage | Adds acts of nature (typhoon, flood, earthquake) at the rate you enter. | Optional. |
 | Include Roadside Assistance, Include Personal Accident Cover | Optional covers with their own rate and premium. | Optional. |
-| Bodily Injury, Property Damage | Excess third-party liability limits (₱ 100,000 to ₱ 500,000) and their premiums. | Choose from the list. |
+| Bodily Injury, Property Damage | Excess third-party liability limits and their premiums. | Choose from the list: ₱ 100,000 to ₱ 500,000 (`quote.bodily_injury_limits`, `quote.property_damage_limits`). |
 | Auto Passenger PA - limit per person | Personal accident limit for each person in the vehicle. | ₱ 25,000 to ₱ 200,000. |
 | Seats covered | Driver and passengers, from Seating Capacity. | Read-only. |
 | APPA Total Coverage, APPA Coverage Premium | Limit × seats, and total × 0.1%. | Read-only. Example: 50,000 × 5 = 250,000; premium 250.00. |
@@ -580,9 +655,9 @@ The order summary shows the premium the client pays:
 | Line | How it is calculated |
 |---|---|
 | NET Premium | Sum of the cover premiums, without CTPL. |
-| Value Added Tax | 12% of the net premium. |
-| Documentary Stamp Tax | 12.5% of the net premium. |
-| Local Gov't Tax | 0.75% of the net premium. |
+| Value Added Tax | 12% of the net premium (`tax.vat_rate`). |
+| Documentary Stamp Tax | 12.5% of the net premium (`tax.dst_rate`). |
+| Local Gov't Tax | 0.75% of the net premium (`tax.lgt_rate`). |
 | Others (Acc. premium) | Accessory premium, if any. |
 | CTPL | Tariff amount, not taxed again and not discounted. |
 | Discount | The discount you give the client. |
@@ -697,7 +772,7 @@ Upload a photo of the left side, right side, front, rear and interior (dashboard
 
 ![Coverage Details Review with the billing mode](policy-3-review-billing)
 
-The review page repeats the policy, assured, vehicle, photos, coverage and premium details. At the bottom, choose the **Billing** mode:
+The review page repeats the policy, assured, vehicle, photos, coverage and premium details. At the bottom, next to **Send to Insurance Company**, choose the **Billing** mode. The default comes from `direct_bill.default_billing_mode` (broker billed):
 
 | Billing mode | Meaning | What the system does |
 |---|---|---|
@@ -740,7 +815,7 @@ Finance users see the button **Record payment and issue receipt** and can post t
 
 ### Direct-bill policies
 
-For a direct-bill policy the payment page shows that the client pays the insurer directly and that the commission (with VAT) is billed to the insurer by finance. There is nothing to record.
+For a direct-bill policy the payment page shows that the client pays the insurer directly and that the commission (with VAT) is billed to the insurer by finance. There is nothing to record. The policy details page shows a *Direct bill* note instead of a payment request, and **Operations > Payments** lists the cancelled premium bill with the status **DIRECT BILL**.
 
 ![Payment page of a direct-bill policy](policy-6-payment-direct)
 
@@ -748,7 +823,7 @@ For a direct-bill policy the payment page shows that the client pays the insurer
 
 ![Operations > Policy](policy-list)
 
-Choose **Operations > Policy**. The list shows the policy number, client code and name, gross premium, issue and expiry dates, product and payment status. Use **Search** with the field selector, or **Show Filters** for payment status, dates, insurer, premium and product.
+Choose **Operations > Policy**. The list shows the policy number, client code and name, gross premium, issue and expiry dates, product and payment status. Use **Search** with the field selector, or **Show Filters** for payment status, dates, insurer, premium and product. **Create Policy** (which opens Leads, where a policy is issued from a lead's quotation) and **Bulk Upload** are shown only to roles that may use them.
 
 Row actions:
 
@@ -771,10 +846,10 @@ The policy details page shows:
 | Insured Details | Client, ID, e-mail, contact number and address. |
 | Vehicle Details and Photos | Vehicle, identifiers, mortgage, TNVS and the five photos. |
 | Coverage Details | Each cover with its sum insured and premium; total sum insured. |
-| Premium Breakdown | Net premium, DST, VAT, LGT, other premium, discount, gross premium. |
+| Premium Breakdown | Net premium, DST, VAT, LGT (labelled with the rate applied to the policy), other premium, discount, gross premium. |
 | Endorsements | The latest endorsements of the policy. |
 | Payment | Payment status; **Proceed to Payment** while premium is due. |
-| Documents & Billing | **Generate Policy Invoice**, **Premium Accounting Entries** and the policy document (**Preview**, **Open**). |
+| Documents & Billing | **Generate Policy Invoice**, **Premium Accounting Entries** and the policy document (**Preview**, **Open**). Document links are signed and expire after a while; open documents from the screen rather than saving their address. |
 | Related Records | Quotation, insurer and account code. |
 
 ![Policy Details (coverage and premium)](policy-detail-2)
@@ -845,13 +920,13 @@ Who uses it: customer services mainly; agents and sales for their own policies. 
 
 ![Endorsement request: personal details change](end-personal)
 
-Correct the fields that changed: **First name**, **Last name**, **Preferred name**, **Contact number**, **House no. street**, **Barangay subd**, **Country**, **Province**, **City** and **Zip code**. The contact number must be a valid Philippine mobile number and the ZIP code must have 4 digits. When the endorsement is completed, the client record is updated.
+The form opens with the client's current details (including earlier endorsements). Correct the fields that changed: **First name**, **Last name**, **Preferred name**, **Contact number**, **House no. street**, **Barangay subd**, **Country**, **Province**, **City** and **Zip code**. The contact number must be a valid Philippine mobile number and the ZIP code must have 4 digits. When the endorsement is completed, the client record is updated.
 
 ### Coverage change
 
 ![Endorsement request: coverage change re-priced](end-coverage)
 
-1. Change the cover, for example **Own damage coverage** from 1,200,000 to 1,400,000, or a higher **Auto passenger personal accident** limit.
+1. Change the cover, for example **Own damage coverage** from 1,200,000 to 1,400,000, or a higher **Auto passenger personal accident** limit. Bodily injury and property damage offer the same limits as the quotation.
 2. The premium boxes recalculate: net premium, VAT (12%), DST (12.5%), LGT (0.75%), gross premium and **Premium change**.
 3. CTPL stays as issued (**CTPL premium (as issued)**).
 
@@ -932,7 +1007,7 @@ Choose **Operations > Claims**. Each row shows the claim number, client, policy,
 | Field | Meaning | Required | Rules |
 |---|---|---|---|
 | Insurance Company Name | Insurer of the policy. | Yes | From the policy. |
-| Date of Incident | Date of loss. | Yes | Not in the future; inside the policy period. |
+| Date of Incident | Date of loss. | Yes | Not in the future; inside the policy period. The reported date cannot be before it. |
 | Time of Incident | Time of loss. | No | |
 | Address of Incident / Loss Location | Where the loss happened. | Yes | |
 | City, Province | Place of loss. | No | |
@@ -942,7 +1017,7 @@ Choose **Operations > Claims**. Each row shows the claim number, client, policy,
 | Same as Policy Holder | Tick when the insured was driving; copies the holder's address. | No | |
 | Driver's name and address | Person driving at the time of loss. | Name yes | |
 | Third Party Details | Name, contact number, plate number, unit, shop and insurer of the other party. | No | |
-| Documents | Police report, photos, estimates. | No | PNG, JPEG or PDF, at most 2 MB each. |
+| Documents | Police report, photos, estimates. | No | PNG, JPEG or PDF, at most 2 MB each. The file content is checked, not only its name. |
 
 The system checks the claim before saving it:
 
@@ -988,7 +1063,7 @@ The maker cannot approve his or her own settlement; the system refuses it. After
 
 **Claim Details** shows the claim, incident, driver, policy, third party and system information, including the insurer's claim number and the claim due date (20 days after reporting, `claims.sla_days`).
 
-For a settled claim the eye icon opens **Claim Settlement** with the documents the system produces: Acknowledgment letter, Claims Discharge Voucher, Claims Data sheet and the FIR (first information report). Select **View** to open each one.
+For a settled claim the eye icon opens **Claim Settlement** with the documents the system produces: Acknowledgment letter, Claims Discharge Voucher, Claims Data sheet and the FIR (first information report). Select **View** to open each one. The claim pages always show the claim number and holder in their header, even when opened directly by address.
 
 ![Claim documents](claim-documents)
 
@@ -1000,14 +1075,14 @@ For a settled claim the eye icon opens **Claim Settlement** with the documents t
 
 Renewals keep the book. The system puts every policy into the renewal pipeline 90 days before expiry, sends renewal notices at 60, 30 and 15 days, prices the renewal and turns the accepted renewal quotation into the next policy term. A policy not renewed within 30 days after expiry lapses.
 
-Who uses it: underwriters and sales work the renewals; agents see their own; the schedules run the notices every day.
+Who uses it: underwriters, sales and customer services work the renewals; agents renew their own expiring policies from **Renewal Policy** (the only Renewals screen in the agent menu); the schedules run the notices every day.
 
 | Menu (Operations > Renewals) | Use it to |
 |---|---|
 | Renewal Policy | See active, expiring (0–5 days) and expired policies and start a renewal. |
 | Renewal Batch | Group many policies and send their notices together. |
 | Renewal Queue | Work the policies due for renewal: days to expiry, status, risk, agent, attempts. |
-| Retention Analytics | Retention figures (see the note below). |
+| Retention Analytics | Renewed, lapsed and open renewals, retention rate and trends. |
 | At-Risk Policies | Policies with a high retention risk score and the recommended actions. |
 | Negotiations | Record contacts and updates with the client and request approval of terms. |
 | Lapse Management | Lapsed policies and policies in the grace period; win-back campaigns. |
@@ -1062,7 +1137,13 @@ A batch groups up to 500 policies (`renewals.batch_max_policies`). Select **Crea
 
 ![Performance Tracking](renew-performance)
 
-> **Known issue:** **Retention Analytics** shows "Something went wrong on this screen" in this release. Use Performance and the Renewal Retention report instead. The "Performance Insights" texts on the Performance screen are fixed examples, not calculated from your data.
+**Performance** compares the renewal rate, premium retention and cycle time of the period with their targets, by agent and product.
+
+> **Note:** The *Performance Insights & Recommendations* texts at the foot of the Performance screen are examples, not calculated from your data. Use the figures and the Renewal Retention report.
+
+![Retention Analytics](renew-analytics)
+
+**Retention Analytics** shows the renewed, lapsed and open renewals of the period with the retention rate. Customer satisfaction is shown only when survey data is recorded.
 
 # Open items and payments
 
@@ -1085,7 +1166,7 @@ Select **See More** to open the full list of a box, or select a record to open i
 
 ![Operations > Payments](payments)
 
-**Operations > Payments** shows gross premium, collected premium, receivables and earned commission, with a list of bills by tab **Paid**, **Pending** and **Reviewing**. The **Type** column tells whether the bill is for a policy, a renewal policy or an endorsement. Receipts are posted by finance; this screen shows the result.
+**Operations > Payments** shows gross premium, collected premium, receivables and earned commission, with a list of bills by tab **Paid**, **Pending** and **Reviewing**. The **Type** column tells whether the bill is for a policy, a renewal policy or an endorsement. A premium bill cancelled because the policy is direct bill shows **DIRECT BILL** (listed with Paid); other cancelled bills show **CANCELLED**. Receipts are posted by finance; this screen shows the result.
 
 
 # Accounts: receipts, collections and the ledger
@@ -1106,7 +1187,7 @@ Who uses it: finance and accounts (liza.finance as maker, fe.approver as checker
 | Petty Cash | Initiate funds, request, disburse, receive and replenish petty cash. |
 | Journal Voucher, Correction JV, Reversal JV | Manual journals, corrections and reversals, with approval. |
 | Remittance | Remittances to insurers, settlements and direct-bill debit notes (Chapter 14). |
-| Incentive | Incentive calculations, approvals and statements (Chapter 16). |
+| Incentive | Incentive calculations, approvals and statements; finance calculates and a second finance user approves (Chapter 16). |
 
 ## Receipts
 
@@ -1155,7 +1236,7 @@ Example: bill INV-2026-00002 of 5,010.00 was paid with OR-2026-00020 (2,000.00, 
 - Premium falls due 30 days after inception (`receivables.due_days`).
 - Items due within 7 days show as Current (`collections.current_window_days`).
 - Overdue level 1 is up to 30 days, level 2 up to 60 days, level 3 beyond (`collections.overdue_levels`).
-- Reminders are e-mailed to clients 7 days before the due date and then every 7 days by the *Collection reminders* job at 08:00. The button at the top of the screen sends the reminders at once.
+- Reminders are e-mailed to clients 7 days before the due date and then every 7 days by the *Collection reminders* job at 08:00. **Send Payment Reminders Now** at the top of the screen sends the reminders at once.
 
 ![Collections Aging Report](acc-ageing)
 
@@ -1273,7 +1354,7 @@ The system refuses an unbalanced voucher with the difference, for example *debit
 
 ![Journal Voucher Details of JV-2026-00117 (office rent)](acc-jv-detail)
 
-Example: JV-2026-00117 *October 2026 office rent, Makati*: Dr 4402001 Rent Expense 85,000 / Cr 1102001 Cash in Bank – BDO operating account 85,000, submitted by liza.finance and posted by fe.approver.
+Example: JV-2026-00117 *October 2026 office rent, Makati*: Dr 4402001 Rent Expense 85,000 / Cr 1102001 Cash in Bank – Operating Account 85,000, submitted by liza.finance and posted by fe.approver.
 
 ### Correction and reversal
 
@@ -1284,7 +1365,7 @@ Example: JV-2026-00117 *October 2026 office rent, Makati*: Dr 4402001 Rent Expen
 
 ## Trial balance
 
-Run the trial balance from **Reports > Financial Reports > Trail Balance** (Chapter 19). It lists, per account, the opening balance, the period debits and credits and the closing balance, grouped by account type and statement group. Only approved and posted journals are counted (`reports.trial_balance_statuses`). Total debits always equal total credits.
+Run the trial balance from **Reports > Financial Reports > Trial Balance** or **Reports > All Reports** (Chapter 19). It lists, per account, the opening balance, the period debits and credits and the closing balance, grouped by account type and statement group. Only approved and posted journals are counted (`reports.trial_balance_statuses`). Total debits always equal total credits.
 
 # Commission
 
@@ -1387,7 +1468,7 @@ Example: REM-2026-00018 to MAPFRE: gross 35,076.27, commission 4,200.75, net 30,
 | Completed | Settled and paid to the insurer. |
 | Rejected, Cancelled | Refused or withdrawn. |
 
-The approval queue shows an SLA per priority: urgent 4 hours (from ₱ 1,000,000), high 12 hours (from ₱ 250,000), normal 24 hours (from ₱ 20,000), low 48 hours (`remittance.priority_sla_hours`).
+When you reject, resolve or reverse an item on the remittance screens, an in-app dialog asks for the reason; the reason is recorded. The approval queue shows an SLA per priority: urgent 4 hours (from ₱ 1,000,000), high 12 hours (from ₱ 250,000), normal 24 hours (from ₱ 20,000), low 48 hours (`remittance.priority_sla_hours`).
 
 ## Direct bill processing
 
@@ -1469,7 +1550,7 @@ Reconciliation matches imported bank transactions (BNK-) with system transaction
 
 The reinsurance screens record the treaties that protect large risks, the cessions made under them, the recoveries on claims and the reconciliation of reinsurer statements.
 
-Who uses it: underwriters (all screens), claims officers (Claims Recovery), finance (Reconciliation), business administrators (treaty master).
+Who uses it: underwriters (all screens except the treaty master), claims officers (Claims Recovery), finance (Reconciliation of reinsurer statements), business and IT administrators (treaty master; **Add Treaty** on the Treaty Dashboard opens the treaty form for them).
 
 | Menu | Use it to |
 |---|---|
@@ -1498,7 +1579,7 @@ Reinsurers must meet the minimum security rating A- (`reinsurance.min_security_r
 
 ## Purpose
 
-Incentive programmes reward agents for reaching targets: premium volume, policy count, renewal rate or conversion. Programmes are set up by the business administrator; finance calculates the results, a second user approves them and the agents see their statements.
+Incentive programmes reward agents for reaching targets: premium volume, policy count, renewal rate or conversion. Programmes are master data set up by the business or IT administrator. Finance calculates the results, a second finance user approves them (maker-checker), finance pays them, and the agents see their statements. Finance cannot change the programmes it pays.
 
 | Screen | Use it to |
 |---|---|
@@ -1506,7 +1587,7 @@ Incentive programmes reward agents for reaching targets: premium volume, policy 
 | Accounts > Incentive > My Programs | An agent's programmes with target, achievement and potential earning. |
 | Accounts > Incentive > Calculations | **New Calculation** for a period creates a batch CALC- with the amount per agent, sent for approval. |
 | Accounts > Incentive > Approvals | Approve, reject or **Bulk Approve** calculation batches (not your own). |
-| Accounts > Incentive > Statement | Statement per agent and month: earnings, year-to-date, pending and last payment, programme breakdown. |
+| Accounts > Incentive > Statement | Statement per agent and month: earnings, year-to-date, pending and last payment, programme breakdown. Finance and administrators choose the agent; an agent sees his own statement. |
 
 ![Incentive Program Master](inc-programs)
 
@@ -1518,7 +1599,13 @@ Incentive programmes reward agents for reaching targets: premium volume, policy 
 
 Only agents and sales users take part (`incentive.eligible_roles`). The Incentive Results report lists target, achievement and payout per agent.
 
-> **Known issue:** The finance role sees the Incentive menu but its screens show *Requires permission: read:incentive or write:incentive*. Until the role is given the incentive permissions, run incentives as a Business Administrator. The contact details at the foot of the Incentive Statement are sample text.
+To run incentives for a period:
+
+1. Finance (maker): **Accounts > Incentive > Calculations**, **New Calculation**, choose the programme and period. The batch CALC- is created with the amount per agent and sent for approval.
+2. A second finance user: **Accounts > Incentive > Approvals**, open the batch and approve or reject it with a reason. The maker cannot approve his or her own batch.
+3. The approved amounts appear on each agent's **Statement** and in the Incentive Results report.
+
+> **Note:** The payment schedule and the contact details printed at the foot of the Incentive Statement are standard sample text. Tell agents your own incentive contact.
 
 # Product Configurator
 
@@ -1568,14 +1655,14 @@ The server checks the values (amounts of 0 or more, whole-number seats, unique c
 | Risk Information | Vehicle information, discounts and loadings of the template. |
 | Premium Rates | Rates by cover (for example the own damage rate per vehicle class). |
 | CTPL & Auto PA | The CTPL tariff and the Auto Passenger PA rate and limits (above). |
-| Taxes and fees | Statutory taxes of the template. |
+| Taxes and fees | The tax rates used for pricing, read-only (they come from Master > Configuration, group *Taxes*). |
 | Rating Factors | Factors applied to the template. |
 
 ![Template MOT-003-2025, tab Risk Information](pc-template)
 
 ![Template MOT-003-2025, tab Taxes and fees](pc-template-taxes)
 
-> **Important:** Quotations are taxed with the rates in **Master > Configuration**, group *tax* (VAT 12%, DST 12.5%, LGT 0.75%, FST 2%), applied per line of business by `premium.taxes_by_lob`. The values on the template's **Taxes and fees** tab and in the Taxation master are not used for pricing. Keep them equal to the Configuration values to avoid confusion.
+> **Important:** Quotations are taxed with one set of rates: **Master > Configuration**, group *Taxes* (VAT 12%, DST 12.5%, LGT 0.75%, FST 2%), applied per line of business by `premium.taxes_by_lob`. The template's **Taxes and fees** tab shows these rates read-only, and the Taxation master keeps its linked records in step. Change a tax rate in Configuration only.
 
 ## Coverages, rating and rules
 
@@ -1624,19 +1711,17 @@ The masters hold the reference data that the operational screens offer in their 
 
 ![Master > Branch](m-branch)
 
-> **Known issue:** **Master > Generals > Employee Management > Hierarchy** shows "Something went wrong on this screen" in this release.
-
 ## Finance masters
 
 | Master (Master > Finance) | Holds |
 |---|---|
 | Premium, Miscellaneous, Customer and RI-Claims Account Setup | Account determination ranges (company, office, department, business type, product, cover, document type → GL accounts). |
 | Transaction code | Codes used on receipts, vouchers and journals: OR, PV, JV, CM, DM, RM. |
-| Currency, Exchange Rate | PHP, USD, EUR, JPY, SGD and monthly rates to PHP. |
+| Currency, Exchange Rate | PHP, USD, EUR, JPY, SGD and monthly rates to PHP. The currency lists on receipts, bank accounts and other forms come from this master. |
 | Bank | Banks with branch, SWIFT code, e-mail and phone; bank accounts and cheque books. |
 | Account Category | Asset, Liability, Equity, Income, Expense. |
 | Main Account, Sub Account | The chart of accounts (below). |
-| Taxation | Tax codes and rates for reference: DST 12.5%, EWT 5%, FST 2%, LGT 0.75%, premium tax 2%. |
+| Taxation | Tax codes and rates for reference, kept in step with the configured tax rates. |
 | Petty cash | Petty cash funds with size, minimum cash box and transaction limit. |
 | Remittance Master | The 16 remittance configuration types (adjustment types, agency and direct bill set-ups, approval, schedules, templates …). |
 
@@ -1671,7 +1756,7 @@ Key accounts used by the system:
 | Code | Account | Posted by |
 |---|---|---|
 | 1101001 | Cash on Hand | Cash receipts |
-| 1102001 | Cash in Bank – Operating Account (BDO Current) | Receipts by transfer and cheque, vouchers |
+| 1102001 | Cash in Bank – Operating Account | Receipts by transfer and cheque, vouchers |
 | 1102002 | Cash in Bank – E-wallet Clearing (GCash) | Online and GCash receipts |
 | 1202001 | Premiums Receivable – Direct Clients | Policy and endorsement bills, receipts |
 | 1203001 | Commission Receivable – Insurers (Direct Bill) | Direct-bill issue, debit note collections |
@@ -1692,18 +1777,39 @@ User Access Administrators and IT Administrators manage users on **Master > Gene
 ### Add a user
 
 1. Choose **Master > Generals > User Management > User** and select **+ Add**.
-2. Enter the **Username** (the user ID for signing in), **E-mail**, **Display Name** and the first **Password**.
-3. Tick one or more **Roles**. At least one role is required.
-4. Select **Save**. **Save** stays disabled until the required fields are filled.
+2. Enter the **Username** (the user ID for signing in), **E-mail** and **Display Name**. All three are required; the e-mail address is where **Forgot password?** sends its code.
+3. Leave **Password** empty (*Leave empty for a temporary password*). The system then generates a temporary password.
+4. Tick one or more **Roles**. At least one role is required. Only an IT Administrator can give the IT Administrator or Business Administrator role.
+5. Select **Save**. **Save** stays disabled until the required fields are filled.
+6. The **Temporary password** dialog shows the password once. Copy it and give it to the user in person or by phone, then select **Done**.
 
 ![Add User (example values)](m-user-add)
 
-The password must follow the password rules (Chapter 1). A duplicate username is refused. The creation is recorded in the audit trail.
+At the first sign-in the user must choose a new password (Chapter 1). If you type a password instead of leaving the field empty, it must follow the password rules and the user must still change it at the first sign-in. A duplicate username is refused. The creation is recorded in the audit trail.
 
-### Change, lock and unlock users
+> **Tip:** Users created without an e-mail address in earlier versions show "-" in the E-mail column and cannot use **Forgot password?**. Add their e-mail address with the pencil.
 
-- Select the pencil on a user to change the display name, e-mail, roles or to set a new password.
-- Use the **Status** switch to deactivate a leaver (the history is kept) or to reactivate a user. Reactivating a locked user unlocks it and resets the failed sign-in count.
+### Unlock, reset a password, turn off two-step verification
+
+The three-dot button at the end of a user row opens the account actions:
+
+| Action | Use it when | What the system does |
+|---|---|---|
+| **Unlock** (locked users only; the list shows a **Locked** tag) | The user was locked after 5 failed sign-ins. | Unlocks the account and clears the failed attempts. |
+| **Reset password** | The user forgot the password and cannot use Forgot password. | Generates a temporary password, shows it once, ends all the user's sessions; the user must choose a new password at the next sign-in. |
+| **Turn off two-step verification** (users with two-factor on) | The user lost the phone with the authenticator app. | Turns two-factor off; the user sets it up again. |
+| **Sign-in history** | Access reviews and investigations. | Lists the user's sign-in attempts, newest first: date and time, result, detail (for example *Wrong password*, *Account locked*), method, IP address and browser. |
+
+Each action asks for confirmation and is recorded in the audit trail. Only an IT Administrator may act on IT or Business Administrator accounts or on his or her own account; the server applies the same rule.
+
+![Account actions of a user](m-user-actions)
+
+![Sign-in history of a user](m-user-history)
+
+### Change and deactivate users
+
+- Select the pencil on a user to change the display name, e-mail or roles. A change of roles takes effect at once: the user's open sessions end.
+- Use the **Status** switch to deactivate a leaver (the history is kept and the user's sessions end) or to reactivate a user.
 - Give each person one user of their own. Keep maker and checker duties on different people.
 
 ### Roles
@@ -1720,9 +1826,9 @@ The nine roles are listed in Chapter 1. Open a role to see its permissions: read
 
 | Section | Settings |
 |---|---|
-| Branding | **App Title** (browser tab), **Logo Preset** (BDO), **Add Company Logo**, **Upload Logo**, **Upload Favicon** (images up to 2 MB). |
+| Branding | **App Title** (browser tab and system name), **Logo Preset** (standard: *iorta TechNXT (BrokerVerse)*), **Add Company Logo**, **Upload Logo**, **Upload Favicon** (images up to 2 MB). Your own logo replaces the iorta TechNXT logo in the sidebar and on the sign-in page. |
 | Localization | **Display Currency** (PHP — Philippine Peso) and **Default Language**. |
-| Theme | **Primary Color** (BDO Blue #0072d8) and **Secondary Color** (BDO Navy #004ea8), with **Theme preview**. |
+| Theme | **Primary Color** (#0072d8) and **Secondary Color** (#004ea8), chosen from the presets or typed as a hex code, with **Theme preview**. |
 
 Select **Save**. The settings apply to every user, including the sign-in page.
 
@@ -1730,15 +1836,25 @@ Select **Save**. The settings apply to every user, including the sign-in page.
 
 ![Master > Configuration](m-config)
 
-**Master > Configuration** holds every business parameter, grouped in tabs (accounting, branding, claims, collections, commission, currency, dashboard, direct bill, e-mail, endorsements, finance, general, incentive, leads, limits, notifications, numbering, policies, policy, premium, product, quotations, quote, reinsurance, remittance, renewals, reports, security, system, taxes, uploads). Each setting shows its label and its key.
+**Master > Configuration** holds every business parameter, grouped in tabs with plain names (for example *Accounting*, *Claims*, *Collections*, *Commission*, *Dashboard*, *Direct bill*, *General*, *Quotations*, *Renewals*, *Reports*, *Security*, *Taxes*). Each setting shows its label; point at the label to see the technical key. Business values that the system uses (tax rates, limits, windows, e-mail texts, lists offered on the screens) are all kept here, not in the program.
 
-1. Choose the tab.
-2. Change the value (number, text, switch or list).
+1. Choose the tab. Scroll the tab strip sideways for more tabs.
+2. Change the value. The editor follows the kind of value (see the table).
 3. Select **Save changes**. The change applies at once and is recorded in the audit trail with the old and new value.
+
+| Kind of value | How you edit it |
+|---|---|
+| Number, text, switch | Type the value or use the switch. |
+| Simple list | Values separated by commas, for example *30, 60, 90, 120*. |
+| List of records | A small table: edit the cells, add or remove rows (for example the available languages with their code and label). |
+| E-mail template | A multi-line box; keep the {{placeholders}}, for example {{code}} or {{companyName}}. |
+| Other structures | Indented text (JSON). |
 
 ![Configuration: security settings](m-config-security)
 
 ![Configuration: direct bill settings](m-config-direct-bill)
+
+![Configuration: a list of records edited as a table (General > available languages)](m-config-list)
 
 > **Caution:** Change GL accounts, tax rates, numbering prefixes and maker-checker switches only with the agreement of Finance and the Business Administrator. See Appendix C for the key settings.
 
@@ -1746,7 +1862,7 @@ Select **Save**. The settings apply to every user, including the sign-in page.
 
 ![Master > Schedules](m-schedules)
 
-**Master > Schedules** lists the jobs the system runs by itself (server time, Asia/Manila). For each job you see what it does, the schedule in plain words, whether it is enabled, the last run and its status.
+**Master > Schedules** lists the jobs the system runs by itself (business time, Asia/Manila). When several API servers run, each scheduled run happens once. For each job you see what it does, the schedule in plain words, whether it is enabled, the last run and its status.
 
 | Icon | Action |
 |---|---|
@@ -1771,53 +1887,61 @@ Use the audit trail for investigations, access reviews and to prove that maker a
 
 ## How to run a report
 
-1. Choose **Reports > Operational Reports** or **Reports > Financial Reports**, then the report.
-2. Choose the **Report Criteria**, for example *Overall*, *Agent*, *Principle Insurance* (insurer) or *Branch*. The filter fields that apply to the criteria become available.
-3. Choose the **From Date** and **To Date**. Without a From Date the last 365 days are used.
-4. Choose the **Agent**, **Company**, **Branch** or **Client** if the criteria needs one.
-5. Select **Generate**. The report file is created on the server and downloads as an Excel workbook (XLSX).
+BrokerVerse has 19 reports. Every report opens on the same report screen, with the filters that report uses. You reach it in two ways:
+
+- **Reports > All Reports** lists every report your role may run, grouped into **Operational Reports** and **Financial Reports**, with a short description. Type in **Search reports** to find one, then select the report.
+- **Reports > Operational Reports** and **Reports > Financial Reports** hold shortcuts to the most used reports (Production, Claims, Renewal, Remittance, Broker Commission; SOA / Premium Receivable, Collection Report, Payables, Journal, Trial Balance).
+
+![Reports > All Reports (Business Administrator: all 19 reports)](rep-catalogue)
+
+To run a report:
+
+1. Open the report.
+2. Choose the **Report Criteria**, for example *Overall*, *Agent*, *Principal Insurer* or *Branch*. The filters that the criteria uses become available; the others show *Used with criteria …* and stay disabled.
+3. Check the **From Date** and **To Date** (DD/MM/YYYY). They start with the current month.
+4. Choose the **Agent**, **Company (principal insurer)**, **Branch**, **Client**, **Product** or status if you need them.
+5. Select **Preview** to see the first page of the report on screen (up to 50 rows, amounts right-aligned). The title shows how many rows the report has.
+6. Choose the **File format**: **CSV**, **Excel (XLSX)** or **PDF**, then select **Generate**. The file is created on the server and downloads.
+
+![Report screen: Production Register with its criteria, file format and preview](rep-preview)
 
 ![Reports > Operational Reports > Production, with the criteria list open](rep-production)
 
-![Claims report: criteria All, Open, Settled, Rejected](rep-claims)
-
 - Files hold up to 50,000 rows (`reports.max_rows`). Download links stay valid for 72 hours; generated files are kept for 90 days.
-- Every generated report is recorded in the audit trail.
-- The report screens produce XLSX. The same reports can be produced as CSV or PDF (A4) through the reports API and the report schedules, which e-mail a report on a timetable to a list of recipients (set up by the IT Administrator).
+- Every generated file is recorded in the audit trail.
+- The IT Administrator can set up report schedules, which e-mail a report on a timetable to a list of recipients.
 - The *Daily reports* job generates the Production Register, the Collection Report and the Claims Position every morning at 05:00.
 
-On **Collection Report**, **Payables**, **Journal** and **Trail Balance** the criteria fields are fixed (greyed): choose the dates and select **Generate**; the report covers all agents, insurers and branches.
+![Finance: Reports > All Reports shows the reports of the finance role](rep-catalogue-finance)
 
-![Reports > Financial Reports > Trail Balance](rep-trial-balance)
-
-> **Known issue:** For sales and claims users the report screens show *Requires permission: read:users* when they open (the list of agents cannot be loaded). The report still generates; leave the Agent filter empty.
+![Reports > Financial Reports > Trial Balance](rep-trial-balance)
 
 ## The report catalogue
 
-{widths: 20,40,22,18}
-| Report | What it shows | Where | Roles (besides administrators) |
-|---|---|---|---|
-| Production Register | Policies incepted in the period: premium, commission, new business or renewal, billing mode; by agent, insurer, branch or billing mode. | Reports > Operational > Production; Executive Dashboard > Export Report | Sales, underwriting, customer services, claims |
-| Claims Position | Claims reported: estimate, approved, settled, age and bucket. Criteria All, Open, Settled, Rejected, Aging. | Reports > Operational > Claims | Sales, underwriting, customer services, claims |
-| Renewal Retention | Renewals due: retained, lost or pending, old and new premium, retention rate. | Reports > Operational > Renewal | Sales, underwriting, customer services, claims |
-| Remittance Summary | Remittances to insurers: gross premium, commission retained, net due, status. | Reports > Operational > Remittance | Operational roles, finance |
-| Broker Commission Statement | Commission per agent and policy: basis, rate, gross, WHT, net, paid status, billing mode. | Reports > Operational > Broker Commission | Operational roles, finance |
-| Premium by Product / Month / Insurer | Policy count, sum insured, premium and commission by month, product or insurer. | Reports API | Operational roles, finance |
-| New Business vs Renewals | Policies and premium split into new business and renewals by month or agent. | Reports API | Operational roles, finance |
-| Claims Ageing | Open claims by ageing bucket (30/60/90/180 days) with estimate and approved amount. | Reports API | Sales, underwriting, customer services, claims |
-| Lead Conversion Funnel | Leads by stage (new to converted or lost) with share and conversion rate. | Reports API; lead list > Generate Report gives the lead list | Sales, underwriting, customer services |
-| Reinsurance Cession Register | Cessions per treaty and policy: sum insured, ceded sum and premium, share. | Reports API | Underwriting, finance |
-| SOA / Premium Receivable | Bills issued: amount, paid, balance, age and bucket as of the To Date. | Reports > Financial > SOA / Premium Receivable | Finance, sales |
-| Collection Report | Bills due: billed, collected, balance and collection rate. | Reports > Financial > Collection Report | Finance |
-| Receivables Ageing | Outstanding receivables by bucket (30/60/90/120 days). | Accounts > Collections > Aging Report (on screen); Reports API | Finance, sales |
-| Commission Receivable – Direct Bill | Commission and VAT due from insurers on direct-bill policies: unbilled, on a debit note, partly or fully collected, with ageing. | Direct Bill Processing > Commission receivable ageing | Finance |
-| Receipts Register | Official receipts: bill, policy, payment mode, bank, reference. | Reports API | Finance |
-| Payables / Disbursement Register | Payment vouchers to insurers, agents, clients and suppliers with approval and paid dates. | Reports > Financial > Payables | Finance |
-| Journal Register | Journal lines: account, debit, credit, memo, status. | Reports > Financial > Journal | Finance |
-| Trial Balance | Opening balance, period debits and credits and closing balance per account, by account type and statement group. | Reports > Financial > Trail Balance | Finance |
-| Incentive Results | Programme target, achieved, achievement % and payout per agent. | Reports API | Finance, sales |
+{widths: 22,42,36}
+| Report | What it shows | Roles (besides administrators) |
+|---|---|---|
+| Production Register | Policies incepted in the period: premium, commission, new business or renewal, billing mode; by agent, insurer, branch or billing mode. Also **Export Report** on the Executive Dashboard. | Sales, underwriting, customer services, claims |
+| Claims Position | Claims reported: estimate, approved, settled, age and bucket. Criteria All, Open, Settled, Rejected, Aging. | Sales, underwriting, customer services, claims |
+| Renewal Retention | Renewals due: retained, lost or pending, old and new premium, retention rate. | Sales, underwriting, customer services, claims |
+| Remittance Summary | Remittances to insurers: gross premium, commission retained, net due, status. | Sales, underwriting, customer services, claims, finance |
+| Broker Commission Statement | Commission per agent and policy: basis, rate, gross, WHT, net, paid status, billing mode. | Sales, underwriting, customer services, claims, finance |
+| Premium by Product / Month / Insurer | Policy count, sum insured, premium and commission by month, product or insurer. | Sales, underwriting, customer services, claims, finance |
+| New Business vs Renewals | Policies and premium split into new business and renewals by month or agent. | Sales, underwriting, customer services, claims, finance |
+| Claims Ageing | Open claims by ageing bucket (30/60/90/180 days) with estimate and approved amount. | Sales, underwriting, customer services, claims |
+| Lead Conversion Funnel | Leads by stage (new to converted or lost) with share and conversion rate. | Sales, underwriting, customer services |
+| Reinsurance Cession Register | Cessions per treaty and policy: sum insured, ceded sum and premium, share. | Underwriting, finance |
+| SOA / Premium Receivable | Bills issued: amount, paid, balance, age and bucket as of the To Date. | Finance, sales |
+| Collection Report | Bills due: billed, collected, balance and collection rate. | Finance |
+| Receivables Ageing | Outstanding receivables by bucket (30/60/90/120 days). Also on screen: Accounts > Collections > Aging Report. | Finance, sales |
+| Commission Receivable – Direct Bill | Commission and VAT due from insurers on direct-bill policies: unbilled, on a debit note, partly or fully collected, with ageing. Also from Direct Bill Processing. | Finance |
+| Receipts Register | Official receipts: bill, policy, payment mode, bank, reference. | Finance |
+| Payables / Disbursement Register | Payment vouchers to insurers, agents, clients and suppliers with approval and paid dates. | Finance |
+| Journal Register | Journal lines: account, debit, credit, memo, status. | Finance |
+| Trial Balance | Opening balance, period debits and credits and closing balance per account, by account type and statement group. | Finance |
+| Incentive Results | Programme target, achieved, achievement % and payout per agent. | Finance, sales |
 
-"Reports API" means `POST /api/reports/{code}/generate` with the format csv, xlsx or pdf, or a report schedule. Ask the IT Administrator for these files.
+Agents and User Access Administrators have no Reports menu. An agent asks finance for his Broker Commission Statement.
 
 ## Other exports
 
@@ -1843,12 +1967,13 @@ Each page below is a one-page summary for one persona: where you land, your dail
 | Change a business parameter (with the owner's agreement) | Master > Configuration > tab > **Save changes** |
 | Branding, logo, colours, language | Master > System Settings |
 | Create users and assign roles (or support the User Access Administrators) | Master > Generals > User Management > User |
-| Review sign-ins and changes | Master > Audit Trail (record type *session*) |
+| Make two-factor authentication compulsory for a role | Master > Configuration > Security (`security.require_2fa_roles`) |
+| Review sign-ins and changes | User list > **...** > **Sign-in history**; Master > Audit Trail (record type *session*) |
 | Run a job now after a change | Master > Schedules > Run |
-| Provide CSV / PDF reports and report schedules | Reports API (`/api/reports`) |
+| Reports in CSV, XLSX or PDF; report schedules | Reports > All Reports; report schedules (`/api/reports`) |
 
 - Keep the administrator user for administration. Use persona users for business work, so that commission and maker-checker work as intended.
-- Before go-live: e-mail (SMTP), server time zone Asia/Manila, logo, GL accounts, numbering prefixes, password of the administrator.
+- Before go-live: e-mail (SMTP), time zone Asia/Manila on the application and the database servers, your logo and name in System Settings, GL accounts, numbering prefixes, password of the administrator.
 - You cannot approve a transaction you entered yourself.
 
 
@@ -1869,10 +1994,11 @@ Each page below is a one-page summary for one persona: where you land, your dail
 | Maintain commission rates | Master > Generals > Commission |
 | Maintain the chart of accounts (with Finance) | Master > Finance > Main Account, Sub Account |
 | Set up incentive programmes and reinsurance treaties | Master > Incentive Programs, Master > Reinsurance Treaty |
-| Follow the business | Dashboard > Executive Dashboard; all reports |
+| Keep business values current (limits, windows, lists, e-mail texts) | Master > Configuration |
+| Follow the business | Dashboard > Executive Dashboard; Reports > All Reports (all 19) |
 
 - Change rates with the agreement of Finance and test them with the Rating Engine's **Test Calculator** or a draft quotation.
-- New treaties and incentive batches need a second user's approval.
+- New treaties need a second user's approval. Incentive batches are calculated and approved by finance.
 
 
 ![Landing page of the Business Administrator](persona-bea.admin)
@@ -1891,7 +2017,7 @@ Each page below is a one-page summary for one persona: where you land, your dail
 | Record the client's payment for finance | Policy > **Proceed to Payment** > **Record payment** |
 | Work renewals | Operations > Renewals > Renewal Queue, At-Risk Policies, Negotiations |
 | Follow your commission | Commission > Commission Dashboard |
-| Reports | Reports > Operational Reports (Production, Claims, Renewal, Remittance, Broker Commission) |
+| Reports | Reports > All Reports (12 reports, including SOA, Receivables Ageing and Incentive Results); Reports > Operational Reports |
 
 Notifications you receive: customer accepted quotation, policy issued, renewal notice sent, renewal approved or returned, policy lapsed.
 
@@ -1918,7 +2044,7 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 - Put yourself as the referrer (Account Code, Commission & Referral) so the commission is credited to you.
 - Keep your bank details with Finance; payouts are blocked without them.
 - You have no Reports menu; ask Finance for your Broker Commission Statement.
-- Of the Renewals menu, use **Renewal Policy**. The other renewal screens need renewal permissions the agent role does not have yet (see Appendix G).
+- Your Renewals menu holds **Renewal Policy** only: renew your own expiring policies from there. The renewal workspace (queue, batches, at-risk, negotiations, lapse, performance) is run by sales and underwriting.
 
 
 ![Landing page of the Agent: Agent Dashboard, own book only](persona-ramon.agent)
@@ -1936,7 +2062,7 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 | Price and approve renewals | Operations > Renewals > Renewal Policy, Renewal Queue, Negotiations |
 | Maintain coverages, rating and underwriting rules | Product Configurator |
 | Reinsurance: treaties, cessions, recoveries, reconciliation | Reinsurance menu |
-| Reports | Reports > Operational Reports; Cession Register (Reports API) |
+| Reports | Reports > All Reports (10 reports, including the Reinsurance Cession Register); Reports > Operational Reports |
 
 - You are notified of every quotation sent to a client (`quotations.approval_notify_roles`) and are the checker for renewal terms (`renewals.approver_roles`).
 - Quotations expire after 30 days; renewal quotations after 30 days.
@@ -1958,7 +2084,7 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 | Follow payments | Operations > Payments |
 | Capture leads and quotations for sales | Operations > Leads/Prospects |
 | Follow expiring policies | Operations > Renewals > Renewal Policy |
-| Reports | Reports > Operational Reports |
+| Reports | Reports > All Reports (9 operational reports); Reports > Operational Reports |
 
 - Choose the endorsement type before **Proceed**; check the summary before **Send to Insurance Company**.
 - Additional premium from an endorsement is billed automatically; finance posts the receipt.
@@ -1980,7 +2106,7 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 | Submit a settlement | Claim > **Claim Settlement** > **Submit** |
 | Check the history | Operations > Claims > history icon (audit trail) |
 | Reinsurance recoveries | Reinsurance > Claims Recovery |
-| Reports | Reports > Operational Reports > Claims |
+| Reports | Reports > All Reports (8 reports, including Claims Position and Claims Ageing); Reports > Operational Reports > Claims |
 
 - The date of loss must be inside the policy period; unpaid premium blocks a claim.
 - Attach documents (PNG, JPEG, PDF up to 2 MB) when you register.
@@ -2022,7 +2148,9 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 | Bill direct-bill commission | Accounts > Remittance > Direct Bill Processing |
 | Journals | Accounts > Journal Voucher > **+ Voucher** > **Submit for approval** |
 | Pay suppliers and refunds | Accounts > Disbursement > **+ Create** |
-| Reports | Reports > Financial Reports; Operational Reports |
+| Calculate agent incentives | Accounts > Incentive > Calculations > **New Calculation** |
+| Reconcile reinsurer statements | Reinsurance > Reconciliation |
+| Reports | Reports > All Reports (14 reports); Reports > Financial Reports; Operational Reports > Remittance, Broker Commission |
 
 - Always select the bill when you post a receipt.
 - Ask the checker to approve the same day; approvals show an SLA.
@@ -2043,6 +2171,7 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 | Commission lines | Commission > Agents/Referrer Accounts > referrer > **Approve** |
 | Remittances, settlements, transfers, adjustments | Accounts > Remittance > Approval Workflow |
 | Commission debit notes | Accounts > Remittance > Direct Bill Processing > 2. Debit Notes |
+| Incentive calculation batches | Accounts > Incentive > Approvals |
 | Petty cash requests | Accounts > Petty Cash > Request |
 
 - You cannot approve what you entered. Check amounts, accounts and supporting documents before approving.
@@ -2060,13 +2189,17 @@ Notifications you receive: customer accepted quotation, policy issued, renewal n
 
 | Task | Where |
 |---|---|
-| Create a user after the manager approves the request | Master > Generals > User Management > User > **+ Add** |
-| Change roles, reset a password | User > pencil |
-| Unlock a locked user, deactivate a leaver | User > **Status** switch |
+| Create a user after the manager approves the request | Master > Generals > User Management > User > **+ Add** (leave the password empty; give the temporary password to the user) |
+| Change roles | User > pencil |
+| Unlock a locked user | User > **...** > **Unlock** |
+| Reset a password | User > **...** > **Reset password** (temporary password shown once) |
+| Lost phone: turn off two-step verification | User > **...** > **Turn off two-step verification** |
+| Deactivate a leaver | User > **Status** switch |
+| Review a user's sign-ins | User > **...** > **Sign-in history**; Master > Audit Trail (record type *session*) |
 | Review roles and permissions | Master > Generals > User Management > Role |
-| Review sign-ins and changes | Master > Audit Trail (record type *session*, or a user name) |
 
 - You cannot open business screens, reports or settings; they show **Not authorised**.
+- You cannot act on IT or Business Administrator accounts; ask the IT Administrator.
 - Give each person the smallest role that does the job, and keep maker and checker on different people.
 - Review users with the line managers every quarter.
 
@@ -2164,15 +2297,20 @@ All settings are on **Master > Configuration** unless noted. Changes apply at on
 | `limits.receivable_ageing_buckets` | 30, 60, 90, 120 | Ageing buckets. |
 | `collections.reminder_days_before`, `…repeat_days` | 7, 7 | Collection reminders. |
 | `security.password_*`, `limits.max_login_attempts`, `limits.session_idle_minutes` | see Chapter 1 | Sign-in rules. |
+| `security.require_2fa_roles` | none | Roles that must use two-factor authentication. |
+| `security.reset_code_minutes`, `security.reset_code_max_attempts` | 15 minutes, 5 | Forgot-password code validity and wrong entries allowed. |
+| `security.login_rate_limit`, `security.api_rate_limit` | 10 per 5 minutes; 600 per minute | Sign-in attempts per computer and user name; requests per user. |
+| `quote.bodily_injury_limits`, `quote.property_damage_limits` | 100,000 to 500,000 | Limits offered on quotations and endorsements. |
+| `dashboard.renewals_due_days`, `renewals.due_soon_days` | 60, 30 | Renewals counted as due on the dashboards and as due soon in the queue. |
 | `security.scoped_roles` | agent | Roles limited to their own book. |
 | `general.date_format`, `general.timezone`, `currency.default` | DD/MM/YYYY, Asia/Manila, PHP | Formats. |
 | `notification.email_enabled` | off in the test system | Sends queued e-mails through SMTP. |
-| System Settings (screen) | logo, colours, currency, language | Look of the system. |
+| System Settings (screen) | name, logo, colours, currency, language | Look of the system (standard: BrokerVerse with the iorta TechNXT logo). |
 | Product Configurator (screen) | CTPL tariff, APPA rate and limits, own damage rates | Motor pricing. |
 
 ## Appendix D. Scheduled jobs
 
-| Job | When (server time) | What it does |
+| Job | When (Manila time) | What it does |
 |---|---|---|
 | Policy expiry | Daily 00:15 | Marks policies past their expiry date as Expired. |
 | Quotation expiry | Daily 00:30 | Expires quotations older than the validity. |
@@ -2225,9 +2363,14 @@ All settings are on **Master > Configuration** unless noted. Changes apply at on
 |---|---|
 | **Not authorised** – "Your role does not give access to this screen" | The screen is not part of your role. Use your menu, or ask a User Access Administrator whether your role is right. |
 | Wrong user ID or password | Check Caps Lock and the user ID. After 5 failures the account locks. |
-| **Account locked. Contact the administrator** | Ask a User Access Administrator to reactivate your user or set a new password. |
+| **Account locked. Contact the administrator** | Ask a User Access Administrator to unlock your user (**Unlock**). |
 | Too many sign-in attempts | Wait 5 minutes, then sign in again. |
+| Forgot password | Use **Forgot password?** on the sign-in page; the code is e-mailed to you. Without an e-mail address, ask a User Access Administrator for **Reset password**. |
+| *Choose a new password to continue* / *Your password has expired* | Choose a new password that meets every rule (Chapter 1). |
+| The authentication code is refused | Use the current code in the app; check that the phone's clock is set automatically. Lost phone: ask a User Access Administrator to turn two-step verification off. |
 | You were signed out | 30 minutes without activity. Sign in again; unsaved entries are lost. |
+| *Your session has ended …* | Your password was changed or reset, your user or roles were changed, or you signed in elsewhere. Sign in again. |
+| *Too many requests* | You sent a very large number of requests in one minute. Wait a minute and try again. |
 | *Requires permission: …* at the top of a screen | Your role lacks a permission the screen needs. Report the screen and the message to the IT Administrator. |
 | *This field is required*, *Invalid email address* | Fill in the field or correct the format shown in red under it. |
 | *Invalid mobile number (e.g. 0917 123 4567 or +63 917 123 4567)* | Type a Philippine mobile number starting with 09, +639 or 9 (10 digits after the 0). |
@@ -2245,24 +2388,13 @@ All settings are on **Master > Configuration** unless noted. Changes apply at on
 
 ## Appendix G. Known limitations in this release
 
-The items below were observed on 29 September 2026 while preparing this manual. They are reported to the product team.
+The items below are known limitations of this release. They are not defects in the business flows, but the IT Administrator should know them before go-live.
 
-- The **Forgot password?** link on the sign-in page is not active, and there is no screen for a user to change an expired password or enter a two-factor code.
-- **Operations > Renewals > Retention Analytics** and **Master > Generals > Employee Management > Hierarchy** show "Something went wrong on this screen".
-- The finance role sees the **Accounts > Incentive** screens but they show *Requires permission: read:incentive or write:incentive*.
-- The report screens show *Requires permission: read:users* for sales and claims users; the report still generates.
-- **See More** in the notification panel opens a page that finance and user access administrators may not open (**Not authorised**).
-- The Executive Dashboard title is dark blue on a dark blue banner and hard to read; its **Settings** button does nothing.
-- The policy details page labels LGT as 2% although 0.75% is applied, and a direct-bill policy still shows *Payment Required*.
-- The template **Taxes and fees** tab and the Taxation master are not used for pricing (see Chapter 17).
-- Some screens show internal record ids instead of numbers (client view header, endorsement numbers on the client's Endorsement tab) and the claim settlement pages show "Loading..." in the header.
-- Some lists and pickers still show dates month-first or as YYYY-MM-DD (Disbursement, Journal Voucher, payment date picker, receipt date).
-- The agent role sees the whole Renewals menu, but Renewal Queue, Renewal Batch, At-Risk Policies, Negotiations, Lapse Management and Performance refuse it (*Requires permission: read:renewals*).
-- The finance role sees Reinsurance > Reconciliation, but the screen is refused (*read:reinsurance*); the Incentive Statement calls a service that does not exist yet; the Remittance Approval Workflow cannot load the user list for finance.
-- On the claims officer's Clients screen, **Create Lead** opens **Not authorised**; the underwriter's **Add Treaty** also opens **Not authorised**.
-- Company clients are listed with category RETAIL; the Account Category master shows untranslated column names.
-- The Agent Dashboard shows collected premium 0.00 for policies that are paid.
-- The Collections screen button is labelled *Manual Trigger Renewal Reminder Now* although it sends collection reminders.
+- **Session tokens in browser storage.** The sign-in session (access and refresh tokens) is kept in the browser's local storage. Anyone who can run scripts in the user's browser could read it. Sign out on shared computers, keep browsers up to date and do not install unknown browser extensions. Sessions end after 30 minutes without activity, and a password change ends the other sessions.
+- **No QR code for two-factor set-up.** The set-up screen shows the setup key and a link for the authenticator app, but no QR code. Users type the key into the app or open the link on the phone.
+- **Rate limits are counted per API server.** The sign-in limit (10 attempts in 5 minutes) and the request limit (600 per minute) are counted by each API server separately. With several API servers behind a load balancer, the effective limit is higher; add a limit at the load balancer or web application firewall if needed.
+- **No Filipino translation.** Filipino is configured as a language (`general.languages`), but there is no Filipino translation of the screens yet, so the language list offers English and Thai only.
+- **Database time zone.** Most business dates follow the configured time zone Asia/Manila. Some database queries use the database's own current date. Set the time zone of the PostgreSQL server (or of the database) to Asia/Manila, so that "today" is the Philippine date between midnight and 08:00.
 
 ## Appendix H. Support
 

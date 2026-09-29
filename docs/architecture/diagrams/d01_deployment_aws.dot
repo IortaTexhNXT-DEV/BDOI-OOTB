@@ -1,0 +1,36 @@
+// Target production deployment on AWS ap-southeast-1 (document 01, 07). Sizes are recommendations.
+digraph G {
+  graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.35, ranksep=0.5, pad=0.2, compound=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10.5];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.7];
+
+  users [label="Users / clients\n(browser, HTTPS)", fillcolor="#FFFFFF"];
+  gha [label="GitHub Actions\nfront end: build, S3 sync,\nCloudFront invalidation\nbackend: image build (to set up)", shape=component, fillcolor="#FFFFFF"];
+  dns [label="Route 53 / DNS\nBrokerVerse URL", fillcolor="#FFFFFF"];
+  subgraph cluster_edge { label="Edge"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    cf [label="CloudFront distribution\ndefault behaviour -> S3 (SPA)\n/api/* behaviour -> ALB (no cache)\n403/404 -> /index.html"];
+    waf [label="AWS WAF (recommended)", style="rounded,dashed,filled", fillcolor="#FFFFFF"];
+  }
+  s3 [label="S3 bucket\nSPA build (versioning on)", shape=folder];
+  subgraph cluster_vpc { label="VPC ap-southeast-1 (two Availability Zones)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    alb [label="Application Load Balancer (HTTPS, ACM certificate)\nhealth check GET /api/health"];
+    subgraph cluster_az { label="Private subnets, AZ a + AZ b"; style="rounded,dashed"; color="#9FB3C8"; fontcolor="#5B6776";
+      api1 [label="API task / container 1\nnode:22-alpine, port 8000\nSCHEDULER_ENABLED=true"];
+      api2 [label="API task / container 2..n\n(auto scaling)\nscheduler optional"];
+    }
+    rds [label="Amazon RDS PostgreSQL 16\nMulti-AZ, encrypted,\nautomated backups + PITR", shape=cylinder];
+    efs [label="Amazon EFS\n/app/uploads (UPLOAD_DIR)\nAWS Backup", shape=folder];
+  }
+  sm [label="Secrets Manager / SSM\nJWT_SECRET, DATA_ENCRYPTION_KEY,\nDATABASE_URL, SMTP_URL, ADMIN_PASSWORD", shape=note, fillcolor="#FFF8E1", color="#E0B23A"];
+  cw [label="CloudWatch Logs, metrics,\nalarms (+ SNS)", shape=note, fillcolor="#FFFFFF"];
+  smtp [label="SMTP relay\n(e.g. Amazon SES)", shape=component, fillcolor="#FFFFFF"];
+  ecr [label="Amazon ECR\nbackend images", shape=folder, fillcolor="#FFFFFF"];
+
+  users -> dns -> cf; waf -> cf [style=dashed, arrowhead=none];
+  cf -> s3 [label="static"]; cf -> alb [label="/api/*"];
+  gha -> s3 [label="aws s3 sync", style=dashed]; gha -> ecr [style=dashed];
+  alb -> api1; alb -> api2;
+  api1 -> rds; api2 -> rds; api1 -> efs; api2 -> efs;
+  sm -> api1 [style=dashed]; sm -> api2 [style=dashed];
+  api1 -> cw [style=dashed]; api2 -> smtp [style=dashed, label="e-mail"]; ecr -> api2 [style=dashed];
+}

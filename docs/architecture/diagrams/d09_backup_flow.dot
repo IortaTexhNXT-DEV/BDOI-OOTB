@@ -1,0 +1,19 @@
+// Backup and recovery data flows (document 09). Retention values are recommendations.
+digraph G {
+  graph [rankdir=LR, fontname="Nunito", fontsize=11, nodesep=0.3, ranksep=0.6, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=8.5, arrowsize=0.6];
+  rds [label="RDS PostgreSQL\n(brokerverse)", shape=cylinder];
+  efs [label="EFS /app/uploads", shape=folder];
+  s3fe [label="S3 SPA bucket", shape=folder];
+  sec [label="Secrets Manager\nJWT_SECRET, DATA_ENCRYPTION_KEY, ...", shape=note, fillcolor="#FFF8E1", color="#E0B23A"];
+  git [label="Git repositories\ncode, migrations, seeds,\nsettings.json, jobs.json", shape=folder, fillcolor="#FFFFFF"];
+  pitr [label="Automated backups + WAL\nPITR window 35 days"];
+  snap [label="Daily / monthly manual snapshots\n(AWS Backup plan)"];
+  dump [label="Monthly logical pg_dump\n(-Fc) to S3 Object Lock"];
+  xr [label="Cross-region copy\n(e.g. ap-southeast-2 / ap-northeast-1)"];
+  efsb [label="AWS Backup for EFS\ndaily, 35 days + monthly 12"];
+  ver [label="S3 versioning\n+ previous build artefacts"];
+  esc [label="Key escrow: sealed copy of\nDATA_ENCRYPTION_KEY and JWT_SECRET\n(offline, dual control)", fillcolor="#FFFFFF"];
+  rds -> pitr; rds -> snap -> xr; rds -> dump -> xr; efs -> efsb -> xr; s3fe -> ver; sec -> esc; git -> ver [style=invis];
+}

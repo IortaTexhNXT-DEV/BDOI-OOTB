@@ -1,0 +1,21 @@
+title: Lead to quotation to policy to billing
+participant S "Agent / sales (SPA)"
+participant Q "Quotations module"
+participant C "Client (e-mail link)"
+participant P "Policies / receipts services"
+participant D "PostgreSQL"
+participant J "Scheduler: e-mail outbox"
+S -> Q: create lead (LD-), then quotation: vehicle, cover, insurer
+Q -> D: price with configured tariff and tax rates (VAT, DST, LGT); next_number('quote') -> QT-YYYY-nnnnn; audit
+S -> Q: POST send-for-approval
+Q -> D: status sent; approval token hash; email_outbox row; notification to underwriting
+J -> C: every 5 min: send queued e-mail (SMTP) with approval link (valid 168 h)
+C -> Q: open /approve-quote?token=... (public, token must be the latest issued)
+Q -> D: status accepted; notify the quotation owner
+S -> Q: convert to policy (KYC check: ID, vehicle identifiers)
+Q -> P: issuePolicy inside one database transaction (quote row locked FOR UPDATE)
+P -> D: policy POL-; client from lead; receivable INV- (net, VAT, DST, LGT)
+P -> D: booking journal JV: Dr premium receivable / Cr payable to insurer + commission income
+P -> D: collection item for the open bill; commission line accrued for the referrer chain
+note: Broker-billed (default) policies follow this path. A direct-billed policy books a commission receivable (direct_bill_items) instead of a premium bill; see the remittance and direct-bill flow.
+P --> S: policy issued; documents (policy schedule PDF) generated on request

@@ -1,19 +1,21 @@
 """Capture live BrokerVerse screens for the persona decks, one sign-in per persona.
 
-Run against your OWN copy of the stack (never the shared ports), e.g. the API on 8307 and the production build
-served as an SPA on 127.0.0.1:5090 (see docs/e2e/harness.py for a SpaHandler example):
+The script only opens screens (read-only). Run it against a system loaded with the sample data, for example the
+front end on 127.0.0.1:5080 (WEB_BASE):
 
-    PERSONA_PASSWORD=... ADMIN_PASSWORD=... python3 docs/decks/tools/capture_screens.py <out_dir> \
-        docs/decks/tools/screens.json [user ...]
+    WEB_BASE=http://127.0.0.1:5080 PERSONA_PASSWORD=... ADMIN_PASSWORD=... \
+        python3 docs/decks/tools/capture_screens.py <out_dir> docs/decks/tools/screens.json [user ...]
 
-Screens are written as <out_dir>/<user>__<name>.png (viewport 1600 x 1000) and fed to build_decks.py --shots.
-Passwords are read from the environment only. Sign-in is rate limited per address, so a failed sign-in is
-retried after a pause.
+Screens are written as <out_dir>/<user>__<name>.png (viewport 1600 x 1000; "clip": [x, y, w, h] keeps part of the
+screen) and fed to build_decks.py --shots. Screens that need clicks (dialogs, wizards, report preview) come from
+the user manual's screenshots instead ('manual:<name>' in personas.py). ADMIN_PASSWORD is the password of
+BrokerVerse and carmela.morfe, PERSONA_PASSWORD that of the other persona users; both are read from the
+environment only. Sign-in is rate limited per address, so a failed sign-in is retried after a pause.
 """
 import json, os, re, sys
 from playwright.sync_api import sync_playwright
 
-BASE = os.environ.get('WEB_BASE', 'http://127.0.0.1:5090')
+BASE = os.environ.get('WEB_BASE', 'http://127.0.0.1:5080')
 CHROMIUM = os.environ.get('CHROMIUM', '/opt/pw-browsers/chromium')
 
 
@@ -26,7 +28,7 @@ def settle(page, t=2500):
 
 
 def password_for(user):
-    return os.environ['ADMIN_PASSWORD'] if user == 'BrokerVerse' else os.environ['PERSONA_PASSWORD']
+    return os.environ['ADMIN_PASSWORD'] if user in ('BrokerVerse', 'carmela.morfe') else os.environ['PERSONA_PASSWORD']
 
 
 def login(page, user):
@@ -66,7 +68,9 @@ def main():
             for it in items:
                 try:
                     page.goto(BASE + it['path']); settle(page, it.get('wait', 2500))
-                    page.screenshot(path=f"{out}/{user}__{it['name']}.png")
+                    clip = it.get('clip')
+                    page.screenshot(path=f"{out}/{user}__{it['name']}.png",
+                                    clip=dict(zip(('x', 'y', 'width', 'height'), clip)) if clip else None)
                     print(user, it['name'], page.url.replace(BASE, ''), flush=True)
                 except Exception as e:
                     print('ERROR', user, it['name'], str(e)[:150], flush=True)

@@ -1,0 +1,22 @@
+// Shared service components (document 05): backend src/lib and front-end shared utilities.
+digraph G {
+  graph [rankdir=LR, fontname="Nunito", fontsize=11, nodesep=0.18, ranksep=0.5, pad=0.2, newrank=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=9.5];
+  edge  [color="#9FB3C8", arrowsize=0.5, fontname="Nunito", fontsize=9];
+  subgraph cluster_fe { label="Front end (brokerverse/src)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    fe1 [label="API access\nutility/interceptor.js (axios)\nutility/sessionRefresh.js (fetch)\nservices/*Service.js (36)"];
+    fe2 [label="Access control\nroutes/ProtectedRoute\nutils/menuPermissions.js, canOpen.js\nutility/idleTimeout.js"];
+    fe3 [label="Configuration and formatting\nutility/applySystemSettings.js\ndateFormat.js, useFormatCurrency\ncurrencyOptions.js, quoteOptions.js"];
+    fe4 [label="UI services\nAppDialogs + utility/dialogs.js\nToast / toastUtils.js\nNotificationContext (30 s poll)\nS3FileUpload, i18n (en, th)"];
+  }
+  subgraph cluster_be { label="Backend (backend/src/lib, jobs, tools)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    b1 [label="Identity and access\nauth.js (JWT, token version, roles,\npermissions), password.js, totp.js,\nscope.js (record scope), loginHistory.js"];
+    b2 [label="Request handling\nregistry.js (define, OpenAPI), validate.js (zod),\nerrors.js, respond.js (envelope, paging),\nrateLimit.js, uploadLimits.js, health.js"];
+    b3 [label="Business utilities\nsettings.js (cache), dates.js (Asia/Manila),\nmoney.js (round2, formatMoney),\nbirthDate.js, next_number() SQL"];
+    b4 [label="Records and messaging\naudit.js, mailer.js (outbox),\nnotifications (+ audience),\nsecrets.js, fileLinks.js, uploads/storage.js"];
+    b5 [label="Batch and documents\njobs/scheduler.js (advisory lock),\njobs/handlers.js, reports engine,\ntools/pdf.js, xlsx.js, csv.js, zip.js"];
+  }
+  db [label="PostgreSQL", shape=cylinder, fillcolor="#FFFFFF"];
+  fe1 -> b2; fe2 -> b1 [style=dashed]; fe3 -> b3 [style=dashed, label=" GET /system-settings ", fontsize=8];
+  b1 -> db; b2 -> db [style=invis]; b3 -> db; b4 -> db; b5 -> db;
+}

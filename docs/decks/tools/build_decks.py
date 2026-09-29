@@ -2,8 +2,8 @@
 
 Usage:  python3 docs/decks/tools/build_decks.py --shots <dir with <user>__<screen>.png> [--out docs/decks]
 
-Screenshots come from docs/decks/tools/capture_screens.py (live screens, one sign-in per persona) and from
-docs/e2e/evidence (end-to-end run). Content lives in personas.py next to this file.
+Screenshots come from docs/decks/tools/capture_screens.py (live screens, one sign-in per persona) and from the user
+manual's screens in docs/manual/images ('manual:<name>'). Content lives in personas.py next to this file.
 """
 import argparse, io, os, sys
 from pptx import Presentation
@@ -18,7 +18,14 @@ from personas import PERSONAS, FLOW_STEPS, REPORTS, JOBS  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 LOGO = os.path.join(ROOT, 'brokerverse', 'public', 'bdoi', 'iorta-technxt.png')
-EVIDENCE = os.path.join(ROOT, 'docs', 'e2e', 'evidence')
+MANUAL_IMAGES = os.path.join(ROOT, 'docs', 'manual', 'images')
+
+
+def shot_path(img, shots):
+    """'manual:<name>' -> docs/manual/images/<name>.jpg; anything else is a file in the --shots directory."""
+    if img.startswith('manual:'):
+        return os.path.join(MANUAL_IMAGES, img[len('manual:'):] + '.jpg')
+    return os.path.join(shots, img)
 
 DEEP = RGBColor(0x0B, 0x4F, 0x9C)
 BRIGHT = RGBColor(0x1E, 0x88, 0xE5)
@@ -186,7 +193,7 @@ def title_slide(d):
     text(s, 0.8, 2.55, 7.9, 1.5, f"BrokerVerse — {p['label']} guide", size=38, bold=True, color=DEEP,
          anchor=MSO_ANCHOR.BOTTOM)
     text(s, 0.8, 4.15, 7.9, 0.5, 'Out-of-the-box functions, flows, reports and schedules', size=20, color=TEXT)
-    text(s, 0.8, 4.75, 7.9, 0.4, 'BDO Insure (BDOI) insurance broking · Philippines · PHP', size=14, color=MUTED)
+    text(s, 0.8, 4.75, 7.9, 0.4, 'BrokerVerse OOTB · insurance broking · Philippines · PHP', size=14, color=MUTED)
     x = 0.8
     for c in p['title_chips']:
         x += chip(s, x, 5.45, c) + 0.15
@@ -282,7 +289,7 @@ def function_slide(d, i, total, f, shots):
     maxw, maxh = 7.95, 4.95
     if f.get('shot'):
         img = f['shot']
-        path = os.path.join(EVIDENCE, img[len('evidence:'):]) if img.startswith('evidence:') else os.path.join(shots, img)
+        path = shot_path(img, shots)
         data, (iw, ih) = jpeg(path, crop=f.get('crop'))
         w = maxw; h = w * ih / iw
         if h > maxh:
@@ -399,7 +406,7 @@ def _table(s, x, y, w, rows, widths, size=11, header_fill=DEEP, row_h=0.3):
 def reports_slide(d):
     p = d.p
     codes = p['reports']
-    s = d.slide(p.get('reports_title', 'Reports you use'), 'Reports > Operational / Financial' if codes else 'Figures and evidence')
+    s = d.slide(p.get('reports_title', 'Reports you use'), 'Reports > All Reports' if codes else 'Figures and evidence')
     x = 0.5
     if not codes:
         text(s, 0.5, 1.33, 12.33, 0.32, p.get('reports_note', ''), size=12, italic=True, color=MUTED,
@@ -496,7 +503,7 @@ def closing_slide(d):
     text(s, 0.8, 3.7, 11, 0.5, f"BrokerVerse — {p['label']} guide", size=18, color=RGBColor(0xBF, 0xD9, 0xF5))
     rect(s, 0.8, 4.55, 11.7, 2.05, fill=RGBColor(0x0E, 0x5C, 0xB2), shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.06)
     text(s, 1.1, 4.7, 5, 0.35, 'SUPPORT', size=11, bold=True, color=RGBColor(0x9F, 0xC8, 0xF2))
-    rows = [('Service desk', '<to be confirmed by BDOI>'), ('E-mail', '<support mailbox to be confirmed>'),
+    rows = [('Service desk', '<service desk to be confirmed>'), ('E-mail', '<support mailbox to be confirmed>'),
             ('Hours', '<business hours, Manila time, to be confirmed>'),
             ('Access requests', p.get('access_contact', 'Your User Access Administrator (Master > User Management)'))]
     y = 5.05
@@ -531,7 +538,7 @@ def extra_slide(d, e, shots):
         text(s, 0.8, 1.6, 5.5, 0.35, e['left_title'], size=15, bold=True, color=DEEP)
         bullets(s, 0.8, 2.05, 5.55, 4.6, e['left'], size=fit(e['left'], 5.55, 4.45, 8), spacing=8)
         if e.get('shot'):
-            path = os.path.join(EVIDENCE, e['shot'][9:]) if e['shot'].startswith('evidence:') else os.path.join(shots, e['shot'])
+            path = shot_path(e['shot'], shots)
             data, (iw, ih) = jpeg(path)
             w = 6.05; h = w * ih / iw
             if h > 4.7:

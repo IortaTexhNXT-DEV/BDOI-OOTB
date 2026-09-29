@@ -1,14 +1,15 @@
 # BrokerVerse user manual
 
-`BrokerVerse_User_Manual.docx` and `BrokerVerse_User_Manual.pdf` are the end-to-end user manual of BrokerVerse
-(BIBS · BDOI Broker System), version 1.0, 29 September 2026. Both files have the same content.
+`BrokerVerse_User_Manual.docx` and `BrokerVerse_User_Manual.pdf` are the end-to-end user manual of BrokerVerse, the
+out-of-the-box insurance broking platform from iorta TechNXT, version 1.0, 29 September 2026. Both files have the
+same content.
 
 | Path | What it is |
 |---|---|
-| `BrokerVerse_User_Manual.docx` / `.pdf` | The manual (A4, BDOI theme, table of contents, headers and footers with page numbers). |
+| `BrokerVerse_User_Manual.docx` / `.pdf` | The manual (A4, BrokerVerse blue theme with the iorta TechNXT logo, table of contents, headers and footers with page numbers). |
 | `tools/manual_source.md` | The text of the manual. Edit this file to change the manual. |
 | `tools/build_manual.py` | Builds the .docx with python-docx, then uses LibreOffice to fill the table of contents and page numbers and to export the PDF. |
-| `tools/capture.py`, `tools/scenes.py` | Take the screenshots from a running system with Playwright (read-only: a guard refuses to click save / submit / approve / post / send / delete / issue and similar controls). |
+| `tools/capture.py`, `tools/scenes.py` | Take the screenshots from a running system with Playwright (read-only: a guard refuses to click save / submit / approve / post / send / delete / issue and similar controls; the sign-in security screens answer the sign-in calls in the browser, so no password, code or two-factor secret is changed on the server). |
 | `tools/install_fonts.py` | Installs the Nunito font for LibreOffice from `brokerverse/node_modules/@fontsource/nunito`. |
 | `images/*.jpg` | The screenshots (JPEG quality 70, 1400 px wide). |
 
@@ -50,7 +51,7 @@ export WEB_BASE=http://127.0.0.1:5080 API=http://localhost:8000/api
 export ADMIN_PASSWORD='<password of BrokerVerse and carmela.morfe>'
 export PERSONA_PASSWORD='<password of the persona users>'
 export STATE_DIR=/tmp/bv-manual-state      # cached sign-ins (sign-in is rate limited: 10 per 5 minutes)
-python3 docs/manual/tools/capture.py                    # every scene (about 45 minutes)
+python3 docs/manual/tools/capture.py                    # every scene (about an hour)
 python3 docs/manual/tools/capture.py quote-wizard m-users   # only the named scenes
 ```
 
@@ -63,6 +64,8 @@ the environment only and never appear in the manual.
 
 ## Notes
 
-- `docs/manual/` is listed in `.git/info/exclude` in this checkout; use `git add -f docs/manual` to commit it.
-- The manual documents the build that was running on 29 September 2026. Items observed not to work are listed in
-  Appendix G of the manual.
+- The manual documents the build that was running on 29 September 2026, with the BrokerVerse OOTB branding (name
+  BrokerVerse, iorta TechNXT logo; a customer's own name and logo come from System Settings). The known limitations
+  of the release are listed in Appendix G of the manual.
+- The persona decks in `docs/decks` reuse these screenshots (`manual:<name>` in `docs/decks/tools/personas.py`):
+  rebuild the decks after retaking them.

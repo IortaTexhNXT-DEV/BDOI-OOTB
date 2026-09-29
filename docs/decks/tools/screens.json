@@ -1,94 +1,62 @@
 {
 "BrokerVerse":[
- {"name":"exec","path":"/executive/dashboard"},
- {"name":"users","path":"/master/generals/usermanagement/user"},
+ {"name":"exec","path":"/executive/dashboard","wait":3500},
  {"name":"roles","path":"/master/generals/usermanagement/role"},
- {"name":"syssettings","path":"/master/configuration/system-settings"},
+ {"name":"syssettings","path":"/master/configuration/system-settings","clip":[0,0,1600,640]},
  {"name":"config","path":"/master/configuration/settings"},
  {"name":"schedules","path":"/master/configuration/schedules"},
- {"name":"audit","path":"/master/configuration/audit-trail"},
- {"name":"production","path":"/reports/operationalreports/production"}
+ {"name":"audit","path":"/master/configuration/audit-trail"}
 ],
 "bea.admin":[
- {"name":"exec","path":"/executive/dashboard"},
  {"name":"pcdash","path":"/product-configurator/dashboard"},
  {"name":"templates","path":"/product-configurator/templates"},
  {"name":"insurer","path":"/master/generals/insurancemanagement/insurancecompany"},
  {"name":"product","path":"/master/generals/insurancemanagement/productmaster"},
- {"name":"taxation","path":"/master/finance/taxation"},
  {"name":"commission","path":"/master/generals/commission"},
  {"name":"treaty","path":"/master/reinsurance/treaty"},
  {"name":"incentive","path":"/master/incentive/programs/view"},
  {"name":"rating","path":"/product-configurator/rating"}
 ],
 "maria.sales":[
- {"name":"exec","path":"/executive/dashboard"},
- {"name":"agentdash","path":"/agent/home"},
+ {"name":"exec","path":"/executive/dashboard","wait":3500},
  {"name":"leads","path":"/agent/leadlisting"},
- {"name":"clients","path":"/agent/clientlisting"},
  {"name":"quotes","path":"/agent/Quotation"},
  {"name":"policy","path":"/agent/policy"},
  {"name":"commission","path":"/commission/dashboard"},
- {"name":"renewalq","path":"/renewal/queue"},
- {"name":"production","path":"/reports/operationalreports/production"}
+ {"name":"renewalq","path":"/renewal/queue"}
 ],
 "ramon.agent":[
- {"name":"agentdash","path":"/agent/home"},
+ {"name":"agentdash","path":"/agent/home","wait":3500},
  {"name":"leads","path":"/agent/leadlisting"},
- {"name":"leaddetail","path":"/agent/leaddetail/ld_7622577ad7739b8e"},
- {"name":"quotes","path":"/agent/Quotation"},
- {"name":"policy","path":"/agent/policy"},
- {"name":"policydetail","path":"/agent/policydetailedview/pol_c05caad664a63e0b"},
- {"name":"claims","path":"/agent/claim"},
- {"name":"commission","path":"/commission/dashboard"},
  {"name":"renewals","path":"/agent/expired-policies"}
 ],
 "jose.uw":[
- {"name":"uwdash","path":"/underwriting/dashboard"},
+ {"name":"uwdash","path":"/underwriting/dashboard","wait":3500},
  {"name":"uwrules","path":"/product-configurator/underwriting"},
  {"name":"rating","path":"/product-configurator/rating"},
  {"name":"coverages","path":"/product-configurator/coverages"},
  {"name":"quotes","path":"/agent/Quotation"},
- {"name":"policy","path":"/agent/policy"},
  {"name":"renewalq","path":"/renewal/queue"},
- {"name":"renewals","path":"/agent/expired-policies"},
- {"name":"cessions","path":"/reinsurance/cessions"},
- {"name":"treaties","path":"/reinsurance/treaties"}
+ {"name":"cessions","path":"/reinsurance/cessions"}
 ],
 "ana.cs":[
- {"name":"exec","path":"/executive/dashboard"},
- {"name":"clients","path":"/agent/clientlisting"},
- {"name":"clientview","path":"/agent/clientview/cl_692a50575393c27f"},
  {"name":"policy","path":"/agent/policy"},
- {"name":"policydetail","path":"/agent/policydetailedview/pol_c05caad664a63e0b"},
  {"name":"openitems","path":"/agent/openitemslistdata"},
  {"name":"payments","path":"/agent/payments"},
- {"name":"renewals","path":"/agent/expired-policies"},
- {"name":"claims","path":"/agent/claim"}
+ {"name":"renewals","path":"/agent/expired-policies"}
 ],
 "carlo.claims":[
- {"name":"claimsdash","path":"/claims/dashboard"},
+ {"name":"claimsdash","path":"/claims/dashboard","wait":3500},
  {"name":"claims","path":"/agent/claim"},
- {"name":"claimdetail","path":"/agent/claimdetail/clm_a99e02507e0e3775"},
- {"name":"policy","path":"/agent/policy"},
- {"name":"clients","path":"/agent/clientlisting"},
- {"name":"recovery","path":"/reinsurance/claims"},
  {"name":"claimsreport","path":"/reports/operationalreports/claims"}
 ],
 "liza.finance":[
- {"name":"exec","path":"/executive/dashboard"},
  {"name":"receipts","path":"/accounts/receipts"},
  {"name":"collections","path":"/agent/collections"},
- {"name":"disbursement","path":"/accounts/paymentvoucher"},
  {"name":"jv","path":"/accounts/journalvoucher"},
- {"name":"remtracking","path":"/finance/remittance/tracking/status"},
- {"name":"settlement","path":"/finance/remittance/settlement/process"},
- {"name":"referrer","path":"/commission/referrer-accounts"},
- {"name":"tb","path":"/reports/financialreports/trailbalance"},
- {"name":"query","path":"/agent/accounting/query"}
+ {"name":"remtracking","path":"/finance/remittance/tracking/status"}
 ],
 "carmela.morfe":[
- {"name":"users","path":"/master/generals/usermanagement/user"},
  {"name":"roles","path":"/master/generals/usermanagement/role"},
  {"name":"audit","path":"/master/configuration/audit-trail"}
 ]

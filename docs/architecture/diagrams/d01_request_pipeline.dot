@@ -1,0 +1,17 @@
+// Request pipeline of the API (src/app.js, src/lib/registry.js, src/lib/auth.js, src/lib/scope.js)
+digraph G {
+  graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.25, ranksep=0.28, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10, width=3.2];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.6];
+  a [label="1. requestId: x-request-id (caller's or UUID), echoed on the response"];
+  b [label="2. helmet security headers; CORS (CORS_ORIGINS)"];
+  c [label="3. pino-http access log (redacted: Authorization,\ncookies, passwords, token / sig query parameters)"];
+  d [label="4. Global rate limit: per user (valid bearer) or per IP,\nsecurity.api_rate_limit = 600 / 60 s, 429 + Retry-After"];
+  e [label="5. express.json (JSON_BODY_LIMIT 2 MB);\nsignFileLinks: HMAC-sign every /api/s3/object URL in JSON responses"];
+  f [label="6. /api/health, /api/health/live (no auth, not logged, not limited)"];
+  g [label="7. Module router (define()): requireAuth first unless auth:false\nHS256 JWT, type=access, user active, token_version matches"];
+  h [label="8. requirePermission / requireRole (admins it-admin, ba pass)\nownRecord / scope: agents see only their own book (404 otherwise)"];
+  i [label="9. multer memory upload limits; zod validate(); handler\n(service + withTransaction), audit(req, ...) on every change"];
+  j [label="10. Response envelope { success, message, data } or errorHandler:\n4xx message kept; 5xx generic message + requestId (detail only in log)"];
+  a -> b -> c -> d -> e -> f -> g -> h -> i -> j;
+}

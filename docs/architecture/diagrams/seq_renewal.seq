@@ -1,0 +1,16 @@
+title: Renewal pipeline to renewed policy
+participant J "Scheduler"
+participant N "Renewals module"
+participant U "Agent / renewals team"
+participant C "Client"
+participant D "PostgreSQL"
+J -> N: renewal-pipeline job (daily): enrol policies expiring within renewals.pipeline_days (90)
+N -> D: renewal RN- per policy; lapse open renewals past renewals.grace_period_days (30)
+J -> N: renewal-notices job (daily): reminders at limits.renewal_notice_days (60, 30, 15)
+N -> D: notifications; renewal-queue job (every minute) sends queued batch notices
+U -> N: renewal quote (RQ- or quotation linked to the expiring policy); negotiate; activities logged
+N -> C: quotation e-mailed for customer approval
+C --> N: accepts
+U -> N: issue renewal: convert quotation to policy
+N -> D: new policy POL-; old policy status renewed (renewed_to); renewal renewed; new bill and commission
+J -> D: policy-expiry job (daily): status expired for policies past expiry

@@ -261,6 +261,9 @@ def run_step(page, step):
         page.locator(a[0]).nth(opts.get('nth', 0)).hover(); page.wait_for_timeout(600)
     elif kind == 'eval':
         page.evaluate(a[0])
+    elif kind == 'mock':  # answer an API call in the browser with a canned body; the server is never called
+        body = a[1]
+        page.route(a[0], lambda route: route.fulfill(status=200, content_type='application/json', body=body))
     elif kind == 'shot':
         shoot(page, a[0], opts)
     else:

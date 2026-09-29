@@ -44,7 +44,7 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 | 23 | Audit trail records logins, reports, jobs, endorsements, receipts, claims, vouchers, cheques, remittances and settlements | BrokerVerse | Pass | |
 | 24 | Motor pricing per business decision: QT-2026-00006 (Honda City, private car, 5 seats) — CTPL 560 at the Insurance Commission tariff, Auto Passenger PA 50,000 x 5 = 250,000 cover for 250.00, net 22,810, gross 28,569.53, brokerage 18% = 4,105.80; same figures on coverage page, order summary, saved quote, quote detail and the customer's approval page; CTPL untick gives 27,868.13; endorsement APPA 50,000 -> 100,000 re-prices APPA to 500.00 only | ramon.agent, client, ana.cs | Pass after fixes D12, D13, D77 | |
 | 25 | Direct bill: QT-2026-00006 approved by the client, KYC and photos, POL-2026-00003 issued; switched to direct bill by finance (premium bill INV-2026-00004 cancelled and its booking reversed; JV-2026-00113 Dr commission receivable 4,598.50 / Cr commission income 4,105.80 / Cr output VAT 492.70); debit note DN-2026-00001 raised by liza.finance, maker approval refused, approved by fe.approver; insurer payments 2,000 + EWT 205.29 (Partially Collected) and 2,187.92 + EWT 205.29 (Collected), JV-2026-00114/115 Dr cash / Dr creditable WHT / Cr commission receivable; direct-bill report and trial balance agree | ramon.agent, liza.finance, fe.approver | Pass after fixes D36, D78 | |
-| 26 | Chart of accounts: 128 accounts grouped by type and statement group on Master > Main Account; office rent 85,000 booked by liza.finance (JV-2026-00117, Dr 4402001 Rent Expense / Cr 1102001 BDO operating account), approved by fe.approver; trial balance grouped and balanced (1,289,443.44) | bea.admin, liza.finance, fe.approver | Pass after fix D57 | |
+| 26 | Chart of accounts: 128 accounts grouped by type and statement group on Master > Main Account; office rent 85,000 booked by liza.finance (JV-2026-00117, Dr 4402001 Rent Expense / Cr 1102001 Cash in Bank – Operating Account), approved by fe.approver; trial balance grouped and balanced (1,289,443.44) | bea.admin, liza.finance, fe.approver | Pass after fix D57 | |
 
 ## Money trail for POL-2026-00001
 
@@ -59,7 +59,7 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 
 ## Defects
 
-80 defects logged, 68 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the business decisions on D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts) were given on 29 Sep 2026 and all four are fixed and re-tested (steps 24-26).
+149 defects logged over the functional run and the persona walks, all 149 fixed and re-tested. They are listed in [DEFECTS.md](DEFECTS.md); the business decisions on D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts) were given on 29 Sep 2026 and all four are fixed and re-tested (steps 24-26).
 
 ## Confirmed business settings (29 Sep 2026)
 

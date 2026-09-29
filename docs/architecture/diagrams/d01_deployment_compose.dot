@@ -1,0 +1,16 @@
+// Alternative deployment: docker-compose.yml (own server / VM). Render.com blueprint (render.yaml) has the same three parts.
+digraph G {
+  graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.3, ranksep=0.4, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10.5];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.7];
+  browser [label="Browser", fillcolor="#FFFFFF"];
+  tls [label="TLS proxy\n(Caddy / load balancer)", fillcolor="#FFFFFF"];
+  subgraph cluster_host { label="Docker host: docker compose up --build -d"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    web [label="web\nnginx 1.27-alpine :80 (host 8080)\nSPA files + SPA fallback\n/api/ -> http://api:8000"];
+    api [label="api\nnode:22-alpine :8000\nNODE_ENV=production\nmigrate + seed on start\nHEALTHCHECK /api/health"];
+    db [label="db\npostgres:16-alpine\npg_isready health check", shape=cylinder];
+    v1 [label="volume db-data", shape=folder, fillcolor="#FFFFFF"];
+    v2 [label="volume uploads\n/app/uploads", shape=folder, fillcolor="#FFFFFF"];
+  }
+  browser -> tls -> web; web -> api [label="/api/*"]; api -> db [label="DATABASE_URL"]; db -> v1 [arrowhead=none, style=dashed]; api -> v2 [arrowhead=none, style=dashed];
+}

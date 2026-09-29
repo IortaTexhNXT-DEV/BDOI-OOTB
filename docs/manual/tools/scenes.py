@@ -6,6 +6,8 @@ Each scene signs in as one user (None = signed out) and runs its steps. Steps:
   ['btn', regex], ['text', exact text], ['click', css]    click (refused when the text looks like a saving action)
   ['fill', label, value], ['choose', label, option], ['open', label], ['type', css, value]
   ['scroll', dy], ['scrollto', text], ['viewport', height], ['wait', ms], ['key', key], ['eval', js]
+  ['mock', url-glob, json-text]  answer that API call in the browser (the server is not called): used to show the
+                                 sign-in steps (two-factor code, forced password change, enrolment) without changing data
   ['shot', name, {full, clip}]   write docs/manual/images/<name>.jpg
 Options go in a trailing dict, e.g. {'nth': 1, 'wait': 2500}.
 Only screens, tabs, menus and dialogs are opened; nothing is saved, submitted, approved or sent.
@@ -31,9 +33,61 @@ def rowbtn(text, css):
     return ['eval', js]
 
 
+# Canned API answers for the sign-in screens (see the 'mock' step): nothing is sent to the server.
+MOCK_FORGOT = '{"success": true, "message": "If the account exists, a verification code has been sent."}'
+MOCK_LOGIN_2FA = ('{"success": true, "message": "Enter the code from your authenticator app", "twoFactorRequired": true,'
+                  ' "challengeToken": "example", "expiresIn": 300}')
+MOCK_LOGIN_CHANGE = ('{"success": true, "message": "Choose a new password to continue", "passwordChangeRequired": true,'
+                     ' "mustChangePassword": true, "accessToken": "example", "expiresIn": 900, "user": {"username": "juan.cruz"}}')
+MOCK_LOGIN_ENROL = ('{"success": true, "message": "Two-factor authentication must be set up for your role",'
+                    ' "twoFactorSetupRequired": true, "accessToken": "example", "expiresIn": 900, "user": {"username": "juan.cruz"}}')
+MOCK_2FA_SETUP = ('{"success": true, "data": {"secret": "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP", "issuer": "BrokerVerse",'
+                  ' "account": "juan.cruz", "otpauthUrl": "otpauth://totp/BrokerVerse:juan.cruz?secret=JBSWY3DPEHPK3PXP&issuer=BrokerVerse"}}')
+
+
+def pagedrowbtn(text, css):
+    """Page through a list until a row contains text, then click a button of that row."""
+    js = ("async () => { for (let i = 0; i < 10; i++) {"
+          " const r = [...document.querySelectorAll('tbody tr')].find(r => r.innerText.includes('%s'));"
+          " if (r) { const b = r.querySelector('%s'); b.scrollIntoView({block:'center'}); b.click(); return; }"
+          " document.querySelector('.p-paginator-next').click(); await new Promise(f => setTimeout(f, 1500)); } }") % (text, css)
+    return ['eval', js]
+
+
 SCENES = [
     # ------------------------------------------------------------ 1 Introduction
-    S('intro-login', None, ['goto', '/login'], ['shot', 'intro-login']),
+    S('intro-login', None, ['goto', '/login'], ['type', '.login__side__screen input', 'maria.sales'],
+      ['type', '.login__side__screen input', 'example-password', {'nth': 1}], ['wait', 400], ['shot', 'intro-login']),
+
+    # ------------------------------------------------------------ sign-in security (signed out; API answers mocked)
+    S('sec-forgot-request', None, ['goto', '/login'], ['text', 'Forgot password?'], ['wait', 800],
+      ['type', '#bv-forgot-user', 'maria.sales'], ['shot', 'sec-forgot-request']),
+    S('sec-forgot-reset', None, ['goto', '/login'], ['mock', '**/auth/forgot-password', MOCK_FORGOT],
+      ['text', 'Forgot password?'], ['wait', 800], ['type', '#bv-forgot-user', 'maria.sales'],
+      ['btn', '^Send code$', {'force': True}], ['wait', 1000], ['type', '#bv-reset-code', '482913'],
+      ['type', '#bv-reset-new', 'Example#2026'], ['type', '#bv-reset-confirm', 'Example#2026'], ['wait', 500],
+      ['shot', 'sec-forgot-reset']),
+    S('sec-signin-2fa', None, ['goto', '/login'], ['mock', '**/auth/login', MOCK_LOGIN_2FA],
+      ['type', '.login__side__screen input', 'maria.sales'], ['type', '.login__side__screen input', 'example-password', {'nth': 1}],
+      ['btn', '^Login$'], ['wait', 1000], ['type', '#bv-2fa-code', '123456'], ['shot', 'sec-signin-2fa']),
+    S('sec-signin-change', None, ['goto', '/login'], ['mock', '**/auth/login', MOCK_LOGIN_CHANGE],
+      ['type', '.login__side__screen input', 'juan.cruz'], ['type', '.login__side__screen input', 'example-password', {'nth': 1}],
+      ['btn', '^Login$'], ['wait', 1500], ['type', '#bv-current-password', 'Temporary-1'],
+      ['type', '#bv-new-password', 'Example#2026'], ['wait', 500], ['shot', 'sec-signin-change']),
+    S('sec-signin-enrol', None, ['goto', '/login'], ['mock', '**/auth/login', MOCK_LOGIN_ENROL],
+      ['mock', '**/auth/2fa/setup', MOCK_2FA_SETUP],
+      ['type', '.login__side__screen input', 'juan.cruz'], ['type', '.login__side__screen input', 'example-password', {'nth': 1}],
+      ['btn', '^Login$'], ['wait', 1500], ['viewport', 1150], ['shot', 'sec-signin-enrol']),
+    S('sec-change-password', 'maria.sales', ['goto', '/agent/leadlisting'],
+      ['click', '.navbar__container__profile__image'], ['wait', 600], ['text', 'Change password'], ['wait', 1200],
+      ['type', '#bv-current-password', 'current-password'], ['type', '#bv-new-password', 'Example#2026'],
+      ['type', '#bv-confirm-password', 'Example#2026'], ['wait', 500], ['shot', 'sec-change-password']),
+    S('sec-2fa-status', 'maria.sales', ['goto', '/agent/leadlisting'],
+      ['click', '.navbar__container__profile__image'], ['wait', 600], ['text', 'Two-factor authentication'], ['wait', 1500],
+      ['shot', 'sec-2fa-status']),
+    S('sec-2fa-enrol', 'maria.sales', ['goto', '/agent/leadlisting'], ['mock', '**/auth/2fa/setup', MOCK_2FA_SETUP],
+      ['click', '.navbar__container__profile__image'], ['wait', 600], ['text', 'Two-factor authentication'], ['wait', 1500],
+      ['btn', '^Turn on$'], ['wait', 1200], ['shot', 'sec-2fa-enrol']),
     S('intro-layout', 'BrokerVerse', ['goto', '/executive/dashboard'], ['shot', 'intro-layout']),
     S('intro-menu-search', 'BrokerVerse', ['goto', '/executive/dashboard'],
       ['type', 'input[placeholder="Search menu..."]', 'receipt'], ['wait', 800], ['shot', 'intro-menu-search']),
@@ -164,6 +218,7 @@ SCENES = [
     S('renew-queue', 'jose.uw', ['goto', '/renewal/queue'], ['shot', 'renew-queue']),
     S('renew-batch', 'jose.uw', ['goto', '/agent/renewal-batch'], ['shot', 'renew-batch']),
     S('renew-atrisk', 'maria.sales', ['goto', '/renewal/at-risk'], ['shot', 'renew-atrisk']),
+    S('renew-analytics', 'maria.sales', ['goto', '/renewal/analytics', {'wait': 3000}], ['shot', 'renew-analytics']),
     S('renew-negotiations', 'maria.sales', ['goto', '/renewal/negotiations'], ['shot', 'renew-negotiations']),
     S('renew-lapse', 'maria.sales', ['goto', '/renewal/lapse-management'], ['shot', 'renew-lapse']),
     S('renew-performance', 'maria.sales', ['goto', '/renewal/performance'], ['shot', 'renew-performance']),
@@ -225,15 +280,15 @@ SCENES = [
     S('ri-treaties', 'jose.uw', ['goto', '/reinsurance/treaties'], ['shot', 'ri-treaties']),
     S('ri-cessions', 'jose.uw', ['goto', '/reinsurance/cessions'], ['shot', 'ri-cessions']),
     S('ri-recovery', 'carlo.claims', ['goto', '/reinsurance/claims'], ['shot', 'ri-recovery']),
-    S('ri-reconciliation', 'jose.uw', ['goto', '/reinsurance/reconciliation'], ['shot', 'ri-reconciliation']),
+    S('ri-reconciliation', 'liza.finance', ['goto', '/reinsurance/reconciliation'], ['shot', 'ri-reconciliation']),
     S('ri-analytics', 'jose.uw', ['goto', '/reinsurance/analytics'], ['shot', 'ri-analytics']),
     S('ri-treaty-master', 'bea.admin', ['goto', '/master/reinsurance/treaty'], ['shot', 'ri-treaty-master']),
 
     # ------------------------------------------------------------ Incentive
     S('inc-programs', 'bea.admin', ['goto', '/master/incentive/programs/view'], ['shot', 'inc-programs']),
-    S('inc-calculations', 'bea.admin', ['goto', '/incentive/calculations'], ['shot', 'inc-calculations']),
-    S('inc-approvals', 'bea.admin', ['goto', '/incentive/approvals'], ['shot', 'inc-approvals']),
-    S('inc-statement', 'bea.admin', ['goto', '/incentive/statement'], ['shot', 'inc-statement']),
+    S('inc-calculations', 'liza.finance', ['goto', '/incentive/calculations'], ['shot', 'inc-calculations']),
+    S('inc-approvals', 'liza.finance', ['goto', '/incentive/approvals'], ['shot', 'inc-approvals']),
+    S('inc-statement', 'liza.finance', ['goto', '/incentive/statement'], ['shot', 'inc-statement']),
 
     # ------------------------------------------------------------ Product Configurator
     S('pc-dashboard', 'bea.admin', ['goto', '/product-configurator/dashboard'], ['shot', 'pc-dashboard']),
@@ -268,21 +323,30 @@ SCENES = [
     S('m-user-add', 'carmela.morfe', ['goto', '/master/generals/usermanagement/user/add'],
       ['fill', 'Username', 'juan.cruz'], ['fill', 'E-mail', 'juan.cruz@brokerverse.example'],
       ['fill', 'Display Name', 'Juan Cruz'], ['text', 'Sales / Relationship Manager'], ['shot', 'm-user-add']),
+    S('m-user-actions', 'carmela.morfe', ['goto', '/master/generals/usermanagement/user'],
+      pagedrowbtn('maria.sales', 'button.user__actions__btn'), ['wait', 800], ['shot', 'm-user-actions']),
+    S('m-user-history', 'carmela.morfe', ['goto', '/master/generals/usermanagement/user'],
+      pagedrowbtn('maria.sales', 'button.user__actions__btn'), ['wait', 800], ['text', 'Sign-in history'], ['wait', 2000],
+      ['shot', 'm-user-history']),
     S('m-roles', 'carmela.morfe', ['goto', '/master/generals/usermanagement/role'], ['shot', 'm-roles']),
     S('m-audit', 'carmela.morfe', ['goto', '/master/configuration/audit-trail'], ['shot', 'm-audit']),
-    S('m-system-settings', 'BrokerVerse', ['goto', '/master/configuration/system-settings'], ['viewport', 1300],
-      ['shot', 'm-system-settings']),
+    S('m-system-settings', 'BrokerVerse', ['goto', '/master/configuration/system-settings'],
+      ['shot', 'm-system-settings', {'clip': {'x': 0, 'y': 0, 'width': 1600, 'height': 640}}]),
     S('m-config', 'BrokerVerse', ['goto', '/master/configuration/settings'], ['shot', 'm-config']),
-    S('m-config-security', 'BrokerVerse', ['goto', '/master/configuration/settings'], ['text', 'security'],
+    S('m-config-security', 'BrokerVerse', ['goto', '/master/configuration/settings'], ['text', 'Security'],
       ['wait', 1000], ['shot', 'm-config-security']),
-    S('m-config-direct-bill', 'BrokerVerse', ['goto', '/master/configuration/settings'], ['text', 'direct_bill'],
+    S('m-config-direct-bill', 'BrokerVerse', ['goto', '/master/configuration/settings'], ['text', 'Direct bill'],
       ['wait', 1000], ['shot', 'm-config-direct-bill']),
+    S('m-config-list', 'BrokerVerse', ['goto', '/master/configuration/settings'], ['text', 'General'],
+      ['wait', 1000], ['scrollto', 'Available languages'], ['wait', 600], ['shot', 'm-config-list']),
     S('m-schedules', 'BrokerVerse', ['goto', '/master/configuration/schedules'], ['shot', 'm-schedules']),
 
     # ------------------------------------------------------------ Reports
+    S('rep-catalogue', 'bea.admin', ['goto', '/reports/catalogue', {'wait': 2500}], ['viewport', 1250], ['shot', 'rep-catalogue']),
+    S('rep-catalogue-finance', 'liza.finance', ['goto', '/reports/catalogue', {'wait': 2500}], ['shot', 'rep-catalogue-finance']),
+    S('rep-preview', 'maria.sales', ['goto', '/reports/run/production-register', {'wait': 2500}],
+      ['choose', 'Report Criteria', 'Overall'], ['btn', '^Preview$', {'wait': 3000}], ['viewport', 1300], ['shot', 'rep-preview']),
     S('rep-production', 'bea.admin', ['goto', '/reports/operationalreports/production'], ['open', 'Report Criteria'],
       ['shot', 'rep-production']),
-    S('rep-claims', 'bea.admin', ['goto', '/reports/operationalreports/claims'], ['open', 'Report Criteria'],
-      ['shot', 'rep-claims']),
     S('rep-trial-balance', 'liza.finance', ['goto', '/reports/financialreports/trailbalance'], ['shot', 'rep-trial-balance']),
 ]

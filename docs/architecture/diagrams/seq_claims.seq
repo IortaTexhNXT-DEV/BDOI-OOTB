@@ -1,0 +1,17 @@
+title: Claim registration to settlement
+participant A "Agent / claims officer"
+participant C "Claims module"
+participant K "Second claims officer"
+participant D "PostgreSQL"
+participant RI "Reinsurance module"
+A -> C: register claim (first notice of loss) with documents
+C -> D: acceptance check: policy active, loss date inside the policy period; next_number('claim') -> CLM-
+C -> D: claim registered; claim_history; claim_field_changes; handler assigned; notifications
+C --> A: acknowledgement / letters generated as PDF on request
+A -> C: review (in-review), update estimate and details (field-level audit)
+A -> C: settle: amount, type, document
+C -> D: pending-approval when approval is required (settlement awaiting a different user)
+K -> C: approve / return / reject (maker cannot approve)
+C -> D: approved -> settled (settled_amount, settled_at); later closed
+RI -> D: recovery raised against the cession of the policy (reinsurance_recoveries)
+note: Agents may register first notice of loss on their own policies only (record scope); review, reject, settle, approve and close need the claims role.

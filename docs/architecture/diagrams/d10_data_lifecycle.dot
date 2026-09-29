@@ -1,0 +1,15 @@
+// Data lifecycle: online, archive, purge (document 10). Periods are recommendations to be confirmed by compliance.
+digraph G {
+  graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.25, ranksep=0.45, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=8.5, arrowsize=0.6];
+  live [label="Online (PostgreSQL + EFS)\nTransaction and financial records:\ncurrent + previous years"];
+  arch [label="Archive schema / tables\n(read-only, same database)\nclosed years, partitions by year"];
+  cold [label="Cold archive\nS3 (Parquet / pg_dump -Fc)\nGlacier Deep Archive,\nObject Lock (WORM)"];
+  purge [label="Purge after retention\n(approved, logged in audit_log)"];
+  tmp [label="Temporary / operational data\ntokens, outbox, notifications,\njob runs, generated reports"];
+  hk [label="Housekeeping jobs\n(scheduled_jobs, advisory lock)"];
+  live -> arch [label="year-end + N years"]; arch -> cold [label="export + verify"]; cold -> purge [label="statutory period ends"];
+  tmp -> hk [label="daily"]; hk -> purge [label="delete older than retention"];
+  cold -> live [label="restore on request\n(pg_restore into restore DB)", style=dashed];
+}

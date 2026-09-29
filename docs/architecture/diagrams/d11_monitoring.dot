@@ -1,0 +1,19 @@
+// Monitoring and alerting (document 11). Thresholds are recommendations.
+digraph G {
+  graph [rankdir=LR, fontname="Nunito", fontsize=11, nodesep=0.25, ranksep=0.6, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=8.5, arrowsize=0.6];
+  api [label="API containers\npino JSON logs (stdout)\nx-request-id"];
+  alb [label="ALB\naccess logs, 5xx, latency,\nhealthy host count"];
+  rds [label="RDS\nCPU, connections, storage,\nreplica lag, Performance Insights"];
+  efs [label="EFS\nstorage bytes, IO"];
+  cf [label="CloudFront\n4xx / 5xx rates"];
+  db [label="Application tables\njob_runs, email_outbox,\nlogin_history, audit_log", shape=cylinder];
+  syn [label="Synthetics canary\nGET /api/health, /api/version,\nsign-in page"];
+  cwl [label="CloudWatch Logs\nlog group /brokerverse/api\nmetric filters, Logs Insights"];
+  cwm [label="CloudWatch metrics\n+ dashboard BrokerVerse"];
+  exp [label="Metrics exporter job\n(SQL -> custom metrics,\nrecommended)", style="rounded,dashed,filled"];
+  alarm [label="Alarms"];
+  sns [label="SNS -> e-mail / chat /\non-call"];
+  api -> cwl -> cwm; alb -> cwm; rds -> cwm; efs -> cwm; cf -> cwm; syn -> cwm; db -> exp -> cwm; cwm -> alarm -> sns;
+}

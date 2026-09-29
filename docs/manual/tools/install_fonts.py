@@ -1,4 +1,4 @@
-"""Install the Nunito font (the BDOI brand font) for LibreOffice from the front end's @fontsource package.
+"""Install the Nunito font (the BrokerVerse theme font) for LibreOffice from the front end's @fontsource package.
 
     pip install fonttools brotli
     python3 docs/manual/tools/install_fonts.py      # writes ~/.fonts/Nunito-*.ttf and refreshes the font cache

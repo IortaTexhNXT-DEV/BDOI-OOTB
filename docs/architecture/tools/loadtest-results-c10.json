@@ -1,0 +1,126 @@
+{
+  "date": "2026-09-29T09:20:31.793Z",
+  "seconds": 15,
+  "concurrency": 10,
+  "node": "v22.22.2",
+  "results": [
+    {
+      "endpoint": "GET /health (readiness, DB ping)",
+      "requests": 27833,
+      "throughputRps": 1855,
+      "p50ms": 4.5,
+      "p95ms": 10.2,
+      "p99ms": 17.8,
+      "maxMs": 100.1,
+      "errors": 6,
+      "statuses": {
+        "200": 27827,
+        "503": 6
+      }
+    },
+    {
+      "endpoint": "GET /health/live (liveness)",
+      "requests": 56719,
+      "throughputRps": 3781,
+      "p50ms": 2.2,
+      "p95ms": 5.1,
+      "p99ms": 8,
+      "maxMs": 29.9,
+      "errors": 0,
+      "statuses": {
+        "200": 56719
+      }
+    },
+    {
+      "endpoint": "GET /policies?page=1&perPage=10",
+      "requests": 5939,
+      "throughputRps": 396,
+      "p50ms": 23.2,
+      "p95ms": 41.4,
+      "p99ms": 59.6,
+      "maxMs": 127,
+      "errors": 0,
+      "statuses": {
+        "200": 5939
+      }
+    },
+    {
+      "endpoint": "GET /leads?page=1&perPage=10",
+      "requests": 11807,
+      "throughputRps": 787,
+      "p50ms": 11.5,
+      "p95ms": 20.7,
+      "p99ms": 33.4,
+      "maxMs": 82.4,
+      "errors": 0,
+      "statuses": {
+        "200": 11807
+      }
+    },
+    {
+      "endpoint": "GET /claims?page=1&perPage=10",
+      "requests": 7150,
+      "throughputRps": 476,
+      "p50ms": 19.6,
+      "p95ms": 31.4,
+      "p99ms": 52.6,
+      "maxMs": 87.4,
+      "errors": 0,
+      "statuses": {
+        "200": 7150
+      }
+    },
+    {
+      "endpoint": "GET /dashboard/executive",
+      "requests": 5900,
+      "throughputRps": 393,
+      "p50ms": 21.9,
+      "p95ms": 44.5,
+      "p99ms": 73.7,
+      "maxMs": 245.8,
+      "errors": 0,
+      "statuses": {
+        "200": 5900
+      }
+    },
+    {
+      "endpoint": "GET /notifications/unread-count",
+      "requests": 17402,
+      "throughputRps": 1160,
+      "p50ms": 8.1,
+      "p95ms": 12.6,
+      "p99ms": 21,
+      "maxMs": 49.4,
+      "errors": 0,
+      "statuses": {
+        "200": 17402
+      }
+    },
+    {
+      "endpoint": "GET /search?q=santos",
+      "requests": 10319,
+      "throughputRps": 688,
+      "p50ms": 13,
+      "p95ms": 25.1,
+      "p99ms": 38.7,
+      "maxMs": 84.9,
+      "errors": 0,
+      "statuses": {
+        "200": 10319
+      }
+    },
+    {
+      "endpoint": "POST /reports/production-register/run (on-screen preview)",
+      "requests": 5870,
+      "throughputRps": 391,
+      "p50ms": 22.6,
+      "p95ms": 45.4,
+      "p99ms": 66.1,
+      "maxMs": 191.8,
+      "errors": 0,
+      "statuses": {
+        "200": 5870
+      }
+    }
+  ]
+}

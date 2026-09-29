@@ -5,7 +5,7 @@ the private repositories and hosting it on the existing BrokerVerse URL.
 
 | Part | Folder in this branch | Where it goes |
 |---|---|---|
-| Front end (React, BDOI theme) | `brokerverse/` | The existing private front-end repository, deployed by its GitHub Actions workflow (build, S3 sync, CloudFront invalidation) to the existing BrokerVerse URL |
+| Front end (React, BrokerVerse OOTB branding: name and logo from System Settings, iorta TechNXT logo by default) | `brokerverse/` | The existing private front-end repository, deployed by its GitHub Actions workflow (build, S3 sync, CloudFront invalidation) to the existing BrokerVerse URL |
 | Backend API (Node.js 22) | `backend/` | New service (a new private repository or a folder in an existing one), container from `backend/Dockerfile` |
 | Database | created by the backend | New PostgreSQL 16 database (e.g. Amazon RDS in ap-southeast-1) |
 | Documents and uploads | `UPLOAD_DIR` of the backend | Persistent disk mounted into the backend container |
@@ -24,6 +24,8 @@ only. Users, insurers, agents and opening balances are set up in the new system 
     the front-end URL.
 - [ ] Create the PostgreSQL database and a login with rights to create tables in it (the backend runs its own
   migrations on start).
+- [ ] Set the database time zone to `Asia/Manila` (RDS parameter group `timezone`, or
+  `ALTER DATABASE <db> SET timezone TO 'Asia/Manila'`): some queries use the database's current date.
 - [ ] Generate the secrets (store them in AWS Secrets Manager / SSM Parameter Store or the GitHub environment, never in
   a repository, ticket or chat):
   - `JWT_SECRET`: random, at least 32 characters (`openssl rand -hex 32`)
@@ -71,7 +73,9 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   `BrokerVerse API listening on :8000`.
 - [ ] Scaling out: scheduled jobs take a database lock per run, so only one instance executes each run; you may also
   set `SCHEDULER_ENABLED=false` on extra instances. Rate limits are counted per instance.
-- [ ] Health check for the load balancer: `GET /api/health` (returns `status: ok`, database connectivity and `ready`).
+- [ ] Health check for the load balancer: `GET /api/health` (readiness: `status: ok`, `ready`, database latency and
+  pending migrations; 503 when not ready). Use `GET /api/health/live` (process only, no database) as the container
+  liveness check. `HEALTH_DB_TIMEOUT_MS` (optional) sets how long the readiness check waits for the database.
 - [ ] Backups: daily automated database snapshots (RDS) with at least 30 days' retention, plus the upload volume (EFS
   backup) and `DATA_ENCRYPTION_KEY`. Test a restore once before go-live.
 
@@ -105,7 +109,8 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 ## 4. Smoke test after deployment
 
 - [ ] `https://<api>/api/health` returns `{"status":"ok", ...}`.
-- [ ] The sign-in page shows the BDOI theme; the password field is masked; "Forgot password?" opens the reset form.
+- [ ] The sign-in page shows "Welcome to BrokerVerse" with the iorta TechNXT logo (or the customer's own name and logo
+  once set in System Settings); the password field is masked; "Forgot password?" opens the reset form.
 - [ ] Sign in as `BrokerVerse` with `ADMIN_PASSWORD`, then change the password at once (profile menu > Change password)
   and turn on two-step verification for the administrator.
 - [ ] Master > System Settings and Master > Configuration load (company name, currency PHP, time zone Asia/Manila,
@@ -140,7 +145,8 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   rate and limits; 3-year CTPL for other classes when known.
 - [ ] Direct bill settings (confirmed): default broker-billed, VAT 12% on commission added on top, insurer EWT 10%,
   debit note due 30 days.
-- [ ] Numbering prefixes (QT-, POL-, INV-, OR-, PV-, REM-, SET-, JV-, CLM-, END-, DN-, DNC-) and starting numbers.
+- [ ] Document numbering (Master > Configuration > Document Numbering): prefixes, format and the starting number of
+  each series (e.g. to continue from the legacy system).
 - [ ] E-mail texts and notification recipients; schedule times (Master > Schedules).
 
 ## 7. If the database was started with sample data by mistake
@@ -149,9 +155,12 @@ Stop, then run the purge script from the backend image against the database (it 
 changes nothing unless confirmed):
 
 ```
-npm run purge:sample                      # dry run: counts per table
-CONFIRM_PURGE=yes npm run purge:sample -- --apply
+CONFIRM_PURGE=yes npm run purge:sample                  # dry run: counts per table, nothing deleted
+CONFIRM_PURGE=yes npm run purge:sample -- --execute     # delete, in one transaction
 ```
+
+Options: `--keep-users=jdoe,mreyes` keeps those users; `--purge-audit` also clears the audit trail (kept by default).
+Without `CONFIRM_PURGE=yes` the script refuses to run.
 
 Set `SEED_SAMPLE_DATA=false` before starting again.
 
