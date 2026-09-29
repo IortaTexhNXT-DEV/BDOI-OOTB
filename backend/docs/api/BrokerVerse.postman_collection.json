@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (568 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (594 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -3631,6 +3631,1140 @@
               ],
               "cookie": [],
               "body": "(application/pdf)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Broker Slips",
+      "item": [
+        {
+          "name": "List broker slips (status (comma-separated), lob, leadRefId, clientId, insurerId, search; paging) with offer counts and status counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips?status=submitted,responses-in&search=BS-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "submitted,responses-in"
+                },
+                {
+                  "key": "search",
+                  "value": "BS-2026"
+                }
+              ]
+            },
+            "description": "List broker slips (status (comma-separated), lob, leadRefId, clientId, insurerId, search; paging) with offer counts and status counts\n\nFront-end touchpoint: Operations > Broker Slips\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips?status=submitted,responses-in&search=BS-2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "submitted,responses-in"
+                    },
+                    {
+                      "key": "search",
+                      "value": "BS-2026"
+                    }
+                  ]
+                },
+                "description": "List broker slips (status (comma-separated), lob, leadRefId, clientId, insurerId, search; paging) with offer counts and status counts\n\nFront-end touchpoint: Operations > Broker Slips\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"brokerSlipId\": \"bs_1\",\n      \"slipNumber\": \"BS-2026-00001\",\n      \"status\": \"submitted\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"submissionDate\": \"2026-09-20\",\n      \"responseDueDate\": \"2026-09-27\",\n      \"offers\": [\n        {\n          \"offerId\": \"ofr_1\",\n          \"offerNumber\": \"OFR-2026-00001\",\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"status\": \"offered\",\n          \"premium\": 212500,\n          \"rate\": 0.25,\n          \"taxes\": 31556.25,\n          \"premiumTotal\": 244056.25,\n          \"offeredShare\": 60,\n          \"validityDate\": \"2026-10-20\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"counts\": {\n    \"submitted\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a broker slip (market submission / RFQ): customer, product / LOB, risk details (motor: quote-shaped doc), requested covers, insurers to approach",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips"
+              ]
+            },
+            "description": "Create a broker slip (market submission / RFQ): customer, product / LOB, risk details (motor: quote-shaped doc), requested covers, insurers to approach\n\nFront-end touchpoint: Operations > Broker Slips > New\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leadRefId\": \"ld_1\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"riskDetails\": {\n    \"location\": \"Mandaue City, Cebu\",\n    \"occupancy\": \"Cold storage warehouse\",\n    \"construction\": \"Class A\"\n  },\n  \"requestedCovers\": [\n    {\n      \"cover\": \"Fire and lightning\",\n      \"sumInsured\": 85000000\n    },\n    {\n      \"cover\": \"Earthquake\",\n      \"sumInsured\": 85000000,\n      \"deductible\": \"2% of loss\"\n    }\n  ],\n  \"insurers\": [\n    \"MALAYAN\",\n    \"PIONEER\",\n    \"FPG\"\n  ],\n  \"responseDueDate\": \"2026-09-27\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips"
+                  ]
+                },
+                "description": "Create a broker slip (market submission / RFQ): customer, product / LOB, risk details (motor: quote-shaped doc), requested covers, insurers to approach\n\nFront-end touchpoint: Operations > Broker Slips > New\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"leadRefId\": \"ld_1\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"riskDetails\": {\n    \"location\": \"Mandaue City, Cebu\",\n    \"occupancy\": \"Cold storage warehouse\",\n    \"construction\": \"Class A\"\n  },\n  \"requestedCovers\": [\n    {\n      \"cover\": \"Fire and lightning\",\n      \"sumInsured\": 85000000\n    },\n    {\n      \"cover\": \"Earthquake\",\n      \"sumInsured\": 85000000,\n      \"deductible\": \"2% of loss\"\n    }\n  ],\n  \"insurers\": [\n    \"MALAYAN\",\n    \"PIONEER\",\n    \"FPG\"\n  ],\n  \"responseDueDate\": \"2026-09-27\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"brokerSlipId\": \"bs_1\",\n  \"slipNumber\": \"BS-2026-00001\",\n  \"status\": \"draft\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"submissionDate\": \"2026-09-20\",\n  \"responseDueDate\": \"2026-09-27\",\n  \"offers\": [\n    {\n      \"offerId\": \"ofr_1\",\n      \"offerNumber\": \"OFR-2026-00001\",\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"status\": \"offered\",\n      \"premium\": 212500,\n      \"rate\": 0.25,\n      \"taxes\": 31556.25,\n      \"premiumTotal\": 244056.25,\n      \"offeredShare\": 60,\n      \"validityDate\": \"2026-10-20\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Broker slip with insurer offers, comparison (ranked by gross premium, capacity), journey and links",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Broker slip with insurer offers, comparison (ranked by gross premium, capacity), journey and links\n\nFront-end touchpoint: Operations > Broker Slips > Detail\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Broker slip with insurer offers, comparison (ranked by gross premium, capacity), journey and links\n\nFront-end touchpoint: Operations > Broker Slips > Detail\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"brokerSlipId\": \"bs_1\",\n  \"slipNumber\": \"BS-2026-00001\",\n  \"status\": \"submitted\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"submissionDate\": \"2026-09-20\",\n  \"responseDueDate\": \"2026-09-27\",\n  \"offers\": [\n    {\n      \"offerId\": \"ofr_1\",\n      \"offerNumber\": \"OFR-2026-00001\",\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"status\": \"offered\",\n      \"premium\": 212500,\n      \"rate\": 0.25,\n      \"taxes\": 31556.25,\n      \"premiumTotal\": 244056.25,\n      \"offeredShare\": 60,\n      \"validityDate\": \"2026-10-20\"\n    }\n  ],\n  \"comparison\": {\n    \"summary\": {\n      \"approached\": 3,\n      \"offered\": 2,\n      \"declined\": 1,\n      \"pending\": 0,\n      \"bestPremium\": 244056.25,\n      \"capacityPercent\": 100\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Edit an open broker slip (risk, covers, dates, insurers approached: pending insurers taken off the list are removed)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Edit an open broker slip (risk, covers, dates, insurers approached: pending insurers taken off the list are removed)\n\nFront-end touchpoint: Operations > Broker Slips > Edit\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responseDueDate\": \"2026-09-30\",\n  \"insurers\": [\n    \"MALAYAN\",\n    \"PIONEER\",\n    \"STANDARD\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Edit an open broker slip (risk, covers, dates, insurers approached: pending insurers taken off the list are removed)\n\nFront-end touchpoint: Operations > Broker Slips > Edit\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"responseDueDate\": \"2026-09-30\",\n  \"insurers\": [\n    \"MALAYAN\",\n    \"PIONEER\",\n    \"STANDARD\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"brokerSlipId\": \"bs_1\",\n  \"slipNumber\": \"BS-2026-00001\",\n  \"status\": \"submitted\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"submissionDate\": \"2026-09-20\",\n  \"responseDueDate\": \"2026-09-27\",\n  \"offers\": [\n    {\n      \"offerId\": \"ofr_1\",\n      \"offerNumber\": \"OFR-2026-00001\",\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"status\": \"offered\",\n      \"premium\": 212500,\n      \"rate\": 0.25,\n      \"taxes\": 31556.25,\n      \"premiumTotal\": 244056.25,\n      \"offeredShare\": 60,\n      \"validityDate\": \"2026-10-20\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel the broker slip",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel the broker slip\n\nFront-end touchpoint: Operations > Broker Slips > Detail\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Client renewed with the incumbent insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel the broker slip\n\nFront-end touchpoint: Operations > Broker Slips > Detail\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Client renewed with the incumbent insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"brokerSlipId\": \"bs_1\",\n    \"slipNumber\": \"BS-2026-00001\",\n    \"status\": \"cancelled\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"submissionDate\": \"2026-09-20\",\n    \"responseDueDate\": \"2026-09-27\",\n    \"offers\": [\n      {\n        \"offerId\": \"ofr_1\",\n        \"offerNumber\": \"OFR-2026-00001\",\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"status\": \"offered\",\n        \"premium\": 212500,\n        \"rate\": 0.25,\n        \"taxes\": 31556.25,\n        \"premiumTotal\": 244056.25,\n        \"offeredShare\": 60,\n        \"validityDate\": \"2026-10-20\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close the broker slip without a quotation (e.g. not taken up)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close the broker slip without a quotation (e.g. not taken up)\n\nFront-end touchpoint: Operations > Broker Slips > Detail\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Client renewed with the incumbent insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close the broker slip without a quotation (e.g. not taken up)\n\nFront-end touchpoint: Operations > Broker Slips > Detail\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Client renewed with the incumbent insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"brokerSlipId\": \"bs_1\",\n    \"slipNumber\": \"BS-2026-00001\",\n    \"status\": \"closed\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"submissionDate\": \"2026-09-20\",\n    \"responseDueDate\": \"2026-09-27\",\n    \"offers\": [\n      {\n        \"offerId\": \"ofr_1\",\n        \"offerNumber\": \"OFR-2026-00001\",\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"status\": \"offered\",\n        \"premium\": 212500,\n        \"rate\": 0.25,\n        \"taxes\": 31556.25,\n        \"premiumTotal\": 244056.25,\n        \"offeredShare\": 60,\n        \"validityDate\": \"2026-10-20\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Comparison of the insurer offers (ranked by gross premium, difference from the best, market capacity)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/comparison",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "comparison"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Comparison of the insurer offers (ranked by gross premium, difference from the best, market capacity)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Compare offers\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/comparison",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "comparison"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Comparison of the insurer offers (ranked by gross premium, difference from the best, market capacity)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Compare offers\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": [\n      {\n        \"offerId\": \"ofr_1\",\n        \"offerNumber\": \"OFR-2026-00001\",\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"status\": \"offered\",\n        \"premium\": 212500,\n        \"rate\": 0.25,\n        \"taxes\": 31556.25,\n        \"premiumTotal\": 244056.25,\n        \"offeredShare\": 60,\n        \"validityDate\": \"2026-10-20\"\n      }\n    ],\n    \"summary\": {\n      \"offered\": 2,\n      \"bestPremium\": 244056.25,\n      \"capacityPercent\": 100\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Broker Slip PDF (request for quotation); insurerId= addresses it to one insurer of the market",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/documents/broker-slip?insurerId=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "documents",
+                "broker-slip"
+              ],
+              "query": [
+                {
+                  "key": "insurerId",
+                  "value": "2"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Broker Slip PDF (request for quotation); insurerId= addresses it to one insurer of the market\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Broker Slip PDF\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/documents/broker-slip?insurerId=2",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "documents",
+                    "broker-slip"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurerId",
+                      "value": "2"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Broker Slip PDF (request for quotation); insurerId= addresses it to one insurer of the market\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Broker Slip PDF\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Approach one more insurer (on a submitted slip the request is queued at once)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/insurers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "insurers"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approach one more insurer (on a submitted slip the request is queued at once)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Add insurer\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insurer\": \"STANDARD\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/insurers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "insurers"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approach one more insurer (on a submitted slip the request is queued at once)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Add insurer\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insurer\": \"STANDARD\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"brokerSlipId\": \"bs_1\",\n    \"slipNumber\": \"BS-2026-00001\",\n    \"status\": \"submitted\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"submissionDate\": \"2026-09-20\",\n    \"responseDueDate\": \"2026-09-27\",\n    \"offers\": [\n      {\n        \"offerId\": \"ofr_1\",\n        \"offerNumber\": \"OFR-2026-00001\",\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"status\": \"offered\",\n        \"premium\": 212500,\n        \"rate\": 0.25,\n        \"taxes\": 31556.25,\n        \"premiumTotal\": 244056.25,\n        \"offeredShare\": 60,\n        \"validityDate\": \"2026-10-20\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record an insurer's response: offer (premium, rate, taxes, deductibles, terms, validity, line %, reference, attachment) or decline",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/offers/:offerId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "offers",
+                ":offerId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "offerId",
+                  "value": "",
+                  "description": "offerId (path parameter)"
+                }
+              ]
+            },
+            "description": "Record an insurer's response: offer (premium, rate, taxes, deductibles, terms, validity, line %, reference, attachment) or decline\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Record offer\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"offered\",\n  \"premium\": 212500,\n  \"deductibles\": \"PHP 50,000 each and every loss\",\n  \"terms\": \"Warranted: sprinkler system maintained\",\n  \"validityDate\": \"2026-10-20\",\n  \"offeredShare\": 60,\n  \"insurerReference\": \"MAL-Q-7781\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/offers/:offerId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "offers",
+                    ":offerId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "offerId",
+                      "value": "",
+                      "description": "offerId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record an insurer's response: offer (premium, rate, taxes, deductibles, terms, validity, line %, reference, attachment) or decline\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Record offer\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"offered\",\n  \"premium\": 212500,\n  \"deductibles\": \"PHP 50,000 each and every loss\",\n  \"terms\": \"Warranted: sprinkler system maintained\",\n  \"validityDate\": \"2026-10-20\",\n  \"offeredShare\": 60,\n  \"insurerReference\": \"MAL-Q-7781\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"offerId\": \"ofr_1\",\n    \"offerNumber\": \"OFR-2026-00001\",\n    \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n    \"status\": \"offered\",\n    \"premium\": 212500,\n    \"rate\": 0.25,\n    \"taxes\": 31556.25,\n    \"premiumTotal\": 244056.25,\n    \"offeredShare\": 60,\n    \"validityDate\": \"2026-10-20\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Prepare the Placement Slip straight from the selected offer(s) (journeys where the Quotation Slip is optional or skipped)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-placement",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "prepare-placement"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Prepare the Placement Slip straight from the selected offer(s) (journeys where the Quotation Slip is optional or skipped)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Prepare Placement Slip\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"offerIds\": [\n    \"ofr_1\",\n    \"ofr_2\"\n  ],\n  \"leadOfferId\": \"ofr_1\",\n  \"inceptionDate\": \"2026-10-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-placement",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "prepare-placement"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Prepare the Placement Slip straight from the selected offer(s) (journeys where the Quotation Slip is optional or skipped)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Prepare Placement Slip\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"offerIds\": [\n    \"ofr_1\",\n    \"ofr_2\"\n  ],\n  \"leadOfferId\": \"ofr_1\",\n  \"inceptionDate\": \"2026-10-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Prepare the Quotation Slip from the selected offer(s): several offers make it co-insurance with their lines as shares (must total 100%)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-quotation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "prepare-quotation"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Prepare the Quotation Slip from the selected offer(s): several offers make it co-insurance with their lines as shares (must total 100%)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Prepare Quotation Slip\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"offerIds\": [\n    \"ofr_1\",\n    \"ofr_2\"\n  ],\n  \"leadOfferId\": \"ofr_1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-quotation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "prepare-quotation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Prepare the Quotation Slip from the selected offer(s): several offers make it co-insurance with their lines as shares (must total 100%)\n\nFront-end touchpoint: Operations > Broker Slips > Detail > Prepare Quotation Slip\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"offerIds\": [\n    \"ofr_1\",\n    \"ofr_2\"\n  ],\n  \"leadOfferId\": \"ofr_1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00007\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit the broker slip to the market: queues the request for quotation to each insurer (outbox) and sets the response due date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/broker-slips/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "broker-slips",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit the broker slip to the market: queues the request for quotation to each insurer (outbox) and sets the response due date\n\nFront-end touchpoint: Operations > Broker Slips > Submit to market\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/broker-slips/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "broker-slips",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit the broker slip to the market: queues the request for quotation to each insurer (outbox) and sets the response due date\n\nFront-end touchpoint: Operations > Broker Slips > Submit to market\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sent\": [\n      {\n        \"insurer\": \"Malayan Insurance Co., Inc.\",\n        \"email\": \"uw@malayan.example\"\n      }\n    ],\n    \"failed\": []\n  }\n}"
             }
           ]
         }
@@ -17524,6 +18658,1046 @@
       ]
     },
     {
+      "name": "Placement Slips",
+      "item": [
+        {
+          "name": "List placement slips (status (comma-separated), source, lob, quoteId, brokerSlipId, clientId, insurerId, search; paging) with status counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements?status=draft,sent&search=PS-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "draft,sent"
+                },
+                {
+                  "key": "search",
+                  "value": "PS-2026"
+                }
+              ]
+            },
+            "description": "List placement slips (status (comma-separated), source, lob, quoteId, brokerSlipId, clientId, insurerId, search; paging) with status counts\n\nFront-end touchpoint: Operations > Placement Slips\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements?status=draft,sent&search=PS-2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "draft,sent"
+                    },
+                    {
+                      "key": "search",
+                      "value": "PS-2026"
+                    }
+                  ]
+                },
+                "description": "List placement slips (status (comma-separated), source, lob, quoteId, brokerSlipId, clientId, insurerId, search; paging) with status counts\n\nFront-end touchpoint: Operations > Placement Slips\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"draft\",\n      \"placementStatus\": \"Draft\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"counts\": {\n    \"draft\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a placement slip: from an accepted quotation (quoteId), from broker slip offers (brokerSlipId + offerIds) or directly (client / lead or new insured, product, insurer(s) with shares, risk, agreed net premium)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements"
+              ]
+            },
+            "description": "Create a placement slip: from an accepted quotation (quoteId), from broker slip offers (brokerSlipId + offerIds) or directly (client / lead or new insured, product, insurer(s) with shares, risk, agreed net premium)\n\nFront-end touchpoint: Operations > Placement Slips > New\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"cl_1\",\n  \"productType\": \"Marine Cargo\",\n  \"riskDetails\": {\n    \"voyage\": \"Manila to Davao\",\n    \"cargo\": \"Canned goods\"\n  },\n  \"sumInsured\": 12000000,\n  \"netPremium\": 36000,\n  \"inceptionDate\": \"2026-10-01\",\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"sharePercent\": 70,\n      \"isLead\": true\n    },\n    {\n      \"insuranceCompanyId\": 3,\n      \"sharePercent\": 30\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements"
+                  ]
+                },
+                "description": "Create a placement slip: from an accepted quotation (quoteId), from broker slip offers (brokerSlipId + offerIds) or directly (client / lead or new insured, product, insurer(s) with shares, risk, agreed net premium)\n\nFront-end touchpoint: Operations > Placement Slips > New\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": \"cl_1\",\n  \"productType\": \"Marine Cargo\",\n  \"riskDetails\": {\n    \"voyage\": \"Manila to Davao\",\n    \"cargo\": \"Canned goods\"\n  },\n  \"sumInsured\": 12000000,\n  \"netPremium\": 36000,\n  \"inceptionDate\": \"2026-10-01\",\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"sharePercent\": 70,\n      \"isLead\": true\n    },\n    {\n      \"insuranceCompanyId\": 3,\n      \"sharePercent\": 30\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"Draft\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)\n\nFront-end touchpoint: Operations > Placement Slips > Detail\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)\n\nFront-end touchpoint: Operations > Placement Slips > Detail\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"Draft\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ],\n  \"timeline\": [\n    {\n      \"key\": \"quotationSlip\",\n      \"label\": \"Quotation Slip\",\n      \"done\": true,\n      \"reference\": \"QT-2026-00007\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks\n\nFront-end touchpoint: Operations > Placement Slips > Edit\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"sharePercent\": 50,\n      \"isLead\": true\n    },\n    {\n      \"insuranceCompanyId\": 4,\n      \"sharePercent\": 50\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks\n\nFront-end touchpoint: Operations > Placement Slips > Edit\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"sharePercent\": 50,\n      \"isLead\": true\n    },\n    {\n      \"insuranceCompanyId\": 4,\n      \"sharePercent\": 50\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"Draft\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel the placement slip",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel the placement slip\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Client withdrew\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel the placement slip\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Client withdrew\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"cancelled\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record insurer confirmation (binding) per participant with the insurer's policy / certificate number; when all have confirmed the placement is Bound",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "confirm"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record insurer confirmation (binding) per participant with the insurer's policy / certificate number; when all have confirmed the placement is Bound\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Record confirmation\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmations\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"insurerReference\": \"MAL-FI-2026-11881\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/confirm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "confirm"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record insurer confirmation (binding) per participant with the insurer's policy / certificate number; when all have confirmed the placement is Bound\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Record confirmation\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"confirmations\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"insurerReference\": \"MAL-FI-2026-11881\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"bound\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/decline",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "decline"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Insurer declined\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCompanyId\": 4,\n  \"reason\": \"Capacity exhausted\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/decline",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "decline"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Insurer declined\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insuranceCompanyId\": 4,\n  \"reason\": \"Capacity exhausted\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"declined\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/documents/placement-slip?insurerId=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "documents",
+                "placement-slip"
+              ],
+              "query": [
+                {
+                  "key": "insurerId",
+                  "value": "2"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer)\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Placement Slip PDF\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/documents/placement-slip?insurerId=2",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "documents",
+                    "placement-slip"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurerId",
+                      "value": "2"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer)\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Placement Slip PDF\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/issue-policy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "issue-policy"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Issue Policy\n\nAccess: write:quotations, write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"additionalPolicyData\": {\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"paymentMethod\": \"Bank transfer\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/issue-policy",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "issue-policy"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Issue Policy\n\nAccess: write:quotations, write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"additionalPolicyData\": {\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"paymentMethod\": \"Bank transfer\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policy\": {\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00012\"\n    },\n    \"placement\": {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"issued\",\n      \"placementStatus\": \"Draft\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "send"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Send to insurer(s)\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/send",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "send"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some\n\nFront-end touchpoint: Operations > Placement Slips > Detail > Send to insurer(s)\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"sent\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  },\n  \"sent\": [\n    {\n      \"insurer\": \"Malayan Insurance Co., Inc.\",\n      \"email\": \"uw@malayan.example\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Placement journey for a line of business / product type (placement.journey): brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/journey?lob=FIRE&productType=Fire and Allied Perils",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "journey"
+              ],
+              "query": [
+                {
+                  "key": "lob",
+                  "value": "FIRE"
+                },
+                {
+                  "key": "productType",
+                  "value": "Fire and Allied Perils"
+                }
+              ]
+            },
+            "description": "Placement journey for a line of business / product type (placement.journey): brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip\n\nFront-end touchpoint: Operations > Placement Slips / Quotation > Send to insurer\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/journey?lob=FIRE&productType=Fire and Allied Perils",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "journey"
+                  ],
+                  "query": [
+                    {
+                      "key": "lob",
+                      "value": "FIRE"
+                    },
+                    {
+                      "key": "productType",
+                      "value": "Fire and Allied Perils"
+                    }
+                  ]
+                },
+                "description": "Placement journey for a line of business / product type (placement.journey): brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip\n\nFront-end touchpoint: Operations > Placement Slips / Quotation > Send to insurer\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"brokerSlip\": \"optional\",\n    \"quotationSlip\": \"optional\",\n    \"placementSlip\": \"required\",\n    \"directPolicy\": \"optional\",\n    \"lob\": \"FIRE\",\n    \"key\": \"FIRE\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reference data of the placement screens: active insurers (insurer master), products with their LOB and journey, default billing mode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "options"
+              ]
+            },
+            "description": "Reference data of the placement screens: active insurers (insurer master), products with their LOB and journey, default billing mode\n\nFront-end touchpoint: Operations > Placement Slips / Operations > Broker Slips (forms)\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "options"
+                  ]
+                },
+                "description": "Reference data of the placement screens: active insurers (insurer master), products with their LOB and journey, default billing mode\n\nFront-end touchpoint: Operations > Placement Slips / Operations > Broker Slips (forms)\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"insurers\": [\n      {\n        \"id\": 2,\n        \"code\": \"MALAYAN\",\n        \"name\": \"Malayan Insurance Co., Inc.\",\n        \"commissionRate\": 0.15\n      }\n    ],\n    \"products\": [\n      {\n        \"id\": 3,\n        \"code\": \"FIRE\",\n        \"name\": \"Fire and Allied Perils\",\n        \"lob\": \"FIRE\",\n        \"journey\": {\n          \"placementSlip\": \"required\"\n        }\n      }\n    ],\n    \"defaultBillingMode\": \"broker\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/record-issued-policy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "record-issued-policy"
+              ]
+            },
+            "description": "Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step\n\nFront-end touchpoint: Operations > Placement Slips / Policy > Record Issued Policy\n\nAccess: write:quotations, write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Visayas Logistics Inc.\",\n  \"productType\": \"Comprehensive General Liability\",\n  \"policyNumber\": \"PIO-CGL-2026-0415\",\n  \"inceptionDate\": \"2026-09-01\",\n  \"expiryDate\": \"2027-09-01\",\n  \"sumInsured\": 20000000,\n  \"netPremium\": 85000,\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 3,\n      \"sharePercent\": 100,\n      \"insurerReference\": \"PIO-CGL-2026-0415\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/record-issued-policy",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "record-issued-policy"
+                  ]
+                },
+                "description": "Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step\n\nFront-end touchpoint: Operations > Placement Slips / Policy > Record Issued Policy\n\nAccess: write:quotations, write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"companyName\": \"Visayas Logistics Inc.\",\n  \"productType\": \"Comprehensive General Liability\",\n  \"policyNumber\": \"PIO-CGL-2026-0415\",\n  \"inceptionDate\": \"2026-09-01\",\n  \"expiryDate\": \"2027-09-01\",\n  \"sumInsured\": 20000000,\n  \"netPremium\": 85000,\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 3,\n      \"sharePercent\": 100,\n      \"insurerReference\": \"PIO-CGL-2026-0415\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"PIO-CGL-2026-0415\",\n    \"placement\": {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"draft\",\n      \"placementStatus\": \"Draft\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Policies",
       "item": [
         {
@@ -17692,7 +19866,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"clientId\": \"cl_1\",\n  \"insuredName\": \"Juan Dela Cruz\",\n  \"status\": \"Active\",\n  \"paymentStatus\": \"Pending\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"grossPremium\": 23171.25,\n  \"billNumber\": \"INV-2026-00001\",\n  \"quoteRefId\": \"qt_1\",\n  \"success\": true\n}"
+              "body": "{\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"clientId\": \"cl_1\",\n  \"insuredName\": \"Juan Dela Cruz\",\n  \"status\": \"Active\",\n  \"paymentStatus\": \"Pending\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"grossPremium\": 23171.25,\n  \"billNumber\": \"INV-2026-00001\",\n  \"quoteRefId\": \"qt_1\",\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 100,\n      \"premium\": 18500,\n      \"premiumTotal\": 23171.25\n    }\n  ],\n  \"success\": true\n}"
             }
           ]
         },
@@ -17853,12 +20027,12 @@
           ]
         },
         {
-          "name": "Insurance placing slip PDF",
+          "name": "Insurance placing slip PDF: the security (each participating insurer with its share); insurerId= gives one participant's slip showing its share",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policies/:id/documents/insurance-placing-slip-fire",
+              "raw": "{{baseUrl}}/policies/:id/documents/insurance-placing-slip-fire?insurerId=2",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -17868,6 +20042,12 @@
                 "documents",
                 "insurance-placing-slip-fire"
               ],
+              "query": [
+                {
+                  "key": "insurerId",
+                  "value": "2"
+                }
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -17876,7 +20056,7 @@
                 }
               ]
             },
-            "description": "Insurance placing slip PDF\n\nFront-end touchpoint: Operations > Policy > Policy detail > Insurance placing slip\n\nAccess: read:policies"
+            "description": "Insurance placing slip PDF: the security (each participating insurer with its share); insurerId= gives one participant's slip showing its share\n\nFront-end touchpoint: Operations > Policy > Policy detail > Insurance placing slip\n\nAccess: read:policies"
           },
           "response": [
             {
@@ -17885,7 +20065,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policies/:id/documents/insurance-placing-slip-fire",
+                  "raw": "{{baseUrl}}/policies/:id/documents/insurance-placing-slip-fire?insurerId=2",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -17895,6 +20075,12 @@
                     "documents",
                     "insurance-placing-slip-fire"
                   ],
+                  "query": [
+                    {
+                      "key": "insurerId",
+                      "value": "2"
+                    }
+                  ],
                   "variable": [
                     {
                       "key": "id",
@@ -17903,7 +20089,7 @@
                     }
                   ]
                 },
-                "description": "Insurance placing slip PDF\n\nFront-end touchpoint: Operations > Policy > Policy detail > Insurance placing slip\n\nAccess: read:policies"
+                "description": "Insurance placing slip PDF: the security (each participating insurer with its share); insurerId= gives one participant's slip showing its share\n\nFront-end touchpoint: Operations > Policy > Policy detail > Insurance placing slip\n\nAccess: read:policies"
               },
               "status": "OK",
               "code": 200,
