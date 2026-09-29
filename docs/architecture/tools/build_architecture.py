@@ -46,9 +46,13 @@ LOGO = os.path.join(REPO, 'brokerverse', 'public', 'bdoi', 'iorta-technxt.png')
 sys.path.insert(0, HERE)
 import table_catalog as catalog  # noqa: E402
 
-PRODUCT = 'BrokerVerse'
+PRODUCT = 'BrokerVerse OOTB'
 SERIES = 'Solution Architecture'
-VERSION = '1.0'
+VERSION = '1.1'
+HISTORY = [
+    ('1.0', '29 September 2026', 'Initial issue'),
+    ('1.1', '29 September 2026', 'Updated to the current system: placement journey, co-insurance, posting rules, period end and BIR tax, bank reconciliation, document numbering, commission rate matrix, single PDF engine, uploads and go-live imports, housekeeping, business time zone, broker roles, deployment on the BrokerVerse URL'),
+]
 DATE = '29 September 2026'
 AUTHOR = 'iorta TechNXT'
 FONT = 'Nunito'
@@ -305,7 +309,7 @@ def cover(doc, num, title):
     p = c.paragraphs[0]
     r = p.add_run(PRODUCT); set_font(r, size=40, bold=True, color=WHITE)
     p.paragraph_format.space_after = Pt(2)
-    p = c.add_paragraph(); r = p.add_run('Out-of-the-box insurance broking platform'); set_font(r, size=13, color=RGBColor(0xEA, 0xF6, 0xFD))
+    p = c.add_paragraph(); r = p.add_run('Insurance broking platform by iorta TechNXT'); set_font(r, size=13, color=RGBColor(0xEA, 0xF6, 0xFD))
     p.paragraph_format.space_after = Pt(22)
     p = c.add_paragraph(); r = p.add_run(f'{SERIES}  ·  Document {num} of {len(DOCS):02d}'); set_font(r, size=12, bold=True, color=RGBColor(0x9F, 0xDD, 0xF8))
     p.paragraph_format.space_after = Pt(4)
@@ -330,10 +334,10 @@ def document_control(doc, num, title):
     heading_plain(doc, 'Document control')
     kv_table(doc, [('Document', f'{PRODUCT} {SERIES}: {num} {title}'), ('Document ID', f'BV-SA-{num}'), ('Version', VERSION),
                    ('Status', 'Issued for review'), ('Date', DATE), ('Prepared by', AUTHOR),
-                   ('Source baseline', 'BrokerVerse source repository, branch brokerverse-platform (backend/, brokerverse/, docker-compose.yml, render.yaml, docs/)')])
+                   ('Source baseline', 'BrokerVerse source repository, branch brokerverse-platform (backend/, brokerverse/, deploy/, docker-compose.yml, .github/workflows, docs/)')])
     p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(10)
     r = p.add_run('Version history'); set_font(r, size=12, bold=True, color=BLUE)
-    grid_table(doc, [['Version', 'Date', 'Author', 'Change'], [VERSION, DATE, AUTHOR, 'Initial issue']], [12, 18, 20, 50], size=9)
+    grid_table(doc, [['Version', 'Date', 'Author', 'Change']] + [[v, d, AUTHOR, c] for v, d, c in HISTORY], [12, 18, 20, 50], size=9)
     p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(10)
     r = p.add_run('Review and approval'); set_font(r, size=12, bold=True, color=BLUE)
     grid_table(doc, [['Role', 'Name', 'Signature', 'Date'], ['Solution architect', '', '', ''], ['DevOps / infrastructure lead', '', '', ''],
@@ -513,7 +517,14 @@ class Builder:
         self.missing = []
         self.text = []
 
+    def portrait(self):
+        """Return to a portrait section after a landscape figure (short text after the figure stays on its page)."""
+        if getattr(self, 'in_landscape', False):
+            self.in_landscape = False
+            self.new_section(False)
+
     def heading(self, level, text):
+        self.portrait()
         self.text.append(text)
         if level == 1:
             self.ch += 1; self.sec = 0
@@ -523,6 +534,7 @@ class Builder:
             text = f'{self.ch}.{self.sec}  {text}'
         p = self.doc.add_paragraph(style=f'Heading {level}')
         add_inline(p, text)
+        self.last_heading = p._p
         if level == 1:
             p.paragraph_format.page_break_before = True
             para_border(p, 'bottom', HEX_CYAN, 12, 6)
@@ -532,6 +544,7 @@ class Builder:
         add_inline(self.doc.add_paragraph(), text)
 
     def steps(self, items):
+        self.portrait()
         self.text.extend(items)
         for i, it in enumerate(items, 1):
             p = self.doc.add_paragraph(style='Step')
@@ -539,11 +552,13 @@ class Builder:
             add_inline(p, it)
 
     def bullets(self, items):
+        self.portrait()
         self.text.extend(items)
         for it in items:
             add_inline(self.doc.add_paragraph(style='List Bullet'), it)
 
     def table(self, rows, widths=None, size=None):
+        self.portrait()
         ncols = max(len(r) for r in rows)
         rows = [r + [''] * (ncols - len(r)) for r in rows]
         for r in rows:
@@ -575,12 +590,32 @@ class Builder:
         nat_w, nat_h = Cm(w / 200 * 2.54), Cm(h / 200 * 2.54)
         landscape = nat_w > PORTRAIT_W * 1.3 and w > h * 1.15
         max_w = LANDSCAPE_W if landscape else PORTRAIT_W
-        max_h = Cm(14.3) if landscape else Cm(22.5)
+        max_h = Cm(12.0) if landscape else Cm(22.5)
         width = min(nat_w, max_w)
         if width * h / w > max_h:
             width = Emu(int(max_h * w / h))
+        if not landscape or getattr(self, 'in_landscape', False):
+            self.portrait()
         if landscape:
-            self.new_section(True)
+            # A heading directly before a landscape figure moves onto the landscape page with it, so it is not left
+            # alone at the bottom of a portrait page.
+            body = self.doc.element.body
+            moved = getattr(self, 'last_heading', None)
+            moved = moved if moved is not None and len(body) > 1 and body[-2] is moved else None
+            if moved is not None:
+                body.remove(moved)
+            prev = body[-2] if len(body) > 1 else None
+            empty = prev is not None and prev.tag == qn('w:p') and prev.find(qn('w:pPr') + '/' + qn('w:sectPr')) is not None
+            if empty:
+                # The current section has no content yet (it started right after another landscape page): turn it
+                # into a landscape section instead of leaving an empty portrait page.
+                sec = self.doc.sections[-1]
+                section_layout(sec, True)
+                header_footer(sec, self.num, self.title, LANDSCAPE_W)
+            else:
+                self.new_section(True)
+            if moved is not None:
+                body.insert(len(body) - 1, moved)
         p = self.doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_before = Pt(4); p.paragraph_format.space_after = Pt(2)
         p.paragraph_format.keep_with_next = True
@@ -590,9 +625,10 @@ class Builder:
         r = cp.add_run(f'Figure {self.fig}. '); set_font(r, size=8.5, bold=True, italic=True, color=BLUE)
         add_inline(cp, caption, size=8.5, color=GREY)
         if landscape:
-            self.new_section(False)
+            self.in_landscape = True
 
     def callout(self, text):
+        self.portrait()
         self.text.append(text)
         m = re.match(r'\*\*(\w[\w /]*):\*\*\s*(.*)', text)
         kind = m.group(1).lower() if m else 'note'
@@ -712,7 +748,7 @@ def build_docx(num, slug, title, path):
     parse_and_build(b, open(os.path.join(SRC, src), encoding='utf-8').read())
     # Related documents
     rel = '\n\n'.join(['# Related documents',
-                       'This document is one of eleven that together form the BrokerVerse Solution Architecture. They are maintained and issued together (source and build: `docs/architecture/README.md`).',
+                       'This document is one of eleven that together form the BrokerVerse OOTB Solution Architecture. They are maintained and issued together (source and build: `docs/architecture/README.md`).',
                        '{widths: 10,50,40}\n| No. | Document | File |\n|---|---|---|\n' + '\n'.join(
                            f'| {n} | {t}{" (this document)" if n == num else ""} | `{n}_BrokerVerse_{s}.pdf` |' for n, s, t in DOCS)])
     parse_and_build(b, rel)
