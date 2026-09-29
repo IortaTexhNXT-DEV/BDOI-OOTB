@@ -1,7 +1,7 @@
 /**
- * Record-level data scoping ("agents see only their own book").
+ * Record-level data scoping ("a scoped role sees only its own book").
  *
- * A user is scoped when every role they hold is listed in the setting security.scoped_roles (default ["agent"]).
+ * A user is scoped when every role they hold is listed in the setting security.scoped_roles (default: none).
  * A scoped user only sees and acts on records they own (owner_user_id / agent_user_id / created_by, whichever the
  * table uses) or records that belong to clients they own. Everyone else is unaffected.
  *
@@ -20,8 +20,8 @@ export const SCOPE = Symbol('record-scope');
 
 /** Roles whose holders only see their own book (setting security.scoped_roles). */
 export async function scopedRoles() {
-  const v = await getSetting('security.scoped_roles', ['agent']);
-  return Array.isArray(v) ? v : ['agent'];
+  const v = await getSetting('security.scoped_roles', []);
+  return Array.isArray(v) ? v : [];
 }
 
 /** True when every role the user holds is a scoped role (a user without roles is not scoped; they are refused by permissions). */

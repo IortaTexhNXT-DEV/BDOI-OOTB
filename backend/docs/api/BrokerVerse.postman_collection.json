@@ -108,7 +108,7 @@
             }
           ],
           "cookie": [],
-          "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
+          "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"system-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
         }
       ],
       "event": [
@@ -3095,7 +3095,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Password changed\",\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Password changed\",\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"system-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
             }
           ]
         },
@@ -3261,7 +3261,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"it-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
+              "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"system-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
             }
           ],
           "event": [
@@ -3624,7 +3624,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"roles\": [\n      \"it-admin\"\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"roles\": [\n      \"system-admin\"\n    ]\n  }\n}"
             }
           ]
         },
@@ -9723,7 +9723,7 @@
       "name": "Dashboards",
       "item": [
         {
-          "name": "Agent home: own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",
+          "name": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",
           "request": {
             "method": "GET",
             "header": [],
@@ -9743,7 +9743,7 @@
                 }
               ]
             },
-            "description": "Agent home: own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)\n\nFront-end touchpoint: Dashboard > Agent Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
+            "description": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
           },
           "response": [
             {
@@ -9767,7 +9767,7 @@
                     }
                   ]
                 },
-                "description": "Agent home: own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)\n\nFront-end touchpoint: Dashboard > Agent Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
+                "description": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
               },
               "status": "OK",
               "code": 200,
@@ -9894,6 +9894,55 @@
           ]
         },
         {
+          "name": "Processing Team workbench: quotations with the customer or the insurers, cycle time, data-quality alerts, cases awaiting decision, volume by LOB",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/processing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "processing"
+              ]
+            },
+            "description": "Processing Team workbench: quotations with the customer or the insurers, cycle time, data-quality alerts, cases awaiting decision, volume by LOB\n\nFront-end touchpoint: Dashboard > Processing Dashboard\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/processing",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "processing"
+                  ]
+                },
+                "description": "Processing Team workbench: quotations with the customer or the insurers, cycle time, data-quality alerts, cases awaiting decision, volume by LOB\n\nFront-end touchpoint: Dashboard > Processing Dashboard\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"workbenchMetrics\": {\n      \"newSubmissions\": 3,\n      \"olderSubmissions\": 1,\n      \"avgCycleTime\": \"26 Hours\",\n      \"openAlerts\": {\n        \"totalAlerts\": 0\n      }\n    },\n    \"myCases\": []\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",
           "request": {
             "method": "GET",
@@ -9951,55 +10000,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"funnel\": {\n      \"leads\": 16,\n      \"quotations\": 14,\n      \"policies\": 8,\n      \"leadToPolicyRate\": 50\n    },\n    \"leadsByStatus\": [\n      {\n        \"status\": \"New\",\n        \"count\": 4\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/dashboard/underwriting",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "dashboard",
-                "underwriting"
-              ]
-            },
-            "description": "Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB\n\nFront-end touchpoint: Dashboard > Underwriting Dashboard\n\nAccess: read:quotations"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/dashboard/underwriting",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "dashboard",
-                    "underwriting"
-                  ]
-                },
-                "description": "Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB\n\nFront-end touchpoint: Dashboard > Underwriting Dashboard\n\nAccess: read:quotations"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"workbenchMetrics\": {\n      \"newSubmissions\": 3,\n      \"olderSubmissions\": 1,\n      \"avgCycleTime\": \"26 Hours\",\n      \"openAlerts\": {\n        \"totalAlerts\": 0\n      }\n    },\n    \"myCases\": []\n  }\n}"
             }
           ]
         }
@@ -18375,7 +18375,7 @@
       "name": "Payments",
       "item": [
         {
-          "name": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); agents see their own policies",
+          "name": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); roles without the payments overview (e.g. Claims) see only the policies they own",
           "request": {
             "method": "GET",
             "header": [],
@@ -18406,7 +18406,7 @@
                 }
               ]
             },
-            "description": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); agents see their own policies\n\nFront-end touchpoint: Agent > Payments\n\nAccess: read:receipts, read:policies"
+            "description": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); roles without the payments overview (e.g. Claims) see only the policies they own\n\nFront-end touchpoint: Agent > Payments\n\nAccess: read:receipts, read:policies"
           },
           "response": [
             {
@@ -18441,7 +18441,7 @@
                     }
                   ]
                 },
-                "description": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); agents see their own policies\n\nFront-end touchpoint: Agent > Payments\n\nAccess: read:receipts, read:policies"
+                "description": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); roles without the payments overview (e.g. Claims) see only the policies they own\n\nFront-end touchpoint: Agent > Payments\n\nAccess: read:receipts, read:policies"
               },
               "status": "OK",
               "code": 200,
@@ -34598,7 +34598,7 @@
           ]
         },
         {
-          "name": "Send the quotation to the customer for approval (signed link e-mail) and notify underwriting",
+          "name": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team",
           "request": {
             "method": "POST",
             "header": [
@@ -34625,7 +34625,7 @@
                 }
               ]
             },
-            "description": "Send the quotation to the customer for approval (signed link e-mail) and notify underwriting\n\nFront-end touchpoint: Operations > Quotation > Quote detail > Send for customer approval\n\nAccess: write:quotations",
+            "description": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team\n\nFront-end touchpoint: Operations > Quotation > Quote detail > Send for customer approval\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -34665,7 +34665,7 @@
                     }
                   ]
                 },
-                "description": "Send the quotation to the customer for approval (signed link e-mail) and notify underwriting\n\nFront-end touchpoint: Operations > Quotation > Quote detail > Send for customer approval\n\nAccess: write:quotations",
+                "description": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team\n\nFront-end touchpoint: Operations > Quotation > Quote detail > Send for customer approval\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -45719,7 +45719,7 @@
             "description": "Add a negotiation update / contact to the renewal timeline\n\nFront-end touchpoint: Operations > Renewals > Negotiations > Add Update\n\nAccess: write:renewals",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"Counter Offer\",\n  \"method\": \"Email\",\n  \"description\": \"Client asked for a 5% discount\",\n  \"outcome\": \"Pending underwriting\",\n  \"nextAction\": \"Submit for approval\",\n  \"followUpDate\": \"2026-10-05\"\n}",
+              "raw": "{\n  \"type\": \"Counter Offer\",\n  \"method\": \"Email\",\n  \"description\": \"Client asked for a 5% discount\",\n  \"outcome\": \"Pending processing review\",\n  \"nextAction\": \"Submit for approval\",\n  \"followUpDate\": \"2026-10-05\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -45760,7 +45760,7 @@
                 "description": "Add a negotiation update / contact to the renewal timeline\n\nFront-end touchpoint: Operations > Renewals > Negotiations > Add Update\n\nAccess: write:renewals",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"type\": \"Counter Offer\",\n  \"method\": \"Email\",\n  \"description\": \"Client asked for a 5% discount\",\n  \"outcome\": \"Pending underwriting\",\n  \"nextAction\": \"Submit for approval\",\n  \"followUpDate\": \"2026-10-05\"\n}",
+                  "raw": "{\n  \"type\": \"Counter Offer\",\n  \"method\": \"Email\",\n  \"description\": \"Client asked for a 5% discount\",\n  \"outcome\": \"Pending processing review\",\n  \"nextAction\": \"Submit for approval\",\n  \"followUpDate\": \"2026-10-05\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -47626,7 +47626,7 @@
           ]
         },
         {
-          "name": "Agents a report can be filtered by (active users with the agent role), as { label, value }",
+          "name": "Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }",
           "request": {
             "method": "GET",
             "header": [],
@@ -47641,7 +47641,7 @@
                 "agents"
               ]
             },
-            "description": "Agents a report can be filtered by (active users with the agent role), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
+            "description": "Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
           },
           "response": [
             {
@@ -47660,7 +47660,7 @@
                     "agents"
                   ]
                 },
-                "description": "Agents a report can be filtered by (active users with the agent role), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
+                "description": "Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
               },
               "status": "OK",
               "code": 200,
@@ -47672,7 +47672,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"label\": \"Ramon Agent\",\n      \"value\": \"usr_1\",\n      \"code\": \"AG001\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"label\": \"Maria Santos\",\n      \"value\": \"usr_1\",\n      \"code\": \"AE001\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -48345,7 +48345,7 @@
                 }
               ]
             },
-            "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: role:it-admin, role:ba, role:finance",
+            "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: role:accounting",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cron\": \"0 7 * * *\",\n  \"enabled\": true\n}",
@@ -48384,7 +48384,7 @@
                     }
                   ]
                 },
-                "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: role:it-admin, role:ba, role:finance",
+                "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: role:accounting",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"cron\": \"0 7 * * *\",\n  \"enabled\": true\n}",
@@ -48432,7 +48432,7 @@
                 }
               ]
             },
-            "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: role:it-admin, role:ba, role:finance"
+            "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: role:accounting"
           },
           "response": [
             {
@@ -48458,7 +48458,7 @@
                     }
                   ]
                 },
-                "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: role:it-admin, role:ba, role:finance"
+                "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: role:accounting"
               },
               "status": "OK",
               "code": 200,
@@ -48760,7 +48760,7 @@
                 "settings"
               ]
             },
-            "description": "Update one or more configuration values\n\nFront-end touchpoint: Master > System Settings\n\nAccess: role:it-admin, role:ba",
+            "description": "Update one or more configuration values\n\nFront-end touchpoint: Master > System Settings\n\nAccess: role:system-admin",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"branding.primary_color\": \"#0072d8\"\n  }\n}",
@@ -48791,7 +48791,7 @@
                     "settings"
                   ]
                 },
-                "description": "Update one or more configuration values\n\nFront-end touchpoint: Master > System Settings\n\nAccess: role:it-admin, role:ba",
+                "description": "Update one or more configuration values\n\nFront-end touchpoint: Master > System Settings\n\nAccess: role:system-admin",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"branding.primary_color\": \"#0072d8\"\n  }\n}",
@@ -48845,7 +48845,7 @@
                 }
               ]
             },
-            "description": "Audit trail (filter by entity / entityId / user)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit"
+            "description": "Audit trail (filter by entity / entityId / user)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
           },
           "response": [
             {
@@ -48877,7 +48877,7 @@
                     }
                   ]
                 },
-                "description": "Audit trail (filter by entity / entityId / user)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit"
+                "description": "Audit trail (filter by entity / entityId / user)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
               },
               "status": "OK",
               "code": 200,
@@ -49541,7 +49541,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"usr_1\",\n      \"username\": \"juan.santos\",\n      \"displayName\": \"Juan Santos\",\n      \"roles\": [\n        \"agent\"\n      ],\n      \"roleNames\": [\n        \"Agent / Referrer\"\n      ],\n      \"status\": \"active\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 10\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"usr_1\",\n      \"username\": \"juan.santos\",\n      \"displayName\": \"Juan Santos\",\n      \"roles\": [\n        \"sales\"\n      ],\n      \"roleNames\": [\n        \"Sales & Marketing (Account Executive)\"\n      ],\n      \"status\": \"active\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 10\n}"
             }
           ]
         },
@@ -49679,7 +49679,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"juan.santos\",\n    \"roles\": [\n      \"agent\"\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"juan.santos\",\n    \"roles\": [\n      \"sales\"\n    ]\n  }\n}"
             }
           ]
         },
@@ -49713,7 +49713,7 @@
             "description": "Update a user and its roles\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: write:users",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"displayName\": \"Maria Cruz\",\n  \"roles\": [\n    \"sales\",\n    \"customer-services\"\n  ],\n  \"status\": \"active\"\n}",
+              "raw": "{\n  \"displayName\": \"Maria Cruz\",\n  \"roles\": [\n    \"sales\",\n    \"operations\"\n  ],\n  \"status\": \"active\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -49752,7 +49752,7 @@
                 "description": "Update a user and its roles\n\nFront-end touchpoint: Master > User Management > User > Edit\n\nAccess: write:users",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"displayName\": \"Maria Cruz\",\n  \"roles\": [\n    \"sales\",\n    \"customer-services\"\n  ],\n  \"status\": \"active\"\n}",
+                  "raw": "{\n  \"displayName\": \"Maria Cruz\",\n  \"roles\": [\n    \"sales\",\n    \"operations\"\n  ],\n  \"status\": \"active\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -50337,7 +50337,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"sales\",\n      \"name\": \"Sales / Relationship Manager\",\n      \"permissions\": [\n        \"read:leads\"\n      ],\n      \"users\": 3\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"sales\",\n      \"name\": \"Sales & Marketing (Account Executive)\",\n      \"permissions\": [\n        \"read:leads\"\n      ],\n      \"users\": 3\n    }\n  ]\n}"
             }
           ]
         },

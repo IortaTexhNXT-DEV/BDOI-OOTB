@@ -166,8 +166,8 @@ export async function sales(book = null) {
   };
 }
 
-/** Underwriting workbench: quotations waiting for customer / insurer decisions, cycle time and data-quality alerts. */
-export async function underwriting() {
+/** Processing Team workbench: quotations waiting for customer / insurer decisions, cycle time and data-quality alerts. */
+export async function processing() {
   const m = await one(`SELECT count(*) FILTER (WHERE status IN ('sent','accepted','submitted') AND updated_at >= now() - interval '7 days')::int AS new_subs,
       count(*) FILTER (WHERE status IN ('sent','accepted','submitted') AND updated_at < now() - interval '7 days')::int AS old_subs,
       COALESCE(avg(EXTRACT(EPOCH FROM (COALESCE(approved_at, customer_accepted_at) - created_at)) / 3600) FILTER (WHERE COALESCE(approved_at, customer_accepted_at) IS NOT NULL), 0) AS cycle_hours,
@@ -196,7 +196,7 @@ export async function claimsSummary() {
   return { totalClaims: t.total, settledAmount: round2(t.settled), averageDaysToSettle: round2(t.avg_days), claimsByStatus: byStatus.map((r) => ({ ...r, estimate: round2(r.estimate) })) };
 }
 
-/** Agent home: own leads, quotes, policies, premium and renewals due. */
+/** Sales home (Account Executive): own leads, quotes, policies, premium and renewals due. */
 export async function agentHome(book) {
   const s = await sales(book);
   const qp = [];

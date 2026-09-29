@@ -17,7 +17,7 @@ async function persona(username, roles) {
 beforeAll(async () => {
   ctx = await setup();
   sales = await persona('d.sales', ['sales']);
-  finance = await persona('d.finance', ['finance']);
+  finance = await persona('d.finance', ['accounting']);
   claims = await persona('d.claims', ['claims']);
 });
 afterAll(async () => { await pool.end(); });
@@ -79,14 +79,14 @@ describe('dashboards', () => {
     expect(d.agentPerformance[0].name).toBe('BrokerVerse Administrator');
     expect(d.claimsAnalytics.totalClaims).toBeGreaterThanOrEqual(0);
   });
-  it('sales funnel, underwriting workbench and claims summary', async () => {
+  it('sales funnel, processing workbench and claims summary', async () => {
     const s = await sales('get', '/dashboard/sales');
     expect(s.body.data.funnel.leads).toBeGreaterThanOrEqual(16);
     expect(s.body.data.funnel.policies).toBeGreaterThanOrEqual(8);
     expect(s.body.data.quotationsByStatus.find((x) => x.status === 'ConvertedToPolicy').count).toBe(8);
     const mine = await sales('get', '/dashboard/sales?scope=mine');
     expect(mine.body.data.funnel.leads).toBe(0);
-    const u = await sales('get', '/dashboard/underwriting');
+    const u = await sales('get', '/dashboard/processing');
     expect(u.body.data.workbenchMetrics.newSubmissions).toBeGreaterThanOrEqual(3);
     expect(u.body.data.myCases.map((c) => c.status)).toEqual(expect.arrayContaining(['PendingCustomer', 'CustomerAccepted', 'SubmittedToInsurer']));
     const c = await claims('get', '/dashboard/claims');
@@ -104,7 +104,7 @@ describe('dashboards', () => {
   it('enforces permissions', async () => {
     expect((await finance('get', '/dashboard/sales')).status).toBe(403);
     expect((await finance('get', '/dashboard/claims')).status).toBe(200); // finance reads claims KPIs
-    expect((await claims('get', '/dashboard/underwriting')).status).toBe(403);
+    expect((await claims('get', '/dashboard/processing')).status).toBe(403);
     expect((await request(ctx.app).get('/api/dashboard/executive')).status).toBe(401);
   });
 });

@@ -1,15 +1,14 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { isAdmin, requireAuth, requirePermission } from '../../lib/auth.js';
 import { scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 
-/** Dashboard KPIs: Executive, Sales, Underwriting, Claims and the agent home (legacy APIROUTES.DASHBOARD.GET_DETAILS). */
+/** Dashboard KPIs: Executive, Sales, Processing, Claims and the sales home (legacy APIROUTES.DASHBOARD.GET_DETAILS). */
 const { router, define } = moduleRouter('Dashboards', '');
 const send = (res, data) => res.json({ success: true, ...data, data });
-const isAdmin = (u) => (u.roles || []).some((r) => ['it-admin', 'ba'].includes(r));
 
 define({
-  method: 'GET', path: '/agent/get-dashboard-details', summary: 'Agent home: own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)', screen: 'Dashboard > Agent Dashboard',
+  method: 'GET', path: '/agent/get-dashboard-details', summary: 'Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)', screen: 'Dashboard > Sales Dashboard',
   middleware: [requireAuth, requirePermission('read:leads', 'read:quotations', 'read:policies')], query: { scope: 'mine' },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8 }, premiumThisMonth: 125000, renewalsDueIn60Days: 3, recentQuotations: [], expiringPolicies: [] } },
   handler: async (req, res) => {
@@ -31,10 +30,10 @@ define({
   handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' || (await scopeOf(req)) ? svc.ownBook(req.user) : null)),
 });
 define({
-  method: 'GET', path: '/dashboard/underwriting', summary: 'Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB', screen: 'Dashboard > Underwriting Dashboard',
+  method: 'GET', path: '/dashboard/processing', summary: 'Processing Team workbench: quotations with the customer or the insurers, cycle time, data-quality alerts, cases awaiting decision, volume by LOB', screen: 'Dashboard > Processing Dashboard',
   middleware: [requireAuth, requirePermission('read:quotations')],
   response: { success: true, data: { workbenchMetrics: { newSubmissions: 3, olderSubmissions: 1, avgCycleTime: '26 Hours', openAlerts: { totalAlerts: 0 } }, myCases: [] } },
-  handler: async (_req, res) => send(res, await svc.underwriting()),
+  handler: async (_req, res) => send(res, await svc.processing()),
 });
 define({
   method: 'GET', path: '/dashboard/claims', summary: 'Claims KPIs: counts and estimates by status, settled amount, average days to settle', screen: 'Dashboard > Claims Dashboard',

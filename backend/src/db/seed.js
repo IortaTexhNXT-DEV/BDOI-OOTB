@@ -13,37 +13,33 @@ import { encryptSecret, isEncrypted } from '../lib/secrets.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 export const ROLES = [
-  ['it-admin', 'IT Administrator', 'Full access: user, role and system administration', true],
-  ['ba', 'Business Administrator', 'Full access: business configuration and masters', true],
-  ['sales', 'Sales / Relationship Manager', 'Leads, clients, quotations, policies, renewals, open items, payments', false],
-  ['underwriting', 'Underwriter', 'Quotation review, policy issuance, product templates', false],
-  ['customer-services', 'Customer Services', 'Client servicing, endorsements, renewals, open items', false],
-  ['claims', 'Claims Officer', 'Claims registration, review and settlement', false],
-  ['finance', 'Finance / Accounts', 'Receipts, collections, disbursement, commission, financial reports', false],
-  ['finance-manager', 'Finance Manager', 'Everything Finance / Accounts does, plus approving the month-end and year-end close, posting into soft-closed periods and reopening periods', false],
-  ['agent', 'Agent / Referrer', 'Own leads, quotations and policies', false],
-  ['user-access-admin', 'User Access Administrator', 'Creates and maintains users, roles and access; reviews the audit trail and sign-in history. Cannot grant administrator roles or change its own access.', true],
+  ['system-admin', 'System Administrator (Super Admin Access)', 'Full access to every module, configuration, user and role administration', true],
+  ['sales', 'Sales & Marketing (Account Executive)', 'Prospects, leads, clients, quotation requests, renewals follow-up and own production', false],
+  ['processing', 'Processing Team (Placement & Policy Processing)', 'Broker slips to insurers, offer comparison, quotation and placement slips, insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates', false],
+  ['operations', 'Operations (Client Servicing)', 'Client servicing, endorsement requests, renewals, open items and documents', false],
+  ['claims', 'Claims', 'Claims registration, follow-up with insurers, review and settlement', false],
+  ['accounting', 'Accounting', 'Billing, collection, official receipts, remittance to insurers, commission, period end and BIR reporting', false],
+  ['accounting-manager', 'Accounting Manager', 'Everything Accounting does, plus approving the month-end and year-end close, posting into soft-closed periods and reopening periods', false],
 ];
+/** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
+export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end'];
-// write:receipts (official receipts, cash posting, payment verification) is finance-only: segregation of duties (D61).
-// Least privilege (D92): the receipt register (read:receipts) is finance's; sales and customer services see a policy's
+// write:receipts (official receipts, cash posting, payment verification) is Accounting-only: segregation of duties (D61).
+// Least privilege (D92): the receipt register (read:receipts) is Accounting's; Sales and Operations see a policy's
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
+// The System Administrator holds every permission (granted below), so it has no entry here.
 const ROLE_PERMS = {
   sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
-  underwriting: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
-  'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read'],
+  processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
+  operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
-  // Finance calculates, approves (maker-checker) and pays agent incentives (D102); program set-up stays with the business administrator.
-  finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'reports', 'notifications', 'masters:read', 'schedules:read'],
-  // Agents work their own book (record scoping: security.scoped_roles): endorsements and first notice of loss on their own
-  // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
-  'user-access-admin': ['profile', 'users', 'roles', 'audit:read', 'notifications', 'settings:read'],
-  agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'endorsements', 'claims', 'notifications'],
-  // Finance Manager inherits Finance (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
-  'finance-manager': ['period-end:approve'],
+  // Accounting calculates, approves (maker-checker) and pays incentives (D102); program set-up stays with the system administrator.
+  accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'reports', 'notifications', 'masters:read', 'schedules:read'],
+  // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
+  'accounting-manager': ['period-end:approve'],
 };
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
-const ROLE_INHERITS = { 'finance-manager': ['finance'] };
+const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };
 
 /**
  * Whether the demo / sample seed files run (SEED_SAMPLE_DATA). An explicit value wins ("true"/"1"/"yes"/"on" or
@@ -80,8 +76,7 @@ export async function seed({ log = console.log, sampleData } = {}) {
   const grant = async (role, codes) => {
     for (const c of codes) if (permIds[c]) await query('INSERT INTO role_permissions(role_id, permission_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [roleIds[role], permIds[c]]);
   };
-  await grant('it-admin', Object.keys(permIds));
-  await grant('ba', Object.keys(permIds));
+  await grant('system-admin', Object.keys(permIds));
   for (const [role, items] of Object.entries(ROLE_PERMS)) {
     const codes = items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`]));
     await grant(role, codes);
@@ -96,7 +91,7 @@ export async function seed({ log = console.log, sampleData } = {}) {
     VALUES ('BrokerVerse', $1, 'BrokerVerse Administrator', 'BrokerVerse', 'Admin', 'admin@brokerverse.local', 'active', 'seed', $2)
     ON CONFLICT (username) DO UPDATE SET display_name = EXCLUDED.display_name RETURNING id, (xmax = 0) AS inserted`, [adminHash, !process.env.ADMIN_PASSWORD]);
   if (admin.rows[0].inserted && !process.env.ADMIN_PASSWORD) log(`administrator BrokerVerse created with password ${adminPassword} (change it after the first sign-in)`);
-  await query('INSERT INTO user_roles(user_id, role_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [admin.rows[0].id, roleIds['it-admin']]);
+  await query('INSERT INTO user_roles(user_id, role_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [admin.rows[0].id, roleIds['system-admin']]);
   // Configuration defaults (all editable from System Settings)
   const settings = JSON.parse(fs.readFileSync(path.join(here, 'seeds', 'settings.json'), 'utf8'));
   for (const s of settings) {

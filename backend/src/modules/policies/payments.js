@@ -9,6 +9,7 @@
  * - An online gateway is used only when policy.payment_gateway_url is configured; otherwise online payments are
  *   captured manually with their transaction reference like any other mode.
  */
+import { isAdmin } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2, num, isoDate, today } from '../accounting/lib/http.js';
@@ -17,7 +18,7 @@ export const DEFAULT_MODES = ['bank-transfer', 'check', 'online', 'cash'];
 const MODE_LABELS = { 'bank-transfer': 'Bank transfer', check: 'Cheque', online: 'Online payment', cash: 'Cash', card: 'Card', gcash: 'GCash' };
 const NEEDS_REFERENCE = ['bank-transfer', 'check', 'online', 'card', 'gcash'];
 
-export const canPostReceipts = (user) => (user?.roles || []).some((r) => ['it-admin', 'ba'].includes(r)) || (user?.permissions || []).includes('write:receipts');
+export const canPostReceipts = (user) => isAdmin(user) || (user?.permissions || []).includes('write:receipts');
 
 export const captureRow = (x) => ({
   id: x.id, policyId: x.policy_id, policyNumber: x.policy_number, receivableId: x.receivable_id, billNumber: x.bill_number,

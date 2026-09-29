@@ -18,8 +18,8 @@ import * as billing from './billing.js';
 const { router, define } = moduleRouter('Receipts', '/receipts');
 const read = [requireAuth, requirePermission('read:receipts')];
 const write = [requireAuth, requirePermission('write:receipts')];
-// Official receipts (cash posting) are finance-only (segregation of duties). Agents, sales and underwriters record the
-// client's payment with POST /policies/:id/payments, which finance verifies (POST /policies/:id/payments/:paymentId/confirm).
+// Official receipts (cash posting) are Accounting-only (segregation of duties). Sales, Operations and Processing record the
+// client's payment with POST /policies/:id/payments, which Accounting verifies (POST /policies/:id/payments/:paymentId/confirm).
 const SCREEN = 'Accounts > Receipts';
 const upload = importUpload();
 const line = { receiptListId: 'rl_1', policies: 'POL-2026-00001', netPremium: '10000.00', paid: '11862.50', unPaid: '0.00', discounts: '0.00', dst: '1250.00', lgt: '75.00', vat: '1200.00', ewt: '0.00', other: '0.00', fcAmount: '0.00', lcAmount: '11862.50', status: 'Paid' };

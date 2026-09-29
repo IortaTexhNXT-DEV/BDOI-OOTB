@@ -26,14 +26,16 @@ async function makeUser(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
-  await makeUser('pw.agent', ['agent']);
-  await makeUser('pw.agent2', ['agent']);
-  await makeUser('pw.finance', ['finance']);
-  await makeUser('pw.finance2', ['finance']);
+  // Account Executives restricted to their own book (security.scoped_roles = sales): the producers of this walk.
+  expect((await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': ['sales'] } })).status).toBe(200);
+  await makeUser('pw.agent', ['sales']);
+  await makeUser('pw.agent2', ['sales']);
+  await makeUser('pw.finance', ['accounting']);
+  await makeUser('pw.finance2', ['accounting']);
   await makeUser('pw.sales', ['sales']);
-  await makeUser('pw.uw', ['underwriting']);
+  await makeUser('pw.uw', ['processing']);
   await makeUser('pw.claims', ['claims']);
-  await makeUser('pw.cs', ['customer-services']);
+  await makeUser('pw.cs', ['operations']);
   await query(`INSERT INTO clients(id, client_code, display_name, first_name, last_name, owner_user_id, created_by) VALUES
     ('cl_pw1','CL-PW-1','Walker Uno','Walker','Uno',$1,$1), ('cl_pw2','CL-PW-2','Walker Dos','Walker','Dos',$2,$2)`, [ids['pw.agent'], ids['pw.agent2']]);
   await query(`INSERT INTO policies(id, policy_number, client_id, product_id, owner_user_id, created_by, status, inception_date, expiry_date, sum_insured, premium_total, insured_name)
@@ -50,13 +52,8 @@ beforeAll(async () => {
 });
 afterAll(async () => { await new Promise((r) => { setTimeout(r, 50); }); await pool.end(); });
 
-describe('agent renewals (D100): own policies through the wizard, not the renewals workspace', () => {
-  it('refuses the workspace screens the agent menu no longer offers', async () => {
-    for (const p of ['/renewals/queue', '/renewals/at-risk', '/renewals/negotiations', '/renewals/campaigns', '/renewals/lapsed', '/policy-renewals/batches']) {
-      expect((await as('pw.agent', 'get', p)).status, p).toBe(403);
-    }
-    expect((await as('pw.agent', 'post', '/renewals/pipeline/refresh')).status).toBe(403);
-  });
+// D100 (the agent role without the renewals workspace) no longer applies: the Agent / Referrer login role was withdrawn.
+describe('own-book renewals: own policies through the wizard', () => {
   it('prefills and saves the renewal wizard of an own policy; another agent\'s policy answers 404', async () => {
     const pre = await as('pw.agent', 'get', '/policy-renewals/policies/pol_pw1/prefill');
     expect(pre.status).toBe(200);
@@ -107,7 +104,7 @@ describe('finance incentives (D101, D102)', () => {
     await query(sql);
     await query(sql);
     const n = await one(`SELECT count(*)::int AS n FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id
-      WHERE r.code = 'finance' AND p.code IN ('read:incentive', 'write:incentive')`);
+      WHERE r.code = 'accounting' AND p.code IN ('read:incentive', 'write:incentive')`);
     expect(n.n).toBe(2);
   });
 });
@@ -134,7 +131,6 @@ describe('look-ups without read:users (D104, D106)', () => {
       expect(r.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ label: 'pw.agent', value: ids['pw.agent'] })]));
       expect(r.body.data.find((o) => o.value === ids['pw.finance'])).toBeUndefined();
     }
-    expect((await as('pw.agent', 'get', '/reports/filters/agents')).status).toBe(403);
   });
   it('GET /remittance/approvals/approvers lists the other users who may approve remittances', async () => {
     const r = await as('pw.finance', 'get', '/remittance/approvals/approvers');

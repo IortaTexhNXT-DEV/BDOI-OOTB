@@ -343,7 +343,7 @@ export async function submitForApproval(id, user, note) {
   if (r.premium_new == null) throw unprocessable('Generate or capture the renewal premium first');
   await query(`UPDATE renewals SET status = 'pending-approval', submitted_by = $2, submitted_at = now(), approval_note = $3, updated_at = now() WHERE id = $1`, [r.id, user.id, note || null]);
   await activity(null, r.id, user, { type: 'Submitted for Approval', description: note || `Renewal premium ${r.premium_new} submitted for approval` });
-  const roles = (await getSetting('renewals.approver_roles', ['underwriting'])) || [];
+  const roles = (await getSetting('renewals.approver_roles', ['processing'])) || [];
   const approvers = new Set();
   for (const role of roles) for (const u of await usersWithRole(role)) if (u.id !== user.id) approvers.add(u.id);
   for (const a of approvers) await notify({ userId: a, type: 'approval', title: `Renewal approval: ${r.policy_number}`, message: `Renewal ${r.renewal_number} (${await formatMoney(r.premium_new)}) awaits approval`, link: '/renewal/negotiations', entity: 'renewal', entityId: r.id });

@@ -55,7 +55,7 @@ INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
  ('reinsurance.bordereau_due_days', '30', 'reinsurance', 'Bordereau due days after period end', 'number', true),
  ('reinsurance.cat_perils', $j$[{"peril":"Typhoon","pmlPercent":2.5},{"peril":"Earthquake","pmlPercent":4},{"peril":"Flood","pmlPercent":1.5}]$j$, 'reinsurance', 'Catastrophe perils and probable maximum loss (% of exposure)', 'json', true),
  -- incentive
- ('incentive.eligible_roles', $j$["agent","sales"]$j$, 'incentive', 'Roles that take part in incentive programs', 'json', true),
+ ('incentive.eligible_roles', $j$["sales"]$j$, 'incentive', 'Roles that take part in incentive programs', 'json', true),
  ('incentive.metric_map', $j${"Premium Volume":"premium","Policy Count":"policies","Renewal Rate":"renewal-rate","Conversion Rate":"conversion","New Business":"policies"}$j$, 'incentive', 'Target metric to measure', 'json', true),
  ('incentive.program_types', $j$["Target Based","Commission Based","Hybrid","Contest"]$j$, 'incentive', 'Incentive program types', 'json', true),
  ('incentive.calculation_frequencies', $j$["Monthly","Quarterly","Semi-Annual","Annual"]$j$, 'incentive', 'Calculation frequencies', 'json', true)

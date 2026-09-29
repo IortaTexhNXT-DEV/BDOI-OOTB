@@ -38,7 +38,7 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('renewals.risk_bands', '{"Low": 0, "Medium": 30, "High": 55, "Critical": 75}', 'renewals', 'Retention risk bands (minimum score)', 'json'),
  ('renewals.status_labels', '{"pipeline": "Pending", "notice-1": "First Notice Sent", "notice-2": "Second Notice Sent", "final-notice": "Final Notice Sent", "quoted": "Quote Sent", "pending-approval": "Pending Approval", "approved": "Approved", "renewed": "Renewed", "lapsed": "Lapsed"}', 'renewals', 'Display label for each renewal status', 'json'),
  ('renewals.batch_max_policies', '500', 'renewals', 'Maximum policies in one renewal batch', 'number'),
- ('renewals.approver_roles', '["underwriting"]', 'renewals', 'Roles notified to approve renewal terms', 'json'),
+ ('renewals.approver_roles', '["processing"]', 'renewals', 'Roles notified to approve renewal terms', 'json'),
  ('renewals.reinstatement_days', '90', 'renewals', 'Days after lapse during which a renewal can be reinstated', 'number'),
  ('renewals.risk_actions', '{"Claims History": ["Review claims experience with the insurer", "Prepare a claims-adjusted quote"], "Unpaid Premium": ["Collect outstanding premium before renewal", "Offer an instalment plan"], "First Renewal": ["Call the client personally", "Highlight service record over the first year"], "No Contact": ["Send the first renewal notice now"], "Premium Increase": ["Seek alternative terms from other insurers", "Explain the rate change with a coverage comparison"], "Due Soon": ["Escalate to the account manager"]}', 'renewals', 'Recommended actions per retention risk factor', 'json')
 ON CONFLICT (key) DO NOTHING;

@@ -171,7 +171,7 @@ function approvalToken(quoteId, hours) {
   throw new Error('Could not generate an approval token');
 }
 
-/** Draft -> PendingCustomer: e-mail the customer a signed approval link and notify underwriting. */
+/** Draft -> PendingCustomer: e-mail the customer a signed approval link and notify the Processing Team. */
 export async function sendForApproval(id, user) {
   const q = await getQuoteRow(id);
   if (!['draft', 'sent'].includes(q.status)) throw badRequest(`Only Draft quotations can be sent for approval (current: ${quoteStatusOut(q.status)})`);
@@ -188,7 +188,7 @@ export async function sendForApproval(id, user) {
   await query("UPDATE quotes SET status = 'sent', approval_token_hash = $2, approval_sent_to = $3, approval_sent_at = now(), updated_by = $4, updated_at = now() WHERE id = $1",
     [q.id, sha(token), to, user.id]);
   if (await getSetting('notification.approval_requests', true)) {
-    for (const u of await usersWithRoles(await getSetting('quotations.approval_notify_roles', ['underwriting']))) {
+    for (const u of await usersWithRoles(await getSetting('quotations.approval_notify_roles', ['processing']))) {
       await notify({ userId: u.id, type: 'approval', title: 'Quotation sent for approval', message: `Quotation ${q.quote_number} (${v.customerName}, ${await formatMoney(q.premium_total, v.currency)}) was sent to the customer for approval`,
         link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
     }

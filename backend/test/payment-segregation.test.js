@@ -40,8 +40,8 @@ async function billedPolicy(net, owner = null) {
 
 beforeAll(async () => {
   ctx = await setupFinance();
-  uw = await persona('sod.uw', 'underwriting');
-  cs = await persona('sod.cs', 'customer-services');
+  uw = await persona('sod.uw', 'processing');
+  cs = await persona('sod.cs', 'operations');
 });
 afterAll(async () => { await pool.end(); });
 
@@ -61,10 +61,10 @@ describe('D61: official receipts are finance-only', () => {
     expect(await balanceOf(p.bill.id)).toBeCloseTo(p.gross - 1000, 2);
   });
 
-  it('only finance (and administrators) hold write:receipts; migration 0084 revokes it from sales on existing databases', async () => {
+  it('only Accounting (and the System Administrator) hold write:receipts; migration 0084 revokes it from sales on existing databases', async () => {
     const holders = await q(`SELECT DISTINCT r.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id
       WHERE p.code = 'write:receipts' ORDER BY r.code`);
-    expect(holders.map((r) => r.code)).toEqual(['ba', 'finance', 'it-admin']);
+    expect(holders.map((r) => r.code)).toEqual(['accounting', 'system-admin']);
     const sales = await q(`SELECT p.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id WHERE r.code = 'sales' AND p.module = 'receipts'`);
     expect(sales.map((r) => r.code)).toEqual([]); // D92: the receipt register is finance-only too
     // an existing database seeded before the fix

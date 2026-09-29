@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, createOwnBookRole } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 
 let ctx;
@@ -18,8 +18,9 @@ async function makeUser(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
-  await makeUser('ag.one', ['agent']);
-  await makeUser('ag.two', ['agent']);
+  const ownBook = await createOwnBookRole(ctx.api);
+  await makeUser('ag.one', [ownBook]);
+  await makeUser('ag.two', [ownBook]);
   await makeUser('clm.officer', ['claims']);
   for (const [who, name] of [['ag.one', 'Scopia Uno'], ['ag.two', 'Scopia Dos']]) {
     const r = await as(who, 'post', '/leads').send({ firstName: name.split(' ')[0], lastName: name.split(' ')[1], emailId: `${who}@lead.example.ph`, lob: 'MOTOR' });
@@ -164,7 +165,7 @@ describe('record-level scoping (agents see only their own book)', () => {
     expect((await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': [] } })).status).toBe(200);
     const r = await as('ag.one', 'get', '/leads?pageSize=500');
     expect(r.body.data.length).toBeGreaterThan(1);
-    await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': ['agent'] } });
+    await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': ['own-book'] } });
     expect((await as('ag.one', 'get', '/leads?pageSize=500')).body.data.length).toBe(1);
   });
 });

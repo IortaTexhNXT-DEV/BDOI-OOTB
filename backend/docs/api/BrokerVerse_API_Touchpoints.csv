@@ -737,7 +737,7 @@
     ""username"": ""BrokerVerse"",
     ""displayName"": ""BrokerVerse Administrator"",
     ""roles"": [
-      ""it-admin""
+      ""system-admin""
     ],
     ""permissions"": [
       ""read:leads""
@@ -765,7 +765,7 @@
     ""username"": ""BrokerVerse"",
     ""displayName"": ""BrokerVerse Administrator"",
     ""roles"": [
-      ""it-admin""
+      ""system-admin""
     ],
     ""permissions"": [
       ""read:leads""
@@ -830,7 +830,7 @@
     ""userId"": ""usr_1"",
     ""username"": ""BrokerVerse"",
     ""roles"": [
-      ""it-admin""
+      ""system-admin""
     ]
   }
 }"
@@ -2874,7 +2874,7 @@
     ""level"": ""insurer + product""
   }
 }"
-123,Dashboards,GET,/api/agent/get-dashboard-details,"Agent home: own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",Dashboard > Agent Dashboard,Bearer JWT,"read:leads, read:quotations, read:policies",Query: ?scope=mine,"{
+123,Dashboards,GET,/api/agent/get-dashboard-details,"Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",Dashboard > Sales Dashboard,Bearer JWT,"read:leads, read:quotations, read:policies",Query: ?scope=mine,"{
   ""success"": true,
   ""data"": {
     ""funnel"": {
@@ -2929,7 +2929,21 @@
     }
   }
 }"
-126,Dashboards,GET,/api/dashboard/sales,"Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",Dashboard > Sales,Bearer JWT,"read:leads, read:quotations",Query: ?scope=mine,"{
+126,Dashboards,GET,/api/dashboard/processing,"Processing Team workbench: quotations with the customer or the insurers, cycle time, data-quality alerts, cases awaiting decision, volume by LOB",Dashboard > Processing Dashboard,Bearer JWT,read:quotations,,"{
+  ""success"": true,
+  ""data"": {
+    ""workbenchMetrics"": {
+      ""newSubmissions"": 3,
+      ""olderSubmissions"": 1,
+      ""avgCycleTime"": ""26 Hours"",
+      ""openAlerts"": {
+        ""totalAlerts"": 0
+      }
+    },
+    ""myCases"": []
+  }
+}"
+127,Dashboards,GET,/api/dashboard/sales,"Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",Dashboard > Sales,Bearer JWT,"read:leads, read:quotations",Query: ?scope=mine,"{
   ""success"": true,
   ""data"": {
     ""funnel"": {
@@ -2944,20 +2958,6 @@
         ""count"": 4
       }
     ]
-  }
-}"
-127,Dashboards,GET,/api/dashboard/underwriting,"Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB",Dashboard > Underwriting Dashboard,Bearer JWT,read:quotations,,"{
-  ""success"": true,
-  ""data"": {
-    ""workbenchMetrics"": {
-      ""newSubmissions"": 3,
-      ""olderSubmissions"": 1,
-      ""avgCycleTime"": ""26 Hours"",
-      ""openAlerts"": {
-        ""totalAlerts"": 0
-      }
-    },
-    ""myCases"": []
   }
 }"
 128,Disbursements,GET,/api/disbursements,"Payment vouchers (paging; filter customerCode, voucherNumber, transactionNumber, fromDate, toDate, status, payeeType, referrerId, search)",Accounts > Disbursement (Payment Voucher),Bearer JWT,read:disbursements,Query: ?page=1&pageSize=10&customerCode=CL-2026-00001&fromDate=2026-09-01&toDate=2026-09-30,"{
@@ -4926,7 +4926,7 @@
 239,Open Items,DELETE,/api/payments/open-items/events/:id,Remove one of the signed-in user's events,Agent > Open Items > Upcoming events,Bearer JWT,Any authenticated user,,"{
   ""success"": true
 }"
-240,Payments,GET,/api/payments,"Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); agents see their own policies",Agent > Payments,Bearer JWT,"read:receipts, read:policies",Query: ?status=PENDING&search=Santos&page=1&pageSize=10,"{
+240,Payments,GET,/api/payments,"Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); roles without the payments overview (e.g. Claims) see only the policies they own",Agent > Payments,Bearer JWT,"read:receipts, read:policies",Query: ?status=PENDING&search=Santos&page=1&pageSize=10,"{
   ""success"": true,
   ""data"": [
     {
@@ -8696,7 +8696,7 @@
     }
   }
 }"
-452,Quotations,POST,/api/quotations/:id/send-for-approval,Send the quotation to the customer for approval (signed link e-mail) and notify underwriting,Operations > Quotation > Quote detail > Send for customer approval,Bearer JWT,write:quotations,"{
+452,Quotations,POST,/api/quotations/:id/send-for-approval,Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team,Operations > Quotation > Quote detail > Send for customer approval,Bearer JWT,write:quotations,"{
   ""sentBy"": ""agent""
 }","{
   ""success"": true,
@@ -11415,7 +11415,7 @@
   ""type"": ""Counter Offer"",
   ""method"": ""Email"",
   ""description"": ""Client asked for a 5% discount"",
-  ""outcome"": ""Pending underwriting"",
+  ""outcome"": ""Pending processing review"",
   ""nextAction"": ""Submit for approval"",
   ""followUpDate"": ""2026-10-05""
 }","{
@@ -12023,13 +12023,13 @@
   ""perPage"": 50,
   ""totalPages"": 1
 }"
-625,Reports,GET,/api/reports/filters/agents,"Agents a report can be filtered by (active users with the agent role), as { label, value }",Reports > * (Agent filter),Bearer JWT,read:reports,,"{
+625,Reports,GET,/api/reports/filters/agents,"Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }",Reports > * (Agent filter),Bearer JWT,read:reports,,"{
   ""success"": true,
   ""data"": [
     {
-      ""label"": ""Ramon Agent"",
+      ""label"": ""Maria Santos"",
       ""value"": ""usr_1"",
-      ""code"": ""AG001""
+      ""code"": ""AE001""
     }
   ]
 }"
@@ -12180,13 +12180,13 @@
     }
   ]
 }"
-635,Schedules,PUT,/api/schedules/:code,"Change a job schedule, parameters or enabled flag",Master > Schedules > Edit,Bearer JWT,"role:it-admin, role:ba, role:finance","{
+635,Schedules,PUT,/api/schedules/:code,"Change a job schedule, parameters or enabled flag",Master > Schedules > Edit,Bearer JWT,role:accounting,"{
   ""cron"": ""0 7 * * *"",
   ""enabled"": true
 }","{
   ""success"": true
 }"
-636,Schedules,POST,/api/schedules/:code/run,Run a job now,Master > Schedules > Run now,Bearer JWT,"role:it-admin, role:ba, role:finance",,"{
+636,Schedules,POST,/api/schedules/:code/run,Run a job now,Master > Schedules > Run now,Bearer JWT,role:accounting,,"{
   ""success"": true,
   ""data"": {
     ""runId"": 1,
@@ -12249,7 +12249,7 @@
     }
   ]
 }"
-641,System Settings,PUT,/api/settings,Update one or more configuration values,Master > System Settings,Bearer JWT,"role:it-admin, role:ba","{
+641,System Settings,PUT,/api/settings,Update one or more configuration values,Master > System Settings,Bearer JWT,role:system-admin,"{
   ""settings"": {
     ""tax.vat_rate"": 0.12,
     ""branding.primary_color"": ""#0072d8""
@@ -12257,7 +12257,7 @@
 }","{
   ""success"": true
 }"
-642,System Settings,GET,/api/settings/audit,Audit trail (filter by entity / entityId / user),Master > Audit trail,Bearer JWT,"role:it-admin, role:ba, read:audit",Query: ?entity=policy&entityId=pol_1&limit=100,"{
+642,System Settings,GET,/api/settings/audit,Audit trail (filter by entity / entityId / user),Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?entity=policy&entityId=pol_1&limit=100,"{
   ""success"": true,
   ""data"": [
     {
@@ -12477,10 +12477,10 @@
       ""username"": ""juan.santos"",
       ""displayName"": ""Juan Santos"",
       ""roles"": [
-        ""agent""
+        ""sales""
       ],
       ""roleNames"": [
-        ""Agent / Referrer""
+        ""Sales & Marketing (Account Executive)""
       ],
       ""status"": ""active""
     }
@@ -12514,7 +12514,7 @@
     ""userId"": ""usr_1"",
     ""username"": ""juan.santos"",
     ""roles"": [
-      ""agent""
+      ""sales""
     ]
   }
 }"
@@ -12522,7 +12522,7 @@
   ""displayName"": ""Maria Cruz"",
   ""roles"": [
     ""sales"",
-    ""customer-services""
+    ""operations""
   ],
   ""status"": ""active""
 }","{
@@ -12591,7 +12591,7 @@
     {
       ""id"": 1,
       ""code"": ""sales"",
-      ""name"": ""Sales / Relationship Manager"",
+      ""name"": ""Sales & Marketing (Account Executive)"",
       ""permissions"": [
         ""read:leads""
       ],

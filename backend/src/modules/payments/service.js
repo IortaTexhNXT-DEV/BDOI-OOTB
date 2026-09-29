@@ -1,4 +1,5 @@
 /** Agent Payments (premium payment status per bill) and Open Items (pending payments, renewals, pending quotes, expiring policies, events). */
+import { isAdmin } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { notFound } from '../../lib/errors.js';
 import { isoDate, round2 } from '../accounting/lib/http.js';
@@ -8,8 +9,9 @@ import { isoDate, round2 } from '../accounting/lib/http.js';
 const STATUS_SQL = `CASE WHEN r.status = 'cancelled' AND p.billing_mode = 'direct' THEN 'DIRECT' WHEN r.status = 'cancelled' THEN 'CANCELLED'
   WHEN r.status = 'paid' OR r.balance <= 0 THEN 'PAID' WHEN r.status = 'partial' THEN 'REVIEWING' ELSE 'PENDING' END`;
 const STATUS_LABEL = { DIRECT: 'DIRECT BILL' };
-/** Agents (no finance read permission) only see their own policies. */
-export const ownOnly = (user) => !(user.roles || []).some((r) => ['it-admin', 'ba', 'finance', 'sales', 'customer-services', 'underwriting'].includes(r));
+/** Roles that see every policy's payments; any other role (e.g. Claims) only sees the policies it owns. Administrators see everything. */
+const ALL_PAYMENTS_ROLES = ['accounting', 'sales', 'operations', 'processing'];
+export const ownOnly = (user) => !isAdmin(user) && !(user.roles || []).some((r) => ALL_PAYMENTS_ROLES.includes(r));
 
 const PAY_SQL = `SELECT r.*, ${STATUS_SQL} AS pay_status, p.policy_number, p.owner_user_id, p.billing_mode, c.client_code, c.display_name, ic.name AS insurer_name, pr.name AS product_name,
   la.payment_mode AS last_mode, la.applied_at AS last_paid_at, COALESCE(rc.receipt_number, la.reference_no) AS last_reference

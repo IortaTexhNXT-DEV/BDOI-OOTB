@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
+import { ADMIN_ROLE, requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
 import { getSettings, setSetting } from '../../lib/settings.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
@@ -22,8 +22,8 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/', summary: 'Update one or more configuration values', screen: 'Master > System Settings', roles: ['it-admin', 'ba'],
-  middleware: [requireAuth, requireRole('it-admin', 'ba'), validate(z.object({ settings: z.record(z.any()) }))],
+  method: 'PUT', path: '/', summary: 'Update one or more configuration values', screen: 'Master > System Settings', roles: [ADMIN_ROLE],
+  middleware: [requireAuth, requireRole(ADMIN_ROLE), validate(z.object({ settings: z.record(z.any()) }))],
   request: { settings: { 'tax.vat_rate': 0.12, 'branding.primary_color': '#0072d8' } }, response: { success: true },
   handler: async (req, res) => {
     const before = Object.fromEntries((await getSettings()).map((s) => [s.key, s.value]));
@@ -37,7 +37,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/audit', summary: 'Audit trail (filter by entity / entityId / user)', screen: 'Master > Audit trail', roles: ['it-admin', 'ba'],
+  method: 'GET', path: '/audit', summary: 'Audit trail (filter by entity / entityId / user)', screen: 'Master > Audit trail', roles: [ADMIN_ROLE],
   middleware: [requireAuth, requirePermission('read:audit')], query: { entity: 'policy', entityId: 'pol_1', limit: 100 },
   response: { success: true, data: [{ at: '2026-01-01T00:00:00Z', username: 'BrokerVerse', entity: 'policy', action: 'create' }] },
   handler: async (req, res) => {

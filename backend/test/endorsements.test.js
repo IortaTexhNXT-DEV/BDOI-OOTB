@@ -36,8 +36,8 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
-  cs = await persona('e.cs', ['customer-services']);
-  finance = await persona('e.finance', ['finance']);
+  cs = await persona('e.cs', ['operations']);
+  finance = await persona('e.finance', ['accounting']);
 });
 afterAll(async () => { await pool.end(); });
 

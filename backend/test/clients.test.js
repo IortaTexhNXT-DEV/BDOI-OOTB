@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, createOwnBookRole } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -17,8 +17,8 @@ async function persona(username, roles) {
 beforeAll(async () => {
   ctx = await setup();
   sales = await persona('c.sales', ['sales']);
-  finance = await persona('c.finance', ['finance']);
-  agent = await persona('c.agent', ['agent']);
+  finance = await persona('c.finance', ['accounting']);
+  agent = await persona('c.agent', [await createOwnBookRole(ctx.api)]);
 });
 afterAll(async () => { await pool.end(); });
 

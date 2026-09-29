@@ -9,9 +9,9 @@ let agentId;
 let checkerTok;
 beforeAll(async () => {
   ctx = await setup();
-  const a = await ctx.api('post', '/users').send({ username: 'i.agent', password: 'Welcome@123', displayName: 'Ivy Agent', employeeCode: 'AG900', roles: ['agent'] });
+  const a = await ctx.api('post', '/users').send({ username: 'i.agent', password: 'Welcome@123', displayName: 'Ivy Agent', employeeCode: 'AG900', roles: ['sales'] });
   agentId = a.body.data.userId || a.body.data.id;
-  await ctx.api('post', '/users').send({ username: 'i.checker', password: 'Welcome@123', displayName: 'Ina Checker', roles: ['ba'] });
+  await ctx.api('post', '/users').send({ username: 'i.checker', password: 'Welcome@123', displayName: 'Ina Checker', roles: ['system-admin'] });
   agentTok = await loginAs(ctx.app, 'i.agent', 'Welcome@123');
   checkerTok = await loginAs(ctx.app, 'i.checker', 'Welcome@123');
   await pool.query('UPDATE policies SET owner_user_id = $1 WHERE policy_number IN (\'POL-2026-90024\', \'POL-2026-95008\')', [agentId]);

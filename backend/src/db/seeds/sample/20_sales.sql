@@ -137,7 +137,7 @@ SELECT 'cm_sls_' || right(p.id, 2), p.id, p.quote_id, p.owner_user_id, p.net_pre
 FROM policies p JOIN quotes q ON q.id = p.quote_id WHERE p.id LIKE 'pol_sls_%'
   -- commission accrues only to producers holding a commission-earning role (commission.eligible_roles), never to an administrator
   AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = p.owner_user_id
-    AND ro.code IN (SELECT jsonb_array_elements_text(COALESCE((SELECT value FROM app_settings WHERE key = 'commission.eligible_roles'), '["agent","sales"]'::jsonb))))
+    AND ro.code IN (SELECT jsonb_array_elements_text(COALESCE((SELECT value FROM app_settings WHERE key = 'commission.eligible_roles'), '["sales"]'::jsonb))))
 ON CONFLICT (id) DO NOTHING;
 
 -- ---------- Sample: endorsements ----------

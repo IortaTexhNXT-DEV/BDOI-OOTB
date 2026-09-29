@@ -3,7 +3,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, createOwnBookRole } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { config } from '../src/config.js';
 import { generateReport, scheduledReport } from '../src/modules/reports/service.js';
@@ -74,7 +74,8 @@ async function seedSample() {
 beforeAll(async () => {
   ctx = await setup();
   tokens.admin = ctx.token;
-  for (const [u, role] of [['rpt.sales', 'sales'], ['rpt.finance', 'finance'], ['rpt.agentrole', 'agent']]) {
+  await createOwnBookRole(ctx.api);
+  for (const [u, role] of [['rpt.sales', 'sales'], ['rpt.finance', 'accounting'], ['rpt.ownbook', 'own-book']]) {
     const r = await ctx.api('post', '/users').send({ username: u, password: 'Welcome@123', displayName: u, roles: [role] });
     expect(r.status).toBe(201);
     tokens[role] = await loginAs(ctx.app, u, 'Welcome@123');
@@ -102,10 +103,10 @@ describe('report catalogue', () => {
     const sales = (await as('sales', 'get', '/reports')).body.data.map((d) => d.code);
     expect(sales).toContain('production-register');
     expect(sales).not.toContain('trial-balance');
-    const fin = (await as('finance', 'get', '/reports?category=financial')).body.data;
+    const fin = (await as('accounting', 'get', '/reports?category=financial')).body.data;
     expect(fin.map((d) => d.code)).toContain('trial-balance');
     expect(fin.every((d) => d.category === 'financial')).toBe(true);
-    expect((await as('agent', 'get', '/reports')).status).toBe(403);
+    expect((await as('own-book', 'get', '/reports')).status).toBe(403);
   });
   it('returns a definition with the screen filter schema', async () => {
     const r = await as('admin', 'get', '/reports/production-register');
@@ -219,8 +220,8 @@ describe('running reports', () => {
     expect((await as('admin', 'post', '/reports/production-register/run').send({ FromDate: '2025-12-31', ToDate: '2025-01-01' })).status).toBe(400);
     expect((await as('admin', 'post', '/reports/production-register/run').send({ FromDate: 'yesterday-ish' })).status).toBe(400);
     expect((await as('sales', 'post', '/reports/trial-balance/run').send(Y)).status).toBe(403);
-    expect((await as('finance', 'post', '/reports/trial-balance/run').send(Y)).status).toBe(200);
-    expect((await as('agent', 'post', '/reports/production-register/run').send(Y)).status).toBe(403);
+    expect((await as('accounting', 'post', '/reports/trial-balance/run').send(Y)).status).toBe(200);
+    expect((await as('own-book', 'post', '/reports/production-register/run').send(Y)).status).toBe(403);
     expect((await request(ctx.app).post('/api/reports/production-register/run').send(Y)).status).toBe(401);
   });
 });
@@ -242,7 +243,7 @@ describe('generated files', () => {
     expect(text).toContain('RPT-POL-3');
     expect(text).toMatch(/TOTAL,.*45000/);
 
-    const x = await gen('trial-balance', { ...Y, format: 'xlsx' }, 'finance');
+    const x = await gen('trial-balance', { ...Y, format: 'xlsx' }, 'accounting');
     const xfile = createdFiles[createdFiles.length - 1];
     expect(execFileSync('unzip', ['-t', xfile]).toString()).toContain('No errors detected');
     const sheet = execFileSync('unzip', ['-p', xfile, 'xl/worksheets/sheet1.xml']).toString();
@@ -286,11 +287,11 @@ describe('generated files', () => {
 describe('report schedules', () => {
   let id;
   it('creates a schedule backed by a scheduledReport job', async () => {
-    expect((await as('finance', 'post', '/reports/schedules').send({ reportCode: 'trial-balance', cron: 'not a cron' })).status).toBe(400);
-    expect((await as('finance', 'post', '/reports/schedules').send({ reportCode: 'trial-balance', cron: '0 6 * * *', recipients: 'not-an-email' })).status).toBe(400);
+    expect((await as('accounting', 'post', '/reports/schedules').send({ reportCode: 'trial-balance', cron: 'not a cron' })).status).toBe(400);
+    expect((await as('accounting', 'post', '/reports/schedules').send({ reportCode: 'trial-balance', cron: '0 6 * * *', recipients: 'not-an-email' })).status).toBe(400);
     expect((await as('sales', 'post', '/reports/schedules').send({ reportCode: 'trial-balance', cron: '0 6 * * *' })).status).toBe(403);
-    expect((await as('agent', 'post', '/reports/schedules').send({ reportCode: 'production-register', cron: '0 6 * * *' })).status).toBe(403);
-    const r = await as('finance', 'post', '/reports/schedules').send({
+    expect((await as('own-book', 'post', '/reports/schedules').send({ reportCode: 'production-register', cron: '0 6 * * *' })).status).toBe(403);
+    const r = await as('accounting', 'post', '/reports/schedules').send({
       name: 'Monthly trial balance', reportCode: 'trial-balance', cron: '0 6 1 * *', format: 'xlsx',
       params: { ...Y, ReportCriteria: 'Overall' }, recipients: 'controller@broker.example; cfo@broker.example',
     });
@@ -300,22 +301,22 @@ describe('report schedules', () => {
     const job = await one('SELECT * FROM scheduled_jobs WHERE code = $1', [`report-${id}`]);
     expect(job).toMatchObject({ handler: 'scheduledReport', cron: '0 6 1 * *', enabled: true });
     expect(job.params.scheduleId).toBe(id);
-    const list = await as('finance', 'get', '/reports/schedules');
+    const list = await as('accounting', 'get', '/reports/schedules');
     expect(list.body.data.map((s) => s.id)).toContain(id);
     expect((await as('sales', 'get', '/reports/schedules')).body.data.map((s) => s.id)).not.toContain(id);
-    expect((await as('finance', 'get', `/reports/schedules/${id}`)).body.data.name).toBe('Monthly trial balance');
+    expect((await as('accounting', 'get', `/reports/schedules/${id}`)).body.data.name).toBe('Monthly trial balance');
   });
   it('updates the schedule and its job', async () => {
-    const r = await as('finance', 'put', `/reports/schedules/${id}`).send({ cron: '30 7 * * 1', enabled: false, format: 'pdf' });
+    const r = await as('accounting', 'put', `/reports/schedules/${id}`).send({ cron: '30 7 * * 1', enabled: false, format: 'pdf' });
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({ cron: '30 7 * * 1', enabled: false, format: 'pdf' });
     const job = await one('SELECT * FROM scheduled_jobs WHERE code = $1', [`report-${id}`]);
     expect(job).toMatchObject({ cron: '30 7 * * 1', enabled: false });
     expect(job.params.format).toBe('pdf');
-    expect((await as('finance', 'put', `/reports/schedules/${id}`).send({ format: 'doc' })).status).toBe(400);
+    expect((await as('accounting', 'put', `/reports/schedules/${id}`).send({ format: 'doc' })).status).toBe(400);
   });
   it('runs now: generates the file and queues the e-mail', async () => {
-    const r = await as('finance', 'post', `/reports/schedules/${id}/run`);
+    const r = await as('accounting', 'post', `/reports/schedules/${id}/run`);
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.data).toMatchObject({ code: 'trial-balance', format: 'pdf', emailed: 2 });
     createdFiles.push(path.resolve(config.uploadDir, (await one('SELECT storage_key FROM generated_reports WHERE id = $1', [r.body.data.reportId])).storage_key));
@@ -331,10 +332,10 @@ describe('report schedules', () => {
   });
   it('deletes the schedule and its job', async () => {
     expect((await as('sales', 'delete', `/reports/schedules/${id}`)).status).toBe(403);
-    const r = await as('finance', 'delete', `/reports/schedules/${id}`);
+    const r = await as('accounting', 'delete', `/reports/schedules/${id}`);
     expect(r.status).toBe(200);
     expect(await one('SELECT 1 FROM scheduled_jobs WHERE code = $1', [`report-${id}`])).toBeNull();
-    expect((await as('finance', 'get', `/reports/schedules/${id}`)).status).toBe(404);
+    expect((await as('accounting', 'get', `/reports/schedules/${id}`)).status).toBe(404);
     expect(await scheduledReport({ scheduleId: id })).toMatchObject({ skipped: expect.any(String) });
     const a = await one('SELECT count(*)::int AS n FROM audit_log WHERE entity = \'report_schedule\'');
     expect(a.n).toBeGreaterThanOrEqual(4);

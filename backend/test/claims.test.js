@@ -18,7 +18,7 @@ beforeAll(async () => {
   await makeUser('c.maker', ['claims']);
   await makeUser('c.checker', ['claims']);
   await makeUser('s.sales', ['sales']);
-  await makeUser('f.finance', ['finance']);
+  await makeUser('f.finance', ['accounting']);
   // prerequisite rows inserted directly (policy endpoints belong to another module)
   await query(`INSERT INTO clients(id, client_code, display_name, first_name, last_name, email, city, state) VALUES
     ('cl_t1','CL-T-1','Test Insured','Test','Insured','insured@example.ph','Makati','Metro Manila'),

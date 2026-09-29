@@ -9,6 +9,14 @@ rows are inserted by natural key or fixed id, and existing rows and administrato
    only when `SEED_SAMPLE_DATA` is on. Reference and sample files are interleaved by file name (a reference file
    runs before the sample file with the same name), so a sample file always runs after the reference data it reads.
 
+Roles (broker terminology, `ROLES` in `seed.js`): `system-admin` System Administrator (Super Admin Access, every
+permission), `sales` Sales & Marketing (Account Executive), `processing` Processing Team (Placement & Policy Processing),
+`operations` Operations (Client Servicing), `claims` Claims, `accounting` Accounting and `accounting-manager` Accounting
+Manager (includes Accounting, adds the period-end approval). A database of an earlier release is converted by migration
+`0140_broker_roles.sql` (underwriting, customer-services, finance, finance-manager renamed; it-admin, ba and
+user-access-admin merged into system-admin; the agent login role withdrawn, its users moved to sales); the seed never
+creates the old codes.
+
 `SEED_SAMPLE_DATA`: `true` / `false` (also `1` / `0`, `yes` / `no`, `on` / `off`). Unset: on in development and test,
 off with `NODE_ENV=production`. To remove sample data from a database that was seeded with it, use
 `npm run purge:sample` (`scripts/purge-sample-data.js`, see `docs/DEPLOY.md`).
@@ -38,7 +46,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/51_masters.sql` | sample | demo master records: broker companies, employees, bank accounts, petty cash funds, dated exchange rates, insurer commission rates; demo contact details on banks, insurers, signatories, branches |
 | `52_product_configurator.sql` | reference | product templates, components, risk sections and mappings |
 | `62_period_end_reports.sql` | reference | report catalogue rows of period-end processing and BIR tax (income statement, balance sheet, trial balance with opening / movement / closing, GL detail, aged payables to insurers, month-end close status, VAT summary, SAWT, QAP, SLSP) |
-| `sample/53_remittance.sql` | sample | six sample users (`agent.jdelacruz`, `agent.msantos`, `agent.preyes`, `agent.agarcia`, `agent.jmartinez`, `fin.approver`; random unusable passwords); remittances, bills, items, approvals, delegation |
+| `sample/53_remittance.sql` | sample | six sample users: five Account Executives with the Sales & Marketing role (`agent.jdelacruz`, `agent.msantos`, `agent.preyes`, `agent.agarcia`, `agent.jmartinez`; the usernames are kept from earlier releases) and an Accounting approver (`fin.approver`); random unusable passwords; remittances, bills, items, approvals, delegation |
 | `sample/54_reinsurance.sql` | sample | reinsurers, treaties, cessions, recoveries, bordereaux, reconciliations, exceptions |
 | `sample/55_incentive.sql` | sample | incentive programmes, calculations, results |
 | `56_chart_of_accounts_masters.sql` | reference | Main / Sub Account masters mirroring the chart of accounts |
