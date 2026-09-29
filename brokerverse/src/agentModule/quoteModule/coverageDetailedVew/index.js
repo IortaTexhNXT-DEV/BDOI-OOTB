@@ -16,6 +16,8 @@ import { RadioButton } from "primereact/radiobutton";
 import policyService from "../../../services/policyService";
 import s3Service from "../../../services/s3Service";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
+import { Dialog } from "primereact/dialog";
+import placementService from "../../../services/placementService";
 
 const CoverageDetailedView = () => {
   const { t } = useTranslation();
@@ -168,7 +170,49 @@ const CoverageDetailedView = () => {
     customHistory.back();
   };
 
+  // Placement journey (placement.journey): a line that requires a Placement Slip places the risk with the insurer(s)
+  // first; optional lets the user choose; skip converts the quotation directly as before.
+  const [journeyChoice, setJourneyChoice] = useState(false);
+
+  const createPlacementSlip = async () => {
+    setJourneyChoice(false);
+    try {
+      setIsProcessing(true);
+      const placement = await placementService.placeQuotation(resolvedQuotationId, {
+        inceptionDate: additionalPolicyData.inception || additionalPolicyData.inceptionDate || undefined,
+        billingMode,
+      });
+      toast.current?.show({ severity: "success", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t("placement.quoteJourney.createdDetail"), life: 2500 });
+      navigate(`/placement/placement-slips/${placement.id}`);
+    } catch (error) {
+      toast.current?.show({ severity: "error", summary: t("common.error"), detail: error.message, life: 5000 });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleSendToInsuranceCompany = async () => {
+    if (!resolvedQuotationId || existingPolicy) return convertDirectly();
+    const q = quotationData || {};
+    if (q.placementId) {
+      navigate(`/placement/placement-slips/${q.placementId}`);
+      return undefined;
+    }
+    let journey = q.journey;
+    if (!journey) {
+      journey = await placementService.journey({ lob: q.lob, productType: q.productType }).catch(() => null);
+    }
+    const mode = q.isRenewal ? "skip" : journey?.placementSlip || "skip";
+    if (mode === "required") return createPlacementSlip();
+    if (mode === "optional") {
+      setJourneyChoice(true);
+      return undefined;
+    }
+    return convertDirectly();
+  };
+
+  const convertDirectly = async () => {
+    setJourneyChoice(false);
     if (!resolvedQuotationId) {
       toast.current?.show({
         severity: "warn",
@@ -225,6 +269,11 @@ const CoverageDetailedView = () => {
         "agent"
       );
 
+      if (!result.success && result.code === "PLACEMENT_JOURNEY") {
+        setIsProcessing(false);
+        await createPlacementSlip();
+        return;
+      }
       if (result.success) {
         const policyData = result.data?.data?.policy || result.data?.policy;
         const clientData = result.data?.data?.client || result.data?.client;
@@ -330,7 +379,17 @@ const CoverageDetailedView = () => {
   const quotData = quotationData || {};
   const lead = quotData?.lead || {};
   const vehicleDetails = quotData?.insuranceVehicleDetails?.[0] || {};
-  const participantDetails = quotData?.participantDetails || [];
+  // risk_participants from the API (lead first, amounts split by share) when present
+  const participantDetails = quotData?.participants?.length
+    ? quotData.participants.map((p) => ({
+        insuranceCompanyName: p.insuranceCompanyName,
+        participantName: p.insuranceCompanyName,
+        sumInsuredCurrency: quotData.currency,
+        premiumCurrency: quotData.currency,
+        sharePercentage: p.sharePercent,
+        premiumAmount: p.premiumTotal,
+      }))
+    : quotData?.participantDetails || [];
 
   // Check if any participant has sumInsured or premium values
   const hasSumInsuredValues = participantDetails.some(
@@ -1090,6 +1149,15 @@ const CoverageDetailedView = () => {
           loading={isProcessing}
         />
       </div>
+      <Dialog header={t("placement.quoteJourney.title")} visible={journeyChoice} onHide={() => setJourneyChoice(false)} style={{ width: "36rem" }} breakpoints={{ "640px": "95vw" }}>
+        <p>{t("placement.quoteJourney.question")}</p>
+        <div className="flex flex-column gap-2">
+          <Button label={t("placement.quoteJourney.placement")} icon="pi pi-briefcase" onClick={createPlacementSlip} />
+          <small className="text-500">{t("placement.quoteJourney.placementHint")}</small>
+          <Button label={t("placement.quoteJourney.direct")} icon="pi pi-verified" severity="secondary" outlined onClick={convertDirectly} className="mt-2" />
+          <small className="text-500">{t("placement.quoteJourney.directHint")}</small>
+        </div>
+      </Dialog>
     </div>
   );
 };

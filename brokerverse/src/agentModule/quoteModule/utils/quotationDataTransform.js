@@ -135,6 +135,7 @@ export const transformToBackendFormat = (
         sumInsuredCurrency: defaultCurrency(),
         premiumCurrency: defaultCurrency(),
         sharePercentage: primaryShare,
+        isLead: true, // the primary insurer is the lead of the co-insurance (validated on the server)
       });
     } else {
       console.log(
@@ -191,6 +192,7 @@ export const transformToBackendFormat = (
           sumInsuredCurrency: defaultCurrency(),
           premiumCurrency: defaultCurrency(),
           sharePercentage: "100",
+          isLead: true,
         },
       ];
     } else {

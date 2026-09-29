@@ -12,6 +12,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import policyService from "../../../services/policyService";
 import quotationService from "../../../services/quotationService";
+import placementService from "../../../services/placementService";
 import systemSettingsService from "../../../services/systemSettingsService";
 import PolicyPaymentCapture from "../../../components/PolicyPaymentCapture";
 
@@ -135,6 +136,17 @@ const PaymentConfirmation = () => {
       state?.lob || null
     );
     setIssuing(false);
+    if (!result.success && result.code === "PLACEMENT_JOURNEY") {
+      // the line's placement journey requires a Placement Slip: the policy is issued from it once the insurer(s) confirm
+      try {
+        const placement = await placementService.placeQuotation(quotationId, { billingMode });
+        showToast("info", t("placement.quoteJourney.created", { number: placement.placementNumber }), t("placement.quoteJourney.createdDetail"), 3000);
+        navigate(`/placement/placement-slips/${placement.id}`);
+      } catch (e) {
+        showToast("error", t("agent.policyCreationFailed", "Policy not issued"), e.message, 8000);
+      }
+      return;
+    }
     if (!result.success) {
       const message = result.error || "The policy could not be issued";
       const missing = message.includes("Missing:") ? message.split("Missing:")[1].split(";").map((s) => s.trim()).filter(Boolean) : [];

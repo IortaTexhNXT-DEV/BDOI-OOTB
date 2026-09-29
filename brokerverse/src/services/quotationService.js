@@ -453,9 +453,12 @@ class QuotationService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
+        const failure = new Error(
           errorData.message || "Failed to convert quotation to policy"
         );
+        // placement journey refusal (placement.journey requires a Placement Slip for this line)
+        failure.code = errorData.errors?.[0]?.code;
+        throw failure;
       }
 
       const data = await response.json();
@@ -469,6 +472,7 @@ class QuotationService {
       console.error("Convert quotation to policy error:", error);
       return {
         success: false,
+        code: error.code,
         error:
           error.name === "AbortError"
             ? "Request timeout. Please try again."

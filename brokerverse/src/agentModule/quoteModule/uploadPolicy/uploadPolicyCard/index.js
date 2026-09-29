@@ -489,7 +489,17 @@ const UploadPolicyCard = ({
   };
 
   // Get participant details from quotation (Motor, etc.) or build for Fire/Allied Perils when empty
-  const participantDetails = quotationDetails?.participantDetails || [];
+  // risk_participants from the API (lead first, amounts split by share) when the quotation carries them
+  const participantDetails = quotationDetails?.participants?.length
+    ? quotationDetails.participants.map((p) => ({
+        participantName: p.insuranceCompanyName,
+        sumInsuredCurrency: quotationDetails.currency,
+        premiumCurrency: quotationDetails.currency,
+        sharePercentage: String(p.sharePercent),
+        sumInsured: p.sumInsured,
+        premium: p.premiumTotal,
+      }))
+    : quotationDetails?.participantDetails || [];
   const lob = state?.lob || quotationDetails?.productType || "";
 
   // For Fire and Allied Perils: when participantDetails is empty, show insured name and premium

@@ -15,6 +15,8 @@ const OPERATIONS_ALL = [
   "Leads/Prospects",
   "Clients",
   "Quotation",
+  "Broker Slips",
+  "Placement Slips",
   "Policy",
   "Claims",
   "Renewals",
@@ -102,7 +104,7 @@ export const roleMenuPermissions = {
   // permission, which the agent role does not hold (D100).
   agent: {
     dashboard: ["Agent Dashboard"],
-    operations: ["Home", "Leads/Prospects", "Clients", "Quotation", "Policy", "Claims", "Renewals > Renewal Policy"],
+    operations: ["Home", "Leads/Prospects", "Clients", "Quotation", "Broker Slips", "Placement Slips", "Policy", "Claims", "Renewals > Renewal Policy"],
     commission: ["Commission Dashboard"],
   },
 };

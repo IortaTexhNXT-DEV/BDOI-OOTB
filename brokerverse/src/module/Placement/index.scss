@@ -1,0 +1,359 @@
+// Placement journey screens: broker slips, placement slips, record issued policy.
+.hidden-file { display: none; }
+
+// dialogs are rendered outside the page container
+.placement-dialog label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #4b5563;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+.placement-page {
+  padding: 1rem 1.25rem 2rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: #4b5563;
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  .muted { color: #6b7280; }
+  .small { font-size: 0.78rem; }
+  .hint { display: block; margin-top: 0.35rem; color: #6b7280; font-size: 0.78rem; }
+  .num { text-align: right; white-space: nowrap; }
+  .center { text-align: center; }
+
+}
+
+.placement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+
+  .placement-header-text {
+    display: flex;
+    align-items: flex-start;
+
+    h2 {
+      margin: 0 0 0.2rem;
+      font-size: 1.45rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+      max-width: 60rem;
+    }
+  }
+
+  .placement-header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+
+    .placement-status { font-size: 0.85rem; padding: 0.35rem 0.75rem; }
+  }
+}
+
+.placement-card {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 1.25rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:first-child { margin-top: 0; }
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+
+    .search input { width: 22rem; max-width: 100%; }
+    .status-filter { min-width: 12rem; }
+  }
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  .kpi-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid var(--primary-color, #0072d8);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+
+    &.active { background: var(--primary-color-light, #eef5ff); border-color: var(--primary-color, #0072d8); }
+    .kpi-value { font-size: 1.5rem; font-weight: 700; color: #111827; }
+    .kpi-label { font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; }
+  }
+}
+
+.placement-grid {
+  .p-datatable-thead > tr > th {
+    background: #f8f9fb;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .num { text-align: right; }
+  tr.clickable { cursor: pointer; }
+  .doc-number { font-weight: 600; color: var(--primary-color, #0072d8); white-space: nowrap; }
+  .nowrap, .placement-status { white-space: nowrap; }
+}
+
+.lob-chip, .co-chip {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #4338ca;
+  vertical-align: middle;
+}
+
+.co-chip { background: #ecfdf5; color: #047857; }
+
+.participant-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: left;
+    background: #f8f9fb;
+    color: #374151;
+    font-weight: 600;
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid #f1f2f4;
+    vertical-align: middle;
+  }
+
+  th.num, td.num { text-align: right; }
+  th.center, td.center { text-align: center; }
+  tr.lead-row td { background: #f5f9ff; }
+  tr.best-row td { background: #f0fdf4; }
+  tfoot td { border-bottom: none; padding-top: 0.6rem; }
+  .actions-cell { white-space: nowrap; text-align: right; }
+  .total-ok { color: #15803d; font-weight: 600; }
+  .total-bad { color: #b91c1c; font-weight: 600; }
+}
+
+.table-scroll { overflow-x: auto; }
+
+.participant-editor {
+  .p-inputnumber { min-width: 6.5rem; }
+  td .p-inputtext:not(.p-inputnumber-input) { min-width: 10rem; }
+  td { white-space: nowrap; }
+}
+
+.participant-table.offers, .participant-table.compare {
+  min-width: 68rem;
+
+  td:first-child strong, td:nth-child(4) { white-space: nowrap; }
+  td:nth-child(8), td:nth-child(9) { min-width: 11rem; }
+}
+
+.participant-table.readonly td:first-child, .participant-table.readonly td:nth-child(2) { white-space: nowrap; }
+
+.journey-timeline {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  overflow-x: auto;
+
+  .journey-step {
+    flex: 1 1 0;
+    min-width: 9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
+    padding-right: 1rem;
+
+    &:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 0.95rem;
+      left: 2.2rem;
+      right: 0.4rem;
+      height: 2px;
+      background: #e5e7eb;
+    }
+
+    &.done:not(:last-child)::after { background: #16a34a; }
+  }
+
+  .journey-marker {
+    flex: 0 0 auto;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+    position: relative;
+    z-index: 1;
+  }
+
+  .done .journey-marker { background: #16a34a; border-color: #16a34a; color: #ffffff; }
+  .current .journey-marker { background: #ffffff; border-color: var(--primary-color, #0072d8); color: var(--primary-color, #0072d8); }
+  .skipped .journey-marker { border-style: dashed; }
+
+  .journey-body {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-card, #ffffff);
+    position: relative;
+    z-index: 1;
+    padding: 0 0.5rem 0 0.6rem;
+  }
+
+  .journey-label { font-weight: 600; font-size: 0.85rem; color: #111827; }
+  .journey-ref { font-size: 0.8rem; color: #374151; }
+  .journey-ref.muted { color: #9ca3af; }
+
+  .journey-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--primary-color, #0072d8);
+    cursor: pointer;
+    text-align: left;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.side-summary .placement-field { padding: 0.35rem 0; border-bottom: 1px dashed #eef0f3; }
+
+.placement-field {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+
+  .placement-field-label { color: #6b7280; }
+  .placement-field-value { color: #111827; text-align: right; }
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.5rem 1.5rem;
+
+  .placement-field { border-bottom: 1px dashed #eef0f3; padding: 0.35rem 0; }
+}
+
+.compare-summary {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+
+  .muted { margin-right: auto; font-size: 0.85rem; }
+}
+
+.premium-strip {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: #f8f9fb;
+  border: 1px solid #eef0f3;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.risk-details-editor .risk-key { font-weight: 500; color: #374151; }
+.empty-note { padding: 1rem; color: #6b7280; }
+.attachment-line { display: flex; align-items: center; gap: 0.5rem; }
+
+// Journey panel on the quotation detail (Quotation Slip)
+.quote-journey-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0 1rem;
+  background: #fbfcfe;
+
+  .quote-journey-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+
+    .journey-title { font-weight: 600; font-size: 0.95rem; color: #111827; }
+    .journey-note { font-size: 0.8rem; color: #b45309; }
+  }
+
+  .journey-timeline .journey-body { background: #fbfcfe; }
+}
+
+@media (max-width: 768px) {
+  .placement-page { padding: 0.75rem; }
+  .placement-card .toolbar .search input { width: 100%; }
+}
