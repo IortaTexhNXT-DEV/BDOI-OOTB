@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (708 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (717 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -871,6 +871,136 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"4401008\",\n    \"name\": \"Office Supplies Expense\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Chart of accounts upload template (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/accounts/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "accounts",
+                "template"
+              ]
+            },
+            "description": "Chart of accounts upload template (XLSX)\n\nFront-end touchpoint: Master > Finance > Main Account > Upload > Download template\n\nAccess: read:journal-vouchers, read:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/accounts/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "accounts",
+                    "template"
+                  ]
+                },
+                "description": "Chart of accounts upload template (XLSX)\n\nFront-end touchpoint: Master > Finance > Main Account > Upload > Download template\n\nAccess: read:journal-vouchers, read:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Add or update GL accounts from CSV / XLSX (multipart \"file\"); rows in file order, each validated like Add / Edit account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/accounts/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "accounts",
+                "upload"
+              ]
+            },
+            "description": "Add or update GL accounts from CSV / XLSX (multipart \"file\"); rows in file order, each validated like Add / Edit account\n\nFront-end touchpoint: Master > Finance > Main Account > Upload\n\nAccess: write:journal-vouchers",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/accounts/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "accounts",
+                    "upload"
+                  ]
+                },
+                "description": "Add or update GL accounts from CSV / XLSX (multipart \"file\"); rows in file order, each validated like Add / Edit account\n\nFront-end touchpoint: Master > Finance > Main Account > Upload\n\nAccess: write:journal-vouchers",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 1 created, 1 updated, 0 failed\",\n    \"total\": 2,\n    \"created\": 1,\n    \"updated\": 1,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
             }
           ]
         },
@@ -20662,6 +20792,164 @@
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"NCR\",\n      \"label\": \"Metro Manila\",\n      \"value\": \"Metro Manila\"\n    }\n  ]\n}"
             }
           ]
+        },
+        {
+          "name": "Upload template (XLSX) of a master type: Data sheet with the column headers, Columns and Instructions sheets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/:type/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                ":type",
+                "template"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Upload template (XLSX) of a master type: Data sheet with the column headers, Columns and Instructions sheets\n\nFront-end touchpoint: Master > (any master screen) > Upload > Download template\n\nAccess: read:masters, write:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/masters/:type/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "masters",
+                    ":type",
+                    "template"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Upload template (XLSX) of a master type: Data sheet with the column headers, Columns and Instructions sheets\n\nFront-end touchpoint: Master > (any master screen) > Upload > Download template\n\nAccess: read:masters, write:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Bulk create records of a master type from CSV / XLSX (multipart \"file\"; headers = field labels or names; each row validated like Add)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/masters/:type/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                ":type",
+                "upload"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Bulk create records of a master type from CSV / XLSX (multipart \"file\"; headers = field labels or names; each row validated like Add)\n\nFront-end touchpoint: Master > (any master screen) > Upload\n\nAccess: write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/masters/:type/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "masters",
+                    ":type",
+                    "upload"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Bulk create records of a master type from CSV / XLSX (multipart \"file\"; headers = field labels or names; each row validated like Add)\n\nFront-end touchpoint: Master > (any master screen) > Upload\n\nAccess: write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 failed\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -23433,6 +23721,197 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2026\",\n    \"periods\": [\n      {\n        \"period\": \"2026-01\",\n        \"periodNo\": 1,\n        \"status\": \"closed\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Opening balances of a fiscal year (go-live load or carried forward by the year-end close) with totals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/opening-balances?fiscalYear=FY2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "opening-balances"
+              ],
+              "query": [
+                {
+                  "key": "fiscalYear",
+                  "value": "FY2026"
+                }
+              ]
+            },
+            "description": "Opening balances of a fiscal year (go-live load or carried forward by the year-end close) with totals\n\nFront-end touchpoint: Accounts > Period End > Period Management > Opening balances\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/opening-balances?fiscalYear=FY2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "opening-balances"
+                  ],
+                  "query": [
+                    {
+                      "key": "fiscalYear",
+                      "value": "FY2026"
+                    }
+                  ]
+                },
+                "description": "Opening balances of a fiscal year (go-live load or carried forward by the year-end close) with totals\n\nFront-end touchpoint: Accounts > Period End > Period Management > Opening balances\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": \"FY2026\",\n    \"source\": \"go-live\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102400,\n    \"lines\": [\n      {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\",\n        \"debit\": 1250000,\n        \"credit\": 0\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/opening-balances/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "opening-balances",
+                "import"
+              ]
+            },
+            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/opening-balances/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "opening-balances",
+                    "import"
+                  ]
+                },
+                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": \"FY2026\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"asAt\": \"2026-09-30\",\n    \"accounts\": 7,\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102400,\n    \"replaced\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Opening balances upload template (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/opening-balances/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "opening-balances",
+                "template"
+              ]
+            },
+            "description": "Opening balances upload template (XLSX)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/opening-balances/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "opening-balances",
+                    "template"
+                  ]
+                },
+                "description": "Opening balances upload template (XLSX)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -28675,7 +29154,7 @@
           ]
         },
         {
-          "name": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums)",
+          "name": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission",
           "request": {
             "method": "POST",
             "header": [
@@ -28694,7 +29173,7 @@
                 "bulk-upload"
               ]
             },
-            "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums)\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
+            "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file\"",
@@ -28726,7 +29205,7 @@
                     "bulk-upload"
                   ]
                 },
-                "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums)\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
+                "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file\"",
@@ -39383,6 +39862,136 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"receivableId\": \"rcv_1\",\n      \"billNumber\": \"INV-2026-00002\",\n      \"source\": \"endorsement\",\n      \"customerCode\": \"CL-2026-00001\",\n      \"customerName\": \"Maria Santos\",\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"amount\": 5010,\n      \"paidAmount\": 0,\n      \"balance\": 5010,\n      \"dueDate\": \"2026-10-28\",\n      \"status\": \"Open\",\n      \"currency\": \"PHP\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/opening-items/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "opening-items",
+                "import"
+              ]
+            },
+            "description": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Open_Items_Upload_Template.xlsx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/opening-items/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "opening-items",
+                    "import"
+                  ]
+                },
+                "description": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Open_Items_Upload_Template.xlsx\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 already loaded, 0 failed\",\n    \"total\": 2,\n    \"created\": 2,\n    \"skipped\": 0,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Go-live open items upload template (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/opening-items/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "opening-items",
+                "template"
+              ]
+            },
+            "description": "Go-live open items upload template (XLSX)\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/opening-items/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "opening-items",
+                    "template"
+                  ]
+                },
+                "description": "Go-live open items upload template (XLSX)\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
