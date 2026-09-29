@@ -7,7 +7,7 @@ import { createZip } from './zip.js';
 
 const MAX_CELL = 32767;
 // Style indexes in styles.xml cellXfs
-const STYLE = { text: 0, header: 1, money: 2, date: 3, wrap: 4, integer: 5, number: 6, percent: 6 };
+const STYLE = { text: 0, header: 1, money: 2, date: 3, wrap: 4, integer: 5, number: 6, percent: 6, headerRequired: 7 };
 
 export const colLetter = (i) => {
   let s = '';
@@ -76,7 +76,7 @@ function sheetXml(sheet, sst) {
   const rows = sheet.rows.map((r) => (Array.isArray(r) ? r : cols.map((c) => r[c.key])));
   const lastCol = colLetter(Math.max(cols.length - 1, 0));
   const lastRow = rows.length + 1;
-  const header = `<row r="1" spans="1:${cols.length}" ht="20" customHeight="1">${cols.map((c, i) => `<c r="${colLetter(i)}1" s="${STYLE.header}" t="s"><v>${sst.idx(String(c.header ?? c.label ?? c.key ?? ''))}</v></c>`).join('')}</row>`;
+  const header = `<row r="1" spans="1:${cols.length}" ht="20" customHeight="1">${cols.map((c, i) => `<c r="${colLetter(i)}1" s="${c.required ? STYLE.headerRequired : STYLE.header}" t="s"><v>${sst.idx(String(c.header ?? c.label ?? c.key ?? ''))}</v></c>`).join('')}</row>`;
   const body = rows.map((r, ri) => `<row r="${ri + 2}">${r.map((v, ci) => cellXml(`${colLetter(ci)}${ri + 2}`, v, cols[ci]?.type || 'text', sst)).join('')}</row>`).join('');
   const widths = cols.map((c, i) => `<col min="${i + 1}" max="${i + 1}" width="${c.width || 15}" customWidth="1"/>`).join('');
   const freeze = sheet.freeze === false ? '<sheetView workbookViewId="0"/>'
@@ -89,10 +89,10 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 <numFmts count="1"><numFmt numFmtId="164" formatCode="yyyy-mm-dd"/></numFmts>
 <fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/></font></fonts>
-<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F4E78"/><bgColor indexed="64"/></patternFill></fill></fills>
+<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F4E78"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF9C2A00"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="7">
+<cellXfs count="8">
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
 <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
 <xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
@@ -100,6 +100,7 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
 <xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 <xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+<xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
@@ -107,7 +108,8 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 /**
  * Build an .xlsx workbook.
  * Column type: text (default), wrap, money, integer, number, percent, date, or auto (numbers numeric, the rest text).
- * @param {{sheets: {name: string, columns: {key?: string, header?: string, label?: string, width?: number, type?: string}[], rows: (Array|Object)[], freeze?: boolean, autoFilter?: boolean}[], creator?: string, title?: string}} wb
+ * A column with required: true gets a dark red header cell instead of the blue one (upload templates).
+ * @param {{sheets: {name: string, columns: {key?: string, header?: string, label?: string, width?: number, type?: string, required?: boolean}[], rows: (Array|Object)[], freeze?: boolean, autoFilter?: boolean}[], creator?: string, title?: string}} wb
  * @returns {Buffer}
  */
 export function writeXlsx({ sheets, creator = 'BrokerVerse', title = '' }) {

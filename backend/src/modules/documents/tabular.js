@@ -56,6 +56,25 @@ export const pick = (row, ...aliases) => {
   return undefined;
 };
 
+/**
+ * Upload column specification, shared by an importer and its template (scripts/build-upload-templates.js):
+ * { key, header, aliases?, required?, format?, allowed?, example?, note? }. The importer reads a value from the
+ * column named key, header or any alias (compared without case, spaces or punctuation); the template shows header.
+ */
+export const headerNames = (c) => [c.key, c.header, ...(c.aliases || [])];
+
+/** Values of a parsed row by column specification: { key: value } for the columns present and not empty. */
+export function mapColumns(row, columns, keyOf = normKey) {
+  const out = {};
+  for (const c of columns) {
+    for (const name of headerNames(c)) {
+      const v = row[keyOf(name)];
+      if (v !== undefined && v !== '') { out[c.key] = v; break; }
+    }
+  }
+  return out;
+}
+
 export const toCsv = (header, rows) => [header, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n');
 
 /** Send a download as XLSX (default) or CSV. */

@@ -10,7 +10,8 @@ import { getSetting } from '../../lib/settings.js';
 import { isoDate, num, pageParams, sendList, sendNoData } from '../accounting/lib/http.js';
 import { storeFile } from '../accounting/lib/files.js';
 import { vouchersPdf } from '../documents/finance.js';
-import { excelDate, readSheet } from '../accounting/lib/sheet.js';
+import { camel, excelDate, readSheet } from '../accounting/lib/sheet.js';
+import { mapColumns } from '../documents/tabular.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Disbursements', '/disbursements');
@@ -18,7 +19,7 @@ const read = [requireAuth, requirePermission('read:disbursements')];
 const write = [requireAuth, requirePermission('write:disbursements')];
 const SCREEN = 'Accounts > Disbursement (Payment Voucher)';
 const upload = importUpload();
-const PAYEE_TYPES = ['Customer', 'Client', 'Insurer', 'Agent/Referrer', 'Supplier'];
+const { PAYEE_TYPES } = svc;
 const example = { disbursementId: 'pv_1', voucherNumber: 'PV-2026-00001', transactionNumber: 'DT-2026-00001', voucherDate: '2026-09-28', payeeType: 'Insurer', payeeName: 'Malayan Insurance Co., Inc.', customerCode: 'CL-2026-00001', insurerName: 'Malayan Insurance Co., Inc.', policyNumber: 'POL-2026-00001', amount: 12500, status: 'draft' };
 
 const createSchema = z.object({
@@ -74,7 +75,8 @@ define({
     const errors = []; const ids = [];
     for (const [i, r] of rows.entries()) {
       try {
-        const parsed = createSchema.parse({ ...r, payeeType: r.payeeType || 'Customer', voucherDate: excelDate(r.voucherDate) || undefined, amount: r.amount || '0' });
+        const v = mapColumns(r, svc.DISBURSEMENT_UPLOAD_COLUMNS, camel);
+        const parsed = createSchema.parse({ ...r, ...v, payeeType: v.payeeType || 'Customer', voucherDate: excelDate(v.voucherDate) || undefined, amount: v.amount || '0' });
         if (parsed.payeeType !== 'Agent/Referrer' && !(num(parsed.amount) > 0)) throw badRequest('amount must be greater than zero');
         const d = await withTransaction((db) => svc.createDisbursement(db, parsed, req.user, { source: 'bulk-upload' }));
         ids.push(d.id);

@@ -392,6 +392,43 @@ export async function setRecordStatus(t, id, status, user) {
   return { before, after: status === 'deleted' ? { ...before, status: 'Deleted' } : await getRecord(t, id) };
 }
 
+// ---------- bulk upload ----------
+
+/** Master types that are copies of another register and are never uploaded here (the chart of accounts is). */
+export const NOT_UPLOADABLE = new Map([['main-account', 'the Chart of Accounts upload'], ['sub-account', 'the Chart of Accounts upload']]);
+
+const FORMAT = {
+  string: 'Text', text: 'Text', number: 'Number', integer: 'Whole number', boolean: 'Yes or No', date: 'Date YYYY-MM-DD', email: 'E-mail address',
+  select: 'One of the allowed values', multiselect: 'Values separated by commas', json: 'JSON text', color: 'Colour, e.g. #1F4E78', url: 'Web address',
+};
+
+/**
+ * Upload columns of a master type, in the field order of its definition: header = field label (the field name is
+ * also accepted). Audit and automatic fields are left out; Status (Active / Inactive) is the last, optional column.
+ */
+export function uploadColumns(t) {
+  const cols = (t.fields || []).filter((f) => !f.auto && f.type !== 'audit-user' && f.type !== 'audit-date').map((f) => ({
+    key: f.name, header: f.label || f.name, aliases: [], required: !!f.required,
+    format: f.ref ? `Name${f.ref.codeColumn ? ' or code' : ''} of an existing ${f.ref.type.replace(/-/g, ' ')} record` : FORMAT[f.type || 'string'] || 'Text',
+    ...(Array.isArray(f.options) && f.options.length ? { allowed: f.options } : {}),
+  }));
+  return [...cols, { key: 'status', header: 'Status', aliases: [], required: false, format: 'Active when empty', allowed: ['Active', 'Inactive'] }];
+}
+
+/** Record body of an uploaded row (keys normalised by parseUploadedRows); JSON fields are parsed. */
+export function bodyFromRow(t, row, pickValue) {
+  const body = {};
+  for (const c of uploadColumns(t)) {
+    const v = pickValue(row, c.header, c.key);
+    if (v === undefined) continue;
+    const f = t.fields.find((x) => x.name === c.key);
+    if (f?.type === 'json' && typeof v === 'string') {
+      try { body[c.key] = JSON.parse(v); } catch { throw badRequest(`${c.header} must be JSON text`); }
+    } else body[c.key] = v;
+  }
+  return body;
+}
+
 /** Dropdown options: [{ id, code, label, value }]; value is the label unless valueField=id|code. */
 export async function listOptions(t, qs) {
   const { rows } = await listRecords(t, { ...qs, status: qs.status || 'active', sortBy: qs.sortBy || t.label_field }, { limit: Math.min(1000, Number(qs.limit) || 500), offset: 0 });

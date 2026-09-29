@@ -66,7 +66,7 @@ function csvRows(text) {
 }
 
 /** "Policy Number", "POLICY_NUMBER", "policyNumber" -> policyNumber */
-const camel = (h) => {
+export const camel = (h) => {
   const words = String(h || '').trim().split(/[^a-zA-Z0-9]+/).filter(Boolean);
   if (words.length === 1) { const w = words[0]; return w === w.toUpperCase() ? w.toLowerCase() : w[0].toLowerCase() + w.slice(1); }
   return words.map((w, i) => (i ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase())).join('');

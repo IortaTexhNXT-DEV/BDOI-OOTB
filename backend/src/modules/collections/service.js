@@ -197,7 +197,7 @@ export async function sync(db, { receiptId } = {}, user = null) {
     if (!r) throw notFound('Receipt not found');
     policyIds = (await db.query('SELECT DISTINCT policy_id FROM receipt_lines WHERE receipt_id = $1 AND policy_id IS NOT NULL UNION SELECT $2::text WHERE $2::text IS NOT NULL', [r.id, r.policy_id])).rows.map((x) => x.policy_id);
   }
-  const unbooked = (await db.query('SELECT * FROM receivables WHERE booking_jv_id IS NULL AND policy_id IS NOT NULL AND ($1::text[] IS NULL OR policy_id = ANY($1)) ORDER BY created_at', [policyIds])).rows;
+  const unbooked = (await db.query('SELECT * FROM receivables WHERE booking_jv_id IS NULL AND source <> \'opening\' AND policy_id IS NOT NULL AND ($1::text[] IS NULL OR policy_id = ANY($1)) ORDER BY created_at', [policyIds])).rows;
   for (const r of unbooked) await ensureBooked(db, r, await findPolicy(db, r.policy_id), user);
   const ins = await db.query(`INSERT INTO collection_items(receivable_id, policy_id, client_id)
     SELECT r.id, r.policy_id, r.client_id FROM receivables r WHERE ($1::text[] IS NULL OR r.policy_id = ANY($1)) ON CONFLICT (receivable_id) DO NOTHING RETURNING id`, [policyIds]);

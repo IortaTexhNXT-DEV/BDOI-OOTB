@@ -4,6 +4,9 @@ import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
 import { setSetting } from '../../lib/settings.js';
 import { one } from '../../db/pool.js';
+import { getSetting } from '../../lib/settings.js';
+import { parseUploadedRows, pick, uploadFile } from '../documents/tabular.js';
+import { masterTemplate } from '../documents/uploadTemplates.js';
 import { canRead, canWrite, parseStatus, sendList } from './helpers.js';
 import * as svc from './service.js';
 
@@ -72,6 +75,43 @@ define({
     const pg = paging(req.query, { page: 1, perPage: 50 });
     const { rows, total } = await svc.listRecords(t, req.query, pg);
     sendList(res, rows, total, pg, { type: svc.typeOut(t) });
+  },
+});
+define({
+  method: 'GET', path: '/:type/template', summary: 'Upload template (XLSX) of a master type: Data sheet with the column headers, Columns and Instructions sheets',
+  screen: `${SCREEN} > Upload > Download template`, middleware: canRead('masters'), response: '(xlsx file)',
+  handler: async (req, res) => {
+    const t = await svc.getType(req.params.type);
+    const { fileName, buffer } = masterTemplate(t, { maxRows: Number(await getSetting('limits.bulk_upload_max_rows', 1000)), withSamples: req.query.samples === 'true' });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(buffer);
+  },
+});
+define({
+  method: 'POST', path: '/:type/upload', summary: 'Bulk create records of a master type from CSV / XLSX (multipart "file"; headers = field labels or names; each row validated like Add)',
+  screen: `${SCREEN} > Upload`, middleware: [...canWrite('masters'), uploadFile], request: 'multipart/form-data file',
+  response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', total: 2, created: 2, failed: 0, errors: [] } },
+  handler: async (req, res) => {
+    const t = await svc.getType(req.params.type);
+    if (svc.NOT_UPLOADABLE.has(t.code)) throw badRequest(`${t.label} records are not uploaded here; use ${svc.NOT_UPLOADABLE.get(t.code)}`);
+    const rows = parseUploadedRows(req.file);
+    const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
+    if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
+    const errors = [];
+    let createdCount = 0;
+    for (const [i, row] of rows.entries()) {
+      try {
+        const rec = await svc.createRecord(t, svc.bodyFromRow(t, row, pick), req.user);
+        await syncLinkedSetting(t, rec, req.user);
+        await audit(req, { entity: `master:${t.code}`, entityId: rec.id, action: 'bulk-create', after: rec });
+        createdCount += 1;
+      } catch (e) {
+        errors.push({ row: i + 2, message: e.details?.length ? `${e.message}: ${e.details.map((d) => d.message).join('; ')}` : e.message });
+      }
+    }
+    const data = { message: `Processed ${rows.length} rows: ${createdCount} created, ${errors.length} failed`, total: rows.length, created: createdCount, failed: errors.length, errors };
+    res.json({ success: true, message: data.message, data });
   },
 });
 define({

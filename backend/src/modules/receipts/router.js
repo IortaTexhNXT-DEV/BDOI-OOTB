@@ -10,10 +10,13 @@ import { getSetting } from '../../lib/settings.js';
 import { isoDate, pageParams, sendList, sendNoData } from '../accounting/lib/http.js';
 import { storeFile } from '../accounting/lib/files.js';
 import { receiptsPdf } from '../documents/finance.js';
-import { excelDate, readSheet } from '../accounting/lib/sheet.js';
+import { camel, excelDate, readSheet } from '../accounting/lib/sheet.js';
+import { mapColumns } from '../documents/tabular.js';
 import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as billing from './billing.js';
+import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 
 const { router, define } = moduleRouter('Receipts', '/receipts');
 const read = [requireAuth, requirePermission('read:receipts')];
@@ -34,7 +37,7 @@ const receiptSchema = z.object({
   receiptType: z.string().optional(), receiptDate: z.string().optional(), customerCode: z.string().optional(), currencyCode: z.string().optional(), transactionCode: z.string().optional(),
   transactionNumber: z.string().optional(), remarks: z.string().optional(), policyRefId: z.string().optional(), name: z.string().optional(), branchCode: z.string().nullable().optional(),
   departmentCode: z.string().nullable().optional(), receiptsList: z.array(lineSchema).optional(), receivableId: z.string().optional(), policyId: z.string().optional(),
-  amount: z.union([z.string(), z.number()]).optional(), paymentMode: z.enum(['cash', 'check', 'bank-transfer', 'card', 'gcash', 'online']).optional(), referenceNo: z.string().optional(),
+  amount: z.union([z.string(), z.number()]).optional(), paymentMode: z.enum(svc.PAYMENT_MODES).optional(), referenceNo: z.string().optional(),
   bankId: z.number().int().optional(), receivedDate: z.string().optional(),
 }).passthrough();
 
@@ -92,9 +95,10 @@ define({
     const errors = []; const ids = [];
     for (const [i, r] of rows.entries()) {
       try {
-        const body = receiptSchema.parse({ policyId: r.policyNumber || r.policyNo || r.policy, amount: r.amount, receiptDate: excelDate(r.receiptDate || r.date) || undefined,
-          paymentMode: r.paymentMode ? String(r.paymentMode).toLowerCase().replace(/\s+/g, '-') : undefined, referenceNo: r.referenceNo || r.reference || undefined,
-          customerCode: r.customerCode || undefined, remarks: r.remarks || undefined, transactionCode: r.transactionCode || undefined });
+        const v = mapColumns(r, svc.RECEIPT_UPLOAD_COLUMNS, camel);
+        const body = receiptSchema.parse({ policyId: v.policyNumber, amount: v.amount, receiptDate: excelDate(v.receiptDate) || undefined,
+          paymentMode: v.paymentMode ? String(v.paymentMode).toLowerCase().replace(/\s+/g, '-') : undefined, referenceNo: v.referenceNo,
+          customerCode: v.customerCode, remarks: v.remarks, transactionCode: v.transactionCode });
         const rc = await withTransaction((db) => svc.createReceipt(db, body, req.user, { source: 'bulk-upload' }));
         ids.push(rc.receiptId);
       } catch (e) {
@@ -103,6 +107,35 @@ define({
     }
     await audit(req, { entity: 'receipt', entityId: null, action: 'bulk-upload', after: { file: req.file.originalname, created: ids.length, failed: errors.length } });
     ok(res, { message: `${ids.length} of ${rows.length} rows imported`, total: rows.length, created: ids.length, failed: errors.length, errors, ids }, `${ids.length} receipts imported`);
+  },
+});
+define({
+  method: 'GET', path: '/opening-items/template', summary: 'Go-live open items upload template (XLSX)', screen: 'Accounts > Collections > Import open items', middleware: read,
+  response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'open-items'),
+});
+define({
+  method: 'POST', path: '/opening-items/import', summary: 'Go-live: load unpaid premium bills of the old system (multipart "file" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped',
+  screen: 'Accounts > Collections > Import open items', middleware: [...write, upload.single('file')], request: { goLiveDate: '2026-10-01', file: '(multipart) Open_Items_Upload_Template.xlsx' },
+  response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 already loaded, 0 failed', total: 2, created: 2, skipped: 0, failed: 0, errors: [] } },
+  handler: async (req, res) => {
+    if (!req.file) throw badRequest('Attach the file in the "file" field');
+    const goLiveDate = String(req.body?.goLiveDate || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(goLiveDate)) throw badRequest('goLiveDate is required (YYYY-MM-DD)');
+    const rows = readSheet(req.file.buffer, req.file.originalname);
+    const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
+    if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
+    const errors = []; let createdCount = 0; let skipped = 0;
+    for (const [i, r] of rows.entries()) {
+      try {
+        const x = await withTransaction((db) => loadOpenItem(db, mapColumns(r, OPEN_ITEM_COLUMNS, camel), { goLiveDate, user: req.user }));
+        if (x.status === 'created') createdCount += 1; else skipped += 1;
+      } catch (e) {
+        errors.push({ row: i + 2, message: e.code === '23505' ? 'This bill reference was loaded by another upload at the same time' : e.message });
+      }
+    }
+    const data = { message: `Processed ${rows.length} rows: ${createdCount} created, ${skipped} already loaded, ${errors.length} failed`, goLiveDate, total: rows.length, created: createdCount, skipped, failed: errors.length, errors };
+    await audit(req, { entity: 'receivable', entityId: null, action: 'go-live-open-items', after: { file: req.file.originalname, goLiveDate, created: createdCount, skipped, failed: errors.length } });
+    ok(res, data, data.message);
   },
 });
 define({

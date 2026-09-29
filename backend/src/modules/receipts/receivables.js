@@ -139,7 +139,8 @@ async function postBooking(db, r, policy, split, user) {
  * still-open part is booked when earlier payments were never journalised, so the sub-ledger and GL stay equal.
  */
 export async function ensureBooked(db, rcv, policy, user) {
-  if (rcv.booking_jv_id) return rcv;
+  // go-live open items (source 'opening') are carried by the GL opening balance, never booked
+  if (rcv.booking_jv_id || rcv.source === 'opening') return rcv;
   const applied = Number((await db.query('SELECT COALESCE(sum(amount),0) AS a FROM receipt_applications WHERE receivable_id = $1 AND status = \'applied\' AND journal_id IS NOT NULL', [rcv.id])).rows[0].a);
   const bookable = round2(Number(rcv.balance) + applied);
   if (!(bookable > 0)) return rcv;
