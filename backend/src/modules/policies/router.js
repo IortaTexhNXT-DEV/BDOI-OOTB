@@ -8,6 +8,7 @@ import { usersWithRoles } from '../documents/common.js';
 import { notify } from '../notifications/router.js';
 import * as payments from './payments.js';
 import { config } from '../../config.js';
+import { forbidden } from '../../lib/errors.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
@@ -65,8 +66,8 @@ define({
   handler: async (req, res) => res.json({ success: true, data: await payments.paymentSummary(pool, await svc.getPolicyRow(req.params.id), req.user) }),
 });
 define({
-  method: 'POST', path: '/:id/payments', summary: 'Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once',
-  screen: `${SCREEN} > Payment`,
+  method: 'POST', path: '/:id/payments', summary: 'Payment capture (policy and endorsement bills): record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof; receivableId picks the bill, e.g. an endorsement bill) as pending for finance to verify; only users with write:receipts (finance) post the official receipt at once',
+  screen: `${SCREEN} > Payment; Endorsement > Payment`,
   middleware: [requireAuth, requirePermission('write:policies', 'write:receipts'), ownRecord('policy'), validate(z.object({
     option: z.enum(['pay-later', 'payment']), paymentMode: z.string().optional(), referenceNo: z.string().max(80).optional().nullable(), amount: z.union([z.number(), z.string()]).optional(),
     paymentDate: z.string().optional(), proofKey: z.string().max(500).optional().nullable(), proofFileName: z.string().max(255).optional().nullable(), remarks: z.string().max(500).optional().nullable(),
@@ -113,19 +114,26 @@ define({
   response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, out(await svc.getPolicyRow(req.params.id))),
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document)', screen: 'Operations > Quotation > Upload policy',
+  method: 'PUT', path: '/:id', summary: 'Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus', screen: 'Operations > Quotation > Upload policy',
   middleware: [...canWrite, ownRecord('policy'), validate(z.object({ policyNumber: z.string().max(60).optional().nullable(), paymentStatus: z.string().optional() }).passthrough())],
   request: { policyNumber: 'MAL-MC-2026-0099', inception: '2026-10-01', expiry: '2027-10-01', plateNumber: 'ABC 1234', policyDocument: 'document/abc.pdf' },
   response: { ...example, success: true },
   handler: async (req, res) => {
+    // the payment status is set by payment capture / finance verification, not by a policy editor (D70)
+    if (req.body.paymentStatus && !payments.canPostReceipts(req.user)) {
+      const current = await svc.getPolicyRow(req.params.id);
+      if (String(req.body.paymentStatus).toLowerCase() !== String(current.payment_status || '').toLowerCase()) {
+        throw forbidden('Only finance can change the payment status; record the payment on the Payment screen for finance to verify');
+      }
+    }
     const { before, after } = await svc.updatePolicy(req.params.id, req.body, actor(req));
     await audit(req, { entity: 'policy', entityId: after.id, action: 'update', before: out(before), after: out(after) });
     sendEntity(res, out(after), { message: 'Policy updated' });
   },
 });
 define({
-  method: 'PATCH', path: '/:id/payment-status', summary: 'Set the payment status (policies.payment_statuses) and method', screen: 'Operations > Quotation / Endorsement > Payment confirmation',
-  middleware: [...canWrite, ownRecord('policy'), validate(z.object({ paymentStatus: z.string().min(1), paymentMethod: z.string().optional() }).passthrough())],
+  method: 'PATCH', path: '/:id/payment-status', summary: 'Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify', screen: 'Accounts > Receipts',
+  middleware: [...canConfirmPayments, ownRecord('policy'), validate(z.object({ paymentStatus: z.string().min(1), paymentMethod: z.string().optional() }).passthrough())],
   request: { paymentStatus: 'Completed', paymentMethod: 'Direct Debit' }, response: { ...example, paymentStatus: 'Completed', success: true },
   handler: async (req, res) => {
     const { before, after } = await svc.updatePaymentStatus(req.params.id, req.body, actor(req));

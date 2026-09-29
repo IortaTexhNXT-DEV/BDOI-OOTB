@@ -1944,11 +1944,11 @@
     "/accounting/payment-entries": {
       "post": {
         "operationId": "postAccountingPaymentEntries",
-        "summary": "Premium payment for a policy from the agent payment flows: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable",
+        "summary": "Finance (write:receipts): record a premium payment for a policy directly: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable. Agents / sales / underwriters record payments with POST /policies/:id/payments for finance to verify",
         "tags": [
           "Accounting"
         ],
-        "description": "Front-end touchpoint: Agent > Quote / Endorsement payment confirmation; Upload policy\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Accounts > Receipts\n\nAccess: Any authenticated user",
         "parameters": [],
         "responses": {
           "200": {
@@ -2008,7 +2008,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Agent > Quote / Endorsement payment confirmation; Upload policy",
+        "x-screen": "Accounts > Receipts",
         "requestBody": {
           "required": true,
           "content": {
@@ -27402,7 +27402,7 @@
       },
       "put": {
         "operationId": "putPoliciesId",
-        "summary": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document)",
+        "summary": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus",
         "tags": [
           "Policies"
         ],
@@ -27670,11 +27670,11 @@
     "/policies/{id}/payment-status": {
       "patch": {
         "operationId": "patchPoliciesIdPaymentStatus",
-        "summary": "Set the payment status (policies.payment_statuses) and method",
+        "summary": "Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify",
         "tags": [
           "Policies"
         ],
-        "description": "Front-end touchpoint: Operations > Quotation / Endorsement > Payment confirmation\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Accounts > Receipts\n\nAccess: Any authenticated user",
         "parameters": [
           {
             "name": "id",
@@ -27758,7 +27758,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Quotation / Endorsement > Payment confirmation",
+        "x-screen": "Accounts > Receipts",
         "requestBody": {
           "required": true,
           "content": {
@@ -27972,11 +27972,11 @@
       },
       "post": {
         "operationId": "postPoliciesIdPayments",
-        "summary": "Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once",
+        "summary": "Payment capture (policy and endorsement bills): record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof; receivableId picks the bill, e.g. an endorsement bill) as pending for finance to verify; only users with write:receipts (finance) post the official receipt at once",
         "tags": [
           "Policies"
         ],
-        "description": "Front-end touchpoint: Operations > Policy > Payment\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Operations > Policy > Payment; Endorsement > Payment\n\nAccess: Any authenticated user",
         "parameters": [
           {
             "name": "id",
@@ -28082,7 +28082,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Policy > Payment",
+        "x-screen": "Operations > Policy > Payment; Endorsement > Payment",
         "requestBody": {
           "required": true,
           "content": {
@@ -41606,11 +41606,11 @@
       },
       "post": {
         "operationId": "postReceipts",
-        "summary": "Create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable",
+        "summary": "Finance (write:receipts): create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable",
         "tags": [
           "Receipts"
         ],
-        "description": "Front-end touchpoint: Accounts > Receipts > Add receipt; Agent > Payment confirmation / Upload policy / Endorsement payment\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: Any authenticated user",
         "parameters": [],
         "responses": {
           "200": {
@@ -41768,7 +41768,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Receipts > Add receipt; Agent > Payment confirmation / Upload policy / Endorsement payment",
+        "x-screen": "Accounts > Receipts > Add receipt",
         "requestBody": {
           "required": true,
           "content": {

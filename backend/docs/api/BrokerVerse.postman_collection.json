@@ -1069,7 +1069,7 @@
           ]
         },
         {
-          "name": "Premium payment for a policy from the agent payment flows: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable",
+          "name": "Finance (write:receipts): record a premium payment for a policy directly: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable. Agents / sales / underwriters record payments with POST /policies/:id/payments for finance to verify",
           "request": {
             "method": "POST",
             "header": [
@@ -1088,7 +1088,7 @@
                 "payment-entries"
               ]
             },
-            "description": "Premium payment for a policy from the agent payment flows: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable\n\nFront-end touchpoint: Agent > Quote / Endorsement payment confirmation; Upload policy\n\nAccess: Any authenticated user",
+            "description": "Finance (write:receipts): record a premium payment for a policy directly: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable. Agents / sales / underwriters record payments with POST /policies/:id/payments for finance to verify\n\nFront-end touchpoint: Accounts > Receipts\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"amount\": 11862.5,\n  \"grossPremium\": 11862.5,\n  \"netPremium\": 10000,\n  \"valueAddedTax\": 1200,\n  \"documentaryStampTax\": 1250,\n  \"localGovernmentTax\": 75,\n  \"accountPremiumOthers\": 0,\n  \"discount\": 662.5,\n  \"paymentDate\": \"2026-09-28T02:00:00Z\",\n  \"description\": \"Quote payment for policy POL-2026-00001\",\n  \"referenceType\": \"Policy\",\n  \"referenceId\": \"pol_1\",\n  \"clientId\": \"cl_1\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"isDirectBilled\": false\n}",
@@ -1120,7 +1120,7 @@
                     "payment-entries"
                   ]
                 },
-                "description": "Premium payment for a policy from the agent payment flows: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable\n\nFront-end touchpoint: Agent > Quote / Endorsement payment confirmation; Upload policy\n\nAccess: Any authenticated user",
+                "description": "Finance (write:receipts): record a premium payment for a policy directly: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable. Agents / sales / underwriters record payments with POST /policies/:id/payments for finance to verify\n\nFront-end touchpoint: Accounts > Receipts\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"amount\": 11862.5,\n  \"grossPremium\": 11862.5,\n  \"netPremium\": 10000,\n  \"valueAddedTax\": 1200,\n  \"documentaryStampTax\": 1250,\n  \"localGovernmentTax\": 75,\n  \"accountPremiumOthers\": 0,\n  \"discount\": 662.5,\n  \"paymentDate\": \"2026-09-28T02:00:00Z\",\n  \"description\": \"Quote payment for policy POL-2026-00001\",\n  \"referenceType\": \"Policy\",\n  \"referenceId\": \"pol_1\",\n  \"clientId\": \"cl_1\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"isDirectBilled\": false\n}",
@@ -17421,7 +17421,7 @@
           ]
         },
         {
-          "name": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document)",
+          "name": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus",
           "request": {
             "method": "PUT",
             "header": [
@@ -17447,7 +17447,7 @@
                 }
               ]
             },
-            "description": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document)\n\nFront-end touchpoint: Operations > Quotation > Upload policy\n\nAccess: Any authenticated user",
+            "description": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus\n\nFront-end touchpoint: Operations > Quotation > Upload policy\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"policyNumber\": \"MAL-MC-2026-0099\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"plateNumber\": \"ABC 1234\",\n  \"policyDocument\": \"document/abc.pdf\"\n}",
@@ -17486,7 +17486,7 @@
                     }
                   ]
                 },
-                "description": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document)\n\nFront-end touchpoint: Operations > Quotation > Upload policy\n\nAccess: Any authenticated user",
+                "description": "Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus\n\nFront-end touchpoint: Operations > Quotation > Upload policy\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"policyNumber\": \"MAL-MC-2026-0099\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"plateNumber\": \"ABC 1234\",\n  \"policyDocument\": \"document/abc.pdf\"\n}",
@@ -17644,7 +17644,7 @@
           ]
         },
         {
-          "name": "Set the payment status (policies.payment_statuses) and method",
+          "name": "Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify",
           "request": {
             "method": "PATCH",
             "header": [
@@ -17671,7 +17671,7 @@
                 }
               ]
             },
-            "description": "Set the payment status (policies.payment_statuses) and method\n\nFront-end touchpoint: Operations > Quotation / Endorsement > Payment confirmation\n\nAccess: Any authenticated user",
+            "description": "Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify\n\nFront-end touchpoint: Accounts > Receipts\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"paymentStatus\": \"Completed\",\n  \"paymentMethod\": \"Direct Debit\"\n}",
@@ -17711,7 +17711,7 @@
                     }
                   ]
                 },
-                "description": "Set the payment status (policies.payment_statuses) and method\n\nFront-end touchpoint: Operations > Quotation / Endorsement > Payment confirmation\n\nAccess: Any authenticated user",
+                "description": "Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify\n\nFront-end touchpoint: Accounts > Receipts\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"paymentStatus\": \"Completed\",\n  \"paymentMethod\": \"Direct Debit\"\n}",
@@ -17802,7 +17802,7 @@
           ]
         },
         {
-          "name": "Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once",
+          "name": "Payment capture (policy and endorsement bills): record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof; receivableId picks the bill, e.g. an endorsement bill) as pending for finance to verify; only users with write:receipts (finance) post the official receipt at once",
           "request": {
             "method": "POST",
             "header": [
@@ -17829,7 +17829,7 @@
                 }
               ]
             },
-            "description": "Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once\n\nFront-end touchpoint: Operations > Policy > Payment\n\nAccess: Any authenticated user",
+            "description": "Payment capture (policy and endorsement bills): record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof; receivableId picks the bill, e.g. an endorsement bill) as pending for finance to verify; only users with write:receipts (finance) post the official receipt at once\n\nFront-end touchpoint: Operations > Policy > Payment; Endorsement > Payment\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"option\": \"payment\",\n  \"paymentMode\": \"bank-transfer\",\n  \"referenceNo\": \"BDO-778812\",\n  \"amount\": 11862.5,\n  \"paymentDate\": \"2026-09-28\",\n  \"proofKey\": \"payment-proofs/abc.jpg\"\n}",
@@ -17869,7 +17869,7 @@
                     }
                   ]
                 },
-                "description": "Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once\n\nFront-end touchpoint: Operations > Policy > Payment\n\nAccess: Any authenticated user",
+                "description": "Payment capture (policy and endorsement bills): record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof; receivableId picks the bill, e.g. an endorsement bill) as pending for finance to verify; only users with write:receipts (finance) post the official receipt at once\n\nFront-end touchpoint: Operations > Policy > Payment; Endorsement > Payment\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"option\": \"payment\",\n  \"paymentMode\": \"bank-transfer\",\n  \"referenceNo\": \"BDO-778812\",\n  \"amount\": 11862.5,\n  \"paymentDate\": \"2026-09-28\",\n  \"proofKey\": \"payment-proofs/abc.jpg\"\n}",
@@ -27733,7 +27733,7 @@
           ]
         },
         {
-          "name": "Create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable",
+          "name": "Finance (write:receipts): create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable",
           "request": {
             "method": "POST",
             "header": [
@@ -27751,7 +27751,7 @@
                 "receipts"
               ]
             },
-            "description": "Create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable\n\nFront-end touchpoint: Accounts > Receipts > Add receipt; Agent > Payment confirmation / Upload policy / Endorsement payment\n\nAccess: Any authenticated user",
+            "description": "Finance (write:receipts): create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable\n\nFront-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"receiptType\": \"Payment\",\n  \"receiptDate\": \"2026-09-28T00:00:00.000Z\",\n  \"customerCode\": \"CL-2026-00001\",\n  \"currencyCode\": \"PHP\",\n  \"transactionCode\": \"PAYMENT\",\n  \"remarks\": \"Payment receipt for policy POL-2026-00001\",\n  \"policyRefId\": \"pol_1\",\n  \"receiptsList\": [\n    {\n      \"receiptListId\": \"rl_1\",\n      \"policies\": \"POL-2026-00001\",\n      \"netPremium\": \"10000.00\",\n      \"paid\": \"11862.50\",\n      \"unPaid\": \"0.00\",\n      \"discounts\": \"0.00\",\n      \"dst\": \"1250.00\",\n      \"lgt\": \"75.00\",\n      \"vat\": \"1200.00\",\n      \"ewt\": \"0.00\",\n      \"other\": \"0.00\",\n      \"fcAmount\": \"0.00\",\n      \"lcAmount\": \"11862.50\",\n      \"status\": \"Paid\"\n    }\n  ]\n}",
@@ -27782,7 +27782,7 @@
                     "receipts"
                   ]
                 },
-                "description": "Create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable\n\nFront-end touchpoint: Accounts > Receipts > Add receipt; Agent > Payment confirmation / Upload policy / Endorsement payment\n\nAccess: Any authenticated user",
+                "description": "Finance (write:receipts): create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable\n\nFront-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"receiptType\": \"Payment\",\n  \"receiptDate\": \"2026-09-28T00:00:00.000Z\",\n  \"customerCode\": \"CL-2026-00001\",\n  \"currencyCode\": \"PHP\",\n  \"transactionCode\": \"PAYMENT\",\n  \"remarks\": \"Payment receipt for policy POL-2026-00001\",\n  \"policyRefId\": \"pol_1\",\n  \"receiptsList\": [\n    {\n      \"receiptListId\": \"rl_1\",\n      \"policies\": \"POL-2026-00001\",\n      \"netPremium\": \"10000.00\",\n      \"paid\": \"11862.50\",\n      \"unPaid\": \"0.00\",\n      \"discounts\": \"0.00\",\n      \"dst\": \"1250.00\",\n      \"lgt\": \"75.00\",\n      \"vat\": \"1200.00\",\n      \"ewt\": \"0.00\",\n      \"other\": \"0.00\",\n      \"fcAmount\": \"0.00\",\n      \"lcAmount\": \"11862.50\",\n      \"status\": \"Paid\"\n    }\n  ]\n}",

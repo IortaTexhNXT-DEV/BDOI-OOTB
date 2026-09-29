@@ -54,10 +54,13 @@ describe('policies', () => {
     expect(u.status).toBe(200);
     expect(u.body).toMatchObject({ policyNumber: 'FPG-MC-2026-0005', plateNumber: 'NEF 5511', inception: '2026-06-01', expiry: '2027-06-01' });
     expect((await sales('put', '/policies/pol_sls_07').send({ policyNumber: 'FPG-MC-2026-0005' })).status).toBe(409);
-    const p = await sales('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Completed', paymentMethod: 'GCash' });
+    // a policy editor cannot mark the premium paid (D70): only finance sets the payment status
+    expect((await sales('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Completed', paymentMethod: 'GCash' })).status).toBe(403);
+    expect((await sales('put', '/policies/pol_sls_05').send({ paymentStatus: 'Completed' })).status).toBe(403);
+    const p = await ctx.api('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Completed', paymentMethod: 'GCash' });
     expect(p.body).toMatchObject({ paymentStatus: 'Completed', paymentMethod: 'GCash' });
     expect(p.body.paidAt).toBeTruthy();
-    expect((await sales('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Maybe' })).status).toBe(400);
+    expect((await ctx.api('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Maybe' })).status).toBe(400);
     const audit = await pool.query("SELECT action FROM audit_log WHERE entity = 'policy' AND entity_id = 'pol_sls_05'");
     expect(audit.rows.map((a) => a.action)).toEqual(expect.arrayContaining(['update', 'payment-status']));
   });

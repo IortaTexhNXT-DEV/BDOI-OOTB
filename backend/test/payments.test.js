@@ -14,7 +14,9 @@ describe('payments, open items and petty cash', () => {
     const paid = await ctx.as('sales')('get', '/payments?status=PAID');
     expect(paid.body.data.every((x) => x.status === 'PAID')).toBe(true);
     const own = await makePolicy({ net: 6000, owner: ctx.userIds.agent });
-    await ctx.as('agent')('post', '/receipts').send({ policyId: own.policy.id, amount: 1000 });
+    // official receipts are finance-only (D61)
+    expect((await ctx.as('agent')('post', '/receipts').send({ policyId: own.policy.id, amount: 1000 })).status).toBe(403);
+    expect((await ctx.as('maker')('post', '/receipts').send({ policyId: own.policy.id, amount: 1000 })).status).toBe(201);
     const mine = await ctx.as('agent')('get', '/payments');
     expect(mine.body.data).toHaveLength(1);
     expect(mine.body.data[0].status).toBe('REVIEWING');
