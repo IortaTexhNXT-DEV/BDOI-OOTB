@@ -7,7 +7,7 @@ import SvgCountMinusIcon from "../../../assets/icons/SvgCountMinusIcon";
 import CalculaitionTextInputs from "../../component/calculaitionTextInputs";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import CustomToast from "../../../components/Toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
@@ -33,6 +33,7 @@ import CommissionReferralSection, {
   defaultCommissionDetails,
 } from "./CommissionReferralSection";
 import { notifyError } from "../../../utility/dialogs";
+import logger from "../../../utility/logger";
 
 // Helper function to transform Redux currentQuoteCreation to component format
 const transformReduxToComponentFormat = (currentQuoteCreation) => {
@@ -99,7 +100,6 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
       currentQuoteCreation.coverageDetails?.localGovernmentTax,
     accountPremiumOthers:
       currentQuoteCreation.coverageDetails?.accountPremiumOthers,
-    discount: currentQuoteCreation.coverageDetails?.discount,
     grossPremium: currentQuoteCreation.coverageDetails?.grossPremium,
 
     // From accessories - camelCase only
@@ -164,13 +164,9 @@ const toPremiumFields = (breakdown) => {
 
 const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => {
   if (quotationData) {
-    console.log("=== GET FORM VALUES ===");
-    console.log("Input quotation data:", quotationData);
-
     // ALWAYS use passed premium values if available (from Coverage Details)
     // This ensures consistency between Coverage Details and Order Summary
     if (quotationData.netPremium && quotationData.grossPremium) {
-      console.log("✅ Using premium data from Coverage Details");
       return {
         netPremium: quotationData.netPremium,
         valueAddedTax: quotationData.valueAddedTax,
@@ -188,14 +184,11 @@ const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => 
     }
 
     // Fallback: Calculate only if no premium data passed
-    console.log("⚠️ Calculating premium (no data from Coverage Details)");
     const premiumValues = calculatePremiumBreakdown(
       quotationData,
       productConfigurator,
       settingsTaxRates
     );
-
-    console.log("Final premium values:", premiumValues);
 
     return {
       netPremium: premiumValues.netPremium,
@@ -248,7 +241,7 @@ const OrderSummary = ({ action, flow }) => {
     "Quote Created Successfully"
   );
   const [quotationData, setQuotationData] = useState(null);
-  const [isLoadingRenewalData, setIsLoadingRenewalData] = useState(false);
+  const [, setIsLoadingRenewalData] = useState(false);
   const [leadData, setLeadData] = useState(null);
   const [clientData, setClientData] = useState(null);
   const dispatch = useDispatch();
@@ -257,7 +250,7 @@ const OrderSummary = ({ action, flow }) => {
   const { state } = useLocation();
 
   // Get current quote creation state from Redux
-  const { currentQuoteCreation, isEditMode, productConfigurator } = useSelector(
+  const { currentQuoteCreation, productConfigurator } = useSelector(
     ({ quotationReducers, productConfiguratorReducer }) => ({
       currentQuoteCreation: quotationReducers?.currentQuoteCreation,
       isEditMode: quotationReducers?.currentQuoteCreation?.isEditMode || false,
@@ -276,17 +269,15 @@ const OrderSummary = ({ action, flow }) => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (flow !== "renewal" && leadRefId) {
-        console.log("Fetching lead data for leadRefId:", leadRefId);
         try {
           const response = await leadService.getLeadById(leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -314,21 +305,16 @@ const OrderSummary = ({ action, flow }) => {
       }
       // NORMAL/EDIT FLOW: Use Redux or navigation state
       else if (currentQuoteCreation && currentQuoteCreation.leadRefId) {
-        console.log("✅ Using Redux currentQuoteCreation as data source");
         setQuotationData(transformReduxToComponentFormat(currentQuoteCreation));
       } else if (state?.quotationData) {
-        console.log("⚠️ Fallback: Using navigation state.quotationData");
         setQuotationData(state.quotationData);
       } else {
-        console.log("❌ No data source available - quotationData will be null");
         setQuotationData(null);
       }
     };
 
     loadQuotationData();
   }, [flow, policyId, state, currentQuoteCreation]);
-
-  console.log("Final quotationData to use:", quotationData);
 
   // Use useMemo to recalculate initial values when quotationData changes
   // The server computes the premium (and recomputes it on save); show its breakdown
@@ -349,13 +335,6 @@ const OrderSummary = ({ action, flow }) => {
   const initialValue = React.useMemo(() => {
     const pricedQuotation = quotationData && serverPremium ? { ...quotationData, ...serverPremium } : quotationData;
     const values = getFormValues(pricedQuotation, productConfigurator, settingsTaxRates);
-    console.log(
-      "=== CALCULATING INITIAL VALUES ===",
-      values,
-      productConfigurator
-    );
-    console.log("quotationData:", quotationData);
-    console.log("Calculated initial values:", values);
     return values;
   }, [quotationData, serverPremium, productConfigurator, settingsTaxRates]);
 
@@ -425,7 +404,7 @@ const OrderSummary = ({ action, flow }) => {
             "admin"
           );
         } catch (error) {
-          console.warn("Error getting user data from localStorage:", error);
+          logger.warn("Error getting user data from localStorage:", error);
           return "admin";
         }
       };
@@ -445,26 +424,8 @@ const OrderSummary = ({ action, flow }) => {
           values.commissionDetails || defaultCommissionDetails(),
       };
 
-      // Validate accounting equation: grossPremium = netPremium + VAT + DST + LGT + Others - Discount
-      const netPremiumNum = parseFloat(orderSummaryData.netPremium) || 0;
-      const grossPremiumNum = parseFloat(orderSummaryData.grossPremium) || 0;
-      const vatNum = parseFloat(orderSummaryData.valueAddedTax) || 0;
-      const dstNum = parseFloat(orderSummaryData.documentaryStampTax) || 0;
-      const lgtNum = parseFloat(orderSummaryData.localGovernmentTax) || 0;
-      const othersNum = parseFloat(orderSummaryData.accountPremiumOthers) || 0;
-      const discountNum = parseFloat(orderSummaryData.discount) || 0;
-      const commission = grossPremiumNum - netPremiumNum;
-      const calculatedTotal =
-        netPremiumNum + vatNum + dstNum + lgtNum + othersNum + ctplAmount - discountNum;
-      const difference = Math.abs(grossPremiumNum - calculatedTotal);
-
-      if (difference > 0.01 && grossPremiumNum > 0) {
-      }
-
       dispatch(setQuoteOrderSummary(orderSummaryData));
 
-      // Prepare data from Redux or fallback to quotationData/accumulated data
-      const accumulatedData = quotationData || {};
 
       // Determine the correct lead ID
       const correctLeadId =
@@ -607,7 +568,6 @@ const OrderSummary = ({ action, flow }) => {
                 ]
               : []),
         };
-        console.log("Final quotation data from fallback:", finalQuotationData);
       } else {
         notifyError(
           "Error: No quote data available. Please go back and fill in the required information."
@@ -662,19 +622,12 @@ const OrderSummary = ({ action, flow }) => {
           });
         }, 2000);
       } else if (result.type.endsWith("/rejected")) {
-        console.error(
-          existingQuotationId
-            ? "Quotation update failed:"
-            : "Quotation creation failed:",
-          result.payload
-        );
         notifyError(
           `Failed to ${existingQuotationId ? "update" : "create"} quotation: ` +
             (result.payload || "Unknown error")
         );
       }
     } catch (error) {
-      console.error("Unexpected error:", error);
       notifyError("An unexpected error occurred while processing the quotation");
     }
   };
@@ -700,7 +653,7 @@ const OrderSummary = ({ action, flow }) => {
 
     if (difference > 0.01 && grossPremiumNum > 0) {
       const commission = grossPremiumNum - netPremiumNum;
-      console.warn("[ORDER SUMMARY VALIDATION] Accounting equation mismatch:", {
+      logger.warn("[ORDER SUMMARY VALIDATION] Accounting equation mismatch:", {
         grossPremium: grossPremiumNum,
         netPremium: netPremiumNum,
         valueAddedTax: vatNum,
@@ -712,7 +665,6 @@ const OrderSummary = ({ action, flow }) => {
         calculatedTotal,
         difference,
       });
-      // Don't block submission, but log warning
     }
 
     return errors;
@@ -768,7 +720,7 @@ const OrderSummary = ({ action, flow }) => {
     applyDiscountPercent(newDiscount);
   };
 
-  // Sync % card from loaded baht discount when quote data initializes
+  // Sync % card from the loaded discount amount when quote data initializes
   useEffect(() => {
     const base = getPremiumBase(initialValue);
     const discountAmt = parseAmount(initialValue?.discount);
@@ -958,7 +910,6 @@ const OrderSummary = ({ action, flow }) => {
                 value={formik.values.authorizedSignature}
                 options={signatoryOptions}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("authorizedSignature", e.value);
                 }}
                 optionLabel="label"

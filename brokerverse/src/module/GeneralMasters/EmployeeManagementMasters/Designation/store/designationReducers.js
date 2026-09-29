@@ -8,7 +8,6 @@ const initialState = {
   getEditData: {},
   getViewData: {}
 };
-let nextId1=4
 const receiptsReducer = createSlice({
   name: "designation",
   initialState,
@@ -41,8 +40,6 @@ const receiptsReducer = createSlice({
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
-
-
     builder.addCase(postAddDesignationMiddleware.pending, (state) => {
       state.loading = true;
     });
@@ -56,10 +53,8 @@ const receiptsReducer = createSlice({
     builder.addCase(postAddDesignationMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
-
 
     builder.addCase(patchDesignationEditMiddleware.pending, (state) => {
       state.loading = true;
@@ -89,7 +84,6 @@ const receiptsReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
 
     builder.addCase(getDesignationViewData.pending, (state) => {
       state.loading = true;
@@ -132,8 +126,6 @@ const receiptsReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
-
   },
 });
 

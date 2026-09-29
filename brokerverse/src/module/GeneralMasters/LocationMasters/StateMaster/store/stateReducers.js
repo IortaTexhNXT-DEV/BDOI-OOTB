@@ -9,7 +9,6 @@ const initialState = {
   getSearchState: [],
   postAddState: "",
   patchStateEdit: {}
-
 };
 const stateReducer = createSlice({
   name: "employee",
@@ -57,8 +56,6 @@ const stateReducer = createSlice({
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
-
-
     builder.addCase(postAddStateMiddleware.pending, (state) => {
       state.loading = true;
     });
@@ -69,10 +66,8 @@ const stateReducer = createSlice({
     builder.addCase(postAddStateMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
-
 
     builder.addCase(patchStateEditMiddleware.pending, (state) => {
       state.loading = true;
@@ -102,10 +97,6 @@ const stateReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
-
-
-
   },
 });
 

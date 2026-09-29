@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -10,13 +10,11 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { useFormik } from "formik";
 import { Dropdown } from "primereact/dropdown";
 import SvgEye from "../../../assets/icons/SvgEye";
 import { useDispatch, useSelector } from "react-redux";
 import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import {
-  getReceiptsListBySearchMiddleware,
   getReceiptsListByFilterMiddleware,
   getReceiptsListMiddleware,
   getReceiptsListByIdMiddleware,
@@ -33,6 +31,7 @@ import { Toast } from "primereact/toast";
 import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const CONVERTED = "Converted";
 
@@ -87,12 +86,7 @@ const PolicyReceipts = () => {
     { name: "CASH002", code: "CASH002" },
     { name: "CASH003", code: "CASH003" },
   ];
-  const initialValue = {
-    receiptDate: new Date(),
-  };
   // Remove minDate restriction to allow selecting today and past dates
-  // const minDate = new Date();
-  // minDate.setDate(minDate.getDate() + 1);
   const search = [
     { name: t("accounts.receipts.searchName"), value: "name" },
     { name: t("accounts.receipts.searchCustomerCode"), value: "customerCode" },
@@ -103,10 +97,8 @@ const PolicyReceipts = () => {
   const {
     receiptsTableList,
     loading,
-    receiptsSearchTable,
     receiptsFilterTable,
     pagination,
-    bulkPrintData,
     bulkPrintLoading,
     bulkPrintError,
   } = useSelector(({ receiptsTableReducers }) => {
@@ -244,10 +236,10 @@ const PolicyReceipts = () => {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -255,12 +247,6 @@ const PolicyReceipts = () => {
 
     fetchClients();
   }, []);
-
-  // Handle bulk print response
-  useEffect(() => {
-    if (bulkPrintData && bulkPrintData.success) {
-    }
-  }, [bulkPrintData]);
 
   // Handle bulk print error from Redux state - only when there's an actual error from bulk print operation
   useEffect(() => {
@@ -530,9 +516,9 @@ const PolicyReceipts = () => {
         });
       }
     } catch (error) {
-      console.error("Bulk print error:", error);
-      console.error("Error type:", typeof error);
-      console.error("Error structure:", JSON.stringify(error, null, 2));
+      logger.error("Bulk print error:", error);
+      logger.error("Error type:", typeof error);
+      logger.error("Error structure:", JSON.stringify(error, null, 2));
 
       // Only handle non-"No data found" errors here
       // "No data found" errors are handled by the Redux state useEffect
@@ -609,7 +595,7 @@ const PolicyReceipts = () => {
           }}
         >
           <span style={{ color: "#1976d2", fontWeight: "500" }}>
-            📋 {t("accounts.receipts.filteredByPolicyId")} {policyId}
+            {t("accounts.receipts.filteredByPolicyId")} {policyId}
           </span>
           <button
             onClick={() => navigate("/accounts/receipts")}

@@ -1,3 +1,4 @@
+import logger from "./logger";
 /**
  * Token Manager Utility
  * Provides utility functions for token management and localStorage operations
@@ -24,7 +25,7 @@ export const getStorageItem = (key) => {
   try {
     return localStorage.getItem(key);
   } catch (error) {
-    console.error(`Error getting item from localStorage: ${key}`, error);
+    logger.error(`Error getting item from localStorage: ${key}`, error);
     return null;
   }
 };
@@ -40,7 +41,7 @@ export const setStorageItem = (key, value) => {
     localStorage.setItem(key, value);
     return true;
   } catch (error) {
-    console.error(`Error setting item in localStorage: ${key}`, error);
+    logger.error(`Error setting item in localStorage: ${key}`, error);
     return false;
   }
 };
@@ -55,7 +56,7 @@ export const removeStorageItem = (key) => {
     localStorage.removeItem(key);
     return true;
   } catch (error) {
-    console.error(`Error removing item from localStorage: ${key}`, error);
+    logger.error(`Error removing item from localStorage: ${key}`, error);
     return false;
   }
 };
@@ -93,7 +94,7 @@ export const isTokenExpired = (expiryTime) => {
     const tokenExpiry = parseInt(expiryTime);
     return currentTime >= tokenExpiry;
   } catch (error) {
-    console.error("Error checking token expiry:", error);
+    logger.error("Error checking token expiry:", error);
     return true;
   }
 };
@@ -168,7 +169,7 @@ export const getUserData = () => {
   try {
     return JSON.parse(userData);
   } catch (error) {
-    console.error("Error parsing user data:", error);
+    logger.error("Error parsing user data:", error);
     return null;
   }
 };

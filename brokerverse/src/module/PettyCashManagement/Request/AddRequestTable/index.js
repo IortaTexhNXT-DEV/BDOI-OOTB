@@ -1,11 +1,10 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useFormik } from "formik";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import CustomToast from "../../../../components/Toast";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
@@ -38,7 +37,7 @@ const AddRequestTable = () => {
   const toastRefApprove = useRef(null);
   const navigate = useNavigate();
 
-  const { AddRequestTable, loading } = useSelector(
+  const { AddRequestTable } = useSelector(
     ({ pettyCashRequestReducer }) => {
       return {
         loading: pettyCashRequestReducer?.loading,
@@ -48,7 +47,6 @@ const AddRequestTable = () => {
   );
 
   const isEmpty = !AddRequestTable?.length;
-
 
   const handleapprove = async (actionName) => {
     const result = await dispatch(
@@ -292,7 +290,6 @@ const AddRequestTable = () => {
         <div className="grid">
           <div className="col-12 md:col-8 lg:col-8">
             <InputField
-              // classNames="input__filed"
               classNames="fielduniqueone__container"
               label={t("pettyCash.narration")}
               placeholder={t("pettyCash.enter")}
@@ -301,7 +298,6 @@ const AddRequestTable = () => {
               textWeight={500}
               value={formik.values.Narration}
               onChange={formik.handleChange("Narration")}
-            // error={formik.touched.Narration && formik.errors.Narration}
             />
           </div>
           <div className="col-12 md:col-4 lg:col-4">
@@ -314,7 +310,6 @@ const AddRequestTable = () => {
               textWeight={500}
               value={formik.values.Amount}
               onChange={formik.handleChange("Amount")}
-            // error={formik.touched.Amount && formik.errors.Amount}
             />
           </div>
         </div>

@@ -64,7 +64,6 @@ const UploadEndorsement = () => {
           notifyError("Failed to load endorsement: " + response.error);
         }
       } catch (error) {
-        console.error("Error fetching endorsement:", error);
         notifyError(t("endorsement.errorLoadingEndorsement"));
       } finally {
         setLoading(false);
@@ -146,7 +145,6 @@ const UploadEndorsement = () => {
         );
       }
     } catch (error) {
-      console.error("Submit error:", error);
       notifyError(t("endorsement.submitFailed") + ": " + error.message);
     } finally {
       setIsSubmitting(false);
@@ -319,10 +317,6 @@ const UploadEndorsement = () => {
             showPreview={false}
             uploadPath="endorsement-documents"
             onUploadSuccess={(url, file) => {
-              console.log("=== S3 Upload Success ===");
-              console.log("URL:", url);
-              console.log("File:", file);
-
               // Extract URL from various possible formats
               let uploadedUrl = null;
 
@@ -333,10 +327,7 @@ const UploadEndorsement = () => {
                   url.url || url.data?.url || url.key || url.data?.key;
               }
 
-              console.log("Final URL:", uploadedUrl);
-
               if (!uploadedUrl) {
-                console.error("Failed to extract URL:", url);
                 notifyWarn(
                   "File uploaded but URL could not be retrieved. Please refresh and try again."
                 );
@@ -347,7 +338,6 @@ const UploadEndorsement = () => {
               formik.setFieldValue("file", uploadedUrl);
             }}
             onUploadError={(error) => {
-              console.error("Endorsement document upload error:", error);
               notifyError(t("endorsement.failedToUploadDocument") + ": " + error.message);
             }}
           />

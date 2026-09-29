@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -26,7 +26,7 @@ const TableData = ({ navigate }) => {
   useEffect(() => {
     dispatch(getInsurancelineOfBusinessListMiddleWare());
   }, [dispatch]);
-  const { InsuranceLineOfBusinessList, loading, SearchTableList } = useSelector(
+  const { InsuranceLineOfBusinessList, SearchTableList } = useSelector(
     ({ insuranceLineOfBusinessReducers }) => {
       return {
         loading: insuranceLineOfBusinessReducers?.loading,
@@ -36,7 +36,6 @@ const TableData = ({ navigate }) => {
       };
     }
   );
-  // const navigate = useNavigation();
 
   const emptyTableIcon = (
     <div>
@@ -186,7 +185,6 @@ const TableData = ({ navigate }) => {
           header="Action"
           headerStyle={{ textAlign: "center" }}
           className="fieldvalueaction_container"
-          // style={{textAlign:'center'}}
         ></Column>
       </DataTable>
     </div>

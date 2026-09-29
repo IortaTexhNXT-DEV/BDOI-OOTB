@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -21,7 +21,7 @@ import {
 
 const AddEmployee = ({ action }) => {
   const { t } = useTranslation();
-  const { employeeEditData, loading, total, employeeViewData } = useSelector(
+  const { employeeEditData } = useSelector(
     ({ employeeReducers }) => {
       return {
         loading: employeeReducers?.loading,
@@ -34,7 +34,6 @@ const AddEmployee = ({ action }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
   const dispatch = useDispatch();
   useEffect(() => {
     if (id && (action === "edit" || action === "view")) dispatch(getEmployeEditMiddleWare(id));
@@ -47,15 +46,9 @@ const AddEmployee = ({ action }) => {
     }
   }, [employeeEditData?.id]);
 
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     setFormikValues();
-  //   }
-  // }, [action]);
   const items = [
     { label: "Employee Management" },
     { label: "Employee", url: "/master/generals/employeemanagement/employee" },
-    ,
     {
       label: `${
         action === "add"
@@ -246,7 +239,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.employeeCode}
               onChange={formik.handleChange("employeeCode")}
-              // error={formik.errors.employeeCode}
               label={t("generalMasters.employeeCode")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -263,7 +255,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.firstName}
               onChange={formik.handleChange("firstName")}
-              // error={formik.errors.firstName}
               label={t("generalMasters.firstName")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -281,7 +272,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.middleName}
               onChange={formik.handleChange("middleName")}
-              // error={formik.errors.middleName}
               label={t("generalMasters.middleName")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -298,7 +288,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.lastName}
               onChange={formik.handleChange("lastName")}
-              // error={formik.errors.lastName}
               label={t("generalMasters.lastName")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -315,7 +304,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.employeeType}
               onChange={formik.handleChange("employeeType")}
-              // error={formik.errors.employeeType}
               className="dropdown__add__sub"
               label={t("generalMasters.employeeType")}
               classNames="label__sub__add"
@@ -337,7 +325,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.designation}
               onChange={formik.handleChange("designation")}
-              // error={formik.errors.designation}
               className="dropdown__add__sub"
               label={t("generalMasters.designation")}
               classNames="label__sub__add"
@@ -358,7 +345,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.reportingTo}
               onChange={formik.handleChange("reportingTo")}
-              // error={formik.errors.reportingto}
               className="dropdown__add__sub"
               label={t("generalMasters.reportingTo")}
               classNames="label__sub__add"
@@ -379,7 +365,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.branchCode}
               onChange={formik.handleChange("branchCode")}
-              // error={formik.errors.branchCode}
               className="dropdown__add__sub"
               label={t("generalMasters.branchCode")}
               classNames="label__sub__add"
@@ -400,7 +385,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.departmentCode}
               onChange={formik.handleChange("departmentCode")}
-              // error={formik.errors.departmentCode}
               className="dropdown__add__sub"
               label={t("generalMasters.departmentCode")}
               classNames="label__sub__add"
@@ -421,7 +405,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.idProofType}
               onChange={formik.handleChange("idProofType")}
-              // error={formik.errors.idProofType}
               className="dropdown__add__sub"
               label={t("generalMasters.idProofType")}
               classNames="label__sub__add"
@@ -442,7 +425,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.idNumber}
               onChange={formik.handleChange("idNumber")}
-              // error={formik.errors.idNumber}
               label={t("generalMasters.idNumber")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -459,7 +441,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.addressLine1}
               onChange={formik.handleChange("addressLine1")}
-              // error={formik.errors.addressLine1}
               label={t("generalMasters.addressLine1")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -476,7 +457,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.addressLine2}
               onChange={formik.handleChange("addressLine2")}
-              // error={formik.errors.addressLine2}
               label={t("generalMasters.addressLine2")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -493,7 +473,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.addressLine3}
               onChange={formik.handleChange("addressLine3")}
-              // error={formik.errors.addressLine3}
               label={t("generalMasters.addressLine3")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -531,7 +510,6 @@ const AddEmployee = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={formik.values.state}
               onChange={formik.handleChange("state")}
-              // error={formik.errors.state}
               className="dropdown__add__sub"
               label={t("generalMasters.state")}
               classNames="label__sub__add"

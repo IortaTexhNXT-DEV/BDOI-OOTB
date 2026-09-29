@@ -15,6 +15,7 @@ import {
   UPDATE_RECEIPT,
 } from "../../../redux/actionTypes";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const toReceiptRow = (receipt) => ({
   id: receipt.receiptId,
@@ -277,19 +278,12 @@ export const patchReceipEditMiddleware = createAsyncThunk(
   async (payload, { rejectWithValue, getState }) => {
     const { receiptsTableReducers } = getState();
     const { receivableTableList } = receiptsTableReducers;
-    
-    console.log("[PATCH MIDDLEWARE] Received payment:", {
-      payloadId: payload?.id,
-      payloadPaid: payload?.paid,
-      currentList: receivableTableList.map(item => ({ id: item.id, paid: item.paid }))
-    });
-    
+
     // Check if this is a NEW entry (created via "+ Add Payment" button)
     const isNewEntry = String(payload?.id).startsWith('new-');
     
     if (isNewEntry) {
       // NEW PAYMENT ENTRY - Always ADD as new row
-      console.log("[PATCH MIDDLEWARE] New payment entry - adding new row");
       
       const newEntry = {
         id: `payment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Generate unique ID
@@ -310,13 +304,7 @@ export const patchReceipEditMiddleware = createAsyncThunk(
       };
       
       const updatedList = [...receivableTableList, newEntry];
-      
-      console.log("[PATCH MIDDLEWARE] Added new payment entry:", {
-        totalRows: updatedList.length,
-        newEntry: { id: newEntry.id, paid: newEntry.paid },
-        allRows: updatedList.map(item => ({ id: item.id, paid: item.paid }))
-      });
-      
+
       return updatedList;
       
     } else {
@@ -326,18 +314,11 @@ export const patchReceipEditMiddleware = createAsyncThunk(
       );
       
       if (!existingItem) {
-        console.warn("[PATCH MIDDLEWARE] Item not found:", payload?.id);
+        logger.warn("[PATCH MIDDLEWARE] Item not found:", payload?.id);
         return receivableTableList;
       }
-      
-      console.log("[PATCH MIDDLEWARE] Editing existing entry:", {
-        existingId: existingItem.id,
-        existingPaid: existingItem.paid,
-        newPaid: payload?.paid
-      });
-      
+
       // UPDATE existing row
-      console.log("[PATCH MIDDLEWARE] Updating existing row");
       const updateTable = receivableTableList.map((item) => {
         if (item.id === payload?.id || item.id === String(payload?.id)) {
           return {
@@ -359,7 +340,6 @@ export const patchReceipEditMiddleware = createAsyncThunk(
         return item;
       });
       
-      console.log("[PATCH MIDDLEWARE] Updated existing row:", updateTable.map(item => ({ id: item.id, paid: item.paid })));
       return updateTable;
     }
   }
@@ -394,7 +374,7 @@ export const getDraftReceiptsMiddleware = createAsyncThunk(
           receiptId: receipt.receiptId,
           receiptNumber: receipt.receiptNumber,
           receiptStatus: receipt.receiptStatus,
-          policyRefId: receipt.policyRefId // ✅ Include the actual policy reference ID
+          policyRefId: receipt.policyRefId // Include the actual policy reference ID
         }));
 
       return draftReceipts;

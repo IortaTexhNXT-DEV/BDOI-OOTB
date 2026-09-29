@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
@@ -12,7 +12,6 @@ import {
 } from "../../../utility/toastUtils";
 import NotificationFallback from "../../../components/NotificationFallback";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgGreenDots from "../../../assets/agentIcon/SvgGreenDots";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
@@ -29,7 +28,7 @@ const Notification = () => {
     refresh,
   } = useNotifications();
 
-  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [, setSelectedNotification] = useState(null);
 
   const handleHomeNavigation = () => {
     navigate("/");

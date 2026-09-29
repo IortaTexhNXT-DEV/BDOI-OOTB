@@ -1,5 +1,5 @@
 /**
- * Date-of-birth plausibility rule for leads and clients (D68). Mirrors the server check (backend/src/lib/birthDate.js):
+ * Date-of-birth plausibility rule for leads and clients. Mirrors the server check (backend/src/lib/birthDate.js):
  * the age must be between app_settings leads.min_age_years and leads.max_age_years (System Settings, group "leads");
  * the defaults below apply when the settings cannot be read. The server refuses anything else with a 400.
  */

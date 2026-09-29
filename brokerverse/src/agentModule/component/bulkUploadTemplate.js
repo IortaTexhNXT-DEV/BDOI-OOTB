@@ -1,6 +1,7 @@
 /**
  * Bulk upload templates generated in the browser as CSV (the upload endpoints accept CSV or XLSX).
- * Column names match the header aliases read by POST /leads|/quotations|/policies/bulk-upload.
+ * Column names match the headers read by the bulk-upload endpoints of leads, quotations, policies,
+ * receipts and disbursements (the backend camel-cases them: "Policy Number" -> policyNumber).
  */
 export const BULK_UPLOAD_TEMPLATES = {
   leads: {
@@ -25,11 +26,22 @@ export const BULK_UPLOAD_TEMPLATES = {
       "Plate Number", "Payment Status",
     ],
   },
+  receipts: {
+    fileName: "Receipts-Bulk-Upload.csv",
+    columns: ["Policy Number", "Amount", "Receipt Date", "Payment Mode", "Reference No", "Customer Code", "Transaction Code", "Remarks"],
+  },
+  disbursements: {
+    fileName: "Disbursements-Bulk-Upload.csv",
+    columns: [
+      "Voucher Date", "Payee Type", "Customer Code", "Insurer Name", "Policy Number", "Referrer Id", "Amount",
+      "Transaction Code", "Transaction Description", "Remarks",
+    ],
+  },
 };
 
 const csvCell = (value) => (/[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
 
-/** Downloads the header-only CSV template of the given kind (leads, quotations or policies). */
+/** Downloads the header-only CSV template of the given kind (a key of BULK_UPLOAD_TEMPLATES). */
 export const downloadBulkUploadTemplate = (kind) => {
   const { fileName, columns } = BULK_UPLOAD_TEMPLATES[kind];
   const blob = new Blob([`${columns.map(csvCell).join(",")}\r\n`], { type: "text/csv;charset=utf-8" });

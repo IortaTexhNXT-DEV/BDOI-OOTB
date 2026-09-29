@@ -1,14 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-// import CustomToast from "../../../../components/Toast";
 import { Button } from "primereact/button";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
@@ -52,9 +50,8 @@ const AddDisbursement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [selectedRows, setSelectedRows] = useState([]);
-  // const toastRef = useRef(null);
 
-  const { AddDisbursment, loading, AddDisbursmentRequestTable } = useSelector(
+  const { AddDisbursmentRequestTable } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -79,7 +76,6 @@ const AddDisbursement = () => {
   const handleBack = () => {
     navigate("/accounts/pettycash/disbursement");
   };
-  const toastRef = useRef(null);
   const { funds, mainAccounts, subAccounts } = usePettyCashOptions();
   const Criteria = CRITERIA;
   const handleSubmit = async (values) => {
@@ -107,21 +103,6 @@ const AddDisbursement = () => {
     if (!values.Criteria) {
       errors.Criteria = t("pettyCash.thisFieldRequired");
     }
-    // if (!values.VATMainAccount) {
-    //   errors.VATMainAccount = "This field is required";
-    // }
-    // if (!values.VATSubAccount) {
-    //   errors.VATSubAccount = "This field is required";
-    // }
-    // if (!values.WHTMainAccount) {
-    //   errors.WHTMainAccount = "This field is required";
-    // }
-    // if (!values.WHTSubAccount) {
-    //   errors.WHTSubAccount = "This field is required";
-    // }
-    // if (!values.Remarks) {
-    //   errors.Remarks = "This field is required";
-    // }
 
     return errors;
   };
@@ -199,7 +180,6 @@ const AddDisbursement = () => {
   minDate.setDate(minDate.getDate() + 1);
   return (
     <div className="add__disbursement__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
         
@@ -225,24 +205,6 @@ const AddDisbursement = () => {
         <Card className="mt-3">
           <div className="grid mt-1">
             <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
-              {/* <LabelWrapper className="calenderlable__container">
-                Date
-              </LabelWrapper>
-              <Calendar
-                minDate={minDate}
-                showIcon
-                classNames="calender__container"
-                label="Date"
-                textColor={"#111927"}
-                textSize={"16"}
-                textWeight={500}
-                value={formik.values.Date}
-                onChange={(e) => {
-                  formik.setFieldValue("Date", e.target.value);
-                }}
-                error={formik.touched.Date && formik.errors.Date}
-                dateFormat={calendarDateFormat()}
-              /> */}
               <LabelWrapper className="calenderlable__container">
                 Date
               </LabelWrapper>
@@ -428,7 +390,6 @@ const AddDisbursement = () => {
           <div className="table__container">
             <DataTable
               value={AddDisbursmentRequestTable}
-              // tableStyle={{ minWidth: "50rem" }}
               emptyMessage={emptyTableIcon}
               selection={selectedRows}
               onSelectionChange={(e) => setSelectedRows(e.value)}
@@ -438,7 +399,6 @@ const AddDisbursement = () => {
               paginator
               rows={5}
               rowsPerPageOptions={[5, 10, 25, 50]}
-              // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
             >
@@ -447,7 +407,6 @@ const AddDisbursement = () => {
                 selectionMode="multiple"
                 selectedItem
                 style={{ textAlign: "center" }}
-              // headerStyle={{ width: "4rem" }}
               ></Column>
               <Column
                 field="TransactionCode"

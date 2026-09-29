@@ -27,6 +27,7 @@ import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 const ENDORSEMENT_TYPE_KEYS = {
   1: "policyDetail.endorsementTypePersonalDetails",
   2: "policyDetail.endorsementTypeMotorDetails",
@@ -414,7 +415,7 @@ const PolicyDetailView = () => {
           setVehiclePhotoUrls(fallbackMap);
         }
       } catch (fetchError) {
-        console.error(
+        logger.error(
           "Error fetching vehicle photo presigned URLs:",
           fetchError
         );
@@ -510,7 +511,7 @@ const PolicyDetailView = () => {
         life: 3000,
       });
     } catch (downloadError) {
-      console.error("Document open error:", downloadError);
+      logger.error("Document open error:", downloadError);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToOpenDocument"),
@@ -558,7 +559,7 @@ const PolicyDetailView = () => {
         life: 3000,
       });
     } catch (err) {
-      console.error("Insurance Placing Slip fetch error:", err);
+      logger.error("Insurance Placing Slip fetch error:", err);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToOpenDocument"),
@@ -605,7 +606,7 @@ const PolicyDetailView = () => {
         });
       }
     } catch (err) {
-      console.error("Policy document preview error:", err);
+      logger.error("Policy document preview error:", err);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToLoad"),
@@ -651,7 +652,7 @@ const PolicyDetailView = () => {
         });
       }
     } catch (err) {
-      console.error("Policy document open error:", err);
+      logger.error("Policy document open error:", err);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToOpenDocument"),
@@ -711,7 +712,7 @@ const PolicyDetailView = () => {
         throw new Error(result.error || "Failed to generate invoice");
       }
     } catch (invoiceError) {
-      console.error(`Generate ${type} invoice error:`, invoiceError);
+      logger.error(`Generate ${type} invoice error:`, invoiceError);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.invoiceGenerationFailed"),
@@ -1631,7 +1632,6 @@ const PolicyDetailView = () => {
                 className="p-button-success p-button-rounded"
               />
             )}
-            {/* {policyDetails.Payment} */}
 
             <Button
               label={t("policyDetail.claim")}
@@ -2129,16 +2129,6 @@ const PolicyDetailView = () => {
                     {t("policyDetail.paymentRequiredDescription")}
                   </p>
                   <div className="payment-actions">
-                    {/* <Button
-                      label={t("policyDetail.payLater")}
-                      icon="pi pi-clock"
-                      className="p-button-outlined p-button-secondary"
-                      onClick={() =>
-                        navigate(
-                          `/agent/clientview/${rawPolicyData?.clientId || ""}`
-                        )
-                      }
-                    /> */}
                     <Button
                       label={t("policyDetail.proceedToPayment")}
                       icon="pi pi-credit-card"

@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useClaimHeader from "../useClaimHeader";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
 import { FileUpload } from "primereact/fileupload";
@@ -19,6 +19,7 @@ import { postSettlementClaimMiddleware } from "./Store/claimSettlementMiddleware
 import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import claimsService from "../../../services/claimsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 
 const initialValues = {
   settlementType: "",
@@ -56,7 +57,6 @@ const SettlementDetails = () => {
 
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
@@ -201,7 +201,7 @@ const SettlementDetails = () => {
 
   const handleSubmit = async (values) => {
     if (!claimId) {
-      console.error("No claim ID available for settlement");
+      logger.error("No claim ID available for settlement");
       return;
     }
 

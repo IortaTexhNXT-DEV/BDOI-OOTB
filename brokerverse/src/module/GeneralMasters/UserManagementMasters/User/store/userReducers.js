@@ -141,7 +141,6 @@ const usersReducer = createSlice({
       state.lastAddUserError = null;
     });
     builder.addCase(postAddUserMiddleware.fulfilled, (state, action) => {
-      console.log(action.payload, "find action.payload");
       state.loading = false;
       state.lastAddUserError = null;
       // Map and add new user to list
@@ -166,7 +165,6 @@ const usersReducer = createSlice({
 
     builder.addCase(patchUserEditMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      console.log(state.userList, "state.countryTableList");
       // Map the updated user data
       const mappedUser = mapUserData(action.payload);
       const updatedIndex = state.userList.findIndex(
@@ -258,7 +256,6 @@ const usersReducer = createSlice({
         ...state.mainBranchAccessTableList,
         newItem2,
       ];
-      console.log(state.mainBranchAccessTableList, "mainBranchAccessTableList");
     });
     builder.addCase(postViewMainBranchUser.rejected, (state, action) => {
       state.loading = false;
@@ -319,7 +316,6 @@ const usersReducer = createSlice({
           ...state.mainAdditionalTableList,
           newItem2,
         ];
-        console.log(state.mainAdditionalTableList, "mainAdditionalTableList");
       }
     );
     builder.addCase(

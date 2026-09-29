@@ -57,7 +57,6 @@ const InsuranceProductReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        //   state.paymentVocherList = state.paymentVocherList;
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );

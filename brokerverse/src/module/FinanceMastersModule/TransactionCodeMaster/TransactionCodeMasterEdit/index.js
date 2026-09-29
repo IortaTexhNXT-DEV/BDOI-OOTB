@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -9,18 +9,15 @@ import { Card } from "primereact/card";
 import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-// import TransactionCodeMasterDetailViewTable from "./TransactionCodeMasterDetailViewTable";
 import TransactionCodeMasterEdit from "./TransactionCodeMasterEditTableview";
-import NavBar from "../../../../components/NavBar";
 import { Button } from "primereact/button";
 import { patchTrascationcodeDetailsEdit } from "../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
-import { PATCH_TRANSACTION_CODE_DETAILS_EDIT } from "../../../../redux/actionTypes";
 import useTransactionCodeOptions from "../useTransactionCodeOptions";
 import CustomToast from "../../../../components/Toast";
 
 const TransactionCodeEdit = () => {
-  const { getTrascationcodeDetailsEdit, loading } = useSelector(
+  const { getTrascationcodeDetailsEdit } = useSelector(
     ({ transactionCodeMasterReducer }) => {
       return {
         loading: transactionCodeMasterReducer?.loading,
@@ -89,11 +86,6 @@ const TransactionCodeEdit = () => {
       DepartmentDescription:
         getTrascationcodeDetailsEdit?.DepartmentDescription || "",
     };
-    console.log(
-      updatedValues.SubAccountCode,
-      subAccount,
-      "updatedValues.TransactionBasis"
-    );
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -219,7 +211,6 @@ const TransactionCodeEdit = () => {
                 options={basicc}
                 onChange={(e) => {
                   formik.setFieldValue("TransactionBasis", e.value);
-                  //   handleAccountcode(e.value.TransactionBasis);
                 }}
                 optionLabel="label"
                 error={
@@ -243,7 +234,6 @@ const TransactionCodeEdit = () => {
                 options={mainAccountC}
                 onChange={(e) => {
                   formik.setFieldValue("MainAccountCode", e.value);
-                  //   handleAccountcode(e.value.MainAccountCode);
                 }}
                 optionLabel="label"
                 error={
@@ -256,7 +246,6 @@ const TransactionCodeEdit = () => {
               <InputField
                 classNames="input__filed"
                 label="Main Account Description"
-                // placeholder="Enter"
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -285,10 +274,6 @@ const TransactionCodeEdit = () => {
                   formik.setFieldValue("SubAccountCode", e.target.value);
                 }}
                 optionLabel="label"
-                // error={
-                //   formik.touched.BankAccountNumber &&
-                //   formik.errors.BankAccountNumber
-                // }
               />
             </div>
             <div className="col-12 md:col-6 lg-col-6 input__view">
@@ -324,15 +309,9 @@ const TransactionCodeEdit = () => {
                 }}
                 options={branchC}
                 // onChange={(e) => {
-                //   console.log(e.value);
-                //   formik.setFieldValue("Description", e.value);
                 //   handleAccountcode(e.value.);
                 // }}
                 optionLabel="label"
-                // error={
-                //   formik.touched.BankAccountNumber &&
-                //   formik.errors.BankAccountNumber
-                // }
               />
             </div>
             <div className="col-12 md:col-6 lg-col-6 input__view">
@@ -364,10 +343,6 @@ const TransactionCodeEdit = () => {
                   formik.setFieldValue("DepartmentCode", e.target.value);
                 }}
                 optionLabel="label"
-                // error={
-                //   formik.touched.BankAccountNumber &&
-                //   formik.errors.BankAccountNumber
-                // }
               />
             </div>
             <div className="col-12 md:col-6 lg-col-6 input__view">
@@ -380,16 +355,11 @@ const TransactionCodeEdit = () => {
                 textWeight={500}
                 value={formik.values.DepartmentDescription}
                 onChange={formik.handleChange("DepartmentDescription")}
-                // error={
-                //   formik.touched.TransactionName &&
-                //   formik.errors.TransactionName
-                // }
               />
             </div>
           </div>
         </Card>
       </form>
-      {/* <TransactionCodeMasterDetailViewTable/> */}
       <TransactionCodeMasterEdit />
       <div className="btn__container">
         <Button

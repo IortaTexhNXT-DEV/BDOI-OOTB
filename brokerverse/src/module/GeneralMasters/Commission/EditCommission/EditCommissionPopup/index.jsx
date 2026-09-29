@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
@@ -8,24 +8,16 @@ import DropDowns from "../../../../../components/DropDowns";
 import InputField from "../../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../../assets/icons/SvgNodalClose";
 import { useDispatch, useSelector } from "react-redux";
 import { addLevelPatchEditPopup } from "../../store/commissionMiddleWare";
 const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) => {
     const { t } = useTranslation();
-    const { loading, popupEditData } = useSelector(({ commissionMianReducers }) => {
+    const { popupEditData } = useSelector(({ commissionMianReducers }) => {
         return {
             loading: commissionMianReducers?.loading,
             popupEditData: commissionMianReducers?.popupEditData
-
         };
     });
-    console.log(popupEditData.sharingRate, "popupEditData")
-
-    const codeOptionsMain = [
-        { label: "Option 1", value: "Main00123" },
-        { label: "Option 2", value: "Main00124" },
-    ];
 
 
     const customValidation = (values) => {
@@ -39,14 +31,12 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
             errors.sharingRate = t("validation.fieldRequired");
         }
 
-
         return errors;
     };
     const dispatch=useDispatch()
     const handleSubmit = (value) => {
         dispatch(addLevelPatchEditPopup(value))
         setShowEditPopup(false);
-        console.log(value, "valuedata");
     }
     const [levetOptionData, setLevelOptionData]=useState([])
 
@@ -70,17 +60,9 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
         initialValues: {
             level: "",
             sharingRate: "",
-
         },
         validate: customValidation,
         onSubmit:handleSubmit
-        // onSubmit: (values) => {
-        //     // console.log("Submitting form with values:", values);
-        //     handleSubmit(values);
-        //     // // formik.resetForm();
-        //     // handleUpdate(values);
-        //     setShowEditPopup(false);
-        // },
     });
     useEffect(() => {
         setFormikValues();
@@ -140,8 +122,6 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
 
                 </div>
 
-
-
                 <div
                     className="col-12 save__popup__jv"
                     style={{
@@ -164,5 +144,4 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
 };
 
 export default EditCommissionPopup;
-
 

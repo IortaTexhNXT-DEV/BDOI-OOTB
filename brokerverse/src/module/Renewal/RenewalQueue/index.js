@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
@@ -15,7 +15,6 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { TabView, TabPanel } from "primereact/tabview";
-import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
 import { Avatar } from "primereact/avatar";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
@@ -28,7 +27,6 @@ const RenewalQueue = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [dateRange, setDateRange] = useState([null, null]);
@@ -266,21 +264,6 @@ const RenewalQueue = () => {
     }
   };
 
-  const handlePriorityChange = (rowData, newPriority) => {
-    confirmDialog({
-      message: t("renewal.confirmPriorityChange", { policy: rowData.policyNumber, priority: newPriority }),
-      header: t("renewal.confirmPriorityChangeHeader"),
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.priorityUpdated"),
-          detail: t("renewal.priorityChangedTo", { priority: newPriority }),
-          life: 3000
-        });
-      }
-    });
-  };
 
   const daysToExpiryBodyTemplate = (rowData) => {
     const days = rowData.daysToExpiry;

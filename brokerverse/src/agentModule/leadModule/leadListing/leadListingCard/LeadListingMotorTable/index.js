@@ -9,7 +9,6 @@ import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
 import { Skeleton } from "primereact/skeleton";
 import { MultiSelect } from "primereact/multiselect";
-import { ProgressSpinner } from "primereact/progressspinner";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../../assets/icons/SvgArrow";
@@ -20,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import debounce from "lodash/debounce";
 import {
-  getPaymentSearchDataMiddleWare,
   getleadtableMiddleware,
   getLeadByIdMiddleware,
   deleteLeadMiddleware,
@@ -28,6 +26,7 @@ import {
 import { isFireLob, isIarLob } from "../../../../endorsementModule/constants/endorsementCategories";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";
+import logger from "../../../../../utility/logger";
 
 const LeadListingMotorTable = ({ lob = null }) => {
   const { t } = useTranslation();
@@ -52,7 +51,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [processing, setProcessing] = useState(false);
+  const [processing] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState([
     "name",
     "category",
@@ -190,7 +189,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
     if (leadId) {
       navigate(`/agent/leaddetail/${leadId}`);
     } else {
-      console.error("No leadId found for viewing details");
+      logger.error("No leadId found for viewing details");
     }
   };
 
@@ -292,7 +291,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
     if (leadId) {
       navigate(`/agent/quotelisting?leadRefId=${leadId}`);
     } else {
-      console.error("No leadId found for viewing quotations");
+      logger.error("No leadId found for viewing quotations");
       navigate("/agent/quotelisting");
     }
   };
@@ -300,7 +299,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
   const handleEdit = (rowData) => {
     const leadId = rowData.leadId || rowData.id;
     if (!leadId) {
-      console.error("No leadId found for editing");
+      logger.error("No leadId found for editing");
       return;
     }
     dispatch(getLeadByIdMiddleware(leadId));

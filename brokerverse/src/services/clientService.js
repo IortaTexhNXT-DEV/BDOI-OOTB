@@ -21,8 +21,6 @@ class ClientService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      console.log(`Fetching clients: page=${page}, pageSize=${pageSize}`);
-
       const response = await fetch(`${this.baseURL}/clients?page=${page}&pageSize=${pageSize}`, {
         method: 'GET',
         headers: {
@@ -40,14 +38,12 @@ class ClientService {
       }
 
       const data = await response.json();
-      console.log('Clients fetched successfully:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Fetch clients error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to fetch clients'),
@@ -63,8 +59,6 @@ class ClientService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log('Fetching customer codes for dropdown');
 
       const response = await fetch(`${this.baseURL}/customers/codes`, {
         method: 'GET',
@@ -83,14 +77,12 @@ class ClientService {
       }
 
       const data = await response.json();
-      console.log('Customer codes fetched successfully:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Fetch customer codes error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to fetch customer codes'),
@@ -107,8 +99,6 @@ class ClientService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log(`Fetching client with ID: ${clientId}`);
 
       const response = await fetch(`${this.baseURL}/clients/${clientId}`, {
         method: 'GET',
@@ -127,14 +117,12 @@ class ClientService {
       }
 
       const data = await response.json();
-      console.log('Client fetched successfully:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Fetch client error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to fetch client'),
@@ -172,7 +160,6 @@ class ClientService {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error('Create client error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to create client'),
@@ -211,7 +198,6 @@ class ClientService {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error('Update client error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to update client'),

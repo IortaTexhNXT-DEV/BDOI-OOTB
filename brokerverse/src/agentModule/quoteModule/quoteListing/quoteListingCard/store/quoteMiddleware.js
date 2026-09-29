@@ -1,26 +1,16 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {GET_QUOTETABLE_DATA, GET_QUOTE_SEARCH } from "../../../../../redux/actionTypes";
 
-
-
-
 export const getquotetableMiddleware = createAsyncThunk(
   GET_QUOTETABLE_DATA,
   async (payload, { rejectWithValue }) => {
-
     try {
       // Simulate an API call if needed
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      // return filteredData[0];
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);
     }
   }
 );
-
-
-
-
 
 /** Filters the quotations on screen (GET /quotations) by insurer name or quotation number. */
 export const getQuoteSearchDataMiddleWare = createAsyncThunk(

@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { postClaimDetailsData } from "../store/claimDetailsMiddleWare";
 import { mapToApiLob } from "../store/claimDetailsMiddleWare";
 import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
 import addressService from "../../../../services/addressService";
@@ -115,10 +115,6 @@ const ClaimDetailsCard = ({
     insuranceCompanyClaimNumber:
       claimThirdParty?.insuranceCompanyClaimNumber || "",
   };
-
-  console.log("=== FORM INITIAL VALUES ===");
-  console.log("Form Initial Value:", formInitialValue);
-  console.log("=== END FORM INITIAL VALUES ===");
 
   const dispatch = useDispatch();
 
@@ -479,19 +475,6 @@ const ClaimDetailsCard = ({
 
   // Update form when Redux data changes
   useEffect(() => {
-    console.log("=== FORM UPDATE USEEFFECT TRIGGERED ===");
-    console.log("Claim Details View Data:", claimDetailsViewData);
-    console.log("Claim Third Party Data:", claimThirdParty);
-    console.log("Data keys:", Object.keys(claimDetailsViewData || {}));
-    console.log("Third Party Data keys:", Object.keys(claimThirdParty || {}));
-    console.log("Data length:", Object.keys(claimDetailsViewData || {}).length);
-    console.log(
-      "Third Party Data length:",
-      Object.keys(claimThirdParty || {}).length
-    );
-    console.log("Last Updated Data:", lastUpdatedData);
-    console.log("Current Formik Values:", formik.values);
-
     // Check if we have either claim details or third party data
     const hasClaimDetails =
       claimDetailsViewData && Object.keys(claimDetailsViewData).length > 0;
@@ -505,15 +488,8 @@ const ClaimDetailsCard = ({
         claimThirdParty,
       });
       if (lastUpdatedData === dataString) {
-        console.log("Data hasn't changed, skipping form update");
         return;
       }
-
-      console.log("=== UPDATING FORM WITH REDUX DATA ===");
-      console.log("Claim Details View Data:", claimDetailsViewData);
-      console.log("Claim Third Party Data:", claimThirdParty);
-      console.log("Last Updated Data:", lastUpdatedData);
-      console.log("Current Formik Values (before update):", formik.values);
 
       // Check if user has already entered data (scenario 3: coming back from mail screen)
       const hasUserData =
@@ -548,7 +524,6 @@ const ClaimDetailsCard = ({
 
       // If user has already entered data, don't override it — unless address snapshot still needs hydration
       if (hasUserData && !needsAddressHydration) {
-        console.log("User has entered data, preserving existing form values");
         setLastUpdatedData(dataString);
         return;
       }
@@ -631,7 +606,6 @@ const ClaimDetailsCard = ({
       }
 
       // Only update form with API data if user hasn't entered anything (scenarios 1 & 2: new claim or edit)
-      console.log("No user data found, updating form with API data");
 
       const updatedValues = {
         InsuranceCompanyName: claimDetailsViewData?.InsuranceCompanyName || "",
@@ -714,25 +688,11 @@ const ClaimDetailsCard = ({
           claimThirdParty?.insuranceCompanyClaimNumber || "",
       };
 
-      console.log("Updated Form Values:", updatedValues);
       formik.setValues(updatedValues);
       setLastUpdatedData(dataString);
-
-      console.log("=== FORM VALUES AFTER UPDATE ===");
-      console.log("Formik values after setValues:", formik.values);
-      console.log("=== END FORM VALUES AFTER UPDATE ===");
-
-      console.log("=== END UPDATING FORM WITH REDUX DATA ===");
-    } else {
-      console.log("No data to update form with");
     }
-  }, [claimDetailsViewData, claimThirdParty, lastUpdatedData, checked]); // Added claimThirdParty to dependencies
+  }, [claimDetailsViewData, claimThirdParty, lastUpdatedData, checked]);
 
-  console.log("=== FORMIK STATE ===");
-  console.log("Formik Values:", formik.values);
-  console.log("Formik Touched:", formik.touched);
-  console.log("Formik Errors:", formik.errors);
-  console.log("=== END FORMIK STATE ===");
   const handleCheckboxChange = (e) => {
     setChecked(e.checked);
 
@@ -804,7 +764,6 @@ const ClaimDetailsCard = ({
               label={t("claimDetails.policyHolderName")}
               value={formik.values.PolicyHolderName}
               onChange={(e) => {
-                console.log("Policy Holder Name changed:", e.target.value);
                 formik.handleChange("PolicyHolderName")(e);
               }}
             />
@@ -1101,7 +1060,6 @@ const ClaimDetailsCard = ({
                   label={t("claimDetails.driversNameLabel")}
               value={formik.values.driverName}
               onChange={(e) => {
-                console.log("Driver's name changed:", e.target.value);
                 formik.handleChange("driverName")(e);
               }}
             />

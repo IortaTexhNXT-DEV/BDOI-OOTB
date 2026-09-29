@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import "./index.scss";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { DataTable } from "primereact/datatable";
@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { Dropdown } from "primereact/dropdown";
 
 const DisbursementDetailviewTable = () => {
-  const { AddDisbursmentTable, loading } = useSelector(
+  const { AddDisbursmentTable } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -15,7 +15,6 @@ const DisbursementDetailviewTable = () => {
       };
     }
   );
-  console.log(AddDisbursmentTable, "AddDisbursmentTable");
   const isEmpty = AddDisbursmentTable.length === 0;
   const emptyTableIcon = (
     <div className="empty-table-icon">
@@ -77,7 +76,6 @@ const DisbursementDetailviewTable = () => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
         >

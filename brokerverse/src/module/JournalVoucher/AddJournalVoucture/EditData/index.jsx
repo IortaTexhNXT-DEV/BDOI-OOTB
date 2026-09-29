@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import "../EditData/index.scss";
 import { useFormik } from "formik";
@@ -6,7 +6,6 @@ import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../assets/icons/SvgNodalClose";
 import useJvMasterData from "../../useJvMasterData";
 
 const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
@@ -130,7 +129,6 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
 
   const handleSubmit = (values) => {
     // Handle form submission
-    console.log(values, "find values");
   };
 
   const formik = useFormik({
@@ -498,8 +496,6 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             </div>
             <InputField
               classNames="input__field__jv"
-              // className="select__label__jv"
-              // label="Remarks (Options)"
               value={formik.values.remarks}
               onChange={(e) => formik.setFieldValue("remarks", e.target.value)}
               placeholder="Enter"

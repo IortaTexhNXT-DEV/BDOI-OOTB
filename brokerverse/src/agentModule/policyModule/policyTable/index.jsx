@@ -25,7 +25,6 @@ import { Tooltip } from "primereact/tooltip";
 import SvgArrow from "../../../assets/icons/SvgArrow";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
-import { MultiSelect } from "primereact/multiselect";
 import debounce from "lodash/debounce";
 import {
   getCategoriesForLob,
@@ -44,7 +43,7 @@ const LeadListingAllTable = ({
 }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const { policyListData, loading, policyListSearchData, pagination } =
+  const { policyListData, loading, policyListSearchData } =
     useSelector(({ policyMainReducers }) => {
       return {
         loading: policyMainReducers?.loading,
@@ -55,11 +54,9 @@ const LeadListingAllTable = ({
     });
   const menu = useRef(null);
 
-  //   const dispatch = useDispatch();
-
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
 
   const [disableOption, setdisableOption] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -69,7 +66,7 @@ const LeadListingAllTable = ({
     { name: t("policyList.claimId"), code: "Claim ID" },
   ];
 
-  const [navAction, setNavAction] = useState(null);
+  const [, setNavAction] = useState(null);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
   // Advanced Filters State
@@ -231,7 +228,6 @@ const LeadListingAllTable = ({
     setNavAction(rowData.Payment);
     setSelectedPolicy(rowData);
 
-    console.log(rowData, "rowData from policy table policy table");
     setdisableOption(
       rowData.Payment === "Pending" || rowData.Payment === "Reviewing"
     );
@@ -398,12 +394,6 @@ const LeadListingAllTable = ({
       command: () => handleMenuClick("reminder"),
       disabled: disableOption,
     });
-
-    console.log(
-      "Final menu items for policy:",
-      rowData.policyNumber,
-      menuItems.map((m) => m.label)
-    );
 
     return (
       <div
@@ -624,7 +614,6 @@ const LeadListingAllTable = ({
         {/* Advanced Filters Panel */}
         {showFilters && (
           <div
-            className="col-12"
             className="filter-container-bg"
             style={{
               padding: "1.5rem",

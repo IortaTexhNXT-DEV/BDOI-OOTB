@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
 import { FileUpload } from "primereact/fileupload";
@@ -29,6 +29,7 @@ import {
   isValidPhilippineZip,
   normalizeCountryName,
 } from "../../../utility/addressHelpers";
+import logger from "../../../utility/logger";
 
 const AdjusterSubmission = () => {
   const { t } = useTranslation();
@@ -46,12 +47,6 @@ const AdjusterSubmission = () => {
     params.claimId ||
     location.state?.claimId ||
     location.state?.id;
-
-  console.log("=== ADJUSTER SUBMISSION PAGE DATA ===");
-  console.log("URL Params:", params);
-  console.log("Navigation State:", location.state);
-  console.log("Claim ID:", claimId);
-  console.log("=== END ADJUSTER SUBMISSION PAGE DATA ===");
 
   // Redux state - memoized to prevent unnecessary rerenders
   const { claimDetails, claimDetailsLoading, claimDetailsError } = useSelector(
@@ -120,7 +115,6 @@ const AdjusterSubmission = () => {
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
@@ -142,33 +136,12 @@ const AdjusterSubmission = () => {
     claimDetails?.data?.claimNumber ||
     "";
 
-  console.log("=== ADJUSTER SUBMISSION REDUX DATA ===");
-  console.log("Claim Details:", claimDetails);
-  console.log("Claim Details Type:", typeof claimDetails);
-  console.log(
-    "Claim Details Keys:",
-    claimDetails ? Object.keys(claimDetails) : "No claim details"
-  );
-  console.log("Loading:", claimDetailsLoading);
-  console.log("Error:", claimDetailsError);
-  console.log("=== REDUX POLICY HOLDER DATA ===");
-  console.log("Redux Policy Holder Name:", reduxPolicyHolderName);
-  console.log("Redux Policy Number:", reduxPolicyNumber);
-  console.log("Redux Claim Number:", reduxClaimNumber);
-  console.log("Final Policy Holder Name:", policyHolderName);
-  console.log("Final Claim Number:", claimNumber);
-  console.log("=== END REDUX POLICY HOLDER DATA ===");
-  console.log("=== END ADJUSTER SUBMISSION REDUX DATA ===");
-
   const dispatch = useDispatch();
 
   // Fetch claim details on component mount
   useEffect(() => {
     if (claimId) {
-      console.log("=== DISPATCHING GET CLAIM DETAILS ===");
-      console.log("Dispatching getClaimDetails with ID:", claimId);
       dispatch(getClaimDetails(claimId));
-      console.log("=== END DISPATCHING GET CLAIM DETAILS ===");
     }
   }, [dispatch, claimId]);
 
@@ -182,14 +155,6 @@ const AdjusterSubmission = () => {
   }, [uploadImage]);
 
   const handleUppendImg = (name, src) => {
-    console.log("=== FILE UPLOAD DEBUG ===");
-    console.log("Name:", name);
-    console.log("Source:", src);
-    console.log("Source objectURL:", src?.objectURL);
-    console.log("Source type:", typeof src);
-    console.log("Source name:", src?.name);
-    console.log("=== END FILE UPLOAD DEBUG ===");
-
     // Create object URL for file preview
     const fileURL = src?.objectURL || (src ? URL.createObjectURL(src) : null);
     setuploadImage(fileURL);
@@ -230,23 +195,6 @@ const AdjusterSubmission = () => {
   };
 
   const customValidation = (values) => {
-    console.log("=== VALIDATION CALLED ===");
-    console.log("Validation values:", values);
-    console.log(
-      "Country validation:",
-      values.country,
-      "Truthy:",
-      !!values.country
-    );
-    console.log(
-      "Province validation:",
-      values.province,
-      "Truthy:",
-      !!values.province
-    );
-    console.log("City validation:", values.city, "Truthy:", !!values.city);
-    console.log("=== END VALIDATION CALLED ===");
-
     const errors = {};
     if (!values.adjusterName) {
       errors.adjusterName = t("validation.fieldRequired");
@@ -298,24 +246,12 @@ const AdjusterSubmission = () => {
     return errors;
   };
   const handleSubmit = async (values) => {
-    console.log("=== HANDLE SUBMIT CALLED ===");
-    console.log("Claim ID:", claimId);
-    console.log("Form Values:", values);
-    console.log("Country value:", values.country);
-    console.log("Province value:", values.province);
-    console.log("City value:", values.city);
-    console.log("=== END HANDLE SUBMIT CALLED ===");
-
     if (!claimId) {
-      console.error("No claim ID available for adjuster submission");
+      logger.error("No claim ID available for adjuster submission");
       return;
     }
 
     setIsSubmitting(true);
-    console.log("=== SUBMITTING ADJUSTER DATA ===");
-    console.log("Claim ID:", claimId);
-    console.log("Form Values:", values);
-    console.log("=== END SUBMITTING ADJUSTER DATA ===");
 
     try {
       // Prepare adjuster data for API
@@ -354,8 +290,6 @@ const AdjusterSubmission = () => {
       );
 
       if (result.type.endsWith("/fulfilled")) {
-        console.log("Adjuster submission successful:", result.payload);
-        console.log("Navigating to settlement approval with claimId:", claimId);
         Navigate(`/agent/claimrequest/settlementapproval/${claimId}`, {
           state: {
             claimId,
@@ -366,11 +300,11 @@ const AdjusterSubmission = () => {
           },
         });
       } else {
-        console.error("Adjuster submission failed:", result.payload);
+        logger.error("Adjuster submission failed:", result.payload);
         // You can add error handling here
       }
     } catch (error) {
-      console.error("Error submitting adjuster data:", error);
+      logger.error("Error submitting adjuster data:", error);
       // You can add error handling here
     } finally {
       setIsSubmitting(false);
@@ -485,9 +419,6 @@ const AdjusterSubmission = () => {
       claimDetails.data &&
       !formInitialized
     ) {
-      console.log("=== UPDATING FORM WITH API DATA ===");
-      console.log("Claim Details:", claimDetails);
-
       const claimData = claimDetails?.data || {};
       const leadData = claimData?.lead || {};
       const thirdPartyData = claimData?.thirdPartyWitnessDetails?.[0] || {};
@@ -558,8 +489,6 @@ const AdjusterSubmission = () => {
         file: null,
       };
 
-      console.log("Updated Form Values:", updatedValues);
-
       // Check if form already has the same data to avoid unnecessary updates
       const currentValues = formik.values;
       const hasChanges = Object.keys(updatedValues).some(
@@ -576,13 +505,9 @@ const AdjusterSubmission = () => {
         // Update formik values
         formik.setValues(safeValues);
         setFormInitialized(true);
-        console.log("Form values updated successfully!");
       } else {
-        console.log("Form already has the same data, skipping update");
         setFormInitialized(true);
       }
-
-      console.log("=== END UPDATING FORM WITH API DATA ===");
     }
   }, [claimDetails, formInitialized]);
 
@@ -598,19 +523,6 @@ const AdjusterSubmission = () => {
         <SvgLeftArrow />
         <div className="claim__request__upload__back__btn__title">
           {(() => {
-            console.log("=== ADJUSTER SUBMISSION LOADING DISPLAY LOGIC ===");
-              console.log("Policy Holder Name:", policyHolderName);
-              console.log("Claim Number:", claimNumber);
-              console.log(
-                "Displaying:",
-                `${policyHolderName} / ${
-                  claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-                }`
-              );
-              console.log(
-                "=== END ADJUSTER SUBMISSION LOADING DISPLAY LOGIC ==="
-              );
-
               return `${policyHolderName} / ${
                 claimNumber ? `${t("agent.claimLabel")}: ${claimNumber}` : t("agent.loading")
               }`;
@@ -639,19 +551,6 @@ const AdjusterSubmission = () => {
         <SvgLeftArrow />
         <div className="claim__request__upload__back__btn__title">
           {(() => {
-            console.log("=== ADJUSTER SUBMISSION ERROR DISPLAY LOGIC ===");
-              console.log("Policy Holder Name:", policyHolderName);
-              console.log("Claim Number:", claimNumber);
-              console.log(
-                "Displaying:",
-                `${policyHolderName} / ${
-                  claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-                }`
-              );
-              console.log(
-                "=== END ADJUSTER SUBMISSION ERROR DISPLAY LOGIC ==="
-              );
-
               return `${policyHolderName} / ${
                 claimNumber ? `${t("agent.claimLabel")}: ${claimNumber}` : t("agent.loading")
               }`;
@@ -678,17 +577,6 @@ const AdjusterSubmission = () => {
         <SvgLeftArrow />
         <div className="claim__request__upload__back__btn__title">
           {(() => {
-            console.log("=== ADJUSTER SUBMISSION MAIN DISPLAY LOGIC ===");
-            console.log("Policy Holder Name:", policyHolderName);
-            console.log("Claim Number:", claimNumber);
-            console.log(
-              "Displaying:",
-              `${policyHolderName} / ${
-                claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-              }`
-            );
-            console.log("=== END ADJUSTER SUBMISSION MAIN DISPLAY LOGIC ===");
-
 return `${policyHolderName} / ${
                 claimNumber ? `${t("agent.claimLabel")}: ${claimNumber}` : t("agent.loading")
               }`;
@@ -739,17 +627,6 @@ return `${policyHolderName} / ${
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
             <DatepickerField
               label={`${t("agent.dateOfReported")}*`}
-              // value={
-              //   formik.values.dateOfReported
-              //     ?
-              //      new Date(formik.values.dateOfReported)
-              //     : null
-              // }
-              // onChange={(e) => {
-              //   formik.handleChange("dateOfReported")(
-              //     e.value.toISOString().split("T")[0]
-              //   );
-              // }}
               value={new Date(formik?.values?.dateOfReported)}
               onChange={(e) =>
                 formik.setFieldValue(
@@ -768,16 +645,6 @@ return `${policyHolderName} / ${
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
             <DatepickerField
               label={`${t("agent.dateOfLoss")}*`}
-              // value={
-              //   formik.values.dateOfLoss
-              //     ? new Date(formik.values.dateOfLoss)
-              //     : null
-              // }
-              // onChange={(e) => {
-              //   formik.handleChange("dateOfLoss")(
-              //     e.value.toISOString().split("T")[0]
-              //   );
-              // }}
               value={new Date(formik?.values?.dateOfLoss)}
               onChange={(e) =>
                 formik.setFieldValue(
@@ -1035,9 +902,6 @@ return `${policyHolderName} / ${
                 name="demo"
                 accept=".png,.jpg,.jpeg,.pdf"
                 maxFileSize={2000000}
-                // uploadHandler={(e) => {
-                //   handleUppendImg(e.options.props.name, e.files[0]);
-                // }}
                 uploadHandler={(e) => {
                   formik.setFieldValue("file", e.files[0]);
                   handleUppendImg(e.options.props.name, e.files[0]);

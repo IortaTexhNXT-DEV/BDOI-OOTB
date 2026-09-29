@@ -3,15 +3,11 @@ import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../../components/LabelWrapper";
-import InputField from "../../../../../../components/InputField";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
@@ -21,7 +17,7 @@ import { getViewMainBranchUser, postViewMainBranchUser } from "../../store/userM
 
 const TransactionCodeSetupTable = ({ action }) => {
   const { t } = useTranslation();
-  const { loading, mainBranchAccessTableList, searchList, mainUserViewData } = useSelector(({ userReducers }) => {
+  const { mainBranchAccessTableList, mainUserViewData } = useSelector(({ userReducers }) => {
     return {
       loading: userReducers?.loading,
       mainBranchAccessTableList: userReducers?.mainBranchAccessTableList,
@@ -29,10 +25,9 @@ const TransactionCodeSetupTable = ({ action }) => {
       mainUserViewData: userReducers?.mainUserViewData
     };
   });
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const [showView, setShowView] = useState(false);
-
 
   const item = [
     {
@@ -57,7 +52,6 @@ const TransactionCodeSetupTable = ({ action }) => {
   const handleClick = () => {
     setShow(!show);
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -97,13 +91,11 @@ const TransactionCodeSetupTable = ({ action }) => {
     },
   };
 
-
   const handleSubmit = () => {
     dispatch(postViewMainBranchUser(formik.values))
     setShow(false)
     formik.resetForm()
   }
-
 
   const headerStyle = {
     fontSize: 16,
@@ -134,38 +126,16 @@ const TransactionCodeSetupTable = ({ action }) => {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
   });
 
-  // const handleView = (rowData) => {
-  //   console.log("View clicked:", rowData);
-  //   // navigate("/accounts/pettycash/PettyCashCodeDetails")
-  // };
   const dispatch = useDispatch()
   const handleView = (rowData) => {
     dispatch(getViewMainBranchUser(rowData))
-    console.log(rowData, "rowData");
     setShowView(true)
-    // dispatch(getUserViewDataMiddleWare(rowData))
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
-
-  // const handlEdit = (rowData) => {
-  //   console.log(rowData, "gg");
-  //   dispatch(getUserEditDataMiddleWare(rowData))
-  //   navigate(`/master/generals/usermanagement/user/edit/${rowData?.id}`);
-  // };
-  const items = [
-    { label: t("generalMasters.userManagement") },
-    {
-      label: t("generalMasters.user"),
-      url: "/master/generals/usermanagement/user",
-    },
-  ];
-
 
 
   const ViewheaderStyle = {
@@ -179,10 +149,7 @@ const TransactionCodeSetupTable = ({ action }) => {
     justifyContent: "center",
   };
 
-
-
   const renderViewButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div >
         <Button
@@ -190,15 +157,9 @@ const TransactionCodeSetupTable = ({ action }) => {
           className="eye__btn"
           onClick={() => handleView(rowData)}
         />
-        {/* <Button
-          icon={<SvgEditIcon />}
-          className="eye__btn"
-          onClick={() => handlEdit(rowData)}
-        /> */}
       </div>
     );
   };
-
 
   return (
     <div className="transactioncode__master__table_view">
@@ -227,7 +188,6 @@ const TransactionCodeSetupTable = ({ action }) => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -285,7 +245,6 @@ const TransactionCodeSetupTable = ({ action }) => {
       >
         <div className="grid mt-1">
 
-
         </div>
         <div className="grid mt-1">
           <div className="col-12 md:col-6 lg-col-6 ">
@@ -326,9 +285,6 @@ const TransactionCodeSetupTable = ({ action }) => {
           <Button
             label={t("generalMasters.save")}
             className="add__btn"
-            // onClick={() => {
-            //   handleSave();
-            // }}
             onClick={() => { formik.handleSubmit(); }}
           />
         </div>
@@ -343,7 +299,6 @@ const TransactionCodeSetupTable = ({ action }) => {
       >
         <div className="grid mt-1">
 
-
         </div>
         <div className="grid mt-1">
           <div className="col-12 md:col-6 lg-col-6 ">
@@ -351,7 +306,6 @@ const TransactionCodeSetupTable = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={mainUserViewData.branchCode}
               onChange={formik.handleChange("branchCode")}
-              // error={formik.errors.branchCode}
               className="dropdown__add__sub"
               label={t("generalMasters.branch")}
               classNames="label__sub__add"
@@ -368,7 +322,6 @@ const TransactionCodeSetupTable = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={mainUserViewData.departmentCode}
               onChange={formik.handleChange("departmentCode")}
-              // error={formik.errors.departmentCode}
               className="dropdown__add__sub"
               label={t("generalMasters.departmentCode")}
               classNames="label__sub__add"

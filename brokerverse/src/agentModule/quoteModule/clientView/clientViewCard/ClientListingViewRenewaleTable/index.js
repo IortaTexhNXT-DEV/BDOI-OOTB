@@ -17,17 +17,18 @@ import policyRenewalService from "../../../../../services/policyRenewalService";
 import { Skeleton } from "primereact/skeleton";
 import { notifyWarn } from "../../../../../utility/dialogs";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import logger from "../../../../../utility/logger";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
   const menu = useRef(null);
   const [displayDialog, setDisplayDialog] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
-  const [disableOption, setdisableOption] = useState(false);
+  const [, setdisableOption] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [paymentStatus, setPaymentStatus] = useState("");
-  const [statusAction, setstatusAction] = useState("");
+  const [, setPaymentStatus] = useState("");
+  const [, setstatusAction] = useState("");
   const [globalFilter, setGlobalFilter] = useState("policy Number");
   const [search, setSearch] = useState("");
   const cities = [{ name: t("tables.policyNumber"), code: "policy Number" }];
@@ -142,7 +143,6 @@ const Index = ({ clientId, action }) => {
           return;
         }
 
-        console.error("Renewal fetch error", fetchError);
         setError(fetchError.message || "Failed to fetch renewals");
         setRenewalPolicy([]);
         setFilteredRenewals([]);
@@ -191,9 +191,6 @@ const Index = ({ clientId, action }) => {
     );
   }, [search, renewalPolicy]);
 
-  const handleSearch = (event) => {
-    setSearch(event.target.value);
-  };
 
   const categories = [
     { name: "Personal Details Change", key: "personaldetail" },
@@ -216,7 +213,6 @@ const Index = ({ clientId, action }) => {
   };
   const handleTypes = () => {
     let result = [];
-    console.log(selectedCategories, "out 1");
     if (selectedCategories.some((obj) => obj.key === "personaldetail")) {
       result.push("1");
     }
@@ -229,7 +225,6 @@ const Index = ({ clientId, action }) => {
     if (selectedCategories.some((obj) => obj.key === "ploicyextend")) {
       result.push("4");
     }
-    console.log(result, "out");
     return result;
   };
   const navigate = useNavigate();
@@ -247,7 +242,7 @@ const Index = ({ clientId, action }) => {
   const handleMenuClick = (menuItem) => {
     if (menuItem == "view") {
       if (!selectedRowData) {
-        console.error("No row data selected");
+        logger.error("No row data selected");
         return;
       }
 
@@ -293,7 +288,7 @@ const Index = ({ clientId, action }) => {
     }
     if (menuItem == "renewal") {
       if (!selectedRowData) {
-        console.error("No row data selected for renewal");
+        logger.error("No row data selected for renewal");
         return;
       }
 
@@ -321,7 +316,6 @@ const Index = ({ clientId, action }) => {
       });
     }
     // Handle the menu item click here
-    console.log(`${menuItem} clicked`);
   };
 
   const onCategoryChange = (e) => {
@@ -528,19 +522,6 @@ const Index = ({ clientId, action }) => {
     }
   };
 
-  const renderStatus = (rowData) => {
-    const status = (rowData.status || "Pending").toLowerCase();
-    const className =
-      status === "pending"
-        ? "company__status__type__green"
-        : status === "approved" || status === "completed"
-        ? "company__status__type__blue"
-        : "company__status__type__red";
-
-    if (loadingState) return <Skeleton width="4rem" />;
-
-    return <div className={className}>{status.toUpperCase()}</div>;
-  };
   const ViewheaderStyle = {
     textalign: "center",
     fontSize: 16,

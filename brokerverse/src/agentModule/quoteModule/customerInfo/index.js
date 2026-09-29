@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
 import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
 import { FileUpload } from "primereact/fileupload";
@@ -32,6 +32,7 @@ import {
 } from "../../../utility/kyc";
 import { notifyError } from "../../../utility/dialogs";
 import useMasterOptions from "../../../module/GeneralMasters/common/useMasterOptions";
+import logger from "../../../utility/logger";
 
 const FieldError = ({ formik, name }) =>
   formik.touched[name] && formik.errors[name] ? (
@@ -77,10 +78,6 @@ const CustomerInfo = ({ action }) => {
   useEffect(() => {
     const loadQuotation = async () => {
       if (quotationId) {
-        console.log(
-          "CustomerInfo: Loading quotation details for ID:",
-          quotationId
-        );
         setIsLoadingQuotation(true);
         setQuotationLoadError(null);
 
@@ -90,16 +87,8 @@ const CustomerInfo = ({ action }) => {
           );
 
           if (result.type.endsWith("/fulfilled")) {
-            console.log(
-              "CustomerInfo: Quotation loaded successfully:",
-              result.payload
-            );
             setQuotationDetails(result.payload);
           } else {
-            console.error(
-              "CustomerInfo: Failed to load quotation:",
-              result.payload
-            );
             const errorMsg = t("agent.failedToLoadQuotation", { id: quotationId });
             setQuotationLoadError(errorMsg);
             notifyError(errorMsg);
@@ -110,7 +99,6 @@ const CustomerInfo = ({ action }) => {
             }, 2000);
           }
         } catch (error) {
-          console.error("CustomerInfo: Error loading quotation:", error);
           const errorMsg = t("agent.errorLoadingQuotation");
           setQuotationLoadError(errorMsg);
           notifyError(errorMsg);
@@ -127,17 +115,15 @@ const CustomerInfo = ({ action }) => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (quotationDetails?.leadRefId) {
-        console.log("Fetching lead data for leadRefId:", quotationDetails.leadRefId);
         try {
           const response = await leadService.getLeadById(quotationDetails.leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -193,8 +179,6 @@ const CustomerInfo = ({ action }) => {
   );
 
   const handleSubmit = async (values) => {
-    console.log(values, "find full datas");
-
     if (!quotationId) {
       toast.current?.show({
         severity: "error",
@@ -291,7 +275,7 @@ const CustomerInfo = ({ action }) => {
         });
       }, 1000);
     } catch (error) {
-      console.error("Failed to save vehicle information:", error);
+      logger.error("Failed to save vehicle information:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -301,7 +285,7 @@ const CustomerInfo = ({ action }) => {
     }
   };
 
-  const { postcustomerinfodata, loading } = useSelector(
+  const { postcustomerinfodata } = useSelector(
     ({ CustomerInfoReducer }) => {
       return {
         loading: CustomerInfoReducer?.loading,
@@ -309,8 +293,6 @@ const CustomerInfo = ({ action }) => {
       };
     }
   );
-
-  console.log("first21", postcustomerinfodata);
 
   // The ID card photo is uploaded as soon as it is chosen; the stored URL is saved on the quotation (idCardImage).
   const handleIdCardSelected = async (file) => {
@@ -356,58 +338,35 @@ const CustomerInfo = ({ action }) => {
   const TruckTypes = [
     { label: "Heavy duty", value: "AL" },
     { label: "Heavy Xl", value: "AZ" },
-    //  { label: "duty", value: "AR" },
   ];
 
   // const customValidation = (values) => {
-  //   const errors = {};
-
   //   if (!values.MotorNumber) {
-  //     errors.MotorNumber = "This field is required";
   //   }
   //   if (!values.ChassisNumber) {
-  //     errors.ChassisNumber = "This field is required";
   //   }
   //   if (!values.TruckType) {
-  //     errors.TruckType = "This field is required";
   //   }
   //   if (!values.Mortgage) {
-  //     errors.Mortgage = "This field is required";
   //   }
   //   if (!values.CertNumber) {
-  //     errors.CertNumber = "This field is required";
   //   }
   //   if (!values.PlateNumber) {
-  //     errors.PlateNumber = "This field is required";
   //   }
   //   if (!values.MVFileNumber) {
-  //     errors.MVFileNumber = "This field is required";
   //   }
   //   if (!values.AuthenCode) {
-  //     errors.AuthenCode = "This field is required";
   //   }
   //   if (!values.Aluminium) {
-  //     errors.Aluminium = "This field is required";
   //   }
   //   if (!values.AirBag) {
-  //     errors.AirBag = "This field is required";
   //   }
   //   if (!values.TNVS) {
-  //     errors.TNVS = "This field is required";
   //   }
   //   if (!values.file) {
-  //     errors.file = "This field is required";
   //   }
-  //   return errors;
   // };
 
-  //   useEffect(() => {
-  //     console.log(action,'find sction call')
-  //     if (action === "edit") {
-  // console.log(postcustomerinfodata,'find postcustomerinfodata')
-  //     setFormikValues(postcustomerinfodata);
-  //     }
-  //   },[action]);
   useEffect(() => {
     if (action === "edit" && postcustomerinfodata) {
       setFormikValues(postcustomerinfodata);
@@ -415,8 +374,6 @@ const CustomerInfo = ({ action }) => {
   }, [action, postcustomerinfodata]);
 
   const setFormikValues = (data) => {
-    console.log(data, "find data");
-    // const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
       MotorNumber: data?.MotorNumber,
       ChassisNumber: data?.ChassisNumber,
@@ -432,7 +389,6 @@ const CustomerInfo = ({ action }) => {
     };
 
     formik.setValues({ ...formik.values, ...updatedValues });
-    console.log("1211", updatedValues);
   };
 
   // KYC and vehicle identifiers required for this line (policy.kyc_required_fields); the server enforces the same rule.
@@ -468,8 +424,6 @@ const CustomerInfo = ({ action }) => {
   }, [formik.values.IdCardImage]);
 
   useEffect(() => {
-    // if (action === "edit") {
-    // }
     if (action === "edit") {
       if (!formik.values.Aluminium) {
         formik.setFieldValue("Aluminium", Aluminium[0].value);

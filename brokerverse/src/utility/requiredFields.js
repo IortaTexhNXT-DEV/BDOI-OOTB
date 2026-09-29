@@ -1,5 +1,5 @@
 /**
- * Required-field checks for forms that keep their values in plain state (not formik) (D105).
+ * Required-field checks for forms that keep their values in plain state (not formik).
  *
  *   const errors = requiredErrors(form, [["name", "Campaign name"], ["startDate", "Start date"]]);
  *   if (hasErrors(errors)) { setErrors(errors); notifyWarn(errorSummary(errors)); return; }

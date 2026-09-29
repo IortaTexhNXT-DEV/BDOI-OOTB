@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 
 const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
-  const [products, setProducts] = useState([]);
 
   const template2 = {
     layout:
@@ -40,7 +39,6 @@ const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
     <div className="reversal__table__container">
       <DataTable
         value={reversalJVGetDataList}
-        //   tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
         paginator
         rows={5}
         rowsPerPageOptions={[5, 10, 25, 50]}

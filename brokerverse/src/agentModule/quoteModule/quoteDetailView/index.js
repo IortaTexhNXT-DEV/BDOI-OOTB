@@ -20,7 +20,6 @@ import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { getLeadByIdMiddleware } from "../../leadModule/Store/leadMiddleware";
 import { BASE_URL } from "../../../utility/constant";
 import authService from "../../../services/authService";
-import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
 import clientService from "../../../services/clientService";
 import { QuotationStatus } from "../../../utils/statusHelpers";
@@ -32,8 +31,9 @@ import QuotationAuditTrail from "../quotationAuditTrail";
 import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
-import { confirmAction, notifyError, notifySuccess } from "../../../utility/dialogs";
+import { notifyError } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
+import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -73,15 +73,11 @@ const QuoteDetailView = ({ action }) => {
     const fetchQuotation = async () => {
       // If we already have data from navigation, don't fetch
       if (quotationData) {
-        console.log("=== USING QUOTATION DATA FROM NAVIGATION ===");
-        console.log("Quotation data:", quotationData);
         return;
       }
 
       // If we have a quotation ID, fetch the data
       if (quotationIdFromParams) {
-        console.log("=== FETCHING QUOTATION FROM API ===");
-        console.log("Quotation ID:", quotationIdFromParams);
         setIsLoading(true);
 
         try {
@@ -90,14 +86,11 @@ const QuoteDetailView = ({ action }) => {
           );
 
           if (result.type.endsWith("/fulfilled")) {
-            console.log("✅ Quotation fetched successfully:", result.payload);
             setQuotationData(result.payload);
           } else {
-            console.error("❌ Failed to fetch quotation:", result.payload);
             notifyError(t("quoteDetailView.failedToLoad"));
           }
         } catch (error) {
-          console.error("❌ Error fetching quotation:", error);
           notifyError(t("quoteDetailView.errorLoading"));
         } finally {
           setIsLoading(false);
@@ -222,9 +215,7 @@ const QuoteDetailView = ({ action }) => {
     return toPct(settingsTaxRates?.[key] || 0);
   };
 
-  console.log(calculatedPremiums, "calculatedPremiums --- QUOTE DETAIL VIEW");
-
-  const { PolicyDetails, loading, currentLeadDetails } = useSelector(
+  const { currentLeadDetails } = useSelector(
     ({ policyDetailsReducer, leadReducer }) => {
       return {
         loading: policyDetailsReducer?.loading,
@@ -266,7 +257,7 @@ const QuoteDetailView = ({ action }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch related policy:", error);
+      logger.error("Failed to fetch related policy:", error);
     } finally {
       setCheckingPolicy(false);
     }
@@ -336,8 +327,6 @@ const QuoteDetailView = ({ action }) => {
       });
       return;
     }
-
-    console.log("Starting policy conversion flow for quotation:", quotationId);
 
     const convertIsIar = isIarLob(quotationData?.productType);
     const convertIsFire =
@@ -428,87 +417,11 @@ const QuoteDetailView = ({ action }) => {
         detail: t("quoteDetailView.errorSendingQuoteForApproval"),
         life: 3000,
       });
-      console.error(error);
+      logger.error(error);
     }
   };
 
-  // Submit quote to insurer
-  const handleSubmitToInsurer = async () => {
-    if (!(await confirmAction(t("quoteDetailView.submitToInsurerConfirm")))) {
-      return;
-    }
 
-    try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/submit-to-insurer`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ submittedBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (result.success) {
-        notifySuccess(t("quoteDetailView.quoteSubmittedToInsurer"));
-        // Refresh data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        notifyError(t("quoteDetailView.failedMessage", { message: result.message }));
-      }
-    } catch (error) {
-      notifyError(t("quoteDetailView.errorSubmittingToInsurer"));
-      console.error(error);
-    }
-  };
-
-  // Manual status change (for SubmittedToInsurer -> Approved)
-  const handleStatusChange = async (newStatus) => {
-    if (!(await confirmAction(t("quoteDetailView.changeStatusConfirm", { newStatus })))) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ status: newStatus, updatedBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        notifySuccess(t("quoteDetailView.statusUpdatedSuccess", { newStatus }));
-        // Refresh data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        notifyError(t("quoteDetailView.failedMessage", { message: result.message || t("quoteDetailView.statusUpdateFailed") }));
-      }
-    } catch (error) {
-      notifyError(t("quoteDetailView.errorUpdatingStatus"));
-      console.error(error);
-    }
-  };
 
   // Show loading state
   if (isLoading) {
@@ -1303,7 +1216,6 @@ const QuoteDetailView = ({ action }) => {
                 label={
                   checkingPolicy ? t("quoteDetailView.checkingPolicy") : t("quoteDetailView.waitingForPolicy")
                 }
-                // className="policy_button p-button-outlined"
                 disabled={checkingPolicy || !relatedPolicy?.policyId}
                 onClick={() => {
                   if (!relatedPolicy?.policyId) {

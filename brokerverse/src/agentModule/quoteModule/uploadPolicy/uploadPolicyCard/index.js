@@ -1,9 +1,9 @@
 import { Card } from "primereact/card";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { Button } from "primereact/button";
@@ -17,8 +17,8 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import S3FileUpload from "../../../../components/S3FileUpload";
 import policyService from "../../../../services/policyService";
 import { useSelector } from "react-redux";
-import quotationService from "../../../../services/quotationService";
 import { notifyError, notifyWarn } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 
 const UploadPolicyCard = ({
   state,
@@ -55,21 +55,6 @@ const UploadPolicyCard = ({
     policydetailedlist?.ClientId ||
     policydetailedlist?.clientId;
 
-  const grossPremium =
-    state?.GrossPremium ||
-    policydetailedlist?.GrossPremium ||
-    quotationDetails?.firePremiumDetails?.totalPremium ||
-    quotationDetails?.grossPremium ||
-    quotationDetails?.totalPremium ||
-    policydetailedlist?.quotation?.participantDetails
-      ?.reduce((sum, participant) => {
-        const premium = parseFloat(
-          participant.premiumCurrency?.replace(/[^0-9.-]/g, "") || 0
-        );
-        return sum + premium;
-      }, 0)
-      ?.toFixed(2) ||
-    "0.00";
 
   const policyIdFromState = useMemo(() => {
     return (
@@ -98,7 +83,7 @@ const UploadPolicyCard = ({
           setResolvedPolicyData(response.data);
         }
       } catch (error) {
-        console.error(
+        logger.error(
           "Failed to fetch policy details for upload screen:",
           error
         );
@@ -177,7 +162,6 @@ const UploadPolicyCard = ({
     const quotationId = propQuotationId || urlQuotationId || detailsQuotationId;
 
     if (!quotationId) {
-      console.error("❌ Quotation ID not found");
       notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
@@ -194,9 +178,6 @@ const UploadPolicyCard = ({
     }
 
     try {
-      console.log("=== PAY LATER FLOW ===");
-      console.log("Updating existing policy:", existingPolicyId);
-
       // Update the existing policy with new details
       const updatePayload = {
         policyNumber: additionalPolicyData.policyNumber,
@@ -228,19 +209,16 @@ const UploadPolicyCard = ({
         paymentStatus: "Pending",
       };
 
-      const updateResult = await policyService.updatePolicy(existingPolicyId, updatePayload);
-      const policyData = updateResult.data || resolvedPolicyData;
+      await policyService.updatePolicy(existingPolicyId, updatePayload);
 
       // Pay later: nothing is received, so no receipt and no journal. The bill raised at issuance stays open
       // and the payment is captured later on the policy payment screen.
       const payLater = await policyService.recordPayLater(existingPolicyId);
       if (!payLater.success) {
-        console.warn("Pay later could not be recorded:", payLater.error);
+        logger.warn("Pay later could not be recorded:", payLater.error);
       }
-      console.log("Policy updated (pay later):", policyData?.policyNumber);
       navigate(`/agent/policydetail/${existingPolicyId}`, {});
     } catch (error) {
-      console.error("Failed to update policy (Pay Later):", error);
       notifyError(
         `Error: ${error.message || "Failed to process. Please try again."}`
       );
@@ -313,7 +291,6 @@ const UploadPolicyCard = ({
     const quotationId = propQuotationId || urlQuotationId || detailsQuotationId;
 
     if (!quotationId) {
-      console.error("❌ Quotation ID not found");
       notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
@@ -359,14 +336,12 @@ const UploadPolicyCard = ({
         paymentStatus: "Pending",
       });
     } catch (error) {
-      console.error("Failed to update policy with uploaded details:", error);
+      logger.error("Failed to update policy with uploaded details:", error);
     }
 
     // Prepare complete policy data for payment flow
     const completePolicyForPayment =
       resolvedPolicyData || state?.policyData || {};
-
-    // Log premium data for verification
 
     navigate(`/agent/policy/paymentoptions/${existingPolicyId}`, {
       state: {
@@ -467,7 +442,7 @@ const UploadPolicyCard = ({
     ]
   );
 
-  const [expiryDateData, setExpieyDateData] = useState("");
+  const [, setExpieyDateData] = useState("");
 
   const handleBackNavigation = () => {
     customHistory.back();
@@ -690,12 +665,10 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.production")}*`}
               value={formik.values.Production}
-              // minDate={minDate}
               onChange={(e) => {
                 formik.setFieldValue("Production", e.target.value);
               }}
               dateFormat="yy-mm-dd"
-              // error={formik.errors.Production}
             />
             {formik.touched.Production && formik.errors.Production && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -707,7 +680,6 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.inception")}*`}
               value={formik.values.Inception}
-              // minDate={minDate}
 
               onChange={(e) => {
                 handleIssuedDateChange();
@@ -741,9 +713,6 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.expiry")}*`}
               value={formik.values.Expiry}
-              // onChange={(e) => {
-              //   formik.setFieldValue("Expiry", e.target.value);
-              // }}
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Expiry && formik.errors.Expiry && (
@@ -776,11 +745,6 @@ const UploadPolicyCard = ({
             formik.setFieldValue("file", "");
           }}
           onUploadSuccess={(url, file) => {
-            console.log("=== S3 Upload Success Callback ===");
-            console.log("URL param:", url);
-            console.log("File param:", file);
-            console.log("URL type:", typeof url);
-
             // Extract URL from various possible formats
             let documentUrl = null;
 
@@ -793,24 +757,16 @@ const UploadPolicyCard = ({
                 url.url || url.data?.url || url.key || url.data?.key;
             }
 
-            console.log("Final extracted URL:", documentUrl);
-
             if (!documentUrl) {
-              console.error(
-                "❌ Failed to extract URL. Full object:",
-                JSON.stringify(url, null, 2)
-              );
               notifyError(t("agent.uploadUrlFailed"));
               return;
             }
 
-            console.log("✅ Setting policy document URL:", documentUrl);
             setPolicyDocumentUrl(documentUrl);
             formik.setFieldValue("file", documentUrl);
             setShowUploadError(false);
           }}
           onUploadError={(error) => {
-            console.error("Policy document upload error:", error);
             notifyError(t("agent.uploadFailed") + ": " + error.message);
           }}
         />

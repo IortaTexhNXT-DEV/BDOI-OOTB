@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -26,8 +25,6 @@ import { formatPercent, formatWithUnit, progressValue } from "../../../utility/n
 const RetentionAnalytics = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState('Last 12 Months');
   const [productFilter, setProductFilter] = useState('All Products');
@@ -259,12 +256,6 @@ const RetentionAnalytics = () => {
 
   const formatPercentage = (value, decimals = 1) => formatPercent(value ?? 0, { decimals });
 
-  const getRiskSeverity = (risk) => {
-    if (risk >= 90) return 'danger';
-    if (risk >= 70) return 'warning';
-    if (risk >= 50) return 'info';
-    return 'success';
-  };
 
   const agentRankingTemplate = (rowData) => {
     const getRankIcon = (rank) => {

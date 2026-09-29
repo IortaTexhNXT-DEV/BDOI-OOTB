@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import { getSearchInsuranceCoverMiddleware, getInsuranceCoverMiddleWare } from "../store/insuranceCoverMiddleware";
@@ -27,7 +26,7 @@ const TableData = ({ navigate }) => {
   useEffect(() => {
     dispatch(getInsuranceCoverMiddleWare());
   }, [dispatch]);
-  const { InsuranceCoverList, loading, SearchTableList } = useSelector(
+  const { InsuranceCoverList, SearchTableList } = useSelector(
     ({ insuranceCoverReducers }) => {
       return {
         loading: insuranceCoverReducers?.loading,
@@ -157,11 +156,6 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
           body={(rowData) => rowData.coverName?.toUpperCase()}
         ></Column>
-        {/* <Column
-          field="policyType"
-          header="Policy Type"
-          className="fieldvalue_container"
-        ></Column> */}
         <Column
           field="modifiedby"
           header="Modified by"

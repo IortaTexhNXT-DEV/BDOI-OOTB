@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
-import NavBar from "../../../../../components/NavBar";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -29,7 +28,7 @@ import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 const DesignationMaster = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { designationDetailList, loading, designationSearchList } = useSelector(
+  const { designationDetailList, designationSearchList } = useSelector(
     ({ designationMainReducers }) => {
       return {
         loading: designationMainReducers?.loading,
@@ -40,9 +39,6 @@ const DesignationMaster = () => {
   );
   const handleNavigate = () => {
     navigate("/master/generals/employeemanagement/designation/add/1");
-  };
-  const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const handleView = (rowData) => {
     dispatch(getDesignationViewData(rowData));
@@ -89,14 +85,13 @@ const DesignationMaster = () => {
     dispatch(getDesignationListByIdMiddleware());
   }, [dispatch]);
 
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [, setFirst] = useState(0);
+  const [, setRowsPerPage] = useState(10);
 
   const onPageChange = (event) => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
   };
-  const [search, setSearch] = useState();
 
   const handleSubmit = (values) => {
     dispatch(getSearchDesignationMiddleware({ textSearch: values.search }));
@@ -130,7 +125,6 @@ const DesignationMaster = () => {
       </div>
     );
   };
-
 
   const template2 = {
     layout:

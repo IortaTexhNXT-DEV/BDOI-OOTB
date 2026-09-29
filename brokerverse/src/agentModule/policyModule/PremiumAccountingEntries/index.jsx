@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -12,6 +12,7 @@ import { Tag } from "primereact/tag";
 import accountingService from "../../../services/accountingService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 // Cell components for DataTable
 const DebitCreditCell = ({ debitCredit }) => {
@@ -213,7 +214,7 @@ const PremiumAccountingEntries = () => {
         throw new Error(response.error || "Failed to fetch policy entries");
       }
     } catch (error) {
-      console.error("Error fetching policy entries:", error);
+      logger.error("Error fetching policy entries:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -232,13 +233,6 @@ const PremiumAccountingEntries = () => {
     return entries;
   }, [entries, selectedEntryType]);
 
-  const handleMotherPolicyClick = (motherPolicyId) => {
-    if (motherPolicyId && motherPolicyId !== policyId) {
-      navigate(`/agent/premium-accounting-entries/${motherPolicyId}`, {
-        state: { policyId: motherPolicyId },
-      });
-    }
-  };
 
   const breadcrumbItems = [
     { label: t("policyAccounting.policy"), command: () => navigate("/agent/clientlisting") },
@@ -387,27 +381,6 @@ const PremiumAccountingEntries = () => {
             )}
             style={{ minWidth: "120px", textAlign: "right" }}
           />
-          {/* <Column
-            field="motherPolicyNumber"
-            header="Mother Policy"
-            body={(rowData) => {
-              if (
-                rowData.motherPolicyNumber &&
-                rowData.motherPolicyNumber !== policyInfo.policyNumber
-              ) {
-                return (
-                  <button
-                    className="mother-policy-link"
-                    onClick={() => handleMotherPolicyClick(rowData.motherPolicyId)}
-                  >
-                    {rowData.motherPolicyNumber}
-                  </button>
-                );
-              }
-              return "-";
-            }}
-            style={{ minWidth: "150px" }}
-          /> */}
         </DataTable>
       </Card>
     </div>

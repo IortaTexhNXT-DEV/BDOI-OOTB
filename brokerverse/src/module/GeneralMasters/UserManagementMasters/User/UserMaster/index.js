@@ -5,7 +5,6 @@ import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
-import NavBar from "../../../../../components/NavBar";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -35,10 +34,7 @@ const UserMaster = () => {
   const handleNavigate = () => {
     navigate("/master/generals/usermanagement/user/add");
   };
-  const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
-  };
-  const { loading, userList, searchList } = useSelector(({ userReducers }) => {
+  const { userList, searchList } = useSelector(({ userReducers }) => {
     return {
       loading: userReducers?.loading,
       userList: userReducers?.userList || [],
@@ -100,7 +96,6 @@ const UserMaster = () => {
     fontWeight: 500,
     padding: "1rem",
     color: "#000",
-    textAlign: "center",
     border: "none",
     textAlign: "center",
     // marginLeft:"6px"
@@ -109,12 +104,6 @@ const UserMaster = () => {
     //  width:"6%"
   };
 
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRowsPerPage(event.rows);
-  };
 
   const renderViewButton = (rowData) => {
     return (
@@ -281,8 +270,6 @@ const UserMaster = () => {
                   header="Action"
                   headerStyle={ViewheaderStyle}
                   style={{ minWidth: "11rem" }}
-                  // className="fieldvalue_container"
-                  //  className="fieldvalue_container_centered"
                 ></Column>
               </DataTable>
             </div>

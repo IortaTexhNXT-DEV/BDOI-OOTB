@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -30,7 +30,6 @@ const RequestApproval = ({ flow }) => {
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
@@ -52,62 +51,22 @@ const RequestApproval = ({ flow }) => {
   // Use Redux claim number instead of navigation state
   const claimNumber = header.claimNumber || reduxClaimNumber || "";
 
-  // Console logs to debug the data
-  console.log("=== REQUEST APPROVAL PAGE DATA ===");
-  console.log("URL Params:", params);
-  console.log("Navigation State:", navigationState);
-  console.log("Policy Number:", policyNumber);
-  console.log("Claim Number:", claimNumber);
-  console.log("Claim ID:", claimId);
-  console.log("Policy Holder Name:", policyHolderName);
-  console.log("Full Response:", fullResponse);
-  console.log("=== REDUX DATA ===");
-  console.log("Redux Policy Holder Name:", reduxPolicyHolderName);
-  console.log("Redux Policy Number:", reduxPolicyNumber);
-  console.log("Redux Claim Number:", reduxClaimNumber);
-  console.log("=== END REDUX DATA ===");
-  console.log("=== CLAIM DATA ANALYSIS ===");
-  console.log("Available claim data fields:", {
-    claimId: claimId,
-    policyNumber: policyNumber,
-    claimNumber: claimNumber,
-    fullResponse: fullResponse,
-    navigationState: navigationState,
-  });
-  console.log("=== END CLAIM DATA ANALYSIS ===");
-  console.log("=== END REQUEST APPROVAL PAGE DATA ===");
-
   const handleEdit = async () => {
     try {
       setIsLoading(true);
 
       // Get claim details using the claim ID from URL
       const claimId = id;
-      console.log("=== FETCHING CLAIM DETAILS FOR EDIT ===");
-      console.log("Claim ID:", claimId);
 
       const result = await claimsService.getClaimDetails(claimId);
 
       if (result.success) {
-        const claimData = result.data;
-        console.log("Claim data fetched:", claimData);
 
-        // Extract the necessary IDs from claim data
-        const leadRefId = claimData.leadRefId || "LEAD-001";
-        const quoteRefId = claimData.quoteRefId || "QUOTE-001";
-        const policyRefId = claimData.policyRefId || "POLICY-001";
-
-        console.log("Extracted IDs:", { leadRefId, quoteRefId, policyRefId });
 
         // Navigate to claim details page with claimId in URL
-        console.log("=== NAVIGATING TO EDIT CLAIM ===");
-        console.log("Claim ID for edit:", claimId);
-        console.log("Reference IDs:", { leadRefId, quoteRefId, policyRefId });
-        console.log("=== END NAVIGATING TO EDIT CLAIM ===");
 
         navigate(`/agent/claimrequest/claimdetails/${claimId}`);
       } else {
-        console.error("Failed to fetch claim details:", result.error);
         toast.current.show({
           severity: "error",
           summary: t("claimRequestApproval.error"),
@@ -116,7 +75,6 @@ const RequestApproval = ({ flow }) => {
         });
       }
     } catch (error) {
-      console.error("Error fetching claim details:", error);
       toast.current.show({
         severity: "error",
         summary: t("claimRequestApproval.error"),
@@ -164,7 +122,6 @@ const RequestApproval = ({ flow }) => {
         });
       }
     } catch (error) {
-      console.error("Error updating claim status:", error);
       toast.current.show({
         severity: "error",
         summary: t("claimRequestApproval.error"),
@@ -200,17 +157,6 @@ const RequestApproval = ({ flow }) => {
         <SvgLeftArrow />
         <div className="claim__request__upload__back__btn__title">
           {(() => {
-            console.log("=== REQUEST APPROVAL DISPLAY LOGIC ===");
-            console.log("Policy Holder Name:", policyHolderName);
-            console.log("Claim Number:", claimNumber);
-            console.log(
-              "Displaying:",
-              `${policyHolderName} / ${
-                claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-              }`
-            );
-            console.log("=== END REQUEST APPROVAL DISPLAY LOGIC ===");
-
             return `${policyHolderName} / ${
               claimNumber ? t("claimRequestApproval.claimLabel", { claimNumber }) : t("claimRequestApproval.loading")
             }`;

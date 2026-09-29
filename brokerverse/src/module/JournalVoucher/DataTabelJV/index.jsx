@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "../DataTabelJV/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
 import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
@@ -52,9 +51,7 @@ const DataTabelJV = ({
 
   const dispatch = useDispatch();
   const handleView = (rowData) => {
-    console.log(rowData.id, "rowdata");
     dispatch(getJournalVoucherViewData(rowData));
-    // const serializedData = JSON.stringify(rowData);
     navigate(`/accounts/journalvoucher/detailsjournalvocture/${rowData.id}`);
   };
 
@@ -94,16 +91,6 @@ const DataTabelJV = ({
     },
   };
 
-  const header__style = {
-    display: "flex",
-    justifyContent: "flex-end",
-    paddingRight: 20,
-  };
-  // const body__style = {
-  //     display: 'flex',
-  //     justifyContent: 'flex-end',
-  //     paddingRight: 30
-  // };
 
   return (
     <div className="journal__table__container">
@@ -165,7 +152,6 @@ const DataTabelJV = ({
         ></Column>
 
         <Column
-          // body={renderEditButton}
 
           body={(columnData) => (
             <SvgIconeye onClick={() => handleView(columnData)} />
@@ -174,8 +160,6 @@ const DataTabelJV = ({
           headerStyle={headaction}
           header={translate("common.view")}
           className="fieldvalue_container"
-          // headerStyle={header__style}
-          // bodyStyle={body__style}
         ></Column>
       </DataTable>
     </div>

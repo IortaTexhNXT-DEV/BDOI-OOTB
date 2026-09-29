@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { DataTable } from "primereact/datatable";
@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { currencySymbol } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 
 export default function BatchTable() {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export default function BatchTable() {
   const [batchesLoading, setBatchesLoading] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [sendingNotices, setSendingNotices] = useState(false);
-  const [queueJobId, setQueueJobId] = useState(null);
+  const [, setQueueJobId] = useState(null);
   const [queueProgress, setQueueProgress] = useState(null);
   const initialBatchCriteria = {
     expiryDateFrom: null,
@@ -100,7 +101,7 @@ export default function BatchTable() {
         setBatches(response.data);
       }
     } catch (error) {
-      console.error("Error fetching batches:", error);
+      logger.error("Error fetching batches:", error);
     } finally {
       setBatchesLoading(false);
     }
@@ -127,12 +128,11 @@ export default function BatchTable() {
       if (result.type.endsWith("/fulfilled")) {
         const transformedData = result.payload.transformedData;
         setSelectedPolicies(transformedData);
-        console.log("Selected policies updated:", transformedData);
       } else {
-        console.error("Failed to fetch policies:", result.payload);
+        logger.error("Failed to fetch policies:", result.payload);
       }
     } catch (error) {
-      console.error("Error generating policy list:", error);
+      logger.error("Error generating policy list:", error);
     }
   };
 
@@ -179,7 +179,6 @@ export default function BatchTable() {
         fetchBatches(); // Refresh the batches list
       }
     } catch (error) {
-      console.error("Error creating batch:", error);
       notifyError("Failed to create batch renewal. Please try again.");
     }
   };
@@ -300,8 +299,6 @@ export default function BatchTable() {
         }
       }
     } catch (error) {
-      console.error("Error polling queue status:", error);
-
       // Job not found (likely completed very fast or server restarted)
       // Stop polling and refresh to see results
       if (
@@ -333,7 +330,7 @@ export default function BatchTable() {
         setSelectedBatch(response.data);
       }
     } catch (error) {
-      console.error("Error fetching batch details:", error);
+      logger.error("Error fetching batch details:", error);
     }
   };
 
@@ -398,7 +395,6 @@ export default function BatchTable() {
       }
     } catch (error) {
       setSendingNotices(false);
-      console.error("Error sending renewal notice:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -462,7 +458,6 @@ export default function BatchTable() {
       }
     } catch (error) {
       setSendingNotices(false);
-      console.error("Error retrying failed notices:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -517,7 +512,6 @@ export default function BatchTable() {
         life: 3000,
       });
     } catch (error) {
-      console.error("Error generating report:", error);
       let errorMessage = "Failed to generate report. Please try again.";
 
       // Handle error response - check if it's a blob (error response from server)
@@ -654,7 +648,6 @@ export default function BatchTable() {
                         )
                       ) {
                         // Implement delete functionality
-                        console.log("Delete batch:", rowData.id);
                       }
                     }}
                   />

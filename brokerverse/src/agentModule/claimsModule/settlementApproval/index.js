@@ -11,6 +11,7 @@ import CustomToast from "../../../components/Toast";
 import claimsService from "../../../services/claimsService";
 import customHistory from "../../../routes/customHistory";
 import StatusIllustration from "../../component/StatusIllustration";
+import logger from "../../../utility/logger";
 
 const SettlementApproval = () => {
   const { t } = useTranslation();
@@ -71,20 +72,16 @@ const SettlementApproval = () => {
 
   const handleReject = async () => {
     if (!claimId) {
-      console.error("No claim ID available for rejection");
+      logger.error("No claim ID available for rejection");
       return;
     }
 
     setLoading(true);
-    console.log("=== REJECTING CLAIM ===");
-    console.log("Claim ID:", claimId);
-    console.log("=== END REJECTING CLAIM ===");
 
     try {
       const result = await claimsService.rejectClaim(claimId);
 
       if (result.success) {
-        console.log("Claim rejected successfully:", result.data);
         toastRef.current.showToast();
         setTimeout(async () => {
           let resolvedClientId = location.state?.clientId;
@@ -98,7 +95,7 @@ const SettlementApproval = () => {
                 claimPayload?.data?.clientId ||
                 claimPayload?.clientId;
             } catch (fetchError) {
-              console.error("Failed to resolve clientId after reject:", fetchError);
+              logger.error("Failed to resolve clientId after reject:", fetchError);
             }
           }
           if (resolvedClientId) {
@@ -108,11 +105,11 @@ const SettlementApproval = () => {
           }
         }, 2000);
       } else {
-        console.error("Failed to reject claim:", result.error);
+        logger.error("Failed to reject claim:", result.error);
         // You can add error handling here, like showing an error toast
       }
     } catch (error) {
-      console.error("Error rejecting claim:", error);
+      logger.error("Error rejecting claim:", error);
       // You can add error handling here
     } finally {
       setLoading(false);
@@ -125,7 +122,7 @@ const SettlementApproval = () => {
 
   const handleSubmit = () => {
     if (!claimId) {
-      console.error("No claim ID available for navigation");
+      logger.error("No claim ID available for navigation");
       return;
     }
 

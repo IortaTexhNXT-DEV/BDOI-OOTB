@@ -31,23 +31,9 @@ const ClaimAuditTrail = () => {
 
   useEffect(() => {
     if (claimId) {
-      console.log(
-        "Fetching audit trail for claimId:",
-        claimId,
-        "sortOrder:",
-        sortOrder
-      );
       dispatch(getClaimAuditTrail(claimId, sortOrder));
     }
   }, [dispatch, claimId, sortOrder]);
-
-  // Debug: Log the audit trail data when it changes
-  useEffect(() => {
-    if (auditTrailData && auditTrailData.length > 0) {
-      console.log("Audit trail data received:", auditTrailData);
-      console.log("First record:", auditTrailData[0]);
-    }
-  }, [auditTrailData]);
 
   const handleBack = () => {
     navigate("/agent/claim");
@@ -64,35 +50,26 @@ const ClaimAuditTrail = () => {
 
   const formatDateTime = (dateString) => {
     if (!dateString) {
-      console.log("No date string provided");
       return t("claimAuditTrail.nA");
     }
-
-    console.log("Formatting date:", dateString);
 
     try {
       const date = new Date(dateString);
 
       // Check if the date is valid
       if (Number.isNaN(date.getTime())) {
-        console.log("Invalid date:", dateString);
         return t("claimAuditTrail.invalidDate");
       }
 
       const formatted = formatAppDate(date, { withTime: true });
 
-      console.log("Formatted date:", formatted);
       return formatted;
     } catch (error) {
-      console.log("Error formatting date:", error, "Input:", dateString);
       return t("claimAuditTrail.dateError");
     }
   };
 
   const renderDate = (rowData) => {
-    // Debug: Log the rowData to see what fields are available
-    console.log("Audit trail row data:", rowData);
-
     // Check for various possible timestamp field names
     const timestamp =
       rowData.date ||
@@ -103,8 +80,6 @@ const ClaimAuditTrail = () => {
       rowData.updated_at ||
       rowData.dateTime ||
       rowData.date_time;
-
-    console.log("Found timestamp:", timestamp);
 
     return <div className="audit-date">{formatDateTime(timestamp)}</div>;
   };

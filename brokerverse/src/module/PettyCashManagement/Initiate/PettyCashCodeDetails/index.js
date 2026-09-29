@@ -1,7 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
@@ -11,30 +9,9 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useSelector } from "react-redux";
-import LabelWrapper from "../../../../components/LabelWrapper";
-import { Calendar } from "primereact/calendar";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
-
-const initialValue = {
-  PettyCashCode: "",
-  PettyCashdescription: "",
-  PettyCashSize: "",
-  BankAccountNumber: "",
-  SubAccountCode: "",
-  Currency: "",
-  Currencydescription: "",
-  TransactionCode: "",
-  Transactiondescription: "",
-  BranchCode: "",
-  Branchdescription: "",
-  DepartmentCode: "",
-  Departmentdescription: "",
-  AvailableCash: "",
-  TransactionLimit: "",
-  MinimumCashbox: "", TransactionDate: new Date()
-};
 
 const PettyCashCodeDetails = () => {
   const { t } = useTranslation();
@@ -74,9 +51,6 @@ const PettyCashCodeDetails = () => {
     navigate("/accounts/pettycash/pettycashcodeinitiate");
   };
 
-  const formik = useFormik({
-    initialValues: initialValue,
-  });
 
   return (
     <div className="pettycash__form">
@@ -104,15 +78,11 @@ const PettyCashCodeDetails = () => {
       <Card className="mt-4 tabel__card__header"  >
 
         <div class="grid" style={{ flexDirection: "row-reverse" }}>
-          {/* <div class="col-12 md:col-6 lg:col-3">
-        <div class="text-center p-3 border-round-sm bg-primary font-bold">col-12 md:col-6 lg:col-3</div>
-    </div> */}
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
               disabled={true}
               classNames="field__container"
               label={t("pettyCash.transactionNumber")}
-              // placeholder={"Enter"}
               value={InitiateDetails?.TransactionNumber}
 
             />
@@ -123,31 +93,15 @@ const PettyCashCodeDetails = () => {
               disabled={true}
               classNames="field__container"
               label={t("pettyCash.transactionCode")}
-              // placeholder={"Enter"}
                value={InitiateDetails?.TransactionCode}
 
             />
 
           </div>
           <div className="calender__container col-12 md:col-3 lg-col-3 ">
-            {/* <LabelWrapper className="calenderlable__container">
-              Transaction Date
-            </LabelWrapper> */}
-            {/* <Calendar
-              showIcon
-              placeholder="Select"
-              className="calendar_container"
-              value={InitiateDetails?.TransactionDate}
-
-              // onChange={(e) => {
-              //   formik.setFieldValue("TransactionDate", e.target.value);
-              // }}
-              dateFormat="yy-mm-dd"
-            /> */}
             <InputField
               classNames="input__filed"
               label={t("pettyCash.transactionDate")}
-              // placeholder="Enter"
               disabled={true}
               value={InitiateDetails?.TransactionDate}
               textColor={"#111927"}
@@ -162,7 +116,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashCode")}
-              // placeholder="Enter"
               disabled={true}
               value={InitiateDetails?.Pettycashcode}
               textColor={"#111927"}
@@ -174,7 +127,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashDescription")}
-              // placeholder="Enter"
               disabled={true}
               value={InitiateDetails?.PettyCashdescription}
               textColor={"#111927"}
@@ -186,7 +138,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashSize")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -200,7 +151,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.bankCode")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -212,7 +162,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.bankAccountCode")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -224,7 +173,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.mainAccountCode")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -236,7 +184,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.subAccountCode")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -266,7 +213,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.currencyDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -296,7 +242,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.branchDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -310,7 +255,6 @@ const PettyCashCodeDetails = () => {
             <DropDowns
               className="input__filed"
               label={t("pettyCash.departmentCode")}
-              // placeholder={t("pettyCash.select")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -326,7 +270,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.departmentDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -340,7 +283,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.availableCash")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -352,7 +294,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.maxLimit")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -364,7 +305,6 @@ const PettyCashCodeDetails = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.minimumCashbox")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}

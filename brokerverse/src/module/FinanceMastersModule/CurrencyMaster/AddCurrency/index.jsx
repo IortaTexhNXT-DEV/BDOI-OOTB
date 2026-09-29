@@ -1,5 +1,5 @@
 import { BreadCrumb } from 'primereact/breadcrumb'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from "react-i18next"
 import SvgDot from '../../../../assets/icons/SvgDot';
 import "../AddCurrency/index.scss"
@@ -11,9 +11,8 @@ import CustomToast from '../../../../components/Toast';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from "formik";
 import SvgBack from '../../../../assets/icons/SvgBack';
-import NavBar from '../../../../components/NavBar';
 import { postAddCurrency } from "../store/currencyMasterMiddlewar";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useCurrencyCodeOptions } from "../../../GeneralMasters/common/useMasterOptions";
 
 const initialValues = {
@@ -25,7 +24,6 @@ const initialValues = {
   Description: "",
   CurrencyFormat: "",
   NumberofDecimals: ""
-
 }
 
 const AddCurrency = () => {
@@ -33,14 +31,7 @@ const AddCurrency = () => {
   const toastRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const toastRef = useRef(null);
 
-  const { CurrencyList, loading } = useSelector(({ currencyMasterReducer }) => {
-    return {
-      loading: currencyMasterReducer?.loading,
-      CurrencyList: currencyMasterReducer?.CurrencyList,
-    };
-  });
   const items = [
     { label: t("financeMasters.currencyLabel"), url: '/master/finance/currency' },
     { label: t("financeMasters.addCurrency"), url: '/master/finance/currency/addcurrency' },
@@ -48,7 +39,6 @@ const AddCurrency = () => {
   ];
 
   const ISOcode = useCurrencyCodeOptions();
-
 
   const home = { label: t("financeMasters.master") };
 
@@ -93,17 +83,14 @@ const AddCurrency = () => {
       errors.NumberofDecimals = t("financeMasters.thisFieldIsRequired");
     }
 
-
     return errors;
   };
-
 
   const formik = useFormik({
     initialValues: initialValues,
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
@@ -155,7 +142,6 @@ const AddCurrency = () => {
               value={formik.values.ISOcode}
               onChange={(e) =>
                 formik.setFieldValue("ISOcode", e.value)
-
               }
               options={ISOcode}
               optionLabel="name"
@@ -295,6 +281,5 @@ const AddCurrency = () => {
       </div>
     </div>
   )
-
 }
 export default AddCurrency

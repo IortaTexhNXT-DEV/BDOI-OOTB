@@ -1,16 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "../CommissionTabel/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
-import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
-import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { useDispatch } from "react-redux";
 import { getCommission, getCommissionView, getPatchCommissionEditMiddleware } from "../store/commissionMiddleWare";
@@ -21,10 +17,7 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
     const { t } = useTranslation();
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const [first, setFirst] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
     const handleNavigateView = (columnData) => {
-        // navigate(`/master/generals/commission/viewcommission`)
         dispatch(getCommissionView(columnData))
 
         navigate(`/master/generals/commission/viewcommission/${columnData.id}`)
@@ -33,37 +26,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
         dispatch(getPatchCommissionEditMiddleware(columnData))
         navigate(`/master/generals/commission/editcommission`)
     }
-    // console.log(newDataTable, "find newDataTable");
-    // let newProduct;
-    // let updatedProductData;
-
-    // if (newDataTable.length > 0) {
-    //     updatedProductData = [
-    //         ...data,
-    //         (newProduct = {
-    //             id: 11,
-    //             mainAC: newDataTable[0].mainAccount,
-    //             subAC: newDataTable[0].subAccount,
-    //             Currency: newDataTable[0].currencyCode,
-    //             foreignAmount: newDataTable[0].foreignAmount,
-    //             localAmount: "500.00",
-    //             Remarks: "New credit voucher",
-    //             Entry: newDataTable[0].entryType,
-    //         }),
-    //     ];
-    // } else {
-    //     updatedProductData = data;
-    // }
-    const onPageChange = (event) => {
-        setFirst(event.first);
-        setRowsPerPage(event.rows);
-    };
-    const isEmpty = commissionList.length === 0;
-    const emptyTableIcon = (
-        <div className="empty-table-icon">
-            <SvgTable />
-        </div>
-    );
 
 
     const headerStyle = {
@@ -107,22 +69,8 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                 </React.Fragment>
             );
         },
-
     };
 
-    const renderEditButton = (rowData) => {
-        return (
-            <div className="centercontent" >
-                <div onClick={handleNavigateView}>
-                    <SvgEyeIcon />
-                </div>
-                <div onClick={handleEditNavigate}>
-                    <SvgEditIcon />
-                </div>
-
-            </div>
-        );
-    };
 
     const statusToast = useRef(null);
     const renderToggleButton = (rowData) => (
@@ -133,7 +81,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
             onError={(error) => statusToast.current?.show({ severity: "error", detail: error.message })}
         />
     );
-
 
     return (
         <div className="petty__cash__table__container">
@@ -151,10 +98,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 paginatorTemplate={template2}
-                // onPage={onPageChange}
-                // onPageChange={onPageChange}
-                // emptyMessage={isEmpty ? emptyTableIcon : null}
-
 
             >
                 <Column
@@ -217,7 +160,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                     className="fieldvalue_container"
                 ></Column>
                 <Column
-                    // body={renderEditButton}
                     body={(columnData) => (
                         <div style={{ display: 'flex', justifyContent: 'space-between', cursor: "pointer" }}>
                             <SvgIconeye onClick={() => handleNavigateView(columnData)} />

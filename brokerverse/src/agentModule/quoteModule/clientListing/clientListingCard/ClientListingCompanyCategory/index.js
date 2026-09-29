@@ -1,21 +1,15 @@
 import { InputText } from "primereact/inputtext";
-import TableDropdownField from "../../../../component/tableDropDwonField";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputSwitch } from "primereact/inputswitch";
-import { Checkbox } from "primereact/checkbox";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../../assets/icons/SvgArrow";
-import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
-import SvgTravlesTable from "../../../../../assets/agentIcon/SvgTravlesTable";
-import SvgHomeTable from "../../../../../assets/agentIcon/SvgHomeTable";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getClientEditMiddleWare,
   getPaymentSearchDataMiddleWare,
@@ -30,7 +24,6 @@ const ClientListingCompanyCategory = ({
   paymentSearchList,
 }) => {
   const { t } = useTranslation();
-  console.log(clientListTable?.company);
   const companyData = clientListTable?.filter(
     (item) => item.category === "Corporate"
   );
@@ -39,7 +32,7 @@ const ClientListingCompanyCategory = ({
   );
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("Name");
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
@@ -227,7 +220,6 @@ const ClientListingCompanyCategory = ({
         <div className="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("clients.search")}
               value={search}

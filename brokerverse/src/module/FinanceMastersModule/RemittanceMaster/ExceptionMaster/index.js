@@ -84,19 +84,7 @@ const ExceptionMaster = () => {
     { label: "System Error", value: "System Error" }
   ];
 
-  const resolutionActionOptions = [
-    { label: "Manual Review", value: "Manual Review" },
-    { label: "Auto Resolve", value: "Auto Resolve" },
-    { label: "Hold for Approval", value: "Hold for Approval" },
-    { label: "Reject Transaction", value: "Reject Transaction" }
-  ];
 
-  const notifyRoleOptions = [
-    { label: "User", value: "User" },
-    { label: "Supervisor", value: "Supervisor" },
-    { label: "Manager", value: "Manager" },
-    { label: "Finance Head", value: "Finance Head" }
-  ];
 
   const items = [
     { label: "Remittance Master", url: "/master/finance/remittance" },

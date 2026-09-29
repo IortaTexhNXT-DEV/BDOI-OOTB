@@ -1,12 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import "./index.scss";
 import { useFormik } from "formik";
-import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useSelector, useDispatch } from "react-redux";
 import { patchAccountCategoryDetailEditMiddleWare } from "../store/accountCategoryMeddleware";
 
@@ -18,7 +16,7 @@ const ModalEditData = ({
   handleEdit,
 }) => {
   const dispatch = useDispatch();
-  const { AccountCategoryDetailEdit, loading } = useSelector(
+  const { AccountCategoryDetailEdit } = useSelector(
     ({ accountCategoryReducer }) => {
       return {
         loading: accountCategoryReducer?.loading,

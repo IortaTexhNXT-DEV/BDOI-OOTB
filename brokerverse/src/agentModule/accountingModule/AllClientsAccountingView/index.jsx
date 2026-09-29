@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useNavigate } from "react-router-dom";
@@ -12,11 +12,11 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { Accordion, AccordionTab } from "primereact/accordion";
 import { Paginator } from "primereact/paginator";
 import accountingService from "../../../services/accountingService";
 import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const EntryTypeBadge = ({ entryType, t }) => {
   const getEntryTypeConfig = (type) => {
@@ -185,7 +185,7 @@ const AllClientsAccountingView = () => {
         );
       }
     } catch (error) {
-      console.error("Error fetching all clients accounting:", error);
+      logger.error("Error fetching all clients accounting:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -303,7 +303,7 @@ const AllClientsAccountingView = () => {
         life: 3000,
       });
     } catch (error) {
-      console.error("Error exporting data:", error);
+      logger.error("Error exporting data:", error);
       toast.current?.show({
         severity: "error",
         summary: "Export Failed",

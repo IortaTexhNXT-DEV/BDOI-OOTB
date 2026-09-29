@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Chart } from "primereact/chart";
 import CommissionService from "../../../services/commissionService";
-import { formatBaht } from "../utils/formatBaht";
+import { formatAmount } from "../utils/formatAmount";
 import {
   getCommissionViewMode,
   setCommissionViewMode,
@@ -9,6 +9,7 @@ import {
 import "./style.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
+import logger from "../../../utility/logger";
 
 const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
 
@@ -32,7 +33,7 @@ const CommissionDashboard = () => {
       const res = await CommissionService.getDashboard();
       setData(res?.data || res);
     } catch (err) {
-      console.error("Failed to load commission dashboard", err);
+      logger.error("Failed to load commission dashboard", err);
       setData(null);
     } finally {
       setLoading(false);
@@ -185,15 +186,15 @@ const CommissionDashboard = () => {
       <div className="kpi-row">
         <div className="kpi-card accent-green">
           <span className="label">Brokerage income</span>
-          <span className="value green">{formatBaht(kpis.brokerageIncome)}</span>
+          <span className="value green">{formatAmount(kpis.brokerageIncome)}</span>
         </div>
         <div className="kpi-card accent-red">
           <span className="label">Comsub (gross)</span>
-          <span className="value red">{formatBaht(kpis.comsubGross)}</span>
+          <span className="value red">{formatAmount(kpis.comsubGross)}</span>
         </div>
         <div className="kpi-card accent-blue">
           <span className="label">Net margin</span>
-          <span className="value blue">{formatBaht(kpis.netMargin)}</span>
+          <span className="value blue">{formatAmount(kpis.netMargin)}</span>
         </div>
         <div className="kpi-card accent-navy">
           <span className="label">Margin %</span>
@@ -202,13 +203,13 @@ const CommissionDashboard = () => {
         <div className="kpi-card accent-purple">
           <span className="label">Outstanding payable</span>
           <span className="value navy">
-            {formatBaht(kpis.outstandingPayable)}
+            {formatAmount(kpis.outstandingPayable)}
           </span>
         </div>
         <div className="kpi-card accent-purple">
           <span className="label">WHT withheld (paid)</span>
           <span className="value navy">
-            {formatBaht(kpis.whtWithheldPaid)}
+            {formatAmount(kpis.whtWithheldPaid)}
           </span>
         </div>
       </div>
@@ -228,7 +229,7 @@ const CommissionDashboard = () => {
                     style={{ width: `${(r.amount / maxReferrer) * 100}%` }}
                   />
                 </div>
-                <span className="hbar-value">{formatBaht(r.amount)}</span>
+                <span className="hbar-value">{formatAmount(r.amount)}</span>
               </div>
             ))}
           </div>
@@ -262,7 +263,7 @@ const CommissionDashboard = () => {
             <strong className="claw-lines">
               {data.clawback.lines} line(s)
             </strong>{" "}
-            · {formatBaht(data.clawback.amount)} comsub clawed back (excluded
+            · {formatAmount(data.clawback.amount)} comsub clawed back (excluded
             from the figures above).
           </p>
         </div>
@@ -306,7 +307,7 @@ const CommissionDashboard = () => {
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
-                    {formatBaht(item.amount)} ({formatPercent(item.pct)})
+                    {formatAmount(item.amount)} ({formatPercent(item.pct)})
                   </span>
                 </li>
               ))}
@@ -355,7 +356,7 @@ const CommissionDashboard = () => {
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
-                    {formatBaht(item.amount)} ({formatPercent(item.pct)})
+                    {formatAmount(item.amount)} ({formatPercent(item.pct)})
                   </span>
                 </li>
               ))}
@@ -386,7 +387,7 @@ const CommissionDashboard = () => {
                   style={{ width: `${(f.amount / maxFunnel) * 100}%` }}
                 />
               </div>
-              <span className="hbar-value">{formatBaht(f.amount)}</span>
+              <span className="hbar-value">{formatAmount(f.amount)}</span>
             </div>
           ))}
         </div>

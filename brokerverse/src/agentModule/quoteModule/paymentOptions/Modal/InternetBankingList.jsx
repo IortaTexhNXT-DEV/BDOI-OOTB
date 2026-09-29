@@ -1,4 +1,3 @@
-import React from "react";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
 
@@ -16,13 +15,6 @@ const InternetBankingList = ({ modalVisible, setModalVisible }) => {
     "Security Bank",
   ];
 
-  const handleCopyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-    } catch (err) {
-      console.error(err);
-    }
-  };
   return (
     <Dialog
       visible={modalVisible}

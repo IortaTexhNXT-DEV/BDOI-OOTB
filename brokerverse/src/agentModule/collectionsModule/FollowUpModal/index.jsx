@@ -89,7 +89,6 @@ This is to inform you that the payment for policy number : ${
       setFormData({ notes: "", callOutcome: "", commitmentDate: null });
       onSaved();
     } catch (error) {
-      console.error("Save follow-up error:", error);
       notifyError("Failed to save follow-up action");
     } finally {
       setSaving(false);

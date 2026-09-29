@@ -1,11 +1,8 @@
 import { Card } from "primereact/card";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
-import SvgBlueArrow from "../../../../assets/agentIcon/SvgBlueArrow";
-import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import { getpolicyDetailedMiddleware } from "../store/policyDetailedMiddleware";
@@ -17,7 +14,6 @@ const handleSubmit = () => {
 const PolicyDetailedViewCard = ({ action, state, policyId }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { policydetailedlist, loading } = useSelector(
@@ -67,7 +63,6 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
       <Card>
         <div className="policy__details__card__view__container__title">
           {t("coverageDetailsReview.policyDetails")}
-          {/* <SvgDot /> */}
         </div>
         <div className="grid mt-2">
           <div className="col-12">
@@ -156,87 +151,6 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
           </div>
         </div>
 
-        {/* <div className="policy__detail__view__title mt-2">Documents</div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => handlePolicySubmit()}
-              className="policy__detail__view__box"
-            >
-              <div className="grid mt-2">
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__title">Policy</div>
-                </div>
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__container">
-                    <div className="policy__detail__view__box__sub__title">
-                      View
-                    </div>
-                    <SvgBlueArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => handleInvoiceSubmit()}
-              className="policy__detail__view__box"
-            >
-              <div className="grid mt-2">
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__title">
-                    Invoice
-                  </div>
-                </div>
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__container">
-                    <div className="policy__detail__view__box__sub__title">
-                      View
-                    </div>
-                    <SvgBlueArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => handleAccountingSubmit()}
-              className="policy__detail__view__box"
-            >
-              <div className="grid mt-2">
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__title">
-                    Premium Accounting Entries
-                  </div>
-                </div>
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__container">
-                    <div className="policy__detail__view__box__sub__title">
-                      View
-                    </div>
-                    <SvgBlueArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {action === "edit" && (
-          <div className="policy__detail__view__btn__container mt-4">
-            <div className="paylater__btn__container">
-              <Button className="back__btn" onClick={handlePayLater}>
-                Pay Later
-              </Button>
-            </div>
-            <div className="proceed__btn__container">
-              <Button className="next__btn" onClick={handleProceedToPayment}>
-                Proceed to payment
-              </Button>
-            </div>
-          </div>
-        )} */}
       </Card>
     </div>
   );

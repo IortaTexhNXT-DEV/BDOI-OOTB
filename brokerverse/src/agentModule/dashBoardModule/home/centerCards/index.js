@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dropdown } from "primereact/dropdown";
 import BarchartMonthly from "./BarchartMonthly";
@@ -16,7 +16,7 @@ const CenterCard = ({ commission }) => {
     navigate("/agent/openitems");
   };
 
-  const { upcommingEventsList, loading } = useSelector(
+  const { upcommingEventsList } = useSelector(
     ({ openitemsReducers }) => {
       return {
         loading: openitemsReducers?.loading,

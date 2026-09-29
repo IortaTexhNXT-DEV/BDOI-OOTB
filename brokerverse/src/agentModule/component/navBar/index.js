@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useLanguageOptions } from "../../../utility/languages";
 import { ChangePasswordDialog, TwoFactorDialog } from "../../authModule/security/AccountSecurityDialogs";
 import "./index.scss";
@@ -13,11 +13,11 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../../utility/logout";
 import { useNotificationContext } from "../../../context/NotificationContext";
 import SvgArrow from "../../../assets/icons/SvgArrow";
-import Cookies from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
 import InitialsAvatar from "../InitialsAvatar";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const AgentNavBar = () => {
   const menuRight = useRef(null);
@@ -33,18 +33,14 @@ const AgentNavBar = () => {
 
   // Get user data from localStorage
   const userName = localStorage.getItem("USER_NAME") || "User";
-  const userEmail = localStorage.getItem("USER_EMAIL") || "user@example.com";
+  const userEmail = localStorage.getItem("USER_EMAIL") || "";
   const currentLanguage = (i18n.language && i18n.language.startsWith("th")) ? "th" : "en";
-
-  // Debug logging
-  console.log("NavBar - Unread Count:", unreadCount);
-  console.log("NavBar - Notifications:", notifications);
 
   const handleLogOut = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout failed:", error);
+      logger.error("Logout failed:", error);
       // Fallback: clear data and redirect
       navigate("/login");
     }
@@ -354,11 +350,6 @@ const AgentNavBar = () => {
   return (
     <div className="Agentnavbar__container">
       <div className="bdo-logo-section">
-        {/* <img
-          src="/iorta.png"
-          alt="iortaTechNxt Logo"
-          className="bdo-logo-nav"
-        /> */}
       </div>
       <div className="nav-spacer"></div>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -409,7 +400,6 @@ const AgentNavBar = () => {
         ref={menuProfile}
         id="popup_menu_right"
         popupAlignment="right"
-        //   style={menuStyle}
       />
       <Button
         className="p-0"

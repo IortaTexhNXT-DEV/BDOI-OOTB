@@ -2,25 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgFilters from "../../../assets/icons/SvgFilters";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgIconeye from "../../../assets/icons/SvgIconeye";
-import SvgDropdown from "../../../assets/icons/SvgDropdown";
-import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
-import SvgEditicon from "../../../assets/icons/SvgEdit";
-import SvgEdit from "../../../assets/icons/SvgEdits";
-// import SvgEditicons from "../../../assets/icons/SvgEdit";
 import SvgTable from "../../../assets/icons/SvgTable";
 import {
   getExchangeDetailEdit,
@@ -35,10 +26,9 @@ import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const Index = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
 
-  const { ExchangeList, loading, ExchangeSearchList } = useSelector(
+  const { ExchangeList, ExchangeSearchList } = useSelector(
     ({ exchangeMasterReducer }) => {
       return {
         loading: exchangeMasterReducer?.loading,
@@ -107,18 +97,6 @@ const Index = () => {
     },
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
 
   const headeraction = {
     fontSize: 16,
@@ -150,18 +128,8 @@ const Index = () => {
   const home = { label: t("financeMasters.master") };
 
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   const handlePolicy = () => {
     navigate("/master/finance/exchangerate/addexchange");
@@ -187,7 +155,6 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
           <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />

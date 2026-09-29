@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -9,6 +9,7 @@ import { Toast } from "primereact/toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import endorsementService from "../../../services/endorsementService";
 import { notifyError } from "../../../utility/dialogs";
+import logger from "../../../utility/logger";
 
 const PaymentConfirmationEmployeeBenefit = () => {
   const { t } = useTranslation();
@@ -29,10 +30,8 @@ const PaymentConfirmationEmployeeBenefit = () => {
   const [autoPaymentProcessing, setAutoPaymentProcessing] = useState(false);
 
   const clientName = state?.clientName || state?.ClientName || t("endorsement.client");
-  const clientId = state?.clientId;
   const clientNumber = state?.clientNumber;
 
-  const policyId = state?.policyId || endorsementData?.policyId;
 
   // Check multiple conditions for cancellation detection
   const endorsementStatus =
@@ -69,7 +68,6 @@ const PaymentConfirmationEmployeeBenefit = () => {
             notifyError(t("endorsement.failedToLoadEndorsement") + ": " + response.error);
           }
         } catch (error) {
-          console.error("Error fetching endorsement:", error);
           notifyError("Error loading endorsement data");
         } finally {
           setLoading(false);
@@ -123,17 +121,6 @@ const PaymentConfirmationEmployeeBenefit = () => {
       // Simulate payment processing delay
       await simulateDelay(1500);
 
-      const targetPolicyId =
-        policyId ||
-        endorsementData?.policyId ||
-        state?.policyId ||
-        "MOCK-POLICY-001";
-
-      console.log("🎭 Mock Payment Processing:", {
-        policyId: targetPolicyId,
-        grossPremium: grossPremium,
-        isCancelled: isCancelled,
-      });
 
       // Mock payment status update - simulate success
       const mockPaymentResult = {
@@ -146,44 +133,16 @@ const PaymentConfirmationEmployeeBenefit = () => {
       if (mockPaymentResult.success) {
         // Mock receipt creation (non-blocking)
         if (!isCancelled) {
-          console.log("🎭 Mock Receipt Creation:", {
-            receiptNumber: `RCP-${new Date().getDate()}${
-              new Date().getMonth() + 1
-            }-${endorsementData?.endorsementNumber || "EMP-001"}`,
-            amount: grossPremium,
-          });
           // Simulate receipt creation delay
           await simulateDelay(500);
         }
 
-        // Mock accounting entries creation
-        const absGrossPremium = Math.abs(grossPremium);
-        const absNetPremium = Math.abs(netPremium);
-        const absVat = Math.abs(vat);
-        const absDst = Math.abs(dst);
-        const absLgt = Math.abs(lgt);
-        const absOthers = Math.abs(others);
-        const absDiscount = Math.abs(discount);
-
-        console.log("🎭 Mock Accounting Entry Creation:", {
-          grossPremium: absGrossPremium,
-          netPremium: absNetPremium,
-          valueAddedTax: absVat,
-          documentaryStampTax: absDst,
-          localGovernmentTax: absLgt,
-          accountPremiumOthers: absOthers,
-          discount: absDiscount,
-        });
 
         // Simulate accounting entry creation delay
         await simulateDelay(500);
 
         // Mock invoice list creation for cancellations
         if (isCancelled) {
-          console.log("🎭 Mock Invoice List Creation for Cancellation:", {
-            customerCode: clientNumber || state?.clientNumber || "CLIENT-001",
-            refundAmount: grossPremium,
-          });
           await simulateDelay(300);
         }
 
@@ -211,7 +170,7 @@ const PaymentConfirmationEmployeeBenefit = () => {
         throw new Error(mockPaymentResult.error || "Payment failed");
       }
     } catch (error) {
-      console.error("Mock Payment error:", error);
+      logger.error("Mock Payment error:", error);
       toast.current?.show({
         severity: "error",
         summary: t("endorsement.paymentConfirmation.paymentFailed"),

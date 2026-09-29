@@ -16,10 +16,6 @@ class ClaimsService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("=== GET CLAIM DETAILS ===");
-      console.log("Fetching claim details for ID:", claimId);
-      console.log("=== END GET CLAIM DETAILS ===");
-
       const response = await fetch(`${this.baseURL}/claims/${claimId}`, {
         method: "GET",
         headers: {
@@ -37,14 +33,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim details fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get claim details error:", error);
       return {
         success: false,
         error:
@@ -113,7 +107,6 @@ class ClaimsService {
         pagination,
       };
     } catch (error) {
-      console.error("Claims fetch error:", error);
       return {
         success: false,
         error:
@@ -158,10 +151,6 @@ class ClaimsService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("=== REJECT CLAIM ===");
-      console.log("Rejecting claim with ID:", claimId);
-      console.log("=== END REJECT CLAIM ===");
-
       const response = await fetch(
         `${this.baseURL}/claims/rejectclaim/${claimId}`,
         {
@@ -182,14 +171,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim rejected successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Reject claim error:", error);
       return {
         success: false,
         error:
@@ -210,11 +197,6 @@ class ClaimsService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log("=== SETTLE CLAIM ===");
-      console.log("Settling claim with ID:", claimId);
-      console.log("Settlement Data:", settlementData);
-      console.log("=== END SETTLE CLAIM ===");
 
       // Create FormData for multipart/form-data request
       const formData = new FormData();
@@ -251,14 +233,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim settled successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Settle claim error:", error);
       return {
         success: false,
         error:
@@ -279,11 +259,6 @@ class ClaimsService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log("=== UPDATE CLAIM ===");
-      console.log("Updating claim with ID:", claimId);
-      console.log("Adjuster Data:", adjusterData);
-      console.log("=== END UPDATE CLAIM ===");
 
       // Create FormData for multipart/form-data request
       const formData = new FormData();
@@ -356,14 +331,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update claim error:", error);
       return {
         success: false,
         error:
@@ -402,14 +375,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim status updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update claim status error:", error);
       return {
         success: false,
         error: error.message || "Failed to update claim status",
@@ -426,10 +397,6 @@ class ClaimsService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for file upload
-
-      console.log("=== CLAIMS SERVICE API CALL ===");
-      console.log("Creating claim with data:", claimData);
-      console.log("=== END CLAIMS SERVICE API CALL ===");
 
       // Create FormData for multipart/form-data request
       const formData = new FormData();
@@ -502,14 +469,6 @@ class ClaimsService {
       }
 
       if (claimData.thirdPartyDetails) {
-        console.log("=== THIRD PARTY DETAILS FOR API ===");
-        console.log("Third Party Details Object:", claimData.thirdPartyDetails);
-        console.log(
-          "Third Party Details JSON:",
-          JSON.stringify(claimData.thirdPartyDetails)
-        );
-        console.log("=== END THIRD PARTY DETAILS FOR API ===");
-
         formData.append(
           "thirdPartyDetails",
           JSON.stringify(claimData.thirdPartyDetails)
@@ -536,15 +495,8 @@ class ClaimsService {
 
       clearTimeout(timeoutId);
 
-      console.log("=== CLAIMS SERVICE RESPONSE DEBUG ===");
-      console.log("Response Status:", response.status);
-      console.log("Response OK:", response.ok);
-      console.log("Response Status Text:", response.statusText);
-      console.log("=== END CLAIMS SERVICE RESPONSE DEBUG ===");
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("Error Response:", errorData);
         // the server lists each acceptance problem (loss date outside the policy period, unpaid premium ...)
         const reasons = Array.isArray(errorData.details)
           ? errorData.details.map((d) => d.message || d).filter(Boolean)
@@ -553,14 +505,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim created successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Create claim error:", error);
       return {
         success: false,
         error:
@@ -582,14 +532,8 @@ class ClaimsService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("=== GET CLAIMS LIST ===");
-      console.log("Page:", page);
-      console.log("Page Size:", pageSize);
-      console.log("=== END GET CLAIMS LIST ===");
-
       // Check if user is authenticated
       if (!authService.isAuthenticated()) {
-        console.error("User not authenticated");
         return {
           success: false,
           error: "User not authenticated. Please login again.",
@@ -612,7 +556,6 @@ class ClaimsService {
 
       if (!response.ok) {
         if (response.status === 401) {
-          console.error("Unauthorized - Token may be expired");
           return {
             success: false,
             error: "Session expired. Please login again.",
@@ -623,14 +566,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claims list fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get claims list error:", error);
       return {
         success: false,
         error:
@@ -651,11 +592,6 @@ class ClaimsService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log("=== GET CLAIM AUDIT TRAIL ===");
-      console.log("Claim ID:", claimId);
-      console.log("Sort Order:", sortOrder);
-      console.log("=== END GET CLAIM AUDIT TRAIL ===");
 
       const response = await fetch(
         `${this.baseURL}/claims/audit-trail/${claimId}?sort=${sortOrder}`,
@@ -681,14 +617,12 @@ class ClaimsService {
       }
 
       const data = await response.json();
-      console.log("Claim audit trail fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get claim audit trail error:", error);
       return {
         success: false,
         error:
@@ -709,11 +643,6 @@ class ClaimsService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log("=== GET CLAIM DOCUMENTS ===");
-      console.log("Claim ID:", claimId);
-      console.log("Document Name:", documentName);
-      console.log("=== END GET CLAIM DOCUMENTS ===");
 
       const response = await fetch(
         `${
@@ -741,8 +670,6 @@ class ClaimsService {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
 
-      console.log("Claim documents fetched successfully");
-
       return {
         success: true,
         data: {
@@ -752,7 +679,6 @@ class ClaimsService {
         },
       };
     } catch (error) {
-      console.error("Get claim documents error:", error);
       return {
         success: false,
         error:

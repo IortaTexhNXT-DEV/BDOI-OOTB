@@ -3,13 +3,13 @@ import { BASE_URL } from "./constant";
 import { getAccessToken } from "./tokenManager";
 import { logout } from "./logout";
 import { refreshAccessToken } from "./sessionRefresh";
+import logger from "./logger";
 
 const request = axios.create({
     baseURL: BASE_URL,
 });
 
 // Alter defaults after instance has been created
-// instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
 
 // set token on request headers
 request.interceptors.request.use((config) => {
@@ -23,7 +23,6 @@ request.interceptors.request.use((config) => {
                 Authorization: `Bearer ${token}`,
             },
         };
-
     }
     else {
         return {
@@ -53,7 +52,7 @@ request.interceptors.response.use(
             try {
                 await logout();
             } catch (logoutError) {
-                console.error("Logout on 401 failed:", logoutError);
+                logger.error("Logout on 401 failed:", logoutError);
                 // Force redirect even if logout fails
                 window.location.href = "/login";
             }

@@ -13,6 +13,7 @@ import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
 import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
+import logger from "../../../utility/logger";
 
 /** Upload folder -> vehicle photo slot. */
 const PHOTO_KEY = { left: "leftSide", right: "rightSide", front: "front", rear: "rear", interior: "interior" };
@@ -29,7 +30,7 @@ const UploadVehiclePhotos = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const toast = React.useRef(null);
 
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const UploadVehiclePhotos = () => {
   
   // State for quotation details and customer info
   const [quotationDetails, setQuotationDetails] = useState(state?.quotation || null);
-  const [customerInfo, setCustomerInfo] = useState(state?.customerInfo || null);
+  const [customerInfo] = useState(state?.customerInfo || null);
   const [existingPolicy, setExistingPolicy] = useState(state?.policyData || null);
   const [leadData, setLeadData] = useState(null);
   
@@ -67,7 +68,7 @@ const UploadVehiclePhotos = () => {
           });
         }
       } catch (error) {
-        console.error('Failed to load quotation:', error);
+        logger.error('Failed to load quotation:', error);
         toast.current?.show({
           severity: 'error',
           summary: t('common.error'),
@@ -98,7 +99,7 @@ const UploadVehiclePhotos = () => {
           setExistingPolicy(response.data.data[0]);
         }
       } catch (error) {
-        console.error('Failed to resolve existing policy for vehicle photos screen:', error);
+        logger.error('Failed to resolve existing policy for vehicle photos screen:', error);
       } finally {
         setIsLoading(false);
       }
@@ -111,17 +112,15 @@ const UploadVehiclePhotos = () => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (quotationDetails?.leadRefId) {
-        console.log("Fetching lead data for leadRefId:", quotationDetails.leadRefId);
         try {
           const response = await leadService.getLeadById(quotationDetails.leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -130,7 +129,6 @@ const UploadVehiclePhotos = () => {
   }, [quotationDetails?.leadRefId]);
 
   const handlePhotoUpload = (position, url) => {
-    console.log(`Uploaded ${position} photo:`, url);
     setVehiclePhotos(prev => ({
       ...prev,
       [position]: url
@@ -167,9 +165,6 @@ const UploadVehiclePhotos = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('Vehicle photos uploaded:', vehiclePhotos);
-      console.log('Customer info from previous step:', customerInfo);
-
       // Show loading toast
       toast.current?.show({
         severity: 'info',
@@ -223,7 +218,7 @@ const UploadVehiclePhotos = () => {
         });
       }, 1000);
     } catch (error) {
-      console.error('Failed to save vehicle photos:', error);
+      logger.error('Failed to save vehicle photos:', error);
       toast.current?.show({
         severity: 'error',
         summary: t("common.error"),
@@ -276,7 +271,7 @@ const UploadVehiclePhotos = () => {
               uploadPath="vehicle-photos/left"
               onRemove={() => handlePhotoUpload(PHOTO_KEY["left"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('leftSide', url)}
-              onUploadError={(error) => console.error('Left photo upload error:', error)}
+              onUploadError={(error) => logger.error('Left photo upload error:', error)}
             />
             {vehiclePhotos.leftSide && (
               <div className="text-sm text-green-600 mt-2">
@@ -295,7 +290,7 @@ const UploadVehiclePhotos = () => {
               uploadPath="vehicle-photos/right"
               onRemove={() => handlePhotoUpload(PHOTO_KEY["right"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('rightSide', url)}
-              onUploadError={(error) => console.error('Right photo upload error:', error)}
+              onUploadError={(error) => logger.error('Right photo upload error:', error)}
             />
             {vehiclePhotos.rightSide && (
               <div className="text-sm text-green-600 mt-2">
@@ -314,7 +309,7 @@ const UploadVehiclePhotos = () => {
               uploadPath="vehicle-photos/front"
               onRemove={() => handlePhotoUpload(PHOTO_KEY["front"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('front', url)}
-              onUploadError={(error) => console.error('Front photo upload error:', error)}
+              onUploadError={(error) => logger.error('Front photo upload error:', error)}
             />
             {vehiclePhotos.front && (
               <div className="text-sm text-green-600 mt-2">
@@ -333,7 +328,7 @@ const UploadVehiclePhotos = () => {
               uploadPath="vehicle-photos/rear"
               onRemove={() => handlePhotoUpload(PHOTO_KEY["rear"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('rear', url)}
-              onUploadError={(error) => console.error('Rear photo upload error:', error)}
+              onUploadError={(error) => logger.error('Rear photo upload error:', error)}
             />
             {vehiclePhotos.rear && (
               <div className="text-sm text-green-600 mt-2">
@@ -352,7 +347,7 @@ const UploadVehiclePhotos = () => {
               uploadPath="vehicle-photos/interior"
               onRemove={() => handlePhotoUpload(PHOTO_KEY["interior"], null)}
               onUploadSuccess={(url) => handlePhotoUpload('interior', url)}
-              onUploadError={(error) => console.error('Interior photo upload error:', error)}
+              onUploadError={(error) => logger.error('Interior photo upload error:', error)}
             />
             {vehiclePhotos.interior && (
               <div className="text-sm text-green-600 mt-2">

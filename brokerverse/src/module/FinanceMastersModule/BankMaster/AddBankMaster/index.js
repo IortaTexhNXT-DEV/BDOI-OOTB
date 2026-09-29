@@ -1,31 +1,22 @@
-import React, { useState, useRef } from 'react';
+import { useRef } from 'react';
 import './index.scss';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import InputField from '../../../../components/InputField';
-import SubmitButton from '../../../../components/SubmitButton'
 import SvgDot from '../../../../assets/icons/SvgDot';
 import DropDowns from '../../../../components/DropDowns';
 import SvgDropdown from '../../../../assets/icons/SvgDropdown';
 import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../../../../components/NavBar';
 import SvgBackicon from '../../../../assets/icons/SvgBackicon';
 import { Card } from "primereact/card";
-import DatePicker from '../../../../components/DatePicker';
-import { Calendar } from 'primereact/calendar';
-import LabelWrapper from '../../../../components/LabelWrapper';
 import { useFormik } from "formik";
-import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
 import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
-import { postAddBankMiddleware, postAddBank } from '../store/bankMasterMiddleware';
-import { useDispatch, useSelector } from 'react-redux';
+import { postAddBankMiddleware } from '../store/bankMasterMiddleware';
+import { useDispatch } from 'react-redux';
 import { phoneCountryCode } from "../../../../utility/phoneFormat";
-
-
-
 
 const initialValues = {
   bankCode: "",
@@ -60,25 +51,10 @@ const initialValues = {
 }
 
 function AddBankMaster() {
-  const [date, setDate] = useState(null);
   const dispatch = useDispatch();
   const Navigate = useNavigate()
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] = useState(null);
   const toastRef = useRef(null);
 
-  const { BankList, loading } = useSelector(({ bankMasterReducer }) => {
-    return {
-      loading: bankMasterReducer?.loading,
-      BankList: bankMasterReducer?.BankList,
-
-    };
-  });
 
   const City = useMasterOptions("city");
   const State = useMasterOptions("state");
@@ -93,11 +69,8 @@ function AddBankMaster() {
   minDate.setDate(minDate.getDate() + 1);
 
   // const handleSubmit=(value)=>{
-
-  //     Navigate("/master/finance/bank")
   // }
 
-  // const toastRef = useRef(null);
   const handleSubmit = async (values) => {
     try {
       await dispatch(postAddBankMiddleware(values)).unwrap();
@@ -112,12 +85,8 @@ function AddBankMaster() {
 
   // const handleSubmit = (values) => {
   //   // Handle form submission
-  //   console.log(values, "find values");
 
-  //   toastRef.current.showToast();
-  //   // {
   //     setTimeout(() => {
-  //     Navigate("/master/finance/bank")
   //     }, 3000);
   //   }
 
@@ -181,7 +150,6 @@ function AddBankMaster() {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
@@ -190,11 +158,6 @@ function AddBankMaster() {
   return (
     <div className='overall__addbankmaster__container'>
 
-
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <CustomToast ref={toastRef} message="Save Successfully" />
       <div>
         <span onClick={() => Navigate(-1)}>
@@ -206,10 +169,6 @@ function AddBankMaster() {
         home={home}
         className='breadcrumbs_container'
         separatorIcon={<SvgDot color={"#000"} />} />
-
-
-
-
 
       <Card>
 
@@ -276,8 +235,6 @@ function AddBankMaster() {
             </div>
           </div>
         </div>
-
-
 
         <div class="grid">
           <div class="col-3 md:col-3 lg-col-3">
@@ -452,7 +409,6 @@ function AddBankMaster() {
 
         <div class="grid">
 
-
           <div class="sm-col-12  md:col-3 lg-col-3">
             <label className='label_text'>Fax</label>
             <div className="p-inputgroup flex-1">
@@ -496,19 +452,12 @@ function AddBankMaster() {
         </div>
       </Card>
 
-
       <div className="next_container">
 
         <Button className="submit_button p-0" label="Save" disabled={!formik.isValid}
           onClick={() => { formik.handleSubmit(); }}
         />
       </div>
-
-
-
-
-
-
 
     </div>
   );

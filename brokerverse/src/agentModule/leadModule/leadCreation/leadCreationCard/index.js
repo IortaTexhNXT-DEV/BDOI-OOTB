@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { Button } from "primereact/button";
 import DatepickerField from "../../../component/datePicker";
 import CustomToast from "../../../../components/Toast";
@@ -47,7 +47,7 @@ const initialValue = {
 
 const LeadCreationCard = ({ flow, action }) => {
   const { t } = useTranslation();
-  // D68: configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
+  // Configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
   const ageLimits = useAgeLimits();
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
@@ -58,7 +58,6 @@ const LeadCreationCard = ({ flow, action }) => {
       };
     }
   );
-  // const [ingredient, setIngredient] = useState("");
   const [show, setShow] = useState(false);
   const toastRef = useRef(null);
   const toastErrorRef = useRef(null);
@@ -137,8 +136,6 @@ const LeadCreationCard = ({ flow, action }) => {
       try {
         const result = await dispatch(postCreateleadMiddleware(valueWithId));
 
-        console.log(result, "result");
-
         if (result.type.endsWith("/fulfilled")) {
           // Success case - use the leadId from the API response
           const createdLeadId = result.payload?.leadId || result.payload?.id;
@@ -171,7 +168,6 @@ const LeadCreationCard = ({ flow, action }) => {
           showErrorToast(errorMsg);
         }
       } catch (error) {
-        console.error("Unexpected error:", error);
         const errorMsg =
           error?.response?.data?.error ||
           error?.message ||
@@ -203,7 +199,6 @@ const LeadCreationCard = ({ flow, action }) => {
             }, 2000);
           } else if (result.type.endsWith("/rejected")) {
             // Error case
-            console.error("Lead update failed:", result.payload);
             const errorMsg = extractErrorMessage(
               result,
               "Failed to update lead. Please try again."
@@ -211,7 +206,6 @@ const LeadCreationCard = ({ flow, action }) => {
             showErrorToast(errorMsg);
           }
         } catch (error) {
-          console.error("Unexpected error:", error);
           const errorMsg =
             error?.response?.data?.error ||
             error?.message ||
@@ -240,17 +234,11 @@ const LeadCreationCard = ({ flow, action }) => {
     if (!values.LastName) {
       errors.LastName = "This field is required";
     }
-    // if (!values.EmailID) {
-    //   errors.EmailID = "This field is required";
-    // }
     if (!values.EmailID) {
       errors.EmailID = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
     }
-    // if (!values.ContactNumber) {
-    //   errors.ContactNumber = "This field is required";
-    // }
     if (!values.ContactNumber) {
       errors.ContactNumber = "Phone Number is required";
     } else if (!isValidMobile(values.ContactNumber)) {
@@ -608,13 +596,11 @@ const LeadCreationCard = ({ flow, action }) => {
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6">
-            {/* <InputTextField label="Date of Birth" />  */}
             <DatepickerField
               label={t("leadCreation.dateOfBirth")}
               value={formik.values.DateofBirth}
               {...birthDateRange(ageLimits)}
               onChange={(date) => {
-                console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);
               }}
             />
@@ -824,12 +810,6 @@ const LeadCreationCard = ({ flow, action }) => {
         )}
 
         <div className="save_continue_conatiner">
-          {/* <Button
-            label={t("leadCreation.saveLead")}
-            onClick={handleSaveLead}
-            text
-            className="btn_lable_container"
-          /> */}
           <div className="btn_lable_save_container flex justify-content-end mt-2">
             <Button
               onClick={() => {

@@ -32,7 +32,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batches error:", error);
       throw error;
     }
   }
@@ -47,7 +46,6 @@ class BatchRenewalService {
       const response = await getRequest(`policy-renewals/batches/${batchId}`);
       return response.data;
     } catch (error) {
-      console.error("Get batch by ID error:", error);
       throw error;
     }
   }
@@ -65,7 +63,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Create batch error:", error);
       throw error;
     }
   }
@@ -84,7 +81,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Update batch error:", error);
       throw error;
     }
   }
@@ -101,7 +97,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Delete batch error:", error);
       throw error;
     }
   }
@@ -128,7 +123,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batch policies error:", error);
       throw error;
     }
   }
@@ -148,7 +142,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Update policy selection error:", error);
       throw error;
     }
   }
@@ -167,7 +160,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Send renewal notices error:", error);
       throw error;
     }
   }
@@ -184,7 +176,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batch statistics error:", error);
       throw error;
     }
   }
@@ -199,7 +190,6 @@ class BatchRenewalService {
       const response = await getRequest(`policy-renewals/queue/${jobId}`);
       return response.data;
     } catch (error) {
-      console.error("Get queue job status error:", error);
       throw error;
     }
   }
@@ -217,7 +207,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Retry failed notices error:", error);
       throw error;
     }
   }
@@ -234,7 +223,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batch notice status error:", error);
       throw error;
     }
   }
@@ -248,7 +236,6 @@ class BatchRenewalService {
       const response = await getRequest(`policy-renewals/queue-stats`);
       return response.data;
     } catch (error) {
-      console.error("Get queue stats error:", error);
       throw error;
     }
   }
@@ -268,7 +255,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Generate batch report error:", error);
       throw error;
     }
   }

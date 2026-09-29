@@ -1,7 +1,5 @@
-import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgAdd from "../../../../assets/icons/SvgAdd";

@@ -1,5 +1,3 @@
-import { Toast } from "primereact/toast";
-import { createRef } from "react";
 
 // Global toast reference
 let globalToastRef = null;
@@ -25,13 +23,10 @@ export const showLogoutSuccessMessage = () => {
       className: 'logout-success'
     });
   } else {
-    // Fallback: create a temporary toast if global ref is not available
-    const tempToast = createRef();
     const tempToastElement = document.createElement('div');
     document.body.appendChild(tempToastElement);
     
     // This is a fallback - in practice, the global toast should be used
-    console.log('Logout successful - redirecting to login...');
   }
 };
 

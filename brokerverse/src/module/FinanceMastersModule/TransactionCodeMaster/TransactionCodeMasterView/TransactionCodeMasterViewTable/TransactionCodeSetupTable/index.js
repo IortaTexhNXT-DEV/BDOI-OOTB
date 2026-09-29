@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
@@ -17,24 +16,19 @@ import { postAddTransactionCodeSetup } from "../../../store/transactionCodeMaste
 import { calendarDateFormat } from "../../../../../../utility/dateFormat";
 
 const TransactionCodeSetupTable = () => {
-  const { TransactioncodeListsearch, TransactionCodeSetup, loading } = useSelector(({ transactionCodeMasterReducer }) => {
+  const { TransactionCodeSetup } = useSelector(({ transactionCodeMasterReducer }) => {
     return {
       loading: transactionCodeMasterReducer?.loading,
       TransactionCodeSetup: transactionCodeMasterReducer?.TransactionCodeSetup,
-    
-
     };
   });
-  console.log(TransactionCodeSetup, "TransactionCodeSetup")
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const dispatch = useDispatch()
- 
- 
+
   const handleClick = () => {
     setShow(!show);
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -64,13 +58,8 @@ const TransactionCodeSetupTable = () => {
             </React.Fragment>
         );
     },
-   
 };
 
-  const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
-  };
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -113,11 +102,9 @@ const TransactionCodeSetupTable = () => {
     onSubmit: (values) => {
       // Handle form submission
        handleSubmit(values);
-
     },
     // onSubmit: handleSubmit
   });
-
 
   return (
     <div className="transactioncode__master__table_view">
@@ -146,7 +133,6 @@ const TransactionCodeSetupTable = () => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -268,9 +254,6 @@ const TransactionCodeSetupTable = () => {
           <Button
             label="Save"
             className="add__btn"
-            // onClick={() => {
-            //   handleSave();
-            // }}
             onClick={() => { formik.handleSubmit(); }}
           />
         </div>

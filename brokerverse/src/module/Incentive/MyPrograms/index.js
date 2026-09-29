@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
@@ -14,7 +14,6 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { Chart } from "primereact/chart";
 import { Knob } from "primereact/knob";
 import { Badge } from "primereact/badge";
-import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import incentiveService from "../../../services/incentiveService";
@@ -26,7 +25,6 @@ import { formatPercent, progressValue, roundTo } from "../../../utility/numberFo
 const MyPrograms = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
 
   // State management

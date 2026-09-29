@@ -1,35 +1,21 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../AddPettyCash/index.scss";
-import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
-import SuccessIcon from "../../../../assets/icons/SuccessIcon";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useFormik } from "formik";
-import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../../../components/Toast";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  pettyCashMaster,
   postAddPettyCash,
 } from "../store/pettyCashMasterMiddleWare";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 
 const AddPettyCash = () => {
   const { t } = useTranslation();
-  const { pettyCashList, loading } = useSelector(
-    ({ pettyCashMainReducers }) => {
-      return {
-        loading: pettyCashMainReducers?.loading,
-        pettyCashList: pettyCashMainReducers?.pettyCashList,
-      };
-    }
-  );
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
@@ -49,7 +35,7 @@ const AddPettyCash = () => {
     navigate("/master/finance/pettycash");
   };
 
-  const [step, setStep] = useState(0);
+  const [, setStep] = useState(0);
   const customValidation = (values) => {
     const errors = {};
 

@@ -13,14 +13,12 @@ const initialState = {
   error: "",
   MainAccountDetailView: {},
   MainAccountList: [],
-
 }
 const mainAccountMasterReducer = createSlice({
   name: "mainAccountMaster",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-
     //MainAccountList
 
     builder.addCase(getMainAccountList.pending, (state) => {
@@ -65,20 +63,9 @@ const mainAccountMasterReducer = createSlice({
       }
     );
 
-
-
-
     builder.addCase(postMainAccountStatus.pending, (state) => {
       state.loading = true;
     });
-    //   builder.addCase(
-    //     postMainAccountStatus.fulfilled, (state, action) => {
-    //         state.loading = false;
-    //         const newItem = action.payload;
-    //         state.MainAccountList = [...state.MainAccountList, newItem];
-    //         console.log(state.MainAccountList, "newItem")
-    //     }
-    // );
     builder.addCase(postMainAccountStatus.fulfilled, (state, action) => {
       state.loading = false;
       state.MainAccountList = [...state.MainAccountList, action.payload];
@@ -131,7 +118,6 @@ const mainAccountMasterReducer = createSlice({
           state.MainAccountList = updatedCurrencyList;
         } else {
           state.MainAccountList = [...state.MainAccountList, action.payload];
-
         }
       }
     );

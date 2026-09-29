@@ -1,27 +1,22 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../EditPettyCash/index.scss";
-import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
-import SuccessIcon from "../../../../assets/icons/SuccessIcon";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useFormik } from "formik";
 import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CustomToast from "../../../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getPatchPettyCashEdit,
   patchPettyCashEdit,
 } from "../store/pettyCashMasterMiddleWare";
 
 const EditPettyCash = () => {
   const { t } = useTranslation();
-  const { getPettyCashEdit, loading } = useSelector(
+  const { getPettyCashEdit } = useSelector(
     ({ pettyCashMainReducers }) => {
       return {
         loading: pettyCashMainReducers?.loading,
@@ -30,8 +25,6 @@ const EditPettyCash = () => {
     }
   );
 
-  const { id } = useParams();
-  const [EditID, setEditID] = useState(id);
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
   const items = [
@@ -50,32 +43,6 @@ const EditPettyCash = () => {
     return () => clearTimeout(timerId);
   }, [visiblePopup]);
 
-  const [step, setStep] = useState(0);
-  const customValidation = (values) => {
-    const errors = {};
-
-    if (!values.pettycashcode) {
-      errors.pettycashcode = "This field is required";
-    }
-
-    if (!values.pettycashname) {
-      errors.pettycashname = "This field is required";
-    }
-    if (!values.pettycashsize) {
-      errors.pettycashsize = "This field is required";
-    }
-    if (!values.avilabelcash) {
-      errors.avilabelcash = "This field is required";
-    }
-    if (!values.minicashbox) {
-      errors.minicashbox = "This field is required";
-    }
-    if (!values.transactionlimit) {
-      errors.transactionlimit = "This field is required";
-    }
-
-    return errors;
-  };
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleGoBack = () => {
@@ -281,7 +248,6 @@ const EditPettyCash = () => {
         <Button
           label={t("financeMasters.save")}
           className="save__add__btn"
-          // onClick={() => setVisiblePopup(true)}
           onClick={formik.handleSubmit}
         />
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
@@ -22,7 +22,7 @@ import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError } from ".
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
-import { formatPercent, progressValue, roundTo } from "../../../utility/numberFormat";
+import { progressValue, roundTo } from "../../../utility/numberFormat";
 const CHART_COLORS = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d'];
 const DAY_MS = 86400000;
 
@@ -575,7 +575,7 @@ const RemittanceAnalytics = () => {
                 </Card>
 
                 <Card className="insights-card">
-                  <h4>AI Insights</h4>
+                  <h4>KPI Insights</h4>
                   <div className="insights-list">
                     {kpiData.map((k) => (
                       <div className="insight-item" key={k.id}>

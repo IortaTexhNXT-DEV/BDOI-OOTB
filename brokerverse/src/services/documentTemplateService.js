@@ -135,7 +135,6 @@ class DocumentTemplateService {
       const blob = await response.blob();
       return { success: true, blob };
     } catch (error) {
-      console.error("Document template fetch error:", error);
       return {
         success: false,
         error:

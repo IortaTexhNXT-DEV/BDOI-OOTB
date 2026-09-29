@@ -14,6 +14,7 @@ import { setQuoteAccessories } from "../Store/quotationReducer";
 import policyRenewalService from "../../../services/policyRenewalService";
 import leadService from "../../../services/leadService";
 import { notifyError } from "../../../utility/dialogs";
+import logger from "../../../utility/logger";
 
 const Accessories = ({ action, flow }) => {
   const { t } = useTranslation();
@@ -135,17 +136,15 @@ const Accessories = ({ action, flow }) => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (flow !== "renewal" && leadRefId) {
-        console.log("Fetching lead data for leadRefId:", leadRefId);
         try {
           const response = await leadService.getLeadById(leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -162,7 +161,7 @@ const Accessories = ({ action, flow }) => {
       }
       const response = await policyRenewalService.getRenewalPrefill(policyId);
       if (!response.success || !response.data) {
-        console.error("Failed to load renewal prefill:", response.error);
+        logger.error("Failed to load renewal prefill:", response.error);
         return;
       }
       const prefill = response.data;

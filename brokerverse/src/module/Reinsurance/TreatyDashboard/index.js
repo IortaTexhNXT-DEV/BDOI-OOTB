@@ -204,7 +204,7 @@ const TreatyDashboard = () => {
     );
   };
 
-  // treaties are set up in Master > Finance > Reinsurance Treaty; only roles that may open it get the button (D109)
+  // treaties are set up in Master > Finance > Reinsurance Treaty; only roles that may open it get the button
   const canAddTreaty = canOpen('/master/reinsurance/treaty');
 
   return (

@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../../components/NavBar";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../../components/InputField";
@@ -23,7 +22,7 @@ import useMasterOptions, { useMasterRecordOptions } from "../../../common/useMas
 
 const AddDesignation = ({ action }) => {
   const { t } = useTranslation();
-  const { getEditData, loading, getViewData } = useSelector(
+  const { getEditData, getViewData } = useSelector(
     ({ designationMainReducers }) => {
       return {
         loading: designationMainReducers?.loading,
@@ -35,9 +34,6 @@ const AddDesignation = ({ action }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
-
-
 
   const items = [
     { label: t("generalMasters.employeeManagement") },
@@ -45,7 +41,6 @@ const AddDesignation = ({ action }) => {
       label: t("generalMasters.designation"),
       url: "/master/generals/employeemanagement/designation",
     },
-    ,
     {
       label: action === "add"
         ? t("generalMasters.addDesignation")
@@ -181,7 +176,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationCode : formik.values.designationCode}
                 onChange={formik.handleChange("designationCode")}
-                // error={formik.errors.designationCode}
                 label={t("generalMasters.designationCode")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -199,7 +193,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationName : formik.values.designationName}
                 onChange={formik.handleChange("designationName")}
-                // error={formik.errors.designationName}
                 label={t("generalMasters.designationName")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -235,7 +228,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.departmentCode : formik.values.departmentCode}
                 onChange={formik.handleChange("departmentCode")}
-                // error={formik.errors.departmentCode}
                 className="dropdown__add__sub"
                 label={t("generalMasters.departmentCode")}
                 classNames="label__sub__add"
@@ -258,12 +250,10 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.level : formik.values.level}
                 onChange={formik.handleChange("level")}
-                // error={formik.errors.level}
                 className="dropdown__add__sub"
                 label={t("generalMasters.level")}
                 classNames="label__sub__add"
                 placeholder={"Select"}
-                // options={item1}
                 options={item1}
 
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -282,7 +272,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.reportingtoLevel : formik.values.reportingtoLevel}
                 onChange={formik.handleChange("reportingtoLevel")}
-                // error={formik.errors.reportingtoLevel}
                 className="dropdown__add__sub"
                 label={t("generalMasters.reportingToLevel")}
                 classNames="label__sub__add"

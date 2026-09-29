@@ -30,10 +30,10 @@ import FieldError from "../../components/FieldError";
 import productConfiguratorService from "../../services/productConfiguratorService";
 import mastersService from "../../services/mastersService";
 import s3Service from "../../services/s3Service";
-import ProductConfiguratorTab from "./PoductConfiguratorTab/ProductConfiguratorTab";
+import ProductConfiguratorTab from "./ProductConfiguratorTab/ProductConfiguratorTab";
 import { fetchProductTemplateByIdMiddleware } from "./store/productConfiguratorMiddleware";
 import { clearProductTemplate } from "./store/productConfiguratorSlice";
-import { cleanMotorTariff } from "./PoductConfiguratorTab/MotorTariffEditor";
+import { cleanMotorTariff } from "./ProductConfiguratorTab/MotorTariffEditor";
 import { numberLocale } from "../../utility/currencyConverter";
 import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../utility/requiredFields";
@@ -416,68 +416,6 @@ export const ProductTemplateManager = () => {
                 />
               </DataTable>
             </div>
-            {/* <div className="field">
-              <label>Category</label>
-              <Dropdown
-                value={selectedTemplate?.category || null}
-                options={categoryOptions}
-                placeholder={t("productTemplateManager.selectCategory")}
-                onChange={(e) =>
-                  setSelectedTemplate((prev) => ({
-                    ...prev,
-                    category: e.value,
-                  }))
-                }
-                disabled={!!id}
-              />
-            </div>
-            <div className="field">
-              <label>Line of Business</label>
-              <InputText
-                value={selectedTemplate?.lineOfBusiness || ""}
-                onChange={(e) =>
-                  setSelectedTemplate({
-                    ...selectedTemplate,
-                    lineOfBusiness: e.target.value,
-                  })
-                }
-                placeholder="e.g. Motor Vehicle"
-              />
-            </div>
-            <div className="field">
-              <label>Effective Date</label>
-              <Calendar
-                value={
-                  selectedTemplate?.effectiveDate
-                    ? new Date(selectedTemplate.effectiveDate)
-                    : null
-                }
-                onChange={(e) =>
-                  setSelectedTemplate({
-                    ...selectedTemplate,
-                    effectiveDate: e.value,
-                  })
-                }
-                showIcon
-                dateFormat={calendarDateFormat()}
-                placeholder={t("productTemplateManager.selectEffectiveDate")}
-              />
-            </div>
-            <div className="field">
-              <label>Status</label>
-              <Dropdown
-                value={selectedTemplate?.status || null}
-                options={statusOptions}
-                placeholder={t("productTemplateManager.selectStatus")}
-                onChange={(e) =>
-                  setSelectedTemplate((prev) => ({
-                    ...prev,
-                    status: e.value,
-                  }))
-                }
-                disabled={!!id && templateLoading}
-              />
-            </div> */}
           </>
         ) : (
           <div>

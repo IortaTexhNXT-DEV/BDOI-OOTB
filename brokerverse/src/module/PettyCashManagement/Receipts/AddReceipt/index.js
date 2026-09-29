@@ -1,19 +1,16 @@
-import React from "react";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-// import CustomToast from "../../../../components/Toast";
 import { Button } from "primereact/button";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import { setReceiptDraft } from "../store/pettyCashReceiptsReducer";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getAddReceiptTableMiddleware } from "../store/pettyCashReceiptsMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 
@@ -35,7 +32,6 @@ const initialValue = {
 const AddReceipts = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const toastRef = useRef(null);
   const items = [
     { label: "Petty Cash", command: () => navigate("/accounts/pettycash/receipts") },
     {
@@ -103,18 +99,8 @@ const AddReceipts = () => {
 
   return (
     <div className="add__receipts__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
-          {/* <div
-            className="pettycash__title"
-            onClick={() => {
-              handleBack();
-            }}
-          >
-            <SvgBackArrow />
-            Add Receipt
-          </div> */}
           <div>
           <span onClick={handleBack}>
             <SvgBackicon />
@@ -140,7 +126,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Receipt Number"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -199,7 +184,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Bank Account Name"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -241,7 +225,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Sub Account Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -284,7 +267,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Transaction Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -324,7 +306,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Branch Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -366,7 +347,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Department Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}

@@ -1,14 +1,11 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../components/NavBar";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../PettyCashMaster/index.scss";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router-dom";
-import SvgFilters from "../../../assets/icons/SvgFilters";
 import { InputText } from "primereact/inputtext";
-import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import SvgUpload from "../../../assets/icons/SvgUpload";
 import { TieredMenu } from "primereact/tieredmenu";
 import PettyDataTabel from "./PettyDataTabel";
@@ -19,9 +16,8 @@ import { getPettyCashSearchList } from "./store/pettyCashMasterMiddleWare";
 const PettyCashMaster = ({ response }) => {
   const translation = useTranslation();
   const t = translation.t;
-  console.log(response, "response");
   const [visible, setVisible] = useState(false);
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const items = [
@@ -33,7 +29,6 @@ const PettyCashMaster = ({ response }) => {
   };
 
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
   const handlePolicy = () => {
@@ -48,8 +43,6 @@ const PettyCashMaster = ({ response }) => {
   ];
   const dispatch = useDispatch();
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchPolicyList");
-    // dispatch(getPettyCashSearchList({ textSearch: values.search }));
   };
 
   const formik = useFormik({
@@ -63,7 +56,7 @@ const PettyCashMaster = ({ response }) => {
     }
   }, [formik.values.search]);
 
-  const { pettyCashList, pettyCashSearchList, loading } = useSelector(
+  const { pettyCashList, pettyCashSearchList } = useSelector(
     ({ pettyCashMainReducers }) => {
       return {
         loading: pettyCashMainReducers?.loading,
@@ -72,7 +65,6 @@ const PettyCashMaster = ({ response }) => {
       };
     }
   );
-  console.log(pettyCashSearchList, "pettyCashSearchList");
 
   useEffect(() => {
     if (search?.length > 0) {
@@ -129,7 +121,6 @@ const PettyCashMaster = ({ response }) => {
           >
             <div className="col-12 md:col-12 lg:col-12">
               <div className="searchIcon__view__input__petty">
-                {/* <span className='pl-2'> <SvgSearchIcon /></span> */}
                 <i className="pi pi-search pl-3" />
                 <InputText
                   style={{ width: "100%" }}
@@ -156,7 +147,6 @@ const PettyCashMaster = ({ response }) => {
                 pettyCashList={search ? pettyCashSearchList : pettyCashList}
               />
 
-              {/* <PettyDataTabel handleEdit={handleEdit} newDataTable={newDataTable} visible={visible}   pettyCashList={search ? pettyCashSearchList : pettyCashList} /> */}
             </div>
           </div>
         </div>

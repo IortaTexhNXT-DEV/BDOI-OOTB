@@ -10,7 +10,6 @@ import SvgDownArrow from "../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
 import "../../quotationModule/index.scss";
 import {
-  quotationSearchListDataMiddleWare,
   quotationListDataMiddleWare,
 } from "../store/quotationMiddleWare";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,7 +22,7 @@ import { isFireLob } from "../../endorsementModule/constants/endorsementCategori
 
 const LeadListingAllTable = () => {
   const { t } = useTranslation();
-  const { quotationListData, quotationListSearchData, pagination, loading } =
+  const { quotationListData, pagination, loading } =
     useSelector(({ quotationMainReducers }) => {
       return {
         quotationListData: quotationMainReducers?.quotationListData,
@@ -83,7 +82,6 @@ const LeadListingAllTable = () => {
   };
 
   const handleEdit = (rowData) => {
-    console.log("Editing quotation:", rowData);
     const quotationId = rowData.id;
     const rawData = rowData.rawData || rowData;
     const productType =
@@ -115,8 +113,6 @@ const LeadListingAllTable = () => {
   };
 
   const handleViewDetail = (rowData) => {
-    console.log("Viewing quotation detail:", rowData);
-
     // Navigate to read-only detail view
     navigate("/agent/quotedetailview", {
       state: {

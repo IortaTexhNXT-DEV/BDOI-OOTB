@@ -1,24 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../../components/InputField";
-import SubmitButton from "../../../../../components/SubmitButton";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../../../components/NavBar";
+import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../../components/DatePicker";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { useFormik } from "formik";
-import { Toast } from "primereact/toast";
 import CustomToast from "../../../../../components/Toast";
-import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchCityEditMiddleware,
@@ -40,9 +33,8 @@ function AddCity({ action }) {
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const Navigate = useNavigate();
-  const { id } = useParams();
 
-  const { cityTableList, loading, CityListById } = useSelector(
+  const { CityListById } = useSelector(
     ({ cityReducers }) => {
       return {
         loading: cityReducers?.loading,
@@ -86,11 +78,7 @@ function AddCity({ action }) {
     }
 
     formik.setValues({ ...formik.values, ...updatedValues });
-
-
-
   };
-
 
   useEffect(() => {
     if (action === "view" || action === "edit") {
@@ -116,7 +104,6 @@ function AddCity({ action }) {
     saveAndReturn(patchCityEditMiddleware, values, t("financeMasters.saveSuccessfully"));
 
   const handleSubmit = (values) => {
-
     if (action === "add") {
       handleSubmitAdd(values);
     } else if (action === "edit") {
@@ -140,7 +127,6 @@ function AddCity({ action }) {
       errors.State = t("validation.fieldRequired");
     }
 
-
     return errors;
   };
 
@@ -150,17 +136,12 @@ function AddCity({ action }) {
     onSubmit: (values) => {
       // Handle form submission
        handleSubmit(values);
-
     },
     // onSubmit: handleSubmit,
   });
 
   return (
     <div className="overall__addcity__container">
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <CustomToast ref={toastRef} message={t("generalMasters.cityAdded")} />
       <div>
         <span onClick={() => Navigate(-1)}>
@@ -189,7 +170,6 @@ function AddCity({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.cityCode")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.CityCode}
                 onChange={formik.handleChange("CityCode")}
                 disabled={
@@ -209,7 +189,6 @@ function AddCity({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.cityName")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.CityName}
                 onChange={formik.handleChange("CityName")}
                 disabled={
@@ -229,7 +208,6 @@ function AddCity({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.Description}
                 onChange={formik.handleChange("Description")}
                 disabled={
@@ -251,8 +229,6 @@ function AddCity({ action }) {
               <DropDowns
                 className="dropdown__container"
                 label={t("generalMasters.state")}
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.State}
                 onChange={(e) => formik.setFieldValue("State", e.value)}
                 options={State}
@@ -278,7 +254,6 @@ function AddCity({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedBy")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.Modifiedby}
                 onChange={formik.handleChange("Modifiedby")}
                 disabled={
@@ -298,7 +273,6 @@ function AddCity({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedOn")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.ModifiedOn}
                 onChange={formik.handleChange("ModifiedOn")}
                 disabled={
@@ -322,9 +296,6 @@ function AddCity({ action }) {
             label={t("generalMasters.save")}
             disabled={!formik.isValid}
             onClick={formik.handleSubmit}
-          // onClick={() => {
-          //   formik.handleSubmit();
-          // }}
           />
         )}
       </div>

@@ -10,13 +10,11 @@ import { Button } from "primereact/button";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import SvgEditIcon from "../../../../assets/icons/SvgEdit";
 import { useFormik } from "formik";
 import {
   getTransactioncodeListsearch,
   getTrascationcodeDetailsView,
   getpatchTrascationcodeDetailsEdit,
-  patchTrascationcodeDetailsEdit,
   getTransactioncodeListMiddleware,
 } from "../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,7 +24,7 @@ import { Toast } from "primereact/toast";
 
 const TransactionCodeMasterTable = () => {
   const { t } = useTranslation();
-  const { TransactioncodeListsearch, TransactioncodeList, loading } =
+  const { TransactioncodeListsearch, TransactioncodeList } =
     useSelector(({ transactionCodeMasterReducer }) => {
       return {
         loading: transactionCodeMasterReducer?.loading,
@@ -36,7 +34,7 @@ const TransactionCodeMasterTable = () => {
         // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
       };
     });
-  const [products, setProducts] = useState([{ TransactionCode: "100101" }]);
+  const [products] = useState([{ TransactionCode: "100101" }]);
   const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
@@ -96,7 +94,6 @@ const TransactionCodeMasterTable = () => {
     );
   };
 
-  const [selectedRows, setSelectedRows] = useState([]);
 
   const handleView = (rowData) => {
     dispatch(getTrascationcodeDetailsView(rowData));
@@ -143,20 +140,6 @@ const TransactionCodeMasterTable = () => {
     initialValues: { search: "" },
     onSubmit: handleSubmit,
   });
-  const handlecheck = (rowData) => {
-    const selectedIndex = selectedRows.findIndex(
-      (row) => row.id === rowData.id
-    );
-    let updatedSelectedRows = [];
-
-    if (selectedIndex === -1) {
-      updatedSelectedRows = [...selectedRows, rowData];
-    } else {
-      updatedSelectedRows = selectedRows.filter((row) => row.id !== rowData.id);
-    }
-
-    setSelectedRows(updatedSelectedRows);
-  };
 
   useEffect(() => {
     if (search?.length > 0) {
@@ -197,32 +180,11 @@ const TransactionCodeMasterTable = () => {
             scrollHeight="40vh"
             paginator
             rows={5}
-            // selection={selectedRows}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
-            // selectionMode="checkbox"
           >
-            {/* <Column
-              header={<input type="checkbox" />}
-              body={(rowData) => (
-                <input
-                  type="checkbox"
-                  checked={selectedRows.some((row) => row.id === rowData.id)}
-                  onClick={() => handlecheck(rowData)}
-                />
-              )}
-              headerStyle={headerStyle}
-              style={{ textAlign: "center" }}
-            /> */}
-            {/* <Column
-              selectionMode="multiple"
-              selectedItem
-              headerStyle={{ width: "2rem" }}
-              style={{textAlign:'center'}}
-            ></Column> */}
 
             <Column
               field="TransactionCode"

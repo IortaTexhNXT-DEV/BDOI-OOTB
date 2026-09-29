@@ -1,15 +1,14 @@
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import "../EditAccountData/index.scss"
 import { useFormik } from 'formik';
 import { Dialog } from 'primereact/dialog';
 import InputField from '../../../../../components/InputField';
 import { Button } from 'primereact/button';
 import { useDispatch } from 'react-redux';
-import { postChequeDataMiddleWare, postChequeEditDataMiddleWare, updateChequeDataMiddleWare } from '../../store/bankMasterMiddleware';
+import { postChequeDataMiddleWare, postChequeEditDataMiddleWare } from '../../store/bankMasterMiddleware';
 
 const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getEditChequeData }) => {
-    console.log(getEditChequeData, "getEditChequeData");
     const initialValues = {
         chequeBookNo: "",
         chequeLeafBegining: "",
@@ -19,7 +18,6 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
     const dispatch = useDispatch()
     const handleSubmit = (values) => {
         // if (values) {
-
         // }
         // else {
        if(values){
@@ -42,7 +40,6 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
             errors.chequeLeafEnd = "This field is required";
         }
 
-
         return errors;
     };
 
@@ -50,16 +47,13 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
         initialValues: initialValues,
         validate: customValidation,
         onSubmit: (values) => {
-
             handleSubmit(values);
-
         },
     });
     const handleUpdate = () => {
         setVisibleEdit(false);
         dispatch(postChequeEditDataMiddleWare(formik.values));
         formik.resetForm();
-        
     }
 
     const setFormikValues = () => {

@@ -27,7 +27,7 @@ describe("route guard", () => {
   });
 });
 
-describe("persona walk: menu grants match the API (D100-D104)", () => {
+describe("persona walk: menu grants match the API", () => {
   const walkMenu = [
     {
       name: "Operations",

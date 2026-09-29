@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { useFormik } from "formik";
 import useQuoteOptions from "../../../quoteModule/policyDetails/policyDetailsCard/useQuoteOptions";
 import useMasterOptions from "../../../../module/GeneralMasters/common/useMasterOptions";
@@ -112,7 +112,6 @@ const MotorDetailsChange = ({
     }
 
     formik.submitForm();
-    // formik.resetForm()
   }, [formik, shouldSubmit]);
 
   return (
@@ -128,7 +127,6 @@ const MotorDetailsChange = ({
               <DropdownField
                 label={t("endorsement.tnvs")}
                 disabled={disabled}
-                // disabled={true}
                 value={formik.values.TNVS}
                 options={tnvsOptions}
                 onChange={(e) => {
@@ -163,7 +161,6 @@ const MotorDetailsChange = ({
             disabled={disabled}
             label={t("endorsement.mortgage")}
             value={formik.values.Mortgage}
-            // options={MortgageOptions || mortgage}
             options={mortgageOptions}
             onChange={(e) => {
               formik.setFieldValue("Mortgage", e.value);

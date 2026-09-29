@@ -6,7 +6,7 @@ import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import { InputNumber } from "primereact/inputnumber";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
@@ -42,6 +42,7 @@ import {
   DISCOUNT_STEP,
 } from "./fireRiskConstants";
 import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
+import logger from "../../../utility/logger";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -228,7 +229,6 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       dispatch(getLeadByIdMiddleware(existingLeadRefId));
     }
   }, [dispatch, existingLeadRefId, existingLeadFromState]);
-
 
   const getTranslatedOptionLabel = useCallback(
     (value, options) => {
@@ -451,7 +451,6 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
     },
   });
 
-
   // Fetch quotation status when on preview screen to check if customer has approved
   const fetchQuotationStatus = useCallback(async () => {
     if (!createdQuotationId) return;
@@ -462,7 +461,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         if (status) setQuotationStatus(status);
       }
     } catch (err) {
-      console.warn("Failed to fetch quotation status:", err);
+      logger.warn("Failed to fetch quotation status:", err);
     }
   }, [createdQuotationId]);
 
@@ -1309,7 +1308,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       try {
         quotationDetailsForUpload = await quotationService.getQuotationById(createdQuotationId);
       } catch (e) {
-        console.warn("Could not fetch quotation for upload step:", e);
+        logger.warn("Could not fetch quotation for upload step:", e);
       }
 
       toastRef.current?.showToast({
@@ -1333,7 +1332,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         },
       });
     } catch (error) {
-      console.error("Failed to create policy for upload step:", error);
+      logger.error("Failed to create policy for upload step:", error);
       toastErrorRef.current?.showToast({
         severity: "error",
         detail: error?.message || t("fireLead.failedToCreatePolicy"),

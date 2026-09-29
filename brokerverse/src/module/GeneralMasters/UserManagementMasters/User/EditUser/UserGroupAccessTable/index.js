@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
@@ -23,9 +22,7 @@ import { useFormik } from "formik";
 const UserGroupAccess = () => {
   const { t } = useTranslation();
   const {
-    loading,
     mainAdditionalTableList,
-    searchList,
     mainAdditionalViewData,
   } = useSelector(({ userReducers }) => {
     return {
@@ -35,15 +32,12 @@ const UserGroupAccess = () => {
       mainAdditionalViewData: userReducers?.mainAdditionalViewData,
     };
   });
-  console.log(mainAdditionalViewData, "mainAdditionalViewData");
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const [showView, setShowView] = useState(false);
 
   const item = [
     {
-      label: "RC0010",
-      value: "RC0134",
       label: "RC0012",
       value: "RC0012",
 
@@ -55,7 +49,6 @@ const UserGroupAccess = () => {
     setShow(!show);
   };
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -72,29 +65,8 @@ const UserGroupAccess = () => {
   //     "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
   //   RowsPerPageDropdown: (options) => {
   //     const dropdownOptions = [
-  //       { label: "5", value: "5" },
-  //       { label: 10, value: 10 },
-  //       { label: 20, value: 20 },
-  //       { label: 120, value: 120 },
   //     ];
 
-  //     return (
-  //       <div className="table__selector">
-  //         <React.Fragment>
-  //           <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-  //             Row count :{" "}
-  //           </span>
-  //           <Dropdown
-  //             value={options.value}
-  //             className="pagedropdown_container"
-  //             options={dropdownOptions}
-  //             onChange={options.onChange}
-  //           />
-  //         </React.Fragment>
-  //       </div>
-  //     );
-  //   },
-  // };
   const headerStyle = {
     // width: '10rem',
     // backgroundColor: 'red',
@@ -104,17 +76,6 @@ const UserGroupAccess = () => {
     padding: "1rem",
     color: "#000",
     border: "none",
-  };
-  const headeraction = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-    alignItem: "center",
   };
 
   const template2 = {
@@ -160,7 +121,6 @@ const UserGroupAccess = () => {
   };
 
   const renderViewButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div className="center-content">
         <Button
@@ -168,11 +128,6 @@ const UserGroupAccess = () => {
           className="eye__btn"
           onClick={() => handleView(rowData)}
         />
-        {/* <Button
-          icon={<SvgEditIcon />}
-          className="eye__btn"
-          onClick={() => handlEdit(rowData)}
-        /> */}
       </div>
     );
   };
@@ -180,17 +135,7 @@ const UserGroupAccess = () => {
   const handleView = (rowData) => {
     dispatch(getAdditionalRoleViewMiddleWare(rowData));
     setShowView(true);
-    console.log("View clicked:", rowData);
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
-  // const headerStyle = {
-  //   fontSize: 16,
-  //   fontFamily: "Nunito, Arial, sans-serif",
-  //   fontWeight: 500,
-  //   padding: 6,
-  //   color: "#000",
-  //   border: "none",
-  // };
 
   const handleSubmit = () => {
     setShow(false);
@@ -225,7 +170,6 @@ const UserGroupAccess = () => {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -9,7 +9,6 @@ import { Checkbox } from "primereact/checkbox";
 import { InputNumber } from "primereact/inputnumber";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import FieldError from "../../../../components/FieldError";
 import { MasterLookup, deleteAndReturn, saveAndReturn, useMasterOptions } from "../masterRecord";

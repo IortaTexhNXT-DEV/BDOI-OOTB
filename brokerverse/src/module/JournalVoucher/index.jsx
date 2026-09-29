@@ -1,31 +1,22 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef, useEffect } from "react";
-import NavBar from "../../components/NavBar";
+import { useState, useRef, useEffect } from "react";
 import SvgDot from "../../assets/icons/SvgDot";
 import "../JournalVoucher/index.scss";
 import SvgAdd from "../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router-dom";
-import SvgFilters from "../../assets/icons/SvgFilters";
 import { InputText } from "primereact/inputtext";
-import SvgSearchIcon from "../../assets/icons/SvgSearchIcon";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
-import SvgTable from "../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import DataTabelJV from "./DataTabelJV";
 import {
-  getJournalVoucherSearchList,
-  journalVoucherMiddleware,
   getJournalVoucherHistory,
 } from "./store/journalVoucherMiddleware";
-import { useFormik } from "formik";
-import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import { useTranslation } from "react-i18next";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
-  const { journalVoucherList, journalVoucherSearchList, loading, pagination } =
+  const { journalVoucherList, loading, pagination } =
     useSelector(({ journalVoucherMainReducers }) => {
       return {
         loading: journalVoucherMainReducers?.loading,
@@ -41,15 +32,13 @@ const JournalVoucher = () => {
       };
     });
 
-  const [selectedCity, setSelectedCity] = useState(null);
   const cities = [
     { name: t("accounts.transactionCode"), code: "transactionCode" },
     { name: t("accounts.transactionNumber"), code: "transactionNumber" },
   ];
 
-  const [products, setProducts] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -67,14 +56,9 @@ const JournalVoucher = () => {
   const isInitialMount = useRef(true);
 
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    console.log(values.search, "getSearchPolicyList");
-    dispatch(getJournalVoucherSearchList({ textSearch: values.search }));
-  };
 
   // Load data on component mount
   useEffect(() => {
@@ -124,17 +108,6 @@ const JournalVoucher = () => {
     }
   }, [search, globalFilter, dispatch, rowsPerPage]);
 
-  const formik = useFormik({
-    initialValues: { search: "" },
-    onSubmit: handleSubmit,
-  });
-  // useEffect(() => {
-  //   if (formik.values.search !== "") {
-  //     dispatch(
-  //       getJournalVoucherSearchList({ textSearch: formik.values.search })
-  //     );
-  //   }
-  // }, [formik.values.search]);
 
   const onPageChange = (event) => {
     const newPage = event.page + 1; // PrimeReact uses 0-based indexing
@@ -157,16 +130,6 @@ const JournalVoucher = () => {
     dispatch(getJournalVoucherHistory(params));
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    { label: t("common.name") },
-    { label: t("common.date") },
-    { label: t("accounts.voucherNumber") },
-  ];
-
-  // const dispatch=useDispatch();
-  //   useEffect(()=>{
-  //   },[])
 
   return (
     <div className="grid  container__Journal__Voture">
@@ -187,7 +150,6 @@ const JournalVoucher = () => {
         </div>
       </div>
       <div className="menu-container">
-        {/* <TieredMenu className='mt-2' model={menuitems} popup ref={menu} breakpoint="767px" /> */}
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture mb-3">
         <div
@@ -216,13 +178,6 @@ const JournalVoucher = () => {
                   <i className="pi pi-search" />
                   {/* <span className='p-1'> <SvgSearchIcon /></span> */}
             {/* <InputText
-                    style={{ width: "100%" }}
-                    classNames="input__sub__account__Journal__Voture"
-                    placeholder="Search by Transaction Code"
-                    value={formik.values.search}
-                    onChange={formik.handleChange("search")}
-                  /> */}
-            {/* <InputText
                 placeholder="Search customers"
                 className="searchinput_left"
               />
@@ -247,12 +202,6 @@ const JournalVoucher = () => {
             </div>
 
             <div className="col-12 md:col-2 lg:col-2">
-              {/* <div className='sort__filter__view__Journal__Voture' onClick={(e) => menu.current.toggle(e)}>
-                <div className='sort__by__text__Journal__Voture'>Search By</div>
-                <div>
-                  <SvgFilters />
-                </div>
-              </div> */}
               <Dropdown
                 value={globalFilter}
                 onChange={(e) => setGlobalFilter(e.value)}

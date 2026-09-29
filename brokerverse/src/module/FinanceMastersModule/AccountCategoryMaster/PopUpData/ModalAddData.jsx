@@ -1,14 +1,12 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import "./index.scss";
 import { useFormik } from "formik";
-import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getAddAccountCategoryMiddleWare } from "../store/accountCategoryMeddleware";
 
 const ModalAddData = ({
@@ -20,14 +18,6 @@ const ModalAddData = ({
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { AccountCategoryList, loading } = useSelector(
-    ({ accountCategoryReducer }) => {
-      return {
-        loading: accountCategoryReducer?.loading,
-        AccountCategoryList: accountCategoryReducer?.AccountCategoryList,
-      };
-    }
-  );
 
   const customValidation = (values) => {
     const errors = {};

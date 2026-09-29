@@ -1,28 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import InputField from '../../../../../components/InputField';
-import SubmitButton from '../../../../../components/SubmitButton'
 import SvgDot from '../../../../../assets/icons/SvgDot';
 import DropDowns from '../../../../../components/DropDowns';
 import SvgDropdown from '../../../../../assets/icons/SvgDropdown';
 import { Button } from 'primereact/button';
-import { useNavigate, useParams } from 'react-router-dom';
-import NavBar from '../../../../../components/NavBar';
+import { useNavigate } from 'react-router-dom';
 import SvgBackicon from '../../../../../assets/icons/SvgBackicon';
 import { Card } from "primereact/card";
-import DatePicker from '../../../../../components/DatePicker';
-import { Calendar } from 'primereact/calendar';
-import LabelWrapper from '../../../../../components/LabelWrapper';
 import { useFormik } from "formik";
-import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../../components/Toast";
-import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from 'react-redux';
 import useMasterOptions from "../../../common/useMasterOptions";
 import { patchStateEditMiddleware, postAddStateMiddleware } from '../store/stateMiddleware';
-
 
 const initialValues = {
   StateCode: "",
@@ -31,25 +23,15 @@ const initialValues = {
   Country: "",
   Modifiedby: "",
   ModifiedOn: ""
-
 }
 
 function AddState({ action }) {
   const { t } = useTranslation();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const { id } = useParams();
   const Navigate = useNavigate()
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] = useState(null);
 
-
-  const { stateTableList, loading, getStateListById } = useSelector(
+  const { getStateListById } = useSelector(
     ({ stateReducers }) => {
       return {
         loading: stateReducers?.loading,
@@ -60,7 +42,6 @@ function AddState({ action }) {
   );
   const Country = useMasterOptions("country");
 
-
   const home = { label: t("generalMasters.master") };
   const items = [
     { label: t("generalMasters.location"), url: "/master/generals/location/state" },
@@ -70,7 +51,6 @@ function AddState({ action }) {
   ];
 
   const setFormikValues = () => {
-    // const getCorrectionJVEdit = correctionJVList.find((item) => item.id === EditID);
     const Country = getStateListById?.Country
     const updatedValues = {
       id: getStateListById?.id,
@@ -103,12 +83,7 @@ function AddState({ action }) {
   minDate.setDate(minDate.getDate() + 1);
 
   // const handleSubmit=(value)=>{
-
-  //     Navigate("/master/finance/exchangerate")
   // }
-
-  // const toastRef = useRef(null);
-
 
   const saveAndReturn = async (thunk, values, message) => {
     try {
@@ -152,10 +127,6 @@ function AddState({ action }) {
     if (!values.Country) {
       errors.Country = "This field is required";
     }
-    // if (!values.Modifiedby) {
-    //   errors.Modifiedby = "This field is required";
-    // }
-
 
     return errors;
   };
@@ -166,7 +137,6 @@ function AddState({ action }) {
     onSubmit: (values) => {
       //   // Handle form submission
       handleSubmit(values);
-
     },
     //  onSubmit:handleSubmit
   });
@@ -174,11 +144,6 @@ function AddState({ action }) {
   return (
     <div className='overall__addstate__container'>
 
-
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <CustomToast ref={toastRef} message="State added" />
       <div>
         <span onClick={() => Navigate(-1)}>
@@ -197,10 +162,6 @@ function AddState({ action }) {
         className='breadcrumbs_container'
         separatorIcon={<SvgDot color={"#000"} />} />
 
-
-
-
-
       <Card>
 
         <div class="grid">
@@ -210,10 +171,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.stateCode")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.StateCode
-
                 }
                 onChange={formik.handleChange("StateCode")}
                 disabled={action === "add"
@@ -237,10 +196,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.stateName")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.StateName
-
                 }
                 onChange={formik.handleChange("StateName")}
                 disabled={action === "add"
@@ -264,10 +221,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.Description
-
                 }
                 onChange={formik.handleChange("Description")}
                 disabled={action === "add"
@@ -294,8 +249,6 @@ function AddState({ action }) {
               <DropDowns
                 className="dropdown__container"
                 label={t("generalMasters.country")}
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.Country}
                 onChange={(e) =>
                   formik.setFieldValue("Country", e.value)
@@ -325,10 +278,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedBy")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.Modifiedby
-
                 }
                 onChange={formik.handleChange("Modifiedby")}
                 disabled={action === "add"
@@ -352,10 +303,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedOn")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.ModifiedOn
-
                 }
                 onChange={formik.handleChange("ModifiedOn")}
                 disabled={action === "add"
@@ -375,11 +324,7 @@ function AddState({ action }) {
           </div>
         </div>
 
-
-
-
       </Card>
-
 
       <div className="next_container">
         {action === "add" && (
@@ -395,11 +340,6 @@ function AddState({ action }) {
           />
         )}
       </div>
-
-
-
-
-
 
     </div>
   );

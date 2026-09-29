@@ -1,24 +1,21 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
 import SvgDot from "../../../assets/icons/SvgDot";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../components/DatePicker";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   postpaymentVocherCreateDataMiddleware,
   paymentVocherMiddleware,
@@ -28,6 +25,7 @@ import clientService from "../../../services/clientService";
 import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
 import { calendarDateFormat } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const initialValues = {
   VoucherDate: new Date(),
@@ -95,7 +93,7 @@ function Createvoucher() {
   const [clientsData, setClientsData] = useState([]);
   const [clientsLoading, setClientsLoading] = useState(false);
   const [policyOptions, setPolicyOptions] = useState([]);
-  const [policiesLoading, setPoliciesLoading] = useState(false);
+  const [, setPoliciesLoading] = useState(false);
   const [policyFilterValue, setPolicyFilterValue] = useState("");
   const [referrerOptions, setReferrerOptions] = useState([]);
   const [referrersLoading, setReferrersLoading] = useState(false);
@@ -126,7 +124,7 @@ function Createvoucher() {
           }))
         );
       } catch (error) {
-        console.error("Error fetching referrers:", error);
+        logger.error("Error fetching referrers:", error);
         setReferrerOptions([]);
       } finally {
         setReferrersLoading(false);
@@ -144,10 +142,10 @@ function Createvoucher() {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -195,7 +193,7 @@ function Createvoucher() {
       }
     } catch (error) {
       if (requestId !== policyFilterRequestIdRef.current) return;
-      console.error("Error fetching policies:", error);
+      logger.error("Error fetching policies:", error);
       setPolicyOptions([]);
     } finally {
       if (requestId === policyFilterRequestIdRef.current) {
@@ -274,14 +272,6 @@ function Createvoucher() {
 
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const { paymentVocherList, loading } = useSelector(
-    ({ paymentVoucherReducers }) => {
-      return {
-        loading: paymentVoucherReducers?.loading,
-        paymentVocherList: paymentVoucherReducers?.paymentVocherList,
-      };
-    }
-  );
 
   // Transform clients data to dropdown options for Customer Code
   const getCustomerCodeOptions = () => {
@@ -395,7 +385,7 @@ function Createvoucher() {
         state: { disbursementData },
       });
     } catch (error) {
-      console.error("Error creating disbursement:", error);
+      logger.error("Error creating disbursement:", error);
       toast.current?.show({
         severity: "error",
         summary: t("common.error"),

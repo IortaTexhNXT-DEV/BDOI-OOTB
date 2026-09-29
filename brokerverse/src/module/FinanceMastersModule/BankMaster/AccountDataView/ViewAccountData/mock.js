@@ -28,7 +28,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   CustomerCodes:"Cus01123",
     //   VoucheDates: "13/12/2023",
     //   Amounts: "700.00",
-    //   actions: <SvgEditIcon/>,
       
     // },
     // {
@@ -38,7 +37,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   CustomerCodes:"Cus01123",
     //   VoucheDates: "14/12/2023",
     //   Amounts: "800.00",
-    //   actions: <SvgEditIcon/>,
     // },
     // {
     //   id: 5,
@@ -47,7 +45,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   VoucheDate: "15/12/2023",
     //   CustomerCode:"Cus01123",
     //   Amount: "900.00",
-    //   action: <SvgEditIcon/>,
     // },
     // {
     //   id: 6,
@@ -56,7 +53,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   VoucheDate: "16/12/2023",
     //   CustomerCode:"Cus01123",
     //   Amount: "1000.00",
-    //   action: <SvgEditIcon/>,
     // },
     // {
     //   id: 7,
@@ -65,7 +61,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   VoucheDate: "17/12/2023",
     //   CustomerCode:"Cus01123",
     //   Amount: "1100.00",
-    //   action: <SvgEditIcon/>,
     // },
     // {
     //   id: 8,
@@ -74,7 +69,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   VoucheDate: "18/12/2023",
     //   CustomerCode:"Cus01123",
     //   Amount: "1200.00",
-    //   action: <SvgEditIcon/>,
     // },
     // {
     //   id: 9,
@@ -83,7 +77,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   VoucheDate: "19/12/2023",
     //   CustomerCode:"Cus01123",
     //   Amount: "1300.00",
-    //   action: <SvgEditIcon/>,
     // },
     // {
     //   id: 10,
@@ -92,7 +85,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon1";
     //   VoucheDate: "20/12/2023",
     //   CustomerCode:"Cus01123",
     //   Amount: "1400.00",
-    //   action: <SvgEditIcon/>,
     // }
 ];
 export default Productdata

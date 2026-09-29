@@ -1,7 +1,7 @@
 {
-  "short_name": "INXT Broker",
-  "name": "INXT Broker Suite - Insurance Management",
-  "description": "Comprehensive insurance broker management system for the Philippines market. Manage policies, claims, quotes, and clients efficiently.",
+  "short_name": "BrokerVerse",
+  "name": "BrokerVerse by iorta TechNXT",
+  "description": "Insurance broking platform for the Philippines: leads, quotations, placement, policies, claims and broker accounting.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -58,7 +58,11 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-US",
-  "categories": ["business", "finance", "productivity"],
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
   "prefer_related_applications": false,
   "related_applications": []
 }

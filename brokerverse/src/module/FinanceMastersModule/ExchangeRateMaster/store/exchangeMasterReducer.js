@@ -18,14 +18,12 @@ const initialState = {
   ExchangeDetailView: {},
   exchangeDetailEdit: {},
   getExchangeEdit: {},
-
 };
 const exchangeMasterReducer = createSlice({
   name: "exchangeMaster",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-
     //ExchangeList
 
     builder.addCase(getExchangeList.pending, (state) => {
@@ -115,22 +113,15 @@ const exchangeMasterReducer = createSlice({
     //ExchangeDetailEdit
 
     // builder.addCase(patchExchangeDetailEdit.pending, (state) => {
-    //   state.loading = true;
     // });
     // builder.addCase(
     //   patchExchangeDetailEdit.fulfilled,
     //   (state, action) => {
-    //     state.loading = false;
-    //     state.ExchangeDetailEdit = action.payload;
     //   }
     // );
     // builder.addCase(
     //   patchExchangeDetailEdit.rejected,
     //   (state, action) => {
-    //     state.loading = false;
-
-    //     state.ExchangeDetailEdit = {};
-    //     state.error = typeof action.payload === "string" ? action.payload : "";
     //   }
     // );
     builder.addCase(patchExchangeDetailEdit.pending, (state) => {

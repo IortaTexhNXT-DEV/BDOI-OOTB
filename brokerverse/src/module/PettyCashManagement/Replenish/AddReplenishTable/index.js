@@ -17,14 +17,12 @@ import { postAddReplenishMiddleware } from "../store/pettyCashReplenishMiddlewar
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReplenishTable = () => {
-  const [visible, setVisible] = useState(false);
-  const [totalAmounts, setTotalAmounts] = useState(0);
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
   const [selectedRows, setSelectedRows] = useState([]);
   const dispatch = useDispatch();
-  const { AddReplenishTable, loading, ReplenishFund } = useSelector(
+  const { AddReplenishTable, ReplenishFund } = useSelector(
     ({ pettyCashReplenishReducer }) => {
       return {
         loading: pettyCashReplenishReducer?.loading,
@@ -50,7 +48,6 @@ const AddReplenishTable = () => {
       navigate("/accounts/pettycash/replenish");
     }, 2000);
   };
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -69,11 +66,6 @@ const AddReplenishTable = () => {
   ];
   const Initiate = { label: "Accounts" };
 
-  const handleClick = (rowData) => {
-    setVisible(true);
-    const clickedAmount = parseInt(rowData.Amount);
-    setTotalAmounts((prevTotalAmounts) => prevTotalAmounts + clickedAmount);
-  };
 
   const handleBack = () => {
     navigate("/accounts/pettycash/addreplenish");
@@ -159,7 +151,6 @@ const AddReplenishTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             selectionMode="checkbox"
@@ -167,7 +158,6 @@ const AddReplenishTable = () => {
             selection={selectedRows}
             onSelectionChange={(e) => setSelectedRows(e.value)}
 
-            // rowClassName={(rowData) => getStatusClassName(rowData.status)}
           >
             <Column
               selectionMode="multiple"
@@ -217,7 +207,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Disbursed Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -229,7 +218,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Reimbursement Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -241,7 +229,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Current balance"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}

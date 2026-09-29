@@ -18,8 +18,6 @@ import usePettyCashOptions from "../../usePettyCashOptions";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReceiptsTable = () => {
-  const [visible, setVisible] = useState(false);
-  const [totalAmounts, setTotalAmounts] = useState(0);
 
   const toastRef = useRef(null);
   const navigate = useNavigate();
@@ -48,7 +46,7 @@ const AddReceiptsTable = () => {
     display: "flex",
   };
   const [selectedRows, setSelectedRows] = useState([]);
-  const { AddReceiptTable, loading } = useSelector(
+  const { AddReceiptTable } = useSelector(
     ({ pettyCashReceiptsReducer }) => {
       return {
         loading: pettyCashReceiptsReducer?.loading,
@@ -83,13 +81,7 @@ const AddReceiptsTable = () => {
   ];
   const Initiate = { label: "Accounts" };
 
-  const handleClick = (rowData) => {
-    setVisible(true);
-    const clickedAmount = parseInt(rowData.Amount);
-    setTotalAmounts((prevTotalAmounts) => prevTotalAmounts + clickedAmount);
-  };
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
 
   const handleBack = () => {
     navigate("/accounts/pettycash/addreceipts");
@@ -175,7 +167,6 @@ const AddReceiptsTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -184,21 +175,6 @@ const AddReceiptsTable = () => {
             selectionMode="checkbox"
             // rowClas/
           >
-            {/* <Column
-              header={<input type="checkbox" />}
-              body={(rowData) => (
-                <input
-                  type="checkbox"
-                  onClick={() => {
-                    handleClick(rowData); 
-                  }}
-      
-                />
-              )}
-              headerStyle={headerStyle}
-              style={{ textAlign: "start" }}
-
-            /> */}
 
             <Column
               selectionMode="multiple"
@@ -251,7 +227,6 @@ const AddReceiptsTable = () => {
           <InputField
             classNames="input__filed"
             label="Disbursed Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -263,7 +238,6 @@ const AddReceiptsTable = () => {
           <InputField
             classNames="input__filed"
             label="Balance Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}

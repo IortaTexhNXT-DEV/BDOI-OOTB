@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgFilters from "../../../../assets/icons/SvgFilters";
@@ -11,7 +10,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-// import  {data} from "../BranchMasterInitial/mock"
 import SvgArrow from "../../../../assets/icons/SvgArrow";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -73,18 +71,8 @@ const Index = () => {
     country: row.Country,
     email: row.EmailID,
   }));
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   const handlePolicy = () => {
     navigate("/master/finance/branch/branchadding");

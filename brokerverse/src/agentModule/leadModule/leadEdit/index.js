@@ -16,8 +16,6 @@ const LeadEdit = ({ flow, action }) => {
       };
     }
   );
-  console.log(flow, "find flow");
-  console.log("Current lead details:", currentLeadDetails);
   const navigate = useNavigate();
   const handleClientNavigation = () => {
     if (flow == "lead") {

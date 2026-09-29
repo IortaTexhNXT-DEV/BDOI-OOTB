@@ -1,20 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
 import "../index.scss";
 import { useFormik } from "formik";
 import InputField from "../../../../../components/InputField";
 import { Button } from "primereact/button";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { postEditRequestMiddleware} from "../../store/pettyCashRequestMiddleware";
 import { Dialog } from "primereact/dialog";
-
 
 const initialValues = {
     Narration: "",
     Amount: "",
-   
   };
-  
-
 
 const AddDialog = ({visible,setVisible}) => {
     const dispatch = useDispatch();
@@ -27,18 +22,11 @@ const AddDialog = ({visible,setVisible}) => {
         if (!values.Amount) {
           errors.Amount = "This field is required";
         }
-        
-        
+
         return errors;
       };
 
-
       const handleSubmit = (value) => {
-        // const valueWithId = {
-        //     ...value,
-        //     id: editrequestDetails?.length + 1,
-        // };
-        console.log("first12", value)
         dispatch(postEditRequestMiddleware(value));
         setVisible(false)
         formik.setFieldValue("Narration",);
@@ -71,7 +59,6 @@ const AddDialog = ({visible,setVisible}) => {
                     <div className="grid">
                         <div className="col-12 md:col-8 lg:col-8">
                             <InputField
-                                // classNames="input__filed"
                                 classNames="fielduniqueone__container"
                                 label="Narration"
                                 placeholder="Enter"
@@ -93,7 +80,6 @@ const AddDialog = ({visible,setVisible}) => {
                                 textWeight={500}
                                 value={formik.values.Amount}
                                 onChange={formik.handleChange("Amount")}
-                                // error={formik.touched.Amount && formik.errors.Amount}
                             />
                         </div>
                     </div>

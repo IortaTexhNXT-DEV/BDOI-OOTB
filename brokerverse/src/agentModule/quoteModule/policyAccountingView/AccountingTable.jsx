@@ -1,11 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import SvgDownArrow from "../../../assets/agentIcon/SvgDownArrow";
-import { Checkbox } from "primereact/checkbox";
-import SvgMotorTable from "../../../assets/agentIcon/SvgMotorTable";
 import { useNavigate } from "react-router-dom";
 import './index.scss'
 // Import PrimeReact styles
@@ -55,59 +51,13 @@ const AccountingTable = ({ type }) => {
         color: "#000",
         border: "none",
     };
-    const ViewheaderStyle = {
-        justifyContent: "center",
-        // textalign: center,
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-        display: "flex",
-        alignItem: "center",
-        height: "56px",
-    };
 
+    const [selectionMode] = useState("multiple");
 
-    const template2 = {
-        layout:
-            "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-        RowsPerPageDropdown: (options) => {
-            const dropdownOptions = [
-                { label: 5, value: 5 },
-                { label: 10, value: 10 },
-                { label: 20, value: 20 },
-                { label: 120, value: 120 },
-            ];
-
-            return (
-                <div className="table__selector">
-                    <React.Fragment>
-                        <span
-                            className="table__selector__text"
-                            style={{ color: "var(--text-color)", userSelect: "none" }}
-                        >
-                            Rows per page:{" "}
-                        </span>
-                        <Dropdown
-                            value={options.value}
-                            className="pagedropdown_container"
-                            options={dropdownOptions}
-                            onChange={options.onChange}
-                            dropdownIcon={<SvgDownArrow />}
-                        />
-                    </React.Fragment>
-                </div>
-            );
-        },
-    };
-    const [selectionMode, setSelectionMode] = useState("multiple");
-
-    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [selectedProducts] = useState([]);
     const handleEdit = (rowData) => {
         navigate("/agent/leadedit");
     };
-
 
     const renderName = (rowData) => {
         return (
@@ -120,7 +70,6 @@ const AccountingTable = ({ type }) => {
             <div className="name__box__container">
 
                 <div className="name__text">{formatCurrency(rowData.amount)}</div>
-                {/* <div className="lead__id__text">Lead Id :{rowData.LeadID} </div> */}
             </div>
         );
     };
@@ -156,12 +105,9 @@ const AccountingTable = ({ type }) => {
                     padding: "0"
                 }}
                 selectionMode={selectionMode}
-                // selection={selectedProducts}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
-                // paginatorTemplate={template2}
                 className="corrections__table__main"
-                // onSelectionChange={(e) => setSelectedProducts(e.value)}
                 dataKey="id"
                 scrollable={true}
                 scrollHeight="80vh"
@@ -178,13 +124,11 @@ const AccountingTable = ({ type }) => {
                     headerStyle={headerStyle}
                 ></Column>
 
-
                 <Column
                     field="dueDt"
                     header={renderUncheckedHeader("Due Date")}
                     headerStyle={headerStyle}
                 ></Column>
-
 
                 <Column
                     field="mainAcc"
@@ -192,7 +136,6 @@ const AccountingTable = ({ type }) => {
                     headerStyle={headerStyle}
                 ></Column>
                 <Column
-                    // body={renderDate}
                     field="drCr"
                     header={renderUncheckedHeader("Dr/Cr")}
                     headerStyle={headerStyle}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
@@ -7,7 +7,7 @@ import SvgCountMinusIcon from "../../../assets/icons/SvgCountMinusIcon";
 import CalculaitionTextInputs from "../../component/calculaitionTextInputs";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import CustomToast from "../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
@@ -38,7 +38,7 @@ const initialValue = {
 const OrderSummary = () => {
   const { t } = useTranslation();
   const [discount, setDiscount] = useState(0);
-  const [ncd, setNcd] = useState(0);
+  const [ncd] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const toastRef = useRef(null);
@@ -145,7 +145,6 @@ const OrderSummary = () => {
       }, 2000);
       
     } catch (error) {
-      console.error('Failed to save quotation:', error);
       notifyError(`${t("agent.failedToSaveQuotation")}: ${error}`);
     } finally {
       setIsSubmitting(false);
@@ -308,7 +307,6 @@ const OrderSummary = () => {
               value={formik.values.AuthorizedSignature}
               options={signatoryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);
               }}
               optionLabel="label"

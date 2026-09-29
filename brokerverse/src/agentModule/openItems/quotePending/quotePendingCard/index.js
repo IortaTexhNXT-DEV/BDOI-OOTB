@@ -2,19 +2,12 @@ import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import TableDropdownField from "../../../component/tableDropDwonField";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import SvgMotorTable from "../../../../assets/agentIcon/SvgMotorTable";
-import SvgProfileC from "../../../../assets/agentIcon/SvgProfileC";
 import SvgArrow from "../../../../assets/agentIcon/SvgArrow";
 import SvgDownArrow from "../../../../assets/agentIcon/SvgDownArrow";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
-import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgDots from "../../../../assets/agentIcon/SvgDot";
-import { Button } from "primereact/button";
-import { Menu } from "primereact/menu";
 import { useSelector, useDispatch } from "react-redux";
 import { getquotependingtableMiddleware, getQuotependingSearchDataMiddleWare } from "../quotePendingCard/store/quotePendingMiddleware";
 import { Avatar } from "primereact/avatar";
@@ -23,14 +16,11 @@ const QuotePendingCard = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("");
-  const [displayDialog, setDisplayDialog] = useState("");
-  const [disableOption, setdisableOption] = useState("");
   const dispatch = useDispatch("");
   const menu = useRef(null);
 
-  const { quotependingtabledata, quotependingSearchList, loading } =
+  const { quotependingtabledata, quotependingSearchList } =
     useSelector(({ agentQuotependingMainReducers }) => {
-      console.log(agentQuotependingMainReducers, "find quote");
       return {
         loading: agentQuotependingMainReducers?.loading,
         quotependingtabledata:
@@ -39,7 +29,6 @@ const QuotePendingCard = () => {
           agentQuotependingMainReducers?.quotependingSearchList,
       };
     });
-  // const [globalFilter, setGlobalFilter] = useState("policy Number");
   const policy = [
     { name: t("openItems.name"), code: "Name" },
     { name: t("openItems.quoteId"), code: "Quote ID" },
@@ -48,16 +37,10 @@ const QuotePendingCard = () => {
   const handleMenuToggle = (event, menuRef, rowData) => {
     navigate(`/agent/convertpolicy/customerinfo/edit/${123}`);
   };
-  const handleMenuClick = (menuItem) => {
-    if (menuItem == "renewal") {
-      navigate("/agent/createquote/coveragedetails");
-    }
-  };
 
   const renderActions = () => {
     return (
       <div className="action__container">
-        {/* <Menu model={menuItems} popup ref={menu} breakpoint="767px" /> */}
         <div
           className="action__Svg"
           onClick={(event) => handleMenuToggle(event, menu)}
@@ -65,49 +48,9 @@ const QuotePendingCard = () => {
           <SvgArrow />
         </div>
       </div>
-      // <div className="btn__container__view__edit">
-      //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-      //   <Button
-      //     icon={<SvgDot />}
-      //     className="view__btn"
-      //     onClick={(event) => handleMenuToggle(event, menu, rowData)}
-      //   />
-      // </div>
     );
-    // navigate("/agent/createquote/coveragedetails");
   };
 
-  const renderViewEditButton = (rowData) => {
-    const menuItems = [
-      {
-        label: t("openItems.reminder"),
-      },
-
-      {
-        label: t("openItems.renewal"),
-        command: () => handleMenuClick("renewal"),
-      },
-    ];
-    //  return (
-    //   <div className="action__container">
-    //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-    //     <div
-    //       className="action__Svg"
-    //       onClick={(event) => handleMenuToggle(event, menu, rowData)}
-    //     >
-    //       <SvgArrow/>
-    //     </div>
-    //   </div>
-    //   // <div className="btn__container__view__edit">
-    //   //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-    //   //   <Button
-    //   //     icon={<SvgDot />}
-    //   //     className="view__btn"
-    //   //     onClick={(event) => handleMenuToggle(event, menu, rowData)}
-    //   //   />
-    //   // </div>
-    // );
-  };
 
   useEffect(() => {
     dispatch(getquotependingtableMiddleware());
@@ -124,98 +67,6 @@ const QuotePendingCard = () => {
     }
   }, [search]);
   const navigate = useNavigate();
-  const TableData = [
-    {
-      Name: "John Doe",
-      LeadId: "012345",
-      QuoteId: "012345",
-      Category: "Retail",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "127332",
-    },
-    {
-      Name: "Jane Smith",
-      LeadId: "167890",
-      QuoteId: "012345",
-      Category: "Corporate",
-      PolicyType: "Travel",
-      Date: "01 JAN 2024",
-      Actions: "1272721",
-    },
-    {
-      Name: "Bob Johnson",
-      LeadId: "254321",
-      QuoteId: "2024 JAN 10",
-      Category: "Retail",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "1270002",
-    },
-    {
-      Name: "Alice Williams",
-      LeadId: "398765",
-      QuoteId: "2024 JAN 05",
-      Category: "Corporate",
-      PolicyType: "Travel",
-      Date: "01 JAN 2024",
-      Actions: "120002",
-    },
-    {
-      Name: "Mike Davis",
-      LeadId: "423456",
-      QuoteId: "2024 JAN 18",
-      Category: "Corporate",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "111172",
-    },
-    {
-      Name: "Sara Miller",
-      LeadId: "578901",
-      QuoteId: "2024 JAN 01",
-      Category: "Retail",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "12000",
-    },
-    {
-      Name: "Chris Brown",
-      LeadId: "9987634",
-      QuoteId: "2024 JAN 12",
-      Category: "Corporate",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "1221112",
-    },
-    {
-      Name: "Emily Taylor",
-      LeadId: "012345",
-      QuoteId: "2024 JAN 28",
-      Category: "Retail",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "12002",
-    },
-    {
-      Name: "David Wilson",
-      LeadId: "53628782",
-      QuoteId: "2024-08-03",
-      Category: "Retail",
-      PolicyType: "Travel",
-      Date: "01 JAN 2024",
-      Actions: "12233",
-    },
-    {
-      Name: "Grace Anderson",
-      LeadId: "287654",
-      QuoteId: "2024-07-20",
-      Category: "Corporate",
-      PolicyType: "Motor",
-      Date: "01 JAN 2024",
-      Actions: "127272",
-    },
-  ];
 
   const headerStyle = {
     textalign: "center",
@@ -242,7 +93,6 @@ const QuotePendingCard = () => {
 
     const backgroundColor =
       colors[parseInt(index) % colors.length] || "#CCCCCC";
-    console.log(parseInt(index) % colors.length, "find");
 
     return (
       <Avatar
@@ -301,20 +151,6 @@ const QuotePendingCard = () => {
       </div>
     );
   };
-  // const renderAction = () => {
-  //   return (
-  //     <div className="action__container">
-  //       <div
-  //         className="action__Svg"
-  //         onClick={() => {
-  //           handlesubmit();
-  //         }}
-  //       >
-  //         <SvgDots/>
-  //       </div>
-  //     </div>
-  //   );
-  // };
 
   const template2 = {
     layout:
@@ -349,9 +185,6 @@ const QuotePendingCard = () => {
     },
   };
 
-  const handlesubmit = () => {
-    // navigate("/agent/policydetailedviewonly");
-  };
 
   return (
     <div className="expiring__policy__card__container mt-4">
@@ -387,7 +220,6 @@ const QuotePendingCard = () => {
         </div>
         <div className="table__container">
           <DataTable
-            // value={TableData}
             value={search ? quotependingSearchList : quotependingtabledata}
             tableStyle={{ minWidth: "50rem" }}
             paginator

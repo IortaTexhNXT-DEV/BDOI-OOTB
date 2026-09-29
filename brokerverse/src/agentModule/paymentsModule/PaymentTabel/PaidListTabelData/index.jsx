@@ -3,13 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Checkbox } from "primereact/checkbox";
-import SvgEdit from "../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../assets/icons/SvgArrow";
-import SvgMotorTable from "../../../../assets/agentIcon/SvgMotorTable";
-import SvgTravlesTable from "../../../../assets/agentIcon/SvgTravlesTable";
-import SvgHomeTable from "../../../../assets/agentIcon/SvgHomeTable";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +12,6 @@ import "../../PaymentTabel/index.scss";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPaymentPaidSearchDataMiddleWare,
-  getPaymentSearchDataMiddleWare,
 } from "../../store/paymentMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
@@ -26,11 +20,7 @@ const PaidListTabelData = () => {
   const { t } = useTranslation();
   const {
     paymenttabledata,
-    paymentSearchList,
-    loading,
     paymentPaidSearchList,
-    paymentPendingtabledata,
-    paymentRewiwingtabledata,
   } = useSelector(({ agentPaymentMainReducers }) => {
     return {
       loading: agentPaymentMainReducers?.loading,
@@ -38,11 +28,9 @@ const PaidListTabelData = () => {
       paymentPaidSearchList: agentPaymentMainReducers?.paymentPaidSearchList,
     };
   });
-  console.log(paymentPaidSearchList, "paymentPaidSearchList  ");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("PolicyNumber");
-  const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -209,9 +197,6 @@ const PaidListTabelData = () => {
     navigate(`/agent/policydetail/${rowData.policyId}`);
   };
 
-  const handleEdit = () => {
-    navigate("/agent/leadedit");
-  };
 
   const ViewheaderStyle = {
     justifyContent: "center",

@@ -1,29 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../../components/InputField";
-import SubmitButton from "../../../../../components/SubmitButton";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../../../components/NavBar";
+import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../../components/DatePicker";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import { useFormik } from "formik";
-import SvgAdd from "../../../../../assets/icons/SvgAdd";
-// import SvgEditIcon from '../../../../../assets/icons/SvgEditIcon';
-import { useDispatch, useSelector } from "react-redux";
-import SvgEdit from "../../../../../assets/icons/SvgEdits";
+import { useSelector } from "react-redux";
 import { Dialog } from "primereact/dialog";
 import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
@@ -38,26 +30,16 @@ const initialValues = {
 
 function ViewAccountDetail() {
   const { t } = useTranslation();
-  const { accountDetailsView, loading } = useSelector(
+  const { accountDetailsView } = useSelector(
     ({ bankMasterReducer }) => {
       return {
         loading: bankMasterReducer?.loading,
         accountDetailsView: bankMasterReducer?.accountDetailsView,
-        // const [products, setProducts] = useState([]);
-
-        // const handleView=()=>{
-        //   navigate('/accounts/paymentvoucher/detailview')
-        // }
       };
     }
   );
-  // const [visible, setVisible] = useState(false);
-  const navigate = useNavigate();
-  const [date, setDate] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState(false);
   const [visible, setVisible] = useState(false);
-  const { id } = useParams();
-  const dispatch = useDispatch();
 
   const customValidation = (values) => {
     const errors = {};
@@ -85,24 +67,10 @@ function ViewAccountDetail() {
   };
 
   const Navigate = useNavigate();
-  const [selectedItem, setSelectedItem] = useState(null);
   const items = [
     { label: "Bank", url: "/master/finance/bank" },
     { label: "Add Account" },
   ];
-  const statusBodyTemplate = (rowData) => {
-    return (
-      <div
-        style={{
-          backgroundColor: rowData.status === "Pending" ? "#E2F6EF" : "#FFE5B4",
-          color: rowData.status === "Pending" ? "#29CE00" : "#FFA800",
-        }}
-        className="statuslable_container"
-      >
-        {rowData.status}
-      </div>
-    );
-  };
 
   const template2 = {
     layout:
@@ -150,17 +118,6 @@ function ViewAccountDetail() {
     color: "#000",
     border: "none",
   };
-  const status = [
-    { name: "Active", code: "NY" },
-    { name: "Deactive", code: "RM" },
-  ];
-  const item = [
-    { name: "New York", code: "NY" },
-    { name: "Rome", code: "RM" },
-    { name: "London", code: "LDN" },
-    { name: "Istanbul", code: "IST" },
-    { name: "Paris", code: "PRS" },
-  ];
   const home = { label: "Master" };
 
   const handleSubmit = () => {
@@ -170,19 +127,12 @@ function ViewAccountDetail() {
   const handlesavebutton = () => {
     setVisible(false);
   };
-  const handleNavigation = () => {
-    navigate("/master/finance/bank/accountdataview");
-  };
 
-  // const handleNavigation = () => {
-  //   Navigate("/SpecificVoucher")
-  // }
   const formik = useFormik({
     initialValues: initialValues,
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit,
@@ -244,9 +194,6 @@ function ViewAccountDetail() {
                 className="dropdown__container"
                 label={t("financeMasters.accountType")}
                 value={accountDetailsView?.AccountType}
-                // onChange={(e) =>
-                //   formik.setFieldValue("AccountType", e.value)
-                // }
                 options={Type}
                 optionLabel="label"
                 placeholder={"Select"}
@@ -328,7 +275,6 @@ function ViewAccountDetail() {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -363,38 +309,10 @@ function ViewAccountDetail() {
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
-            {/* <Column
-              body={(columnData) => <SvgEdit />}
-              header="Action"
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column> */}
 
-            {/* <Column field="Amount" header="Total Amount" style={{ width: '24rem' }} headerStyle={headerStyle} className='fieldvalue_container'></Column> */}
-            {/* <Column field="action" header="Action" headerStyle={headerStyle} className='fieldvalue_container'
-        onClick={() => setVisible(true)}
-        ></Column> */}
-
-            {/* <Column
-            body={(params) => (
-                <SvgEditIcon onClick={() => setVisible(true)}/>
-            )}
-            header="Action"
-            headerStyle={headerStyle}
-            className="fieldvalue_container"
-        ></Column> */}
           </DataTable>
         </div>
       </Card>
-
-      {/* <div className="next_container">
-
-        <Button className="submit_button p-0" label={t("generalMasters.save")}
-          onClick={handleNavigation}
-        //   disabled={!selectedProducts}
-        disabled={!formik.isValid}
-        />
-      </div> */}
 
       <Dialog
         header="Add Cheque book"

@@ -1,7 +1,7 @@
 import { Card } from "primereact/card";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { DataTable } from 'primereact/datatable';
@@ -19,11 +19,10 @@ import {
 import useInsuranceCompanyOptions from "../component/useInsuranceCompanyOptions";
 import SvgTable from "../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import DialogList from "../quoteModule/policyDetails/policyDetailsCard/DialogList";
 import { Checkbox } from "primereact/checkbox";
 import InputTextField from "../component/inputText";
-import SvgUploadArrowIcon from "../../assets/agentIcon/SvgUpload";
 import { postPolicyDetailsMiddleware } from "../quoteModule/policyDetails/store/policyDetailsMiddleware";
 import './index.scss'
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
@@ -32,8 +31,6 @@ import ArrowUpToLineIcon from "./uploadIcon";
 const CQPolicyAndRiskDetails = ({ action, flow, }) => {
     const InsuranceCompanyOptions = useInsuranceCompanyOptions();
     const { t } = useTranslation();
-    const { type } = useParams();
-    console.log(action, type, "action111");
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const initialValue = {
@@ -53,10 +50,8 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
         LimitPerPerson: "",
         LimitPerOccurrence: "",
         Remarks: "",
-
     };
     const handleclick = (values) => {
-        console.log(action, "action");
         dispatch(postPolicyDetailsMiddleware(values));
         {
             action === "quotedetails"
@@ -65,33 +60,10 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
         }
     };
     // const customValidation = (values) => {
-    //   const errors = {}
     //   if (!values.PaymentType) {
-    //     errors.PaymentType = "This field is required";
     //   }
     //   if (!values.InstallmentType) {
-    //     errors.InstallmentType = "This field is required";
     //   }
-
-    //   // if (!values.VehicleBrand) {
-    //   //   errors.VehicleBrand = "This field is required";
-    //   // }
-    //   // if (!values.ModelYear) {
-    //   //   errors.ModelYear = "This field is required";
-    //   // }
-    //   // if (!values.VehicleModel) {
-    //   //   errors.VehicleModel = "This field is required";
-    //   // }
-    //   // if (!values.ModelVariant) {
-    //   //   errors.ModelVariant = "This field is required";
-    //   // }
-    //   // if (!values.VehicleColor) {
-    //   //   errors.VehicleColor = "This field is required";
-    //   // }
-
-    //   // if (!values.SeatingCapacity) {
-    //   //   errors.SeatingCapacity = "This field is required";
-    //   // }
 
     //   return errors
     // }
@@ -140,12 +112,9 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
     {/* //changes */ }
     const [checked, setChecked] = useState(false);
     const [paychecked, setPayChecked] = useState(false);
-    console.log(formik.values.PaymentType, "check")
-    const [products, setProducts] = useState([]);
     const [visible, setVisible] = useState(false);
 
-
-    const { TableList, leadtabledata, loading } = useSelector(
+    const { TableList, leadtabledata } = useSelector(
         ({ policydetailreducer, leadReducers }) => {
             return {
                 loading: policydetailreducer?.loading,
@@ -155,7 +124,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
             };
         }
     );
-    console.log("checkget2", leadtabledata[leadtabledata.length - 1]?.category);
 
     const category = leadtabledata[leadtabledata.length - 1]?.category
 
@@ -263,7 +231,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.InsuranceCompanyName}
                             options={InsuranceCompanyOptions}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("InsuranceCompanyName", e.value);
                             }}
                             optionLabel="label"
@@ -271,7 +238,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
 
                     </div>
                 </div>
-
 
                 {checked &&
                     <div>
@@ -298,8 +264,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                     </div>
                 }
 
-
-
                 <div className="grid mt-2">
                     <div className="col-12 md:col-6 lg:col-6">
                         <DropdownField
@@ -307,7 +271,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.InsurancePolicyType}
                             options={InsurancePolicyTypes}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("InsurancePolicyType", e.value);
                             }}
                             optionLabel="label"
@@ -325,7 +288,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.AccountCode}
                             options={AccountCodes}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("AccountCode", e.value);
                             }}
                             optionLabel="label"
@@ -344,7 +306,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.PaymentType}
                             options={PolicyTypes}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("PaymentType", e.value);
                             }}
                             optionLabel="label"
@@ -373,7 +334,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                                 value={formik.values.InstallmentType}
                                 options={InstallmentType}
                                 onChange={(e) => {
-                                    console.log(e.value);
                                     formik.setFieldValue("InstallmentType", e.value);
                                 }}
                                 optionLabel="label"
@@ -388,8 +348,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                     </div>
                 }
 
-
-
                 <div className="policy__details__card__sub__title mt-2">
                     Employees Details
                 </div>
@@ -401,7 +359,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.VehicleBrand}
                             options={VehicleBrands}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("VehicleBrand", e.value);
                             }}
                             optionLabel="label"
@@ -475,7 +432,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             value={formik.values.ModelYear}
                             options={ModelYears}
                             onChange={(e) => {
-                                console.log(e.value);
                                 formik.setFieldValue("ModelYear", e.value);
                             }}
                             optionLabel="label"
@@ -526,31 +482,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                     </div>
 
                 </div>
-                {/* <div style={{ backgroundColor: 'black' }}>
-                    <div className="">
-                        <Button
-                             onClick={() => {
-                                formik.handleSubmit();
-                            }}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                backgroundColor: '#0072d8',
-                                gap: '8px',
-                                padding: '10px',
-                                color: '#fff',
-                                border: '1px solid #0072d8',
-                                borderRadius: '6px',
-                                fontFamily: "Nunito, Arial, sans-serif",
-                                fontSize: '16px',
-                                fontWeight: 400,
-                                lineHeight: '24px', 
-                            }}
-                        >
-                            Next
-                        </Button>
-                    </div>
-                </div> */}
                 <div >
                     <div
                         style={{

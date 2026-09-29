@@ -23,7 +23,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 
 const initialValue = {
-
   PettycashCode: "",
   RequestNumber: "",
   RequesterName: "",
@@ -44,16 +43,15 @@ const initialValue = {
 const AddDisbursementTable = () => {
   const [visible, setVisible] = useState(false);
   const [addvisible, setaddVisible] = useState(false);
-  const [moduleData, setModuleData] = useState();
+  const [, setModuleData] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
-  const [totalAmounts, setTotalAmounts] = useState(0);
   const [formAction, setformAction] = useState(null);
-  const [show, setshow] = useState(false);
+  const [, setshow] = useState(false);
   const dispatch = useDispatch();
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
-  const { AddDisbursmentTable, loading, getPatchDisbursment } = useSelector(
+  const { AddDisbursmentTable, getPatchDisbursment } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -65,7 +63,6 @@ const AddDisbursementTable = () => {
 
   const isEmpty = !AddDisbursmentTable?.length;
 
-  const [amountData, setAmountData] = useState()
   const [totalNetAmount, setTotalNetAmount] = useState(0);
   useEffect(() => {
     const newTotalNetAmount = selectedRows.reduce((total, item) => {
@@ -88,7 +85,6 @@ const AddDisbursementTable = () => {
     }, 2000);
   };
 
-
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -109,11 +105,7 @@ const AddDisbursementTable = () => {
 
   const handlehide = () => {
     setVisible(false)
-    console.log("first8", formAction)
-    // // {formAction === "add" &&  }
-    // formik.resetForm()
   }
-
 
   const handleBack = () => {
     navigate("/accounts/pettycash/adddisbursement");
@@ -148,7 +140,6 @@ const AddDisbursementTable = () => {
     // if (formAction === "Edit") {
     dispatch(getPatchDisbursementData(data))
     // }
-    console.log(data, "sata");
     setformAction("Edit");
     setModuleData({ ...data });
     setVisible(true);
@@ -157,25 +148,9 @@ const AddDisbursementTable = () => {
     setformAction("Add");
     setaddVisible(true);
     formik.resetForm()
-
-  };
-  const validate = (values) => {
-    const errors = {};
-
-    if (!values.MainAccountCode) {
-      errors.MainAccountCode = "Main Account Code is required";
-    }
-
-    if (!values.RequestNumber) {
-      errors.RequestNumber = "Sub Account Code is required";
-    }
-
-    return errors;
   };
 
   const handleSubmit = (value) => {
-    // alert("hii")
-    console.log(value, "valuevalue");
     if (formAction === "Edit") {
       dispatch(postPatchDisbursementData(value));
       setVisible(false);
@@ -207,9 +182,6 @@ const AddDisbursementTable = () => {
     initialValues: initialValue,
     onSubmit: handleSubmit
   });
-
-
-
 
   const { expenseAccounts, subAccounts } = usePettyCashOptions();
   const AddDisbursmentRequestTable = useSelector(
@@ -246,7 +218,6 @@ const AddDisbursementTable = () => {
       Departmentcode: getPatchDisbursment?.Departmentcode,
       TotalAmount: getPatchDisbursment?.TotalAmount,
       Date: getPatchDisbursment?.Date,
-
     };
     if (RequestNumberData) {
       setRequestNumberOptionData([{ label: RequestNumberData, value: RequestNumberData }])
@@ -265,15 +236,11 @@ const AddDisbursementTable = () => {
   };
 
   useEffect(() => {
-    console.log("first9",formAction)
 if(formAction === "Edit" ){
   SetFormikValue();
 }
-    
 
   }, [getPatchDisbursment]);
-
-
 
   const template2 = {
     layout:
@@ -364,7 +331,6 @@ if(formAction === "Edit" ){
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
           >
@@ -373,7 +339,6 @@ if(formAction === "Edit" ){
               selectionMode="multiple"
               selectedItem
               style={{ textAlign: "center" }}
-            // headerStyle={{ width: "4rem" }}
             ></Column>
             <Column
               field="RequestNumber"
@@ -447,7 +412,6 @@ if(formAction === "Edit" ){
           <InputField
             classNames="input__filed"
             label="Total"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -474,7 +438,6 @@ if(formAction === "Edit" ){
         header={`${formAction} Disbursement`}
         visible={visible}
         style={{ width: "40vw" }}
-        // onHide={() => setVisible(false)}
         onHide={() => handlehide()}
         headerStyle={{
           color: "#343434",
@@ -496,9 +459,7 @@ if(formAction === "Edit" ){
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // value={formAction === "Add" ? formik.values.RequestNumber : formAction === "Edit" && formik.values.RequestNumber}
                 options={formAction === "Edit" ? RequestNumberOptionData : item
-
                 }
                 value={formik.values.RequestNumber}
                 disabled={formAction === "Edit" ? true : false}
@@ -520,7 +481,6 @@ if(formAction === "Edit" ){
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // value={formAction === "Add" ? formik.values.ExpenseCode : formAction === "Edit" && formik.values.ExpenseCode}
                 options={
                   formAction === "Edit" ? ExpenseCodeOptionData : item1}
                   value={formik.values.ExpenseCode}
@@ -542,7 +502,6 @@ if(formAction === "Edit" ){
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // value={formAction === "Add" ? formik.values.SubAc : formAction === "Edit" && formik.values.SubAc}
                 options={formAction === "Edit" ? SubAcOptionData : item2}
                 value={formik.values.SubAc}
                 onChange={(e) => {
@@ -558,11 +517,9 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Purpose"
-                // disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? formik.values.Purpose : formAction === "Edit" && formik.values.Purpose}
                 onChange={formik.handleChange("Purpose")}
                 disabled={formAction === "Edit" ? true : false}
                 placeholder="Enter"
@@ -577,7 +534,6 @@ if(formAction === "Edit" ){
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? formik.values.Remarks : formAction === "Edit" && formik.values.Remarks}
                 onChange={formik.handleChange("Remarks")}
                 value={formik.values.Remarks}
               />
@@ -590,7 +546,6 @@ if(formAction === "Edit" ){
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? formik.values.VAT : formAction === "Edit" && formik.values.VAT}
                 onChange={formik.handleChange("VAT")}
                 value={formik.values.VAT}
               />
@@ -603,7 +558,6 @@ if(formAction === "Edit" ){
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? formik.values.WHT : formAction === "Edit" && formik.values.WHT}
                 onChange={formik.handleChange("WHT")}
                 value={formik.values.WHT}
               />
@@ -612,11 +566,9 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Amount"
-                // placeholder="Enter"
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? "" : formAction === "Edit" && formik.values.Amount}
                 value={formik.values.Amount}
                 onChange={formik.handleChange("Amount")}
                 placeholder="Enter"
@@ -627,12 +579,10 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Net Amount"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? "" : formAction === "Edit" && formik.values.NetAmount}
                 onChange={formik.handleChange("NetAmount")}
                 value={formik.values.NetAmount}
               />
@@ -649,8 +599,6 @@ if(formAction === "Edit" ){
           </div>
         </div>
       </Dialog>
-
-
 
       {/* add */}
 
@@ -680,9 +628,7 @@ if(formAction === "Edit" ){
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // value={formAction === "Add" ? formik.values.RequestNumber : formAction === "Edit" && formik.values.RequestNumber}
                 options={formAction === "Edit" ? RequestNumberOptionData : item
-
                 }
                 value={formik.values.RequestNumber}
                 disabled={formAction === "Edit" ? true : false}
@@ -740,15 +686,12 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Purpose"
-                // disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? formik.values.Purpose : formAction === "Edit" && formik.values.Purpose}
                 onChange={formik.handleChange("Purpose")}
                 disabled={formAction === "Edit" ? true : false}
                 placeholder="Enter"
-              // value={formik.values.RequestNumber}
               />
             </div>
             <div className="col-12 ">
@@ -759,7 +702,6 @@ if(formAction === "Edit" ){
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? formik.values.Remarks : formAction === "Edit" && formik.values.Remarks}
                 onChange={formik.handleChange("Remarks")}
               />
             </div>
@@ -791,11 +733,9 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Amount"
-                // placeholder="Enter"
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formAction === "Add" ? "" : formAction === "Edit" && formik.values.Amount}
                 value={formik.values.Amount}
                 onChange={formik.handleChange("Amount")}
                 placeholder="Enter"
@@ -806,7 +746,6 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Net Amount"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}

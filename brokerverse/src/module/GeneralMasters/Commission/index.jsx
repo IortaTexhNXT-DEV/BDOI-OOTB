@@ -1,6 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef, useEffect } from "react";
-import NavBar from "../../../components/NavBar";
+import { useState, useRef, useEffect } from "react";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../Commission/index.scss";
 import SvgAdd from "../../../assets/icons/SvgAdd";
@@ -17,16 +16,13 @@ import { useTranslation } from "react-i18next";
 const Commission = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
 
   const navigate = useNavigate();
   const items = [
     { id: 1, label: t("sidebar.Commission"), url: "/master/generals/commission" },
   ];
   const home = { label: t("sidebar.Master") };
-  const handleNavigate = () => {
-    navigate("/accounts/journalvoucher/addjournalvoucture");
-  };
 
   const handleEdit = () => {
     setVisible(true);
@@ -58,8 +54,7 @@ const Commission = () => {
     }
   }, [formik.values.search]);
 
-  const [products, setProducts] = useState([]);
-  const { commissionList, loading, commissionSearchList, getCommissionEdit } =
+  const { commissionList, commissionSearchList, getCommissionEdit } =
     useSelector(({ commissionMianReducers }) => {
       return {
         loading: commissionMianReducers?.loading,

@@ -5,7 +5,6 @@ import { TieredMenu } from 'primereact/tieredmenu';
 
 const MenuData = ({ menuitems, rowData }) => {
     const menu = useRef(null);
-    console.log(rowData, "llll");
     return (
         <div className="card flex justify-content-center">
             <TieredMenu

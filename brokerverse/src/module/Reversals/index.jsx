@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../assets/icons/SvgDot";
@@ -6,10 +6,8 @@ import InputField from "../../components/InputField";
 import DropDowns from "../../components/DropDowns";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
-import NavBar from "../../components/NavBar";
 import TableData from "./TableData/TableData";
 import { useFormik } from "formik";
-import ArrowLeftIcon from "../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -120,17 +118,8 @@ const Reversals = () => {
 
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
-        {/* <div className="col-12 p-0">
-          <div className="correction__title__reversal">
-            <span onClick={() => setStep(step - 1)}>
-              {step !== 0 && <ArrowLeftIcon />}
-            </span>{" "}
-            Reversal JV Details
-          </div>
-        </div> */}
         <div className="correction__title__reversal">
           <span onClick={() => setStep(step - 1)}>
-            {/* <SvgBackicon /> */}
             {step !== 0 && <SvgBackicon />}
           </span>
           <label className={step !== 0 ? "label_header" : ""}>

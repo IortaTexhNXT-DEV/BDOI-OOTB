@@ -32,23 +32,9 @@ const QuotationAuditTrail = ({ quotationId: propQuotationId }) => {
 
   useEffect(() => {
     if (quotationId) {
-      console.log(
-        "Fetching audit trail for quotationId:",
-        quotationId,
-        "sortOrder:",
-        sortOrder
-      );
       dispatch(getQuotationAuditTrail(quotationId, sortOrder));
     }
   }, [dispatch, quotationId, sortOrder]);
-
-  // Debug: Log the audit trail data when it changes
-  useEffect(() => {
-    if (auditTrailData && auditTrailData.length > 0) {
-      console.log("Audit trail data received:", auditTrailData);
-      console.log("First record:", auditTrailData[0]);
-    }
-  }, [auditTrailData]);
 
   const handleSortChange = (e) => {
     setSortOrder(e.value);

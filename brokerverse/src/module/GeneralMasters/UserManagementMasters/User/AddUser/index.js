@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -19,7 +19,6 @@ import {
 import moment from "moment";
 import userService from "../../../../../services/userService";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
-import { unwrapResult } from "@reduxjs/toolkit";
 import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
 import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
 
@@ -174,7 +173,6 @@ const AddUser = ({ action }) => {
 
   // Set form values when user data is loaded (for edit/view)
   const setFormikValues = () => {
-
     // The record loaded for this route first, then the row picked in the list
     const userData =
       userDetailList?.userId === id
@@ -226,14 +224,6 @@ const AddUser = ({ action }) => {
     }
   }, [id, action, dispatch]);
 
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     dispatch(getUserListByIdMiddleware(id)).then(() => {
-  //       setFormikValues();
-  //     });
-  //     setFormikValues();
-  //   }
-  // }, [action, id]);
   return (
     <div className="grid add__user__container">
       <div

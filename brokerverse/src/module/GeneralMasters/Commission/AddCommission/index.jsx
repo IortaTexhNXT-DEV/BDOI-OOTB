@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../AddCommission/index.scss";
 import DropDowns from "../../../../components/DropDowns";
@@ -20,7 +19,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import AddCommissionPopup from "./AddCommissionPopup";
-import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../../../components/Toast";
 import { SelectButton } from "primereact/selectbutton";
 import useMasterOptions from "../../common/useMasterOptions";
@@ -43,12 +41,8 @@ const AddCommission = () => {
   const { t } = useTranslation();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
-  const [date, setDate] = useState();
   const {
     addLevelCommissionSharing,
-    loading,
-    commissionSearchList,
-    commissionList,
   } = useSelector(({ commissionMianReducers }) => {
     return {
       loading: commissionMianReducers?.loading,
@@ -161,11 +155,8 @@ const AddCommission = () => {
   const handlePolicy = () => {
     setVisible(true);
   };
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const handleNavigate = () => {
-    navigate("/accounts/journalvoucher/detailsjournalvocture");
-  };
+  const [, setFirst] = useState(0);
+  const [, setRowsPerPage] = useState(10);
   const onPageChange = (event) => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
@@ -176,9 +167,6 @@ const AddCommission = () => {
       <SvgTable />
     </div>
   );
-  const handleApproval = () => {
-    setStep(2);
-  };
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const headerStyle = {
@@ -223,7 +211,6 @@ const AddCommission = () => {
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showViewPopup, setShowViewPopup] = useState(false);
   const handleNavigateView = (rowData) => {
-    // navigate("/master/generals/commission/viewcommission")
     setShowViewPopup(true);
     dispatch(getCommissionPopupView(rowData));
   };
@@ -231,7 +218,6 @@ const AddCommission = () => {
   const handleEditNavigate = (rowData) => {
     dispatch(getEditCommissionPopup(rowData));
     setShowEditPopup(true);
-    // navigate("/master/generals/commission/editcommission/editcommissionpopup")
   };
   const renderEditButton = (rowData) => {
     return (
@@ -260,12 +246,6 @@ const AddCommission = () => {
           </span>
           <label className="label_header">{t("commission.addCommissions")}</label>
         </div>
-        {/* <div className="add__sub__title">
-          <div onClick={handleGoBack} className="mr-2 mt-1">
-            <ArrowLeftIcon />
-          </div>
-          Add Commissions
-        </div> */}
         <div className="mt-3 mb-3">
           <BreadCrumb
             home={home}
@@ -304,7 +284,6 @@ const AddCommission = () => {
                   </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -358,7 +337,6 @@ const AddCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -449,8 +427,6 @@ const AddCommission = () => {
                 classNames="input__field__reversal"
               >
                 <Calendar
-                  // value={date}
-                  // onChange={(e) => setDate(e.value)}
                   value={
                     formik.values.effectiveFrom
                       ? new Date(formik.values.effectiveFrom)
@@ -515,7 +491,6 @@ const AddCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -596,7 +571,6 @@ const AddCommission = () => {
               field="commissionCode"
               header="Commission Code"
               headerStyle={headerStyle}
-              // style={{ display: 'grid', alignItems: 'center', justifyContent: 'center' }}
             ></Column>
             <Column
               field="sharingRate"

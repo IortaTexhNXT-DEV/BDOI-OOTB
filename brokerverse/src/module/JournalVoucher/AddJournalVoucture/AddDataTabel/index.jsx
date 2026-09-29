@@ -5,9 +5,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgEditIcon from "../../../../assets/icons/SvgEditicons";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgDeleteIcon from "../../../../assets/icons/SvgDeleteIcon";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { Dialog } from "primereact/dialog";
 import "../EditData/index.scss";
 import { useFormik } from "formik";
@@ -15,7 +13,6 @@ import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { patchJVMiddleware } from "../../store/journalVoucherMiddleware";
 import useJvMasterData from "../../useJvMasterData";
 
@@ -25,16 +22,9 @@ const ENTRY_TYPES = [
 ];
 
 const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
-  const [first, setFirst] = useState(0);
+  const [, setFirst] = useState(0);
   const [visibleEdit, setVisibleEdit] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const navigate = useNavigate();
-  const handleNavigate = (rowData) => {
-    console.log(rowData, "rowData");
-
-    // setVisibleEdit(true)
-  };
-  console.log(journalVoucherPostTabelData, "jv");
+  const [, setRowsPerPage] = useState(10);
 
   const onPageChange = (event) => {
     setFirst(event.first);
@@ -78,7 +68,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
 
   const handleEdit = (rowData) => {
     setEditID(rowData?.id);
-    console.log("first10", rowData?.id);
     setVisibleEdit(true);
   };
 
@@ -139,7 +128,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
   const dispatch = useDispatch();
   const [EditID, setEditID] = useState(null);
   const handleSubmit = (values) => {
-    console.log(values, "find values in formik");
     // keep the local amount in step with an edited foreign amount (same rate the line was entered with)
     const original = (Array.isArray(journalVoucherPostTabelData) ? journalVoucherPostTabelData : []).find((r) => r.id === EditID) || {};
     const oldForeign = parseFloat(original.foreignAmount);
@@ -151,7 +139,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       localAmount: Number.isFinite(newForeign) ? (newForeign * rate).toFixed(2) : values.localAmount,
       id: EditID,
     };
-    console.log(valueWithId, "find values in formik");
     dispatch(patchJVMiddleware(valueWithId));
     setVisibleEdit(false);
   };
@@ -182,7 +169,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     const targetInvoice = journalVoucherPostTabelData.find(
       (item) => item.id === EditID
     );
-    console.log(targetInvoice, "find data");
     const mainAcc = targetInvoice?.mainAccount;
     const subAc = targetInvoice?.subAccount;
     const entryT = targetInvoice?.entryType;
@@ -325,11 +311,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           <div className="grid m-0">
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 placeholder="Select "
                 className="dropdown__container"
-                // classNames="select__label__jv"
                 optionLabel="value"
                 label="Main Account"
                 value={formik.values.mainAccount}
@@ -347,8 +331,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Main Account Description"
                 value={describe(mainAccountsData, formik.values.mainAccount)}
@@ -357,11 +339,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
 
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 placeholder="Select "
                 className="dropdown__container"
-                // classNames="select__label__jv"
                 optionLabel="value"
                 label="Entry Type"
                 value={formik.values.entryType}
@@ -380,13 +360,10 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           </div>
           <div
             className="grid m-0 "
-            // style={{ alignItems: "center" }}
           >
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 className="dropdown__container"
                 optionLabel="value"
                 label="Sub Account"
@@ -406,8 +383,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Sub Account Description"
                 value={describe(subAccountsData, formik.values.subAccount)}
@@ -417,9 +392,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           <div className="grid m-0 ">
             <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 optionLabel="value"
                 className="dropdown__container"
                 label="Branch Code"
@@ -439,8 +412,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Branch Code Description"
                 value={describe(branchCodesData, formik.values.branchCode)}
@@ -459,9 +430,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           <div className="grid m-0 ">
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 className="dropdown__container"
                 optionLabel="value"
                 label="Department Code"
@@ -484,8 +453,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Department Description"
                 value={describe(departmentCodesData, formik.values.departmentCode)}
@@ -503,13 +470,10 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           </div>
           <div
             className="grid m-0 "
-            // style={{ alignItems: "center" }}
           >
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 optionLabel="value"
                 className="dropdown__container"
                 label="Currency Code"
@@ -529,8 +493,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Currency Description"
                 value={describe(currencyCodesData, formik.values.currencyCode)}
@@ -547,8 +509,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <InputField
-                // classNames="input__field__jv"
-                // className="select__label__jv"
                 classNames="field__container"
                 label="Foreign Amount"
                 value={formik.values.foreignAmount}
@@ -571,9 +531,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 Remarks <span style={{ color: "#B1B1B1" }}>(Options)</span>
               </div>
               <InputField
-                // classNames="input__field__jv"
-                // className="select__label__jv"
-                // label="Remarks (Options)"
                 value={formik.values.remarks}
                 classNames="field__container"
                 onChange={(e) =>

@@ -1,9 +1,7 @@
-// import "./index.scss";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate } from "react-router-dom";
-// import LeadEdit from "../leadEdit";
 import { EmployeeCreationCard } from "./EmployeeCreationCard";
  
 const EmployeeLeadCreation = ({ flow, action }) => {
@@ -23,7 +21,6 @@ const EmployeeLeadCreation = ({ flow, action }) => {
           <EmployeeCreationCard flow={flow} action={action} />
         </div>
         : <div>
-          {/* <LeadEdit flow={flow} action={action} /> */}
           <EmployeeCreationCard flow={flow} action={action} />
         </div>
       }

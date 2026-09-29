@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getEmployeeListMiddleware, getEmployeeListByIdMiddleware, postAddEmployeeMiddleware, patchEmployeeEditMiddleware, getSearchEmployeeMiddleware, getEmployeViewMiddleWare, getEmployeEditMiddleWare } from "./employeeMiddleware";
-// import SvgIconeye from "../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",
@@ -55,8 +54,6 @@ const employeeReducer = createSlice({
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
-
-
     builder.addCase(postAddEmployeeMiddleware.pending, (state) => {
       state.loading = true;
     });
@@ -70,10 +67,8 @@ const employeeReducer = createSlice({
     builder.addCase(postAddEmployeeMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
-
 
     builder.addCase(patchEmployeeEditMiddleware.pending, (state) => {
       state.loading = true;
@@ -106,7 +101,6 @@ const employeeReducer = createSlice({
       }
     );
 
-
     builder.addCase(getEmployeViewMiddleWare.pending, (state) => {
       state.loading = true;
     });
@@ -128,7 +122,6 @@ const employeeReducer = createSlice({
       }
     );
 
-
     builder.addCase(getEmployeEditMiddleWare.pending, (state) => {
       state.loading = true;
     });
@@ -149,8 +142,6 @@ const employeeReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
-
   },
 });
 

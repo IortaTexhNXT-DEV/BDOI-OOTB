@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "../OpenItemsListData/index.scss";
-import SvgGoBack from "../../../assets/agentIcon/SvgGoBack";
 import SvgArrow from "../../../assets/agentIcon/SvgArrow";
 import SvgMotorTable from "../../../assets/agentIcon/SvgMotorTable";
 import { useNavigate } from "react-router-dom";

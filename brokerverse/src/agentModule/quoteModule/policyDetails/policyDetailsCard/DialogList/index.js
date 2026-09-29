@@ -1,8 +1,7 @@
 import { Button } from 'primereact/button';
-import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputTextField from '../../../../component/inputText';
-import DropdownField from '../../../../component/DropdwonField';
+import DropdownField from '../../../../component/DropdownField';
 import { Dialog } from 'primereact/dialog';
 import { getDisplayCurrencyConfig } from "../../../../../utility/currencyConverter";
 import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";
@@ -14,7 +13,6 @@ import { useFormik } from 'formik';
 
 const DialogList = ({ setVisible, visible }) => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   // Participants from the Insurance Company master; currencies from the Currency master (default: display currency)
   const InsurancePolicycontainer = useInsuranceCompanyOptions();
   const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
@@ -27,7 +25,7 @@ const DialogList = ({ setVisible, visible }) => {
     Premiumcurrencys: getDisplayCurrencyConfig().currency,
     Sharepercentage: ""
   };
-  const { TableList, loading } = useSelector(
+  const { TableList } = useSelector(
     ({ policydetailreducer }) => {
       return {
         loading: policydetailreducer?.loading,
@@ -38,23 +36,14 @@ const DialogList = ({ setVisible, visible }) => {
   );
   const dispatch = useDispatch();
   const handleclick = (values) => {
-
-    console.log(values, "action");
     setVisible(false)
     formik.resetForm()
     const valueWithId = {
       ...values,
       id: TableList?.length + 1,
     };
-    console.log(valueWithId, "action with valuesP")
     dispatch(postModleDetailsMiddleware(valueWithId));
-    // {
-    //   action === "quotedetails"
-    //     ? navigate(`/agent/createquote/coveragedetails/coveragedetail/${123}`)
-    //     : navigate(`/agent/createquote/coveragedetails/coveragecreate/${123}`);
-    // }
   };
-
 
   const formik = useFormik({
     initialValues: initialValue,
@@ -63,7 +52,6 @@ const DialogList = ({ setVisible, visible }) => {
       handleclick(values);
     },
   });
-
 
   return (
     <div>
@@ -75,7 +63,6 @@ const DialogList = ({ setVisible, visible }) => {
               value={formik.values.ParticipantName}
               options={InsurancePolicycontainer}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("ParticipantName", e.value);
               }}
               optionLabel="label"
@@ -91,7 +78,6 @@ const DialogList = ({ setVisible, visible }) => {
               value={formik.values.SumInsuredcurrency}
               options={pesoTypes}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("SumInsuredcurrency", e.value);
               }}
               optionLabel="label"
@@ -104,7 +90,6 @@ const DialogList = ({ setVisible, visible }) => {
               value={formik.values.Premiumcurrencys}
               options={PremiumCurrency}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("Premiumcurrencys", e.value);
               }}
               optionLabel="label"
@@ -116,7 +101,6 @@ const DialogList = ({ setVisible, visible }) => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("tables.sharePercent")}
-              // value={formik.values.SeatingCapacity}
               value={formik.values.Sharepercentage}
               onChange={formik.handleChange("Sharepercentage")}
             />
@@ -132,7 +116,6 @@ const DialogList = ({ setVisible, visible }) => {
             {t("common.save")}
           </Button>
         </div>
-
 
       </Dialog>
     </div>

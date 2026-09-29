@@ -4,38 +4,28 @@ import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
 import SvgDot from "../../../assets/icons/SvgDot";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useLocation, useNavigate } from "react-router-dom";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../components/DatePicker";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../components/LabelWrapper";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { Tag } from "primereact/tag";
-import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import { useDispatch, useSelector } from "react-redux";
-import { patchpaymentStatusByIdMiddleware } from "../store/paymentVocherMiddleware";
+import { useSelector } from "react-redux";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import mastersService from "../../../services/mastersService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 function Bankdetailselection() {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const toastRef = useRef(null);
-  const [date, setDate] = useState(null);
-  const dispatch = useDispatch();
   const [selectedProducts, setSelectedProducts] = useState(null);
-  const [visible, setVisible] = useState(false);
   const Navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState(null);
   const [bankaccountitem, setBankaccount] = useState(null);
@@ -43,7 +33,7 @@ function Bankdetailselection() {
   const [totalAmount, setTotalAmount] = useState("");
   const [checkbookList, setCheckbookList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [invoiceData, setInvoiceData] = useState(null);
+  const [, setInvoiceData] = useState(null);
   const location = useLocation();
   const locationState = location.state || {};
   const { disbursementData: disbursementDataFromState } = locationState;
@@ -105,18 +95,17 @@ function Bankdetailselection() {
               })
             );
             setCheckbookList(transformedCheckbooks);
-            console.log("Transformed checkbook data:", transformedCheckbooks);
           }
         } else {
-          console.error("Failed to fetch invoice list:", result.error);
+          logger.error("Failed to fetch invoice list:", result.error);
         }
       } catch (error) {
-        console.error("Error fetching checkbook details:", error);
+        logger.error("Error fetching checkbook details:", error);
       } finally {
         setLoading(false);
       }
     } else {
-      console.warn("No invoice IDs selected");
+      logger.warn("No invoice IDs selected");
       setLoading(false);
     }
   };
@@ -271,9 +260,6 @@ function Bankdetailselection() {
   useEffect(() => {
     if (actionToast != null) {
       toastRef.current.showToast();
-      {
-        setTimeout(() => {}, 3000);
-      }
     }
   }, [actionToast]);
 
@@ -331,7 +317,7 @@ function Bankdetailselection() {
           );
         }
       } catch (error) {
-        console.error("Error approving agent payout:", error);
+        logger.error("Error approving agent payout:", error);
         toastRef.current?.showToast(
           "error",
           t("common.error"),
@@ -342,7 +328,7 @@ function Bankdetailselection() {
     }
 
     if (!selectedProducts || !selectedProducts.rawData) {
-      console.error("No checkbook selected");
+      logger.error("No checkbook selected");
       return;
     }
     const checkbookData = selectedProducts.rawData;
@@ -386,7 +372,7 @@ function Bankdetailselection() {
           });
 
         if (!disbursementUpdateResult.success) {
-          console.error(
+          logger.error(
             "Failed to update disbursement:",
             disbursementUpdateResult.error
           );
@@ -426,7 +412,7 @@ function Bankdetailselection() {
           setTotalAmount("");
           await fetchCheckbookDetails();
         } else {
-          console.error("Failed to update checkbook:", result.error);
+          logger.error("Failed to update checkbook:", result.error);
           toastRef.current?.showToast({
             severity: "error",
             summary: t("common.error"),

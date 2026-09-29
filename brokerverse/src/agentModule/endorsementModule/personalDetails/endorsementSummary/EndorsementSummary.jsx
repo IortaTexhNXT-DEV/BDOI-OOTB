@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import "./index.scss";
@@ -25,6 +25,7 @@ import { numberLocale } from "../../../../utility/currencyConverter";
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 import { getTaxRates } from "../../../quoteModule/utils/premiumCalculations";
 import { confirmAction, notifyError } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -54,9 +55,9 @@ const EndorsementSummary = ({ action }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [policyData, setPolicyData] = useState(null);
-  const [relatedPolicy, setRelatedPolicy] = useState(null);
-  const [checkingPolicy, setCheckingPolicy] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setRelatedPolicy] = useState(null);
+  const [, setCheckingPolicy] = useState(false);
+  const [isLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
   const { productConfigurator } = useSelector(
@@ -124,7 +125,7 @@ const EndorsementSummary = ({ action }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch related policy:", error);
+      logger.error("Failed to fetch related policy:", error);
     } finally {
       setCheckingPolicy(false);
     }
@@ -163,16 +164,10 @@ const EndorsementSummary = ({ action }) => {
       );
 
       if (!validation.isValid) {
-        console.warn("⚠️ [EndorsementSummary] Accounting equation mismatch:", {
+        logger.warn("[EndorsementSummary] Accounting equation mismatch:", {
           ...validation.breakdown,
           calculatedTotal: validation.calculatedTotal,
           difference: validation.difference,
-          endorsementId: state?.endorsementId,
-        });
-      } else {
-        console.log("✅ [EndorsementSummary] Accounting equation validates correctly:", {
-          ...validation.breakdown,
-          calculatedTotal: validation.calculatedTotal,
           endorsementId: state?.endorsementId,
         });
       }
@@ -335,41 +330,29 @@ const EndorsementSummary = ({ action }) => {
     } catch (error) {
       setIsSending(false);
       notifyError(t("endorsementSummary.errorSending"));
-      console.error(error);
     } finally {
       setIsSending(false);
     }
 
     // try {
     //   const response = await fetch(
-    //     `${BASE_URL}/quotations/${quotationData.quotationId}/send-for-approval`,
     //     {
     //       method: "POST",
     //       headers: {
     //         "Content-Type": "application/json",
-    //         ...authService.getAuthHeader(),
     //       },
-    //       body: JSON.stringify({ sentBy: "agent" }),
     //     }
     //   );
 
-    //   const result = await response.json();
-
     //   if (result.success) {
-    //     alert(`Quote sent to ${result.sentTo} successfully!`);
     //     // Refresh quotation data
     //     const refreshed = await dispatch(
-    //       getQuotationByIdMiddleware(quotationData.quotationId)
     //     );
     //     if (refreshed.type.endsWith("/fulfilled")) {
-    //       setQuotationData(refreshed.payload);
     //     }
     //   } else {
-    //     alert(`Failed: ${result.message}`);
     //   }
     // } catch (error) {
-    //   alert("Error sending quote for approval");
-    //   console.error(error);
     // }
   };
 

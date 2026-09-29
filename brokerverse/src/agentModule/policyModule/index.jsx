@@ -34,7 +34,7 @@ const ClientListingCard = () => {
   };
 
   // A policy is issued from a lead's quotation: offer Create Policy only to roles that may open Leads (not claims,
-  // as D109 did for Create Lead), and Bulk Upload only to roles the server lets write policies.
+  // as for Create Lead), and Bulk Upload only to roles the server lets write policies.
   const mayCreatePolicy = canOpen("/agent/leadlisting");
   const mayBulkUpload = hasPermission("write:policies");
 
@@ -152,9 +152,6 @@ const ClientListingCard = () => {
         </div>
 
         {/* Policy Statistics Cards */}
-        {/* <div className="col-12">
-          <PolicyStatsCards />
-        </div> */}
 
         <div className="card__container__outer">
           <Card style={{ borderRadius: "20px" }}>

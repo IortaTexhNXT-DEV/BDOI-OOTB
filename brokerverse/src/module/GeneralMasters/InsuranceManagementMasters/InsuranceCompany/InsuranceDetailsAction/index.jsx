@@ -1,20 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import { MultiSelect } from "primereact/multiselect";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
-import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import {
   patchInsuranceCompanyMiddleWare,
@@ -23,17 +18,13 @@ import {
   getInsurancePatchData as loadInsurancePatchData,
 } from "../store/insuranceCompanyMiddleware";
 import { useSelector, useDispatch } from "react-redux";
-import { act } from "react-dom/test-utils";
 import useMasterOptions from "../../../common/useMasterOptions";
 
 const InsuranceDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [dropdownData, setdropdown] = useState({});
   const {
-    InsuranceCompanyList,
     getInsuranceView,
-    loading,
     getInsurancePatchData,
   } = useSelector(({ insuranceCompanyReducers }) => {
     return {
@@ -46,18 +37,6 @@ const InsuranceDetailsAction = ({ action }) => {
   const { id } = useParams();
   const toastRef = useRef(null);
   const navigation = useNavigate();
-
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     if (id != null) {
-  //       const filteredInsuranceCompanyList = InsuranceCompanyList.filter(
-  //         (data) => data.id === parseInt(id)
-  //       );
-  //       setFormikValues(filteredInsuranceCompanyList);
-  //       setdropdown(filteredInsuranceCompanyList)
-  //     }
-  //   }
-  // }, [action]);
 
   const items = [
     {
@@ -250,7 +229,6 @@ const InsuranceDetailsAction = ({ action }) => {
               className="input__label__corrections"
               placeholder="Enter"
               label={t("generalMasters.insuranceCompanyCode")}
-              // value={formik.values.insuranceCompanyCode}
               value={
                 action == "add"
                   ? formik.values.insuranceCompanyCode
@@ -258,7 +236,6 @@ const InsuranceDetailsAction = ({ action }) => {
                     ? formik.values.insuranceCompanyCode
                     : getInsuranceView?.insuranceCompanyCode
               }
-              // value={formik.values.insuranceCompanyCode}
               onChange={(e) =>
                 formik.setFieldValue("insuranceCompanyCode", e.target.value)
               }
@@ -448,7 +425,6 @@ const InsuranceDetailsAction = ({ action }) => {
               }
              
               onChange={(e) => formik.setFieldValue("state", e.value)}
-              // options={State}
               options={State}
             />
             {formik.touched.state && formik.errors.state && (
@@ -478,7 +454,6 @@ const InsuranceDetailsAction = ({ action }) => {
               }
               
               onChange={(e) => formik.setFieldValue("country", e.value)}
-              // options={Country}
               options={Country}
             />
             {formik.touched.country && formik.errors.country && (

@@ -145,7 +145,6 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -171,7 +170,6 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -257,7 +255,6 @@ const LeadListing = () => {
         throw new Error(result.error || t("leads.reportFailedDetail"));
       }
     } catch (error) {
-      console.error("Generate report error:", error);
       toast.current.show({
         severity: "error",
         summary: t("leads.reportFailed"),
@@ -318,7 +315,6 @@ const LeadListing = () => {
             <Dropdown
               value={selectedOption}
               options={dropdownOptions}
-              // onChange={(e) => setSelectedOption(e.value)}
               placeholder={t("leads.createLead")}
               dropdownIcon={<SvgAdd />}
             />

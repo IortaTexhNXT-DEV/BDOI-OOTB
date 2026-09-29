@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getAccessToken } from "../utility/tokenManager";
 import { BASE_URL } from "../utility/constant";
+import logger from "../utility/logger";
 
 const API_BASE_URL = BASE_URL;
 
@@ -20,7 +21,7 @@ class NotificationService {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         } else {
-          console.warn("Notification API: No access token found");
+          logger.warn("Notification API: No access token found");
         }
         return config;
       },
@@ -36,7 +37,7 @@ class NotificationService {
       },
       (error) => {
         if (error.response?.status === 401) {
-          console.error(
+          logger.error(
             "Notification API: Authentication failed - token may be invalid or expired"
           );
           // Optionally redirect to login or refresh token
@@ -56,9 +57,6 @@ class NotificationService {
       const response = await this.api.get("/notifications", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching notifications:", error);
-      console.error("Error response:", error.response?.data);
-
       // Handle different error types
       if (error.response?.status === 500) {
         throw new Error(
@@ -92,8 +90,6 @@ class NotificationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error marking notification as read:", error);
-      console.error("Error response:", error.response?.data);
       throw new Error(error.message || "Failed to mark notification as read");
     }
   }
@@ -110,7 +106,6 @@ class NotificationService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error marking notifications as read:", error);
       throw new Error(error.message || "Failed to mark notifications as read");
     }
   }
@@ -124,7 +119,6 @@ class NotificationService {
       const response = await this.api.put("/notifications/read-all");
       return response.data;
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
       throw new Error(
         error.message || "Failed to mark all notifications as read"
       );
@@ -143,7 +137,6 @@ class NotificationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error deleting notification:", error);
       throw new Error(error.message || "Failed to delete notification");
     }
   }
@@ -160,7 +153,6 @@ class NotificationService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error deleting notifications:", error);
       throw new Error(error.message || "Failed to delete notifications");
     }
   }
@@ -174,7 +166,6 @@ class NotificationService {
       const response = await this.api.get("/notifications/stats");
       return response.data;
     } catch (error) {
-      console.error("Error fetching notification stats:", error);
       throw new Error(error.message || "Failed to fetch notification stats");
     }
   }
@@ -188,10 +179,11 @@ class NotificationService {
       const response = await this.api.get("/notifications/unread-count");
       return response.data.unreadCount;
     } catch (error) {
-      console.error("Error fetching unread count:", error);
+      logger.error("Error fetching unread count:", error);
       return 0;
     }
   }
 }
 
-export default new NotificationService();
+const notificationService = new NotificationService();
+export default notificationService;

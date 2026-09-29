@@ -1,10 +1,9 @@
-import React from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -13,7 +12,7 @@ import document from "../../../assets/images/document.png";
 const ClaimDocumentUpload = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { claimDocumentUploadData, loading } = useSelector(
+  const { claimDocumentUploadData } = useSelector(
     ({ claimDocumentUploadMainReducers }) => {
       return {
         loading: claimDocumentUploadMainReducers?.loading,
@@ -40,7 +39,6 @@ const ClaimDocumentUpload = () => {
       value: claimDocumentUploadData.country,
     },
   ];
-  console.log(claimDocumentUploadData, "claimDocumentUploadData");
   const Navigate = useNavigate();
   const clientId =
     location.state?.clientId || claimDocumentUploadData?.clientId;
@@ -177,8 +175,8 @@ const ClaimDocumentUpload = () => {
           </div>
 
           <div className="uploaddoc__conatiner">
-            <img src={document} className="claimtitle__img__container" />
-            <img src={document} className="claimtitle__img__container" />
+            <img src={document} alt="" className="claimtitle__img__container" />
+            <img src={document} alt="" className="claimtitle__img__container" />
           </div>
 
           <div className="col-12 mt-3">

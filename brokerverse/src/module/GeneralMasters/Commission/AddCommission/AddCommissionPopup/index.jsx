@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
@@ -7,9 +6,9 @@ import DropDowns from "../../../../../components/DropDowns";
 import InputField from "../../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../../assets/icons/SvgNodalClose";
 import { postAddLevelShareRatingCommission } from "../../store/commissionMiddleWare";
 import { useDispatch } from "react-redux";
+import logger from "../../../../../utility/logger";
 const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
     const { t } = useTranslation();
     const codeOptionsMain = [
@@ -17,7 +16,6 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
         { label: "Option 2", value: "L2" },
         { label: "Option 2", value: "L3" },
     ];
-
 
     const customValidation = (values) => {
         const errors = {};
@@ -30,25 +28,16 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
             errors.sharingRate = t("validation.fieldRequired");
         }
 
-
         return errors;
     };
-    // const handleSubmit = (values) => {
-    //     console.log(values, "find values");
-    //     setVisible(false);
-    // };
     const dispatch=useDispatch()
     const handleSubmit = (values) => {
         dispatch(postAddLevelShareRatingCommission(formik.values))
           .then(() => {
-            // toastRef.current.showToast();
-            // setTimeout(() => {
-            //     setVisible(false);
-            // }, 2000);
             setVisible(false);
           })
           .catch((error) => {
-            console.error("Error:", error);
+            logger.error("Error:", error);
           });
       };
     
@@ -56,7 +45,6 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
         initialValues: {
             level: "",
             sharingRate: "",
-
         },
         validate: customValidation,
         onSubmit: (values) => {
@@ -64,7 +52,6 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
             formik.resetForm();
             handleUpdate(values);
             setVisible(false);
-            
         },
     });
     
@@ -122,8 +109,6 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
 
                 </div>
 
-
-
                 <div
                     className="col-12 save__popup__jv"
                     style={{
@@ -146,5 +131,4 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
 };
 
 export default AddCommissionPopup;
-
 

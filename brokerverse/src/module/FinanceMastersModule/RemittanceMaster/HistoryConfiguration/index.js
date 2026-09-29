@@ -3,16 +3,11 @@ import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { Checkbox } from "primereact/checkbox";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { MultiSelect } from "primereact/multiselect";
-import { RadioButton } from "primereact/radiobutton";
-import { Calendar } from "primereact/calendar";
-import { Slider } from "primereact/slider";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -171,11 +166,6 @@ const HistoryConfiguration = () => {
     }
   ]);
 
-  const retentionUnitOptions = [
-    { label: "Years", value: "Years" },
-    { label: "Months", value: "Months" },
-    { label: "Days", value: "Days" }
-  ];
 
   const archiveLocationOptions = [
     { label: "Cloud Storage", value: "Cloud Storage" },
@@ -189,20 +179,7 @@ const HistoryConfiguration = () => {
     { label: "Encrypted", value: "Encrypted" }
   ];
 
-  const priorityOptions = [
-    { label: "Low", value: "Low" },
-    { label: "Medium", value: "Medium" },
-    { label: "High", value: "High" },
-    { label: "Critical", value: "Critical" }
-  ];
 
-  const frequencyOptions = [
-    { label: "Daily", value: "Daily" },
-    { label: "Weekly", value: "Weekly" },
-    { label: "Monthly", value: "Monthly" },
-    { label: "Quarterly", value: "Quarterly" },
-    { label: "Annually", value: "Annually" }
-  ];
 
   const priorityBodyTemplate = (rowData) => {
     const getSeverity = (priority) => {
@@ -317,14 +294,6 @@ const HistoryConfiguration = () => {
     navigate("/master/finance/remittance");
   };
 
-  const handleRunPurgeRule = (ruleId) => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Purge Rule',
-      detail: `Purge rule ${ruleId} runs on its configured schedule; save the configuration to apply changes`,
-      life: 4000
-    });
-  };
 
   const handleTestArchive = () => {
     toast.current.show({

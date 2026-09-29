@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FileUpload } from "primereact/fileupload";
 import { Button } from "primereact/button";
@@ -19,8 +19,6 @@ import { postUploadPolicyMiddleWare } from "../quoteModule/uploadPolicy/store/up
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 import "./index.scss"
 
-
-
 const PCuploadPolicy = ({ state }) => {
   const { t } = useTranslation();
   const [imageURL, setimageURL] = useState();
@@ -30,36 +28,25 @@ const PCuploadPolicy = ({ state }) => {
 
   const handleSubmit = (value) => {
     toastRef.current.showToast();
-    console.log("122", value)
     dispatch(postUploadPolicyMiddleWare(value));
     setTimeout(() => {
       navigate("/agent/employee-benefit/client-policy-details", { state: state });
     }, 2000);
   };
-  // const minDate = new Date();
-  // minDate.setDate(minDate.getDate() + 1);
   // const customValidation = (values) => {
-  //   const errors = {}
   //   if (!values.PolicyNumber) {
-  //     errors.PolicyNumber = "This field is required";
   //   }
   //   if (!values.InsuranceCompany) {
-  //     errors.InsuranceCompany = "This field is required";
   //   }
   //   if (!values.Production) {
-  //     errors.Production = "This field is required";
   //   }
   //   if (!values.Inception) {
-  //     errors.Inception = "This field is required";
   //   }
   //   if (!values.IssuedDate) {
-  //     errors.IssuedDate = "This field is required";
   //   }
   //   if (!values.Expiry) {
-  //     errors.Expiry = "This field is required";
   //   }
   //   if (!values.file) {
-  //     errors.file = "This field is required";
   //   }
 
   //   return errors
@@ -77,10 +64,9 @@ const PCuploadPolicy = ({ state }) => {
     })(),
     file: null,
   };
-  const [expiryDateData, setExpieyDateData] = useState("")
+  const [, setExpieyDateData] = useState("")
   const handleUppendImg = (name, src) => {
     setimageURL(src.objectURL);
-    console.log(name, src.objectURL, "find handleUppendImg");
   };
   const handleBackNavigation = () => {
     customHistory.back();
@@ -88,7 +74,6 @@ const PCuploadPolicy = ({ state }) => {
   const handleLeadNavigation = () => {
     navigate(-1)
   };
-  console.log(imageURL, "imageURL");
 
   const formik = useFormik({
     initialValues:
@@ -106,7 +91,7 @@ const PCuploadPolicy = ({ state }) => {
     formik.setFieldValue("IssuedDate", issuedDate);
     formik.setFieldValue("Expiry", expiryDate);
   };
-  const { TableList, loading } = useSelector(
+  const { TableList } = useSelector(
     ({ policydetailreducer }) => {
       return {
         loading: policydetailreducer?.loading,
@@ -125,7 +110,6 @@ const PCuploadPolicy = ({ state }) => {
       <div className="no__data__found" style={{ textAlign: 'center' }}>{t("employeeBenefit.noDataEntered")}</div>
     </div>
   );
-  console.log("checkget", TableList)
 
   let flow = "nonrenewal"
   return (
@@ -171,7 +155,6 @@ sumInsured
           </DataTable>
         </div>
 
-
         <div className="grid mt-2">
 
           <div className="col-12 md:col-6 lg:col-6">
@@ -190,12 +173,10 @@ sumInsured
           <div className="col-12 md:col-6 lg:col-6">
             <DatepickerField label={t("employeeBenefit.productionRequired")}
               value={formik.values.Production}
-              // minDate={minDate}
               onChange={(e) => {
                 formik.setFieldValue("Production", e.target.value);
               }}
               dateFormat="yy-mm-dd"
-            // error={formik.errors.Production}
             />
             {formik.touched.Production && formik.errors.Production && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -206,7 +187,6 @@ sumInsured
           <div className="col-12 md:col-6 lg:col-6">
             <DatepickerField label="Inception*"
               value={formik.values.Inception}
-              // minDate={minDate}
 
               onChange={(e) => {
                 handleIssuedDateChange()
@@ -240,9 +220,6 @@ sumInsured
             <DatepickerField
               label={t("employeeBenefit.expiryRequired")}
               value={formik.values.Expiry}
-              // onChange={(e) => {
-              //   formik.setFieldValue("Expiry", e.target.value);
-              // }}
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Expiry && formik.errors.Expiry && (
@@ -290,26 +267,6 @@ sumInsured
             <SvgUploadClose />
           </div>
         )}
-
-        {/* <div className="grid m-0">
-          <div className="col-12 md:col-12 lg:col-12 back__complete__btn__container p-0 mt-4">
-            <div className="back__btn__container">
-              <Button className="back__btn" onClick={handleBackNavigation}>
-                Back
-              </Button>
-            </div>
-            <div className="complete__btn__container">
-              <Button
-                className="complete__btn__container"
-                onClick={() => {
-                  formik.handleSubmit();
-                }}
-              >
-                Complete
-              </Button>
-            </div>
-          </div>
-        </div> */}
 
         <div className="grid m-0">
           <div

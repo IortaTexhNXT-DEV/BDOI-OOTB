@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import "../../PettyCashManagement/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -7,7 +6,6 @@ import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router";
 import PettyCashReplenishTable from "./ReplenishTable";
-import NavBar from "../../../components/NavBar";
 
 const PettyCashReplenish = () => {
   const { t } = useTranslation();
@@ -34,7 +32,6 @@ const PettyCashReplenish = () => {
             <BreadCrumb
               model={items}
               home={Initiate}
-              // className="breadCrums"
               separatorIcon={<SvgDot color={"#000"} />}
             />
           </div>

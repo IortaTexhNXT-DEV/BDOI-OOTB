@@ -1,23 +1,16 @@
 import { InputText } from "primereact/inputtext";
-import TableDropdownField from "../../../../component/tableDropDwonField";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputSwitch } from "primereact/inputswitch";
-import { Checkbox } from "primereact/checkbox";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../../assets/icons/SvgArrow";
-import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
-import SvgTravlesTable from "../../../../../assets/agentIcon/SvgTravlesTable";
-import SvgHomeTable from "../../../../../assets/agentIcon/SvgHomeTable";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "primereact/avatar";
-// import PaymentCard from "./paymentCard";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getClientEditMiddleWare,
   getPaymentSearchDataMiddleWare,
@@ -31,11 +24,9 @@ const ClientListingAllCategory = ({
   paymentSearchList,
 }) => {
   const { t } = useTranslation();
-  console.log(data, "data");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("Name");
-  const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -55,109 +46,6 @@ const ClientListingAllCategory = ({
       );
     }
   }, [search]);
-
-  // console.log(status, "status");
-  // const clientListTable = [
-  //   {
-  //     id: "1",
-  //     Name: "Sophie Clark",
-  //     Category: "Retail",
-  //     Date: "2024-01-26",
-  //     Quotes: "01",
-  //     LeadID: "123456",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "2",
-  //     Name: "John Smith",
-  //     Category: "Retail",
-  //     Date: "2024-02-10",
-  //     Quotes: "02",
-  //     LeadID: "126",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "3",
-  //     Name: "Emma Davis",
-  //     Category: "Retail",
-  //     Date: "2024-03-15",
-  //     Quotes: "02",
-  //     LeadID: "1456",
-  //     Svg: <SvgHomeTable />,
-  //   },
-  //   {
-  //     id: "4",
-  //     Name: "Michael Johnson",
-  //     Category: "Retail",
-  //     Date: "2024-04-20",
-  //     Quotes: "03",
-  //     LeadID: "1236",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "5",
-  //     Name: "Olivia Turner",
-  //     Category: "Retail",
-  //     Date: "2024-05-25",
-  //     Quotes: "04",
-  //     LeadID: "1456",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "6",
-  //     Name: "David Rodriguez",
-  //     Category: "Corporate",
-  //     Date: "2024-06-30",
-  //     Quotes: "05",
-  //     LeadID: "123116",
-  //     Svg: <SvgHomeTable />,
-  //   },
-  //   {
-  //     id: "7",
-  //     Name: "Ava Williams",
-  //     Category: "Corporate",
-  //     Date: "2024-07-05",
-  //     Quotes: "06",
-  //     LeadID: "123411",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "8",
-  //     Name: "Daniel Brown",
-  //     Category: "Corporate",
-  //     Date: "2024-08-10",
-  //     Quotes: "01",
-  //     LeadID: "1234000",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "9",
-  //     Name: "Sophia Carter",
-  //     Category: "Retail",
-  //     Date: "2024-09-15",
-  //     Quotes: "02",
-  //     LeadID: "1234555",
-  //     Svg: <SvgHomeTable />,
-  //   },
-  //   {
-  //     id: "10",
-  //     Name: "Ryan Walker",
-  //     Category: "Corporate",
-  //     Date: "2024-10-20",
-  //     Quotes: "03",
-  //     LeadID: "1234226",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "11",
-  //     Name: "Ella Adams",
-  //     Category: "Corporate",
-  //     Date: "2024-11-25",
-  //     Quotes: "04",
-  //     LeadID: "1234000",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  // ];
 
   const template2 = {
     layout:
@@ -287,21 +175,9 @@ const ClientListingAllCategory = ({
   const handleViewAction = (rowData) => {
     // Use the actual client ID from the database
     const clientId = rowData.id || rowData.clientId || rowData.LeadID;
-    console.log('Navigating to client view with ID:', clientId, 'Row data:', rowData);
     navigate(`/agent/clientview/${clientId}`);
   };
 
-  const ViewheaderStyle = {
-    // justifyContent: 'center',
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-    // display: "grid",
-    // alignItem: "center",
-  };
   const ViewheadercenterStyle = {
     // justifyContent: 'center',
     textalign: "center",
@@ -348,7 +224,6 @@ const ClientListingAllCategory = ({
         <div className="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("clients.search")}
               value={search}
@@ -371,10 +246,7 @@ const ClientListingAllCategory = ({
             placeholder={t("clients.searchBy")}
             className="sorbyfilter__style"
             dropdownIcon={<SvgDropdownicon />}
-            // dropdownIcon={<SvgDownArrow/>}
           />
-          {/* // <Dropdown   optionLabel="name" className="feat_searchby_container" */}
-          {/* //         placeholder="Search by"  dropdownIcon={<SvgDownArrow/>}/> */}
         </div>
       </div>
       <div className="lead__table__container">

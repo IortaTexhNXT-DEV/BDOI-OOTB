@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -6,18 +6,15 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
-import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getDisbursmentListMiddleware,
   getDisbursmentSearchMiddleware,
   getDisbursmentViewMiddleware,
-  getViewDisbursmentMiddleware,
 } from "../store/pettyCashDisbursementMiddleware";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
@@ -26,13 +23,12 @@ const DisbursementTable = () => {
   const dispatch = useDispatch();
   const [globalFilter, setGlobalFilter] = useState("Pettycash Code");
   const [search, setSearch] = useState("");
-  const [selectedCity, setSelectedCity] = useState(null);
   const cities = [
     { name: "Pettycash Code", code: "PettycashCode" },
     { name: "Transaction code", code: "Transactioncode" },
     { name: "Transaction Number", code: "TransactionNumber" },
   ];
-  const { DisbursmentList, loading, DisbursmentSearch } = useSelector(
+  const { DisbursmentList, DisbursmentSearch } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -42,7 +38,6 @@ const DisbursementTable = () => {
     }
   );
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(
@@ -112,8 +107,6 @@ const DisbursementTable = () => {
 
   const handleView = (rowData) => {
     dispatch(getDisbursmentViewMiddleware(rowData));
-    // dispatch(getDisbursmentSearchMiddleware(rowData));
-    console.log("View clicked:", rowData);
     navigate("/accounts/pettycash/disbursementdetailview");
   };
   const headerStyle = {
@@ -126,18 +119,6 @@ const DisbursementTable = () => {
     border: "none",
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
 
   return (
     <div className="disbursement__table">
@@ -179,7 +160,6 @@ const DisbursementTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}

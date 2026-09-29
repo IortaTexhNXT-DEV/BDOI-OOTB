@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -179,7 +179,6 @@ const PersonalDetails = () => {
     policydetailedlist?.premiumTotal ??
     policydetailedlist?.quotation?.grossPremium ??
     "";
-  const [fireEndorsementPayload, setFireEndorsementPayload] = useState(null);
 
   useEffect(() => {
     const quotation = policydetailedlist?.quotation || {};
@@ -431,11 +430,9 @@ const PersonalDetails = () => {
               });
             }, 2000);
           } else {
-            console.error("API returned success: false", response.error);
             notifyError(response.error || "Failed to create endorsement");
           }
         } catch (error) {
-          console.error("Error creating endorsement:", error);
           notifyError("Error creating endorsement: " + error.message);
         }
         return;
@@ -521,11 +518,9 @@ const PersonalDetails = () => {
             });
           }, 2000);
         } else {
-          console.error("API returned success: false", response.error);
           notifyError(response.error || "Failed to create endorsement");
         }
       } catch (error) {
-        console.error("Error creating endorsement:", error);
         notifyError("Error creating endorsement: " + error.message);
       }
     },
@@ -596,10 +591,6 @@ const PersonalDetails = () => {
       const currentPosition = availableSections.indexOf(currentKey);
       const nextKey =
         currentPosition >= 0 ? availableSections[currentPosition + 1] : null;
-
-      if (index === 4 && payload) {
-        console.debug("Policy extend submission", payload);
-      }
 
       if (!nextKey) {
         setCurrentSectionIndex(null);

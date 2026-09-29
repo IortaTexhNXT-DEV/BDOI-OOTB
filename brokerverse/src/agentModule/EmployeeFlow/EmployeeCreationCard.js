@@ -1,17 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "primereact/card"; 
 import { Button } from "primereact/button"; 
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"; 
 import { useFormik } from "formik";
-// import { CountryOptions, CityOptions, StateOptions } from "../mock";
-// import countriesData from "../EmployeeFLow/mockdata";
 import countriesData from "./mockdata";
  import { RadioButton } from "primereact/radiobutton";
 import CustomToast from "../../components/Toast";
 import InputTextField from "../component/inputText";
 import DatepickerField from "../component/datePicker";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import { postCreateleadMiddleware,patchLeadEditMiddleWare } from "../leadModule/Store/leadMiddleware";
 import { patchClientEditMiddleWare } from "../quoteModule/clientListing/store/clientsMiddleware";
 
@@ -37,8 +35,7 @@ const initialValue = {
 };
 
 export const EmployeeCreationCard = ({ flow, action }) => {
-  console.log(flow, action, "datata");
-  const { loading, leadtabledata, getEditLeadData, getClientEditData } =
+  const { leadtabledata, getEditLeadData, getClientEditData } =
     useSelector(({ leadReducers, clientsReducers }) => {
       return {
         loading: leadReducers?.loading,
@@ -47,8 +44,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
         getClientEditData: clientsReducers?.getClientEditData,
       };
     });
-  console.log(getClientEditData, "getClientEditData");
-  // const [ingredient, setIngredient] = useState("");
   const [show, setShow] = useState(false);
   const toastRef = useRef(null);
   const navigate = useNavigate();
@@ -60,7 +55,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
         ...values,
         id: leadtabledata?.length + 1,
       };
-      console.log(values, "values");
       dispatch(postCreateleadMiddleware(valueWithId));
       toastRef.current.showToast();
       setTimeout(() => {
@@ -103,17 +97,11 @@ export const EmployeeCreationCard = ({ flow, action }) => {
     if (!values.LastName) {
       errors.LastName = "This field is required";
     }
-    // if (!values.EmailID) {
-    //   errors.EmailID = "This field is required";
-    // }
     if (!values.EmailID) {
       errors.EmailID = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
     }
-    // if (!values.ContactNumber) {
-    //   errors.ContactNumber = "This field is required";
-    // }
     if (!values.ContactNumber) {
       errors.ContactNumber = "Phone Number is required";
     } else if (!/^\d{10}$/.test(values.ContactNumber)) {
@@ -150,12 +138,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
     return errors;
   };
 
-  const handleSaveLead = () => {
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/agent/quotelisting");
-    }, 2000);
-  };
 
   const formik = useFormik({
     initialValues: initialValue,
@@ -256,7 +238,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     if (action === "edit") {
       setFormikValues();
@@ -395,40 +376,13 @@ export const EmployeeCreationCard = ({ flow, action }) => {
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6">
-            {/* <InputTextField label="Date of Birth" />  */}
             <DatepickerField
               label="Date of Birth*"
               value={formik.values.DateofBirth}
               onChange={(date) => {
-                console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);
               }}
             />
-
-            {/* <DatepickerField
-    label="Date of Birth"
-    value={formik.values.DateofBirth}
-    maxDate={new Date(2005, 11, 31)}
-    onChange={(date) => {
-        
-        const selectedDate = new Date(date);
-        
-        if (selectedDate.getFullYear() === 2024) {
-            console.log("You cannot select a date in the year 2024.");
-            return;
-        }
-        
-        const minDateOfBirth = new Date("2000-01-01");
-        const maxDateOfBirth = new Date();
-        
-        if (selectedDate < minDateOfBirth || selectedDate > maxDateOfBirth) {
-            console.log("Please select a valid date of birth.");
-            return;
-        }
- 
-        formik.setFieldValue("DateofBirth", selectedDate);
-    }}
-/> */}
 
             {formik.touched.DateofBirth && formik.errors.DateofBirth && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -521,13 +475,11 @@ export const EmployeeCreationCard = ({ flow, action }) => {
 
         <div class="grid mt-2">
           <div class="col-12 md:col-6 lg:col-6">
-            {/* <InputTextField label="First Name*"/> */}
             <DropdownField
               label="Country*"
               value={formik.values.Country}
               options={action === "post" ? Country : countryDataOption}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("Country", e.value);
               }}
               optionLabel="label"
@@ -544,7 +496,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
               value={formik.values.Province}
               options={action === "post" ? State : stateDataOption}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("Province", e.value);
               }}
               optionLabel="label"
@@ -564,7 +515,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
               value={formik.values.City}
               options={action === "post" ? City : cityDataOption}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("City", e.value);
               }}
               optionLabel="label"
@@ -590,16 +540,9 @@ export const EmployeeCreationCard = ({ flow, action }) => {
         </div>
 
         <div className="save_continue_conatiner">
-          {/* <Button
-            label="Save Lead"
-            onClick={handleSaveLead}
-            text
-            className="btn_lable_container"
-          /> */}
           <div className="btn_lable_save_container flex justify-content-end mt-2">
             <Button
               onClick={() => {
-                // formik.handleSubmit();
                 navigate("/agent/employee-benefit/create-quote")
               }}
               label={action === "post" ? "Save & Continue" : "Update"}

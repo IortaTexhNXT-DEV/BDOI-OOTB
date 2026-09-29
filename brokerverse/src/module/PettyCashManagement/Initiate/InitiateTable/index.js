@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -7,11 +7,9 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getInitiateDetailsMiddleware,
@@ -23,13 +21,12 @@ import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const InitiateTable = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Pettycashcode");
 
-  const { InitiateList, loading, InitiateListSearch } = useSelector(
+  const { InitiateList, InitiateListSearch } = useSelector(
     ({ pettyCashInitiateReducer }) => {
       return {
         loading: pettyCashInitiateReducer?.loading,
@@ -142,18 +139,6 @@ const InitiateTable = () => {
     }
   }, [search]);
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
   return (
     <div className="initiate__table">
       <Card className="mt-1">
@@ -170,7 +155,6 @@ const InitiateTable = () => {
             </span>
           </div>
           <div class="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
             <Dropdown
               value={search}
               onChange={(e) => setGlobalFilter(e.value)}
@@ -182,10 +166,6 @@ const InitiateTable = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <Button label="Search by" outlined icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
           <div className="sub__title">Petty Cash Code history</div>
         </div>
@@ -200,7 +180,6 @@ const InitiateTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}

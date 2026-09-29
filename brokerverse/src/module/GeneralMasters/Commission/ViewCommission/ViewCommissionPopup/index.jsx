@@ -1,32 +1,25 @@
 
-import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../components/DropDowns";
 import InputField from "../../../../../components/InputField";
-import { Button } from "primereact/button";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../../assets/icons/SvgNodalClose";
-import { useDispatch, useSelector } from "react-redux";
-import { addLevelPatchEditPopup } from "../../store/commissionMiddleWare";
+import { useSelector } from "react-redux";
 const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) => {
     const { t } = useTranslation();
-    const { loading, commissionPopupView } = useSelector(({ commissionMianReducers }) => {
+    const { commissionPopupView } = useSelector(({ commissionMianReducers }) => {
         return {
             loading: commissionMianReducers?.loading,
             commissionPopupView: commissionMianReducers?.commissionPopupView
-
         };
     });
-    console.log(commissionPopupView.sharingRate, "popupEditData")
 
     const codeOptionsMain = [
         { label: commissionPopupView.level, value: commissionPopupView.level },
       
     ];
-
 
     const customValidation = (values) => {
         const errors = {};
@@ -39,52 +32,24 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
             errors.sharingRate = t("validation.fieldRequired");
         }
 
-
         return errors;
     };
-    const dispatch=useDispatch()
     const handleSubmit = (value) => {
-        // dispatch(addLevelPatchEditPopup(value))
         setShowViewPopup(false);
-        console.log(value, "valuedata");
     }
-    const [levetOptionData, setLevelOptionData]=useState([])
 
     // const setFormikValues = () => {
     //     const levelData=popupEditData?.level
-       
-    //     const updatedValues = {
-    //         id: popupEditData?.id,
-    //         level:levelData,
-    //         sharingRate: popupEditData?.sharingRate,
-    //         commissionCode: popupEditData?.commissionCode,
-    //     };
-    //     if(levelData){
-    //         formik.setValues({ ...formik.values, ...updatedValues });
-    //         setLevelOptionData([{ label: levelData, value: levelData }]);
-    //     }
-      
-    //     formik.setValues({ ...formik.values, ...updatedValues });
+
     // };
     const formik = useFormik({
         initialValues: {
             level: "",
             sharingRate: "",
-
         },
         validate: customValidation,
         onSubmit:handleSubmit
-        // onSubmit: (values) => {
-        //     // console.log("Submitting form with values:", values);
-        //     handleSubmit(values);
-        //     // // formik.resetForm();
-        //     // handleUpdate(values);
-        //     setShowEditPopup(false);
-        // },
     });
-    // useEffect(() => {
-    //     setFormikValues();
-    // }, [popupEditData]);
 
     return (
         <Dialog
@@ -141,8 +106,6 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
 
                 </div>
 
-
-
                 <div
                     className="col-12 save__popup__jv"
                     style={{
@@ -151,12 +114,6 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
                         alignItems: "flex-end",
                     }}
                 >
-                    {/* <Button
-                        label={t("generalMasters.save")}
-                        className="jv__btn__reversal"
-                        disabled={!formik.isValid}
-                        onClick={formik.handleSubmit}
-                    /> */}
                 </div>
 
             </div>
@@ -165,5 +122,4 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
 };
 
 export default ViewCommissionPopup;
-
 

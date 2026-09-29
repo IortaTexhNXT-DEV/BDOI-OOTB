@@ -85,7 +85,6 @@ const accountCategoryMasterReducer = createSlice({
           ...state.AccountCategoryList,
           action.payload,
         ];
-        // state.AddBank = action.payload;
       }
     );
     builder.addCase(

@@ -7,9 +7,10 @@ import { Message } from "primereact/message";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CommissionService from "../../../services/commissionService";
-import { formatBaht } from "../utils/formatBaht";
+import { formatAmount } from "../utils/formatAmount";
 import LineDetailDrawer from "./LineDetailDrawer";
 import "./style.scss";
+import logger from "../../../utility/logger";
 
 const ReferrerAccountDetail = () => {
   const { id } = useParams();
@@ -36,7 +37,7 @@ const ReferrerAccountDetail = () => {
       const res = await CommissionService.getReferrerAccount(id);
       setDetail(res?.data || res);
     } catch (err) {
-      console.error("Failed to load referrer detail", err);
+      logger.error("Failed to load referrer detail", err);
       setDetail(null);
     } finally {
       setLoading(false);
@@ -126,13 +127,13 @@ const ReferrerAccountDetail = () => {
 
   const comsubBody = (row) => (
     <div className="comsub-cell">
-      <span className="comsub-amt">{formatBaht(row.comsub)}</span>
+      <span className="comsub-amt">{formatAmount(row.comsub)}</span>
       <span className="comsub-rate">{row.comsubRateLabel}</span>
     </div>
   );
 
   const netBody = (row) => (
-    <span className="net-amt">{formatBaht(row.net)}</span>
+    <span className="net-amt">{formatAmount(row.net)}</span>
   );
 
   const statusBody = (row) => {
@@ -157,7 +158,7 @@ const ReferrerAccountDetail = () => {
       <Column field="productInsurer" header="PRODUCT • INSURER" />
       <Column field="cycle" header="CYCLE" />
       <Column field="comsub" header="COMSUB" body={comsubBody} />
-      <Column field="wht" header="WHT" body={(r) => formatBaht(r.wht)} />
+      <Column field="wht" header="WHT" body={(r) => formatAmount(r.wht)} />
       <Column field="net" header="NET" body={netBody} />
       <Column field="status" header="STATUS" body={statusBody} />
     </DataTable>
@@ -246,15 +247,15 @@ const ReferrerAccountDetail = () => {
           <span className="label">
             Due this cycle ({summary.cycleLabel})
           </span>
-          <span className="value due">{formatBaht(summary.dueThisCycle)}</span>
+          <span className="value due">{formatAmount(summary.dueThisCycle)}</span>
         </div>
         <div className="summary-card">
           <span className="label">Upcoming (future)</span>
-          <span className="value">{formatBaht(summary.upcoming)}</span>
+          <span className="value">{formatAmount(summary.upcoming)}</span>
         </div>
         <div className="summary-card">
           <span className="label">Paid to date</span>
-          <span className="value paid">{formatBaht(summary.paidToDate)}</span>
+          <span className="value paid">{formatAmount(summary.paidToDate)}</span>
         </div>
       </div>
 
@@ -262,7 +263,7 @@ const ReferrerAccountDetail = () => {
         <div className="section-head">
           <h2>
             • CURRENT CYCLE — {currentCycle.label?.toUpperCase()} (DUE NOW) ·{" "}
-            {formatBaht(currentCycle.totalNet)}
+            {formatAmount(currentCycle.totalNet)}
           </h2>
           <div className="actions">
             <Button
@@ -290,7 +291,7 @@ const ReferrerAccountDetail = () => {
         <div className="section-head">
           <h2>
             ○ FUTURE CYCLES (ACCRUED, NOT YET PAYABLE) ·{" "}
-            {formatBaht(futureCycles.totalNet)}
+            {formatAmount(futureCycles.totalNet)}
           </h2>
           <Button
             label={`Mark eligible (${actions.markEligibleCount})`}
@@ -304,7 +305,7 @@ const ReferrerAccountDetail = () => {
 
       <section className="cycle-section past">
         <div className="section-head">
-          <h2>✓ PAST (PAID HISTORY) · {formatBaht(past.totalNet)}</h2>
+          <h2>✓ PAST (PAID HISTORY) · {formatAmount(past.totalNet)}</h2>
         </div>
         {past.lines?.length ? (
           renderLinesTable(past.lines, { clickable: true })

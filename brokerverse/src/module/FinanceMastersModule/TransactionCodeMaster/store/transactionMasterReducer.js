@@ -20,20 +20,10 @@ const initialState = {
   error: "",
   TransactioncodeList: [],
   TransactioncodeListsearch: [],
-  TrascationcodeDetailsView: [],
   AddTransaction: {},
   Status: {},
   getUserAccessData: {},
-  TransactionCodeSetup: [
-    {
-      id: 1,
-      AccountingPeriodStart: "12/1/2023",
-      AccountingPeriodEnd: "12/1/2023",
-      TransactionNumberFrom: "123",
-      TransactionNumberTo: "12",
-      lastUsed: "0",
-    },
-  ],
+  TransactionCodeSetup: [],
   UserGroupAccessList: [],
   AddTransactionCodeSetup: {},
   AddUserGroupAccess: {},
@@ -80,7 +70,6 @@ const transactionCodeMasterReducer = createSlice({
     builder.addCase(getTransactioncodeListsearch.rejected, (state, action) => {
       state.loading = false;
 
-      // state.TransactioncodeList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -105,12 +94,6 @@ const transactionCodeMasterReducer = createSlice({
     builder.addCase(postAddTransaction.pending, (state) => {
       state.loading = true;
     });
-    // builder.addCase(postAddTransaction.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   const newItem2 = action.payload;
-    //   state.TransactioncodeList = [...state.TransactioncodeList, newItem2];
-    //   console.log(state.TransactioncodeList, "g")
-    // });
     builder.addCase(postAddTransaction.fulfilled, (state, action) => {
       state.loading = false;
       state.TransactioncodeList = [
@@ -121,7 +104,6 @@ const transactionCodeMasterReducer = createSlice({
     builder.addCase(postAddTransaction.rejected, (state, action) => {
       state.loading = false;
 
-      // state.postTCdata = {};
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -169,7 +151,6 @@ const transactionCodeMasterReducer = createSlice({
     builder.addCase(postAddTransactionCodeSetup.rejected, (state, action) => {
       state.loading = false;
 
-      // state.postTCdata = {};
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 

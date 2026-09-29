@@ -67,10 +67,10 @@ const LeadListingAllTable = ({ action, clientId }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [displayDialog, setDisplayDialog] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode, setSelectionMode] = useState("multiple");
-  const [navAction, setNavAction] = useState(null);
+  const [selectionMode] = useState("multiple");
+  const [, setNavAction] = useState(null);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
   const [disableOption, setdisableOption] = useState(false);
@@ -106,7 +106,6 @@ const LeadListingAllTable = ({ action, clientId }) => {
       setFilteredPolicies([]);
     } finally {
       setLoading(false);
-      console.log("=== POLICY FETCH COMPLETE ===");
     }
   };
 
@@ -146,7 +145,6 @@ const LeadListingAllTable = ({ action, clientId }) => {
     const policyId = policy?.policyId || policy?.id;
 
     if (!policyId) {
-      console.error("No policy ID found for endorsement navigation");
       notifyWarn("Policy ID not found. Please try again.");
       return;
     }
@@ -189,7 +187,6 @@ const LeadListingAllTable = ({ action, clientId }) => {
       const policy = normalizePolicyRecord(selectedPolicy);
       const policyId = policy?.policyId || policy?.id;
       if (!policyId) {
-        console.error("No policy ID found for navigation");
         notifyWarn("Policy ID not found. Please try again.");
         return;
       }

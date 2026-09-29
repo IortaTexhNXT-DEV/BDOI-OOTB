@@ -7,6 +7,7 @@ import { Button } from "primereact/button";
 import "./index.scss";
 
 import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const PolicyRenewalWaiting = () => {
   const { t } = useTranslation();
@@ -70,10 +71,7 @@ const PolicyRenewalWaiting = () => {
             {t("renewalWaiting.waitingForPolicyRenewal")}
           </div>
           <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/4pbj1hp/waiting-for-approval.png"
-              className="claimtitle__img__container"
-            />
+            <StatusIllustration variant="waiting" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>

@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../../components/NavBar";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../../components/InputField";
@@ -23,7 +22,7 @@ const AddHierarchy = ({ action }) => {
   const { t } = useTranslation();
   const { id } = useParams();
 
-  const { hierarchyListDetails, loading, total, getViewData, getPatchData } =
+  const { getViewData, getPatchData } =
     useSelector(({ hierarchyTableReducers }) => {
       return {
         loading: hierarchyTableReducers?.loading,
@@ -35,7 +34,6 @@ const AddHierarchy = ({ action }) => {
     });
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
   const dispatch = useDispatch();
   useEffect(() => {
     if (!id) return;
@@ -153,7 +151,6 @@ const AddHierarchy = ({ action }) => {
                   : formik.values.rankCode
               }
               onChange={formik.handleChange("rankCode")}
-              // error={action === "view" ? "" : formik.errors.rankCode}
               label={t("generalMasters.rankCode")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -170,7 +167,6 @@ const AddHierarchy = ({ action }) => {
                   : formik.values.rankName
               }
               onChange={formik.handleChange("rankName")}
-              // error={action === "view" ? "" : formik.errors.rankName}
               label={t("generalMasters.rankName")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -188,7 +184,6 @@ const AddHierarchy = ({ action }) => {
                   : formik.values.description
               }
               onChange={formik.handleChange("description")}
-              // error={action === "view" ? "" : formik.errors.basis}
               label={t("generalMasters.description")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -205,7 +200,6 @@ const AddHierarchy = ({ action }) => {
                   : formik.values.levelNumber
               }
               onChange={formik.handleChange("levelNumber")}
-              // error={action === "view" ? "" : formik.errors.levelNumber}
               label={t("generalMasters.levelNumber")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
@@ -213,31 +207,6 @@ const AddHierarchy = ({ action }) => {
               error={formik.touched.levelNumber && formik.errors.levelNumber}
             />
           </div>
-          {/* <div className="col-12 md:col-3 lg:col-3">
-            <InputField
-             disabled={action === "view" ? true : false}
-              value={formik.values.modifiedBy}
-              onChange={formik.handleChange("modifiedBy")}
-              error={formik.errors.modifiedBy}
-              label="Modified By"
-              classNames="dropdown__add__sub"
-              className="label__sub__add"
-              placeholder={t("generalMasters.enter")}
-            />
-          </div>
-
-          <div className="col-12 md:col-3 lg:col-3">
-            <InputField
-             disabled={action === "view" ? true : false}
-              value={formik.values.modifiedOn}
-              onChange={formik.handleChange("modifiedOn")}
-              error={formik.errors.modifiedOn}
-              label={t("generalMasters.modifiedOn")}
-              classNames="dropdown__add__sub"
-              className="label__sub__add"
-              placeholder={t("generalMasters.enter")}
-            />
-          </div> */}
         </div>
       </div>
       <div className="col-12 btn__view__Add mt-2">

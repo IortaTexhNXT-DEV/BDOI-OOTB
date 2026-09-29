@@ -1,12 +1,8 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgHomes from "../../../assets/agentIcon/SvgHomes";
-import SvgQr from "../../../assets/agentIcon/SvgQr";
-import SvgCredit from "../../../assets/agentIcon/SvgCredit";
-import SvgEmoney from "../../../assets/agentIcon/SvgEmoney";
 import SvgDigital from "../../../assets/agentIcon/SvgDigital";
 import SvgStore from "../../../assets/agentIcon/SvgStore";
 import SvgDebit from "../../../assets/agentIcon/SvgDebit";
@@ -16,10 +12,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import DocumentUpload from "./Modal/DocumentUpload";
 import SvgPaymentLinkIcon from "../../../assets/agentIcon/SvgPaymentLinkIcon";
-import SvgInxTlinkicon from "../../../assets/agentIcon/SvgInxTlinkicon";
 import ShareOption from "./Modal/ShareOption";
 import InternetBankingList from "./Modal/InternetBankingList";
-import policyService from "../../../services/policyService";
 import { getpolicyDetailedMiddleware } from "../policyDetailedView/store/policyDetailedMiddleware";
 import clientService from "../../../services/clientService";
 
@@ -40,7 +34,7 @@ const PaymentOptions = () => {
   const fromEndorsement = state?.fromEndorsement;
   const endorsementId = state?.endorsementId;
 
-  const { policydetailedlist, loadingPolicyDetails } = useSelector(
+  const { policydetailedlist } = useSelector(
     ({ policyDetailedViewMainReducers }) => ({
       policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
       loadingPolicyDetails: policyDetailedViewMainReducers?.loading,
@@ -72,10 +66,6 @@ const PaymentOptions = () => {
     policydetailedlist?.grossPremium ||
     policydetailedlist?.quotation?.grossPremium ||
     "0.00";
-
-  // Log data completeness for debugging
-
-  console.log(clientData, "clientData");
 
   const displayTitle = useMemo(() => {
     const parts = [];
@@ -122,7 +112,6 @@ const PaymentOptions = () => {
       const payload = response.data?.data || response.data;
       setClientData(payload);
     } else {
-      console.log(response.error, "error");
       setClientData(null);
     }
   };
@@ -142,7 +131,6 @@ const PaymentOptions = () => {
       clientData?.generatedClientId
     ) {
       const timer = setTimeout(() => {
-        console.log("Auto-proceeding: endorsement payment");
         handleSubmit("Direct Debit");
       }, 2000);
       return () => clearTimeout(timer);
@@ -159,7 +147,6 @@ const PaymentOptions = () => {
   ]);
 
   const handleUppendImg = (name, src) => {
-    console.log(name, src, "find handleUppendImg");
     setuploadImage(src?.objectURL);
   };
   const handleMOdalOpen = () => {
@@ -199,21 +186,19 @@ const PaymentOptions = () => {
       ? "/agent/quote/paymentconfirmation"
       : "/agent/policy/paymentconfirmation";
 
-    // FIX: Ensure we have complete policy data for policy payment flow
+    // The policy payment flow needs the complete policy record.
     const completePolicyData = isQuoteFlow
       ? policyData
       : policydetailedlist || policyData;
 
-    // FIX: Extract policy number correctly (never use ID as fallback)
+    // Policy number only; the id is not a policy number.
     const actualPolicyNumber =
       completePolicyData?.policyNumber ||
       state?.policyNumber ||
       state?.PolicyNumber;
 
-    // FIX: Extract gross premium correctly
     const actualGrossPremium = completePolicyData?.grossPremium || grossPremium;
 
-    // FIX: Extract client ID correctly
     const actualClientId = completePolicyData?.clientId || clientId;
 
     const actualClientName =
@@ -316,12 +301,6 @@ const PaymentOptions = () => {
               >
                 <SvgInternet />
                 <div className="input__text__style">{t("agent.internetBanking")}</div>
-              </div>
-            </div>
-            <div className="col-6">
-              <div className="atm__text cursor-pointer">
-                <SvgInxTlinkicon />
-                <div className="input__text__style">{t("agent.inxtPayment")}</div>
               </div>
             </div>
             <div className="col-6">

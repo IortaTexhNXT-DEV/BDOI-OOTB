@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate, useLocation } from "react-router-dom";
 import quotationService from "../../../services/quotationService";
@@ -20,7 +19,7 @@ const QuoteDetailView = () => {
   const [error, setError] = useState(null);
   const [quotation1, setQuotation1] = useState(null);
   const [quotation2, setQuotation2] = useState(null);
-  const [aiInsights, setAiInsights] = useState(null);
+  const [insights, setInsights] = useState(null);
 
   useEffect(() => {
     const fetchComparison = async () => {
@@ -48,13 +47,13 @@ const QuoteDetailView = () => {
           return;
         }
 
-        const { quotation1: q1, quotation2: q2, aiInsights: ai } = result.data;
+        // The API returns the rule-based comparison notes as "aiInsights".
+        const { quotation1: q1, quotation2: q2, aiInsights: comparisonNotes } = result.data;
         setQuotation1(q1);
         setQuotation2(q2);
-        setAiInsights(ai);
+        setInsights(comparisonNotes);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching comparison:', err);
         setError(t("agent.unexpectedErrorComparison"));
         setLoading(false);
       }
@@ -126,24 +125,23 @@ const QuoteDetailView = () => {
         <label className="left_arrow_text">{t("agent.backToQuotes")}</label>
       </div>
 
-      {/* AI Insights Card */}
-      {aiInsights && !aiInsights.error && (
-        <Card className="mt-4 ai-insights-card">
-          <div className="ai-insights-header">
-            <i className="pi pi-sparkles"></i>
-            <h3>{t("agent.aiPoweredInsights")}</h3>
+            {insights && !insights.error && (
+        <Card className="mt-4 comparison-insights-card">
+          <div className="comparison-insights-header">
+            <i className="pi pi-chart-bar"></i>
+            <h3>{t("agent.comparisonInsights")}</h3>
           </div>
           
-          <div className="ai-section">
+          <div className="insights-section">
             <h4>{t("agent.summary")}</h4>
-            <p>{aiInsights.summary}</p>
+            <p>{insights.summary}</p>
           </div>
 
-          {aiInsights.keyDifferences && aiInsights.keyDifferences.length > 0 && (
-            <div className="ai-section">
+          {insights.keyDifferences && insights.keyDifferences.length > 0 && (
+            <div className="insights-section">
               <h4>{t("agent.keyDifferences")}</h4>
               <div className="key-differences-list">
-                {aiInsights.keyDifferences.map((diff, idx) => (
+                {insights.keyDifferences.map((diff, idx) => (
                   <div key={idx} className="difference-item">
                     <span className={`impact-badge ${getImpactBadgeClass(diff.impact)}`}>
                       {diff.impact}
@@ -155,48 +153,48 @@ const QuoteDetailView = () => {
             </div>
           )}
 
-          {aiInsights.pricingAnalysis && (
-            <div className="ai-section">
+          {insights.pricingAnalysis && (
+            <div className="insights-section">
               <h4>{t("agent.pricingAnalysis")}</h4>
               <div className="pricing-grid">
                 <div className="pricing-item">
                   <span className="label">{t("agent.quote1Total")}</span>
-                  <span className="value">{formatCurrency(aiInsights.pricingAnalysis.quote1Total)}</span>
+                  <span className="value">{formatCurrency(insights.pricingAnalysis.quote1Total)}</span>
                 </div>
                 <div className="pricing-item">
                   <span className="label">{t("agent.quote2Total")}</span>
-                  <span className="value">{formatCurrency(aiInsights.pricingAnalysis.quote2Total)}</span>
+                  <span className="value">{formatCurrency(insights.pricingAnalysis.quote2Total)}</span>
                 </div>
                 <div className="pricing-item highlight">
                   <span className="label">{t("agent.difference")}</span>
                   <span className="value">
-                    {formatCurrency(Math.abs(aiInsights.pricingAnalysis.difference))} 
-                    ({aiInsights.pricingAnalysis.percentageDifference?.toFixed(1)}%)
+                    {formatCurrency(Math.abs(insights.pricingAnalysis.difference))} 
+                    ({insights.pricingAnalysis.percentageDifference?.toFixed(1)}%)
                   </span>
                 </div>
               </div>
-              <p className="mt-3">{aiInsights.pricingAnalysis.analysis}</p>
+              <p className="mt-3">{insights.pricingAnalysis.analysis}</p>
             </div>
           )}
 
-          {aiInsights.recommendation && (
-            <div className="ai-section recommendation-section">
+          {insights.recommendation && (
+            <div className="insights-section recommendation-section">
               <h4>{t("agent.recommendation")}</h4>
               <div className="recommendation-box">
                 <div className="recommendation-header">
                   <i className="pi pi-thumbs-up"></i>
                   <span>
-                    {aiInsights.recommendation.preferredQuote === 'quote1' ? t("agent.quote1Recommended") :
-                     aiInsights.recommendation.preferredQuote === 'quote2' ? t("agent.quote2Recommended") :
+                    {insights.recommendation.preferredQuote === 'quote1' ? t("agent.quote1Recommended") :
+                     insights.recommendation.preferredQuote === 'quote2' ? t("agent.quote2Recommended") :
                      t("agent.dependsOnYourNeeds")}
                   </span>
                 </div>
-                <p>{aiInsights.recommendation.reasoning}</p>
-                {aiInsights.recommendation.considerations && aiInsights.recommendation.considerations.length > 0 && (
+                <p>{insights.recommendation.reasoning}</p>
+                {insights.recommendation.considerations && insights.recommendation.considerations.length > 0 && (
                   <div className="considerations">
                     <strong>{t("agent.consider")}</strong>
                     <ul>
-                      {aiInsights.recommendation.considerations.map((consideration, idx) => (
+                      {insights.recommendation.considerations.map((consideration, idx) => (
                         <li key={idx}>{consideration}</li>
                       ))}
                     </ul>
@@ -206,25 +204,25 @@ const QuoteDetailView = () => {
             </div>
           )}
 
-          <div className="ai-section pros-cons-section">
+          <div className="insights-section pros-cons-section">
             <div className="grid">
               <div className="col-6">
                 <h4>Quote 1 ({quotation1.quotationNumber})</h4>
-                {aiInsights.quote1Pros && aiInsights.quote1Pros.length > 0 && (
+                {insights.quote1Pros && insights.quote1Pros.length > 0 && (
                   <div className="pros-list">
                     <strong className="pros-label">{t("agent.pros")}</strong>
                     <ul>
-                      {aiInsights.quote1Pros.map((pro, idx) => (
+                      {insights.quote1Pros.map((pro, idx) => (
                         <li key={idx} className="pro-item">{pro}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {aiInsights.quote1Cons && aiInsights.quote1Cons.length > 0 && (
+                {insights.quote1Cons && insights.quote1Cons.length > 0 && (
                   <div className="cons-list">
                     <strong className="cons-label">{t("agent.cons")}</strong>
                     <ul>
-                      {aiInsights.quote1Cons.map((con, idx) => (
+                      {insights.quote1Cons.map((con, idx) => (
                         <li key={idx} className="con-item">{con}</li>
                       ))}
                     </ul>
@@ -233,21 +231,21 @@ const QuoteDetailView = () => {
               </div>
               <div className="col-6">
                 <h4>Quote 2 ({quotation2.quotationNumber})</h4>
-                {aiInsights.quote2Pros && aiInsights.quote2Pros.length > 0 && (
+                {insights.quote2Pros && insights.quote2Pros.length > 0 && (
                   <div className="pros-list">
                     <strong className="pros-label">{t("agent.pros")}</strong>
                     <ul>
-                      {aiInsights.quote2Pros.map((pro, idx) => (
+                      {insights.quote2Pros.map((pro, idx) => (
                         <li key={idx} className="pro-item">{pro}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {aiInsights.quote2Cons && aiInsights.quote2Cons.length > 0 && (
+                {insights.quote2Cons && insights.quote2Cons.length > 0 && (
                   <div className="cons-list">
                     <strong className="cons-label">{t("agent.cons")}</strong>
                     <ul>
-                      {aiInsights.quote2Cons.map((con, idx) => (
+                      {insights.quote2Cons.map((con, idx) => (
                         <li key={idx} className="con-item">{con}</li>
                       ))}
                     </ul>
@@ -523,10 +521,6 @@ const QuoteDetailView = () => {
         </div>
         </div>
       </Card>
-      {/* <div className="button_component">
-        <Button label="Download" className="policy_button">
-        </Button>
-      </div> */}
     </div>
   );
 };

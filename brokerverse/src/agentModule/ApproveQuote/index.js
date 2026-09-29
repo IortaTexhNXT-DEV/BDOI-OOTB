@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormatCurrency } from '../../hooks/useFormatCurrency';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
@@ -15,9 +15,8 @@ const ApproveQuote = () => {
   const t = i18n.getFixedT('en');
   const { formatCurrency } = useFormatCurrency();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [token, setToken] = useState(null);
-  const [tokenPayload, setTokenPayload] = useState(null);
+  const [, setTokenPayload] = useState(null);
   const [quotationData, setQuotationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
@@ -41,7 +40,6 @@ const ApproveQuote = () => {
       // Fetch full quotation details in preview mode
       fetchQuotationPreview(tokenParam);
     } catch (e) {
-      console.error('Error decoding token:', e);
       setError(t('approveQuote.invalidLink'));
       setLoading(false);
     }
@@ -61,14 +59,11 @@ const ApproveQuote = () => {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ Fetched quote preview:', result);
         setQuotationData(result);
       } else {
-        console.error('Failed to fetch quote preview:', result.message);
         setError(result.message || t('approveQuote.failedToLoad'));
       }
     } catch (error) {
-      console.error('Error fetching quote preview:', error);
       setError(t('approveQuote.failedToLoad'));
     } finally {
       setLoading(false);
@@ -90,8 +85,6 @@ const ApproveQuote = () => {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ Quote approved successfully!');
-        console.log('Full quotation data from backend:', result);
         setApproved(true);
         // Backend returns full quotation with all details and premium values
         setQuotationData(result);
@@ -100,7 +93,6 @@ const ApproveQuote = () => {
       }
     } catch (error) {
       setError(t('approveQuote.failedToApprove'));
-      console.error(error);
     } finally {
       setApproving(false);
     }

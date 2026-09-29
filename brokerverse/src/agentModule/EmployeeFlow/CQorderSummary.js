@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import useSignatoryOptions from "../quoteModule/utils/useSignatoryOptions";
 import { useDispatch } from "react-redux";
-// import CardComponent from "../../../components/Cardcomponent";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { postOrderSummaryMiddleware } from "../quoteModule/orderSummary/store/orderSummaryMiddleware";
 import customHistory from "../../routes/customHistory";
@@ -15,7 +14,7 @@ import CustomToast from "../../components/Toast";
 import CalculaitionTextInputs from "../component/calculaitionTextInputs";
 import SvgCountMinusIcon from "../../assets/icons/SvgCountMinusIcon";
 import SvgCountPlusIcon from "../../assets/icons/SvgCountPlusIcon";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 
 const initialValue = {
@@ -39,15 +38,11 @@ const CQOrderSummary = ({ action, flow }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  console.log(state, "ades")
   const handleclick = (values) => {
-    console.log(values, "valuesleo");
     dispatch(postOrderSummaryMiddleware(values));
     toastRef.current.showToast();
     setTimeout(() => {
-      console.log(action, "find ");
       if (action === "post") {
-        // navigate("/agent/quotedetailedit");
         navigate("/agent/quotedetailview", { state: state });
       }
       if (action === "view") {
@@ -82,7 +77,6 @@ const CQOrderSummary = ({ action, flow }) => {
   const handleLeadNavigation = () => {
     navigate("/agent/leadlisting");
   };
-  console.log(flow, "find test");
   return (
     <div className="order__summary__container">
       <CustomToast ref={toastRef} message={t("employeeBenefit.quoteCreatedSuccess")} />
@@ -175,7 +169,6 @@ const CQOrderSummary = ({ action, flow }) => {
               value={formik.values.AuthorizedSignature}
               options={signatoryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);
               }}
               optionLabel="label"
@@ -185,8 +178,6 @@ const CQOrderSummary = ({ action, flow }) => {
               }
             />
           </div>
-
-
 
           <div class="col-12 md:col-6 lg:col-6 xl:col-6">
             <div class="grid">
@@ -378,7 +369,6 @@ const CQOrderSummary = ({ action, flow }) => {
                 <Button
                   className="next__btn"
                   onClick={() => {
-                    // formik.handleSubmit();
                     navigate('/agent/employee-benefit/create-quote-quote-details')
                   }}
                 >

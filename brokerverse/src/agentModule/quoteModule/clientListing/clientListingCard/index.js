@@ -1,5 +1,4 @@
 import { Card } from "primereact/card";
-import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import ClientListingAllCategory from "./ClientListingAllCategory";
@@ -7,7 +6,6 @@ import ClientListingIndividualCategory from "./ClientListingIndividualCategory";
 import ClientListingCompanyCategory from "./ClientListingCompanyCategory";
 import { useSelector } from "react-redux";
 import { ProgressSpinner } from "primereact/progressspinner";
-
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
@@ -19,7 +17,6 @@ const ClientListingCard = () => {
       error: clientsReducers?.error,
     };
   });
-  console.log(clientListTable, "clientListTable");
   
   return (
     <div className="lead__listing__card__container mt-4">

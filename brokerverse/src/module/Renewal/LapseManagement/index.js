@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -18,7 +17,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
-import { Chip } from "primereact/chip";
 import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -31,8 +29,6 @@ import { formatPercent, progressValue } from "../../../utility/numberFormat";
 const LapseManagement = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode, locale } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [reasonFilter, setReasonFilter] = useState("All");
@@ -187,7 +183,6 @@ const LapseManagement = () => {
 
   const calculateDashboard = (data) => {
     const inGrace = data.filter(p => p.status === 'In Grace Period');
-    const lapsed = data.filter(p => p.lapseDate);
     const eligible = data.filter(p => p.reinstatementEligible);
     const totalRevenue = data.reduce((sum, p) => sum + (p.premiumLost || p.currentPremium), 0);
 

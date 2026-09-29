@@ -4,30 +4,23 @@ import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
-import SvgEdit from "../../../assets/icons/SvgEdit";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { Paginator } from "primereact/paginator";
 import { Dialog } from "primereact/dialog";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Dropdown } from "primereact/dropdown";
-import SvgEditicon from "../../../assets/icons/SvgEdit";
-import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  getpaymentCheckbookDetailsMiddleware,
   patchpaymentVocherInvoiceListMiddleware,
-  getDisbursementDetailsMiddleware,
 } from "../store/paymentVocherMiddleware";
 import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 function SpecificVoucher() {
   const { t } = useTranslation();
@@ -39,9 +32,8 @@ function SpecificVoucher() {
   const location = useLocation();
   const { disbursementData: disbursementDataFromState } = location.state || {};
   const [visible, setVisible] = useState(false);
-  const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [EditID, setEditID] = useState(null);
+  const [EditID] = useState(null);
   const [loading, setLoading] = useState(true);
   const [disbursementData, setDisbursementData] = useState(null);
   const [invoiceListData, setInvoiceListData] = useState([]);
@@ -70,7 +62,7 @@ function SpecificVoucher() {
 
     const result = await disbursementService.getDisbursementById(disbursementId);
     if (!result.success) {
-      console.error("Failed to fetch disbursement for customerCode:", result.error);
+      logger.error("Failed to fetch disbursement for customerCode:", result.error);
       return null;
     }
 
@@ -143,7 +135,7 @@ function SpecificVoucher() {
   useEffect(() => {
     const fetchDisbursementDetails = async () => {
       if (!disbursementId) {
-        console.warn("No disbursement ID found in URL params");
+        logger.warn("No disbursement ID found in URL params");
         setLoading(false);
         return;
       }
@@ -192,7 +184,7 @@ function SpecificVoucher() {
             }));
             setInvoiceListData(transformedData);
           } else {
-            console.error("Failed to fetch agent invoice lines:", result.error);
+            logger.error("Failed to fetch agent invoice lines:", result.error);
           }
         } else {
           const insurerVoucher = voucherInvoicesOnly && payeeType === "Insurer";
@@ -245,7 +237,7 @@ function SpecificVoucher() {
               setInvoiceListData(transformedData);
             }
           } else {
-            console.error(
+            logger.error(
               "Failed to fetch invoice list by customer code:",
               result.error
             );
@@ -258,7 +250,7 @@ function SpecificVoucher() {
           }
         }
       } catch (error) {
-        console.error("Error fetching disbursement details:", error);
+        logger.error("Error fetching disbursement details:", error);
       } finally {
         setLoading(false);
       }
@@ -273,9 +265,7 @@ function SpecificVoucher() {
     }
   }, [EditID]);
   const setFormikValues = () => {
-    console.log("find action");
     const targetInvoice = invoiceListData.find((item) => item.id === EditID);
-    console.log(targetInvoice, "find data");
     const fcAmount = targetInvoice?.fcamount;
     const discount = targetInvoice?.discount;
     const vat = targetInvoice?.vat;
@@ -303,9 +293,6 @@ function SpecificVoucher() {
     };
     dispatch(patchpaymentVocherInvoiceListMiddleware(valueWithId));
     toastRef.current.showToast();
-    {
-      setTimeout(() => {}, 3000);
-    }
     setVisible(false);
   };
 
@@ -374,16 +361,6 @@ function SpecificVoucher() {
       </div>
     );
   }
-
-  // if (!disbursementData) {
-  //   return (
-  //     <div className="overall__specific__container">
-  //       <div className="error-message">
-  //         Failed to load disbursement details.
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="overall__specific__container">
@@ -580,7 +557,6 @@ function SpecificVoucher() {
             label={t("paymentVoucher.update")}
             className="update_btnlabel"
             onClick={formik.handleSubmit}
-            // onClick={() => setVisible(false)}
           />
         </div>
       </Dialog>

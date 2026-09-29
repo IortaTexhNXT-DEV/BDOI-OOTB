@@ -1,10 +1,10 @@
 import { formatNumber } from "../../../../utility/currencyConverter";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import InputTextField from "../../../component/inputText";
 import CalculaitionTextInputs from "../../../component/calculaitionTextInputs";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
@@ -26,6 +26,7 @@ import useMotorTariff, { appaFigures, findVehicleClass } from "../../utils/useMo
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { notifyError } from "../../../../utility/dialogs";
 import { amountOptions, bodilyInjuryOptions, propertyDamageOptions } from "../../../../utility/quoteOptions";
+import logger from "../../../../utility/logger";
 
 const CoverageDetailsCard = ({
   action,
@@ -268,75 +269,6 @@ const CoverageDetailsCard = ({
   const isEditMode = currentQuoteCreation?.isEditMode || false;
   const existingCoverageDetails = currentQuoteCreation?.coverageDetails;
 
-  const initialFormikValues = useMemo(() => {
-    if (isEditMode && existingCoverageDetails) {
-      return {
-        LossandDamagecoverage:
-          existingCoverageDetails.lossAndDamageCoverage || "",
-        LossandDamagecoverageRate:
-          existingCoverageDetails.lossAndDamageCoverageRate ||
-          productConfigurator?.configuration?.premiumRates?.[vehicleType] ||
-          "",
-        LossandDamagecoveragepremium:
-          existingCoverageDetails.lossAndDamageCoveragePremium || "",
-        ActsofNatureRate:
-          existingCoverageDetails.actsOfNatureRate ||
-          productConfigurator?.configuration?.premiumRates?.acts_of_nature ||
-          "",
-        RoadsideAssistanceRate:
-          existingCoverageDetails.roadsideAssistanceRate ||
-          productConfigurator?.configuration?.premiumRates
-            ?.roadside_assistance ||
-          "",
-        RoadsideAssistancepremium:
-          existingCoverageDetails.roadsideAssistancePremium || "",
-        PersonalAccidentCoverRate:
-          existingCoverageDetails.personalAccidentCoverRate ||
-          productConfigurator?.configuration?.premiumRates
-            ?.personal_accident_cover ||
-          "",
-        PersonalAccidentCoverpremium:
-          existingCoverageDetails.personalAccidentCoverPremium || "",
-        CtplCoverageRate:
-          ctplOneYearPremium,
-        ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
-        BodilyInjury: existingCoverageDetails.bodilyInjury || "",
-        BodilyInjuryCoveragePremium:
-          existingCoverageDetails.bodilyInjuryCoveragePremium || "",
-        PropertyDamage: existingCoverageDetails.propertyDamage || "",
-        PropertyDamageCoveragePremium:
-          existingCoverageDetails.propertyDamageCoveragePremium || "",
-        AutopassengerpersonalAccident:
-          existingCoverageDetails.autoPassengerPersonalAccident || "",
-        APPATotalCoverage: existingCoverageDetails.APPAtotalCoverage || "",
-        APPACoveragePremium: existingCoverageDetails.APPAcoveragePremium || "",
-        TotalSumInsured: existingCoverageDetails.totalSumInsured || "",
-      };
-    }
-
-    return {
-      LossandDamagecoverage: "",
-      LossandDamagecoverageRate:
-        productConfigurator?.configuration?.premiumRates?.[vehicleType] || "",
-      LossandDamagecoveragepremium: "",
-      ActsofNatureRate: "",
-      ActsofNaturepremium: "",
-      RoadsideAssistanceRate: "",
-      RoadsideAssistancepremium: "",
-      PersonalAccidentCoverRate: "",
-      PersonalAccidentCoverpremium: "",
-      CtplCoverageRate:
-        ctplOneYearPremium,
-      BodilyInjury: "",
-      BodilyInjuryCoveragePremium: "",
-      PropertyDamage: "",
-      PropertyDamageCoveragePremium: "",
-      AutopassengerpersonalAccident: "",
-      APPATotalCoverage: "",
-      APPACoveragePremium: "",
-      TotalSumInsured: "",
-    };
-  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType, ctplOneYearPremium]);
 
   // Configured tax rates (app settings) so the gross shown here matches the order summary.
   const settingsTaxRates = useTaxRates();
@@ -547,18 +479,12 @@ const CoverageDetailsCard = ({
     if (sumInsuredNum > 0 && grossPremiumNum > 0) {
       const premiumRatio = (grossPremiumNum / sumInsuredNum) * 100;
       if (premiumRatio > 10) {
-        console.warn(
-          `⚠️ [Coverage Details] Gross Premium (${
+        logger.warn(
+          `[Coverage Details] Gross Premium (${
             breakdown.grossPremium
           }) is ${premiumRatio.toFixed(2)}% of Sum Insured (${
             computed.totalSumInsured
           }). This seems unusually high (>10%). Expected range: 1-5%.`
-        );
-      } else {
-        console.log(
-          `[Coverage Details] Premium ratio: ${premiumRatio.toFixed(
-            2
-          )}% (within expected range)`
         );
       }
     }
@@ -756,7 +682,6 @@ const CoverageDetailsCard = ({
   };
 
   const initialValue = getFormValues();
-  console.log("initialValue", initialValue);
 
   const handleBackNavigation = () => {
     customHistory.back();
@@ -775,15 +700,11 @@ const CoverageDetailsCard = ({
   useEffect(() => {
     // CRITICAL: Skip auto-calculate completely for renewal flow
     if (flow === "renewal") {
-      console.log(
-        "Skipping auto-calculate - this is a renewal flow, waiting for policy data"
-      );
       return;
     }
 
     // Skip auto-calculate if renewal data was already loaded
     if (renewalDataLoaded) {
-      console.log("Skipping auto-calculate - renewal data already loaded");
       return;
     }
 
@@ -797,7 +718,6 @@ const CoverageDetailsCard = ({
       formik.values.BodilyInjuryCoveragePremium;
 
     if (hasCoverageData && !hasPremiumData && !loading) {
-      console.log("Auto-calculating premiums on form load");
       hadlecalculation();
     }
   }, [
@@ -813,12 +733,11 @@ const CoverageDetailsCard = ({
     const fetchPolicyDataForRenewal = async () => {
       // Only process if this is a renewal flow
       if (flow !== "renewal") {
-        console.log("Skipping renewal fetch - not a renewal flow");
         return;
       }
 
       if (!policyId) {
-        console.error("No policy ID available for renewal");
+        logger.error("No policy ID available for renewal");
         return;
       }
 
@@ -826,7 +745,7 @@ const CoverageDetailsCard = ({
       // policy itself (its quotation, else sum insured / insurer / product of the policy row).
       const response = await policyRenewalService.getRenewalPrefill(policyId);
       if (!response.success || !response.data) {
-        console.error("Failed to load renewal prefill:", response.error);
+        logger.error("Failed to load renewal prefill:", response.error);
         return;
       }
       const coverage = response.data.coverageDetails || {};

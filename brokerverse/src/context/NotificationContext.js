@@ -8,6 +8,7 @@ import React, {
 import { useLocation } from "react-router-dom";
 import notificationService from "../services/notificationService";
 import authService from "../services/authService";
+import logger from "../utility/logger";
 
 /** Notifications are per user: nothing is fetched or polled on the sign-in page or after sign-out. */
 const signedIn = () => Boolean(authService.getAccessToken());
@@ -54,16 +55,8 @@ export const NotificationProvider = ({ children }) => {
       setLastFetch(new Date());
 
       // Debug logging
-      console.log(
-        "NotificationContext - Setting unread count:",
-        unreadCountData
-      );
-      console.log(
-        "NotificationContext - Setting notifications:",
-        notificationsData
-      );
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      logger.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -88,7 +81,7 @@ export const NotificationProvider = ({ children }) => {
 
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      logger.error("Error marking notification as read:", error);
     }
   }, []);
 
@@ -107,7 +100,7 @@ export const NotificationProvider = ({ children }) => {
 
       setUnreadCount(0);
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
+      logger.error("Error marking all notifications as read:", error);
     }
   }, []);
 
@@ -128,7 +121,7 @@ export const NotificationProvider = ({ children }) => {
           setUnreadCount((prev) => Math.max(0, prev - 1));
         }
       } catch (error) {
-        console.error("Error deleting notification:", error);
+        logger.error("Error deleting notification:", error);
       }
     },
     [notifications]
@@ -141,7 +134,7 @@ export const NotificationProvider = ({ children }) => {
       const count = await notificationService.getUnreadCount();
       setUnreadCount(count);
     } catch (error) {
-      console.error("Error fetching unread count:", error);
+      logger.error("Error fetching unread count:", error);
     }
   }, []);
 

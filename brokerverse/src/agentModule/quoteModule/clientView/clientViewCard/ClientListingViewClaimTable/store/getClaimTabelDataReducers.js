@@ -57,7 +57,6 @@ const initialState = {
   ],
   claimSearchListData: [],
 };
-let nextId = 2;
 const claimTabelDataReducers = createSlice({
   name: "claimTabelData",
   initialState,

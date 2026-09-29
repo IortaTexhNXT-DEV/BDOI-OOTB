@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Toast } from "primereact/toast";
-import { Card } from "primereact/card";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import "./index.scss";
@@ -23,7 +22,7 @@ import SvgIconeye from "../../../../../../assets/icons/SvgIconeye";
 import SvgEditicons from "../../../../../../assets/icons/SvgEditicons";
 
 const DepartMentList = ({ action, branchCode }) => {
-  const { departmentList, loading, depatmentView, getDepartmentPatch } =
+  const { departmentList, depatmentView, getDepartmentPatch } =
     useSelector(({ organizationBranchMainReducers }) => {
       return {
         loading: organizationBranchMainReducers?.loading,
@@ -144,7 +143,6 @@ const DepartMentList = ({ action, branchCode }) => {
     onSubmit: handleSubmit,
   });
 
-  const [epartmentCodeDataOption, setDepartmentCodeDataOption] = useState([]);
 
   const setFormikValues = () => {
     const DepartmentCodeData = getDepartmentPatch?.DepartmentCode;
@@ -154,9 +152,6 @@ const DepartMentList = ({ action, branchCode }) => {
       DepartmentName: getDepartmentPatch?.DepartmentName,
       Description: getDepartmentPatch?.Description,
     };
-    // if(DepartmentCodeData){
-    //   setDepartmentCodeDataOption([{label:DepartmentCodeData,value:DepartmentCodeData}])
-    // }
 
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -192,7 +187,6 @@ const DepartMentList = ({ action, branchCode }) => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           scrollable={true}
