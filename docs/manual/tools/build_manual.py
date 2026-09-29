@@ -222,12 +222,12 @@ def cover(doc):
     p = c.add_paragraph(); r = p.add_run(TAGLINE); set_font(r, size=18, color=RGBColor(0xFF, 0xFF, 0xFF))
     p.paragraph_format.space_after = Pt(18)
     p = c.add_paragraph(); r = p.add_run('User Manual'); set_font(r, size=28, bold=True, color=RGBColor(0xFD, 0xB9, 0x13))
-    p = c.add_paragraph(); r = p.add_run('Out-of-the-box insurance broking for the Philippines — end-to-end guide for every user role')
+    p = c.add_paragraph(); r = p.add_run('Insurance broking for the Philippines: a guide for every user role')
     set_font(r, size=12, color=RGBColor(0xE5, 0xF5, 0xFF))
     p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(26)
-    rows = [('Product', 'BrokerVerse (out-of-the-box)'), ('Document', TITLE), ('Version', VERSION), ('Date', DATE),
-            ('Audience', 'Business users, approvers and administrators of BrokerVerse'),
-            ('Classification', 'Internal — BrokerVerse customers and partners')]
+    rows = [('Product', 'BrokerVerse OOTB'), ('Document', TITLE), ('Version', VERSION), ('Date', DATE),
+            ('Audience', 'Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager and System Administrator users'),
+            ('Classification', 'Internal: BrokerVerse customers and partners')]
     t = doc.add_table(rows=len(rows), cols=2)
     fixed_layout(t, [Cm(4), CONTENT_W - Cm(4)])
     table_borders(t, color='C9D6E3', size=4)
@@ -240,7 +240,7 @@ def cover(doc):
         pb = b.paragraphs[0]; rb = pb.add_run(v); set_font(rb, size=10, color=TEXT)
     p = doc.add_paragraph(); p.paragraph_format.space_before = Pt(80)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    r = p.add_run('Powered by iorta TechNXT'); set_font(r, size=11, color=GREY)
+    r = p.add_run('BrokerVerse OOTB by iorta TechNXT'); set_font(r, size=11, color=GREY)
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
 
@@ -252,7 +252,7 @@ def header_footer(doc):
     for pos in (Cm(8.255), Cm(16.51), Emu(2971800), Emu(5943600)):
         tabs.add_tab_stop(pos, WD_TAB_ALIGNMENT.CLEAR)
     tabs.add_tab_stop(CONTENT_W, WD_TAB_ALIGNMENT.RIGHT)
-    r = hp.add_run(PRODUCT + ' — ' + TAGLINE); set_font(r, size=8.5, bold=True, color=BLUE)
+    r = hp.add_run(PRODUCT + ' OOTB: ' + TAGLINE); set_font(r, size=8.5, bold=True, color=BLUE)
     r = hp.add_run('\tUser Manual · ' + VERSION); set_font(r, size=8.5, color=GREY)
     para_border(hp, 'bottom', HEX_YELLOW, 8, 4)
     fp = sec.footer.paragraphs[0]
@@ -260,7 +260,7 @@ def header_footer(doc):
         fp.paragraph_format.tab_stops.add_tab_stop(pos, WD_TAB_ALIGNMENT.CLEAR)
     fp.paragraph_format.tab_stops.add_tab_stop(CONTENT_W, WD_TAB_ALIGNMENT.RIGHT)
     para_border(fp, 'top', 'C9D6E3', 4, 4)
-    r = fp.add_run(DATE + '  ·  Powered by iorta TechNXT'); set_font(r, size=8, color=GREY)
+    r = fp.add_run(DATE + '  ·  BrokerVerse OOTB by iorta TechNXT'); set_font(r, size=8, color=GREY)
     r = fp.add_run('\tPage '); set_font(r, size=8.5, color=GREY)
     set_font(add_field(fp, 'PAGE', '1'), size=8.5, bold=True, color=BLUE)
     r = fp.add_run(' of '); set_font(r, size=8.5, color=GREY)
@@ -467,7 +467,7 @@ def build_docx(path):
     setup_styles(doc)
     cp = doc.core_properties
     cp.title = TITLE
-    cp.subject = 'BrokerVerse user manual — ' + TAGLINE; cp.author = 'iorta TechNXT'
+    cp.subject = 'BrokerVerse user manual: ' + TAGLINE; cp.author = 'iorta TechNXT'
     cp.keywords = 'BrokerVerse, iorta TechNXT, insurance broking, user manual'; cp.category = 'User manual'
     cover(doc)
     header_footer(doc)

@@ -8,11 +8,12 @@ Usage (see ../README.md):
     ADMIN_PASSWORD=... PERSONA_PASSWORD=... python3 docs/manual/tools/capture.py [scene-name ...]
 
 Environment:
-    WEB_BASE          front end (default http://127.0.0.1:5080)
-    API               API base (default http://localhost:8000/api)
+    WEB_BASE          front end (default http://127.0.0.1:5211)
+    API               API base (default http://localhost:8211/api)
     CHROMIUM          Chromium executable (default /opt/pw-browsers/chromium)
-    ADMIN_PASSWORD    password of BrokerVerse and carmela.morfe
-    PERSONA_PASSWORD  password of the other persona users
+    ADMIN_PASSWORD    password of the BrokerVerse administrator (only needed for scenes signed in as BrokerVerse)
+    PERSONA_PASSWORD  password of the role users (bea.admin, maria.sales, jose.uw, ana.cs, carlo.claims,
+                      liza.finance, rosa.acctmgr)
     DATABASE_URL      optional; read-only lookup of the customer approval link for the public approval screen
     STATE_DIR         where sign-in sessions are cached (default /tmp/bv-manual-state); sign-in is rate limited
     TEXT_DIR          optional; the visible text of each captured screen is written here (for writing the manual)
@@ -34,10 +35,10 @@ from playwright.sync_api import sync_playwright
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from scenes import SCENES  # noqa: E402
+from scenes import LATE_SCENES, SCENES  # noqa: E402
 
-BASE = os.environ.get('WEB_BASE', 'http://127.0.0.1:5080')
-API = os.environ.get('API', 'http://localhost:8000/api')
+BASE = os.environ.get('WEB_BASE', 'http://127.0.0.1:5211')
+API = os.environ.get('API', 'http://localhost:8211/api')
 CHROMIUM = os.environ.get('CHROMIUM', '/opt/pw-browsers/chromium')
 OUT = os.path.join(os.path.dirname(HERE), 'images')
 STATE_DIR = os.environ.get('STATE_DIR', '/tmp/bv-manual-state')
@@ -54,7 +55,7 @@ FORBIDDEN = re.compile(r'\b(save|submit|approve|approval|post|posting|send|delet
 
 
 def password_for(user):
-    key = 'ADMIN_PASSWORD' if user in ('BrokerVerse', 'carmela.morfe') else 'PERSONA_PASSWORD'
+    key = 'ADMIN_PASSWORD' if user == 'BrokerVerse' else 'PERSONA_PASSWORD'
     if key not in os.environ:
         sys.exit(f'Set {key} in the environment')
     return os.environ[key]
@@ -107,7 +108,7 @@ _cache = {}
 
 
 def admin_token():
-    state = os.path.join(STATE_DIR, 'BrokerVerse.json')
+    state = os.path.join(STATE_DIR, 'bea.admin.json')
     if not os.path.exists(state):
         return None
     for origin in json.load(open(state)).get('origins', []):
@@ -138,6 +139,10 @@ LOOKUPS = {
     'end': ('/endorsements/get-All-Endorsements?search={v}&pageNo=1&perPage=50', 'endorsementNumber'),
     'pv': ('/disbursements?voucherNumber={v}&limit=50', 'voucherNumber'),
     'jv': ('/journal-vouchers/history?all=true&limit=200', 'transactionNumber'),
+    'bs': ('/broker-slips?search={v}&limit=50', 'slipNumber'),
+    'ps': ('/placements?search={v}&limit=50', 'placementNumber'),
+    'mec': ('/period-end/close-runs?limit=50', 'runNumber'),
+    'brc': ('/bank-reconciliation/reconciliations?limit=50', 'recNumber'),
 }
 
 
@@ -146,7 +151,7 @@ def resolve(kind, value):
     if key in _cache:
         return _cache[key]
     if kind == 'token':
-        url = os.environ.get('DATABASE_URL', 'postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse')
+        url = os.environ.get('DATABASE_URL', 'postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse_doc')
         qid = resolve('q', value)
         sql = ("select substring(body_html from 'approve-quote\\?token=([^\"&<]*)') from email_outbox "
                f"where template = 'quote_approval' and entity_id = '{qid}' order by created_at desc limit 1")
@@ -155,7 +160,7 @@ def resolve(kind, value):
         return out
     path, field = LOOKUPS[kind]
     rows = api_get(path.format(v=value)) or []
-    rid = next((r.get('id') or r.get('leadId') for r in rows if r.get(field) == value), None)
+    rid = next((r.get('id') or r.get('leadId') or r.get('placementId') or r.get('brokerSlipId') for r in rows if r.get(field) == value), None)
     if not rid:
         raise KeyError(f'{kind}:{value} not found')
     _cache[key] = rid
@@ -276,8 +281,8 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=CHROMIUM if os.path.exists(CHROMIUM) else None)
         contexts = {}
-        for scene in SCENES:
-            if only and scene['name'] not in only:
+        for scene in SCENES + LATE_SCENES:
+            if (only and scene['name'] not in only) or (not only and scene in LATE_SCENES):
                 continue
             user = scene.get('user')
             print(f"scene {scene['name']} ({user or 'signed out'})", flush=True)
