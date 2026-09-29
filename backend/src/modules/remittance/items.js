@@ -11,7 +11,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { fileSize, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
-import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, statusLabels } from './service.js';
+import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
 
 const ts = (d) => (d ? new Date(d).toISOString().replace('T', ' ').slice(0, 16) : null);
 const ITEM_SELECT = `SELECT x.*, (SELECT display_name FROM users u WHERE u.id = x.created_by) AS created_by_name,
@@ -170,7 +170,10 @@ export async function createAdjustment(b, user) {
   const id = await withTransaction(async (c) => {
     const itemId = await insertItem(c, { kind: 'adjustment', referenceNo: ref, remittanceId: rem?.id, amount, status: needsApproval ? 'Pending Approval' : 'Approved', data, userId: user.id });
     if (needsApproval) await openApproval(c, { entity: 'item', entityId: itemId, referenceNo: ref, transactionType: 'Adjustment', amount, description: `${type.data.name}: ${b.reason}`, initiatorId: user.id });
-    else if (rem) await c.query('UPDATE remittances SET adjustments = adjustments + $2, net_due = net_due + $2, updated_at = now() WHERE id = $1', [rem.id, amount]);
+    else {
+      if (rem) await c.query('UPDATE remittances SET adjustments = adjustments + $2, net_due = net_due + $2, updated_at = now() WHERE id = $1', [rem.id, amount]);
+      await postItemJournal(c, (await c.query('SELECT * FROM remittance_items WHERE id = $1', [itemId])).rows[0], user);
+    }
     return itemId;
   });
   return itemOut(await getItem('adjustment', id));

@@ -89,7 +89,7 @@ for (const action of ['approve', 'reject']) {
 define({
   method: 'POST', path: '/calculations/:batchId/pay', summary: 'Mark an approved batch as paid', screen: S('Approvals'), middleware: write, request: { paymentDate: '2026-09-30', paymentReference: 'PV-2026-00123' },
   response: { success: true, data: { ...batch, status: 'Paid' } },
-  handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', 'pay', () => svc.payCalculation(req.params.batchId, req.body || {})), 'Batch marked as paid'),
+  handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', 'pay', () => svc.payCalculation(req.params.batchId, req.body || {}, req.user)), 'Batch marked as paid'),
 });
 define({
   method: 'GET', path: '/approvals', summary: 'Approval board: all batches with waiting days and a summary', screen: S('Approvals'), middleware: read,

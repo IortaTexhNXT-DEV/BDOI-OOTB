@@ -8,6 +8,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
+import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 
 const need = (b, fields) => {
@@ -334,7 +335,17 @@ export async function decideCession(id, action, b, user) {
   if (action === 'confirm') {
     if (c.treaty_id) await assertSecurity((await treatyRow(c.treaty_id)).reinsurer_ids);
     if (c.facultative_reinsurer_id) await assertSecurity([c.facultative_reinsurer_id]);
-    await query('UPDATE cessions SET status = \'Confirmed\', confirmed_by = $2, confirmed_at = now(), updated_at = now() WHERE id = $1', [c.id, user.id]);
+    await withTransaction(async (db) => {
+      await db.query('UPDATE cessions SET status = \'Confirmed\', confirmed_by = $2, confirmed_at = now(), updated_at = now() WHERE id = $1', [c.id, user.id]);
+      // ceded premium due from the cedant, net premium due to the reinsurer(s), reinsurance commission (posting rule ri.cession)
+      const reinsurer = c.facultative_reinsurer_id ? (await db.query('SELECT name FROM reinsurers WHERE id::text = $1', [String(c.facultative_reinsurer_id)])).rows[0]?.name : null;
+      const treaty = c.treaty_id ? (await db.query('SELECT treaty_number, name FROM reinsurance_treaties WHERE id = $1', [c.treaty_id])).rows[0] : null;
+      const jv = await postEvent('ri.cession', { source: 'reinsurance', entryType: 'REINSURANCE', transactionCode: c.cession_number, referenceType: 'Cession', referenceId: c.id,
+        policyId: c.policy_id, policyNumber: c.policy_number, description: `Cession ${c.cession_number} – ${c.policy_number || ''}`.trim(),
+        amounts: { ceded_premium: Number(c.ceded_premium), net_premium: Number(c.net_premium), commission: Number(c.commission) },
+        vars: { cessionNumber: c.cession_number, policyNumber: c.policy_number || '', reinsurer: reinsurer || (treaty ? `treaty ${treaty.treaty_number}` : 'reinsurer') } }, { db, user });
+      await db.query('UPDATE cessions SET journal_id = $2 WHERE id = $1', [c.id, jv.id]);
+    });
   } else {
     if (!b.reason) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to reject' }]);
     await query('UPDATE cessions SET status = \'Rejected\', notes = COALESCE(notes || \' | \', \'\') || $2, updated_at = now() WHERE id = $1', [c.id, b.reason]);
@@ -403,7 +414,14 @@ export async function recoveryAction(id, action, b, user) {
   if (action === 'settle') {
     const amt = toNumber(b.settlementAmount, NaN);
     if (!(amt > 0)) throw badRequest('Validation failed', [{ path: 'settlementAmount', message: 'settlementAmount must be greater than zero' }]);
-    await query('UPDATE reinsurance_recoveries SET status = \'Recovered\', settlement_amount = $2, recovery_date = COALESCE($3::date, current_date), updated_by = $4, updated_at = now() WHERE id = $1', [before.id, amt, isoDate(b.recoveryDate), user.id]);
+    await withTransaction(async (db) => {
+      await db.query('UPDATE reinsurance_recoveries SET status = \'Recovered\', settlement_amount = $2, recovery_date = COALESCE($3::date, current_date), updated_by = $4, updated_at = now() WHERE id = $1', [before.id, amt, isoDate(b.recoveryDate), user.id]);
+      // recovery due from the reinsurer, payable to the cedant (posting rule ri.recovery)
+      const jv = await postEvent('ri.recovery', { source: 'reinsurance', entryType: 'REINSURANCE', transactionCode: before.recoveryNumber, referenceType: 'ReinsuranceRecovery', referenceId: before.id,
+        policyNumber: before.policyNumber, description: `Recovery ${before.recoveryNumber} – claim ${before.claimNumber || ''}`.trim(), amounts: { amount: round2(amt) },
+        vars: { recoveryNumber: before.recoveryNumber, claimNumber: before.claimNumber || '' } }, { db, user });
+      await db.query('UPDATE reinsurance_recoveries SET journal_id = $2 WHERE id = $1', [before.id, jv.id]);
+    });
   }
   if (action === 'dispute') {
     if (!b.reason) throw badRequest('Validation failed', [{ path: 'reason', message: 'reason is required' }]);

@@ -7,6 +7,7 @@ import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { reverseJournal } from '../accounting/lib/ledger.js';
 import { postEvent, splitTaxes } from '../accounting/lib/posting.js';
+import { allocate } from '../accounting/lib/coinsurance.js';
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { findClient, findPolicy } from '../receipts/receivables.js';
 import { payLines, lineView } from '../commission/service.js';
@@ -328,15 +329,44 @@ export async function bulkAgentDisburse(db, { referrerIds, transactionCode, inst
  * Insurer remittance voucher: premium collected (receipt applications not yet remitted) for an insurer's policies, net
  * of brokerage commission, as one invoice-list row per policy on a new voucher.
  */
+const CO_INSURED = '((SELECT count(*) FROM risk_participants x WHERE x.entity_type = \'policy\' AND x.entity_id = p.id AND x.status = \'active\') > 1)';
+
+/**
+ * An insurer's share of one collection on a co-insured bill: the collection split by the insurers' gross on the bill and the
+ * commission collected split by their commission (receivable_participants; the participants' shares when the bill has none).
+ */
+async function insurerShareOfCollection(db, a, insurerId) {
+  let rows = (await db.query('SELECT insurance_company_id, share_percent, gross, commission FROM receivable_participants WHERE receivable_id = $1 ORDER BY insurance_company_id', [a.receivable_id])).rows;
+  if (!rows.length) {
+    rows = (await db.query(`SELECT insurance_company_id, share_percent, 0 AS gross, 0 AS commission FROM risk_participants WHERE entity_type = 'policy' AND entity_id = $1 AND status = 'active'
+      ORDER BY insurance_company_id`, [a.policy_id])).rows;
+  }
+  const i = rows.findIndex((r) => Number(r.insurance_company_id) === Number(insurerId));
+  if (i < 0) return { gross: 0, commission: 0, share: 0 };
+  const grossW = rows.map((r) => Number(r.gross) || Number(r.share_percent));
+  const commW = rows.map((r) => (Number(r.gross) ? Number(r.commission) : Number(r.share_percent)));
+  const collectedCommission = round2((Number(a.amount) / Number(a.rcv_amount)) * Number(a.commission_amount));
+  return { gross: allocate(Number(a.amount), grossW)[i], commission: allocate(collectedCommission, commW)[i], share: Number(rows[i].share_percent) };
+}
+
 export async function createInsurerRemittance(db, b, user) {
   const insurer = await resolveInsurer(db, b.insuranceCompanyId || b.insurerName);
   if (!insurer) throw notFound('Insurer not found');
+  const filter = [insurer.id, isoDate(b.fromDate), isoDate(b.toDate), Array.isArray(b.policyIds) ? b.policyIds.map(String) : null];
   const apps = (await db.query(`SELECT a.*, r.amount AS rcv_amount, r.commission_amount, r.client_id, p.id AS policy_id, p.policy_number, c.client_code
     FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id
-    WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND p.insurance_company_id = $1
+    WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND p.insurance_company_id = $1 AND NOT ${CO_INSURED}
       AND ($2::date IS NULL OR a.applied_at::date >= $2) AND ($3::date IS NULL OR a.applied_at::date <= $3)
-      AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, [insurer.id, isoDate(b.fromDate), isoDate(b.toDate), Array.isArray(b.policyIds) ? b.policyIds.map(String) : null])).rows;
-  if (!apps.length) throw conflict(`No collected premium awaiting remittance to ${insurer.name}`);
+      AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, filter)).rows;
+  // Co-insured policies: the insurer's share of each collection (its share of the premium less its own commission)
+  const coApps = (await db.query(`SELECT a.*, r.amount AS rcv_amount, r.commission_amount, r.client_id, p.id AS policy_id, p.policy_number, c.client_code
+    FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id
+    WHERE a.status = 'applied' AND ${CO_INSURED}
+      AND EXISTS (SELECT 1 FROM risk_participants x WHERE x.entity_type = 'policy' AND x.entity_id = p.id AND x.status = 'active' AND x.insurance_company_id = $1)
+      AND NOT EXISTS (SELECT 1 FROM remittance_allocations al WHERE al.receipt_application_id = a.id AND al.insurance_company_id = $1)
+      AND ($2::date IS NULL OR a.applied_at::date >= $2) AND ($3::date IS NULL OR a.applied_at::date <= $3)
+      AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, filter)).rows;
+  if (!apps.length && !coApps.length) throw conflict(`No collected premium awaiting remittance to ${insurer.name}`);
   const d = await createDisbursement(db, { payeeType: 'Insurer', insurerName: insurer.name, transactionCode: b.transactionCode || 'REMT', criteria: 'Payall',
     transactionDescription: `Premium remittance – ${insurer.name}`, remarks: b.remarks }, user, { source: 'insurer-remittance', status: 'draft' });
   const byPolicy = new Map();
@@ -350,6 +380,23 @@ export async function createInsurerRemittance(db, b, user) {
       outstanding: net, lcAmount: gross, comsub: comm, balAmount: net, totalAmount: net, isInvoicePaid: true, source: 'insurer-remittance' }, user);
     await db.query('UPDATE invoice_lists SET status = \'in-voucher\' WHERE id = $1', [inv.id]);
     await db.query('UPDATE receipt_applications SET remitted_invoice_id = $2 WHERE id = ANY($1)', [list.map((a) => a.id), inv.id]);
+    total = round2(total + net);
+  }
+  const coByPolicy = new Map();
+  for (const a of coApps) coByPolicy.set(a.policy_id, [...(coByPolicy.get(a.policy_id) || []), a]);
+  for (const list of coByPolicy.values()) {
+    const shares = [];
+    for (const a of list) shares.push({ a, ...(await insurerShareOfCollection(db, a, insurer.id)) });
+    const gross = round2(shares.reduce((s, x) => s + x.gross, 0));
+    const comm = round2(shares.reduce((s, x) => s + x.commission, 0));
+    const net = round2(gross - comm);
+    const inv = await createInvoiceList(db, { disbursementId: d.id, customerCode: list[0].client_code, policyId: list[0].policy_id, payeeType: 'Insurer', payables: gross,
+      outstanding: net, lcAmount: gross, comsub: comm, balAmount: net, totalAmount: net, isInvoicePaid: true, source: 'insurer-remittance' }, user);
+    await db.query('UPDATE invoice_lists SET status = \'in-voucher\', insurance_company_id = $2 WHERE id = $1', [inv.id, insurer.id]);
+    for (const x of shares) {
+      await db.query(`INSERT INTO remittance_allocations(receipt_application_id, insurance_company_id, invoice_list_id, share_percent, gross, commission, net)
+        VALUES ($1,$2,$3,$4,$5,$6,$7)`, [x.a.id, insurer.id, inv.id, x.share, x.gross, x.commission, round2(x.gross - x.commission)]);
+    }
     total = round2(total + net);
   }
   await db.query('UPDATE disbursements SET amount = $2, gross_amount = $2 WHERE id = $1', [d.id, total]);

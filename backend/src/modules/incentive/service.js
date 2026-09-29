@@ -318,6 +318,14 @@ export async function decideCalculation(batchId, action, b, user) {
     if (action === 'approve') {
       await tx.query('UPDATE incentive_calculations SET status = \'Approved\', approved_by = $2, approval_date = now(), updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);
       await tx.query('UPDATE incentive_results SET status = \'Approved\' WHERE calculation_id = $1', [c.batch_id]);
+      // incentives earned are accrued (posting rule incentive.accrual)
+      const total = round2((await tx.query('SELECT COALESCE(sum(payout), 0) AS t FROM incentive_results WHERE calculation_id = $1', [c.batch_id])).rows[0].t);
+      if (total > 0) {
+        const { postEvent } = await import('../accounting/lib/posting.js');
+        const jv = await postEvent('incentive.accrual', { source: 'incentive', entryType: 'INCENTIVE_ACCRUAL', transactionCode: c.batch_id, referenceType: 'IncentiveCalculation', referenceId: c.batch_id,
+          description: `Incentives ${c.batch_id} (${c.period}) approved`, amounts: { amount: total }, vars: { batchId: c.batch_id, period: c.period } }, { db: tx, user });
+        await tx.query('UPDATE incentive_calculations SET accrual_jv_id = $2 WHERE batch_id = $1', [c.batch_id, jv.id]);
+      }
     } else {
       if (!b.reason) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to reject' }]);
       await tx.query('UPDATE incentive_calculations SET status = \'Rejected\', rejected_by = $2, rejection_date = now(), rejection_reason = $3, updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id, b.reason]);
@@ -328,11 +336,20 @@ export async function decideCalculation(batchId, action, b, user) {
   return { before: await calcOut(c, false), after: await getCalculation(c.batch_id) };
 }
 
-export async function payCalculation(batchId, b) {
+export async function payCalculation(batchId, b, user = null) {
   const c = await calcRow(batchId);
   if (c.status !== 'Approved') throw conflict('Only approved batches can be paid');
   const date = isoDate(b.paymentDate) || (await today());
   await withTransaction(async (tx) => {
+    // payout of the accrued incentives from the chosen bank account (posting rule incentive.payout)
+    const total = round2((await tx.query('SELECT COALESCE(sum(payout), 0) AS t FROM incentive_results WHERE calculation_id = $1', [c.batch_id])).rows[0].t);
+    if (total > 0 && c.accrual_jv_id) {
+      const { postEvent } = await import('../accounting/lib/posting.js');
+      const jv = await postEvent('incentive.payout', { source: 'incentive', entryType: 'INCENTIVE_PAYMENT', transactionCode: c.batch_id, referenceType: 'IncentiveCalculation', referenceId: c.batch_id,
+        date: date <= (await today()) ? date : undefined, description: `Incentives ${c.batch_id} (${c.period}) paid`, bankAccount: b.bankAccount || null, paymentMode: b.paymentMode || 'bank-transfer',
+        amounts: { amount: total }, vars: { batchId: c.batch_id, period: c.period, memoRef: b.paymentReference || `Incentives ${c.batch_id}` } }, { db: tx, user });
+      await tx.query('UPDATE incentive_calculations SET payment_jv_id = $2 WHERE batch_id = $1', [c.batch_id, jv.id]);
+    }
     await tx.query('UPDATE incentive_calculations SET status = \'Paid\', payment_date = $2, payment_reference = $3, updated_at = now() WHERE batch_id = $1', [c.batch_id, date, b.paymentReference || null]);
     await tx.query('UPDATE incentive_results SET status = \'Paid\', paid_at = $2::date WHERE calculation_id = $1', [c.batch_id, date]);
   });

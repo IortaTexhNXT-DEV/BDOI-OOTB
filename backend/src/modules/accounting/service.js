@@ -1,6 +1,7 @@
 /** Ledger queries (entries, client / policy ledgers, trial balance), open-entry matching, periods, chart of accounts, payment entries. */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { periodOf } from './lib/ledger.js';
+import { postEvent } from './lib/posting.js';
 import { isoDate, num, round2, today } from './lib/http.js';
 import { applyToPolicy, ensureBilled, requirePolicy, findClient } from '../receipts/receivables.js';
 import { bookDirectBill, changeBillingModeIn } from '../remittance/directbill.js';
@@ -11,7 +12,8 @@ const STATUS_FILTER = { Posted: ['posted'], Pending: ['pending', 'draft', 'for-a
 export const ENTRY_SQL = `SELECT l.id, l.jv_id, l.line_no, l.account_code, COALESCE(a.name, l.account_name) AS account_name, a.parent_code, a.account_type, l.debit, l.credit,
   l.memo, COALESCE(l.due_date, j.due_date) AS due_date, l.currency_code, j.jv_number, j.jv_date, j.description, j.status, j.source, j.entry_type, j.entry_sub_type,
   j.transaction_code, j.reference_type, j.reference_id, j.currency, COALESCE(l.client_id, j.client_id) AS client_id, COALESCE(l.policy_id, j.policy_id) AS policy_id,
-  COALESCE(p.policy_number, j.policy_number) AS policy_number, c.client_code, c.first_name, c.last_name, c.display_name
+  COALESCE(p.policy_number, j.policy_number) AS policy_number, c.client_code, c.first_name, c.last_name, c.display_name,
+  l.insurance_company_id, (SELECT name FROM insurance_companies WHERE id = l.insurance_company_id) AS line_insurer_name
   FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id LEFT JOIN gl_accounts a ON a.code = l.account_code
   LEFT JOIN clients c ON c.id = COALESCE(l.client_id, j.client_id) LEFT JOIN policies p ON p.id = COALESCE(l.policy_id, j.policy_id)`;
 
@@ -26,6 +28,7 @@ export const entryRow = (e) => {
     motherPolicyId: e.policy_id, motherPolicyNumber: e.policy_number, policyId: e.policy_id, policyNumber: e.policy_number, clientId: e.client_id,
     client: e.client_id ? { id: e.client_id, clientId: e.client_code, firstName: e.first_name, lastName: e.last_name, displayName: e.display_name } : null,
     referenceType: e.reference_type, referenceId: e.reference_id, source: e.source, currency: e.currency_code || e.currency,
+    insurerId: e.insurance_company_id ?? null, insurerName: e.line_insurer_name ?? null,
   };
 };
 
@@ -119,9 +122,56 @@ export async function matchEntries(db, pairs, meta, user) {
     const m = (await db.query(`INSERT INTO entry_matches(debit_line_id, credit_line_id, matched_amount, adjustment_amount, document_ref, narration, write_off_code, matched_by)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`, [dr.id, cr.id, amount, pr.adjustmentAmount == null ? null : round2(num(pr.adjustmentAmount)), meta.documentRef || null,
       meta.narration || null, meta.writeOffCode || null, user.id])).rows[0];
-    out.push({ id: m.id, matchingId: m.id, debitTransactionId: String(dr.id), creditTransactionId: String(cr.id), matchedAmount: Number(m.matched_amount), matchedDate: m.matched_at });
+    const wo = await writeOffResidual(db, { dr, cr, matched: amount, adjustment: pr.adjustmentAmount, reasonCode: pr.writeOffCode ?? meta.writeOffCode, narration: meta.narration, match: m, user });
+    out.push({ id: m.id, matchingId: m.id, debitTransactionId: String(dr.id), creditTransactionId: String(cr.id), matchedAmount: Number(m.matched_amount), matchedDate: m.matched_at,
+      ...(wo ? { writeOff: wo } : {}) });
   }
   return out;
+}
+
+/**
+ * Write-off with a reason code (write_off_reasons): the adjustment amount left open on the debit entry (or, when the debit is
+ * fully matched, on the credit entry) is posted to the reason's GL account (posting rules write_off / write_off.credit_balance)
+ * and matched, so the open item closes. A premium bill written off this way has its balance reduced (status written-off at nil).
+ */
+async function writeOffResidual(db, { dr, cr, matched, adjustment, reasonCode, narration, match, user }) {
+  const adj = adjustment === undefined || adjustment === null ? 0 : round2(num(adjustment));
+  if (!(adj > 0) || !reasonCode) return null;
+  const reason = (await db.query('SELECT * FROM write_off_reasons WHERE (code = $1 OR id::text = $1) AND status = \'active\'', [String(reasonCode)])).rows[0];
+  if (!reason) throw badRequest(`Write-off reason ${reasonCode} is not an active reason`);
+  if (reason.max_amount !== null && adj > Number(reason.max_amount)) throw badRequest(`Write-off ${adj} exceeds the limit of reason ${reason.code} (${Number(reason.max_amount)})`);
+  const drLeft = round2(Number(dr.remaining) - matched);
+  const crLeft = round2(Number(cr.remaining) - matched);
+  const debitSide = drLeft >= adj;
+  if (!debitSide && crLeft < adj) throw badRequest(`Write-off ${adj} exceeds the balance left open on the entries (${Math.max(drLeft, crLeft)})`);
+  const line = debitSide ? dr : cr;
+  const jvRow = (await db.query('SELECT * FROM journal_vouchers WHERE id = $1', [line.jv_id])).rows[0];
+  const jv = await postEvent(debitSide ? 'write_off' : 'write_off.credit_balance', {
+    source: 'write-off', entryType: 'WRITE_OFF', transactionCode: jvRow?.transaction_code || jvRow?.jv_number, referenceType: 'EntryMatch', referenceId: match.id,
+    clientId: line.client_id || jvRow?.client_id || null, policyId: line.policy_id || jvRow?.policy_id || null, policyNumber: jvRow?.policy_number || null,
+    description: `Write-off ${reason.code} – ${line.account_code}${narration ? ` – ${narration}` : ''}`, writeOffReason: reason.code,
+    accounts: { open_item: line.account_code }, amounts: { amount: adj }, vars: { reasonCode: reason.code, reasonName: reason.name, accountCode: line.account_code },
+  }, { db, user });
+  const newLine = (await db.query(`SELECT id FROM journal_lines WHERE jv_id = $1 AND account_code = $2 AND ${debitSide ? 'credit' : 'debit'} > 0 ORDER BY line_no LIMIT 1`, [jv.id, line.account_code])).rows[0];
+  if (jv.status === 'posted' && newLine) {
+    await db.query(`INSERT INTO entry_matches(debit_line_id, credit_line_id, matched_amount, adjustment_amount, document_ref, narration, write_off_code, matched_by, write_off_jv_id)
+      VALUES ($1,$2,$3,NULL,$4,$5,$6,$7,$8)`, [debitSide ? dr.id : newLine.id, debitSide ? newLine.id : cr.id, adj, match.document_ref, narration || `Write-off ${reason.code}`, reason.code, user.id, jv.id]);
+  }
+  await db.query('UPDATE entry_matches SET write_off_jv_id = $2, write_off_code = $3 WHERE id = $1', [match.id, jv.id, reason.code]);
+  if (debitSide) {
+    const rcv = (await db.query('SELECT id FROM receivables WHERE booking_jv_id = $1 AND balance > 0 FOR UPDATE', [line.jv_id])).rows[0];
+    if (rcv) {
+      await db.query(`UPDATE receivables SET balance = GREATEST(balance - $2, 0), updated_at = now(), status = CASE WHEN balance - $2 <= 0 THEN 'written-off' ELSE status END WHERE id = $1`, [rcv.id, adj]);
+      await db.query('UPDATE collection_items SET closed_at = COALESCE(closed_at, now()), updated_at = now() WHERE receivable_id = $1 AND EXISTS (SELECT 1 FROM receivables WHERE id = $1 AND balance <= 0)', [rcv.id]);
+    }
+  }
+  return { journalId: jv.id, journalNumber: jv.jv_number, amount: adj, reasonCode: reason.code, glAccount: reason.gl_account, side: debitSide ? 'DEBIT' : 'CREDIT' };
+}
+
+/** Active write-off reasons (Open Entry Matching reason picker). */
+export async function writeOffReasons(db) {
+  return (await db.query('SELECT * FROM write_off_reasons WHERE status = \'active\' ORDER BY code')).rows
+    .map((r) => ({ id: r.id, code: r.code, name: r.name, glAccount: r.gl_account, maxAmount: r.max_amount === null ? null : Number(r.max_amount), description: r.description }));
 }
 
 export async function matchedEntries(db, q) {

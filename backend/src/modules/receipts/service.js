@@ -155,6 +155,11 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
     b.bankId || null, isoDate(b.receiptDate || b.receivedDate) || (await today()), str(b.remarks), user?.id ?? null, b.receiptType || 'Payment', str(b.transactionCode) || 'PAYMENT', txn,
     client?.client_code || client?.id || str(b.customerCode), str(b.name) || client?.display_name || policy?.client_name || null, str(b.branchCode), str(b.departmentCode),
     b.currencyCode || (await getSetting('currency.default', 'PHP')), policy?.policy_number || null, str(b.receiptNumber), source])).rows[0];
+  // the bank account the money was deposited to: its GL account is debited (posting rule receipt.apply, resolver bank_account)
+  if (str(b.bankAccountCode ?? b.bankAccount)) {
+    header.bank_account_code = str(b.bankAccountCode ?? b.bankAccount);
+    await db.query('UPDATE receipts SET bank_account_code = $2 WHERE id = $1', [header.id, header.bank_account_code]);
+  }
   let n = 0;
   for (const l of lines) {
     n += 1;

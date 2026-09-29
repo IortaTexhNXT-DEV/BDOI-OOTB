@@ -259,9 +259,18 @@ export async function completeEndorsement(body, userId) {
         receivableId = (await createReceivable(db, { policyId: p.id, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
       }
     }
-    // A negative delta (return premium) on a broker-billed policy is recorded on the endorsement and lowers the policy
-    // premium, but nothing is billed. TODO: returning it is a business decision (refund vs. credit against a later bill);
-    // there is no automatic refund, so finance raises a client refund payment voucher (disbursements) once the return is approved.
+    // A return premium (negative delta) or a cancellation on a broker-billed policy is credited to the open bills; what the
+    // client already paid becomes a refund payable (posting rules endorsement.return_premium / policy.cancel).
+    let credit = null;
+    if (billingMode !== 'direct' && (delta < 0 || e.is_cancel)) {
+      const { returnPremium, findPolicy } = await import('../receipts/receivables.js');
+      const fp = await findPolicy(db, p.id);
+      if (fp && fp.billing_mode !== 'direct') {
+        credit = await returnPremium(db, { policy: fp, amount: delta < 0 ? -delta : 0, breakdown, kind: e.is_cancel ? 'cancellation' : 'return-premium',
+          reference: e.endorsement_number, endorsementId: e.id, user: { id: userId } });
+      }
+    }
+    if (credit) completion.returnPremium = credit;
     await db.query(`UPDATE endorsements SET status = $2, completion = $3, document_key = COALESCE($4, document_key), completed_at = now(), completed_by = $5,
       receivable_id = $6, billing_mode = $7, updated_by = $5, updated_at = now() WHERE id = $1`, [e.id, e.is_cancel ? 'cancelled' : 'completed', JSON.stringify(completion), body.documentKey || null, userId, receivableId, billingMode]);
     return p;
