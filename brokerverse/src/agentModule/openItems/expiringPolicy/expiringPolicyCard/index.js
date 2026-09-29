@@ -18,7 +18,6 @@ import { Menu } from "primereact/menu";
 import { useSelector, useDispatch } from "react-redux";
 import ClientListing from "../../../quoteModule/clientListing";
 import { getexpiringtableMiddleware, getExpiringSearchDataMiddleWare } from "../expiringPolicyCard/store/expiringMiddleware";
-import { collectFromHash } from "@fullcalendar/core/internal";
 import { Avatar } from "primereact/avatar";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
