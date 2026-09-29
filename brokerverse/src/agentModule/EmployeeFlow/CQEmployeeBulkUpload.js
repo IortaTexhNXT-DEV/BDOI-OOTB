@@ -8,17 +8,14 @@ import { Column } from "primereact/column";
 import SvgDownArrow from "../../assets/agentIcon/SvgDownArrow";
 import { Dropdown } from "primereact/dropdown";
 import React, { useRef, useState } from "react";
-import SvgArrow from "../../assets/icons/SvgArrow";
 import { Dialog } from "primereact/dialog";
 import InputTextField from '../../components/InputField';
 import { useFormik } from "formik";
-import DatepickerField from "../../components/DatePicker";
 import "./index.scss";
 import PlusIcon from "./PlusIcon";
 import SvgDeleteIcon from "../../assets/icons/SvgDeleteIcon";
-import SvgEditIcon from "../../assets/icons/SvgEditIcon";
 import SvgEdit from "../../assets/icons/SvgEdits";
-import { Navigate, useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom"; 
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 
 const CQEmployeeBulkUpload = ({ action, flow, }) => {
@@ -113,35 +110,8 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
         <div className="category__text">{rowIndex + 1}</div>
     );
 
-    const ViewheaderStyle = {
-        textalign: "center",
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-    };
 
-    const headerStyle = {
-        textalign: "center",
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-    };
 
-    const headeraction = {
-        textalign: "center",
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-        display: "flex",
-        justifyContent: "center",
-        alignItem: "center",
-    };
 
     const handleDummyUpload = () => {
         const dummyData = [

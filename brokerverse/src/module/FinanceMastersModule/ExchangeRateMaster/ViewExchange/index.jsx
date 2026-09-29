@@ -1,23 +1,16 @@
-import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../components/InputField";
-import SubmitButton from "../../../../components/SubmitButton";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../../components/NavBar";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../components/DatePicker";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { useFormik } from "formik";
-import { Toast } from "primereact/toast";
-import CustomToast from "../../../../components/Toast";
 import { useSelector } from "react-redux";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
 
@@ -33,7 +26,7 @@ const initialValues = {
 
 function ViewExchange() {
   const { t } = useTranslation();
-  const { ExchangeDetailView, loading } = useSelector(
+  const { ExchangeDetailView } = useSelector(
     ({ exchangeMasterReducer }) => {
       return {
         loading: exchangeMasterReducer?.loading,
@@ -41,16 +34,7 @@ function ViewExchange() {
       };
     }
   );
-  const [date, setDate] = useState(null);
   const Navigate = useNavigate();
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] =
-    useState(null);
 
   const currencyCode = [
     {

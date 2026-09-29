@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import DropdownField from "../../../component/DropdwonField";
 import InputTextField from "../../../component/inputText";
@@ -23,12 +23,12 @@ import DialogList from "./DialogList";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgUploadArrowIcon from "../../../../assets/icons/SvgUploadArrowIcon";
 import useMotorTariff, { findVehicleClass } from "../../utils/useMotorTariff";
-import { confirmAction, notifyError, notifyWarn } from "../../../../utility/dialogs";
+import { confirmAction, notifyWarn } from "../../../../utility/dialogs";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
   const InsuranceCompanyOptions = useInsuranceCompanyOptions();
-  const { type, id: leadRefId } = useParams();
+  const { id: leadRefId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();

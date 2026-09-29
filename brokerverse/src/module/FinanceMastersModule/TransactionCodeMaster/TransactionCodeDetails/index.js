@@ -1,4 +1,3 @@
-import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -11,12 +10,11 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import TransactionCodeMasterDetailViewTable from "./TransactionCodeMasterDetailViewTable";
-import NavBar from "../../../../components/NavBar";
 import { useSelector } from "react-redux";
 
 const TransactionCodeDetails = () => {
   const { t } = useTranslation();
-  const { TrascationcodeDetailsView, TransactioncodeList, loading } =
+  const { TrascationcodeDetailsView } =
     useSelector(({ transactionCodeMasterReducer }) => {
       return {
         loading: transactionCodeMasterReducer?.loading,
@@ -25,7 +23,6 @@ const TransactionCodeDetails = () => {
         // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
       };
     });
-  const toastRef = useRef(null);
   const navigate = useNavigate();
   const items = [
     {

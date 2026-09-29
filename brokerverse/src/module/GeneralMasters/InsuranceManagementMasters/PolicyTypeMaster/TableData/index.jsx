@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import { getSearchInsurancePolicyTypeMiddleware, getInsurancePolicyTypeMiddleWare } from "../store/insurancePolicyTypeMiddleware";
@@ -27,7 +26,7 @@ const TableData = ({ navigate }) => {
   useEffect(() => {
     dispatch(getInsurancePolicyTypeMiddleWare());
   }, [dispatch]);
-  const { InsurancePolicyType, loading, SearchTableList } = useSelector(
+  const { InsurancePolicyType, SearchTableList } = useSelector(
     ({ insurancePolicyTypeReducers }) => {
       return {
         loading: insurancePolicyTypeReducers?.loading,

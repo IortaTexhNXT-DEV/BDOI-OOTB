@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
@@ -11,28 +10,26 @@ import { Dialog } from "primereact/dialog";
 import InputField from "../../../../../../components/InputField";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
-import { getUserEditData, postAddTransactionCodeSetup, postAddUserGroupAccess } from "../../../store/transactionCodeMasterMiddleware";
+import { getUserEditData, postAddUserGroupAccess } from "../../../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import SvgEditIcon from "../../../../../../assets/icons/SvgEditIcon";
 import UserGroupAccessEditPopup from "../../../TransactionCodeMasterEdit/TransactionCodeMasterEditTableview/UserGroupAccessEdit/UserGroupAccessEditPopup";
-import { findAllByTestId } from "@testing-library/react";
 
 const UserGroupAccess = () => {
-  const { TransactioncodeListsearch, UserGroupAccessList, loading } = useSelector(({ transactionCodeMasterReducer }) => {
+  const { UserGroupAccessList } = useSelector(({ transactionCodeMasterReducer }) => {
     return {
       loading: transactionCodeMasterReducer?.loading,
       UserGroupAccessList: transactionCodeMasterReducer?.UserGroupAccessList,
       // TransactioncodeListsearch: transactionCodeMasterReducer?.TransactioncodeListsearch,
     };
   });
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
 
   const handleClick = () => {
     setShow(true);
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -82,8 +79,6 @@ const UserGroupAccess = () => {
     },
   };
 
-  const handleView = (rowData) => {
-  };
   const [showEdit, setShowEditData] = useState(false)
   const handleEdit = (columnData) => {
     setShowEditData(true)

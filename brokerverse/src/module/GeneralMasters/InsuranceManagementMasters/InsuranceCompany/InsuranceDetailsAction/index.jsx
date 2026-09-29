@@ -1,20 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import { MultiSelect } from "primereact/multiselect";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
-import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import {
   patchInsuranceCompanyMiddleWare,
@@ -23,17 +18,13 @@ import {
   getInsurancePatchData as loadInsurancePatchData,
 } from "../store/insuranceCompanyMiddleware";
 import { useSelector, useDispatch } from "react-redux";
-import { act } from "react-dom/test-utils";
 import useMasterOptions from "../../../common/useMasterOptions";
 
 const InsuranceDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [dropdownData, setdropdown] = useState({});
   const {
-    InsuranceCompanyList,
     getInsuranceView,
-    loading,
     getInsurancePatchData,
   } = useSelector(({ insuranceCompanyReducers }) => {
     return {

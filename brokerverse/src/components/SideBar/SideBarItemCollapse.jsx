@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SidebarItem from "./SideBarItem";
-import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
-import SvgArrow from "../../assets/icons/SvgArrow";
-import SvgBackArrow from "../../assets/icons/SvgBackArrow";
-import SvgAdd from "../../assets/icons/SvgAdd";
 import SvgDownarrows from "../../assets/agentIcon/SvgDownarrows";
 import SvgUparrows from "../../assets/agentIcon/SvgUparrows";
 
@@ -17,7 +13,6 @@ const SidebarItemCollapse = ({
   onToggle, // Callback to parent to handle expansion (for top-level menus)
 }) => {
   const { t } = useTranslation();
-  const [isActive, setIsActive] = useState(false);
   // For nested menus (when onToggle is not provided), manage own state
   const [localExpanded, setLocalExpanded] = useState(false);
 

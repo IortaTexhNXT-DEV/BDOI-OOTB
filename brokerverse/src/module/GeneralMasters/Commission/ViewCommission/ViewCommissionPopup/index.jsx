@@ -1,19 +1,15 @@
 
-import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../components/DropDowns";
 import InputField from "../../../../../components/InputField";
-import { Button } from "primereact/button";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../../assets/icons/SvgNodalClose";
-import { useDispatch, useSelector } from "react-redux";
-import { addLevelPatchEditPopup } from "../../store/commissionMiddleWare";
+import { useSelector } from "react-redux";
 const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) => {
     const { t } = useTranslation();
-    const { loading, commissionPopupView } = useSelector(({ commissionMianReducers }) => {
+    const { commissionPopupView } = useSelector(({ commissionMianReducers }) => {
         return {
             loading: commissionMianReducers?.loading,
             commissionPopupView: commissionMianReducers?.commissionPopupView
@@ -38,11 +34,9 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
 
         return errors;
     };
-    const dispatch=useDispatch()
     const handleSubmit = (value) => {
         setShowViewPopup(false);
     }
-    const [levetOptionData, setLevelOptionData]=useState([])
 
     // const setFormikValues = () => {
     //     const levelData=popupEditData?.level

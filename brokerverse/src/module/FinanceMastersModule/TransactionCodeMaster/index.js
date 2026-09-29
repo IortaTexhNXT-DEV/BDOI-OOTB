@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -8,8 +7,6 @@ import SvgAdd from "../../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import TransactionCodeMasterTable from "./TransactionCodeMasterTable";
-import NavBar from "../../../components/NavBar";
-import { useSelector } from "react-redux";
 
 const TransactionCodeMaster = () => {
   const { t } = useTranslation();

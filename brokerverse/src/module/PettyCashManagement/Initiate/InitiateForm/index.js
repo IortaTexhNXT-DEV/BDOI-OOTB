@@ -1,11 +1,10 @@
-import React, { useState, useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Card } from "primereact/card";
 import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
@@ -16,7 +15,7 @@ import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import {
   postInitiateMiddleware,
 } from "../store/pettyCashInitiateMiddleware";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
@@ -81,14 +80,6 @@ const InitiateForm = () => {
     return errors;
   };
 
-  const { InitiateList, loading } = useSelector(
-    ({ pettyCashInitiateReducer }) => {
-      return {
-        loading: pettyCashInitiateReducer?.loading,
-        InitiateList: pettyCashInitiateReducer?.InitiateList,
-      };
-    }
-  );
 
   const handleSubmit = async (value) => {
     const result = await dispatch(postInitiateMiddleware(value));

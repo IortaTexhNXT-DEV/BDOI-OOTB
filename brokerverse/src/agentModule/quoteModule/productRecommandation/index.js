@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -217,7 +217,6 @@ const ProductRecommendation = () => {
 
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAlternatives, setShowAlternatives] = useState(false);
   const [activePlanId, setActivePlanId] = useState(null);
 
   const { policydetailedlist } = useSelector(
@@ -389,7 +388,6 @@ const ProductRecommendation = () => {
     })
     .filter(Boolean);
 
-  const alternativePlans = plans.slice(3, 6);
 
   if (loading) {
     return (

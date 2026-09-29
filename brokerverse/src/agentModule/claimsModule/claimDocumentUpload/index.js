@@ -1,4 +1,3 @@
-import React from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
@@ -13,7 +12,7 @@ import document from "../../../assets/images/document.png";
 const ClaimDocumentUpload = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { claimDocumentUploadData, loading } = useSelector(
+  const { claimDocumentUploadData } = useSelector(
     ({ claimDocumentUploadMainReducers }) => {
       return {
         loading: claimDocumentUploadMainReducers?.loading,

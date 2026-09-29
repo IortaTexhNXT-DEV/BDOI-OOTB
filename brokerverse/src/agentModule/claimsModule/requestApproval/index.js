@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -30,7 +30,6 @@ const RequestApproval = ({ flow }) => {
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
@@ -62,12 +61,7 @@ const RequestApproval = ({ flow }) => {
       const result = await claimsService.getClaimDetails(claimId);
 
       if (result.success) {
-        const claimData = result.data;
 
-        // Extract the necessary IDs from claim data
-        const leadRefId = claimData.leadRefId || "LEAD-001";
-        const quoteRefId = claimData.quoteRefId || "QUOTE-001";
-        const policyRefId = claimData.policyRefId || "POLICY-001";
 
         // Navigate to claim details page with claimId in URL
 

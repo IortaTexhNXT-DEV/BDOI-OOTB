@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
@@ -6,7 +6,6 @@ import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
 import { receiptsService } from "../../../services/receiptsService";
 import SvgUpload from "../../../assets/agentIcon/SvgUpload";
-import SvgDownloadIcon from "../../../assets/agentIcon/SvgDownloadIcon";
 import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../../agentModule/component/bulkUploadTemplate";
 import "./index.scss";
 import PropTypes from "prop-types";

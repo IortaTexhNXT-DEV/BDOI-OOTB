@@ -5,9 +5,6 @@ import SvgAdd from "../../../assets/icons/SvgAdd";
 import "../TaxationMaster/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
-import NavBar from "../../../components/NavBar";
-import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
-import { Paginator } from "primereact/paginator";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
@@ -33,9 +30,6 @@ const TaxationMaster = () => {
   const handleNavigate = () => {
     navigate("/master/finance/taxation/addtaxation");
   };
-  const handleNavigateedit = () => {
-    navigate("/master/finance/taxation/taxationdetails");
-  };
 
   const items = [{ label: t("financeMasters.taxation"), url: "/master/finance/taxation" }];
   const home = { label: t("financeMasters.master") };
@@ -58,26 +52,10 @@ const TaxationMaster = () => {
     justifyContent: "center",
   };
 
-  const columns = [
-    { field: "tax", headerName: "Tax Code", flex: 1 },
-    { field: "taxName", headerName: " Tax Name", flex: 1 },
 
-    { field: "desc", headerName: "Tax Rate", flex: 1 },
-    { field: "effective", headerName: "Effective From", flex: 1 },
-    { field: "effectiveTo", headerName: "Effective To", flex: 1 },
-    { field: "status", headerName: "Status", flex: 1 },
-    { field: "action", headerName: "Action", flex: 1 },
-  ];
-
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRowsPerPage(event.rows);
-  };
-  const { taxationList, loading, taxationSearchList } = useSelector(
+  const { taxationList, taxationSearchList } = useSelector(
     ({ taxationMainReducers }) => {
       return {
         loading: taxationMainReducers?.loading,
@@ -87,17 +65,6 @@ const TaxationMaster = () => {
     }
   );
 
-  const rows = [
-    {
-      id: 1,
-      tax: "",
-      shorDesc: "",
-      desc: "",
-      effective: "",
-      status: "",
-      view: "",
-    },
-  ];
   const renderViewButton = (rowData) => {
     return (
       <div className="center-content">

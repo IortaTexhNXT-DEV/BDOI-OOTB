@@ -1,24 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import InputField from '../../../../../components/InputField';
-import SubmitButton from '../../../../../components/SubmitButton'
 import SvgDot from '../../../../../assets/icons/SvgDot';
 import DropDowns from '../../../../../components/DropDowns';
 import SvgDropdown from '../../../../../assets/icons/SvgDropdown';
 import { Button } from 'primereact/button';
-import { useNavigate, useParams } from 'react-router-dom';
-import NavBar from '../../../../../components/NavBar';
+import { useNavigate } from 'react-router-dom';
 import SvgBackicon from '../../../../../assets/icons/SvgBackicon';
 import { Card } from "primereact/card";
-import DatePicker from '../../../../../components/DatePicker';
-import { Calendar } from 'primereact/calendar';
-import LabelWrapper from '../../../../../components/LabelWrapper';
 import { useFormik } from "formik";
-import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../../components/Toast";
-import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from 'react-redux';
 import useMasterOptions from "../../../common/useMasterOptions";
 import { patchStateEditMiddleware, postAddStateMiddleware } from '../store/stateMiddleware';
@@ -36,17 +29,9 @@ function AddState({ action }) {
   const { t } = useTranslation();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const { id } = useParams();
   const Navigate = useNavigate()
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] = useState(null);
 
-  const { stateTableList, loading, getStateListById } = useSelector(
+  const { getStateListById } = useSelector(
     ({ stateReducers }) => {
       return {
         loading: stateReducers?.loading,

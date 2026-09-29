@@ -1,5 +1,4 @@
 import { Button } from 'primereact/button';
-import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputTextField from '../../../../component/inputText';
 import DropdownField from '../../../../component/DropdwonField';
@@ -14,7 +13,6 @@ import { useFormik } from 'formik';
 
 const DialogList = ({ setVisible, visible }) => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   // Participants from the Insurance Company master; currencies from the Currency master (default: display currency)
   const InsurancePolicycontainer = useInsuranceCompanyOptions();
   const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
@@ -27,7 +25,7 @@ const DialogList = ({ setVisible, visible }) => {
     Premiumcurrencys: getDisplayCurrencyConfig().currency,
     Sharepercentage: ""
   };
-  const { TableList, loading } = useSelector(
+  const { TableList } = useSelector(
     ({ policydetailreducer }) => {
       return {
         loading: policydetailreducer?.loading,

@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   getBankList,
   getBankSearchList,
-  postBankStatus,
   getAddBank,
   patchBankDetailEdit,
   getBankDetailView,
@@ -18,7 +17,6 @@ import {
   postChequeEditDataMiddleWare,
   getSeachAddAccountDetails
 } from "./bankMasterMiddleware";
-import SvgArrow from "../../../../assets/icons/SvgArrow";
 const initialState = {
   loading: false,
   error: "",

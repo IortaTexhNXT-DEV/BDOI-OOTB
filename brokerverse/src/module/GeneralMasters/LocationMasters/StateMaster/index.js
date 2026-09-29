@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgFilters from "../../../../assets/icons/SvgFilters";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -14,13 +12,10 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgUpload from "../../../../assets/icons/SvgUpload";
-import SvgMenudots from "../../../../assets/icons/SvgMenudots";
-import { TieredMenu } from "primereact/tieredmenu";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../components/InputField";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
-import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchStateMiddleware,
@@ -35,7 +30,6 @@ import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const State = () => {
   const { t } = useTranslation();
-  const menu = useRef(null);
   const dispatch = useDispatch();
   const statusToast = useRef(null);
   const reloadList = () => dispatch(getStateMiddleware());
@@ -48,7 +42,7 @@ const State = () => {
   const [visible, setVisible] = useState(false);
   const [visibleview, setVisibleview] = useState(false);
 
-  const { stateTableList, getSearchState, loading } = useSelector(
+  const { stateTableList, getSearchState } = useSelector(
     ({ stateReducers }) => {
       return {
         loading: stateReducers?.loading,

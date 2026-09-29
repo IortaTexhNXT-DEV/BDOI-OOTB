@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../AddTaxation/index.scss";
 import DropDowns from "../../../../components/DropDowns";
@@ -14,25 +13,15 @@ import { useFormik } from "formik";
 import SvgBack from "../../../../assets/icons/SvgBack";
 import CustomToast from "../../../../components/Toast";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { postAddTaxationMiddileware } from "../store/taxationMiddleWare";
 import useTaxRateOptions from "../useTaxRateOptions";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
 const AddTaxation = () => {
   const { t } = useTranslation();
-  const [errors, setErrors] = useState("");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const { taxationList, loading, taxationSearchList } = useSelector(
-    ({ taxationMainReducers }) => {
-      return {
-        loading: taxationMainReducers?.loading,
-        taxationList: taxationMainReducers?.taxationList,
-        taxationSearchList: taxationMainReducers?.taxationSearchList,
-      };
-    }
-  );
   const items = [
     { label: t("financeMasters.taxationMaster"), url: "/master/finance/taxation" },
     { label: t("financeMasters.addTaxation"), url: "/master/finance/taxation/addtaxation" },

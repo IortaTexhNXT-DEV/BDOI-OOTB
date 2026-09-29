@@ -1,6 +1,4 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getRequest } from "../../../../utility/commonServices";
-import { APIROUTES } from "../../../../routes/apiRoutes";
 import { GET_TRANSACTION_CODE_LIST, GET_TRANSACTION_CODE_LIST_SEARCH, POST_STATUS, POST_ADD_TRANSACTION, GET_TRANSACTION_CODE_SETUP, GET_USER_GROUP_ACCESS, POST_ADD_TRANSACTION_CODE_SETUP, POST_ADD_USER_GROUP_ACCESS, PATCH_TRANSACTION_CODE_DETAILS_EDIT, GET_TRANSACTION_CODE_DETAILS_VIEW, GET_PATCH_TRANSACTION_EDIT, GET_PATCH_USER_ACCESS, POST_PATCH_USER_ACCESS } from "../../../../redux/actionTypes";
 import mastersService, { searchText } from "../../../../services/mastersService";
 import masterThunk from "../../../GeneralMasters/common/masterThunk";

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
@@ -38,7 +38,7 @@ const initialValue = {
 const OrderSummary = () => {
   const { t } = useTranslation();
   const [discount, setDiscount] = useState(0);
-  const [ncd, setNcd] = useState(0);
+  const [ncd] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const toastRef = useRef(null);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -233,13 +233,6 @@ const PremiumAccountingEntries = () => {
     return entries;
   }, [entries, selectedEntryType]);
 
-  const handleMotherPolicyClick = (motherPolicyId) => {
-    if (motherPolicyId && motherPolicyId !== policyId) {
-      navigate(`/agent/premium-accounting-entries/${motherPolicyId}`, {
-        state: { policyId: motherPolicyId },
-      });
-    }
-  };
 
   const breadcrumbItems = [
     { label: t("policyAccounting.policy"), command: () => navigate("/agent/clientlisting") },

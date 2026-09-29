@@ -9,7 +9,6 @@ import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
 import { Skeleton } from "primereact/skeleton";
 import { MultiSelect } from "primereact/multiselect";
-import { ProgressSpinner } from "primereact/progressspinner";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../../assets/icons/SvgArrow";
@@ -20,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import debounce from "lodash/debounce";
 import {
-  getPaymentSearchDataMiddleWare,
   getleadtableMiddleware,
   getLeadByIdMiddleware,
   deleteLeadMiddleware,
@@ -53,7 +51,7 @@ const LeadListingMotorTable = ({ lob = null }) => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [processing, setProcessing] = useState(false);
+  const [processing] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState([
     "name",
     "category",

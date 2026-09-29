@@ -2,14 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import "../CurrencyMaster/index.scss";
-import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
-import NavBar from "../../../components/NavBar";
-import SvgFilters from "../../../assets/icons/SvgFilters";
-import InputField from "../../../components/InputField";
-import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
-import { Paginator } from "primereact/paginator";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
@@ -18,8 +12,6 @@ import { InputText } from "primereact/inputtext";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
-import SvgEditicon from "../../../assets/icons/SvgEdit";
-import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCurrencyDetailEdit,
@@ -45,7 +37,7 @@ const CurrencyMaster = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  const { CurrencyList, loading, CurrencySearchList } = useSelector(
+  const { CurrencyList, CurrencySearchList } = useSelector(
     ({ currencyMasterReducer }) => {
       return {
         loading: currencyMasterReducer?.loading,
@@ -61,12 +53,6 @@ const CurrencyMaster = () => {
       <SvgTable />
     </div>
   );
-  const menu = useRef(null);
-  const menuitems = [
-    { label: t("common.name") },
-    { label: t("common.date") },
-    { label: t("accounts.voucherNumber") },
-  ];
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",

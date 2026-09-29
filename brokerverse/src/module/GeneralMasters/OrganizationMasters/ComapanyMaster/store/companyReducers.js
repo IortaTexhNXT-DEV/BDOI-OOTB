@@ -1,12 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   getCompanyListMiddleware,
-  getCompanyListByIdMiddleware,
   postAddCompanyMiddleware,
   patchCompanyEditMiddleware,
   getSearchCompanyMiddleware,
   getComapnyListByIdMiddleware,
-  getCompanyView,
   getCompanyViewMiddleWare,
   getCompanyEditData,
 } from "./companyMiddleware";

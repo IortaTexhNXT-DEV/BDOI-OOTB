@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgFilters from "../../../assets/icons/SvgFilters";
@@ -69,27 +68,14 @@ const BankAccountMaster = () => {
   const home = { label: t("financeMasters.master") };
 
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   const handlePolicy = () => {
     navigate("/master/finance/bankaccount/addbankaccount");
   };
   const handleArrowClick = () => {
     navigate("/master/finance/bankaccount/bankaccountdetails");
-  };
-  const handleEditClick = () => {
-    navigate("/otherreceiptsview");
   };
   return (
     <div className="overall__bankaccount__container">

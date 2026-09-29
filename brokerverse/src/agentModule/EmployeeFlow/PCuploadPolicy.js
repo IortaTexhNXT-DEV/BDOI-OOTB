@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FileUpload } from "primereact/fileupload";
 import { Button } from "primereact/button";
@@ -64,7 +64,7 @@ const PCuploadPolicy = ({ state }) => {
     })(),
     file: null,
   };
-  const [expiryDateData, setExpieyDateData] = useState("")
+  const [, setExpieyDateData] = useState("")
   const handleUppendImg = (name, src) => {
     setimageURL(src.objectURL);
   };
@@ -91,7 +91,7 @@ const PCuploadPolicy = ({ state }) => {
     formik.setFieldValue("IssuedDate", issuedDate);
     formik.setFieldValue("Expiry", expiryDate);
   };
-  const { TableList, loading } = useSelector(
+  const { TableList } = useSelector(
     ({ policydetailreducer }) => {
       return {
         loading: policydetailreducer?.loading,

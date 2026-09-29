@@ -1,23 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import "./index.scss";
-import SvgTable from "../../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
-import SvgAdd from "../../../../../../../assets/icons/SvgAdd";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../../../../components/InputField";
 import DropDowns from "../../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../../assets/icons/SvgDropdown";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
-import { getUserEditData, patchUserRoleAccess, postAddUserGroupAccess } from "../../../../store/transactionCodeMasterMiddleware";
-import SvgEditicon from "../../../../../../../assets/icons/SvgEdit";
+import { patchUserRoleAccess } from "../../../../store/transactionCodeMasterMiddleware";
 
 const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
-    const { TransactioncodeListsearch, UserGroupAccessList, loading, getUserAccessData } = useSelector(({ transactionCodeMasterReducer }) => {
+    const { getUserAccessData } = useSelector(({ transactionCodeMasterReducer }) => {
         return {
             loading: transactionCodeMasterReducer?.loading,
             UserGroupAccessList: transactionCodeMasterReducer?.UserGroupAccessList,
@@ -82,16 +75,6 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
         setFormikValues();
     }, [getUserAccessData]);
 
-    const handleView = (rowData) => {
-    };
-    const headerStyle = {
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        padding: 6,
-        color: "#000",
-        border: "none",
-    };
 
     return (
         <div className="transactioncode__master__tableedit_UserGroupAccess">

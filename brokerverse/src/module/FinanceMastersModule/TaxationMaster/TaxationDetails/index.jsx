@@ -1,7 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../components/InputField";
@@ -14,7 +12,7 @@ import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const TaxationDetails = () => {
   const { t } = useTranslation();
-  const { taxationView, loading } = useSelector(({ taxationMainReducers }) => {
+  const { taxationView } = useSelector(({ taxationMainReducers }) => {
     return {
       loading: taxationMainReducers?.loading,
       taxationView: taxationMainReducers?.taxationView,

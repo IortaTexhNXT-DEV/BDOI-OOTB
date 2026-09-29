@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate, useLocation } from "react-router-dom";
 import quotationService from "../../../services/quotationService";

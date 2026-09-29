@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormatCurrency } from '../../hooks/useFormatCurrency';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
@@ -15,9 +15,8 @@ const ApproveQuote = () => {
   const t = i18n.getFixedT('en');
   const { formatCurrency } = useFormatCurrency();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [token, setToken] = useState(null);
-  const [tokenPayload, setTokenPayload] = useState(null);
+  const [, setTokenPayload] = useState(null);
   const [quotationData, setQuotationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);

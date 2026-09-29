@@ -1,12 +1,8 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgHomes from "../../../assets/agentIcon/SvgHomes";
-import SvgQr from "../../../assets/agentIcon/SvgQr";
-import SvgCredit from "../../../assets/agentIcon/SvgCredit";
-import SvgEmoney from "../../../assets/agentIcon/SvgEmoney";
 import SvgDigital from "../../../assets/agentIcon/SvgDigital";
 import SvgStore from "../../../assets/agentIcon/SvgStore";
 import SvgDebit from "../../../assets/agentIcon/SvgDebit";
@@ -18,7 +14,6 @@ import DocumentUpload from "./Modal/DocumentUpload";
 import SvgPaymentLinkIcon from "../../../assets/agentIcon/SvgPaymentLinkIcon";
 import ShareOption from "./Modal/ShareOption";
 import InternetBankingList from "./Modal/InternetBankingList";
-import policyService from "../../../services/policyService";
 import { getpolicyDetailedMiddleware } from "../policyDetailedView/store/policyDetailedMiddleware";
 import clientService from "../../../services/clientService";
 
@@ -39,7 +34,7 @@ const PaymentOptions = () => {
   const fromEndorsement = state?.fromEndorsement;
   const endorsementId = state?.endorsementId;
 
-  const { policydetailedlist, loadingPolicyDetails } = useSelector(
+  const { policydetailedlist } = useSelector(
     ({ policyDetailedViewMainReducers }) => ({
       policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
       loadingPolicyDetails: policyDetailedViewMainReducers?.loading,

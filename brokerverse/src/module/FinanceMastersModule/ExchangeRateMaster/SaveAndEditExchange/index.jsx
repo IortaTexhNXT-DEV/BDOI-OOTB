@@ -1,22 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../components/InputField";
-import SubmitButton from "../../../../components/SubmitButton";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../../components/NavBar";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../components/DatePicker";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { useFormik } from "formik";
-import { Toast } from "primereact/toast";
 import CustomToast from "../../../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { patchExchangeDetailEdit } from "../store/exchangeMasterMiddleware";
@@ -36,33 +32,8 @@ const initialValues = {
 function EditExchange() {
   const { t } = useTranslation();
   const toastRef = useRef(null);
-  const [date, setDate] = useState(null);
   const Navigate = useNavigate();
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] =
-    useState(null);
 
-  const PayeeType = [
-    { name: "Customer", code: "NY" },
-    { name: "owner", code: "RM" },
-  ];
-  const Criteria = [
-    { name: "Specific", code: "NY" },
-    { name: "payall", code: "RM" },
-  ];
-  const CustomerCode = [
-    { name: "Cus00123", code: "NY" },
-    { name: "Cus001234", code: "RM" },
-  ];
-  const Transactioncode = [
-    { name: "Trans00123", code: "NY" },
-    { name: "Trans001234", code: "RM" },
-  ];
 
   const home = { label: t("financeMasters.master") };
   const items = [
@@ -75,7 +46,7 @@ function EditExchange() {
 
   const dispatch = useDispatch();
 
-  const { getExchangeEdit, loading } = useSelector(
+  const { getExchangeEdit } = useSelector(
     ({ exchangeMasterReducer }) => {
       return {
         loading: exchangeMasterReducer?.loading,
@@ -97,7 +68,6 @@ function EditExchange() {
   const currencyCode = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
   const ToCurrencyCode = currencyCode;
   const setFormikValues = () => {
-    const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
       id: getExchangeEdit?.id,
       EffectiveFrom: new Date(getExchangeEdit?.EffectiveFrom),

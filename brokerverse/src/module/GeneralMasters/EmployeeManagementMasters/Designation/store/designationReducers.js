@@ -8,7 +8,6 @@ const initialState = {
   getEditData: {},
   getViewData: {}
 };
-let nextId1=4
 const receiptsReducer = createSlice({
   name: "designation",
   initialState,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
@@ -16,10 +16,9 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { MultiSelect } from "primereact/multiselect";
-import { Checkbox } from "primereact/checkbox";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import FieldError from "../../../../components/FieldError";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
@@ -36,7 +35,6 @@ import "./index.scss";
 const IncentiveProgramMaster = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const location = useLocation();
   const toast = useRef(null);
 
@@ -258,25 +256,6 @@ const IncentiveProgramMaster = () => {
     }
   };
 
-  const handleDelete = (rowData) => {
-    confirmDialog({
-      message: `Are you sure you want to delete program "${rowData.programName}"?`,
-      header: "Confirm Delete",
-      icon: "pi pi-exclamation-triangle",
-      accept: async () => {
-        setLoading(true);
-        try {
-          await incentiveService.deleteProgram(rowData.id);
-          showSuccess(toast, "Incentive program deleted successfully");
-          await loadPrograms();
-        } catch (error) {
-          showError(toast, error, "Failed to delete incentive program");
-        } finally {
-          setLoading(false);
-        }
-      }
-    });
-  };
 
   const handleStatusChange = async (rowData) => {
     const newStatus = rowData.status === "Active" ? "Inactive" : "Active";

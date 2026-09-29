@@ -1,10 +1,8 @@
-import React from "react";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
@@ -12,7 +10,7 @@ import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import { setReceiptDraft } from "../store/pettyCashReceiptsReducer";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getAddReceiptTableMiddleware } from "../store/pettyCashReceiptsMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 

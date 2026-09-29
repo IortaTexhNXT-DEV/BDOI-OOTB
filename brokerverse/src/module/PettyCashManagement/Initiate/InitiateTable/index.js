@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -7,11 +7,9 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getInitiateDetailsMiddleware,
@@ -23,13 +21,12 @@ import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const InitiateTable = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Pettycashcode");
 
-  const { InitiateList, loading, InitiateListSearch } = useSelector(
+  const { InitiateList, InitiateListSearch } = useSelector(
     ({ pettyCashInitiateReducer }) => {
       return {
         loading: pettyCashInitiateReducer?.loading,
@@ -142,18 +139,6 @@ const InitiateTable = () => {
     }
   }, [search]);
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
   return (
     <div className="initiate__table">
       <Card className="mt-1">

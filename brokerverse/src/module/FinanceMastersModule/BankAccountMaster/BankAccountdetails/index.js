@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -8,17 +8,10 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
-import SuccessIcon from "../../../../assets/icons/SuccessIcon";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import SvgEditicon from "../../../../assets/icons/SvgEdit";
-import NavBar from "../../../../components/NavBar";
 function BankAccountdetails() {
   const { t } = useTranslation();
   const [selectedItem, setSelectedItem] = useState(null);
-  const [visiblePopup, setVisiblePopup] = useState(false);
-  const showPopup = () => {
-    setVisiblePopup(true);
-  };
   
   const items = [{ label: t("financeMasters.bankAccount") }, { label: t("financeMasters.bankAccountDetails") }];
   const item = [

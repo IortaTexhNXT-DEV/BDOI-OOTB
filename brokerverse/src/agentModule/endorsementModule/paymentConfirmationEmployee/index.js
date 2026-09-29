@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -30,10 +30,8 @@ const PaymentConfirmationEmployeeBenefit = () => {
   const [autoPaymentProcessing, setAutoPaymentProcessing] = useState(false);
 
   const clientName = state?.clientName || state?.ClientName || t("endorsement.client");
-  const clientId = state?.clientId;
   const clientNumber = state?.clientNumber;
 
-  const policyId = state?.policyId || endorsementData?.policyId;
 
   // Check multiple conditions for cancellation detection
   const endorsementStatus =
@@ -123,11 +121,6 @@ const PaymentConfirmationEmployeeBenefit = () => {
       // Simulate payment processing delay
       await simulateDelay(1500);
 
-      const targetPolicyId =
-        policyId ||
-        endorsementData?.policyId ||
-        state?.policyId ||
-        "MOCK-POLICY-001";
 
       // Mock payment status update - simulate success
       const mockPaymentResult = {
@@ -144,14 +137,6 @@ const PaymentConfirmationEmployeeBenefit = () => {
           await simulateDelay(500);
         }
 
-        // Mock accounting entries creation
-        const absGrossPremium = Math.abs(grossPremium);
-        const absNetPremium = Math.abs(netPremium);
-        const absVat = Math.abs(vat);
-        const absDst = Math.abs(dst);
-        const absLgt = Math.abs(lgt);
-        const absOthers = Math.abs(others);
-        const absDiscount = Math.abs(discount);
 
         // Simulate accounting entry creation delay
         await simulateDelay(500);

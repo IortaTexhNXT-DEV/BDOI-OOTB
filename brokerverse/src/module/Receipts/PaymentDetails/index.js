@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { Button } from "primereact/button";
-import NavBar from "../../../components/NavBar";
-import { DataTable } from "primereact/datatable";
 import { useNavigate } from "react-router-dom";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
 import SvgBack from "../../../assets/icons/SvgBack";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
@@ -41,13 +37,11 @@ function PolicyReceipts() {
   const location = useLocation();
   const totalFC = location.state?.totalFC;
   const toastRef = useRef(null);
-  const [selectedProducts, setSelectedProducts] = useState(false);
   const [products, setProducts] = useState("Approve");
   const navigate = useNavigate();
-  const [errors, setErrors] = useState("");
-  const [printLoading, setPrintLoading] = useState(false);
+  const [, setPrintLoading] = useState(false);
 
-  const { paymentDetails, loading, total, currentReceiptId } = useSelector(
+  const { currentReceiptId } = useSelector(
     ({ receiptsTableReducers }) => {
       return {
         loading: receiptsTableReducers?.loading,
@@ -191,14 +185,6 @@ function PolicyReceipts() {
   // useEffect(() => {
   // }, [])
 
-  const headerStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
 
   return (
     <div className="overall__payment_details_container">

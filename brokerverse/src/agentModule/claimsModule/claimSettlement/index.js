@@ -1,17 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import NavBar from "../../../components/NavBar";
 import { Card } from "primereact/card";
-import DropdownField from "../../component/DropdwonField";
 import InputTextField from "../../component/inputText";
-import DatepickerField from "../../component/datePicker";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import "./index.scss";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useClaimHeader from "../useClaimHeader";
 import { useSelector, useDispatch } from "react-redux";
-import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionMiddleWare";
 import claimsService from "../../../services/claimsService";
@@ -50,7 +46,6 @@ const ClaimSettlement = () => {
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
@@ -85,9 +80,6 @@ const ClaimSettlement = () => {
     navigate(`/agent/clientview/${claimDetails?.data?.policy?.clientId}`);
   };
 
-  const handleList = () => {
-    navigate(`/agent/clientview/${claimDetails?.data?.policy?.clientId}`);
-  };
   const handleAcknowledgmentsubmit = async () => {
     if (!claimId) {
       logger.error("No claim ID available for document download");

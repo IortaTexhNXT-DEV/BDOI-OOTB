@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
 import { useFormik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { getSearchInsuranceVehicleMiddleware, getInsuranceVehicleMiddleWare } from "../store/insuranceVehicleMiddleware";
@@ -26,7 +25,7 @@ const TableData = ({ navigate }) => {
   useEffect(() => {
     dispatch(getInsuranceVehicleMiddleWare());
   }, [dispatch]);
-  const { InsuranceVehicleList, loading, SearchTableList } = useSelector(
+  const { InsuranceVehicleList, SearchTableList } = useSelector(
     ({ insuranceVehicleReducers }) => {
       return {
         loading: insuranceVehicleReducers?.loading,
@@ -35,7 +34,6 @@ const TableData = ({ navigate }) => {
       };
     }
   );
-  const [products, setProducts] = useState([]);
 
   const emptyTableIcon = (
     <div>

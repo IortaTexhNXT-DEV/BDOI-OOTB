@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import "./index.scss";
@@ -55,9 +55,9 @@ const EndorsementSummary = ({ action }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [policyData, setPolicyData] = useState(null);
-  const [relatedPolicy, setRelatedPolicy] = useState(null);
-  const [checkingPolicy, setCheckingPolicy] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setRelatedPolicy] = useState(null);
+  const [, setCheckingPolicy] = useState(false);
+  const [isLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
   const { productConfigurator } = useSelector(

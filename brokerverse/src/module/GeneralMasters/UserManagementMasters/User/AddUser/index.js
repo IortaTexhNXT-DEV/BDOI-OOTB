@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -19,7 +19,6 @@ import {
 import moment from "moment";
 import userService from "../../../../../services/userService";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
-import { unwrapResult } from "@reduxjs/toolkit";
 import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
 import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
 

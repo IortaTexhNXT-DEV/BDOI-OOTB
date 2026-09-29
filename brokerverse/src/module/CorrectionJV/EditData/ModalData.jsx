@@ -1,12 +1,5 @@
-import React, { useState } from "react";
-import { Dialog } from "primereact/dialog";
 import "./index.scss";
 import { useFormik } from "formik";
-import DropDowns from "../../../components/DropDowns";
-import InputField from "../../../components/InputField";
-import { Button } from "primereact/button";
-import SvgDropdown from "../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../assets/icons/SvgNodalClose";
 import { useDispatch } from "react-redux";
 import { patchCorrectionJVEdit } from "../store/correctionJVMiddleWare";
 const ModalData = ({ visible, setVisible, handleUpdate, setEditID,correctionJVList }) => {

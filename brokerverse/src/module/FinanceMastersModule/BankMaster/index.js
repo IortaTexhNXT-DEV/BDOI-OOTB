@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgFilters from "../../../assets/icons/SvgFilters";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -14,11 +12,8 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgUpload from "../../../assets/icons/SvgUpload";
-import SvgMenudots from "../../../assets/icons/SvgMenudots";
-import { TieredMenu } from "primereact/tieredmenu";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../components/InputField";
-import ToggleButton from "../../../components/ToggleButton";
 import SvgTable from "../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
@@ -33,10 +28,9 @@ import { Toast } from "primereact/toast";
 
 const BankMaster = () => {
   const { t } = useTranslation();
-  const menu = useRef(null);
   const [visible, setVisible] = useState(false);
   const [visibleview, setVisibleview] = useState(false);
-  const [currentDialog, setDialog] = useState({});
+  const [, setDialog] = useState({});
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
   const statusToast = useRef(null);
@@ -88,7 +82,6 @@ const BankMaster = () => {
     fillBankForm(rowData);
   };
 
-  const [products, setProducts] = useState([]);
   const { bankList, BankSearchList } = useSelector(({ bankMasterReducer }) => {
     return {
       bankList: bankMasterReducer?.BankList,
@@ -140,7 +133,7 @@ const BankMaster = () => {
   };
 
   const handleSubmit = () => {
-    const formErrors = validate(formik.values);
+    validate(formik.values);
   };
 
   const formik = useFormik({
@@ -214,38 +207,12 @@ const BankMaster = () => {
   };
 
   const items = [{ label: t("financeMasters.bank") }];
-  const renderToggleButton = (state) => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const home = { label: t("financeMasters.master") };
 
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
-  const handlePolicy = () => {
-    navigate("/createvoucher");
-  };
-  const handleArrowClick = () => {
-    navigate("/policyreceiptsview");
-  };
-  const handleEditClick = () => {
-    navigate("/otherreceiptsview");
-  };
 
   useEffect(() => {
     if (search?.length > 0) {

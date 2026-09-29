@@ -205,11 +205,6 @@ const ApprovalWorkflowMaster = () => {
     ]);
   };
 
-  const onCellEdit = (options) => {
-    let updatedData = [...options.props.value];
-    updatedData[options.rowIndex][options.field] = options.newValue;
-    return updatedData;
-  };
 
   const deleteStageTemplate = (rowData, column) => {
     const rowIndex = approvalStages.indexOf(rowData);

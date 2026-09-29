@@ -1,12 +1,12 @@
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import "../EditAccountData/index.scss"
 import { useFormik } from 'formik';
 import { Dialog } from 'primereact/dialog';
 import InputField from '../../../../../components/InputField';
 import { Button } from 'primereact/button';
 import { useDispatch } from 'react-redux';
-import { postChequeDataMiddleWare, postChequeEditDataMiddleWare, updateChequeDataMiddleWare } from '../../store/bankMasterMiddleware';
+import { postChequeDataMiddleWare, postChequeEditDataMiddleWare } from '../../store/bankMasterMiddleware';
 
 const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getEditChequeData }) => {
     const initialValues = {

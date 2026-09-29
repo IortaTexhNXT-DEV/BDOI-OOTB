@@ -4,10 +4,8 @@ import {
   getJournalVoucherViewData,
   journalVoucherMiddleware,
   journalVoucherPostTabel,
-  journalVoucherPostTabelData,
   patchJVMiddleware,
   postAddJournalVoucher,
-  postJournalVoucher,
   postTCJournalVoucher,
   getJournalVoucherHistory,
   getJournalVoucherDetails,
@@ -38,7 +36,6 @@ const initialState = {
   journalVoucherList: [],
 };
 let transactionNumber = 1345;
-let nextId = 2;
 let nextId2 = 2;
 const journalVoucherReducer = createSlice({
   name: "journalVocher",

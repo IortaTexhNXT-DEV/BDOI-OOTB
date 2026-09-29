@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -10,13 +10,11 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { useFormik } from "formik";
 import { Dropdown } from "primereact/dropdown";
 import SvgEye from "../../../assets/icons/SvgEye";
 import { useDispatch, useSelector } from "react-redux";
 import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import {
-  getReceiptsListBySearchMiddleware,
   getReceiptsListByFilterMiddleware,
   getReceiptsListMiddleware,
   getReceiptsListByIdMiddleware,
@@ -88,9 +86,6 @@ const PolicyReceipts = () => {
     { name: "CASH002", code: "CASH002" },
     { name: "CASH003", code: "CASH003" },
   ];
-  const initialValue = {
-    receiptDate: new Date(),
-  };
   // Remove minDate restriction to allow selecting today and past dates
   const search = [
     { name: t("accounts.receipts.searchName"), value: "name" },
@@ -102,10 +97,8 @@ const PolicyReceipts = () => {
   const {
     receiptsTableList,
     loading,
-    receiptsSearchTable,
     receiptsFilterTable,
     pagination,
-    bulkPrintData,
     bulkPrintLoading,
     bulkPrintError,
   } = useSelector(({ receiptsTableReducers }) => {

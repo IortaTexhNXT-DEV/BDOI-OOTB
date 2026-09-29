@@ -23,12 +23,12 @@ const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
   const menu = useRef(null);
   const [displayDialog, setDisplayDialog] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
-  const [disableOption, setdisableOption] = useState(false);
+  const [, setdisableOption] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [paymentStatus, setPaymentStatus] = useState("");
-  const [statusAction, setstatusAction] = useState("");
+  const [, setPaymentStatus] = useState("");
+  const [, setstatusAction] = useState("");
   const [globalFilter, setGlobalFilter] = useState("policy Number");
   const [search, setSearch] = useState("");
   const cities = [{ name: t("tables.policyNumber"), code: "policy Number" }];
@@ -191,9 +191,6 @@ const Index = ({ clientId, action }) => {
     );
   }, [search, renewalPolicy]);
 
-  const handleSearch = (event) => {
-    setSearch(event.target.value);
-  };
 
   const categories = [
     { name: "Personal Details Change", key: "personaldetail" },
@@ -525,19 +522,6 @@ const Index = ({ clientId, action }) => {
     }
   };
 
-  const renderStatus = (rowData) => {
-    const status = (rowData.status || "Pending").toLowerCase();
-    const className =
-      status === "pending"
-        ? "company__status__type__green"
-        : status === "approved" || status === "completed"
-        ? "company__status__type__blue"
-        : "company__status__type__red";
-
-    if (loadingState) return <Skeleton width="4rem" />;
-
-    return <div className={className}>{status.toUpperCase()}</div>;
-  };
   const ViewheaderStyle = {
     textalign: "center",
     fontSize: 16,

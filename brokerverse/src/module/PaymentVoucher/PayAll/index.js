@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
 import SvgEdit from "../../../assets/icons/SvgEdit";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { ProductService } from "./mock";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { Paginator } from "primereact/paginator";
 
 function SpecificVoucher() {
   const [products, setProducts] = useState([]);

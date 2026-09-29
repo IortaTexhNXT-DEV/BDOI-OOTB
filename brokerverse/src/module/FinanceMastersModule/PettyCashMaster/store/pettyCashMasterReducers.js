@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import {
   getPatchPettyCashEdit,
   getPettyCashSearchList,

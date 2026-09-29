@@ -7,7 +7,6 @@ import {
   getCommissionView,
   getEditCommissionPopup,
   getLevelCommissionSharing,
-  getPatchCommissionEdit,
   getPatchCommissionEditMiddleware,
   patchCommissionEdit,
   postAddCommission,

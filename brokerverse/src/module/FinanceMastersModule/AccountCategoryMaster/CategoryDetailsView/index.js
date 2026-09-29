@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../components/InputField";
@@ -9,17 +9,11 @@ import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
 import SuccessIcon from "../../../../assets/icons/SuccessIcon";
 import SvgEdit from "../../../../assets/icons/SvgEdit";
-import NavBar from "../../../../components/NavBar";
 
 function DepartmentDetailsView() {
   const [selectedItem, setSelectedItem] = useState({
     name: "Active",
     code: "AC",
-  });
-  const [selected2, setSelected2] = useState({ name: "Comp012", code: "CM" });
-  const [selected3, setSelected3] = useState({
-    name: "Branch Code",
-    code: "BC",
   });
   const [visiblePopup, setVisiblePopup] = useState(false);
   const showPopup = () => {

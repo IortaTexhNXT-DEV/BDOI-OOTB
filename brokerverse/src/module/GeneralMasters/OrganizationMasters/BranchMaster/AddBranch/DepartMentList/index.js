@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Toast } from "primereact/toast";
-import { Card } from "primereact/card";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import "./index.scss";
@@ -23,7 +22,7 @@ import SvgIconeye from "../../../../../../assets/icons/SvgIconeye";
 import SvgEditicons from "../../../../../../assets/icons/SvgEditicons";
 
 const DepartMentList = ({ action, branchCode }) => {
-  const { departmentList, loading, depatmentView, getDepartmentPatch } =
+  const { departmentList, depatmentView, getDepartmentPatch } =
     useSelector(({ organizationBranchMainReducers }) => {
       return {
         loading: organizationBranchMainReducers?.loading,
@@ -144,7 +143,6 @@ const DepartMentList = ({ action, branchCode }) => {
     onSubmit: handleSubmit,
   });
 
-  const [epartmentCodeDataOption, setDepartmentCodeDataOption] = useState([]);
 
   const setFormikValues = () => {
     const DepartmentCodeData = getDepartmentPatch?.DepartmentCode;

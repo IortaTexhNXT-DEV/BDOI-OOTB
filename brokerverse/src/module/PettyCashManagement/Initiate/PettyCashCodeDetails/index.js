@@ -1,7 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
@@ -11,29 +9,9 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useSelector } from "react-redux";
-import LabelWrapper from "../../../../components/LabelWrapper";
-import { Calendar } from "primereact/calendar";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
-const initialValue = {
-  PettyCashCode: "",
-  PettyCashdescription: "",
-  PettyCashSize: "",
-  BankAccountNumber: "",
-  SubAccountCode: "",
-  Currency: "",
-  Currencydescription: "",
-  TransactionCode: "",
-  Transactiondescription: "",
-  BranchCode: "",
-  Branchdescription: "",
-  DepartmentCode: "",
-  Departmentdescription: "",
-  AvailableCash: "",
-  TransactionLimit: "",
-  MinimumCashbox: "", TransactionDate: new Date()
-};
 
 const PettyCashCodeDetails = () => {
   const { t } = useTranslation();
@@ -73,9 +51,6 @@ const PettyCashCodeDetails = () => {
     navigate("/accounts/pettycash/pettycashcodeinitiate");
   };
 
-  const formik = useFormik({
-    initialValues: initialValue,
-  });
 
   return (
     <div className="pettycash__form">

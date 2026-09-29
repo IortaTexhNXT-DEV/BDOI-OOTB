@@ -18,8 +18,6 @@ import usePettyCashOptions from "../../usePettyCashOptions";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReceiptsTable = () => {
-  const [visible, setVisible] = useState(false);
-  const [totalAmounts, setTotalAmounts] = useState(0);
 
   const toastRef = useRef(null);
   const navigate = useNavigate();
@@ -48,7 +46,7 @@ const AddReceiptsTable = () => {
     display: "flex",
   };
   const [selectedRows, setSelectedRows] = useState([]);
-  const { AddReceiptTable, loading } = useSelector(
+  const { AddReceiptTable } = useSelector(
     ({ pettyCashReceiptsReducer }) => {
       return {
         loading: pettyCashReceiptsReducer?.loading,
@@ -83,13 +81,7 @@ const AddReceiptsTable = () => {
   ];
   const Initiate = { label: "Accounts" };
 
-  const handleClick = (rowData) => {
-    setVisible(true);
-    const clickedAmount = parseInt(rowData.Amount);
-    setTotalAmounts((prevTotalAmounts) => prevTotalAmounts + clickedAmount);
-  };
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
 
   const handleBack = () => {
     navigate("/accounts/pettycash/addreceipts");

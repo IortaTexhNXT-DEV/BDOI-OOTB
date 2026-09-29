@@ -1,6 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
-import NavBar from "../../../../components/NavBar";
+import { useEffect, useState, useRef } from "react";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../EditCommission/index.scss";
 import DropDowns from "../../../../components/DropDowns";
@@ -17,7 +16,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import EditCommissionPopup from "./EditCommissionPopup";
 import CustomToast from "../../../../components/Toast";
@@ -38,9 +36,6 @@ import { calendarDateFormat, toIsoDate } from "../../../../utility/dateFormat";
 const EditCommission = () => {
   const { t } = useTranslation();
   const {
-    commissionList,
-    loading,
-    commissionSearchList,
     getCommissionEdit,
     addLevelCommissionSharing,
   } = useSelector(({ commissionMianReducers }) => {
@@ -59,7 +54,6 @@ const EditCommission = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [selectSwitch, setselectSwitch] = useState(selectSwitchoptions[0]);
-  const [date, setDate] = useState(new Date());
   const items = [
     { label: t("sidebar.Commission"), url: "/master/generals/commission" },
     {
@@ -109,10 +103,6 @@ const EditCommission = () => {
 
     return errors;
   };
-  const codeOptions = [
-    { label: "Option 1", value: "Trans00123" },
-    { label: "Option 2", value: "Trans00124" },
-  ];
   const handleSubmit = async (value) => {
     try {
       await dispatch(patchCommissionEdit(value)).unwrap();
@@ -199,11 +189,8 @@ const EditCommission = () => {
     setVisible(true);
   };
   const [showEditPopup, setShowEditPopup] = useState(false);
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const handleNavigate = () => {
-    navigate("/accounts/journalvoucher/detailsjournalvocture");
-  };
+  const [, setFirst] = useState(0);
+  const [, setRowsPerPage] = useState(10);
   const onPageChange = (event) => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
@@ -214,9 +201,6 @@ const EditCommission = () => {
       <SvgTable />
     </div>
   );
-  const handleApproval = () => {
-    setStep(2);
-  };
 
   const template2 = {
     layout:
@@ -244,7 +228,6 @@ const EditCommission = () => {
       );
     },
   };
-  const handleNavigateView = () => {};
   const handleEditNavigate = (rowData) => {
     setVisiblePopup(true);
     dispatch(getEditCommissionPopup(rowData));

@@ -285,7 +285,7 @@ const CustomerInfo = ({ action }) => {
     }
   };
 
-  const { postcustomerinfodata, loading } = useSelector(
+  const { postcustomerinfodata } = useSelector(
     ({ CustomerInfoReducer }) => {
       return {
         loading: CustomerInfoReducer?.loading,

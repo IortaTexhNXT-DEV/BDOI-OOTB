@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import InputTextField from "../../../component/inputText/index";
 import { Button } from "primereact/button";
 import { useSelector, useDispatch } from "react-redux";
@@ -10,7 +10,7 @@ import DatepickerField from "../../../component/datePicker";
 const AgentProfileCard = () => {
   const dispatch = useDispatch();
   const [formAction, setFormAction] = useState("view");
-  const { profileData, profileEditData, loading, total } = useSelector(
+  const { profileData } = useSelector(
     ({ profileReducers }) => {
       return {
         loading: profileReducers?.loading,
@@ -69,7 +69,6 @@ const AgentProfileCard = () => {
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
-  const toastRef = useRef(null);
   const handleSubmit = (value) => {
     dispatch(patchProfileEditMiddleware(value));
     setFormAction("view");

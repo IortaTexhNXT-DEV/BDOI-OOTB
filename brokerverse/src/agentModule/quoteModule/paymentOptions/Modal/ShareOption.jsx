@@ -1,9 +1,7 @@
-import React from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import "./index.scss";
 import SvgWhatsAppIcon from "../../../../assets/agentIcon/SvgWhatsAppIcon";
-import SvgDownloadIcon from "../../../../assets/agentIcon/SvgDownloadIcon";
 import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
 import logger from "../../../../utility/logger";
 

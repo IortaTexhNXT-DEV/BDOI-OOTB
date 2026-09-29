@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
 import "../index.scss";
 import { useFormik } from "formik";
 import InputField from "../../../../../components/InputField";
 import { Button } from "primereact/button";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { postEditRequestMiddleware} from "../../store/pettyCashRequestMiddleware";
 import { Dialog } from "primereact/dialog";
 

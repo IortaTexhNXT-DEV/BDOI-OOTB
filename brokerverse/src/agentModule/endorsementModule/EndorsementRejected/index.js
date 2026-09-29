@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -26,12 +26,6 @@ const EndorsementRejected = () => {
     }
   };
 
-  const handleReject = () => {
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigateToClientView(true);
-    }, 2000);
-  };
   const handleCommonAction = () => {
     navigateToClientView(false);
   };

@@ -1,14 +1,11 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../components/NavBar";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../PettyCashMaster/index.scss";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router-dom";
-import SvgFilters from "../../../assets/icons/SvgFilters";
 import { InputText } from "primereact/inputtext";
-import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import SvgUpload from "../../../assets/icons/SvgUpload";
 import { TieredMenu } from "primereact/tieredmenu";
 import PettyDataTabel from "./PettyDataTabel";
@@ -20,7 +17,7 @@ const PettyCashMaster = ({ response }) => {
   const translation = useTranslation();
   const t = translation.t;
   const [visible, setVisible] = useState(false);
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const items = [
@@ -59,7 +56,7 @@ const PettyCashMaster = ({ response }) => {
     }
   }, [formik.values.search]);
 
-  const { pettyCashList, pettyCashSearchList, loading } = useSelector(
+  const { pettyCashList, pettyCashSearchList } = useSelector(
     ({ pettyCashMainReducers }) => {
       return {
         loading: pettyCashMainReducers?.loading,

@@ -1,22 +1,16 @@
 import { InputText } from "primereact/inputtext";
-import TableDropdownField from "../../../../component/tableDropDwonField";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputSwitch } from "primereact/inputswitch";
-import { Checkbox } from "primereact/checkbox";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../../assets/icons/SvgArrow";
-import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
-import SvgTravlesTable from "../../../../../assets/agentIcon/SvgTravlesTable";
-import SvgHomeTable from "../../../../../assets/agentIcon/SvgHomeTable";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "primereact/avatar";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getClientEditMiddleWare,
   getPaymentSearchDataMiddleWare,
@@ -31,9 +25,8 @@ const ClientListingAllCategory = ({
 }) => {
   const { t } = useTranslation();
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("Name");
-  const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -185,17 +178,6 @@ const ClientListingAllCategory = ({
     navigate(`/agent/clientview/${clientId}`);
   };
 
-  const ViewheaderStyle = {
-    // justifyContent: 'center',
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-    // display: "grid",
-    // alignItem: "center",
-  };
   const ViewheadercenterStyle = {
     // justifyContent: 'center',
     textalign: "center",

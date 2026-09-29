@@ -5,7 +5,6 @@ import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
-import NavBar from "../../../../../components/NavBar";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -31,7 +30,6 @@ const HierarchyMaster = () => {
   const handleNavigate = () => {
     navigate("/master/generals/employeemanagement/hierarchy/add");
   };
-  const [rowList, setRowList] = useState(5);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
   const statusToast = useRef(null);
@@ -47,7 +45,7 @@ const HierarchyMaster = () => {
     }
   }, [search]);
 
-  const { hierarchTableList, loading, total, hierarchSeachList } = useSelector(
+  const { hierarchTableList, hierarchSeachList } = useSelector(
     ({ hierarchyTableReducers }) => {
       return {
         loading: hierarchyTableReducers?.loading,
@@ -57,8 +55,6 @@ const HierarchyMaster = () => {
       };
     }
   );
-  const handleNavigateedit = () => {
-  };
   const handleView = (rowData) => {
     dispatch(getHierarchyViewMiddleWare(rowData));
     navigate(
@@ -100,13 +96,7 @@ const HierarchyMaster = () => {
     justifyContent: "center",
   };
 
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRowsPerPage(event.rows);
-  };
 
   const renderViewButton = (rowData) => {
     return (

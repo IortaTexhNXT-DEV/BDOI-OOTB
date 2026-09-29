@@ -50,7 +50,6 @@ function PolicyReceipts() {
 
   // Get customer data and receivable list from navigation state
   const customerData = location.state?.customerData || {};
-  const passedReceivableList = location.state?.receivableTableList || [];
 
   const paymentDetails = useSelector(
     ({ receiptsTableReducers }) => receiptsTableReducers?.paymentDetails

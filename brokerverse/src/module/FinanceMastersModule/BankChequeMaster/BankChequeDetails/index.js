@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -8,16 +8,14 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
-import SuccessIcon from "../../../../assets/icons/SuccessIcon";
 import SvgEditicon from "../../../../assets/icons/SvgEdit";
-import NavBar from "../../../../components/NavBar";
 
 
 
 function BankChequeDetails() {
   const { t } = useTranslation();
   const [selectedItem, setSelectedItem] = useState(null);
-  const [visiblePopup, setVisiblePopup] = useState(false);
+  const [, setVisiblePopup] = useState(false);
   const showPopup = () => {
     setVisiblePopup(true);
     setTimeout(() => {

@@ -255,7 +255,6 @@ const ClaimTable = () => {
   };
 
   const renderClientName = (rowData) => {
-    const normalized = normalizeClaimRecord(rowData);
     if (loading) {
       return <Skeleton width="8rem" />;
     }

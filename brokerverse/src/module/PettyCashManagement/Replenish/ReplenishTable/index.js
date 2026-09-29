@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -6,11 +6,9 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,7 +24,7 @@ const PettyCashReplenishTable = () => {
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Pettycashcode");
 
-  const { ReplenishList, loading, ReplenishSearch } = useSelector(
+  const { ReplenishList, ReplenishSearch } = useSelector(
     ({ pettyCashReplenishReducer }) => {
       return {
         loading: pettyCashReplenishReducer?.loading,
@@ -115,12 +113,6 @@ const PettyCashReplenishTable = () => {
     color: "#000",
     border: "none",
   };
-  const [selectedCity, setSelectedCity] = useState(null);
-  const cities = [
-    { name: "Name", code: "NY" },
-    { name: "Edit", code: "RM" },
-    { name: "Voucher Number", code: "LDN" },
-  ];
   const headeraction = {
     justifyContent: "center",
     // textalign: center,
@@ -132,18 +124,6 @@ const PettyCashReplenishTable = () => {
     border: " none",
     display: "flex",
   };
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
 
   useEffect(() => {
     if (globalFilter?.length > 0) {

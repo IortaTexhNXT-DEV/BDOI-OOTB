@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Paginator } from "primereact/paginator";
-import { Checkbox } from "primereact/checkbox";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { Skeleton } from "primereact/skeleton";
@@ -40,7 +39,7 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
   );
 
   // Local state
-  const [selectedLeads, setSelectedLeads] = useState([]);
+  const [selectedLeads] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
@@ -121,22 +120,7 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
     setCurrentPage(1);
   };
 
-  const handleSelectLead = (lead) => {
-    const isSelected = selectedLeads.find((l) => l.leadId === lead.leadId);
-    if (isSelected) {
-      setSelectedLeads(selectedLeads.filter((l) => l.leadId !== lead.leadId));
-    } else {
-      setSelectedLeads([...selectedLeads, lead]);
-    }
-  };
 
-  const handleSelectAll = () => {
-    if (selectedLeads.length === leadtabledata.length) {
-      setSelectedLeads([]);
-    } else {
-      setSelectedLeads([...leadtabledata]);
-    }
-  };
 
   const handleView = async (leadId) => {
     try {

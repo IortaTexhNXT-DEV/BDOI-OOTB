@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "../DataTabelJV/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
 import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
@@ -92,11 +91,6 @@ const DataTabelJV = ({
     },
   };
 
-  const header__style = {
-    display: "flex",
-    justifyContent: "flex-end",
-    paddingRight: 20,
-  };
 
   return (
     <div className="journal__table__container">

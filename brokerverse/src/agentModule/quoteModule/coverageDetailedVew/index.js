@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import "./index.scss";
@@ -15,7 +15,6 @@ import systemSettingsService from "../../../services/systemSettingsService";
 import { RadioButton } from "primereact/radiobutton";
 import policyService from "../../../services/policyService";
 import s3Service from "../../../services/s3Service";
-import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import { Dialog } from "primereact/dialog";
 import placementService from "../../../services/placementService";
 import logger from "../../../utility/logger";
@@ -30,7 +29,7 @@ const CoverageDetailedView = () => {
   const [quotationData, setQuotationData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [resolving, setResolving] = useState(false);
+  const [, setResolving] = useState(false);
   const [existingPolicy, setExistingPolicy] = useState(
     state?.policyData || null
   );
@@ -329,20 +328,6 @@ const CoverageDetailedView = () => {
     }
   };
 
-  const handleProceedToPayment = () => {
-    // Navigate to payment options with all collected data
-    navigate(`/agent/quote/paymentoptions/${resolvedQuotationId}`, {
-      state: {
-        ...state,
-        quotation: quotationData,
-        quotationId: resolvedQuotationId,
-        customerInfo: customerInfo,
-        vehiclePhotos: vehiclePhotos,
-        additionalPolicyData: additionalPolicyData,
-        proceedingToPayment: true,
-      },
-    });
-  };
 
   const quotData = quotationData || {};
   const lead = quotData?.lead || {};

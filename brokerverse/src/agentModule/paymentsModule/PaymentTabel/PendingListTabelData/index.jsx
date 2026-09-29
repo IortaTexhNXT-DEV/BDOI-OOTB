@@ -3,13 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Checkbox } from "primereact/checkbox";
-import SvgEdit from "../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
 import SvgArrow from "../../../../assets/icons/SvgArrow";
-import SvgMotorTable from "../../../../assets/agentIcon/SvgMotorTable";
-import SvgTravlesTable from "../../../../assets/agentIcon/SvgTravlesTable";
-import SvgHomeTable from "../../../../assets/agentIcon/SvgHomeTable";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
@@ -17,14 +12,13 @@ import "../../PaymentTabel/index.scss";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPaymentPendingSearchDataMiddleWare,
-  getPaymentSearchDataMiddleWare,
 } from "../../store/paymentMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const PendingListTabelData = () => {
   const { t } = useTranslation();
-  const { paymentPendingSearchList, loading, paymentPendingtabledata } =
+  const { paymentPendingSearchList, paymentPendingtabledata } =
     useSelector(({ agentPaymentMainReducers }) => {
       return {
         loading: agentPaymentMainReducers?.loading,
@@ -35,9 +29,8 @@ const PendingListTabelData = () => {
       };
     });
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("PolicyNumber");
-  const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -159,9 +152,6 @@ const PendingListTabelData = () => {
     navigate(`/agent/policydetail/${rowData.policyId}`);
   };
 
-  const handleEdit = () => {
-    navigate("/agent/leadedit");
-  };
 
   const ViewheaderStyle = {
     justifyContent: "center",

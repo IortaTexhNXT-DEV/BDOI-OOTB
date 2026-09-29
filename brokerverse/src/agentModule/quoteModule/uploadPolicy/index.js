@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -27,7 +27,7 @@ const UploadPolicy = () => {
   const [policyData, setPolicyData] = useState(
     locationState.policyData || null
   );
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
 
   // Get current lead details from Redux
   const { currentLeadDetails } = useSelector(({ leadReducer }) => ({

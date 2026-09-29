@@ -1,5 +1,5 @@
 import { formatNumber } from "../../../../utility/currencyConverter";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import InputTextField from "../../../component/inputText";
@@ -269,75 +269,6 @@ const CoverageDetailsCard = ({
   const isEditMode = currentQuoteCreation?.isEditMode || false;
   const existingCoverageDetails = currentQuoteCreation?.coverageDetails;
 
-  const initialFormikValues = useMemo(() => {
-    if (isEditMode && existingCoverageDetails) {
-      return {
-        LossandDamagecoverage:
-          existingCoverageDetails.lossAndDamageCoverage || "",
-        LossandDamagecoverageRate:
-          existingCoverageDetails.lossAndDamageCoverageRate ||
-          productConfigurator?.configuration?.premiumRates?.[vehicleType] ||
-          "",
-        LossandDamagecoveragepremium:
-          existingCoverageDetails.lossAndDamageCoveragePremium || "",
-        ActsofNatureRate:
-          existingCoverageDetails.actsOfNatureRate ||
-          productConfigurator?.configuration?.premiumRates?.acts_of_nature ||
-          "",
-        RoadsideAssistanceRate:
-          existingCoverageDetails.roadsideAssistanceRate ||
-          productConfigurator?.configuration?.premiumRates
-            ?.roadside_assistance ||
-          "",
-        RoadsideAssistancepremium:
-          existingCoverageDetails.roadsideAssistancePremium || "",
-        PersonalAccidentCoverRate:
-          existingCoverageDetails.personalAccidentCoverRate ||
-          productConfigurator?.configuration?.premiumRates
-            ?.personal_accident_cover ||
-          "",
-        PersonalAccidentCoverpremium:
-          existingCoverageDetails.personalAccidentCoverPremium || "",
-        CtplCoverageRate:
-          ctplOneYearPremium,
-        ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
-        BodilyInjury: existingCoverageDetails.bodilyInjury || "",
-        BodilyInjuryCoveragePremium:
-          existingCoverageDetails.bodilyInjuryCoveragePremium || "",
-        PropertyDamage: existingCoverageDetails.propertyDamage || "",
-        PropertyDamageCoveragePremium:
-          existingCoverageDetails.propertyDamageCoveragePremium || "",
-        AutopassengerpersonalAccident:
-          existingCoverageDetails.autoPassengerPersonalAccident || "",
-        APPATotalCoverage: existingCoverageDetails.APPAtotalCoverage || "",
-        APPACoveragePremium: existingCoverageDetails.APPAcoveragePremium || "",
-        TotalSumInsured: existingCoverageDetails.totalSumInsured || "",
-      };
-    }
-
-    return {
-      LossandDamagecoverage: "",
-      LossandDamagecoverageRate:
-        productConfigurator?.configuration?.premiumRates?.[vehicleType] || "",
-      LossandDamagecoveragepremium: "",
-      ActsofNatureRate: "",
-      ActsofNaturepremium: "",
-      RoadsideAssistanceRate: "",
-      RoadsideAssistancepremium: "",
-      PersonalAccidentCoverRate: "",
-      PersonalAccidentCoverpremium: "",
-      CtplCoverageRate:
-        ctplOneYearPremium,
-      BodilyInjury: "",
-      BodilyInjuryCoveragePremium: "",
-      PropertyDamage: "",
-      PropertyDamageCoveragePremium: "",
-      AutopassengerpersonalAccident: "",
-      APPATotalCoverage: "",
-      APPACoveragePremium: "",
-      TotalSumInsured: "",
-    };
-  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType, ctplOneYearPremium]);
 
   // Configured tax rates (app settings) so the gross shown here matches the order summary.
   const settingsTaxRates = useTaxRates();

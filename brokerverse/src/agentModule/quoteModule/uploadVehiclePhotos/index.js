@@ -30,7 +30,7 @@ const UploadVehiclePhotos = () => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const toast = React.useRef(null);
 
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ const UploadVehiclePhotos = () => {
   
   // State for quotation details and customer info
   const [quotationDetails, setQuotationDetails] = useState(state?.quotation || null);
-  const [customerInfo, setCustomerInfo] = useState(state?.customerInfo || null);
+  const [customerInfo] = useState(state?.customerInfo || null);
   const [existingPolicy, setExistingPolicy] = useState(state?.policyData || null);
   const [leadData, setLeadData] = useState(null);
   

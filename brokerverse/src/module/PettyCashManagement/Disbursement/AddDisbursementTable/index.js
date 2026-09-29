@@ -43,16 +43,15 @@ const initialValue = {
 const AddDisbursementTable = () => {
   const [visible, setVisible] = useState(false);
   const [addvisible, setaddVisible] = useState(false);
-  const [moduleData, setModuleData] = useState();
+  const [, setModuleData] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
-  const [totalAmounts, setTotalAmounts] = useState(0);
   const [formAction, setformAction] = useState(null);
-  const [show, setshow] = useState(false);
+  const [, setshow] = useState(false);
   const dispatch = useDispatch();
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
-  const { AddDisbursmentTable, loading, getPatchDisbursment } = useSelector(
+  const { AddDisbursmentTable, getPatchDisbursment } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -64,7 +63,6 @@ const AddDisbursementTable = () => {
 
   const isEmpty = !AddDisbursmentTable?.length;
 
-  const [amountData, setAmountData] = useState()
   const [totalNetAmount, setTotalNetAmount] = useState(0);
   useEffect(() => {
     const newTotalNetAmount = selectedRows.reduce((total, item) => {
@@ -150,19 +148,6 @@ const AddDisbursementTable = () => {
     setformAction("Add");
     setaddVisible(true);
     formik.resetForm()
-  };
-  const validate = (values) => {
-    const errors = {};
-
-    if (!values.MainAccountCode) {
-      errors.MainAccountCode = "Main Account Code is required";
-    }
-
-    if (!values.RequestNumber) {
-      errors.RequestNumber = "Sub Account Code is required";
-    }
-
-    return errors;
   };
 
   const handleSubmit = (value) => {

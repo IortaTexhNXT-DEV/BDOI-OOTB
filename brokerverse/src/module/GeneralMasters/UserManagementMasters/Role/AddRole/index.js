@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../../components/NavBar";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../../components/InputField";
@@ -25,7 +24,7 @@ import { accessOptions, toRoleCode } from "../store/roleMapping";
 
 const AddRole = ({ action }) => {
   const { t } = useTranslation();
-  const { loading, roleViewData, roleEditData } = useSelector(({ roleMainReducers }) => {
+  const { roleViewData, roleEditData } = useSelector(({ roleMainReducers }) => {
     return {
       loading: roleMainReducers?.loading,
       roleViewData: roleMainReducers?.roleViewData,
@@ -35,7 +34,6 @@ const AddRole = ({ action }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
 
   const items = [
     { label: "User Management" },

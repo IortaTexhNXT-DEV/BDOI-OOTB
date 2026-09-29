@@ -242,7 +242,7 @@ const OrderSummary = ({ action, flow }) => {
     "Quote Created Successfully"
   );
   const [quotationData, setQuotationData] = useState(null);
-  const [isLoadingRenewalData, setIsLoadingRenewalData] = useState(false);
+  const [, setIsLoadingRenewalData] = useState(false);
   const [leadData, setLeadData] = useState(null);
   const [clientData, setClientData] = useState(null);
   const dispatch = useDispatch();
@@ -251,7 +251,7 @@ const OrderSummary = ({ action, flow }) => {
   const { state } = useLocation();
 
   // Get current quote creation state from Redux
-  const { currentQuoteCreation, isEditMode, productConfigurator } = useSelector(
+  const { currentQuoteCreation, productConfigurator } = useSelector(
     ({ quotationReducers, productConfiguratorReducer }) => ({
       currentQuoteCreation: quotationReducers?.currentQuoteCreation,
       isEditMode: quotationReducers?.currentQuoteCreation?.isEditMode || false,
@@ -427,8 +427,6 @@ const OrderSummary = ({ action, flow }) => {
 
       dispatch(setQuoteOrderSummary(orderSummaryData));
 
-      // Prepare data from Redux or fallback to quotationData/accumulated data
-      const accumulatedData = quotationData || {};
 
       // Determine the correct lead ID
       const correctLeadId =

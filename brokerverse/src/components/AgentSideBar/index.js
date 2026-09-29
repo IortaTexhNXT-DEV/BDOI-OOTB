@@ -5,9 +5,6 @@ import SvgDot from "../../assets/icons/SvgDot";
 import { menuList } from "./menu";
 import "./index.scss";
 import { Link, useNavigate } from "react-router-dom";
-import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
-import SvgMassterIcon from "../../assets/icons/SvgMassterIcon";
-import SvgReportsIcon from "../../assets/icons/SvgReportsIcon";
 
 const AgenSideBar = () => {
     const [findPath, setPath] = useState(null);

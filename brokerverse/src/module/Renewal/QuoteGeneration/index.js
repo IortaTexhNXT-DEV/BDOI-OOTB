@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -12,9 +12,6 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { TabView, TabPanel } from "primereact/tabview";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { Badge } from "primereact/badge";

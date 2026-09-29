@@ -1,5 +1,4 @@
 import { Card } from "primereact/card";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -75,7 +74,7 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
     }
   };
 
-  const { policydetailedlist, loading } = useSelector(
+  const { policydetailedlist } = useSelector(
     ({ policyDetailedViewMainReducers }) => {
       return {
         loading: policyDetailedViewMainReducers?.loading,

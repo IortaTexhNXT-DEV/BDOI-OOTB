@@ -1,6 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
-import NavBar from "../../../components/NavBar";
+import { useEffect, useState, useRef } from "react";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import InputField from "../../../components/InputField";
@@ -10,21 +9,12 @@ import SvgDatePicker from "../../../assets/icons/SvgDatePicker";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../AddJournalVoucture/index.scss";
 import useJvMasterData from "../useJvMasterData";
-import ArrowLeftIcon from "../../../assets/icons/ArrowLeftIcon";
 import SvgAddBlue from "../../../assets/icons/SvgAddBlue";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import SvgArrow from "../../../assets/icons/SvgArrow";
 import { useNavigate } from "react-router-dom";
-import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import SvgDeleteIcon from "../../../assets/icons/SvgDeleteIcon";
-import SvgEditIcon from "../../../assets/icons/SvgEditicons";
 import { useFormik } from "formik";
 import AddData from "./AddData/AddData";
-import SvgTable from "../../../assets/icons/SvgTable";
 import CustomToast from "../../../components/Toast";
-import SuccessIcon from "../../../assets/icons/SuccessIcon";
 import AddDataTabel from "./AddDataTabel";
 import EditData from "./EditData";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,7 +37,6 @@ const AddJournalVocture = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [buttonshow, setButtonShow] = useState(0);
-  const [products, setProducts] = useState([]);
   const [visibleSuccess, setVisibleSuccess] = useState(false);
 
   const toastRef = useRef(null);
@@ -56,7 +45,6 @@ const AddJournalVocture = () => {
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [visible, setVisible] = useState(false);
   const [visibleEdit, setVisibleEdit] = useState(false);
-  const [date, setDate] = useState(new Date());
   const items = [
     {
       label: t("accounts.journalVoucher"),
@@ -80,7 +68,7 @@ const AddJournalVocture = () => {
   const handleGoback = () => {
     navigate("/accounts/journalvoucher");
   };
-  const { loading, journalVoucherPostTabelData } = useSelector(
+  const { journalVoucherPostTabelData } = useSelector(
     ({ journalVoucherMainReducers }) => {
       return {
         loading: journalVoucherMainReducers?.loading,
@@ -111,7 +99,6 @@ const AddJournalVocture = () => {
 
     return errors;
   };
-  const [errors, setErrors] = useState("");
 
   const dispatch = useDispatch();
 
@@ -144,9 +131,9 @@ const AddJournalVocture = () => {
     return () => clearTimeout(timerId);
   }, [visiblePopup]);
 
-  const [creditTotal, setCreditTotal] = useState(500);
-  const [debitTotal, setDebitTotal] = useState(500);
-  const [netTotal, setNetTotal] = useState(100);
+  const [, setCreditTotal] = useState(500);
+  const [, setDebitTotal] = useState(500);
+  const [, setNetTotal] = useState(100);
   const [toastMessage, setToastMessage] = useState("");
 
   const handleApproval = async () => {
@@ -243,7 +230,7 @@ const AddJournalVocture = () => {
     setNetTotal(0);
     setDebitTotal(2600);
   };
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const handleEdit = () => {
     setVisible(true);
   };

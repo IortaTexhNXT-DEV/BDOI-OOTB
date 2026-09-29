@@ -1,11 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Card } from "primereact/card";
 import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
@@ -13,8 +12,7 @@ import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import CustomToast from "../../../../components/Toast";
 import TransactionCodeMasterViewTable from "./TransactionCodeMasterViewTable";
-import NavBar from "../../../../components/NavBar";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getUserGroupAccess, postAddTransaction } from "../store/transactionCodeMasterMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import useTransactionCodeOptions from "../useTransactionCodeOptions";
@@ -37,14 +35,6 @@ const initialValue = {
 
 const TransactionCodeMasterView = () => {
   const { t } = useTranslation();
-  const { TransactioncodeList, loading } = useSelector(({ transactionCodeMasterReducer }) => {
-    return {
-      loading: transactionCodeMasterReducer?.loading,
-      TransactioncodeList: transactionCodeMasterReducer?.TransactioncodeList,
-
-      // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
-    };
-  });
   const toastRef = useRef(null);
   const navigate = useNavigate();
   const codeOptions = useTransactionCodeOptions();

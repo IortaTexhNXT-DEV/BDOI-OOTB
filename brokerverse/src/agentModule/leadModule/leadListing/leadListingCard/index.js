@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import LeadListingMotorTable from "./LeadListingMotorTable";
@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 const LeadListingCard = () => {
   const { t } = useTranslation();
-  const [viewMode, setViewMode] = useState("cards");
+  const [viewMode] = useState("cards");
   const [activeTab, setActiveTab] = useState(0);
 
   const { leadtabledata, paymentSearchList } = useSelector(

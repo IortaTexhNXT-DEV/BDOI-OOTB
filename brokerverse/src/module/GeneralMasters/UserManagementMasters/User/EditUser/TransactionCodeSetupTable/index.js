@@ -3,15 +3,11 @@ import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../../components/LabelWrapper";
-import InputField from "../../../../../../components/InputField";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
@@ -21,7 +17,7 @@ import { getViewMainBranchUser, postViewMainBranchUser } from "../../store/userM
 
 const TransactionCodeSetupTable = ({ action }) => {
   const { t } = useTranslation();
-  const { loading, mainBranchAccessTableList, searchList, mainUserViewData } = useSelector(({ userReducers }) => {
+  const { mainBranchAccessTableList, mainUserViewData } = useSelector(({ userReducers }) => {
     return {
       loading: userReducers?.loading,
       mainBranchAccessTableList: userReducers?.mainBranchAccessTableList,
@@ -29,7 +25,7 @@ const TransactionCodeSetupTable = ({ action }) => {
       mainUserViewData: userReducers?.mainUserViewData
     };
   });
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const [showView, setShowView] = useState(false);
 
@@ -56,7 +52,6 @@ const TransactionCodeSetupTable = ({ action }) => {
   const handleClick = () => {
     setShow(!show);
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -142,13 +137,6 @@ const TransactionCodeSetupTable = ({ action }) => {
     setShowView(true)
   };
 
-  const items = [
-    { label: t("generalMasters.userManagement") },
-    {
-      label: t("generalMasters.user"),
-      url: "/master/generals/usermanagement/user",
-    },
-  ];
 
   const ViewheaderStyle = {
     fontSize: 16,

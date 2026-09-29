@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -9,7 +9,6 @@ import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
 import SuccessIcon from "../../../../assets/icons/SuccessIcon";
-import NavBar from "../../../../components/NavBar";
 import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
 function AddBankAccount() {

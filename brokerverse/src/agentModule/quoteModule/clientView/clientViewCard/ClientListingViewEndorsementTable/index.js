@@ -1,6 +1,5 @@
 import { InputText } from "primereact/inputtext";
-import TableDropdownField from "../../../../component/tableDropDwonField";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -93,9 +92,9 @@ const normalizeEndorsement = (record) => {
 
 const LeadListingAllTable = ({ clientId }) => {
   const { t } = useTranslation();
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode, setSelectionMode] = useState("multiple");
+  const [selectionMode] = useState("multiple");
   const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState("endorsementNumber");
   const [endorsementData, setEndorsementData] = useState([]);
@@ -106,7 +105,6 @@ const LeadListingAllTable = ({ clientId }) => {
     { name: "Policy Number", code: "policyNumber" },
     { name: "Endorsement Number", code: "endorsementNumber" },
   ];
-  const searchDebounce = useRef(null);
 
   useEffect(() => {
     if (!clientId) {

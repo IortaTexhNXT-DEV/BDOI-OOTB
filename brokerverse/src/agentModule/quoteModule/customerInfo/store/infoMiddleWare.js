@@ -1,6 +1,4 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getRequest } from "../../../../utility/commonServices";
-import { APIROUTES } from "../../../../routes/apiRoutes";
 import {
     POST_INFORMATION_DATA,PATCH_INFORMATION_DATA
 } from "../../../../redux/actionTypes";

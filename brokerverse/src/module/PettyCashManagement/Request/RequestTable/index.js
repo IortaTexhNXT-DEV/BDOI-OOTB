@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -6,12 +6,8 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -30,7 +26,7 @@ const RequestTable = () => {
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("ReceiptNo");
 
-  const { RequestList, loading, RequestSearch } = useSelector(
+  const { RequestList, RequestSearch } = useSelector(
     ({ pettyCashRequestReducer }) => {
       return {
         loading: pettyCashRequestReducer?.loading,
@@ -101,11 +97,7 @@ const RequestTable = () => {
     },
   };
 
-  const menu = useRef(null);
 
-  const handleView = (rowData) => {
-    navigate("/accounts/pettycash/PettyCashCodeDetails");
-  };
   const headerStyle = {
     // width: "10rem",
     fontSize: 16,

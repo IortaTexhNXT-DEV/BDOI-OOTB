@@ -1,4 +1,3 @@
-import React, { useState, useRef } from "react";
 import "./index.scss";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { DataTable } from "primereact/datatable";

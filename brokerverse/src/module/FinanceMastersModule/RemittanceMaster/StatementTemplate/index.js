@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -10,7 +10,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { PickList } from "primereact/picklist";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
 import { deleteAndReturn, saveAndReturn } from "../masterRecord";

@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
@@ -28,7 +27,7 @@ import { Toast } from "primereact/toast";
 const Index = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { companyTableList, loading, companySearchList } = useSelector(
+  const { companyTableList, companySearchList } = useSelector(
     ({ organizationCompanyMainReducers }) => {
       return {
         loading: organizationCompanyMainReducers?.loading,
@@ -100,18 +99,6 @@ const Index = () => {
       );
     },
   };
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: t("generalMasters.name"),
-    },
-    {
-      label: t("generalMasters.date"),
-    },
-    {
-      label: t("generalMasters.voucherNumber"),
-    },
-  ];
 
   const headerStyle = {
     width: "26%",
@@ -133,17 +120,7 @@ const Index = () => {
   ];
   const home = { label: t("generalMasters.master") };
 
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   const handleSubmit = (values) => {
     dispatch(getSearchCompanyMiddleware({ textSearch: values.search }));

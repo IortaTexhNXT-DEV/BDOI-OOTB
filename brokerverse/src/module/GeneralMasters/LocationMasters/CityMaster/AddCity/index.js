@@ -1,24 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../../components/InputField";
-import SubmitButton from "../../../../../components/SubmitButton";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../../../components/NavBar";
+import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../../components/DatePicker";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { useFormik } from "formik";
-import { Toast } from "primereact/toast";
 import CustomToast from "../../../../../components/Toast";
-import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchCityEditMiddleware,
@@ -40,9 +33,8 @@ function AddCity({ action }) {
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const Navigate = useNavigate();
-  const { id } = useParams();
 
-  const { cityTableList, loading, CityListById } = useSelector(
+  const { CityListById } = useSelector(
     ({ cityReducers }) => {
       return {
         loading: cityReducers?.loading,

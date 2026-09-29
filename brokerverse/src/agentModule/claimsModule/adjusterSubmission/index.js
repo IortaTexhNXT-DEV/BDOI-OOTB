@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
@@ -115,7 +115,6 @@ const AdjusterSubmission = () => {
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",

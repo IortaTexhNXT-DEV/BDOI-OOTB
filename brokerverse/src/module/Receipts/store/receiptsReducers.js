@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getReceiptsListMiddleware, getReceiptsListByIdMiddleware, getReceiptsReceivableMiddleware, postAddReceiptsMiddleware, postPaymentDetailsMiddleware, patchReceipEditMiddleware, getReceiptsListBySearchMiddleware, getReceiptsListByFilterMiddleware, getPaymentDetails, createReceiptMiddleware, bulkPrintReceiptsMiddleware, getDraftReceiptsMiddleware, updateReceiptMiddleware, getReceiptByIdMiddleware } from "./receiptsMiddleware";
-import SvgIconeye from "../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",

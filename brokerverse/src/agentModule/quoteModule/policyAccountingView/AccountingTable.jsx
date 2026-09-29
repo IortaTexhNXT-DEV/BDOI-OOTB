@@ -1,11 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import SvgDownArrow from "../../../assets/agentIcon/SvgDownArrow";
-import { Checkbox } from "primereact/checkbox";
-import SvgMotorTable from "../../../assets/agentIcon/SvgMotorTable";
 import { useNavigate } from "react-router-dom";
 import './index.scss'
 // Import PrimeReact styles
@@ -55,54 +51,10 @@ const AccountingTable = ({ type }) => {
         color: "#000",
         border: "none",
     };
-    const ViewheaderStyle = {
-        justifyContent: "center",
-        // textalign: center,
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-        display: "flex",
-        alignItem: "center",
-        height: "56px",
-    };
 
-    const template2 = {
-        layout:
-            "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-        RowsPerPageDropdown: (options) => {
-            const dropdownOptions = [
-                { label: 5, value: 5 },
-                { label: 10, value: 10 },
-                { label: 20, value: 20 },
-                { label: 120, value: 120 },
-            ];
+    const [selectionMode] = useState("multiple");
 
-            return (
-                <div className="table__selector">
-                    <React.Fragment>
-                        <span
-                            className="table__selector__text"
-                            style={{ color: "var(--text-color)", userSelect: "none" }}
-                        >
-                            Rows per page:{" "}
-                        </span>
-                        <Dropdown
-                            value={options.value}
-                            className="pagedropdown_container"
-                            options={dropdownOptions}
-                            onChange={options.onChange}
-                            dropdownIcon={<SvgDownArrow />}
-                        />
-                    </React.Fragment>
-                </div>
-            );
-        },
-    };
-    const [selectionMode, setSelectionMode] = useState("multiple");
-
-    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [selectedProducts] = useState([]);
     const handleEdit = (rowData) => {
         navigate("/agent/leadedit");
     };

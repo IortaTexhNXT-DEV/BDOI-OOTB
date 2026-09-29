@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
@@ -7,7 +6,6 @@ import DropDowns from "../../../../../components/DropDowns";
 import InputField from "../../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../../assets/icons/SvgNodalClose";
 import { postAddLevelShareRatingCommission } from "../../store/commissionMiddleWare";
 import { useDispatch } from "react-redux";
 import logger from "../../../../../utility/logger";

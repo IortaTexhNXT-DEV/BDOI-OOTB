@@ -1,11 +1,8 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useLocation, useNavigate } from "react-router-dom";
 import AccountingTable from "./AccountingTable";
-import CustomTable from "./NewTable";
-import data from './AccountingTable';
 
 const PolicyAccountingView = ({ action }) => {
     const { t } = useTranslation();

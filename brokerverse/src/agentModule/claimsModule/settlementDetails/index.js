@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -57,7 +57,6 @@ const SettlementDetails = () => {
 
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",

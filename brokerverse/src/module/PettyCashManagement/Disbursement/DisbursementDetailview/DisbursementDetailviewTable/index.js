@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import "./index.scss";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { DataTable } from "primereact/datatable";
@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { Dropdown } from "primereact/dropdown";
 
 const DisbursementDetailviewTable = () => {
-  const { AddDisbursmentTable, loading } = useSelector(
+  const { AddDisbursmentTable } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,

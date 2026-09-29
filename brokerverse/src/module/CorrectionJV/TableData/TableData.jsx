@@ -24,7 +24,7 @@ const ENTRY_TYPES = [
 ];
 
 const TableData = ({ newDataTable, editID }) => {
-  const { correctionJVList, getCorrectionJVEdit, loading } = useSelector(
+  const { correctionJVList, getCorrectionJVEdit } = useSelector(
     ({ correctionJVMainReducers }) => {
       return {
         loading: correctionJVMainReducers?.loading,
@@ -129,7 +129,7 @@ const TableData = ({ newDataTable, editID }) => {
     return errors;
   };
   const dispatch = useDispatch();
-  const [EditID, setEditID] = useState(null);
+  const [, setEditID] = useState(null);
   const handleEdit = (rowData) => {
     dispatch(getPatchCorrectionJVEdit(rowData));
     setEditID(rowData.id);

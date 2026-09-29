@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountCategorySearchList, getAccountCategoryList } from "../store/accountCategoryMeddleware";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
@@ -25,9 +24,8 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
   useEffect(() => {
     dispatch(getAccountCategoryList());
   }, [dispatch]);
-  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const { AccountCategoryList, loading, AccountCategorySearchList } =
+  const { AccountCategoryList, AccountCategorySearchList } =
     useSelector(({ accountCategoryReducer }) => {
       return {
         loading: accountCategoryReducer?.loading,
@@ -84,20 +82,6 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
           icon={<SvgEdit />}
           onClick={() => handleEditAction(rowData)}
           className="action__button p-0 w-auto"
-        />
-      </div>
-    );
-  };
-  const renderStatusButton = (rowData) => {
-    return (
-      <div className="action__switch__container">
-        <InputSwitch
-          checked={rowData.status ? true : false}
-          className={
-            rowData.status
-              ? "switch__action__input__active"
-              : "switch__action__input__inactive"
-          }
         />
       </div>
     );

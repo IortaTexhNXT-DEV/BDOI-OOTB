@@ -4,25 +4,17 @@ import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
-import SvgEdit from "../../../assets/icons/SvgEdit";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { Paginator } from "primereact/paginator";
 import { Dialog } from "primereact/dialog";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Dropdown } from "primereact/dropdown";
-import SvgEditicon from "../../../assets/icons/SvgEdit";
-import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  getpaymentCheckbookDetailsMiddleware,
   patchpaymentVocherInvoiceListMiddleware,
-  getDisbursementDetailsMiddleware,
 } from "../store/paymentVocherMiddleware";
 import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
@@ -40,9 +32,8 @@ function SpecificVoucher() {
   const location = useLocation();
   const { disbursementData: disbursementDataFromState } = location.state || {};
   const [visible, setVisible] = useState(false);
-  const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [EditID, setEditID] = useState(null);
+  const [EditID] = useState(null);
   const [loading, setLoading] = useState(true);
   const [disbursementData, setDisbursementData] = useState(null);
   const [invoiceListData, setInvoiceListData] = useState([]);

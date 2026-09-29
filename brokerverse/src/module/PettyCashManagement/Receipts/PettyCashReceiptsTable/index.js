@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -6,11 +6,9 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,11 +21,10 @@ import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 const PettyCashReceiptsTable = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [filterData, setFilterData] = useState(null);
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("ReceiptNo");
 
-  const { ReceiptList, loading, ReceiptSearch } = useSelector(
+  const { ReceiptList, ReceiptSearch } = useSelector(
     ({ pettyCashReceiptsReducer }) => {
       return {
         loading: pettyCashReceiptsReducer?.loading,
@@ -117,23 +114,6 @@ const PettyCashReceiptsTable = () => {
     border: "none",
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
-  const cities = [
-    { name: "Name", code: "name" },
-    { name: "Date", code: "date" },
-    { name: "Receipt No", code: "code" },
-  ];
 
   useEffect(() => {
     if (globalFilter?.length > 0) {

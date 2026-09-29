@@ -1,4 +1,3 @@
-import React, { useState, useRef } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -16,7 +15,7 @@ import { calendarDateFormat } from "../../../../utility/dateFormat";
 const ReplenishtDetailView = () => {
   const navigate = useNavigate();
 
-  const { ViewReplenish, loading, AddReplenishTable } = useSelector(
+  const { ViewReplenish, AddReplenishTable } = useSelector(
     ({ pettyCashReplenishReducer }) => {
       return {
         loading: pettyCashReplenishReducer?.loading,

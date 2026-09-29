@@ -1,31 +1,22 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef, useEffect } from "react";
-import NavBar from "../../components/NavBar";
+import { useState, useRef, useEffect } from "react";
 import SvgDot from "../../assets/icons/SvgDot";
 import "../JournalVoucher/index.scss";
 import SvgAdd from "../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router-dom";
-import SvgFilters from "../../assets/icons/SvgFilters";
 import { InputText } from "primereact/inputtext";
-import SvgSearchIcon from "../../assets/icons/SvgSearchIcon";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
-import SvgTable from "../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import DataTabelJV from "./DataTabelJV";
 import {
-  getJournalVoucherSearchList,
-  journalVoucherMiddleware,
   getJournalVoucherHistory,
 } from "./store/journalVoucherMiddleware";
-import { useFormik } from "formik";
-import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import { useTranslation } from "react-i18next";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
-  const { journalVoucherList, journalVoucherSearchList, loading, pagination } =
+  const { journalVoucherList, loading, pagination } =
     useSelector(({ journalVoucherMainReducers }) => {
       return {
         loading: journalVoucherMainReducers?.loading,
@@ -41,15 +32,13 @@ const JournalVoucher = () => {
       };
     });
 
-  const [selectedCity, setSelectedCity] = useState(null);
   const cities = [
     { name: t("accounts.transactionCode"), code: "transactionCode" },
     { name: t("accounts.transactionNumber"), code: "transactionNumber" },
   ];
 
-  const [products, setProducts] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -70,9 +59,6 @@ const JournalVoucher = () => {
     setVisible(true);
   };
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    dispatch(getJournalVoucherSearchList({ textSearch: values.search }));
-  };
 
   // Load data on component mount
   useEffect(() => {
@@ -122,10 +108,6 @@ const JournalVoucher = () => {
     }
   }, [search, globalFilter, dispatch, rowsPerPage]);
 
-  const formik = useFormik({
-    initialValues: { search: "" },
-    onSubmit: handleSubmit,
-  });
 
   const onPageChange = (event) => {
     const newPage = event.page + 1; // PrimeReact uses 0-based indexing
@@ -148,12 +130,6 @@ const JournalVoucher = () => {
     dispatch(getJournalVoucherHistory(params));
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    { label: t("common.name") },
-    { label: t("common.date") },
-    { label: t("accounts.voucherNumber") },
-  ];
 
   return (
     <div className="grid  container__Journal__Voture">

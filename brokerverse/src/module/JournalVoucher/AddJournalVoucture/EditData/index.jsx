@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import "../EditData/index.scss";
 import { useFormik } from "formik";
@@ -6,7 +6,6 @@ import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../assets/icons/SvgNodalClose";
 import useJvMasterData from "../../useJvMasterData";
 
 const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {

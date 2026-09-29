@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -7,7 +7,7 @@ import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { postAddJournalVoucher } from "../../store/journalVoucherMiddleware";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import useJvMasterData from "../../useJvMasterData";
 
 const AddData = ({ visible, setVisible, handleUpdate }) => {
@@ -98,10 +98,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
 
   const dispatch = useDispatch();
 
-  const journalVoucherPostTabelData = useSelector(
-    ({ journalVoucherMainReducers }) =>
-      journalVoucherMainReducers?.journalVoucherPostTabelData || []
-  );
 
   // Helper functions to get descriptions
   const getMainAccountDescription = (code) => {

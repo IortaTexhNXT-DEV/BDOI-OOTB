@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -179,7 +179,6 @@ const PersonalDetails = () => {
     policydetailedlist?.premiumTotal ??
     policydetailedlist?.quotation?.grossPremium ??
     "";
-  const [fireEndorsementPayload, setFireEndorsementPayload] = useState(null);
 
   useEffect(() => {
     const quotation = policydetailedlist?.quotation || {};

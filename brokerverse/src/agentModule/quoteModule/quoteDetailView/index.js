@@ -20,7 +20,6 @@ import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { getLeadByIdMiddleware } from "../../leadModule/Store/leadMiddleware";
 import { BASE_URL } from "../../../utility/constant";
 import authService from "../../../services/authService";
-import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
 import clientService from "../../../services/clientService";
 import { QuotationStatus } from "../../../utils/statusHelpers";
@@ -32,7 +31,7 @@ import QuotationAuditTrail from "../quotationAuditTrail";
 import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
-import { confirmAction, notifyError, notifySuccess } from "../../../utility/dialogs";
+import { notifyError } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
 import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
@@ -216,7 +215,7 @@ const QuoteDetailView = ({ action }) => {
     return toPct(settingsTaxRates?.[key] || 0);
   };
 
-  const { PolicyDetails, loading, currentLeadDetails } = useSelector(
+  const { currentLeadDetails } = useSelector(
     ({ policyDetailsReducer, leadReducer }) => {
       return {
         loading: policyDetailsReducer?.loading,
@@ -422,81 +421,7 @@ const QuoteDetailView = ({ action }) => {
     }
   };
 
-  // Submit quote to insurer
-  const handleSubmitToInsurer = async () => {
-    if (!(await confirmAction(t("quoteDetailView.submitToInsurerConfirm")))) {
-      return;
-    }
 
-    try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/submit-to-insurer`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ submittedBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (result.success) {
-        notifySuccess(t("quoteDetailView.quoteSubmittedToInsurer"));
-        // Refresh data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        notifyError(t("quoteDetailView.failedMessage", { message: result.message }));
-      }
-    } catch (error) {
-      notifyError(t("quoteDetailView.errorSubmittingToInsurer"));
-    }
-  };
-
-  // Manual status change (for SubmittedToInsurer -> Approved)
-  const handleStatusChange = async (newStatus) => {
-    if (!(await confirmAction(t("quoteDetailView.changeStatusConfirm", { newStatus })))) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ status: newStatus, updatedBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        notifySuccess(t("quoteDetailView.statusUpdatedSuccess", { newStatus }));
-        // Refresh data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        notifyError(t("quoteDetailView.failedMessage", { message: result.message || t("quoteDetailView.statusUpdateFailed") }));
-      }
-    } catch (error) {
-      notifyError(t("quoteDetailView.errorUpdatingStatus"));
-    }
-  };
 
   // Show loading state
   if (isLoading) {

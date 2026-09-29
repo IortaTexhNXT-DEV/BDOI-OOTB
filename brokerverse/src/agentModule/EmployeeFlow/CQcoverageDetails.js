@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card"; 
 import { Button } from "primereact/button";
@@ -16,7 +16,6 @@ import InputTextField from "../component/inputText";
 import { APPATotalCoverageOptions } from "./mockdataforcoverDetails";
 import { postcoverageDetailsMiddleware } from "../quoteModule/coverageDetails/store/coverageDetailsMiddleware";
 import DropdownField from "../component/DropdwonField";
-import customHistory from "../../routes/customHistory";
 import CalculaitionTextInputs from "../component/calculaitionTextInputs"; 
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => {
@@ -25,7 +24,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isOverRide, setOverRide] = useState(false)
-  const { CoverageDetails, loading } = useSelector(
+  const { CoverageDetails } = useSelector(
     ({ agentCoverageDetailsReducers }) => {
       return {
         loading: agentCoverageDetailsReducers?.loading,
@@ -124,9 +123,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
-  const handleBackNavigation = () => {
-    customHistory.back();
-  };
 
   const formik = useFormik({
     initialValues: initialValue,

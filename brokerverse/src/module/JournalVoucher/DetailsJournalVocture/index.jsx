@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../components/NavBar";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import InputField from "../../../components/InputField";
@@ -11,11 +10,7 @@ import SvgDatePicker from "../../../assets/icons/SvgDatePicker";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../DetailsJournalVocture/index.scss";
 import ArrowLeftIcon from "../../../assets/icons/ArrowLeftIcon";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import SvgArrow from "../../../assets/icons/SvgArrow";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Dropdown } from "primereact/dropdown";
+import { useNavigate, useParams } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -78,8 +73,6 @@ const DetailsJournalVocture = () => {
   }, 0);
 
   const [visiblePopup, setVisiblePopup] = useState(false);
-  const [sortField, setSortField] = useState(null);
-  const [sortOrder, setSortOrder] = useState(null);
   const [date, setDate] = useState(new Date());
   const items = [
     {
@@ -134,28 +127,6 @@ const DetailsJournalVocture = () => {
     setCurrentPage(newPage);
   };
 
-  const rows = [
-    {
-      id: 1,
-      main: "",
-      sub: "",
-      remarks: "",
-      currency: "",
-      foreign: "",
-      local: "",
-      entry: "",
-    },
-    {
-      id: 2,
-      main: "",
-      sub: "",
-      remarks: "",
-      currency: "",
-      foreign: "",
-      local: "",
-      entry: "",
-    },
-  ];
   const toast = useRef(null);
   const [voucherStatus, setVoucherStatus] = useState("");
   const [rejectVisible, setRejectVisible] = useState(false);
@@ -211,21 +182,12 @@ const DetailsJournalVocture = () => {
 
   const handleReject = () =>
     runVoucherAction(() => journalVoucherService.reject(id, rejectReason.trim()));
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const [visible, setVisible] = useState(false);
   const handleEdit = () => {
     setVisible(true);
   };
 
-  const showSuccess = () => {
-    toast.current.show({
-      severity: "success",
-      summary: t("accounts.journalVoucherDetails.success"),
-      detail: t("accounts.journalVoucherDetails.messageContent"),
-      life: 3000,
-      icon: "pi pi-check-circle",
-    });
-  };
   const customValidation = (values) => {
     const errors = {};
 
@@ -236,9 +198,6 @@ const DetailsJournalVocture = () => {
     return errors;
   };
 
-  const handleFormSubmit = () => {
-    showSuccess();
-  };
   const handleSubmit = (values) => {
     dispatch(getJournalVoucherViewData());
     // Handle form submission
@@ -281,14 +240,6 @@ const DetailsJournalVocture = () => {
     enableReinitialize: true,
   });
 
-  const headerStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: 6,
-    color: "#000",
-    border: "none",
-  };
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -343,37 +294,6 @@ const DetailsJournalVocture = () => {
     navigate("/accounts/journalvoucher");
   };
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
-        { label: 20, value: 20 },
-        { label: 120, value: 120 },
-      ];
-
-      return (
-        <React.Fragment>
-          <div className="row__count__view">
-            <span
-              className="mx-1"
-              style={{ color: "var(--text-color)", userSelect: "none" }}
-            >
-              {t("accounts.journalVoucherDetails.rowCount")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </div>
-        </React.Fragment>
-      );
-    },
-  };
 
   return (
     <div className="grid sub__add__container">

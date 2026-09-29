@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
@@ -23,9 +22,7 @@ import { useFormik } from "formik";
 const UserGroupAccess = () => {
   const { t } = useTranslation();
   const {
-    loading,
     mainAdditionalTableList,
-    searchList,
     mainAdditionalViewData,
   } = useSelector(({ userReducers }) => {
     return {
@@ -35,7 +32,7 @@ const UserGroupAccess = () => {
       mainAdditionalViewData: userReducers?.mainAdditionalViewData,
     };
   });
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const [showView, setShowView] = useState(false);
 
@@ -54,7 +51,6 @@ const UserGroupAccess = () => {
     setShow(!show);
   };
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -82,17 +78,6 @@ const UserGroupAccess = () => {
     padding: "1rem",
     color: "#000",
     border: "none",
-  };
-  const headeraction = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-    alignItem: "center",
   };
 
   const template2 = {

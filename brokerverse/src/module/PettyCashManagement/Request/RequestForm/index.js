@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -11,10 +11,8 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import CustomToast from "../../../../components/Toast";
-import { TriStateCheckbox } from "primereact/tristatecheckbox";
 import usePettyCashOptions from "../../usePettyCashOptions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setRequestDraft } from "../store/pettyCashRequestReducer";
 import { Calendar } from "primereact/calendar";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
@@ -35,8 +33,6 @@ const initialValue = {
 };
 const RequestForm = ({ action }) => {
   const { t } = useTranslation();
-  const [value, setValue] = useState(null);
-  const toastRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);

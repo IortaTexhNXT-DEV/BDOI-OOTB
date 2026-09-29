@@ -3,14 +3,11 @@ import SvgAgentHomeIcon from "../../assets/agentIcon/SvgAgentHomeIcon";
 import SvgAgentItemsIcon from "../../assets/agentIcon/SvgAgentItemsIcon";
 import SvgAgentLeadIcon from "../../assets/agentIcon/SvgAgentLeadIcon";
 import SvgAgentPaymentIcon from "../../assets/agentIcon/SvgAgentPaymentIcon";
-import SvgClient from "../../assets/agentIcon/SvgClient";
-import SvgLead from "../../assets/agentIcon/SvgLead";
 import SvgPolicyIcon from "../../assets/agentIcon/SvgPolicyIcon";
 import SvgQuotationIcon from "../../assets/agentIcon/SvgQuotationIcon";
 import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
 import SvgMassterIcon from "../../assets/icons/SvgMassterIcon";
 import SvgReportsIcon from "../../assets/icons/SvgReportsIcon";
-import { useParams } from "react-router-dom";
 
 export const menuList = [
   {

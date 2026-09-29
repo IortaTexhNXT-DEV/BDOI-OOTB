@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../../components/NavBar";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../../components/InputField";
@@ -23,7 +22,7 @@ const AddHierarchy = ({ action }) => {
   const { t } = useTranslation();
   const { id } = useParams();
 
-  const { hierarchyListDetails, loading, total, getViewData, getPatchData } =
+  const { getViewData, getPatchData } =
     useSelector(({ hierarchyTableReducers }) => {
       return {
         loading: hierarchyTableReducers?.loading,
@@ -35,7 +34,6 @@ const AddHierarchy = ({ action }) => {
     });
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
   const dispatch = useDispatch();
   useEffect(() => {
     if (!id) return;

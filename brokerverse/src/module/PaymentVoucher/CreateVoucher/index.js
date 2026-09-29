@@ -1,24 +1,21 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
 import SvgDot from "../../../assets/icons/SvgDot";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../components/DatePicker";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   postpaymentVocherCreateDataMiddleware,
   paymentVocherMiddleware,
@@ -96,7 +93,7 @@ function Createvoucher() {
   const [clientsData, setClientsData] = useState([]);
   const [clientsLoading, setClientsLoading] = useState(false);
   const [policyOptions, setPolicyOptions] = useState([]);
-  const [policiesLoading, setPoliciesLoading] = useState(false);
+  const [, setPoliciesLoading] = useState(false);
   const [policyFilterValue, setPolicyFilterValue] = useState("");
   const [referrerOptions, setReferrerOptions] = useState([]);
   const [referrersLoading, setReferrersLoading] = useState(false);
@@ -275,14 +272,6 @@ function Createvoucher() {
 
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const { paymentVocherList, loading } = useSelector(
-    ({ paymentVoucherReducers }) => {
-      return {
-        loading: paymentVoucherReducers?.loading,
-        paymentVocherList: paymentVoucherReducers?.paymentVocherList,
-      };
-    }
-  );
 
   // Transform clients data to dropdown options for Customer Code
   const getCustomerCodeOptions = () => {

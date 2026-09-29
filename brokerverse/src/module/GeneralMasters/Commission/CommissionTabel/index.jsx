@@ -1,16 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "../CommissionTabel/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
-import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
-import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { useDispatch } from "react-redux";
 import { getCommission, getCommissionView, getPatchCommissionEditMiddleware } from "../store/commissionMiddleWare";
@@ -21,8 +17,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
     const { t } = useTranslation();
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const [first, setFirst] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
     const handleNavigateView = (columnData) => {
         dispatch(getCommissionView(columnData))
 
@@ -33,16 +27,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
         navigate(`/master/generals/commission/editcommission`)
     }
 
-    const onPageChange = (event) => {
-        setFirst(event.first);
-        setRowsPerPage(event.rows);
-    };
-    const isEmpty = commissionList.length === 0;
-    const emptyTableIcon = (
-        <div className="empty-table-icon">
-            <SvgTable />
-        </div>
-    );
 
     const headerStyle = {
         // width: '10rem',
@@ -87,19 +71,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
         },
     };
 
-    const renderEditButton = (rowData) => {
-        return (
-            <div className="centercontent" >
-                <div onClick={handleNavigateView}>
-                    <SvgEyeIcon />
-                </div>
-                <div onClick={handleEditNavigate}>
-                    <SvgEditIcon />
-                </div>
-
-            </div>
-        );
-    };
 
     const statusToast = useRef(null);
     const renderToggleButton = (rowData) => (

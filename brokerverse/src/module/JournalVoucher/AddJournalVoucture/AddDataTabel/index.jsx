@@ -5,9 +5,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgEditIcon from "../../../../assets/icons/SvgEditicons";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgDeleteIcon from "../../../../assets/icons/SvgDeleteIcon";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { Dialog } from "primereact/dialog";
 import "../EditData/index.scss";
 import { useFormik } from "formik";
@@ -15,7 +13,6 @@ import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { patchJVMiddleware } from "../../store/journalVoucherMiddleware";
 import useJvMasterData from "../../useJvMasterData";
 
@@ -25,12 +22,9 @@ const ENTRY_TYPES = [
 ];
 
 const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
-  const [first, setFirst] = useState(0);
+  const [, setFirst] = useState(0);
   const [visibleEdit, setVisibleEdit] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const navigate = useNavigate();
-  const handleNavigate = (rowData) => {
-  };
+  const [, setRowsPerPage] = useState(10);
 
   const onPageChange = (event) => {
     setFirst(event.first);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { DataTable } from "primereact/datatable";
@@ -41,7 +41,7 @@ export default function BatchTable() {
   const [batchesLoading, setBatchesLoading] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [sendingNotices, setSendingNotices] = useState(false);
-  const [queueJobId, setQueueJobId] = useState(null);
+  const [, setQueueJobId] = useState(null);
   const [queueProgress, setQueueProgress] = useState(null);
   const initialBatchCriteria = {
     expiryDateFrom: null,

@@ -2,18 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../assets/icons/SvgDot";
-import SvgFilters from "../../assets/icons/SvgFilters";
 import SvgAdd from "../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgIconeye from "../../assets/icons/SvgIconeye";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
@@ -21,11 +17,9 @@ import DropDowns from "../../components/DropDowns";
 import { useDispatch, useSelector } from "react-redux";
 import LabelWrapper from "../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
-import { useFormik } from "formik";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import {
-  getPaymentVocherListBySearchMiddleware,
   paymentVocherMiddleware,
   bulkPrintDisbursementsMiddleware,
   filterPaymentVoucherMiddleware,
@@ -37,7 +31,6 @@ import logger from "../../utility/logger";
 
 const Index = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [code, setCode] = useState("");
   const [codeTo, setCodeTo] = useState("");
@@ -54,14 +47,12 @@ const Index = () => {
   const [dateTo, setDateTo] = useState(new Date());
   const [clientsData, setClientsData] = useState([]);
   const [clientsLoading, setClientsLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
   const [visibleBulkUploadPopup, setVisibleBulkUploadPopup] = useState(false);
   const toast = useRef(null);
 
   const dispatch = useDispatch();
   const {
     paymentVocherList,
-    paymentVocherSearchList,
     paymentVocherFilterList,
     pagination,
     bulkPrintLoading,
@@ -317,9 +308,6 @@ const Index = () => {
     { name: "CASH002", code: "CASH002" },
     { name: "CASH003", code: "CASH003" },
   ];
-  const initialValue = {
-    receiptDate: new Date(),
-  };
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -371,8 +359,6 @@ const Index = () => {
   const home = { label: t("paymentVoucher.accounts") };
 
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
   const [globalFilter, setGlobalFilter] = useState();
   const [search, setSearch] = useState("");
   const cities = [

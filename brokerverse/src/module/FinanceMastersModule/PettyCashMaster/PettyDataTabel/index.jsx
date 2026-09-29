@@ -1,16 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "../PettyDataTabel/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
-import SvgEditIcon from "../../../../assets/icons/SvgEditIcon";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import {
   getPatchPettyCashEdit,
   getPettyCashView,
@@ -21,23 +18,8 @@ import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggl
 import { Toast } from "primereact/toast";
 const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
   const { t } = useTranslation();
-  const { getPettyCashEdit, loading } = useSelector(
-    ({ pettyCashMainReducers }) => {
-      return {
-        loading: pettyCashMainReducers?.loading,
-        getPettyCashEdit: pettyCashMainReducers?.getPettyCashEdit,
-      };
-    }
-  );
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRowsPerPage(event.rows);
-  };
-  const isEmpty = pettyCashList.length === 0;
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />

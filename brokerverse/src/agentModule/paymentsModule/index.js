@@ -1,72 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
-import NavBar from "../../components/NavBar";
-import { TabPanel, TabView } from "primereact/tabview";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import SvgFilters from "../../assets/icons/SvgFilters";
-import { DataTable } from "primereact/datatable";
-import { Dropdown } from "primereact/dropdown";
-import { Column } from "primereact/column";
-import { Menu } from "primereact/menu";
-import { useNavigate } from "react-router-dom";
 import { Card } from "primereact/card";
-import PaymentCard from "./paymentCard";
-import { Paginator } from "primereact/paginator";
 import "./index.scss";
-import TableDropdownField from "../component/tableDropDwonField";
 import SvgGross from "../../assets/agentIcon/SvgGross";
-import SvgCollectedPremium from "../../assets/agentIcon/SvgCollectedPremium";
 import SvgCollected from "../../assets/agentIcon/SvgCollected";
-import SvgReceivable from "../../assets/agentIcon/SvgReceivable";
 import SvgCommission from "../../assets/agentIcon/SvgCommission";
 import SvgReceivables from "../../assets/agentIcon/SvgReceivables";
 import { useDispatch, useSelector } from "react-redux";
 import { postpaymentdataMiddleWare } from "./store/paymentMiddleware";
-import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
-import SvgDownArrow from "../../assets/agentIcon/SvgDownArrow";
 import PyamentTabelCard from "./PaymentTabel";
 
 const Payments = () => {
-  const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const [search, setSearch] = useState("");
-  const menuRight = useRef(null);
-  const navigate = useNavigate();
-  const [endrosementModal, setEndrosementModal] = useState(false);
 
-  const renderPaymentStatus = (rowData) => {
-    return <div>{rowData?.payment}</div>;
-  };
-  const handleMenuToggle = (event, menuRef) => {
-    menuRef.current.toggle(event);
-  };
-  const menuItems = [
-    {
-      label: t("payments.view"),
-      command: () => handleMenuClick("view"),
-      icon: "pi pi-refresh",
-    },
-    {
-      label: t("payments.claim"),
-      command: () => handleMenuClick("claim"),
-      icon: "pi pi-refresh",
-    },
-    {
-      label: t("payments.renewal"),
-      command: () => handleMenuClick("renewal"),
-      icon: "pi pi-refresh",
-    },
-    {
-      label: t("payments.endorsement"),
-      command: () => handleMenuClick("endrosement"),
-      icon: "pi pi-refresh",
-    },
-  ];
-  const headerStyle = {
-    textAlign: "end",
-  };
   // const template2 = {
   //   layout:
   //     "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -74,36 +20,7 @@ const Payments = () => {
   //     const dropdownOptions = [
   //     ];
 
-  const handleMenuClick = (menuItem) => {
-    if (menuItem == "view") {
-      navigate("/agent/claimrequest/claimdetails");
-    }
-    if (menuItem == "endrosement") {
-      setEndrosementModal(true);
-    }
-  };
 
-  const renderEditButton = (rowData) => {
-    return (
-      <div className="card flex justify-content-center">
-        <Menu
-          model={menuItems}
-          popup
-          ref={menuRight}
-          id="popup_menu_right"
-          popupAlignment="right"
-        />
-
-        <Button
-          icon="pi pi-align-right"
-          className="mr-2"
-          onClick={(event) => handleMenuToggle(event, menuRight)}
-          aria-controls="popup_menu_right"
-          aria-haspopup
-        />
-      </div>
-    );
-  };
   const dispatch = useDispatch();
   const totals = useSelector(
     ({ agentPaymentMainReducers }) => agentPaymentMainReducers?.postpaymentdata || {}
@@ -112,33 +29,6 @@ const Payments = () => {
     dispatch(postpaymentdataMiddleWare());
   }, [dispatch]);
 
-  const template2 = {
-    layout: "RowsPerPageDropdown CurrentPageReport PrevPageLink  NextPageLink ",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
-        { label: 20, value: 20 },
-        { label: 120, value: 120 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              Rows per page:{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
   return (
     <div>
       <div className="payment__dashboard__container">

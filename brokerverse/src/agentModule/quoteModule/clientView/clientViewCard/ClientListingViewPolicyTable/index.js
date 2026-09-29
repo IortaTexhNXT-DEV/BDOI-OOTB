@@ -67,10 +67,10 @@ const LeadListingAllTable = ({ action, clientId }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [displayDialog, setDisplayDialog] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode, setSelectionMode] = useState("multiple");
-  const [navAction, setNavAction] = useState(null);
+  const [selectionMode] = useState("multiple");
+  const [, setNavAction] = useState(null);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
   const [disableOption, setdisableOption] = useState(false);

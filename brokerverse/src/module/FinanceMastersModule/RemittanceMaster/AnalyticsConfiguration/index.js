@@ -11,10 +11,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { MultiSelect } from "primereact/multiselect";
 import { InputTextarea } from "primereact/inputtextarea";
-import { ColorPicker } from "primereact/colorpicker";
 import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
-import { RadioButton } from "primereact/radiobutton";
 import { Slider } from "primereact/slider";
 import { Toast } from "primereact/toast";
 import { useNavigate, useParams } from "react-router-dom";
@@ -165,12 +163,6 @@ const AnalyticsConfiguration = () => {
     { label: "Exception Data", value: "Exception Data" }
   ];
 
-  const kpiCategoryOptions = [
-    { label: "Operational", value: "Operational" },
-    { label: "Financial", value: "Financial" },
-    { label: "Quality", value: "Quality" },
-    { label: "Compliance", value: "Compliance" }
-  ];
 
   const frequencyOptions = [
     { label: "Real-time", value: "Real-time" },

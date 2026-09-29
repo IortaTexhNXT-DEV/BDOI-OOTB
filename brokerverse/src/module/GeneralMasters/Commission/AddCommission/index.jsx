@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../AddCommission/index.scss";
 import DropDowns from "../../../../components/DropDowns";
@@ -20,7 +19,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import AddCommissionPopup from "./AddCommissionPopup";
-import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../../../components/Toast";
 import { SelectButton } from "primereact/selectbutton";
 import useMasterOptions from "../../common/useMasterOptions";
@@ -43,12 +41,8 @@ const AddCommission = () => {
   const { t } = useTranslation();
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
-  const [date, setDate] = useState();
   const {
     addLevelCommissionSharing,
-    loading,
-    commissionSearchList,
-    commissionList,
   } = useSelector(({ commissionMianReducers }) => {
     return {
       loading: commissionMianReducers?.loading,
@@ -161,11 +155,8 @@ const AddCommission = () => {
   const handlePolicy = () => {
     setVisible(true);
   };
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const handleNavigate = () => {
-    navigate("/accounts/journalvoucher/detailsjournalvocture");
-  };
+  const [, setFirst] = useState(0);
+  const [, setRowsPerPage] = useState(10);
   const onPageChange = (event) => {
     setFirst(event.first);
     setRowsPerPage(event.rows);
@@ -176,9 +167,6 @@ const AddCommission = () => {
       <SvgTable />
     </div>
   );
-  const handleApproval = () => {
-    setStep(2);
-  };
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const headerStyle = {

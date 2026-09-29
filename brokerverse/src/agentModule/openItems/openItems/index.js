@@ -1,14 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgpolicyExpire from "../../../assets/agentIcon/SvgpolicyExpire";
 import SvgAdd from "../../../assets/agentIcon/SvgAdd";
 import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
-import SvgpendingPayment from "../../../assets/agentIcon/SvgpendingPayment";
 import { Button } from "primereact/button";
-import SvgCalendertracker from "../../../assets/agentIcon/SvgCalendertracker";
 import DropdownField from "../../component/DropdwonField";
 import DatepickerField from "../../component/datePicker";
 import InputTextField from "../../component/inputText";
@@ -21,12 +18,10 @@ import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
 import { useDispatch, useSelector } from "react-redux";
 import UpcommingEventCard from "./UpcommingEventCard";
 import { useFormik } from "formik";
-import moment from "moment";
 import {
   getOpenItemsListMiddleware,
   postOpenItemsListMiddleware,
 } from "../store/openItemsMiddleware";
-import SvgBackArrow from "../../../assets/icons/SvgBackArrow";
 import Notification from "../upcomingEvents";
 
 const initialValues = {
@@ -46,7 +41,6 @@ const customValidation = (values) => {
 const OpenItems = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [value, setValue] = useState("");
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -111,15 +105,7 @@ const OpenItems = () => {
   const handleSeeMore = () => {
     navigate("/agent/openitems/upcomingevents");
   };
-  const handlePolicyExpiry = () => {
-    navigate("/agent/openitems/expiringpolicy");
-  };
 
-  const handlePendingPayments = () => {
-    navigate("/agent/payments");
-  };
-  const handleDateSelect = (info) => {
-  };
   const handleHomeNavigation = () => {
     navigate("/");
   };

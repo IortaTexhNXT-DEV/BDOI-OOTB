@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
@@ -17,7 +17,6 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import S3FileUpload from "../../../../components/S3FileUpload";
 import policyService from "../../../../services/policyService";
 import { useSelector } from "react-redux";
-import quotationService from "../../../../services/quotationService";
 import { notifyError, notifyWarn } from "../../../../utility/dialogs";
 import logger from "../../../../utility/logger";
 
@@ -56,21 +55,6 @@ const UploadPolicyCard = ({
     policydetailedlist?.ClientId ||
     policydetailedlist?.clientId;
 
-  const grossPremium =
-    state?.GrossPremium ||
-    policydetailedlist?.GrossPremium ||
-    quotationDetails?.firePremiumDetails?.totalPremium ||
-    quotationDetails?.grossPremium ||
-    quotationDetails?.totalPremium ||
-    policydetailedlist?.quotation?.participantDetails
-      ?.reduce((sum, participant) => {
-        const premium = parseFloat(
-          participant.premiumCurrency?.replace(/[^0-9.-]/g, "") || 0
-        );
-        return sum + premium;
-      }, 0)
-      ?.toFixed(2) ||
-    "0.00";
 
   const policyIdFromState = useMemo(() => {
     return (
@@ -225,8 +209,7 @@ const UploadPolicyCard = ({
         paymentStatus: "Pending",
       };
 
-      const updateResult = await policyService.updatePolicy(existingPolicyId, updatePayload);
-      const policyData = updateResult.data || resolvedPolicyData;
+      await policyService.updatePolicy(existingPolicyId, updatePayload);
 
       // Pay later: nothing is received, so no receipt and no journal. The bill raised at issuance stays open
       // and the payment is captured later on the policy payment screen.
@@ -459,7 +442,7 @@ const UploadPolicyCard = ({
     ]
   );
 
-  const [expiryDateData, setExpieyDateData] = useState("");
+  const [, setExpieyDateData] = useState("");
 
   const handleBackNavigation = () => {
     customHistory.back();

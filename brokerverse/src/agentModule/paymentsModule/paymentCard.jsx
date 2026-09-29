@@ -1,5 +1,4 @@
-import { Card } from "primereact/card";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import SvgArrow from "../../assets/agentIcon/SvgArrow";
 import { Button } from "primereact/button";
@@ -9,7 +8,7 @@ import { formatDate as formatAppDate } from "../../utility/dateFormat";
 
 const PaymentCard = ({  dataSearch, status,setStatus }) => {
   const { formatCurrency } = useFormatCurrency();
-  const { paymenttabledata, paymentSearchList, loading } = useSelector(
+  const { paymenttabledata, paymentSearchList } = useSelector(
     ({ agentPaymentMainReducers }) => {
       return {
         loading: agentPaymentMainReducers?.loading,

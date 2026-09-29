@@ -153,7 +153,6 @@ class BillingService {
       };
     }
 
-    const useEndorsementId = options.useEndorsementId === true;
     const id = policyIdOrEndorsementId;
 
     try {

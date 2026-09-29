@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "primereact/card"; 
 import { Button } from "primereact/button"; 
 import { useNavigate } from "react-router-dom";
@@ -35,7 +35,7 @@ const initialValue = {
 };
 
 export const EmployeeCreationCard = ({ flow, action }) => {
-  const { loading, leadtabledata, getEditLeadData, getClientEditData } =
+  const { leadtabledata, getEditLeadData, getClientEditData } =
     useSelector(({ leadReducers, clientsReducers }) => {
       return {
         loading: leadReducers?.loading,
@@ -138,12 +138,6 @@ export const EmployeeCreationCard = ({ flow, action }) => {
     return errors;
   };
 
-  const handleSaveLead = () => {
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/agent/quotelisting");
-    }, 2000);
-  };
 
   const formik = useFormik({
     initialValues: initialValue,

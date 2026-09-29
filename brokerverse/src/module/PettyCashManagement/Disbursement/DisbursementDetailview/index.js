@@ -1,4 +1,3 @@
-import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -11,12 +10,11 @@ import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
 import DisbursementDetailviewTable from "./DisbursementDetailviewTable";
 import { useSelector } from "react-redux";
-import { useFormik } from "formik";
 
 const DisbursementDetailview = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { ViewDisbursment, loading, getViewDisbursment } = useSelector(
+  const { getViewDisbursment } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -42,33 +40,9 @@ const DisbursementDetailview = () => {
     navigate("/accounts/pettycash/disbursement");
   };
 
-  const PettycashCodetOptions = [
-    {
-      label: ViewDisbursment?.PettycashCode,
-      value: ViewDisbursment?.PettycashCode,
-    },
-  ];
 
-  const TransactioncodeOptions = [
-    {
-      label: ViewDisbursment?.Transactioncode,
-      value: ViewDisbursment?.Transactioncode,
-    },
-  ];
 
-  const BranchcodeOptions = [
-    {
-      label: ViewDisbursment?.Branchcode,
-      value: ViewDisbursment?.Branchcode,
-    },
-  ];
 
-  const DepartmentcodeOptions = [
-    {
-      label: ViewDisbursment?.Departmentcode,
-      value: ViewDisbursment?.Departmentcode,
-    },
-  ];
 
   return (
     <div className="add__disbursement__view__container">

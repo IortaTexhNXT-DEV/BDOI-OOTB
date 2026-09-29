@@ -1,19 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./index.scss";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/agentIcon/SvgAdd";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
 import ClientViewCard from "./clientViewCard";
-import { Dropdown } from "primereact/dropdown";
-import SvgMotor from "../../../assets/agentIcon/SvgMotor";
-import SvgTravel from "../../../assets/agentIcon/SvgTravel";
-import SvgHome from "../../../assets/agentIcon/SvgHome";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const LeadListing = ({ action }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
-  const navigate = useNavigate();
   const { id: clientId } = useParams();
   // the header shows the client code (CL-...), never the internal record id of the address
   const [clientCode, setClientCode] = useState(null);

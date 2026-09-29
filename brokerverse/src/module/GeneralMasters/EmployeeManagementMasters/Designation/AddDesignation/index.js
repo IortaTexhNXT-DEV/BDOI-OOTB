@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../../components/NavBar";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../../components/InputField";
@@ -23,7 +22,7 @@ import useMasterOptions, { useMasterRecordOptions } from "../../../common/useMas
 
 const AddDesignation = ({ action }) => {
   const { t } = useTranslation();
-  const { getEditData, loading, getViewData } = useSelector(
+  const { getEditData, getViewData } = useSelector(
     ({ designationMainReducers }) => {
       return {
         loading: designationMainReducers?.loading,
@@ -35,7 +34,6 @@ const AddDesignation = ({ action }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
 
   const items = [
     { label: t("generalMasters.employeeManagement") },

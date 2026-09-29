@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,10 +11,9 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { ProgressBar } from "primereact/progressbar";
 import { Badge } from "primereact/badge";
-import { Chip } from "primereact/chip";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
@@ -30,8 +28,6 @@ import { progressValue } from "../../../utility/numberFormat";
 const AtRiskAnalysis = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState("All");
   const [agentFilter, setAgentFilter] = useState("All");

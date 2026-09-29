@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../components/NavBar";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../AddTaxation/index.scss";
 import DropDowns from "../../../../components/DropDowns";
@@ -21,7 +20,7 @@ import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const AddTaxation = () => {
   const { t } = useTranslation();
-  const { getTaxationEdit, loading } = useSelector(
+  const { getTaxationEdit } = useSelector(
     ({ taxationMainReducers }) => {
       return {
         loading: taxationMainReducers?.loading,
@@ -31,10 +30,6 @@ const AddTaxation = () => {
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [selectedOption, setSelectedOption] = useState("30%");
-  const handleDropdownChange = (e) => {
-    setSelectedOption(e.value);
-  };
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const items = [
@@ -43,7 +38,6 @@ const AddTaxation = () => {
   ];
   const home = { label: t("financeMasters.master") };
 
-  const item = [{ name: "30%" }, { name: "40%" }, { name: "70%" }];
   const isocode = useTaxRateOptions();
   const validate = (values) => {
     const errors = {};

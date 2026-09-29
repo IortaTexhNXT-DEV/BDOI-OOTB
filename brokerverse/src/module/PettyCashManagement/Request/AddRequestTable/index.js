@@ -1,11 +1,10 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useFormik } from "formik";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import CustomToast from "../../../../components/Toast";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
@@ -38,7 +37,7 @@ const AddRequestTable = () => {
   const toastRefApprove = useRef(null);
   const navigate = useNavigate();
 
-  const { AddRequestTable, loading } = useSelector(
+  const { AddRequestTable } = useSelector(
     ({ pettyCashRequestReducer }) => {
       return {
         loading: pettyCashRequestReducer?.loading,

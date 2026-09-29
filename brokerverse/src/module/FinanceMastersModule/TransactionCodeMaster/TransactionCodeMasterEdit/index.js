@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -10,16 +10,14 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import TransactionCodeMasterEdit from "./TransactionCodeMasterEditTableview";
-import NavBar from "../../../../components/NavBar";
 import { Button } from "primereact/button";
 import { patchTrascationcodeDetailsEdit } from "../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
-import { PATCH_TRANSACTION_CODE_DETAILS_EDIT } from "../../../../redux/actionTypes";
 import useTransactionCodeOptions from "../useTransactionCodeOptions";
 import CustomToast from "../../../../components/Toast";
 
 const TransactionCodeEdit = () => {
-  const { getTrascationcodeDetailsEdit, loading } = useSelector(
+  const { getTrascationcodeDetailsEdit } = useSelector(
     ({ transactionCodeMasterReducer }) => {
       return {
         loading: transactionCodeMasterReducer?.loading,

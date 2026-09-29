@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useLanguageOptions } from "../../../utility/languages";
 import { ChangePasswordDialog, TwoFactorDialog } from "../../authModule/security/AccountSecurityDialogs";
 import "./index.scss";
@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../../utility/logout";
 import { useNotificationContext } from "../../../context/NotificationContext";
 import SvgArrow from "../../../assets/icons/SvgArrow";
-import Cookies from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
 import InitialsAvatar from "../InitialsAvatar";

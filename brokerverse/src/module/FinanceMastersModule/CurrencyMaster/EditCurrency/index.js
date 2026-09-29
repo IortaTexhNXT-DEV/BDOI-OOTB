@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../AddCurrency/index.scss";
@@ -33,8 +33,7 @@ const EditCurrency = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isocode = useCurrencyCodeOptions();
-  const [ID, setID] = useState("");
-  const { CurrencyDetailEdit, loading } = useSelector(
+  const { CurrencyDetailEdit } = useSelector(
     ({ currencyMasterReducer }) => {
       return {
         loading: currencyMasterReducer?.loading,

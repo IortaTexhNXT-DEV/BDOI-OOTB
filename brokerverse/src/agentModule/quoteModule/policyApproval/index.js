@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import "./index.scss";
@@ -17,7 +17,7 @@ const PolicyApproval = () => {
   // State variables
   const [quotationDetails, setQuotationDetails] = useState(null);
   const [leadData, setLeadData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   
   // Get quotation ID from URL params or state
   const quotationId = params.quotationId || state?.quotationId || state?.quotation?.id;

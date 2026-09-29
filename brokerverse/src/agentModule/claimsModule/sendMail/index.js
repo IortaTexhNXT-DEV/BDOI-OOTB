@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -30,7 +30,7 @@ const SendMail = () => {
     null;
 
   // Get loading, error states and claim response data from Redux
-  const { loading, error, claimResponseData } = useSelector(
+  const { loading, error } = useSelector(
     ({ sendMailReducers }) => ({
       loading: sendMailReducers?.loading || false,
       error: sendMailReducers?.error || "",

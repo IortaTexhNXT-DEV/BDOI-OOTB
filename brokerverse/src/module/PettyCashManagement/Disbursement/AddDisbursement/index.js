@@ -1,11 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
@@ -52,7 +51,7 @@ const AddDisbursement = () => {
   const dispatch = useDispatch();
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const { AddDisbursment, loading, AddDisbursmentRequestTable } = useSelector(
+  const { AddDisbursmentRequestTable } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -77,7 +76,6 @@ const AddDisbursement = () => {
   const handleBack = () => {
     navigate("/accounts/pettycash/disbursement");
   };
-  const toastRef = useRef(null);
   const { funds, mainAccounts, subAccounts } = usePettyCashOptions();
   const Criteria = CRITERIA;
   const handleSubmit = async (values) => {

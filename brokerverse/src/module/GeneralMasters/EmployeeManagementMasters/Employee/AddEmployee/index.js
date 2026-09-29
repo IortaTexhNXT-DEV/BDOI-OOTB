@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -21,7 +21,7 @@ import {
 
 const AddEmployee = ({ action }) => {
   const { t } = useTranslation();
-  const { employeeEditData, loading, total, employeeViewData } = useSelector(
+  const { employeeEditData } = useSelector(
     ({ employeeReducers }) => {
       return {
         loading: employeeReducers?.loading,
@@ -34,7 +34,6 @@ const AddEmployee = ({ action }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
   const dispatch = useDispatch();
   useEffect(() => {
     if (id && (action === "edit" || action === "view")) dispatch(getEmployeEditMiddleWare(id));

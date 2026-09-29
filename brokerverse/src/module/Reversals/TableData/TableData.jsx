@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 
 const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
-  const [products, setProducts] = useState([]);
 
   const template2 = {
     layout:

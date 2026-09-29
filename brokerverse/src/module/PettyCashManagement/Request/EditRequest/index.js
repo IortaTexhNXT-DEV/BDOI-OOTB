@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -12,7 +12,6 @@ import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import CustomToast from "../../../../components/Toast";
-import { TriStateCheckbox } from "primereact/tristatecheckbox";
 import { useDispatch, useSelector } from "react-redux";
 import {
     geteditrequestMiddleware,
@@ -28,7 +27,7 @@ import SvgDeleteIcon from "../../../../assets/icons/SvgDeleteIcon";
 import { Dialog } from "primereact/dialog";
 import { Checkbox } from "primereact/checkbox";
 import AddDialog from "./AddDialog";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValue = {

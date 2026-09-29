@@ -1,5 +1,5 @@
 import { BreadCrumb } from 'primereact/breadcrumb'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from "react-i18next"
 import SvgDot from '../../../../assets/icons/SvgDot';
 import "../AddCurrency/index.scss"
@@ -11,9 +11,8 @@ import CustomToast from '../../../../components/Toast';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from "formik";
 import SvgBack from '../../../../assets/icons/SvgBack';
-import NavBar from '../../../../components/NavBar';
 import { postAddCurrency } from "../store/currencyMasterMiddlewar";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useCurrencyCodeOptions } from "../../../GeneralMasters/common/useMasterOptions";
 
 const initialValues = {
@@ -33,12 +32,6 @@ const AddCurrency = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { CurrencyList, loading } = useSelector(({ currencyMasterReducer }) => {
-    return {
-      loading: currencyMasterReducer?.loading,
-      CurrencyList: currencyMasterReducer?.CurrencyList,
-    };
-  });
   const items = [
     { label: t("financeMasters.currencyLabel"), url: '/master/finance/currency' },
     { label: t("financeMasters.addCurrency"), url: '/master/finance/currency/addcurrency' },

@@ -26,11 +26,9 @@ import {
   clearCurrentQuoteCreation,
 } from "../../Store/quotationReducer";
 import { getLeadByIdMiddleware } from "../../../leadModule/Store/leadMiddleware";
-import quotationService from "../../../../services/quotationService";
 import {
   canConvertToPolicy,
   canEditQuotation,
-  QuotationStatus,
 } from "../../../../utils/statusHelpers";
 import StatusBadge from "../../../../components/StatusBadge";
 import SvgHome from "../../../../assets/agentIcon/SvgHome";

@@ -299,9 +299,6 @@ const ProductConfiguratorTab = ({
     return { ...(valuesForTab || {}) };
   };
 
-  const getSubTabLabel = (tabKey, subTabKey) =>
-    SUB_TAB_OPTIONS[tabKey]?.find((option) => option.value === subTabKey)
-      ?.label || "";
 
   const resetNewLabelForm = () => {
     setNewLabelForm(getInitialNewLabelForm());

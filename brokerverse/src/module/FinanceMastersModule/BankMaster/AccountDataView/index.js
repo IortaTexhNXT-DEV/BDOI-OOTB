@@ -1,24 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgFilters from "../../../../assets/icons/SvgFilters";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
-import SvgEditicon from "../../../../assets/icons/SvgEdit";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
 import ToggleButton from "../../../../components/ToggleButton";
 import SvgTable from "../../../../assets/icons/SvgTable";
@@ -30,9 +23,8 @@ import {
 
 const Index = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const { AccountDetailsList, loading, searchAccountDetails } = useSelector(
+  const { AccountDetailsList, searchAccountDetails } = useSelector(
     ({ bankMasterReducer }) => {
       return {
         loading: bankMasterReducer?.loading,
@@ -81,18 +73,6 @@ const Index = () => {
     },
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
 
   const headerStyle = {
     // width: '19%',
@@ -109,24 +89,10 @@ const Index = () => {
     { label: t("financeMasters.bank"), url: "/master/finance/bank" },
     { label: t("financeMasters.accountDetails") },
   ];
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
   const home = { label: t("financeMasters.master") };
 
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
   const isEmpty = AccountDetailsList?.length === 0 || "undefined";
   const emptyTableIcon = (
     <div>
@@ -137,9 +103,6 @@ const Index = () => {
     </div>
   );
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   const handlePolicy = () => {
     navigate("/master/finance/bank/accountdataview/addaccountdetail");

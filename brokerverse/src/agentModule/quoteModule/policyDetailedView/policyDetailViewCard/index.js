@@ -1,11 +1,8 @@
 import { Card } from "primereact/card";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
-import SvgBlueArrow from "../../../../assets/agentIcon/SvgBlueArrow";
-import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import { getpolicyDetailedMiddleware } from "../store/policyDetailedMiddleware";
@@ -17,7 +14,6 @@ const handleSubmit = () => {
 const PolicyDetailedViewCard = ({ action, state, policyId }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { policydetailedlist, loading } = useSelector(

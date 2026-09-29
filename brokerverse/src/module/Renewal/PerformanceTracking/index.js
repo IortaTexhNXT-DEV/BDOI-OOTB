@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -27,8 +26,6 @@ import { formatPercent, formatWithUnit, progressValue } from "../../../utility/n
 const PerformanceTracking = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [timeFilter, setTimeFilter] = useState('Current Month');
   const [teamFilter, setTeamFilter] = useState('All Teams');
@@ -94,7 +91,6 @@ const PerformanceTracking = () => {
   };
 
   const setupCharts = () => {
-    const documentStyle = getComputedStyle(document.documentElement);
     const primaryColor = '#3B82F6';
     const successColor = '#10B981';
     const warningColor = '#F59E0B';

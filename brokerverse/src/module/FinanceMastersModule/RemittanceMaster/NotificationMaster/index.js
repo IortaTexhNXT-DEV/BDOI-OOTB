@@ -108,7 +108,7 @@ const NotificationMaster = () => {
   };
 
   // Notification rules state - enhanced examples
-  const [notificationRules, setNotificationRules] = useState([
+  const [notificationRules] = useState([
     {
       id: 1,
       ruleName: "Payment Overdue Alert",
@@ -178,12 +178,6 @@ const NotificationMaster = () => {
     { label: "Push Notification", value: "Push Notification" }
   ];
 
-  const priorityOptions = [
-    { label: "Low", value: "Low" },
-    { label: "Medium", value: "Medium" },
-    { label: "High", value: "High" },
-    { label: "Critical", value: "Critical" }
-  ];
 
   const frequencyOptions = [
     { label: "Immediate", value: "Immediate" },

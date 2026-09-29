@@ -5,7 +5,6 @@ import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
-import NavBar from "../../../../../components/NavBar";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -28,7 +27,7 @@ import { formatDate } from "../../../../../utility/dateFormat";
 
 const RoleMaster = () => {
   const { t } = useTranslation();
-  const { loading, roleTableList, roleSearchList } = useSelector(
+  const { roleTableList, roleSearchList } = useSelector(
     ({ roleMainReducers }) => {
       return {
         loading: roleMainReducers?.loading,
@@ -51,8 +50,6 @@ const RoleMaster = () => {
   }, [dispatch]);
   const handleNavigate = () => {
     navigate("/master/generals/usermanagement/role/add/1");
-  };
-  const handleNavigateedit = () => {
   };
   const handleView = (rowData) => {
     dispatch(getViewRoleEditMiddleware(rowData));
@@ -97,8 +94,8 @@ const RoleMaster = () => {
     justifyContent: "center",
   };
 
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [, setFirst] = useState(0);
+  const [, setRowsPerPage] = useState(10);
 
   const onPageChange = (event) => {
     setFirst(event.first);

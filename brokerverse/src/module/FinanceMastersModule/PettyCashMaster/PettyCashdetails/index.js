@@ -1,17 +1,13 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useEffect, useState, useRef } from "react";
-import NavBar from "../../../../components/NavBar";
+import { useEffect, useState } from "react";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import "../PettyCashdetails/index.scss";
 import InputField from "../../../../components/InputField";
-import { Button } from "primereact/button";
-import { useFormik } from "formik";
 import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const PettyCashDetail = () => {
-  const toastRef = useRef(null);
   const navigate = useNavigate();
   const [visiblePopup, setVisiblePopup] = useState(false);
 
@@ -22,7 +18,7 @@ const PettyCashDetail = () => {
       url: "/master/finance/pettycash/pettycashdetail",
     },
   ];
-  const { pettyCashView, pettyCashSearchList, loading } = useSelector(
+  const { pettyCashView } = useSelector(
     ({ pettyCashMainReducers }) => {
       return {
         loading: pettyCashMainReducers?.loading,
@@ -44,50 +40,8 @@ const PettyCashDetail = () => {
     return () => clearTimeout(timerId);
   }, [visiblePopup]);
 
-  const [step, setStep] = useState(0);
-  const customValidation = (values) => {
-    const errors = {};
+  const [step] = useState(0);
 
-    if (!values.pettycashcode) {
-      errors.pettycashcode = "This field is required";
-    }
-
-    if (!values.pettycashname) {
-      errors.pettycashname = "This field is required";
-    }
-    if (!values.pettycashsize) {
-      errors.pettycashsize = "This field is required";
-    }
-    if (!values.avilabelcash) {
-      errors.avilabelcash = "This field is required";
-    }
-    if (!values.minicashbox) {
-      errors.minicashbox = "This field is required";
-    }
-    if (!values.transactionlimit) {
-      errors.transactionlimit = "This field is required";
-    }
-
-    return errors;
-  };
-  const handleSubmit = (values) => {
-  };
-
-  const formik = useFormik({
-    initialValues: {
-      pettycashcode: pettyCashView.pettycashcode || "",
-      pettycashname: pettyCashView.pettycashname || "",
-      pettycashsize: pettyCashView.pettycashsize || "",
-      avilabelcash: pettyCashView.avilabelcash || "",
-      minicashbox: pettyCashView.minicashbox || "",
-      transactionlimit: pettyCashView.transactionlimit || "",
-    },
-    validate: customValidation,
-    onSubmit: (values) => {
-      handleSubmit(values);
-      setStep(1);
-    },
-  });
 
   return (
     <div className="grid detail__add__container">

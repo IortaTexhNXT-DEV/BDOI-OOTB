@@ -2,18 +2,13 @@ import React, { useEffect, useState } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../../components/InputField";
-import SubmitButton from "../../../../../components/SubmitButton";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../../../components/NavBar";
+import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../../components/DatePicker";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
@@ -21,11 +16,9 @@ import { useFormik } from "formik";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import { useDispatch, useSelector } from "react-redux";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
-import { Dialog } from "primereact/dialog";
 import ToggleButton from "../../../../../components/ToggleButton";
 import {
   getChequeEditDataMiddleWare,
-  postChequeDataMiddleWare,
   postPatchAccountDetailEdit,
 } from "../../store/bankMasterMiddleware";
 import CheckEditData from "./CheckEditData";
@@ -40,7 +33,7 @@ const initialValues = {
 };
 
 function EditAccountDetail({ action }) {
-  const { AccountPatchDetailView, loading, chequeListData, getEditChequeData } =
+  const { AccountPatchDetailView, chequeListData, getEditChequeData } =
     useSelector(({ bankMasterReducer }) => {
       return {
         loading: bankMasterReducer?.loading,
@@ -50,35 +43,19 @@ function EditAccountDetail({ action }) {
       };
     });
   const navigate = useNavigate();
-  const [date, setDate] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState(false);
   const [visible, setVisible] = useState(false);
   const [visibleEdit, setVisibleEdit] = useState(false);
-  const { id } = useParams();
   const dispatch = useDispatch();
 
   // const customValidation = (values) => {
   // };
 
   const Navigate = useNavigate();
-  const [selectedItem, setSelectedItem] = useState(null);
   const items = [
     { label: "Bank", url: "/master/finance/bank" },
     { label: "Edit Account details" },
   ];
-  const statusBodyTemplate = (rowData) => {
-    return (
-      <div
-        style={{
-          backgroundColor: rowData.status === "Pending" ? "#E2F6EF" : "#FFE5B4",
-          color: rowData.status === "Pending" ? "#29CE00" : "#FFA800",
-        }}
-        className="statuslable_container"
-      >
-        {rowData.status}
-      </div>
-    );
-  };
 
   const template2 = {
     layout:
@@ -109,10 +86,6 @@ function EditAccountDetail({ action }) {
       );
     },
   };
-  const Type = [
-    { name: "Savings", code: "NY" },
-    { name: "Current", code: "RM" },
-  ];
 
   const headerStyle = {
     // width: '12rem',
@@ -124,17 +97,6 @@ function EditAccountDetail({ action }) {
     color: "#000",
     border: "none",
   };
-  const status = [
-    { name: "Active", code: "NY" },
-    { name: "Deactive", code: "RM" },
-  ];
-  const item = [
-    { name: "New York", code: "NY" },
-    { name: "Rome", code: "RM" },
-    { name: "London", code: "LDN" },
-    { name: "Istanbul", code: "IST" },
-    { name: "Paris", code: "PRS" },
-  ];
   const home = { label: "Master" };
   const handleSubmit = (value) => {
     dispatch(postPatchAccountDetailEdit(value));
@@ -173,16 +135,6 @@ function EditAccountDetail({ action }) {
     setFormikValues();
   }, [AccountPatchDetailView]);
 
-  const handlesavebutton = () => {
-    setVisible(false);
-    dispatch(postChequeDataMiddleWare(formik.values));
-  };
-  const handleEditbutton = () => {
-    setVisibleEdit(false);
-  };
-  const handleNavigation = () => {
-    navigate("/master/finance/bank/accountdataview");
-  };
 
   // const handleNavigation = () => {
   // }

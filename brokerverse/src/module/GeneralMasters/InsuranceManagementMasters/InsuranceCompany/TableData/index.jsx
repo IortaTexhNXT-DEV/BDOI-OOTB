@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import {
@@ -32,7 +31,7 @@ const TableData = ({ navigate }) => {
   useEffect(() => {
     dispatch(getInsuranceCompanyListMiddleWare());
   }, [dispatch]);
-  const { InsuranceCompanyList, loading, SearchTableList } = useSelector(
+  const { InsuranceCompanyList, SearchTableList } = useSelector(
     ({ insuranceCompanyReducers }) => {
       return {
         loading: insuranceCompanyReducers?.loading,

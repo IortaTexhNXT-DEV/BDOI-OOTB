@@ -1,10 +1,9 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import CustomToast from "../../../../components/Toast";
@@ -14,7 +13,7 @@ import { Card } from "primereact/card";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getAddReplenishTableMiddleware } from "../store/pettyCashReplenishMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
@@ -39,14 +38,6 @@ const AddReplenish = () => {
   const dispatch = useDispatch();
   const toastRef = useRef(null);
 
-  const { ReplenishList, loading } = useSelector(
-    ({ pettyCashReplenishReducer }) => {
-      return {
-        loading: pettyCashReplenishReducer?.loading,
-        ReplenishList: pettyCashReplenishReducer?.ReplenishList,
-      };
-    }
-  );
   const items = [
     {
       label: "Petty Cash",
@@ -62,7 +53,7 @@ const AddReplenish = () => {
   const handleBack = () => {
     navigate("/accounts/pettycash/replenish");
   };
-  const { funds, banks, subAccounts, transactionCodes, branches, departments } =
+  const { funds, banks, subAccounts } =
     usePettyCashOptions();
   const handleSubmit = async (values) => {
     const result = await dispatch(getAddReplenishTableMiddleware(values));
@@ -94,14 +85,8 @@ const AddReplenish = () => {
       handleSubmit(values);
     },
   });
-  const handleTrans = (option) =>
-    formik.setFieldValue("TransactionDescription", describe(transactionCodes, option?.code));
   const handleBankcode = (option) =>
     formik.setFieldValue("BankAccountName", describe(banks, option?.code));
-  const handleBranch = (option) =>
-    formik.setFieldValue("BranchDescription", describe(branches, option?.code));
-  const handleDepart = (option) =>
-    formik.setFieldValue("DepartmentDescription", describe(departments, option?.code));
   const handleSubAccount = (option) =>
     formik.setFieldValue("SubAccountDescription", describe(subAccounts, option?.code));
   const handlePettyCashDescribtion = (fund) =>

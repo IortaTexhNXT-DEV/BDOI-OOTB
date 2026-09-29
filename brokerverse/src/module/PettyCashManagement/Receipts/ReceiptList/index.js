@@ -1,4 +1,3 @@
-import React from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -11,7 +10,7 @@ import { useSelector } from "react-redux";
 
 const ReceiptList = () => {
   const navigate = useNavigate();
-  const { ViewReceipt, loading,AddReceiptTable } = useSelector(
+  const { ViewReceipt, AddReceiptTable } = useSelector(
     ({ pettyCashReceiptsReducer }) => {
       return {
         loading: pettyCashReceiptsReducer?.loading,

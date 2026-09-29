@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getHirarchyListMiddleware, getHirarchyListByIdMiddleware, postAddHirarchyMiddleware, patchHirarchyEditMiddleware, getSearchHirarchyMiddleware, getHierarchyViewMiddleWare, getHierarchyPatchMiddleWare } from "./hierarchyMiddleware";
-import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",

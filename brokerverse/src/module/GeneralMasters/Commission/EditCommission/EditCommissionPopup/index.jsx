@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
@@ -8,22 +8,17 @@ import DropDowns from "../../../../../components/DropDowns";
 import InputField from "../../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import SvgModalClose from "../../../../../assets/icons/SvgNodalClose";
 import { useDispatch, useSelector } from "react-redux";
 import { addLevelPatchEditPopup } from "../../store/commissionMiddleWare";
 const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) => {
     const { t } = useTranslation();
-    const { loading, popupEditData } = useSelector(({ commissionMianReducers }) => {
+    const { popupEditData } = useSelector(({ commissionMianReducers }) => {
         return {
             loading: commissionMianReducers?.loading,
             popupEditData: commissionMianReducers?.popupEditData
         };
     });
 
-    const codeOptionsMain = [
-        { label: "Option 1", value: "Main00123" },
-        { label: "Option 2", value: "Main00124" },
-    ];
 
     const customValidation = (values) => {
         const errors = {};

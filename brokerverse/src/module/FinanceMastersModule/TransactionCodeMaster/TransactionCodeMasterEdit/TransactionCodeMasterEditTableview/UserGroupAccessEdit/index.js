@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
@@ -17,16 +16,12 @@ import {
   getUserEditData,
   postAddUserGroupAccess,
 } from "../../../store/transactionCodeMasterMiddleware";
-import SvgEditicon from "../../../../../../assets/icons/SvgEdit";
 import UserGroupAccessEditPopup from "./UserGroupAccessEditPopup";
 import SvgEditIcon from "../../../../../../assets/icons/SvgEditIcon";
 
 const UserGroupAccess = () => {
   const {
-    TransactioncodeListsearch,
     UserGroupAccessList,
-    loading,
-    getUserAccessData,
   } = useSelector(({ transactionCodeMasterReducer }) => {
     return {
       loading: transactionCodeMasterReducer?.loading,
@@ -35,7 +30,7 @@ const UserGroupAccess = () => {
       getUserAccessData: transactionCodeMasterReducer?.getUserAccessData,
     };
   });
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
@@ -46,7 +41,6 @@ const UserGroupAccess = () => {
     setShowEdit(true);
     dispatch(getUserEditData(columnData));
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -141,8 +135,6 @@ const UserGroupAccess = () => {
     // onSubmit: handleSubmit
   });
 
-  const handleView = (rowData) => {
-  };
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -152,9 +144,6 @@ const UserGroupAccess = () => {
     border: "none",
   };
 
-  const handleSave = () => {
-    setShow(false);
-  };
   return (
     <div className="transactioncode__master__tableedit_UserGroupAccess">
       {/* <Card className="mt-1"> */}

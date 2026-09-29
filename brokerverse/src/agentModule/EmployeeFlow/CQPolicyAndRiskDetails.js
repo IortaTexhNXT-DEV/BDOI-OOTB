@@ -1,7 +1,7 @@
 import { Card } from "primereact/card";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { DataTable } from 'primereact/datatable';
@@ -23,7 +23,6 @@ import DropdownField from "../component/DropdwonField";
 import DialogList from "../quoteModule/policyDetails/policyDetailsCard/DialogList";
 import { Checkbox } from "primereact/checkbox";
 import InputTextField from "../component/inputText";
-import SvgUploadArrowIcon from "../../assets/agentIcon/SvgUpload";
 import { postPolicyDetailsMiddleware } from "../quoteModule/policyDetails/store/policyDetailsMiddleware";
 import './index.scss'
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
@@ -32,7 +31,6 @@ import ArrowUpToLineIcon from "./uploadIcon";
 const CQPolicyAndRiskDetails = ({ action, flow, }) => {
     const InsuranceCompanyOptions = useInsuranceCompanyOptions();
     const { t } = useTranslation();
-    const { type } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const initialValue = {
@@ -114,10 +112,9 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
     {/* //changes */ }
     const [checked, setChecked] = useState(false);
     const [paychecked, setPayChecked] = useState(false);
-    const [products, setProducts] = useState([]);
     const [visible, setVisible] = useState(false);
 
-    const { TableList, leadtabledata, loading } = useSelector(
+    const { TableList, leadtabledata } = useSelector(
         ({ policydetailreducer, leadReducers }) => {
             return {
                 loading: policydetailreducer?.loading,

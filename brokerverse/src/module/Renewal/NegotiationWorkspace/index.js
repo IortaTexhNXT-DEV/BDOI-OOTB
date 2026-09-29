@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,14 +11,13 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { Timeline } from "primereact/timeline";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
 import { Badge } from "primereact/badge";
-import { Chip } from "primereact/chip";
 import { FileUpload } from "primereact/fileupload";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Splitter, SplitterPanel } from "primereact/splitter";
@@ -33,8 +31,6 @@ import "./index.scss";
 const NegotiationWorkspace = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode, locale } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [agentFilter, setAgentFilter] = useState("All");
@@ -371,57 +367,8 @@ const NegotiationWorkspace = () => {
     return <Tag value={rowData.currentStage} severity={getSeverity(rowData.currentStage)} />;
   };
 
-  const premiumBodyTemplate = (rowData) => {
-    const current = rowData.currentPremium || 0;
-    const quoted = rowData.quotedPremium || current;
-    const change = quoted > 0 ? ((quoted - current) / current) * 100 : 0;
 
-    return (
-      <div className="premium-cell">
-        <div className="premium-current">
-          {formatCurrency(current)}
-        </div>
-        {quoted !== current && (
-          <div className={`premium-change ${change > 0 ? 'increase' : 'decrease'}`}>
-            {change > 0 ? '+' : ''}{change.toFixed(1)}%
-          </div>
-        )}
-      </div>
-    );
-  };
 
-  const lastUpdateBodyTemplate = (rowData) => {
-    const daysSince = Math.floor((new Date() - new Date(rowData.lastUpdated)) / (1000 * 60 * 60 * 24));
-
-    return (
-      <div className="last-update-cell">
-        <span>{formatAppDate(rowData.lastUpdated)}</span>
-        <small>({daysSince} days ago)</small>
-      </div>
-    );
-  };
-
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button
-          icon="pi pi-eye"
-          className="p-button-text"
-          onClick={() => handleSelectNegotiation(rowData)}
-          tooltip="View Details"
-        />
-        <Button
-          icon="pi pi-comments"
-          className="p-button-text"
-          onClick={() => {
-            setSelectedNegotiation(rowData);
-            handleSendCommunication();
-          }}
-          tooltip="Send Communication"
-        />
-      </div>
-    );
-  };
 
   const policyLinkTemplate = (rowData) => {
     return (

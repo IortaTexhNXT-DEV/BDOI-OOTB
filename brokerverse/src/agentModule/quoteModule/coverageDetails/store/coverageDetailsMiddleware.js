@@ -5,39 +5,10 @@ import {
 } from "../../../../redux/agentActionTypes";
 import {
   GET_POLICY_RENEWAL_COVERAGE,
-  GET_POLICY_RENEWAL_COVERAGE_FAILURE,
-  GET_POLICY_RENEWAL_COVERAGE_SUCCESS,
 } from "../../../../redux/actionTypes";
 import policyService from "../../../../services/policyService";
 
-const toNumberOrNull = (value) => {
-  if (value === null || value === undefined) {
-    return null;
-  }
 
-  if (typeof value === "number") {
-    return Number.isNaN(value) ? null : value;
-  }
-
-  if (typeof value === "string") {
-    const normalized = value.replace(/[^0-9.-]/g, "");
-    if (!normalized) {
-      return null;
-    }
-
-    const parsed = parseFloat(normalized);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
-};
-
-const filterNullish = (obj = {}) =>
-  Object.fromEntries(
-    Object.entries(obj).filter(
-      ([, value]) => value !== null && value !== undefined
-    )
-  );
 
 const resolveRenewalRecordId = (record = {}) =>
   record?.id || record?._id || record?.renewalId || record?.renewalID || null;

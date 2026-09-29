@@ -162,14 +162,6 @@ const AdjustmentMaster = () => {
     );
   };
 
-  const checkboxEditor = (options) => {
-    return (
-      <Checkbox
-        checked={options.value}
-        onChange={(e) => options.editorCallback(e.checked)}
-      />
-    );
-  };
 
   const numberEditor = (options) => {
     return (

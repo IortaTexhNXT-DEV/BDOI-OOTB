@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 import SvgRightarrow from "../../assets/agentIcon/SvgRightArrow";
 import ShareOption from "../quoteModule/quoteDetailView/Modal/ShareOption";
@@ -12,33 +11,11 @@ import ShareOption from "../quoteModule/quoteDetailView/Modal/ShareOption";
 const CQquoteDetails = ({ action }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state } = useLocation();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const { PolicyDetails, loading } = useSelector(({ policyDetailsReducer }) => {
-    return {
-      loading: policyDetailsReducer?.loading,
-      PolicyDetails: policyDetailsReducer?.PolicyDetails,
-    };
-  });
 
-  const { CoverageDetails } = useSelector(({ coverageDetailsReducer }) => {
-    return {
-      CoverageDetails: coverageDetailsReducer?.CoverageDetails,
-    };
-  });
 
-  const { OrderSummary } = useSelector(({ orderSummaryReducer }) => {
-    return {
-      OrderSummary: orderSummaryReducer?.OrderSummary,
-    };
-  });
 
-  const { createleaddata } = useSelector(({ leadReducer }) => {
-    return {
-      createleaddata: leadReducer?.createleaddata,
-    };
-  });
 
   const handleclick = () => {
     navigate('/agent/employee-benefit/policy-waiting-for-policy')
