@@ -9,6 +9,7 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('accounting.account.premium_receivable', '"1202001"', 'accounting', 'GL: Premiums receivable', 'string'),
  ('accounting.account.commission_receivable', '"1203001"', 'accounting', 'GL: Commission receivable from insurers (direct billed)', 'string'),
  ('accounting.account.agent_receivable', '"1204001"', 'accounting', 'GL: Receivable from agents (commission clawback)', 'string'),
+ ('accounting.account.insurer_refund_receivable', '"1203002"', 'accounting', 'GL: Refunds due from insurers (return premium on premium already remitted)', 'string'),
  ('accounting.account.employee_advances', '"1205001"', 'accounting', 'GL: Employee advances (petty cash returns)', 'string'),
  ('accounting.account.input_vat', '"1301001"', 'accounting', 'GL: Input VAT', 'string'),
  ('accounting.account.creditable_wht', '"1302001"', 'accounting', 'GL: Creditable withholding tax (BIR 2307) withheld by insurers on commission', 'string'),

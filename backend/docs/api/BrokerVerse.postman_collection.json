@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (704 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (708 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -975,7 +975,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientId\": \"cl_1\",\n      \"clientNumber\": \"CL-2026-00001\",\n      \"clientName\": \"Maria Santos\",\n      \"totalTransactions\": 5,\n      \"summary\": {\n        \"totalDebits\": 23725,\n        \"totalCredits\": 23725,\n        \"balance\": 0\n      },\n      \"transactions\": [\n        {\n          \"id\": \"101\",\n          \"transactionId\": \"jv_1\",\n          \"transactionCode\": \"JV-2026-00001\",\n          \"entryType\": \"PAYMENT_RECEIPT\",\n          \"debitCredit\": \"DEBIT\",\n          \"amount\": 11862.5,\n          \"accountCode\": \"1102001\",\n          \"accountName\": \"Cash in Bank – BDO Current\",\n          \"account\": {\n            \"accountCode\": \"1102001\",\n            \"accountName\": \"Cash in Bank – BDO Current\"\n          },\n          \"glCode\": \"1102001\",\n          \"documentDate\": \"2026-09-28\",\n          \"status\": \"Posted\",\n          \"motherPolicyId\": \"pol_1\",\n          \"motherPolicyNumber\": \"POL-2026-00001\",\n          \"clientId\": \"cl_1\",\n          \"client\": {\n            \"clientId\": \"CL-2026-00001\",\n            \"firstName\": \"Maria\",\n            \"lastName\": \"Santos\"\n          },\n          \"referenceType\": \"Receipt\",\n          \"referenceId\": \"or_1\"\n        }\n      ]\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"total\": 1,\n    \"totalPages\": 1\n  },\n  \"totals\": {\n    \"totalClients\": 1,\n    \"totalTransactions\": 5,\n    \"grandTotalDebits\": 23725,\n    \"grandTotalCredits\": 23725,\n    \"grandTotalBalance\": 0\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientId\": \"cl_1\",\n      \"clientNumber\": \"CL-2026-00001\",\n      \"clientName\": \"Maria Santos\",\n      \"totalTransactions\": 5,\n      \"summary\": {\n        \"totalDebits\": 23725,\n        \"totalCredits\": 23725,\n        \"balance\": 0\n      },\n      \"transactions\": [\n        {\n          \"id\": \"101\",\n          \"transactionId\": \"jv_1\",\n          \"transactionCode\": \"JV-2026-00001\",\n          \"entryType\": \"PAYMENT_RECEIPT\",\n          \"debitCredit\": \"DEBIT\",\n          \"amount\": 11862.5,\n          \"accountCode\": \"1102001\",\n          \"accountName\": \"Cash in Bank – Operating Account\",\n          \"account\": {\n            \"accountCode\": \"1102001\",\n            \"accountName\": \"Cash in Bank – Operating Account\"\n          },\n          \"glCode\": \"1102001\",\n          \"documentDate\": \"2026-09-28\",\n          \"status\": \"Posted\",\n          \"motherPolicyId\": \"pol_1\",\n          \"motherPolicyNumber\": \"POL-2026-00001\",\n          \"clientId\": \"cl_1\",\n          \"client\": {\n            \"clientId\": \"CL-2026-00001\",\n            \"firstName\": \"Maria\",\n            \"lastName\": \"Santos\"\n          },\n          \"referenceType\": \"Receipt\",\n          \"referenceId\": \"or_1\"\n        }\n      ]\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"total\": 1,\n    \"totalPages\": 1\n  },\n  \"totals\": {\n    \"totalClients\": 1,\n    \"totalTransactions\": 5,\n    \"grandTotalDebits\": 23725,\n    \"grandTotalCredits\": 23725,\n    \"grandTotalBalance\": 0\n  }\n}"
             }
           ]
         },
@@ -1042,7 +1042,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\",\n      \"runningBalance\": 11862.5\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 0,\n    \"balance\": 11862.5\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – Operating Account\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\",\n      \"runningBalance\": 11862.5\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 0,\n    \"balance\": 11862.5\n  }\n}"
             }
           ]
         },
@@ -1172,7 +1172,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"mt_1\",\n      \"matchedAmount\": 11862.5,\n      \"matchedDate\": \"2026-09-28T08:00:00Z\",\n      \"debitTransaction\": {\n        \"id\": \"101\",\n        \"transactionId\": \"jv_1\",\n        \"transactionCode\": \"JV-2026-00001\",\n        \"entryType\": \"PAYMENT_RECEIPT\",\n        \"debitCredit\": \"DEBIT\",\n        \"amount\": 11862.5,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\",\n        \"account\": {\n          \"accountCode\": \"1102001\",\n          \"accountName\": \"Cash in Bank – BDO Current\"\n        },\n        \"glCode\": \"1102001\",\n        \"documentDate\": \"2026-09-28\",\n        \"status\": \"Posted\",\n        \"motherPolicyId\": \"pol_1\",\n        \"motherPolicyNumber\": \"POL-2026-00001\",\n        \"clientId\": \"cl_1\",\n        \"client\": {\n          \"clientId\": \"CL-2026-00001\",\n          \"firstName\": \"Maria\",\n          \"lastName\": \"Santos\"\n        },\n        \"referenceType\": \"Receipt\",\n        \"referenceId\": \"or_1\"\n      },\n      \"creditTransaction\": {\n        \"id\": \"102\",\n        \"transactionId\": \"jv_1\",\n        \"transactionCode\": \"JV-2026-00001\",\n        \"entryType\": \"PAYMENT_RECEIPT\",\n        \"debitCredit\": \"CREDIT\",\n        \"amount\": 11862.5,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\",\n        \"account\": {\n          \"accountCode\": \"1102001\",\n          \"accountName\": \"Cash in Bank – BDO Current\"\n        },\n        \"glCode\": \"1102001\",\n        \"documentDate\": \"2026-09-28\",\n        \"status\": \"Posted\",\n        \"motherPolicyId\": \"pol_1\",\n        \"motherPolicyNumber\": \"POL-2026-00001\",\n        \"clientId\": \"cl_1\",\n        \"client\": {\n          \"clientId\": \"CL-2026-00001\",\n          \"firstName\": \"Maria\",\n          \"lastName\": \"Santos\"\n        },\n        \"referenceType\": \"Receipt\",\n        \"referenceId\": \"or_1\"\n      }\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"mt_1\",\n      \"matchedAmount\": 11862.5,\n      \"matchedDate\": \"2026-09-28T08:00:00Z\",\n      \"debitTransaction\": {\n        \"id\": \"101\",\n        \"transactionId\": \"jv_1\",\n        \"transactionCode\": \"JV-2026-00001\",\n        \"entryType\": \"PAYMENT_RECEIPT\",\n        \"debitCredit\": \"DEBIT\",\n        \"amount\": 11862.5,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\",\n        \"account\": {\n          \"accountCode\": \"1102001\",\n          \"accountName\": \"Cash in Bank – Operating Account\"\n        },\n        \"glCode\": \"1102001\",\n        \"documentDate\": \"2026-09-28\",\n        \"status\": \"Posted\",\n        \"motherPolicyId\": \"pol_1\",\n        \"motherPolicyNumber\": \"POL-2026-00001\",\n        \"clientId\": \"cl_1\",\n        \"client\": {\n          \"clientId\": \"CL-2026-00001\",\n          \"firstName\": \"Maria\",\n          \"lastName\": \"Santos\"\n        },\n        \"referenceType\": \"Receipt\",\n        \"referenceId\": \"or_1\"\n      },\n      \"creditTransaction\": {\n        \"id\": \"102\",\n        \"transactionId\": \"jv_1\",\n        \"transactionCode\": \"JV-2026-00001\",\n        \"entryType\": \"PAYMENT_RECEIPT\",\n        \"debitCredit\": \"CREDIT\",\n        \"amount\": 11862.5,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\",\n        \"account\": {\n          \"accountCode\": \"1102001\",\n          \"accountName\": \"Cash in Bank – Operating Account\"\n        },\n        \"glCode\": \"1102001\",\n        \"documentDate\": \"2026-09-28\",\n        \"status\": \"Posted\",\n        \"motherPolicyId\": \"pol_1\",\n        \"motherPolicyNumber\": \"POL-2026-00001\",\n        \"clientId\": \"cl_1\",\n        \"client\": {\n          \"clientId\": \"CL-2026-00001\",\n          \"firstName\": \"Maria\",\n          \"lastName\": \"Santos\"\n        },\n        \"referenceType\": \"Receipt\",\n        \"referenceId\": \"or_1\"\n      }\n    }\n  ]\n}"
             }
           ]
         },
@@ -1259,7 +1259,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – Operating Account\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
             }
           ]
         },
@@ -1464,7 +1464,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\",\n      \"originalAmount\": 11862.5\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – Operating Account\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\",\n      \"originalAmount\": 11862.5\n    }\n  ]\n}"
             }
           ]
         },
@@ -1944,7 +1944,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false,\n  \"participants\": []\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – Operating Account\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false,\n  \"participants\": []\n}"
             }
           ]
         },
@@ -2039,7 +2039,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false,\n  \"participants\": []\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – Operating Account\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false,\n  \"participants\": []\n}"
             }
           ]
         },
@@ -2380,7 +2380,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-09-30\",\n    \"rows\": [\n      {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\",\n        \"debit\": 11862.5,\n        \"credit\": 0\n      }\n    ],\n    \"totals\": {\n      \"debit\": 11862.5,\n      \"credit\": 11862.5,\n      \"balanced\": true\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-09-30\",\n    \"rows\": [\n      {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\",\n        \"debit\": 11862.5,\n        \"credit\": 0\n      }\n    ],\n    \"totals\": {\n      \"debit\": 11862.5,\n      \"credit\": 11862.5,\n      \"balanced\": true\n    }\n  }\n}"
             }
           ]
         },
@@ -8515,6 +8515,261 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Claim updated\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Pending\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/settlement-cash",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "settlement-cash"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts\n\nFront-end touchpoint: Operations > Claims > Claim settlement\n\nAccess: read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/settlement-cash",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "settlement-cash"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts\n\nFront-end touchpoint: Operations > Claims > Claim settlement\n\nAccess: read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"settlementAmount\": 75000,\n    \"paidThroughBroker\": true,\n    \"canRecord\": true,\n    \"claimant\": \"Maria Santos\",\n    \"insurers\": [\n      {\n        \"insurerId\": 1,\n        \"insurer\": \"Malayan Insurance Co., Inc.\",\n        \"share\": 100,\n        \"recoverable\": 75000,\n        \"received\": 75000,\n        \"outstanding\": 0\n      }\n    ],\n    \"totalRecoverable\": 75000,\n    \"totalReceived\": 75000,\n    \"paidToClaimant\": 0,\n    \"payableToClaimant\": 75000,\n    \"movements\": [\n      {\n        \"id\": 1,\n        \"kind\": \"funds-received\",\n        \"insurer\": \"Malayan Insurance Co., Inc.\",\n        \"amount\": 75000,\n        \"date\": \"2026-09-29\",\n        \"bankAccount\": \"ACC-OPS-001\",\n        \"reference\": \"RA-8812\",\n        \"journalNumber\": \"JV-2026-00140\"\n      }\n    ],\n    \"bankAccounts\": [\n      {\n        \"code\": \"ACC-OPS-001\",\n        \"name\": \"Operating Account\",\n        \"glAccount\": \"1102001\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/settlement-cash/funds-received",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "settlement-cash",
+                "funds-received"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-09-29\",\n  \"reference\": \"RA-8812\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/settlement-cash/funds-received",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "settlement-cash",
+                    "funds-received"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-09-29\",\n  \"reference\": \"RA-8812\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"journalNumber\": \"JV-2026-00140\",\n    \"position\": {\n      \"claimNumber\": \"CLM-2026-00001\",\n      \"settlementAmount\": 75000,\n      \"paidThroughBroker\": true,\n      \"canRecord\": true,\n      \"claimant\": \"Maria Santos\",\n      \"insurers\": [\n        {\n          \"insurerId\": 1,\n          \"insurer\": \"Malayan Insurance Co., Inc.\",\n          \"share\": 100,\n          \"recoverable\": 75000,\n          \"received\": 75000,\n          \"outstanding\": 0\n        }\n      ],\n      \"totalRecoverable\": 75000,\n      \"totalReceived\": 75000,\n      \"paidToClaimant\": 0,\n      \"payableToClaimant\": 75000,\n      \"movements\": [\n        {\n          \"id\": 1,\n          \"kind\": \"funds-received\",\n          \"insurer\": \"Malayan Insurance Co., Inc.\",\n          \"amount\": 75000,\n          \"date\": \"2026-09-29\",\n          \"bankAccount\": \"ACC-OPS-001\",\n          \"reference\": \"RA-8812\",\n          \"journalNumber\": \"JV-2026-00140\"\n        }\n      ],\n      \"bankAccounts\": [\n        {\n          \"code\": \"ACC-OPS-001\",\n          \"name\": \"Operating Account\",\n          \"glAccount\": \"1102001\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the payment of the settlement to the claimant by voucher / cheque or transfer (posting rule claim.paid_to_claimant; not more than the amount still payable)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/settlement-cash/paid-to-claimant",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "settlement-cash",
+                "paid-to-claimant"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the payment of the settlement to the claimant by voucher / cheque or transfer (posting rule claim.paid_to_claimant; not more than the amount still payable)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Pay claimant\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"paymentMode\": \"check\",\n  \"reference\": \"PV-2026-00031 / chq 000512\",\n  \"payee\": \"Maria Santos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/settlement-cash/paid-to-claimant",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "settlement-cash",
+                    "paid-to-claimant"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the payment of the settlement to the claimant by voucher / cheque or transfer (posting rule claim.paid_to_claimant; not more than the amount still payable)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Pay claimant\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"paymentMode\": \"check\",\n  \"reference\": \"PV-2026-00031 / chq 000512\",\n  \"payee\": \"Maria Santos\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"journalNumber\": \"JV-2026-00141\",\n    \"position\": {\n      \"claimNumber\": \"CLM-2026-00001\",\n      \"settlementAmount\": 75000,\n      \"paidThroughBroker\": true,\n      \"canRecord\": true,\n      \"claimant\": \"Maria Santos\",\n      \"insurers\": [\n        {\n          \"insurerId\": 1,\n          \"insurer\": \"Malayan Insurance Co., Inc.\",\n          \"share\": 100,\n          \"recoverable\": 75000,\n          \"received\": 75000,\n          \"outstanding\": 0\n        }\n      ],\n      \"totalRecoverable\": 75000,\n      \"totalReceived\": 75000,\n      \"paidToClaimant\": 0,\n      \"payableToClaimant\": 75000,\n      \"movements\": [\n        {\n          \"id\": 1,\n          \"kind\": \"funds-received\",\n          \"insurer\": \"Malayan Insurance Co., Inc.\",\n          \"amount\": 75000,\n          \"date\": \"2026-09-29\",\n          \"bankAccount\": \"ACC-OPS-001\",\n          \"reference\": \"RA-8812\",\n          \"journalNumber\": \"JV-2026-00140\"\n        }\n      ],\n      \"bankAccounts\": [\n        {\n          \"code\": \"ACC-OPS-001\",\n          \"name\": \"Operating Account\",\n          \"glAccount\": \"1102001\"\n        }\n      ]\n    }\n  }\n}"
             }
           ]
         },
@@ -18099,7 +18354,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"agentName\": \"Juan Dela Cruz\",\n    \"period\": \"August 2026\",\n    \"totalEarnings\": 13500,\n    \"ytdEarnings\": 38500,\n    \"pendingPayment\": 13500,\n    \"programBreakdown\": [],\n    \"monthlyTrend\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"agentName\": \"Juan Dela Cruz\",\n    \"period\": \"August 2026\",\n    \"totalEarnings\": 13500,\n    \"ytdEarnings\": 38500,\n    \"pendingPayment\": 13500,\n    \"pendingPeriods\": [\n      \"August 2026\"\n    ],\n    \"lastPaymentPeriods\": [\n      \"July 2026\"\n    ],\n    \"contact\": {\n      \"companyName\": \"BrokerVerse Insurance Brokerage\",\n      \"email\": \"info@brokerverse.ph\",\n      \"phone\": \"+63 2 8888 0000\"\n    },\n    \"programBreakdown\": [],\n    \"monthlyTrend\": []\n  }\n}"
             }
           ]
         }
@@ -30799,7 +31054,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"eventCode\": \"receipt.apply\",\n    \"description\": \"Premium collected – POL-SAMPLE (OR-SAMPLE)\",\n    \"balanced\": true,\n    \"totalDebit\": 11200,\n    \"totalCredit\": 11200,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account (BDO Current)\",\n        \"debit\": 11200,\n        \"credit\": 0,\n        \"memo\": \"Premium collection\"\n      },\n      {\n        \"lineNo\": 2,\n        \"accountCode\": \"1202001\",\n        \"accountName\": \"Premiums Receivable – Direct Clients\",\n        \"debit\": 0,\n        \"credit\": 11200,\n        \"memo\": \"Settles INV-SAMPLE\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"eventCode\": \"receipt.apply\",\n    \"description\": \"Premium collected – POL-SAMPLE (OR-SAMPLE)\",\n    \"balanced\": true,\n    \"totalDebit\": 11200,\n    \"totalCredit\": 11200,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account\",\n        \"debit\": 11200,\n        \"credit\": 0,\n        \"memo\": \"Premium collection\"\n      },\n      {\n        \"lineNo\": 2,\n        \"accountCode\": \"1202001\",\n        \"accountName\": \"Premiums Receivable – Direct Clients\",\n        \"debit\": 0,\n        \"credit\": 11200,\n        \"memo\": \"Settles INV-SAMPLE\"\n      }\n    ]\n  }\n}"
             }
           ]
         }
@@ -45643,6 +45898,75 @@
           ]
         },
         {
+          "name": "Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/insurer-credits?insurer=MALAYAN&status=open",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "insurer-credits"
+              ],
+              "query": [
+                {
+                  "key": "insurer",
+                  "value": "MALAYAN"
+                },
+                {
+                  "key": "status",
+                  "value": "open"
+                }
+              ]
+            },
+            "description": "Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer\n\nFront-end touchpoint: Accounts > Remittance > Settlement; Accounts > Remittance > Tracking\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/insurer-credits?insurer=MALAYAN&status=open",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "insurer-credits"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurer",
+                      "value": "MALAYAN"
+                    },
+                    {
+                      "key": "status",
+                      "value": "open"
+                    }
+                  ]
+                },
+                "description": "Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer\n\nFront-end touchpoint: Accounts > Remittance > Settlement; Accounts > Remittance > Tracking\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"openBalance\": 970,\n    \"items\": [\n      {\n        \"id\": 1,\n        \"insurer\": \"Malayan Insurance Co., Inc.\",\n        \"policyNumber\": \"POL-2026-00001\",\n        \"reference\": \"END-2026-00003\",\n        \"kind\": \"return-premium\",\n        \"amount\": 970,\n        \"balance\": 970,\n        \"status\": \"open\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type)",
           "request": {
             "method": "GET",
@@ -51187,7 +51511,7 @@
       "name": "Schedules",
       "item": [
         {
-          "name": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)",
+          "name": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)",
           "request": {
             "method": "GET",
             "header": [],
@@ -51200,7 +51524,7 @@
                 "schedules"
               ]
             },
-            "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user"
+            "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -51217,7 +51541,7 @@
                     "schedules"
                   ]
                 },
-                "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user"
+                "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -51229,7 +51553,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"renewal-notices\",\n      \"cron\": \"0 6 * * *\",\n      \"enabled\": true,\n      \"lastStatus\": \"success\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"timeZone\": \"Asia/Manila\",\n  \"data\": [\n    {\n      \"code\": \"renewal-notices\",\n      \"cron\": \"0 6 * * *\",\n      \"enabled\": true,\n      \"lastStatus\": \"success\",\n      \"timeZone\": \"Asia/Manila\",\n      \"nextRunAt\": \"2026-01-02T22:00:00.000Z\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -51732,12 +52056,12 @@
           ]
         },
         {
-          "name": "Audit trail (filter by entity / entityId / user)",
+          "name": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&limit=100",
+              "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&limit=100",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -51755,12 +52079,24 @@
                   "value": "pol_1"
                 },
                 {
+                  "key": "username",
+                  "value": "BrokerVerse"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
                   "key": "limit",
                   "value": "100"
                 }
               ]
             },
-            "description": "Audit trail (filter by entity / entityId / user)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit"
+            "description": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit"
           },
           "response": [
             {
@@ -51769,7 +52105,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&limit=100",
+                  "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&limit=100",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -51787,12 +52123,24 @@
                       "value": "pol_1"
                     },
                     {
+                      "key": "username",
+                      "value": "BrokerVerse"
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-09-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    },
+                    {
                       "key": "limit",
                       "value": "100"
                     }
                   ]
                 },
-                "description": "Audit trail (filter by entity / entityId / user)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit"
+                "description": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit"
               },
               "status": "OK",
               "code": 200,
@@ -51912,7 +52260,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/BDO_insure_logo.png.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"bdo\",\n        \"label\": \"BDO\",\n        \"url\": \"/BDO_insure_logo.png.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -51987,7 +52335,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/BDO_insure_logo.png.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"bdo\",\n        \"label\": \"BDO\",\n        \"url\": \"/BDO_insure_logo.png.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -52202,7 +52550,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/BDO_insure_logo.png.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"bdo\",\n        \"label\": \"BDO\",\n        \"url\": \"/BDO_insure_logo.png.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -52267,7 +52615,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/BDO_insure_logo.png.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"bdo\",\n        \"label\": \"BDO\",\n        \"url\": \"/BDO_insure_logo.png.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -52360,7 +52708,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/BDO_insure_logo.png.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"bdo\",\n        \"label\": \"BDO\",\n        \"url\": \"/BDO_insure_logo.png.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         }

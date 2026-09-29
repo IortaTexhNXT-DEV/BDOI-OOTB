@@ -52,6 +52,7 @@ const SettlementProcessing = () => {
   const [selectedPolicies, setSelectedPolicies] = useState([]);
   const [addPolicyDialog, setAddPolicyDialog] = useState(false);
   const [availablePolicies, setAvailablePolicies] = useState([]);
+  const [insurerCredits, setInsurerCredits] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [approvalResult, setApprovalResult] = useState(null);
   const [workflowHistory, setWorkflowHistory] = useState([]);
@@ -79,6 +80,7 @@ const SettlementProcessing = () => {
     if (!insurerCode) return;
     try {
       setAvailablePolicies(await remittanceService.settlementPolicies(insurerCode));
+      setInsurerCredits(await remittanceService.insurerCredits(insurerCode).catch(() => null));
     } catch (e) {
       showError(toast, e);
     }
@@ -417,6 +419,17 @@ const SettlementProcessing = () => {
               <TabPanel header={t("remittance.settlementDetails")}>
                 <div className="tab-content">
                   <div className="section-title">{t("remittance.insurerInformation")}</div>
+                  {insurerCredits?.openBalance > 0 && (
+                    <div className="p-3 mb-3 border-round surface-100">
+                      <b>{t("followUps.refundsDueFromInsurer", "Refunds due from this insurer")}: {formatCurrency(insurerCredits.openBalance)}</b>
+                      <div className="text-sm mt-1">{t("followUps.refundsNettedNote", "Return premium on premium already remitted. It is deducted from the next premium remittance voucher to the insurer.")}</div>
+                      <ul className="mt-2 mb-0">
+                        {insurerCredits.items.map((c) => (
+                          <li key={c.id}>{c.policyNumber} · {c.reference} · {formatCurrency(c.balance)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <div className="form-grid">
                     <div className="form-field">
                       <label htmlFor="insurerCode" className="required">{t("remittance.insurerCode")}</label>

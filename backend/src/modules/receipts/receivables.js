@@ -309,8 +309,11 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
     refundPayable = await createInvoiceList(db, { customerCode: policy.client_code, policyId: policy.id, payeeType: 'Customer', payables: refund, outstanding: refund, lcAmount: refund,
       balAmount: refund, totalAmount: refund, isInvoicePaid: true, source: kind }, user);
   }
+  // premium the client paid and the broker already remitted: the insurers owe their share back (netted against the next remittance)
+  const { raiseInsurerRefunds } = await import('../remittance/insurerCredits.js');
+  const insurerRefunds = await raiseInsurerRefunds(db, { policy, split, gross, refund, kind, reference, endorsementId, user });
   return { journalId: jv.id, journalNumber: jv.jv_number, amount: gross, credited, refund, commission: split.commission, refundPayableId: refundPayable?.id || null,
-    credits: credits.map((c) => ({ billNumber: c.receivable.bill_number, amount: c.amount })) };
+    credits: credits.map((c) => ({ billNumber: c.receivable.bill_number, amount: c.amount })), insurerRefunds };
 }
 
 /** Undo every application of a receipt: reversing journals and restoring receivable balances. */

@@ -272,6 +272,74 @@ async function reverse(db, line, user) {
   await db.query('UPDATE commissions SET status = \'Reversed\', clawback = $3, reversed_at = now(), reversed_by = $2, updated_at = now() WHERE id = $1', [line.id, user.id, line.status === 'Paid']);
 }
 
+/**
+ * Return premium or cancellation: the referrers' comsub on the policy follows the premium. Each line is adjusted in
+ * proportion to the returned premium (ratio = returned gross premium / policy gross premium, capped at 1):
+ * - Accrued / Eligible (nothing posted): the line is reduced (reduction; a full return reverses it);
+ * - Approved, not on a payout voucher: the accrual is reversed for the ratio (posting rule commission.approve with a
+ *   negative amount: Dr Commission Payable / Cr Commission Expense) and the line reduced (reversal);
+ * - Paid: the ratio of the comsub is clawed back from the referrer (posting rule commission.clawback: Dr Receivable from
+ *   Agents / Cr Commission Expense); a full return marks the line Reversed as a clawback.
+ * Approved lines already on an unpaid payout voucher are skipped (reported) until the voucher is settled or edited.
+ * Every adjustment is recorded in commission_adjustments. Returns { ratio, adjustments: [...], skipped: [...] }.
+ */
+export async function adjustForReturnPremium(db, { policyId, returnedGross, baseGross = null, endorsementId = null, reference = null, user = null }) {
+  const p = (await db.query('SELECT id, policy_number, premium_total FROM policies WHERE id = $1', [policyId])).rows[0];
+  // baseGross: the policy's gross premium before this return (the endorsement updates premium_total first)
+  const base = Number(baseGross ?? p?.premium_total) || 0;
+  const returned = Math.abs(Number(returnedGross) || 0);
+  if (!p || !(base > 0) || !(returned > 0)) return { ratio: 0, adjustments: [], skipped: [] };
+  const ratio = Math.min(1, returned / base);
+  const full = ratio >= 0.9999;
+  const lines = (await db.query(`${LINE_SQL} WHERE c.policy_id = $1 AND c.referrer_id IS NOT NULL AND c.status IN ('Accrued', 'Eligible', 'Approved', 'Paid') ORDER BY c.chain_position FOR UPDATE OF c`, [p.id])).rows;
+  const adjustments = []; const skipped = [];
+  const record = async (line, kind, amount, withholding, journalId) => {
+    await db.query(`INSERT INTO commission_adjustments(commission_id, policy_id, endorsement_id, reference, kind, ratio, line_status, amount, withholding, journal_id, created_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [line.id, p.id, endorsementId, reference || p.policy_number, kind, round2(ratio * 1e6) / 1e6, line.status, amount, withholding, journalId, user?.id ?? null]);
+    adjustments.push({ commissionId: line.id, referrer: line.referrer_name, status: line.status, kind, amount, withholding, journalId });
+  };
+  // the line keeps (1 - ratio) of its comsub; a full return leaves nothing
+  const shrink = async (line) => {
+    const keep = full ? 0 : 1 - ratio;
+    await db.query(`UPDATE commissions SET amount = round(amount * $2, 2), withholding = round(withholding * $2, 2), net_amount = round(amount * $2, 2) - round(withholding * $2, 2),
+      comsub_fixed = round(comsub_fixed * $2, 2), net_premium = round(net_premium * $2, 2), basis_amount = round(basis_amount * $2, 2), updated_at = now() WHERE id = $1`, [line.id, keep]);
+  };
+  const vars = (line) => ({ referrerName: line.referrer_name, policyNumber: line.policy_number });
+  for (const line of lines) {
+    const amount = full ? Number(line.amount) : round2(Number(line.amount) * ratio);
+    const wht = full ? Number(line.withholding) : round2(Number(line.withholding) * ratio);
+    if (!(amount > 0)) continue;
+    if (line.status === 'Accrued' || line.status === 'Eligible') {
+      if (full) await db.query('UPDATE commissions SET status = \'Reversed\', clawback = false, reversed_at = now(), reversed_by = $2, updated_at = now() WHERE id = $1', [line.id, user?.id ?? null]);
+      else await shrink(line);
+      await record(line, 'reduction', amount, wht, null);
+    } else if (line.status === 'Approved') {
+      if (line.disbursement_id) { skipped.push({ commissionId: line.id, referrer: line.referrer_name, reason: `on payout voucher ${line.voucher_no || line.disbursement_id}` }); continue; }
+      const jv = await postEvent('commission.approve', {
+        source: 'commission', entryType: 'COMMISSION_ACCRUAL', referenceType: 'Commission', referenceId: line.id, policyId: line.policy_id, policyNumber: line.policy_number,
+        description: `Comsub reversed on return premium – ${line.referrer_name} – ${line.policy_number}${reference ? ` (${reference})` : ''}`, transactionCode: reference || line.policy_number,
+        amounts: { amount: -amount }, vars: vars(line),
+      }, { db, user });
+      if (full) await db.query('UPDATE commissions SET status = \'Reversed\', clawback = false, reversed_at = now(), reversed_by = $2, updated_at = now() WHERE id = $1', [line.id, user?.id ?? null]);
+      else await shrink(line);
+      await record(line, 'reversal', amount, wht, jv.id);
+    } else if (line.status === 'Paid') {
+      // a paid line keeps its amount; earlier clawbacks on it are deducted so a later cancellation claws back only the rest
+      const done = Number((await db.query('SELECT COALESCE(sum(amount), 0) AS a FROM commission_adjustments WHERE commission_id = $1 AND kind = \'clawback\'', [line.id])).rows[0].a);
+      const claw = round2(Math.min(full ? Number(line.amount) : amount, Number(line.amount) - done));
+      if (!(claw > 0)) continue;
+      const jv = await postEvent('commission.clawback', {
+        source: 'commission', entryType: 'COMMISSION_CLAWBACK', referenceType: 'Commission', referenceId: line.id, policyId: line.policy_id, policyNumber: line.policy_number,
+        description: `Comsub clawback on return premium – ${line.referrer_name} – ${line.policy_number}${reference ? ` (${reference})` : ''}`, transactionCode: reference || line.policy_number,
+        amounts: { amount: claw }, vars: vars(line),
+      }, { db, user });
+      if (full) await db.query('UPDATE commissions SET status = \'Reversed\', clawback = true, reversed_at = now(), reversed_by = $2, updated_at = now() WHERE id = $1', [line.id, user?.id ?? null]);
+      await record(line, 'clawback', claw, round2((claw / Number(line.amount)) * Number(line.withholding)), jv.id);
+    }
+  }
+  return { ratio: round2(ratio * 10000) / 10000, adjustments, skipped };
+}
+
 /** Line-level action dispatcher; returns { account, line }. */
 export async function lineAction(db, referrerId, lineId, action, user, body = {}) {
   const line = await getLine(db, referrerId, lineId, true);
