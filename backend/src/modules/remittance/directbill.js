@@ -25,7 +25,9 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/router.js';
-import { account, cashAccountFor, createJournal, reverseJournal } from '../accounting/lib/ledger.js';
+import { cashAccountFor, reverseJournal } from '../accounting/lib/ledger.js';
+import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
+import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { renderTemplate } from '../documents/common.js';
 import { formatMoney } from '../../lib/money.js';
@@ -82,41 +84,63 @@ async function policyRow(db, id) {
 /**
  * Book the commission due from the insurer for a direct-bill billing event. amount = premium of the event (negative for a
  * return premium); breakdown = { netPremium, commissionAmount }. Returns the direct_bill_items row, or null when the
- * commission is nil.
+ * commission is nil. On a co-insured policy one item (and journal) is booked per participating insurer for its share, so
+ * each insurer receives its own commission debit note; the lead insurer's item is returned with all of them in `items`.
  */
 export async function bookDirectBill(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, endorsementId = null, date = null, user = null }) {
   const p = await policyRow(db, policy.id || policy);
   const gross = round2(amount);
   if (!gross) throw badRequest('Premium amount is required to book direct-bill commission');
+  const bookedOn = isoDate(date) || (await today());
+  const parts = await policyParticipants(p.id, db);
+  if (!isCoInsured(parts)) {
+    return bookDirectBillShare(db, p, { insurerId: p.insurance_company_id, insurerName: p.insurer_name, commissionPolicy: p, gross, breakdown, coInsured: false },
+      { source, reference, endorsementId, bookedOn, user });
+  }
+  const w = parts.map((x) => x.share);
+  const grossS = allocate(gross, w);
+  const net = Math.abs(num(breakdown.netPremium));
+  const netS = net ? allocate(net, w) : parts.map(() => 0);
+  const explicit = breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null ? allocate(Math.abs(num(breakdown.commissionAmount)), w) : null;
+  const items = [];
+  for (const [i, part] of parts.entries()) {
+    let commissionAmount = explicit ? explicit[i] : undefined;
+    if (!explicit && part.commissionRate !== null) commissionAmount = round2(Math.min((netS[i] || Math.abs(grossS[i])) * part.commissionRate, Math.abs(grossS[i])));
+    const item = await bookDirectBillShare(db, p, {
+      insurerId: part.insurerId, insurerName: part.insurerName, gross: grossS[i], coInsured: true,
+      commissionPolicy: { ...p, insurer_commission_rate: part.insurerCommissionRate, commission_amount: part.commissionAmount, premium_total: part.premiumTotal },
+      breakdown: { netPremium: netS[i] || undefined, commissionAmount },
+    }, { source, reference, endorsementId, bookedOn, user });
+    if (item) items.push(item);
+  }
+  return items.length ? { ...items[0], items } : null;
+}
+
+async function bookDirectBillShare(db, p, { insurerId, insurerName, commissionPolicy, gross, breakdown, coInsured }, { source, reference, endorsementId, bookedOn, user }) {
   const sign = gross < 0 ? -1 : 1;
   const { commissionFor } = await import('../receipts/receivables.js');
   const net = Math.abs(num(breakdown.netPremium));
   const base = breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null
     ? round2(Math.abs(num(breakdown.commissionAmount)))
-    : await commissionFor(p, Math.abs(gross), { ...breakdown, netPremium: net }, source);
+    : await commissionFor(commissionPolicy, Math.abs(gross), { ...breakdown, netPremium: net }, source);
   if (!(base > 0)) return null;
   const tax = await commissionTax(base);
   const basis = net > 0 ? net : Math.abs(gross);
   const rate = basis ? Math.round((base / basis) * 1e6) / 1e6 : null;
-  const bookedOn = isoDate(date) || (await today());
   const it = (await db.query(`INSERT INTO direct_bill_items(policy_id, endorsement_id, insurance_company_id, source, reference, booked_on, currency, gross_premium, net_premium,
       commission_rate, commission, vat, amount, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
-  [p.id, endorsementId, p.insurance_company_id, source, reference || p.policy_number, bookedOn, p.currency || (await getSetting('currency.default', 'PHP')), gross,
+  [p.id, endorsementId, insurerId, source, reference || p.policy_number, bookedOn, p.currency || (await getSetting('currency.default', 'PHP')), gross,
     round2(sign * (net || Math.abs(gross))), rate, round2(sign * tax.commission), round2(sign * tax.vat), round2(sign * tax.amount), user?.id ?? null])).rows[0];
-  const insurer = p.insurer_name || 'insurer';
-  const receivable = { accountCode: await account('commission_receivable'), memo: `Commission due from ${insurer}` };
-  const income = { accountCode: await account('commission_income'), memo: 'Brokerage commission (direct bill)' };
-  const vat = { accountCode: await account('output_vat'), memo: 'Output VAT on commission' };
-  const lines = sign > 0
-    ? [{ ...receivable, debit: tax.amount }, { ...income, credit: tax.commission }, { ...vat, credit: tax.vat }]
-    : [{ ...income, debit: tax.commission }, { ...vat, debit: tax.vat }, { ...receivable, credit: tax.amount }];
-  const jv = await createJournal(db, {
-    source: 'booking', entryType: 'DIRECT_BILLED', entrySubType: String(source).toUpperCase(), transactionCode: reference || p.policy_number,
-    referenceType: 'Policy', referenceId: p.id, policyId: p.id, policyNumber: p.policy_number, date: bookedOn,
-    description: `${sign > 0 ? 'Direct-bill commission' : 'Direct-bill commission returned'} – ${p.policy_number}${reference && reference !== p.policy_number ? ` (${reference})` : ''} – ${insurer}`,
-    lines,
-  }, user);
+  const insurer = insurerName || 'insurer';
+  const refSuffix = reference && reference !== p.policy_number ? ` (${reference})` : '';
+  const jv = await postEvent(sign > 0 ? 'directbill.commission' : 'directbill.commission_return', {
+    source: 'booking', entryType: 'DIRECT_BILLED', entrySubType: coInsured ? 'CO_INSURANCE' : String(source).toUpperCase(), transactionCode: reference || p.policy_number,
+    referenceType: 'Policy', referenceId: p.id, policyId: p.id, policyNumber: p.policy_number, date: bookedOn, insuranceCompanyId: coInsured ? insurerId : null,
+    description: `${sign > 0 ? 'Direct-bill commission' : 'Direct-bill commission returned'} – ${p.policy_number}${refSuffix} – ${insurer}`,
+    amounts: { amount: tax.amount, commission: tax.commission, vat: tax.vat, gross_premium: Math.abs(gross) },
+    vars: { policyNumber: p.policy_number, referenceSuffix: refSuffix, insurer },
+  }, { db, user });
   await db.query('UPDATE direct_bill_items SET booking_jv_id = $2 WHERE id = $1', [it.id, jv.id]);
   return { ...it, booking_jv_id: jv.id };
 }
@@ -476,18 +500,16 @@ export async function collectDebitNote(id, b, user) {
     const applied = round2(cash + ewt);
     if (!(applied > 0)) throw badRequest('Validation failed', [{ path: 'cashAmount', message: 'Enter the amount received' }]);
     if (applied > balance + EPS) throw badRequest('Validation failed', [{ path: 'cashAmount', message: `Cash ${cash.toFixed(2)} + tax withheld ${ewt.toFixed(2)} exceeds the balance of ${d.dn_number} (${balance.toFixed(2)})` }]);
-    const cashAccount = b.cashAccount ? String(b.cashAccount) : await cashAccountFor(b.paymentMode);
+    const cashAccount = b.cashAccount ? String(b.cashAccount) : ((await bankAccountGl(db, b.bankAccount)) || (await cashAccountFor(b.paymentMode)));
     const number = (await db.query('SELECT next_number($1, $2) AS n', ['dn_collection', await getSetting('numbering.dn_collection.prefix', 'DNC')])).rows[0].n;
     const insurer = (await db.query('SELECT name FROM insurance_companies WHERE id = $1', [d.insurance_company_id])).rows[0]?.name || 'insurer';
-    const jv = await createJournal(db, {
+    const jv = await postEvent('directbill.collection', {
       source: 'receipt', entryType: 'DIRECT_BILL_COLLECTION', transactionCode: number, referenceType: 'CommissionDebitNote', referenceId: d.id, date: receivedDate,
       description: `Commission collected – ${d.dn_number} – ${insurer}${b.referenceNo ? ` (${b.referenceNo})` : ''}`,
-      lines: [
-        { accountCode: cashAccount, debit: cash, memo: b.referenceNo || `Collection ${number}` },
-        { accountCode: await account('creditable_wht'), debit: ewt, memo: `EWT withheld by ${insurer}${b.form2307No ? ` (BIR 2307 ${b.form2307No})` : ''}` },
-        { accountCode: await account('commission_receivable'), credit: applied, memo: `Settles ${d.dn_number}` },
-      ],
-    }, user);
+      accounts: { bank: cashAccount }, paymentMode: b.paymentMode, amounts: { cash, ewt, applied },
+      vars: { dnNumber: d.dn_number, insurer, referenceSuffix: b.referenceNo ? ` (${b.referenceNo})` : '', memoRef: b.referenceNo || `Collection ${number}`,
+        form2307Suffix: b.form2307No ? ` (BIR 2307 ${b.form2307No})` : '' },
+    }, { db, user });
     const x = (await db.query(`INSERT INTO commission_debit_note_collections(collection_number, debit_note_id, received_date, cash_amount, ewt_amount, applied_amount, payment_mode, cash_account,
         reference_no, form_2307_no, remarks, journal_id, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
     [number, d.id, receivedDate, cash, ewt, applied, b.paymentMode || null, cashAccount, b.referenceNo || null, b.form2307No || null, b.remarks || null, jv.id, user.id])).rows[0];

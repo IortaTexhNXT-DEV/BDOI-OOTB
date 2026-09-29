@@ -5,7 +5,8 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { createJournal, payableAccountFor, account, reverseJournal } from '../accounting/lib/ledger.js';
+import { reverseJournal } from '../accounting/lib/ledger.js';
+import { postEvent, splitTaxes } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { findClient, findPolicy } from '../receipts/receivables.js';
 import { payLines, lineView } from '../commission/service.js';
@@ -194,20 +195,52 @@ export async function createCheckbook(db, b, user) {
   return c;
 }
 
+/**
+ * Premium taxes (VAT, DST, LGT) inside an insurer payment: the tax share booked on the bills whose collections the voucher
+ * remits (booking journal lines on the premium tax accounts, pro rata to the amount collected; on a co-insured bill only the
+ * insurer's own lines). Zero when premium taxes are not booked separately.
+ */
+export async function remittedPremiumTaxes(db, { invoiceListId, disbursementId }, amount) {
+  const zero = { vat: 0, dst: 0, lgt: 0 };
+  if (!(await splitTaxes())) return zero;
+  const lists = (await db.query('SELECT id, total_amount FROM invoice_lists WHERE ($1::text IS NOT NULL AND id = $1) OR ($1::text IS NULL AND $2::text IS NOT NULL AND disbursement_id = $2)',
+    [invoiceListId || null, disbursementId || null])).rows;
+  if (!lists.length) return zero;
+  const { account } = await import('../accounting/lib/ledger.js');
+  const codes = { vat: await account('premium_vat_payable'), dst: await account('premium_dst_payable'), lgt: await account('premium_lgt_payable') };
+  const rows = (await db.query(`SELECT x.ratio, x.insurer, l.account_code, l.credit, l.insurance_company_id FROM (
+      SELECT a.amount / r.amount AS ratio, NULL::int AS insurer, r.booking_jv_id FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id
+        WHERE a.remitted_invoice_id = ANY($1)
+      UNION ALL
+      SELECT a.amount / r.amount, al.insurance_company_id, r.booking_jv_id FROM remittance_allocations al JOIN receipt_applications a ON a.id = al.receipt_application_id
+        JOIN receivables r ON r.id = a.receivable_id WHERE al.invoice_list_id = ANY($1)) x
+    JOIN journal_lines l ON l.jv_id = x.booking_jv_id AND l.account_code = ANY($2) AND (x.insurer IS NULL OR l.insurance_company_id = x.insurer)`,
+  [lists.map((l) => l.id), Object.values(codes)])).rows;
+  const out = { vat: 0, dst: 0, lgt: 0 };
+  for (const r of rows) for (const [k, code] of Object.entries(codes)) if (r.account_code === code) out[k] += Number(r.credit) * Number(r.ratio);
+  const total = lists.reduce((s, l) => s + Number(l.total_amount), 0);
+  const factor = total > 0 ? Math.min(1, amount / total) : 1;
+  for (const k of Object.keys(out)) out[k] = round2(out[k] * factor);
+  if (round2(out.vat + out.dst + out.lgt) >= amount) return zero;
+  return out;
+}
+
 async function approveCheque(db, c, amount, user) {
   await assertChecker(user, c.created_by, 'cheque');
   const inv = c.invoice_list_id ? (await db.query('SELECT * FROM invoice_lists WHERE id = $1', [c.invoice_list_id])).rows[0] : null;
   const d = c.disbursement_id ? await getDisbursementRaw(db, c.disbursement_id, true) : null;
   if (d) await assertChecker(user, d.created_by, 'payment voucher');
   const payeeType = d?.payee_type || inv?.payee_type || 'Insurer';
-  const jv = await createJournal(db, {
+  const taxes = payeeType === 'Insurer' ? await remittedPremiumTaxes(db, { invoiceListId: inv?.id, disbursementId: d?.id }, amount) : { vat: 0, dst: 0, lgt: 0 };
+  const jv = await postEvent('disbursement.payment', {
     source: 'disbursement', entryType: payeeType === 'Insurer' ? 'REMITTANCE' : payeeType === AGENT ? 'COMMISSION_PAYMENT' : 'REFUND',
     referenceType: 'Disbursement', referenceId: d?.id || c.id, transactionCode: d?.voucher_number || c.instrument_no, clientId: d?.client_id || inv?.client_id || null,
     policyId: inv?.policy_id || d?.policy_id || null, policyNumber: inv?.policy_number || d?.policy_number || null,
     description: `Cheque ${c.instrument_no || ''} – ${d?.payee_name || c.customer_name || c.customer_code || payeeType}`.trim(),
-    lines: [{ accountCode: await payableAccountFor(payeeType), debit: amount, memo: `Payable settled (${payeeType})` },
-      { accountCode: await account('cash_in_bank'), credit: amount, memo: `Cheque ${c.instrument_no || ''}`.trim() }],
-  }, user);
+    payeeType, bankAccount: c.main_account || null, paymentMode: 'check',
+    amounts: { amount, payable: round2(amount - taxes.vat - taxes.dst - taxes.lgt), ...taxes },
+    vars: { payeeType, payeeName: d?.payee_name || c.customer_name || c.customer_code || payeeType, instrumentNo: c.instrument_no || '' },
+  }, { db, user });
   await db.query('UPDATE checkbooks SET status = \'Approved\', totale_amount = $2, approved_by = $3, approved_at = now(), journal_id = $4, updated_at = now() WHERE id = $1', [c.id, amount, user.id, jv.id]);
   if (inv) await db.query('UPDATE invoice_lists SET status = \'paid\', updated_at = now() WHERE id = $1', [inv.id]);
   if (d) {

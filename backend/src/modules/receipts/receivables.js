@@ -5,8 +5,10 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, notFound } from '../../lib/errors.js';
-import { account, cashAccountFor, createJournal, reverseJournal } from '../accounting/lib/ledger.js';
-import { round2, today } from '../accounting/lib/http.js';
+import { reverseJournal } from '../accounting/lib/ledger.js';
+import { num, round2, today } from '../accounting/lib/http.js';
+import { postEvent, splitTaxes } from '../accounting/lib/posting.js';
+import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { onPolicyPremiumCollected } from '../commission/service.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
@@ -40,6 +42,49 @@ export async function commissionFor(policy, amount, breakdown, source) {
 }
 
 const ENTRY_BY_SOURCE = { endorsement: 'ENDORSEMENT', renewal: 'RENEWAL' };
+const EVENT_BY_SOURCE = { endorsement: 'endorsement.additional_premium', renewal: 'policy.renewal.broker_billed' };
+
+/** Premium taxes booked in their own accounts (accounting.split_premium_taxes), unless they do not fit in the amount due to the insurer. */
+function taxesOf(breakdown, split, room) {
+  if (!split) return { vat: 0, dst: 0, lgt: 0 };
+  const t = { vat: round2(num(breakdown.vat)), dst: round2(num(breakdown.dst)), lgt: round2(num(breakdown.lgt)) };
+  if (t.vat < 0 || t.dst < 0 || t.lgt < 0 || round2(t.vat + t.dst + t.lgt) > round2(room)) return { vat: 0, dst: 0, lgt: 0 };
+  return t;
+}
+
+/**
+ * Split of a premium amount between the insurers of the policy: per participant gross, commission, premium taxes and the
+ * premium due to the insurer. A single-insurer policy is one participant at 100% with the commission of commissionFor().
+ * On a co-insured policy each insurer's commission is its own rate on its share of the net premium (commissionFor() with
+ * the insurer's master rate when the participant has no rate), unless a commission amount is given (split by share).
+ */
+export async function premiumSplit(db, policy, gross, breakdown = {}, source = 'policy', { commission: given = null, parts: known = null } = {}) {
+  const parts = known || (await policyParticipants(policy.id, db));
+  const split = await splitTaxes();
+  if (!isCoInsured(parts)) {
+    const commission = given ?? (await commissionFor(policy, gross, breakdown, source));
+    const tax = taxesOf(breakdown, split, gross - commission);
+    return { coInsured: false, commission, taxes: tax, parts: [{ insurerId: policy.insurance_company_id, insurerName: policy.insurer_name || parts[0]?.insurerName || 'insurer', share: 100, isLead: true,
+      amounts: { gross, commission, ...tax, due_to_insurer: round2(gross - commission - tax.vat - tax.dst - tax.lgt) } }] };
+  }
+  const w = parts.map((p) => p.share);
+  const grossS = allocate(gross, w);
+  const net = num(breakdown.netPremium) > 0 ? round2(num(breakdown.netPremium)) : 0;
+  const netS = net ? allocate(net, w) : grossS.map(() => 0);
+  const explicit = given ?? (breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null ? round2(breakdown.commissionAmount) : null);
+  const comms = explicit !== null ? allocate(explicit, w) : [];
+  if (explicit === null) {
+    for (const [i, p] of parts.entries()) {
+      if (p.commissionRate !== null) comms.push(round2(Math.min((netS[i] > 0 ? netS[i] : grossS[i]) * p.commissionRate, grossS[i])));
+      else comms.push(await commissionFor({ ...policy, insurer_commission_rate: p.insurerCommissionRate, commission_amount: p.commissionAmount, premium_total: p.premiumTotal }, grossS[i], { netPremium: netS[i] }, source));
+    }
+  }
+  const tax = taxesOf(breakdown, split, gross - comms.reduce((s, c) => s + c, 0));
+  const taxS = { vat: allocate(tax.vat, w), dst: allocate(tax.dst, w), lgt: allocate(tax.lgt, w) };
+  const out = parts.map((p, i) => ({ insurerId: p.insurerId, insurerName: p.insurerName, share: p.share, isLead: p.isLead,
+    amounts: { gross: grossS[i], commission: comms[i], vat: taxS.vat[i], dst: taxS.dst[i], lgt: taxS.lgt[i], due_to_insurer: round2(grossS[i] - comms[i] - taxS.vat[i] - taxS.dst[i] - taxS.lgt[i]) } }));
+  return { coInsured: true, commission: round2(comms.reduce((s, c) => s + c, 0)), taxes: tax, parts: out };
+}
 
 /** Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount, commissionAmount } */
 export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, user = null }) {
@@ -50,30 +95,39 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const creditDays = Number(await getSetting('collections.default_credit_days', 30));
   const prefix = await getSetting('numbering.invoice.prefix', 'INV');
   const billNumber = (await db.query('SELECT next_number($1, $2) AS n', ['invoice', prefix])).rows[0].n;
-  const commission = await commissionFor(policy, gross, breakdown, source);
+  const split = await premiumSplit(db, policy, gross, breakdown, source);
+  const { commission } = split;
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
       net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by)
     VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
   [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await getSetting('currency.default', 'PHP')), round2(breakdown.netPremium || gross),
     round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null])).rows[0];
-  const jv = await postBooking(db, r, policy, commission, user);
+  const jv = await postBooking(db, r, policy, split, user);
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
   return { ...r, booking_jv_id: jv.id };
 }
 
-async function postBooking(db, r, policy, commission, user) {
-  return createJournal(db, {
-    source: 'booking', entryType: ENTRY_BY_SOURCE[r.source] || 'NEW_BUSINESS', transactionCode: r.bill_number, referenceType: 'Policy', referenceId: policy.id,
-    clientId: r.client_id || policy.client_id, policyId: policy.id, policyNumber: policy.policy_number, dueDate: r.due_date,
+/** Booking journal of a bill from the posting rule of its source (issue, endorsement, renewal); participants kept on co-insured bills. */
+async function postBooking(db, r, policy, split, user) {
+  if (split.coInsured) {
+    for (const p of split.parts) {
+      const a = p.amounts;
+      await db.query(`INSERT INTO receivable_participants(receivable_id, insurance_company_id, is_lead, share_percent, gross, commission, taxes, due_to_insurer)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (receivable_id, insurance_company_id) DO UPDATE SET share_percent = EXCLUDED.share_percent, gross = EXCLUDED.gross,
+          commission = EXCLUDED.commission, taxes = EXCLUDED.taxes, due_to_insurer = EXCLUDED.due_to_insurer`,
+      [r.id, p.insurerId, p.isLead, p.share, a.gross, a.commission, round2(a.vat + a.dst + a.lgt), a.due_to_insurer]);
+    }
+  }
+  const gross = Number(r.amount);
+  return postEvent(EVENT_BY_SOURCE[r.source] || 'policy.issue.broker_billed', {
+    source: 'booking', entryType: ENTRY_BY_SOURCE[r.source] || 'NEW_BUSINESS', entrySubType: split.coInsured ? 'CO_INSURANCE' : null, transactionCode: r.bill_number,
+    referenceType: 'Policy', referenceId: policy.id, clientId: r.client_id || policy.client_id, policyId: policy.id, policyNumber: policy.policy_number, dueDate: r.due_date,
     description: `Premium billed – ${policy.policy_number} (${r.bill_number})`,
-    lines: [
-      { accountCode: await account('premium_receivable'), debit: Number(r.amount), memo: `Premium receivable ${r.bill_number}` },
-      { accountCode: await account('due_to_insurer'), credit: round2(Number(r.amount) - commission), memo: `Premium due to ${policy.insurer_name || 'insurer'}` },
-      { accountCode: await account('commission_income'), credit: commission, memo: 'Brokerage commission' },
-    ],
-  }, user);
+    amounts: { gross, net_premium: Number(r.net_premium) || gross, commission: split.commission, ...split.taxes, due_to_insurer: round2(split.parts.reduce((s, p) => s + p.amounts.due_to_insurer, 0)) },
+    participants: split.parts, vars: { policyNumber: policy.policy_number, billNumber: r.bill_number, insurer: policy.insurer_name || 'insurer', participantSuffix: '' },
+  }, { db, user });
 }
 
 /**
@@ -86,7 +140,10 @@ export async function ensureBooked(db, rcv, policy, user) {
   const bookable = round2(Number(rcv.balance) + applied);
   if (!(bookable > 0)) return rcv;
   const commission = round2(Number(rcv.commission_amount) > 0 ? Number(rcv.commission_amount) * (bookable / Number(rcv.amount)) : await commissionFor(policy, bookable, { netPremium: Number(rcv.net_premium) * (bookable / Number(rcv.amount)) }, rcv.source));
-  const jv = await postBooking(db, { ...rcv, amount: bookable }, policy, Math.min(commission, bookable), user);
+  const ratio = bookable / Number(rcv.amount);
+  const split = await premiumSplit(db, policy, bookable, { vat: Number(rcv.vat) * ratio, dst: Number(rcv.dst) * ratio, lgt: Number(rcv.lgt) * ratio, netPremium: Number(rcv.net_premium) * ratio },
+    rcv.source, { commission: Math.min(commission, bookable) });
+  const jv = await postBooking(db, { ...rcv, amount: bookable }, policy, split, user);
   const upd = (await db.query('UPDATE receivables SET booking_jv_id = $2, commission_amount = CASE WHEN commission_amount > 0 THEN commission_amount ELSE $3 END WHERE id = $1 RETURNING *', [rcv.id, jv.id, commission])).rows[0];
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [rcv.id, rcv.policy_id, rcv.client_id]);
   return upd;
@@ -104,16 +161,14 @@ export async function ensureBilled(db, { policy, amount, breakdown, source, user
 async function applyToReceivable(db, rcv, amount, ctx) {
   const policy = ctx.policy;
   await ensureBooked(db, rcv, policy, ctx.user);
-  const jv = await createJournal(db, {
+  const jv = await postEvent('receipt.apply', {
     source: ctx.receipt ? 'receipt' : 'payment', entryType: 'PAYMENT_RECEIPT', transactionCode: ctx.receipt?.receipt_number || rcv.bill_number,
     referenceType: ctx.receipt ? 'Receipt' : 'Policy', referenceId: ctx.receipt?.id || policy.id, clientId: rcv.client_id, policyId: policy.id,
     policyNumber: policy.policy_number, date: ctx.date || (await today()),
     description: `Premium collected – ${policy.policy_number}${ctx.receipt ? ` (${ctx.receipt.receipt_number})` : ''}`,
-    lines: [
-      { accountCode: await cashAccountFor(ctx.paymentMode), debit: amount, memo: ctx.referenceNo || 'Premium collection' },
-      { accountCode: await account('premium_receivable'), credit: amount, memo: `Settles ${rcv.bill_number}` },
-    ],
-  }, ctx.user);
+    paymentMode: ctx.paymentMode, bankAccount: ctx.bankAccount || ctx.receipt?.bank_account_code || null, amounts: { amount },
+    vars: { policyNumber: policy.policy_number, receiptSuffix: ctx.receipt ? ` (${ctx.receipt.receipt_number})` : '', memoRef: ctx.referenceNo || 'Premium collection', billNumber: rcv.bill_number },
+  }, { db, user: ctx.user });
   const upd = (await db.query(`UPDATE receivables SET balance = balance - $2, last_payment_at = now(), updated_at = now(),
       status = CASE WHEN balance - $2 <= 0 THEN 'paid' ELSE 'partial' END WHERE id = $1 RETURNING *`, [rcv.id, amount])).rows[0];
   if (Number(upd.balance) <= 0) await db.query('UPDATE collection_items SET closed_at = COALESCE(closed_at, now()), updated_at = now() WHERE receivable_id = $1', [rcv.id]);
