@@ -308,7 +308,14 @@ export async function participantsFromOffers(slip, { offerIds, shares = {}, lead
 
 /** Quote / placement body fields from the slip and the lead offer (premium agreed with the market). */
 export function riskFromSlip(slip, lead) {
+  const rd = slip.risk_details || {};
+  // Fire / IAR screens read fireRiskDetails: the generic risk details map onto it when the slip has none
+  const fire = ['FIRE', 'IAR'].includes(slip.lob) && !slip.doc?.fireRiskDetails ? {
+    fireRiskDetails: { locationAddress: rd.location || rd.locationAddress, constructionType: rd.construction || rd.constructionType, occupancyType: rd.occupancy || rd.occupancyType,
+      buildingType: rd.buildingType, natureOfBusiness: rd.natureOfBusiness || rd.business, earthquakeZone: rd.earthquakeZone, totalSumInsured: Number(slip.sum_insured) },
+  } : {};
   return {
+    ...fire,
     ...(slip.doc || {}), productType: slip.product_type || slip.product_name, lob: slip.lob, productId: slip.product_id, totalSumInsured: Number(slip.sum_insured),
     riskDetails: slip.risk_details || {}, requestedCovers: slip.requested_covers || [], insuredName: slip.insured_name, agreedNetPremium: lead.premium,
     offerTerms: { offerNumber: lead.offerNumber, insurer: lead.insuranceCompanyName, deductibles: lead.deductibles, terms: lead.terms, validityDate: lead.validityDate, rate: lead.rate },
