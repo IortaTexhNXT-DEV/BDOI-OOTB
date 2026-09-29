@@ -46,6 +46,8 @@ export const TRANSACTION_TABLES = [
   // period-end processing (fiscal years are regenerated from the first journal on demand)
   'fiscal_years', 'opening_balances', 'period_status_history', 'period_close_runs', 'period_close_run_checks', 'period_close_entries',
   'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'bir_2307_certificates',
+  // bank reconciliation (statement formats, transaction types and match rules are configuration and stay)
+  'bank_statements', 'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations', 'bank_reconciliation_history',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

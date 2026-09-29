@@ -23,6 +23,8 @@ const FILTERS = {
   status: (p) => `lower(t.status) = lower(${p})`,
   // GL account (exact code or main-account prefix); the ledger reports expose it as _account
   account: (p) => `(t._account = ${p} OR t._account LIKE ${p} || '%')`,
+  // bank account master (code or id); the bank reconciliation reports expose it as _bank_account_code / _bank_account_id
+  bankAccount: (p) => `(lower(t._bank_account_code) = lower(${p}) OR t._bank_account_id = ${p})`,
 };
 /** Accepted parameter names: the screen's formik field names first, then API-style aliases. */
 const ALIASES = {
@@ -36,6 +38,7 @@ const ALIASES = {
   product: ['Product', 'product', 'productId'],
   status: ['Status', 'status'],
   account: ['Account', 'account', 'accountCode', 'glCode'],
+  bankAccount: ['BankAccount', 'bankAccount', 'bankAccountCode', 'bankAccountId'],
   period: ['period', 'datePreset'],
 };
 const pick = (raw, key) => {

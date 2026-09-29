@@ -462,11 +462,27 @@ export async function processBulk(id, user) {
 }
 
 // ---------------- bank reconciliation ----------------
+// Bank lines live in the one bank statement line table (bank_statement_lines, Accounts > Bank Reconciliation): lines
+// imported here (source 'remittance', no bank account) plus the credit lines of the bank account named in
+// remittance.reconciliation_bank_account. The remittance match is kept on the line (rem_* columns).
 
-export const bankOut = (x) => ({ id: x.id, reference: x.reference_no, transDate: x.data.transDate, amount: x.amount, description: x.data.description || '', status: x.status, matchedTo: x.data.matchedTo || null, difference: x.data.difference ?? null });
+export const bankOut = (x) => ({ id: x.id, reference: x.txn_number || x.reference, bankReference: x.reference, transDate: isoDate(x.txn_date), amount: Number(x.amount),
+  description: x.description || '', status: x.rem_status, matchedTo: x.rem_remittance_id || null, difference: x.rem_difference === null || x.rem_difference === undefined ? null : Number(x.rem_difference) });
+
+async function bankLines(c = { query }, where = 'TRUE', values = []) {
+  const account = String((await getSetting('remittance.reconciliation_bank_account', '')) || '').trim();
+  return (await c.query(`SELECT l.* FROM bank_statement_lines l WHERE l.status = 'active' AND (l.source = 'remittance'
+      OR (l.amount > 0 AND $1 <> '' AND l.bank_account_id IN (SELECT id FROM master_records WHERE type_code = 'bank-account' AND lower(code) = lower($1))))
+      AND ${where} ORDER BY l.txn_date, l.created_at`, [account, ...values])).rows;
+}
+async function bankLine(id) {
+  const x = (await bankLines({ query }, '(l.id = $2 OR l.txn_number = $2)', [String(id)]))[0];
+  if (!x) throw notFound('bank-txn not found');
+  return x;
+}
 
 export async function reconciliation() {
-  const bank = (await many(`${ITEM_SELECT} WHERE x.kind = 'bank-txn' ORDER BY (x.data->>'transDate'), x.created_at`)).map(bankOut);
+  const bank = (await bankLines()).map(bankOut);
   const sys = await many(`SELECT r.id, r.remittance_number, r.remittance_date, r.net_due, r.data, i.name AS insurer_name,
       (SELECT string_agg(l.policy_number, ', ') FROM remittance_lines l WHERE l.remittance_id = r.id) AS policies
     FROM remittances r LEFT JOIN insurance_companies i ON i.id = r.insurance_company_id WHERE r.status IN ('approved', 'settled') ORDER BY r.remittance_date`);
@@ -489,10 +505,11 @@ export async function importBankTransactions(list, user) {
     const amount = toNumber(t.amount, NaN);
     const d = isoDate(t.transDate);
     if (!Number.isFinite(amount) || !d || !t.reference) throw badRequest('Validation failed', [{ path: 'transactions', message: 'Each transaction needs transDate, reference and amount' }]);
-    if (await one('SELECT 1 FROM remittance_items WHERE kind = \'bank-txn\' AND data->>\'bankReference\' = $1', [String(t.reference)])) continue;
+    if (await one('SELECT 1 FROM bank_statement_lines WHERE source = \'remittance\' AND status = \'active\' AND reference = $1', [String(t.reference)])) continue;
     const ref = await nextDocumentNumber('bank_txn');
-    const id = await insertItemNoTx({ kind: 'bank-txn', referenceNo: ref, amount, status: 'unmatched', data: { transDate: d, bankReference: String(t.reference), description: t.description || '' }, userId: user.id });
-    out.push(bankOut(await getItem('bank-txn', id)));
+    const x = await one(`INSERT INTO bank_statement_lines(txn_number, txn_date, description, reference, debit, credit, amount, source, created_by, updated_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,'remittance',$8,$8) RETURNING *`, [ref, d, t.description || '', String(t.reference), round2(Math.max(-amount, 0)), round2(Math.max(amount, 0)), round2(amount), user.id]);
+    out.push(bankOut(x));
   }
   return out;
 }
@@ -502,18 +519,19 @@ async function tolerance(v) {
 }
 
 async function markMatch(c, bank, rem, status, diff, userId) {
-  await c.query('UPDATE remittance_items SET status = $2, data = data || $3, updated_by = $4, updated_at = now() WHERE id = $1', [bank.id, status, JSON.stringify({ matchedTo: rem.id, matchedRef: rem.remittance_number, difference: diff }), userId]);
+  await c.query('UPDATE bank_statement_lines SET rem_status = $2, rem_remittance_id = $3, rem_reference = $4, rem_difference = $5, updated_by = $6, updated_at = now() WHERE id = $1',
+    [bank.id, status, rem.id, rem.remittance_number, diff, userId]);
   await c.query('UPDATE remittances SET data = data || $2 WHERE id = $1', [rem.id, JSON.stringify({ reconciliation: { status, bankId: bank.id, difference: diff } })]);
 }
 
 export async function autoMatch(b, user) {
   const tol = await tolerance(b.tolerance);
-  const bank = await many('SELECT * FROM remittance_items WHERE kind = \'bank-txn\' AND status = \'unmatched\' ORDER BY created_at');
+  const bank = await bankLines({ query }, 'l.rem_status = \'unmatched\'');
   let matched = 0;
   await withTransaction(async (c) => {
     for (const t of bank) {
       const rem = (await c.query(`SELECT * FROM remittances WHERE status IN ('approved', 'settled') AND COALESCE(data->'reconciliation'->>'status', 'unmatched') = 'unmatched'
-          AND abs(net_due - $1) <= $2 ORDER BY (remittance_number = $3 OR bill_number = $3) DESC, abs(remittance_date - $4::date), created_at LIMIT 1`, [t.amount, tol, t.data.bankReference, t.data.transDate])).rows[0];
+          AND abs(net_due - $1) <= $2 ORDER BY (remittance_number = $3 OR bill_number = $3) DESC, abs(remittance_date - $4::date), created_at LIMIT 1`, [t.amount, tol, t.reference, isoDate(t.txn_date)])).rows[0];
       if (!rem) continue;
       await markMatch(c, t, rem, 'matched', round2(Number(t.amount) - Number(rem.net_due)), user.id);
       matched += 1;
@@ -524,24 +542,25 @@ export async function autoMatch(b, user) {
 
 export async function manualMatch(b, user) {
   requireFields(b, ['bankId', 'remittanceId']);
-  const t = await getItem('bank-txn', b.bankId);
-  if (t.status !== 'unmatched') throw conflict('Bank transaction is already matched');
+  const t = await bankLine(b.bankId);
+  if (t.rem_status !== 'unmatched') throw conflict('Bank transaction is already matched');
   const rem = await one('SELECT * FROM remittances WHERE (id = $1 OR remittance_number = $1) AND status IN (\'approved\', \'settled\')', [String(b.remittanceId)]);
   if (!rem) throw badRequest('Validation failed', [{ path: 'remittanceId', message: 'Approved remittance not found' }]);
   const diff = round2(Number(t.amount) - Number(rem.net_due));
   const tol = await tolerance(b.tolerance);
   const status = Math.abs(diff) <= tol ? 'matched' : 'partial';
   await withTransaction((c) => markMatch(c, t, rem, status, diff, user.id));
-  if (status === 'partial') await createException({ type: 'Amount Mismatch', description: `Bank ${t.data.bankReference} differs from ${rem.remittance_number} by ${diff}`, bankRef: t.data.bankReference, sysRef: rem.remittance_number, difference: diff, remittanceId: rem.id, severity: 'High' }, user);
+  const bankRef = t.reference || t.txn_number;
+  if (status === 'partial') await createException({ type: 'Amount Mismatch', description: `Bank ${bankRef} differs from ${rem.remittance_number} by ${diff}`, bankRef, sysRef: rem.remittance_number, difference: diff, remittanceId: rem.id, severity: 'High' }, user);
   return { status, difference: diff, ...(await reconciliation()).summary };
 }
 
 export async function unmatch(bankId, user) {
-  const t = await getItem('bank-txn', bankId);
-  if (t.status === 'unmatched') throw conflict('Bank transaction is not matched');
+  const t = await bankLine(bankId);
+  if (t.rem_status === 'unmatched') throw conflict('Bank transaction is not matched');
   await withTransaction(async (c) => {
-    await c.query('UPDATE remittance_items SET status = \'unmatched\', data = data - \'matchedTo\' - \'matchedRef\' - \'difference\', updated_by = $2, updated_at = now() WHERE id = $1', [t.id, user.id]);
-    if (t.data.matchedTo) await c.query('UPDATE remittances SET data = data - \'reconciliation\' WHERE id = $1', [t.data.matchedTo]);
+    await c.query('UPDATE bank_statement_lines SET rem_status = \'unmatched\', rem_remittance_id = NULL, rem_reference = NULL, rem_difference = NULL, updated_by = $2, updated_at = now() WHERE id = $1', [t.id, user.id]);
+    if (t.rem_remittance_id) await c.query('UPDATE remittances SET data = data - \'reconciliation\' WHERE id = $1', [t.rem_remittance_id]);
   });
   return (await reconciliation()).summary;
 }

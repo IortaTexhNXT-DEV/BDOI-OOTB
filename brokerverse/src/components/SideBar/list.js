@@ -520,6 +520,18 @@ export const menuList = [
             includes: ["/master/finance/close-checklist"],
           },
           {
+            id: 21,
+            name: "Bank Statement Formats",
+            path: "/master/finance/bank-statement-formats",
+            includes: ["/master/finance/bank-statement-formats"],
+          },
+          {
+            id: 22,
+            name: "Bank Transaction Types",
+            path: "/master/finance/bank-transaction-types",
+            includes: ["/master/finance/bank-transaction-types"],
+          },
+          {
             id: 9,
             name: "Petty cash",
             path: "/master/finance/pettycash",
@@ -1005,6 +1017,19 @@ export const menuList = [
         ],
       },
       {
+        id: 22,
+        name: "Bank Reconciliation",
+        submenu: [
+          { id: 1, name: "Reconciliation Workspace", path: "/accounts/bank-reconciliation", includes: ["/accounts/bank-reconciliation"] },
+          { id: 2, name: "Reconciliations", path: "/accounts/bank-reconciliation/reconciliations", includes: ["/accounts/bank-reconciliation/reconciliations"] },
+          { id: 3, name: "Reconciliation Statement Report", path: "/accounts/bank-reconciliation/reports/bank-reconciliation-statement", includes: ["/accounts/bank-reconciliation/reports/bank-reconciliation-statement"] },
+          { id: 4, name: "Outstanding Cheques", path: "/accounts/bank-reconciliation/reports/bank-outstanding-cheques", includes: ["/accounts/bank-reconciliation/reports/bank-outstanding-cheques"] },
+          { id: 5, name: "Deposits in Transit", path: "/accounts/bank-reconciliation/reports/bank-deposits-in-transit", includes: ["/accounts/bank-reconciliation/reports/bank-deposits-in-transit"] },
+          { id: 6, name: "Unmatched Bank Lines", path: "/accounts/bank-reconciliation/reports/bank-unmatched-lines", includes: ["/accounts/bank-reconciliation/reports/bank-unmatched-lines"] },
+          { id: 7, name: "Bank Book", path: "/accounts/bank-reconciliation/reports/bank-book", includes: ["/accounts/bank-reconciliation/reports/bank-book"] },
+        ],
+      },
+      {
         id: 21,
         name: "Tax",
         submenu: [
@@ -1386,6 +1411,8 @@ export const menuList = [
             includes: ["/reports/financialreports/duetoinsurers"],
             permissions: ["read:financial-reports"],
           },
+          { id: 14, name: "Bank Reconciliation Statement", path: "/reports/financialreports/pe/bank-reconciliation-statement", includes: ["/reports/financialreports/pe/bank-reconciliation-statement"] },
+          { id: 15, name: "Bank Book", path: "/reports/financialreports/pe/bank-book", includes: ["/reports/financialreports/pe/bank-book"] },
         ],
       },
     ],

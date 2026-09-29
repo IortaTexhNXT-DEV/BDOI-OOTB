@@ -46,6 +46,8 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `58_insurer_credit_terms.sql` | reference | credit-term fields (premium warranty days, remittance terms, default billing mode) on the insurance company master screen |
 | `60_reports.sql` | reference | report settings and the report catalogue |
 | `61_direct_bill.sql` | reference | direct-bill configuration and report columns |
+| `63_bank_reconciliation.sql` | reference | bank reconciliation: document numbering series (BST, BRC), GL cash account and statement format fields on the bank account master, month-end checklist wording, report catalogue rows (bank reconciliation statement, outstanding cheques, deposits in transit, unmatched bank lines, bank book) |
+| `sample/63_bank_reconciliation.sql` | sample | sample bank accounts linked to their GL cash accounts; last month's BDO statement built from the sample ledger (plus interest, final tax, service charge) |
 | `70_security.sql` | reference | security configuration |
 
 No persona test users are seeded: the end-to-end persona walk and the tests create their own users.

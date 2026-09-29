@@ -233,6 +233,12 @@ import CloseChecklist from "../module/PeriodEnd/CloseChecklist";
 import TaxCodes from "../module/PeriodEnd/TaxCodes";
 import Bir2307 from "../module/PeriodEnd/Bir2307";
 import PeriodEndReportPage from "../module/PeriodEnd/ReportPage";
+import BankRecWorkspace from "../module/BankReconciliation/Workspace";
+import BankReconciliations from "../module/BankReconciliation/Reconciliations";
+import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRun";
+import BankStatementFormats from "../module/BankReconciliation/StatementFormats";
+import BankTransactionTypes from "../module/BankReconciliation/TransactionTypes";
+import BankRecReportPage from "../module/BankReconciliation/ReportPage";
 // import OperationalReports from "../module/Reports/OperationalReports";
 
 // Collections Module
@@ -1068,6 +1074,8 @@ const Maincomponent = () => {
           <Route path="master/finance/taxation" element={<TaxCodes />} />
           <Route path="master/finance/taxation-legacy" element={<TaxationMaster />} />
           <Route path="master/finance/close-checklist" element={<CloseChecklist />} />
+          <Route path="master/finance/bank-statement-formats" element={<BankStatementFormats />} />
+          <Route path="master/finance/bank-transaction-types" element={<BankTransactionTypes />} />
           <Route
             path="master/finance/taxation/addtaxation"
             element={<AddTaxation />}
@@ -1824,6 +1832,11 @@ const Maincomponent = () => {
           <Route path="/accounts/period-end/statements" element={<FinancialStatements />} />
           <Route path="/accounts/tax/2307" element={<Bir2307 />} />
           <Route path="/accounts/tax/reports/:code" element={<PeriodEndReportPage area="tax" />} />
+          {/* Bank reconciliation */}
+          <Route path="/accounts/bank-reconciliation" element={<BankRecWorkspace />} />
+          <Route path="/accounts/bank-reconciliation/reconciliations" element={<BankReconciliations />} />
+          <Route path="/accounts/bank-reconciliation/reconciliations/:id" element={<BankReconciliationRun />} />
+          <Route path="/accounts/bank-reconciliation/reports/:code" element={<BankRecReportPage />} />
 
           {/* OperationalReports */}
           <Route

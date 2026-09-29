@@ -85,7 +85,11 @@ const closeStatus = `SELECT p.period, p.fiscal_year AS "fiscalYear", p.period_no
     (SELECT count(*) FROM period_close_run_checks c WHERE c.run_id = r.id AND c.status = 'failed') AS "blockingFailures",
     (SELECT count(*) FROM period_close_run_checks c WHERE c.run_id = r.id AND c.status = 'warning') AS warnings,
     (SELECT count(*) FROM period_close_entries e WHERE e.run_id = r.id AND e.status = 'active') AS journals,
-    pu.display_name AS "preparedBy", r.prepared_at AS "preparedAt", au.display_name AS "approvedBy", r.approved_at AS "approvedAt", p.closed_at AS "closedAt", p.status AS status
+    pu.display_name AS "preparedBy", r.prepared_at AS "preparedAt", au.display_name AS "approvedBy", r.approved_at AS "approvedAt", p.closed_at AS "closedAt", p.status AS status,
+    -- bank reconciliations approved for the period / bank accounts with GL activity in it (see bank reconciliation)
+    (SELECT count(*) FROM bank_reconciliations br WHERE br.period = p.period AND br.status = 'approved') || ' / ' ||
+    (SELECT count(*) FROM bank_account_links b WHERE b.gl_account_code IS NOT NULL AND EXISTS (SELECT 1 FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
+      WHERE l.account_code = b.gl_account_code AND j.status IN ('posted', 'reversed') AND j.jv_date BETWEEN p.start_date AND p.end_date)) AS "bankReconciliations"
   FROM accounting_periods p
   LEFT JOIN LATERAL (SELECT * FROM period_close_runs x WHERE x.period = p.period AND x.status <> 'cancelled' ORDER BY x.created_at DESC LIMIT 1) r ON true
   LEFT JOIN users pu ON pu.id = r.prepared_by LEFT JOIN users au ON au.id = r.approved_by

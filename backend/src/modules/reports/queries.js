@@ -9,6 +9,7 @@
  * summary by that column, { dims } chooses the aggregation dimensions of aggregate reports.
  */
 import { PERIOD_END_QUERIES } from './periodEndQueries.js';
+import { BANK_REC_QUERIES } from './bankRecQueries.js';
 
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
@@ -209,6 +210,7 @@ export const QUERIES = {
     aggregate: { bills: 'count(*)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', dueToInsurer: 'sum(t."dueToInsurer")', collectedDue: 'sum(t."collectedDue")',
       remitted: 'sum(t.remitted)', outstanding: 'sum(t.outstanding)', uncollected: 'sum(t.uncollected)' },
   },
+  ...BANK_REC_QUERIES,
   production: {
     sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
