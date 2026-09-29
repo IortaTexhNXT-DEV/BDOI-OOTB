@@ -9,9 +9,47 @@ import pinoHttp from 'pino-http';
 import pino from 'pino';
 import { config } from './config.js';
 import { errorHandler } from './lib/errors.js';
+import { verify } from './lib/auth.js';
+import { apiRateLimit } from './lib/rateLimit.js';
+import { signFileLinks } from './lib/fileLinks.js';
 
-export const logger = pino({ level: config.logLevel });
+/**
+ * Log redaction: bearer tokens, cookies and credentials never reach the log store. Query parameters that carry
+ * tokens (signed download links, file signatures) are masked in logged URLs.
+ */
+export const REDACT_PATHS = [
+  'req.headers.authorization', 'req.headers.cookie', 'req.headers["x-api-key"]', 'res.headers["set-cookie"]',
+  'req.query.token', 'req.query.sig', 'req.query.code',
+  'req.body.password', 'req.body.newPassword', 'req.body.currentPassword', 'req.body.refreshToken', 'req.body.code',
+];
+const SECRET_PARAMS = /([?&](?:token|sig|access_token|refresh_token|refreshToken|code|password)=)[^&#]*/gi;
+export const redactUrl = (url) => (typeof url === 'string' ? url.replace(SECRET_PARAMS, '$1[redacted]') : url);
+/** pino-http request serializer (receives the standard serialized request): mask token query parameters. */
+export function redactRequest(req) {
+  if (!req || typeof req !== 'object') return req;
+  req.url = redactUrl(req.url);
+  if (req.query && typeof req.query === 'object') {
+    const q = { ...req.query };
+    for (const k of Object.keys(q)) if (/^(token|sig|access_token|refresh_token|refreshToken|code|password)$/i.test(k)) q[k] = '[redacted]';
+    req.query = q;
+  }
+  return req;
+}
+
+export const logger = pino({ level: config.logLevel, redact: { paths: REDACT_PATHS, censor: '[redacted]' } });
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+/** Rate-limit key: the user of a valid access token, else the client IP. */
+function rateKey(req) {
+  const h = req.headers.authorization || '';
+  if (h.startsWith('Bearer ')) {
+    try {
+      const p = verify(h.slice(7));
+      if (p.type === 'access' && p.sub) return `user:${p.sub}`;
+    } catch { /* invalid token: counted per IP */ }
+  }
+  return `ip:${req.ip || 'unknown'}`;
+}
 
 /**
  * Every folder in src/modules with a router.js is mounted under /api.
@@ -45,8 +83,13 @@ export async function createApp() {
   app.use(requestId);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins, exposedHeaders: ['x-request-id', 'Retry-After', 'Content-Disposition'] }));
-  app.use(express.json({ limit: '10mb' }));
-  app.use(pinoHttp({ logger, genReqId: (req) => req.id, autoLogging: { ignore: (req) => req.url === '/api/health' } }));
+  app.use(pinoHttp({
+    logger, genReqId: (req) => req.id, autoLogging: { ignore: (req) => req.url === '/api/health' },
+    serializers: { req: redactRequest },
+  }));
+  app.use(apiRateLimit(rateKey));
+  app.use(express.json({ limit: config.jsonBodyLimit }));
+  app.use(signFileLinks);
 
   const api = express.Router();
   app.use('/api', api);

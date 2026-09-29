@@ -76,7 +76,7 @@ describe('disbursements / payment vouchers', () => {
   it('print and bulk upload', async () => {
     const p = await ctx.as('maker')('get', `/disbursements/printDisbursement?customerCodeFrom=${client.client_code}&customerCodeTo=${client.client_code}&createdAtFrom=2020-01-01&createdAtTo=2099-12-31`);
     expect(p.status).toBe(200);
-    expect(p.body.data.url).toContain('/api/upload/file/print/');
+    expect(p.body.data.url).toContain('/api/s3/object/print/');
     const none = await ctx.as('maker')('get', '/disbursements/printDisbursement?customerCodeFrom=ZZZ&customerCodeTo=ZZZ&createdAtFrom=2020-01-01&createdAtTo=2020-01-02');
     expect(none.status).toBe(404);
     const csv = 'Voucher Date,Payee Type,Customer Code,Insurer Name,Amount,Transaction Code,Remarks\n2026-09-01,Supplier,,,"1,250.00",SUPP,Office rent\n2026-09-01,Martian,,,10,X,bad\n';

@@ -3,6 +3,7 @@
  * single-sheet workbook for report downloads. XLSX files are ZIP archives of XML parts; zlib handles DEFLATE.
  */
 import zlib from 'node:zlib';
+import { assertRowLimit, inflateEntry } from '../../lib/uploadLimits.js';
 
 // ---------- ZIP ----------
 function readZip(buf) {
@@ -31,7 +32,7 @@ function readZip(buf) {
     if (!f) return null;
     const start = f.local + 30 + buf.readUInt16LE(f.local + 26) + buf.readUInt16LE(f.local + 28);
     const data = buf.subarray(start, start + f.csize);
-    return (f.method === 8 ? zlib.inflateRawSync(data) : data).toString('utf8');
+    return inflateEntry(data, f.method).toString('utf8');
   };
   return { get, names: [...files.keys()] };
 }
@@ -100,6 +101,7 @@ export function readXlsx(buf) {
       row[ref ? colIndex(ref) : row.length] = value;
     }
     rows.push(Array.from(row, (x) => x ?? ''));
+    assertRowLimit(rows.length - 1);
   }
   return rows;
 }

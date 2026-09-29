@@ -77,7 +77,7 @@ export async function runReport(code, params, { user, page = 1, perPage = 50 } =
 
 const signDownload = async (id) => {
   const hours = Number(await getSetting('reports.download_link_ttl_hours', 72)) || 72;
-  return jwt.sign({ type: 'report-download', rid: id }, config.jwtSecret, { expiresIn: Math.round(hours * 3600) });
+  return jwt.sign({ type: 'report-download', rid: id }, config.jwtSecret, { expiresIn: Math.round(hours * 3600), algorithm: 'HS256' });
 };
 export function verifyDownloadToken(token, id) {
   try {

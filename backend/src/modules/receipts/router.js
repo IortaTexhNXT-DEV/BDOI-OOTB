@@ -1,4 +1,4 @@
-import multer from 'multer';
+import { importUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
@@ -20,7 +20,7 @@ const write = [requireAuth, requirePermission('write:receipts')];
 // Official receipts (cash posting) are finance-only (segregation of duties). Agents, sales and underwriters record the
 // client's payment with POST /policies/:id/payments, which finance verifies (POST /policies/:id/payments/:paymentId/confirm).
 const SCREEN = 'Accounts > Receipts';
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = importUpload();
 const line = { receiptListId: 'rl_1', policies: 'POL-2026-00001', netPremium: '10000.00', paid: '11862.50', unPaid: '0.00', discounts: '0.00', dst: '1250.00', lgt: '75.00', vat: '1200.00', ewt: '0.00', other: '0.00', fcAmount: '0.00', lcAmount: '11862.50', status: 'Paid' };
 const example = { receiptId: 'or_1', receiptNumber: 'OR-2026-00001', receiptType: 'Payment', receiptDate: '2026-09-28', customerCode: 'CL-2026-00001', currencyCode: 'PHP', transactionCode: 'PAYMENT', transactionNumber: 'RT-2026-00001', name: 'Maria Santos', policyRefId: 'pol_1', policyNumber: 'POL-2026-00001', receiptStatus: 'Converted', amount: 11862.5, receiptsList: [line] };
 
@@ -65,7 +65,7 @@ define({
 define({
   method: 'GET', path: '/printReceipt', summary: 'Print receipts (one receiptId, or customer-code and date range) to a PDF download URL', screen: `${SCREEN} > Bulk print / Print`, middleware: read,
   query: { customerCodeFrom: 'CL-2026-00001', customerCodeTo: 'CL-2026-00099', createdAtFrom: '2026-09-01', createdAtTo: '2026-09-30' },
-  response: { success: true, message: 'Receipts exported', data: { url: 'http://host/api/upload/file/print/…pdf', filename: 'receipts.pdf', count: 2 } },
+  response: { success: true, message: 'Receipts exported', data: { url: 'http://host/api/s3/object/print/…pdf?exp=1767225600&sig=...', filename: 'receipts.pdf', count: 2 } },
   handler: async (req, res) => {
     const q = req.query;
     const from = q.customerCodeFrom || q.customerCode || null;

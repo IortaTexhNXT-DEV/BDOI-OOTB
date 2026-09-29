@@ -20,6 +20,17 @@ import moment from "moment";
 import userService from "../../../../../services/userService";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
+
+/** Only an IT administrator may grant the IT or business administrator role (the server enforces the same rule). */
+const PRIVILEGED_ROLES = ["it-admin", "ba"];
+const canGrantPrivileged = () => {
+  try {
+    return (JSON.parse(localStorage.getItem("USER_ROLES") || "[]") || []).includes("it-admin");
+  } catch {
+    return false;
+  }
+};
 
 const AddUser = ({ action }) => {
   const { t } = useTranslation();
@@ -27,6 +38,8 @@ const AddUser = ({ action }) => {
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
+  // temporary password of a user created without one (shown once)
+  const [temporary, setTemporary] = useState(null);
 
   const items = [
     { label: t("generalMasters.userManagement") },
@@ -61,6 +74,7 @@ const AddUser = ({ action }) => {
         setRoleOptions(
           roles
             .filter((role) => role.status !== "inactive")
+            .filter((role) => canGrantPrivileged() || !PRIVILEGED_ROLES.includes(role.code))
             .map((role) => ({ name: "roles", label: role.name, value: role.code }))
         )
       )
@@ -87,15 +101,8 @@ const AddUser = ({ action }) => {
       errors.roles = "At least one role is required";
     }
 
-    if (action === "add" && !values.password) {
-      errors.password = "Password is required";
-    } else if (
-      action === "add" &&
-      values.password &&
-      values.password.length < 6
-    ) {
-      errors.password = "Password must be at least 6 characters";
-    }
+    // Password is optional: left empty, the server generates a temporary password (shown once below) that the user
+    // must change at the first sign-in. A typed password is checked against the password policy by the server.
 
     return errors;
   };
@@ -118,15 +125,20 @@ const AddUser = ({ action }) => {
         }, 1500);
       }
       if (action === "add") {
-        await dispatch(postAddUserMiddleware(value)).unwrap();
+        const createdUser = await dispatch(postAddUserMiddleware(value)).unwrap();
         toastRef.current.showToast({
           severity: "success",
           summary: "Success",
           detail: "User created successfully",
         });
-        setTimeout(() => {
-          navigate("/master/generals/usermanagement/user");
-        }, 1500);
+        if (createdUser?.temporaryPassword) {
+          // shown once; the list opens when the administrator closes the dialog
+          setTemporary({ username: createdUser.username, temporaryPassword: createdUser.temporaryPassword });
+        } else {
+          setTimeout(() => {
+            navigate("/master/generals/usermanagement/user");
+          }, 1500);
+        }
       }
     } catch (error) {
       const errorMessage =
@@ -323,7 +335,7 @@ const AddUser = ({ action }) => {
                 label={t("generalMasters.password")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
-                placeholder={t("generalMasters.enter")}
+                placeholder={t("security.leaveEmptyForTemporary")}
                 type="password"
                 error={formik.touched.password && formik.errors.password}
               />
@@ -381,6 +393,13 @@ const AddUser = ({ action }) => {
         )}
       </div>
       <CustomToast ref={toastRef} />
+      <TemporaryPasswordDialog
+        result={temporary}
+        onHide={() => {
+          setTemporary(null);
+          navigate("/master/generals/usermanagement/user");
+        }}
+      />
     </div>
   );
 };

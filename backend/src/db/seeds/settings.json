@@ -431,5 +431,26 @@
     "group": "leads",
     "label": "Maximum age (years) for a lead or client date of birth",
     "type": "number"
+  },
+  {
+    "key": "security.api_rate_limit",
+    "value": {"max": 600, "windowSeconds": 60},
+    "group": "security",
+    "label": "API rate limit per signed-in user (or per IP without sign-in): max requests in windowSeconds (max 0 = off)",
+    "type": "json"
+  },
+  {
+    "key": "security.reset_code_max_attempts",
+    "value": 5,
+    "group": "security",
+    "label": "Wrong entries allowed for one password reset code before it is withdrawn",
+    "type": "number"
+  },
+  {
+    "key": "uploads.allowed_types",
+    "value": ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf", "text/csv", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"],
+    "group": "uploads",
+    "label": "File types users may upload (checked against the file signature, not the browser's claim)",
+    "type": "json"
   }
 ]

@@ -127,7 +127,7 @@ function approvalToken(quoteId, hours) {
   const base = crypto.randomInt(1e9);
   for (let n = base; n < base + 100000; n += 1) {
     const payload = { sub: quoteId, typ: 'quote-approval', n, iat, exp: iat + hours * 3600 };
-    if (!/[-_]/.test(Buffer.from(JSON.stringify(payload)).toString('base64url'))) return jwt.sign(payload, config.jwtSecret);
+    if (!/[-_]/.test(Buffer.from(JSON.stringify(payload)).toString('base64url'))) return jwt.sign(payload, config.jwtSecret, { algorithm: 'HS256' });
   }
   throw new Error('Could not generate an approval token');
 }
@@ -160,7 +160,7 @@ export async function sendForApproval(id, user) {
 /** Public link: preview or accept. The token must be the latest one issued for the quotation. */
 export async function approveByCustomer(token, preview) {
   let payload;
-  try { payload = jwt.verify(String(token || ''), config.jwtSecret); } catch { throw badRequest('This approval link is invalid or has expired'); }
+  try { payload = jwt.verify(String(token || ''), config.jwtSecret, { algorithms: ['HS256'] }); } catch { throw badRequest('This approval link is invalid or has expired'); }
   if (payload.typ !== 'quote-approval') throw badRequest('This approval link is invalid');
   const q = await getQuoteRow(payload.sub);
   if (q.approval_token_hash !== sha(String(token))) throw badRequest('This approval link has been replaced by a newer one');

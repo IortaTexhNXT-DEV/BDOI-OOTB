@@ -1,6 +1,6 @@
 /** Read the first worksheet of an .xlsx file (or a CSV) into row objects keyed by camel-cased header names. */
-import zlib from 'node:zlib';
 import { badRequest } from '../../../lib/errors.js';
+import { assertRowLimit, inflateEntry } from '../../../lib/uploadLimits.js';
 
 function unzip(buf) {
   let eocd = -1;
@@ -16,7 +16,7 @@ function unzip(buf) {
     const local = buf.readUInt32LE(p + 42); const name = buf.toString('utf8', p + 46, p + 46 + nameLen);
     const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
     const raw = buf.subarray(start, start + size);
-    files[name] = () => (method === 8 ? zlib.inflateRawSync(raw) : raw).toString('utf8');
+    files[name] = () => inflateEntry(raw, method).toString('utf8');
     p += 46 + nameLen + extraLen + commentLen;
   }
   return files;
@@ -45,6 +45,7 @@ function xlsxRows(buf) {
       row[ref ? colIndex(ref) : row.length] = val;
     }
     rows.push(row);
+    assertRowLimit(rows.length - 1);
   }
   return rows;
 }
@@ -57,6 +58,7 @@ function csvRows(text) {
     else if (ch === ',') { row.push(cell); cell = ''; } else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && text[i + 1] === '\n') i += 1;
       row.push(cell); rows.push(row); row = []; cell = '';
+      assertRowLimit(rows.length - 1);
     } else cell += ch;
   }
   if (cell !== '' || row.length) { row.push(cell); rows.push(row); }

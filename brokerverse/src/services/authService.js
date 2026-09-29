@@ -1,4 +1,5 @@
 import { BASE_URL } from "../utility/constant";
+import { refreshAccessToken } from "../utility/sessionRefresh";
 
 /**
  * Authentication Service
@@ -36,51 +37,13 @@ class AuthService {
    * @returns {Promise<Object>} Login response with tokens and user data
    */
   async login(username, password) {
-    const startTime = performance.now();
-
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // Reduced to 8 seconds
-      const response = await fetch(`${this.baseURL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-        signal: controller.signal,
+      const data = await this.authCall("/auth/login", {
+        body: { username, password, deviceId: this.storeDeviceId() },
+        timeout: 15000,
       });
-
-      clearTimeout(timeoutId);
-      const apiTime = performance.now() - startTime;
-      console.log(`API call took ${apiTime.toFixed(2)}ms`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
-      }
-
-      const data = await response.json();
-
-      // Store tokens and user data in localStorage
-      this.setTokens(data);
-      this.setUser(data.user);
-
-      const totalTime = performance.now() - startTime;
-      console.log(`Total login process took ${totalTime.toFixed(2)}ms`);
-
-      // Store deviceId for session tracking
-      this.storeDeviceId();
-
-      return {
-        success: true,
-        data: data,
-      };
+      return this.signInStep(data);
     } catch (error) {
-      const totalTime = performance.now() - startTime;
-      console.error(`Login error after ${totalTime.toFixed(2)}ms:`, error);
       return {
         success: false,
         error:
@@ -89,6 +52,130 @@ class AuthService {
             : error.message || "Login failed",
       };
     }
+  }
+
+  /**
+   * Classify a sign-in answer. Only a full session (access + refresh token) is stored; the intermediate steps
+   * (two-factor code, forced two-factor enrolment, required password change) keep their short-lived token in the
+   * screen's memory and never reach localStorage.
+   * @returns {{ success: true, step: "done"|"twoFactor"|"enrol2fa"|"changePassword", data: Object }}
+   */
+  signInStep(data) {
+    if (data?.twoFactorRequired) return { success: true, step: "twoFactor", data };
+    if (data?.twoFactorSetupRequired) return { success: true, step: "enrol2fa", data };
+    if (data?.passwordChangeRequired) return { success: true, step: "changePassword", data };
+    this.startSession(data);
+    return { success: true, step: "done", data };
+  }
+
+  /** Store a full sign-in payload (tokens and user). */
+  startSession(data) {
+    if (!data?.accessToken || !data?.refreshToken) throw new Error("Sign-in did not return a session");
+    this.setTokens(data);
+    if (data.user) this.setUser(data.user);
+    this.storeDeviceId();
+    this.clearAuthCache();
+  }
+
+  /**
+   * JSON call to an /auth endpoint. `token` is sent as the bearer (a restricted sign-in token or the session's).
+   * Throws an Error with the API message (and .status, .errors) on failure.
+   */
+  async authCall(path, { method = "POST", body, token, timeout = 10000 } = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    try {
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const response = await fetch(`${this.baseURL}${path}`, {
+        method,
+        headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
+        signal: controller.signal,
+        // never retried with the stored session token (the bearer may be a restricted sign-in token)
+        __bvRetried: true,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(data.message || `Request failed (${response.status})`);
+        error.status = response.status;
+        error.errors = data.errors;
+        error.retryAfter = data.retryAfter;
+        throw error;
+      }
+      return data;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /** Second sign-in step: the 6-digit authenticator code. */
+  async verifyTwoFactor(challengeToken, code) {
+    const data = await this.authCall("/auth/login/2fa", {
+      body: { challengeToken, code: String(code).trim(), deviceId: this.storeDeviceId() },
+    });
+    return this.signInStep(data);
+  }
+
+  /** Password rules from System Settings (minLength, requireUpper/Lower/Digit/Symbol, historyCount, maxAgeDays). */
+  async getPasswordPolicy() {
+    const data = await this.authCall("/auth/password-policy", { method: "GET" });
+    return data.data || {};
+  }
+
+  /**
+   * Change the password. With `token` (the restricted token of a sign-in that requires a new password) the answer
+   * completes the sign-in; in a normal session the server ends the other sessions and returns new tokens.
+   */
+  async changePassword({ currentPassword, newPassword }, token) {
+    const bearer = token || (await this.freshAccessToken());
+    const data = await this.authCall("/auth/change-password", {
+      body: { currentPassword, newPassword, deviceId: this.storeDeviceId() },
+      token: bearer,
+    });
+    if (token) return this.signInStep(data);
+    if (data.accessToken && data.refreshToken) this.startSession(data);
+    return { success: true, step: "done", data };
+  }
+
+  /** Forgot password: ask for a reset code by username or e-mail (the answer never says whether the account exists). */
+  async requestPasswordReset(usernameOrEmail) {
+    const value = String(usernameOrEmail || "").trim();
+    return this.authCall("/auth/forgot-password", { body: value.includes("@") ? { email: value } : { username: value } });
+  }
+
+  /** Reset the password with the e-mailed code. */
+  async resetPassword({ usernameOrEmail, code, newPassword }) {
+    const value = String(usernameOrEmail || "").trim();
+    return this.authCall("/auth/reset-password", {
+      body: { ...(value.includes("@") ? { email: value } : { username: value }), code: String(code).trim(), newPassword },
+    });
+  }
+
+  /** Two-factor authentication of the signed-in user (or of a restricted enrolment token). */
+  async twoFactorStatus(token) {
+    return (await this.authCall("/auth/2fa/status", { method: "GET", token: token || (await this.freshAccessToken()) })).data || {};
+  }
+
+  async twoFactorSetup(token) {
+    return (await this.authCall("/auth/2fa/setup", { token: token || (await this.freshAccessToken()) })).data || {};
+  }
+
+  /** Confirm enrolment. After a forced enrolment (restricted token) the answer continues the sign-in. */
+  async twoFactorEnable(code, token) {
+    const data = await this.authCall("/auth/2fa/enable", { body: { code: String(code).trim() }, token: token || (await this.freshAccessToken()) });
+    if (token) return this.signInStep(data);
+    return { success: true, step: "done", data };
+  }
+
+  async twoFactorDisable(code) {
+    return this.authCall("/auth/2fa/disable", { body: { code: String(code).trim() }, token: await this.freshAccessToken() });
+  }
+
+  /** The session's access token, renewed first when it is about to expire (/auth calls bypass the 401 retry). */
+  async freshAccessToken() {
+    if (this.needsRefresh() && this.getRefreshToken()) await refreshAccessToken();
+    return this.getAccessToken();
   }
 
   /**
@@ -181,25 +268,12 @@ class AuthService {
       return false;
     }
 
-    // Check if token is expired
+    // Access tokens are short-lived; with a refresh token the session continues (the next API call renews it).
+    if (this.getRefreshToken()) return true;
     const currentTime = new Date().getTime();
     const tokenExpiry = parseInt(expiry);
 
     return currentTime < tokenExpiry;
-  }
-
-  /**
-   * Get authorization header for API requests
-   * @returns {Object} Authorization header object
-   */
-  getAuthHeader() {
-    const token = this.getAccessToken();
-    if (token) {
-      return {
-        Authorization: `Bearer ${token}`,
-      };
-    }
-    return {};
   }
 
   /**

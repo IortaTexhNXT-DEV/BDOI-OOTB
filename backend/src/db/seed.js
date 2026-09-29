@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { pool, query } from './pool.js';
+import { encryptSecret, isEncrypted } from '../lib/secrets.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,11 +22,13 @@ export const ROLES = [
 ];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit'];
 // write:receipts (official receipts, cash posting, payment verification) is finance-only: segregation of duties (D61).
+// Least privilege (D92): the receipt register (read:receipts) is finance's; sales and customer services see a policy's
+// payments through read:policies. Claims officers read the lead through the policy, not the lead register.
 const ROLE_PERMS = {
-  sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'receipts:read', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
+  sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
   underwriting: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
-  'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'receipts:read', 'reports', 'notifications', 'masters:read', 'products:read'],
-  claims: ['profile', 'leads:read', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
+  'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read'],
+  claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
   // Agents work their own book (record scoping: security.scoped_roles): endorsements and first notice of loss on their own
   // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
@@ -58,9 +61,10 @@ export async function seed({ log = console.log } = {}) {
   // An existing administrator keeps the password it has.
   const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
   const adminHash = await bcrypt.hash(adminPassword, 10);
-  const admin = await query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, status, created_by)
-    VALUES ('BrokerVerse', $1, 'BrokerVerse Administrator', 'BrokerVerse', 'Admin', 'admin@brokerverse.local', 'active', 'seed')
-    ON CONFLICT (username) DO UPDATE SET display_name = EXCLUDED.display_name RETURNING id, (xmax = 0) AS inserted`, [adminHash]);
+  // A generated password is temporary: the administrator must change it at the first sign-in.
+  const admin = await query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, status, created_by, must_change_password)
+    VALUES ('BrokerVerse', $1, 'BrokerVerse Administrator', 'BrokerVerse', 'Admin', 'admin@brokerverse.local', 'active', 'seed', $2)
+    ON CONFLICT (username) DO UPDATE SET display_name = EXCLUDED.display_name RETURNING id, (xmax = 0) AS inserted`, [adminHash, !process.env.ADMIN_PASSWORD]);
   if (admin.rows[0].inserted && !process.env.ADMIN_PASSWORD) log(`administrator BrokerVerse created with password ${adminPassword} (change it after the first sign-in)`);
   await query('INSERT INTO user_roles(user_id, role_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [admin.rows[0].id, roleIds['it-admin']]);
   // Configuration defaults (all editable from System Settings)
@@ -69,6 +73,14 @@ export async function seed({ log = console.log } = {}) {
     await query(`INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (key) DO NOTHING`,
       [s.key, JSON.stringify(s.value), s.group, s.label, s.type || 'string', s.editable !== false]);
   }
+  // Two-factor secrets stored before encryption at rest (DATA_ENCRYPTION_KEY) was introduced are encrypted now.
+  const plain = await query(`SELECT id, totp_secret, totp_pending_secret FROM users
+    WHERE (totp_secret IS NOT NULL AND totp_secret NOT LIKE 'enc:%') OR (totp_pending_secret IS NOT NULL AND totp_pending_secret NOT LIKE 'enc:%')`);
+  for (const u of plain.rows) {
+    await query('UPDATE users SET totp_secret = $2, totp_pending_secret = $3 WHERE id = $1',
+      [u.id, isEncrypted(u.totp_secret) ? u.totp_secret : encryptSecret(u.totp_secret), isEncrypted(u.totp_pending_secret) ? u.totp_pending_secret : encryptSecret(u.totp_pending_secret)]);
+  }
+  if (plain.rows.length) log(`encrypted the two-factor secrets of ${plain.rows.length} user(s)`);
   const jobs = JSON.parse(fs.readFileSync(path.join(here, 'seeds', 'jobs.json'), 'utf8'));
   for (const j of jobs) {
     await query(`INSERT INTO scheduled_jobs(code, name, description, cron, handler, params, enabled) VALUES ($1,$2,$3,$4,$5,$6,$7)

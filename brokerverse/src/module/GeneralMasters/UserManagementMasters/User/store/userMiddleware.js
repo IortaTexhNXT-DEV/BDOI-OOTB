@@ -54,7 +54,8 @@ export const postAddUserMiddleware = createAsyncThunk(
         username: payload?.username,
         email: payload?.email,
         displayName: payload?.displayName,
-        password: payload?.password,
+        // empty: the server generates a temporary password
+        password: payload?.password || undefined,
         roles: Array.isArray(payload?.roles) ? payload.roles : [],
         permissions: payload?.permissions || [],
       };

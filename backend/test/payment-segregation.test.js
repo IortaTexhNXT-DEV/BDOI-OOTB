@@ -66,7 +66,7 @@ describe('D61: official receipts are finance-only', () => {
       WHERE p.code = 'write:receipts' ORDER BY r.code`);
     expect(holders.map((r) => r.code)).toEqual(['ba', 'finance', 'it-admin']);
     const sales = await q(`SELECT p.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id WHERE r.code = 'sales' AND p.module = 'receipts'`);
-    expect(sales.map((r) => r.code)).toEqual(['read:receipts']);
+    expect(sales.map((r) => r.code)).toEqual([]); // D92: the receipt register is finance-only too
     // an existing database seeded before the fix
     await q(`INSERT INTO role_permissions(role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p WHERE r.code = 'sales' AND p.code = 'write:receipts'`);
     const sql = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/db/migrations/0084_finance_only_receipts.sql'), 'utf8');

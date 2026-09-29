@@ -1,4 +1,4 @@
-import multer from 'multer';
+import { importUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
@@ -16,7 +16,7 @@ const { router, define } = moduleRouter('Disbursements', '/disbursements');
 const read = [requireAuth, requirePermission('read:disbursements')];
 const write = [requireAuth, requirePermission('write:disbursements')];
 const SCREEN = 'Accounts > Disbursement (Payment Voucher)';
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = importUpload();
 const PAYEE_TYPES = ['Customer', 'Client', 'Insurer', 'Agent/Referrer', 'Supplier'];
 const example = { disbursementId: 'pv_1', voucherNumber: 'PV-2026-00001', transactionNumber: 'DT-2026-00001', voucherDate: '2026-09-28', payeeType: 'Insurer', payeeName: 'Malayan Insurance Co., Inc.', customerCode: 'CL-2026-00001', insurerName: 'Malayan Insurance Co., Inc.', policyNumber: 'POL-2026-00001', amount: 12500, status: 'draft' };
 
@@ -50,7 +50,7 @@ define({
 define({
   method: 'GET', path: '/printDisbursement', summary: 'Print vouchers for a customer-code and date range (PDF download URL)', screen: `${SCREEN} > Bulk print`, middleware: read,
   query: { customerCodeFrom: 'CL-2026-00001', customerCodeTo: 'CL-2026-00099', createdAtFrom: '2026-09-01', createdAtTo: '2026-09-30' },
-  response: { success: true, message: 'Disbursements exported', data: { url: 'http://host/api/upload/file/print/…pdf', filename: 'disbursements.pdf', count: 3 } },
+  response: { success: true, message: 'Disbursements exported', data: { url: 'http://host/api/s3/object/print/…pdf?exp=1767225600&sig=...', filename: 'disbursements.pdf', count: 3 } },
   handler: async (req, res) => {
     const q = req.query;
     const rows = (await pool.query(`SELECT * FROM disbursements WHERE ($1::text IS NULL OR customer_code >= $1) AND ($2::text IS NULL OR customer_code <= $2)

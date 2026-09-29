@@ -2,12 +2,11 @@
  * Tabular import / export shared by the bulk-upload and report endpoints: multipart upload (field "file"),
  * CSV and XLSX parsing into objects keyed by normalised header, and CSV / XLSX downloads.
  */
-import multer from 'multer';
+import { assertRowLimit, importUpload } from '../../lib/uploadLimits.js';
 import { badRequest } from '../../lib/errors.js';
 import { readXlsx, writeXlsx } from './xlsx.js';
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
-export const uploadFile = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_UPLOAD_BYTES } }).single('file');
+export const uploadFile = importUpload().single('file');
 
 /** RFC 4180 CSV parser (quoted fields, escaped quotes, CRLF). */
 export function parseCsv(text) {
@@ -24,6 +23,7 @@ export function parseCsv(text) {
     else if (ch === ',') { row.push(field); field = ''; } else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && s[i + 1] === '\n') i += 1;
       row.push(field); rows.push(row); row = []; field = '';
+      assertRowLimit(rows.length - 1);
     } else field += ch;
   }
   if (field !== '' || row.length) { row.push(field); rows.push(row); }

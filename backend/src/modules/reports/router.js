@@ -48,7 +48,7 @@ define({
 });
 define({
   method: 'GET', path: '/generated/:id/download', summary: 'Download a generated report file (bearer token or signed ?token= link)', screen: 'Reports > * > Generate (download)',
-  middleware: [optionalAuth], permissions: ['read:reports (or signed link token)'], query: { token: '<signed link token from downloadUrl>' }, response: '(file: text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet or application/pdf)',
+  auth: false, middleware: [optionalAuth], permissions: ['read:reports (or signed link token)'], query: { token: '<signed link token from downloadUrl>' }, response: '(file: text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet or application/pdf)',
   handler: async (req, res) => {
     if (req.user && !(req.user.roles.some((r) => ['it-admin', 'ba'].includes(r)) || req.user.permissions.includes('read:reports')) && !req.query.token) {
       res.status(403).json({ success: false, message: 'Requires permission: read:reports' });

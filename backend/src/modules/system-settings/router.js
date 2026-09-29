@@ -1,4 +1,4 @@
-import multer from 'multer';
+import { memoryUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
@@ -13,7 +13,7 @@ import * as svc from './service.js';
  */
 const { router, define } = moduleRouter('System Settings', '/system-settings');
 // Files are held in memory and validated against uploads.image_max_bytes before being written to UPLOAD_DIR.
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024, files: 1 } });
+const upload = memoryUpload({ files: 1 });
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 const SCREEN = 'Master > System Settings';
 const example = {

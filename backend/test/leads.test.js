@@ -156,8 +156,8 @@ describe('leads', () => {
 
   it('enforces permissions', async () => {
     expect((await finance('post', '/leads').send(body)).status).toBe(403);
-    // claims officers read leads (claim intake shows the holder from the lead) but cannot create them
-    expect((await claims('get', '/leads')).status).toBe(200);
+    // D92: claims officers do not read the lead register (the policy embeds its lead) and cannot create leads
+    expect((await claims('get', '/leads')).status).toBe(403);
     expect((await claims('post', '/leads').send(body)).status).toBe(403);
     expect((await finance('get', '/leads')).status).toBe(403);
     expect((await request(ctx.app).get('/api/leads')).status).toBe(401);

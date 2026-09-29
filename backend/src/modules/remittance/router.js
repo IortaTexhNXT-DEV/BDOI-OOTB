@@ -1,4 +1,4 @@
-import multer from 'multer';
+import { importUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
@@ -15,7 +15,7 @@ import { commissionDebitNoteDoc } from '../documents/templates.js';
 const { router, define } = moduleRouter('Remittance', '/remittance');
 const read = canRead('remittance');
 const write = canWrite('remittance');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024, files: 1 } });
+const upload = importUpload();
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 const S = (name) => `Accounts > Remittance > ${name}`;
 const rem = { id: 'rm_1', remittanceNo: 'REM-2026-00001', remittanceDate: '2026-09-15', insurerCode: 'MALAYAN', insurerName: 'Malayan Insurance Co., Inc.', policyCount: 3, grossAmount: 45000, commission: 6750, tax: 0, netAmount: 38250, status: 'Pending Approval', statusCode: 'for-approval' };

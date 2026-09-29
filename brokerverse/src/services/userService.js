@@ -369,6 +369,36 @@ class UserService {
   setUserStatus(userId, status) {
     return this.request(`/users/${encodeURIComponent(userId)}/status`, { method: "PATCH", body: { status } });
   }
+
+  /** Unlock an account locked after too many failed sign-ins (status active, failed sign-ins cleared). */
+  unlockUser(userId) {
+    return this.setUserStatus(userId, "active");
+  }
+
+  /**
+   * Administrator password reset: the server generates a temporary password, returns it once
+   * ({ userId, mustChangePassword, temporaryPassword }) and ends the user's sessions.
+   */
+  resetUserPassword(userId) {
+    return this.request(`/users/${encodeURIComponent(userId)}/reset-password`, { method: "POST", body: { mustChangePassword: true } });
+  }
+
+  /** Turn off a user's two-factor authentication (lost phone); the user enrols again. */
+  resetUserTwoFactor(userId) {
+    return this.request(`/users/${encodeURIComponent(userId)}/2fa/reset`, { method: "POST", body: {} });
+  }
+
+  /** Sign-in history of a user: { items, total, page, perPage } (GET /users/:id/login-history). */
+  async getLoginHistory(userId, { page = 1, perPage = 10, success } = {}) {
+    const q = new URLSearchParams({ page: String(page), perPage: String(perPage) });
+    if (success !== undefined && success !== null && success !== "") q.set("success", String(success));
+    const response = await fetch(`${this.baseURL}/users/${encodeURIComponent(userId)}/login-history?${q}`, {
+      headers: { Accept: "application/json", ...authService.getAuthHeader() },
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || json.success === false) throw new Error(apiErrorMessage(json, response.status));
+    return { items: json.data || [], total: json.total || 0, page: json.page || page, perPage: json.perPage || perPage };
+  }
 }
 
 const userService = new UserService();

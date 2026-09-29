@@ -21,12 +21,15 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: DATA_ENCRYPTION_KEY
+        generateValue: true    # encrypts two-factor secrets; keep it with the database backups (docs/DEPLOY.md)
       - key: ADMIN_PASSWORD
         sync: false
       - key: CORS_ORIGINS
-        sync: false            # set to the brokerverse-web URL, e.g. https://brokerverse-web.onrender.com
+        sync: false            # required: the brokerverse-web URL, e.g. https://brokerverse-web.onrender.com ("*" is refused)
       - key: PUBLIC_BASE_URL
-        sync: false            # set to this service's URL, e.g. https://brokerverse-api.onrender.com
+        sync: false            # required: this service's URL, e.g. https://brokerverse-api.onrender.com
+      # The API refuses to start in production without JWT_SECRET, DATA_ENCRYPTION_KEY, CORS_ORIGINS and PUBLIC_BASE_URL.
       - key: UPLOAD_DIR
         value: /app/uploads
     disk:
