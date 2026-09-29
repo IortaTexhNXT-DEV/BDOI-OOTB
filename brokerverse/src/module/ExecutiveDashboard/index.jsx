@@ -20,6 +20,7 @@ import { numberLocale } from "../../utility/currencyConverter";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
+import { formatPercent, progressValue } from "../../utility/numberFormat";
 
 const SETTINGS_PATH = "/master/configuration/system-settings";
 /**
@@ -60,7 +61,7 @@ const CURRENCY_KPIS = ["totalRevenue", "newBusiness"];
 const PERCENT_KPIS = ["claimsRatio", "retentionRate", "customerSatisfaction"];
 
 const formatChange = (change) =>
-  change === undefined || change === null ? null : `${change >= 0 ? "+" : ""}${change}%`;
+  change === undefined || change === null ? null : `${change >= 0 ? "+" : ""}${formatPercent(change)}`;
 
 const ExecutiveDashboard = () => {
   const { t } = useTranslation();
@@ -117,7 +118,7 @@ const ExecutiveDashboard = () => {
   const formatKpiValue = (key, value) => {
     if (value === null || value === undefined) return "-";
     if (CURRENCY_KPIS.includes(key)) return money(value);
-    if (PERCENT_KPIS.includes(key)) return `${value}%`;
+    if (PERCENT_KPIS.includes(key)) return formatPercent(value);
     return Number(value).toLocaleString(numberLocale());
   };
 
@@ -221,7 +222,7 @@ const ExecutiveDashboard = () => {
   const marketShareTemplate = (rowData) => {
     return (
       <ProgressBar
-        value={rowData.marketShare}
+        value={progressValue(rowData.marketShare, 1)}
         showValue={true}
         style={{ height: "20px" }}
       />
@@ -462,7 +463,7 @@ const ExecutiveDashboard = () => {
             <Column field="product" header={t("executiveDashboard.product")} />
             <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => money(row.premium)} />
             <Column field="policies" header={t("executiveDashboard.policies")} />
-            <Column field="claimRatio" header={t("executiveDashboard.claimRatio")} body={(row) => `${row.claimRatio}%`} />
+            <Column field="claimRatio" header={t("executiveDashboard.claimRatio")} body={(row) => formatPercent(row.claimRatio)} />
           </DataTable>
         </Card>
 
@@ -476,7 +477,7 @@ const ExecutiveDashboard = () => {
             <Column field="name" header={t("executiveDashboard.agent")} />
             <Column field="branch" header={t("executiveDashboard.branch")} />
             <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => money(row.premium)} />
-            <Column field="conversion" header={t("executiveDashboard.conversion")} body={(row) => `${row.conversion}%`} />
+            <Column field="conversion" header={t("executiveDashboard.conversion")} body={(row) => formatPercent(row.conversion)} />
             <Column field="policies" header={t("executiveDashboard.policies")} />
           </DataTable>
         </Card>

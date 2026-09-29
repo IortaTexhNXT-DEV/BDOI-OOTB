@@ -550,7 +550,7 @@ const CustomerInfo = ({ action }) => {
             {leadData
               ? `${leadData.firstName || ""} ${leadData.lastName || ""} / ${t("agent.leadIdLabel")} ${leadData.generatedLeadId || ""}`
               : quotationDetails?.leadRefId
-              ? `${t("agent.leadIdLabel")} ${quotationDetails.leadRefId}`
+              ? `${t("agent.leadIdLabel")} ${quotationDetails.lead?.generatedLeadId || ""}`
               : t("agent.loadingLeadData")}
           </div>
         </div>

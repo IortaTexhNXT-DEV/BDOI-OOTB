@@ -196,8 +196,8 @@ const UploadEndorsement = () => {
         >
           <SvgLeftArrow />
           <div className="upload__endorsement__container__back__btn__title">
-            {state?.clientName || "Client"} / Client ID :{" "}
-            {state?.clientNumber || endorsementId}
+            {state?.clientName || "Client"}
+            {state?.clientNumber && <> / Client ID : {state.clientNumber}</>}
           </div>
         </div>
       </div>

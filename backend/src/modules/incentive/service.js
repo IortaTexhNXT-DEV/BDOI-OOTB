@@ -9,6 +9,7 @@ import { today } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
 import { assertChecker, fileUrl, isoDate, lastMonths, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { getLetterhead } from '../../lib/letterhead.js';
 
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
@@ -394,12 +395,19 @@ export async function agentPrograms(agentId) {
   return out;
 }
 
+/** Contact block of the statement: the letterhead company (Company master, primary company) name, e-mail and phone. */
+async function statementContact() {
+  const l = await getLetterhead();
+  return { companyName: l.name || '', email: l.email || '', phone: l.phone || '' };
+}
+const periodLabels = (keys) => [...new Set(keys.filter(Boolean))].sort().map((k) => parsePeriod(k).label);
+
 /** Statement shape with no agent: the period label and zero totals. */
 export async function emptyStatement(periodRef) {
   const t = await today();
   const period = parsePeriod(periodRef || t.slice(0, 7));
   return { agentId: null, agentName: '', agentCode: '', branch: '', period: period.label, statementDate: t, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0,
-    lastPayment: 0, lastPaymentDate: null, programBreakdown: [], monthlyTrend: [] };
+    lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], programBreakdown: [], monthlyTrend: [], contact: await statementContact() };
 }
 
 export async function statement(agentId, periodRef) {
@@ -412,13 +420,16 @@ export async function statement(agentId, periodRef) {
   const earned = (statuses, extra = '', params = []) => one(`SELECT COALESCE(sum(payout), 0) AS v FROM incentive_results WHERE agent_user_id = $1 AND status = ANY($2) ${extra}`, [a.id, statuses, ...params]);
   const ytd = await earned(['Approved', 'Paid'], 'AND left(period, 4) = $3', [key.slice(0, 4)]);
   const pending = await earned(['Approved']);
-  const last = await one('SELECT paid_at, sum(payout) AS v FROM incentive_results WHERE agent_user_id = $1 AND status = \'Paid\' GROUP BY paid_at ORDER BY paid_at DESC LIMIT 1', [a.id]);
+  const last = await one('SELECT paid_at, sum(payout) AS v, array_agg(DISTINCT period) AS periods FROM incentive_results WHERE agent_user_id = $1 AND status = \'Paid\' GROUP BY paid_at ORDER BY paid_at DESC LIMIT 1', [a.id]);
+  const pendingPeriods = (await many('SELECT DISTINCT period FROM incentive_results WHERE agent_user_id = $1 AND status = \'Approved\'', [a.id])).map((r) => r.period);
   const months = lastMonths(13, new Date(`${key}-01T00:00:00Z`));
   const trend = await many('SELECT period, COALESCE(sum(payout), 0) AS v FROM incentive_results WHERE agent_user_id = $1 AND status IN (\'Approved\', \'Paid\') AND period >= $2 GROUP BY period', [a.id, months[0].key]);
   return {
     agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, period: period.label, statementDate: (await today()),
     totalEarnings: round2(lines.filter((l) => ['Approved', 'Paid'].includes(l.status)).reduce((s, l) => s + Number(l.payout), 0)), ytdEarnings: round2(ytd.v), pendingPayment: round2(pending.v),
     lastPayment: last ? round2(last.v) : 0, lastPaymentDate: last?.paid_at ? new Date(last.paid_at).toISOString().slice(0, 10) : null,
+    // incentive periods of the last payment and of the approved, unpaid results (labels such as "August 2026")
+    lastPaymentPeriods: periodLabels(last?.periods || []), pendingPeriods: periodLabels(pendingPeriods), contact: await statementContact(),
     programBreakdown: lines.map((l) => ({ program: l.name, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
     monthlyTrend: months.map(({ key: k }) => ({ month: new Date(`${k}-01T00:00:00Z`).toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }) + '-' + k.slice(2, 4), period: k, earnings: round2(trend.find((t) => t.period === k)?.v || 0) })),
   };

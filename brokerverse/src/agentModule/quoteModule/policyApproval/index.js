@@ -85,7 +85,7 @@ const PolicyApproval = () => {
               {leadData
                 ? `${leadData.firstName || ""} ${leadData.lastName || ""} / Lead ID: ${leadData.generatedLeadId || ""}`
                 : quotationDetails?.leadRefId
-                ? `Lead ID: ${quotationDetails.leadRefId}`
+                ? `Lead ID: ${quotationDetails.lead?.generatedLeadId || ""}`
                 : "Loading lead data..."}
             </div>
           </div>

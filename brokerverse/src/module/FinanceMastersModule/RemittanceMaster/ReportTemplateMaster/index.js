@@ -18,6 +18,7 @@ import remittanceService from "../../../../services/remittanceService";
 import { showError } from "../../../Remittance/shared";
 import { saveAndReturn } from "../masterRecord";
 import "./index.scss";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const ReportTemplateMaster = () => {
   const { t } = useTranslation();
@@ -290,7 +291,7 @@ const ReportTemplateMaster = () => {
                   style={{ width: '15%' }}
                 />
                 <Column
-                  field="generatedOn"
+                  field="generatedOn" body={(row) => formatAppDate(row.generatedOn)}
                   header="Generated On"
                   style={{ width: '20%' }}
                 />

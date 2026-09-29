@@ -18,6 +18,7 @@ import reinsuranceService from '../../../services/reinsuranceService';
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { canOpen } from "../../../utils/canOpen";
 import './style.scss';
+import { progressValue } from "../../../utility/numberFormat";
 
 const RENEWAL_WINDOW_DAYS = 90;
 
@@ -114,7 +115,7 @@ const TreatyDashboard = () => {
     return (
       <div className="utilization-cell">
         <ProgressBar
-          value={rowData.utilization}
+          value={progressValue(rowData.utilization, 1)}
           color={color}
           showValue={true}
           style={{ height: '20px' }}
@@ -254,7 +255,7 @@ const TreatyDashboard = () => {
             <span className="metric-label">Average Utilization</span>
             <div className="knob-container">
               <Knob
-                value={averageUtilization}
+                value={progressValue(averageUtilization)}
                 size={80}
                 strokeWidth={8}
                 valueColor="#4caf50"
@@ -335,7 +336,7 @@ const TreatyDashboard = () => {
                   </div>
                   <div className="capacity-row">
                     <span>Utilization:</span>
-                    <ProgressBar value={treaty.utilization} showValue />
+                    <ProgressBar value={progressValue(treaty.utilization, 1)} showValue />
                   </div>
                   <div className="capacity-row">
                     <span>Premium Ceded:</span>

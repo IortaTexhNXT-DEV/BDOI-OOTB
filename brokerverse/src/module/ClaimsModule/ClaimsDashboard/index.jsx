@@ -15,6 +15,7 @@ import { BASE_URL } from "../../../utility/constant";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { formatPercent } from "../../../utility/numberFormat";
 
 const pad = (n) => String(n).padStart(2, "0");
 const toIsoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -417,7 +418,7 @@ const ClaimsDashboard = () => {
                   {kpiData.highestClaimsCategory}
                 </span>
                 <span className="kpi-percentage">
-                  {kpiData.highestClaimsPercentage}%
+                  {formatPercent(kpiData.highestClaimsPercentage)}
                 </span>
               </div>
             </div>
@@ -433,7 +434,7 @@ const ClaimsDashboard = () => {
                 <span className="kpi-label">{t("claimsDashboard.maxClaimsByState")}</span>
                 <span className="kpi-value">{kpiData.maxClaimsByState}</span>
                 <span className="kpi-percentage">
-                  {kpiData.statePercentage}%
+                  {formatPercent(kpiData.statePercentage)}
                 </span>
               </div>
             </div>

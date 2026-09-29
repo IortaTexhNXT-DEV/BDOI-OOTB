@@ -15,7 +15,7 @@ import { Tag } from "primereact/tag";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Paginator } from "primereact/paginator";
 import accountingService from "../../../services/accountingService";
-import { calendarDateFormat } from "../../../utility/dateFormat";
+import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const EntryTypeBadge = ({ entryType, t }) => {
@@ -101,18 +101,8 @@ const AmountCell = ({ amount, debitCredit }) => {
   );
 };
 
-const DateCell = ({ dateString }) => {
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  return formatDate(dateString);
-};
+// Dates in the configured display format (System Settings, general.date_format), not ISO
+const DateCell = ({ dateString }) => formatDate(dateString, { empty: "" });
 
 const AllClientsAccountingView = () => {
   const { t } = useTranslation();

@@ -21,6 +21,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
+import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
 
 const RetentionAnalytics = () => {
   const { t } = useTranslation();
@@ -256,9 +257,7 @@ const RetentionAnalytics = () => {
     });
   };
 
-  const formatPercentage = (value, decimals = 1) => {
-    return `${Number(value ?? 0).toFixed(decimals)}%`;
-  };
+  const formatPercentage = (value, decimals = 1) => formatPercent(value ?? 0, { decimals });
 
   const getRiskSeverity = (risk) => {
     if (risk >= 90) return 'danger';
@@ -288,7 +287,7 @@ const RetentionAnalytics = () => {
   const renewalRateTemplate = (rowData) => {
     return (
       <div className="rate-cell">
-        <ProgressBar value={rowData.renewalRate} style={{ width: '80px', height: '8px' }} />
+        <ProgressBar value={progressValue(rowData.renewalRate)} showValue={false} style={{ width: '80px', height: '8px' }} />
         <span>{formatPercentage(rowData.renewalRate)}</span>
       </div>
     );
@@ -306,7 +305,7 @@ const RetentionAnalytics = () => {
     };
 
     return (
-      <Tag value={`${rowData.avgCycleTime} days`} severity={getTimeColor(rowData.avgCycleTime)} />
+      <Tag value={formatWithUnit(rowData.avgCycleTime, "days")} severity={getTimeColor(rowData.avgCycleTime)} />
     );
   };
 
@@ -394,7 +393,7 @@ const RetentionAnalytics = () => {
             <div className="kpi-content">
               <div className="kpi-visual">
                 <Knob
-                  value={Number(analyticsData.overall?.renewalRate ?? 0)}
+                  value={progressValue(analyticsData.overall?.renewalRate)}
                   size={80}
                   readOnly
                   valueColor="#3B82F6"
@@ -413,7 +412,7 @@ const RetentionAnalytics = () => {
             <div className="kpi-content">
               <div className="kpi-visual">
                 <Knob
-                  value={Number(analyticsData.overall?.premiumRetention ?? 0)}
+                  value={progressValue(analyticsData.overall?.premiumRetention)}
                   size={80}
                   readOnly
                   valueColor="#10B981"
@@ -438,7 +437,7 @@ const RetentionAnalytics = () => {
               </div>
               <div className="kpi-info">
                 <span className="kpi-label">Avg Cycle Time</span>
-                <span className="kpi-value">{analyticsData.overall?.avgCycleTime ?? 0} days</span>
+                <span className="kpi-value">{formatWithUnit(analyticsData.overall?.avgCycleTime ?? 0, "days")}</span>
                 <span className="kpi-change">From renewal opened to renewed</span>
               </div>
             </div>
@@ -514,7 +513,7 @@ const RetentionAnalytics = () => {
                         <div className="product-premium">
                           <span>Avg Premium: {formatCurrency(product.avgPremium)}</span>
                         </div>
-                        <ProgressBar value={product.renewalRate} style={{ height: '6px' }} />
+                        <ProgressBar value={progressValue(product.renewalRate)} showValue={false} style={{ height: '6px' }} />
                       </div>
                     ))}
                   </div>

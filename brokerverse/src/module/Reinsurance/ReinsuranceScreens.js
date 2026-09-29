@@ -21,6 +21,7 @@ import { Knob } from 'primereact/knob';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import reinsuranceService from '../../services/reinsuranceService';
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate as isoDate } from "../../utility/dateFormat";
+import { formatWithUnit } from "../../utility/numberFormat";
 
 const sum = (rows, field) => rows.reduce((total, row) => total + (Number(row[field]) || 0), 0);
 const orDash = (value) => (value === undefined || value === null || value === '' ? '-' : value);
@@ -623,7 +624,7 @@ export const RecoveryDashboard = () => {
           <div className="col-3">
             <Card>
               <h4 className="m-0">{t('reinsurance.avgRecoveryTime')}</h4>
-              <p className="text-3xl font-bold">{performance?.averageTime ?? 0} days</p>
+              <p className="text-3xl font-bold">{formatWithUnit(performance?.averageTime ?? 0, "days")}</p>
             </Card>
           </div>
         </div>

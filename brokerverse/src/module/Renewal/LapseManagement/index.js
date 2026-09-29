@@ -26,6 +26,7 @@ import FieldError from "../../../components/FieldError";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import "./index.scss";
+import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const LapseManagement = () => {
   const { t } = useTranslation();
@@ -444,7 +445,7 @@ const LapseManagement = () => {
 
     return (
       <div className="attempts-cell">
-        <ProgressBar value={percentage} style={{ width: '60px', height: '8px' }} />
+        <ProgressBar value={progressValue(percentage)} showValue={false} style={{ width: '60px', height: '8px' }} />
         <span>{attempts}/{maxAttempts}</span>
       </div>
     );
@@ -781,7 +782,7 @@ const LapseManagement = () => {
                               <span className="stat-label">Converted</span>
                             </div>
                             <div className="stat-item">
-                              <span className="stat-value">{campaign.statistics?.conversionRate || 0}%</span>
+                              <span className="stat-value">{formatPercent(campaign.statistics?.conversionRate || 0)}</span>
                               <span className="stat-label">Rate</span>
                             </div>
                             <div className="stat-item">
@@ -792,7 +793,8 @@ const LapseManagement = () => {
 
                           <div className="campaign-progress">
                             <ProgressBar
-                              value={campaign.statistics?.conversionRate || 0}
+                              value={progressValue(campaign.statistics?.conversionRate)}
+                              showValue={false}
                               style={{ height: '6px' }}
                             />
                           </div>

@@ -36,7 +36,7 @@ const ViewEndorsement = () => {
         <div className="view__endorsement__container__back__btn__container col-12 md:col-6 lg:col-6">
           <SvgLeftArrow />
           <div className="view__endorsement__container__back__btn__title">
-            {t("endorsement.clientId")} :123456
+            {state?.clientNumber ? `${t("endorsement.clientId")} : ${state.clientNumber}` : state?.clientName || t("endorsement.client")}
           </div>
         </div>
       </div>
