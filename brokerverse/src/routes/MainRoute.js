@@ -16,8 +16,6 @@ import Paymentvoucher from "../module/PaymentVoucher/index";
 import CreateVoucher from "../module/PaymentVoucher/CreateVoucher/index";
 import Detailview from "../module/PaymentVoucher/DetailView/index";
 import BulkDisburse from "../module/PaymentVoucher/BulkDisburse";
-import BankAccountMaster from "../module/FinanceMastersModule/BankAccountMaster";
-import BankChequeMaster from "../module/FinanceMastersModule/BankChequeMaster";
 import BranchMasterInitial from "../module/FinanceMastersModule/BranchMaster/BranchMasterInitial";
 import BranchAdding from "../module/FinanceMastersModule/BranchMaster/BranchAdding";
 import BranchDetailsView from "../module/FinanceMastersModule/BranchMaster/BranchDetailsView";
@@ -41,10 +39,6 @@ import TaxationEdit from "../module/FinanceMastersModule/TaxationMaster/Taxation
 import AddExchange from "../module/FinanceMastersModule/ExchangeRateMaster/AddExchange";
 import SaveAndEditExchange from "../module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange";
 
-import AddBankAccount from "../module/FinanceMastersModule/BankAccountMaster/AddBankAccount";
-import BankAccountdetails from "../module/FinanceMastersModule/BankAccountMaster/BankAccountdetails";
-import AddBankCheque from "../module/FinanceMastersModule/BankChequeMaster/AddBankCheque";
-import BankChequeDetails from "../module/FinanceMastersModule/BankChequeMaster/BankChequeDetails";
 import AddPettyCash from "../module/FinanceMastersModule/PettyCashMaster/AddPettyCash";
 import PettyCashdetails from "../module/FinanceMastersModule/PettyCashMaster/PettyCashdetails";
 import AddJournalVoucture from "../module/JournalVoucher/AddJournalVoucture";
@@ -890,42 +884,8 @@ const Maincomponent = () => {
             element={<AccountCategoryMaster />}
           />
 
-          <Route
-            path="master/finance/bankaccount"
-            element={<BankAccountMaster />}
-          />
-          <Route
-            path="master/finance/bankcheque"
-            element={<BankChequeMaster />}
-          />
 
-          {/* bankacountmaster */}
-          <Route
-            path="master/finance/bankaccount"
-            element={<BankAccountMaster />}
-          />
-          <Route
-            path="master/finance/bankaccount/addbankaccount"
-            element={<AddBankAccount />}
-          />
-          <Route
-            path="master/finance/bankaccount/bankaccountdetails"
-            element={<BankAccountdetails />}
-          />
 
-          {/* bankchequemaster */}
-          <Route
-            path="master/finance/bankcheque"
-            element={<BankChequeMaster />}
-          />
-          <Route
-            path="master/finance/bankcheque/addbankcheque"
-            element={<AddBankCheque />}
-          />
-          <Route
-            path="master/finance/bankcheque/bankchequedetails"
-            element={<BankChequeDetails />}
-          />
 
           {/* pettycash */}
           <Route
