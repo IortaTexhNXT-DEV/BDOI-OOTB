@@ -34,8 +34,9 @@ export async function loadUser(where, params) {
     SELECT u.id, u.username, u.display_name, u.email, u.status, u.password_hash, u.last_login_at, u.must_change_password, u.password_changed_at,
            u.totp_enabled, u.totp_secret, u.totp_pending_secret, u.totp_last_step, u.token_version,
            u.first_name, u.last_name, u.phone, u.branch_code, u.employee_code,
-           COALESCE((SELECT array_agg(r.code ORDER BY r.code) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS roles,
-           COALESCE((SELECT array_agg(DISTINCT p.code ORDER BY p.code) FROM user_roles ur JOIN role_permissions rp ON rp.role_id = ur.role_id JOIN permissions p ON p.id = rp.permission_id WHERE ur.user_id = u.id), '{}') AS permissions
+           -- effective roles: assigned roles plus the roles they inherit (roles.inherits)
+           COALESCE((SELECT array_agg(DISTINCT er.code ORDER BY er.code) FROM user_effective_roles(u.id) er), '{}') AS roles,
+           COALESCE((SELECT array_agg(DISTINCT p.code ORDER BY p.code) FROM user_effective_roles(u.id) er JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id), '{}') AS permissions
     FROM users u WHERE ${where}`, params);
 }
 

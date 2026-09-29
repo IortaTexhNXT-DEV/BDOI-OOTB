@@ -20,6 +20,7 @@ export const ROLES = [
   ['customer-services', 'Customer Services', 'Client servicing, endorsements, renewals, open items', false],
   ['claims', 'Claims Officer', 'Claims registration, review and settlement', false],
   ['finance', 'Finance / Accounts', 'Receipts, collections, disbursement, commission, financial reports', false],
+  ['finance-manager', 'Finance Manager', 'Everything Finance / Accounts does, plus approving the month-end and year-end close, posting into soft-closed periods and reopening periods', false],
   ['agent', 'Agent / Referrer', 'Own leads, quotations and policies', false],
   ['user-access-admin', 'User Access Administrator', 'Creates and maintains users, roles and access; reviews the audit trail and sign-in history. Cannot grant administrator roles or change its own access.', true],
 ];
@@ -38,7 +39,11 @@ const ROLE_PERMS = {
   // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
   'user-access-admin': ['profile', 'users', 'roles', 'audit:read', 'notifications', 'settings:read'],
   agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'endorsements', 'claims', 'notifications'],
+  // Finance Manager inherits Finance (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
+  'finance-manager': ['period-end:approve'],
 };
+/** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
+const ROLE_INHERITS = { 'finance-manager': ['finance'] };
 
 /**
  * Whether the demo / sample seed files run (SEED_SAMPLE_DATA). An explicit value wins ("true"/"1"/"yes"/"on" or
@@ -81,6 +86,7 @@ export async function seed({ log = console.log, sampleData } = {}) {
     const codes = items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`]));
     await grant(role, codes);
   }
+  for (const [role, inherits] of Object.entries(ROLE_INHERITS)) await query('UPDATE roles SET inherits = $2 WHERE code = $1', [role, inherits]);
   // First administrator. The password comes from ADMIN_PASSWORD; without it a random one is generated and shown once.
   // An existing administrator keeps the password it has.
   const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');

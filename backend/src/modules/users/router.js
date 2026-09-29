@@ -248,7 +248,7 @@ const rolesRouter = moduleRouter('User Management', '/roles');
 rolesRouter.define({
   method: 'GET', path: '/', summary: 'List roles with their permissions and user counts', screen: 'Master > User Management > Role', middleware: [requireAuth],
   response: { success: true, data: [{ id: 1, code: 'sales', name: 'Sales / Relationship Manager', permissions: ['read:leads'], users: 3 }] },
-  handler: async (_req, res) => ok(res, await many(`SELECT r.id, r.code, r.name, r.description, r.is_system AS "isSystem", r.status, r.created_at AS "createdAt",
+  handler: async (_req, res) => ok(res, await many(`SELECT r.id, r.code, r.name, r.description, r.is_system AS "isSystem", r.status, r.inherits AS "includesRoles", r.created_at AS "createdAt",
       COALESCE((SELECT array_agg(p.code ORDER BY p.code) FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id), '{}') AS permissions,
       (SELECT count(*)::int FROM user_roles ur WHERE ur.role_id = r.id) AS users FROM roles r ORDER BY r.id`)),
 });

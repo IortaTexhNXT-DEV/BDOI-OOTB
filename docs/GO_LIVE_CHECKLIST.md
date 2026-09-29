@@ -145,7 +145,11 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   rate and limits; 3-year CTPL for other classes when known.
 - [ ] Direct bill settings (confirmed): default broker-billed, VAT 12% on commission added on top, insurer EWT 10%,
   debit note due 30 days.
-- [ ] Document numbering (Master > Configuration > Document Numbering): prefixes, format and the starting number of
+- [ ] Tax codes (Master > Finance > Taxation): the finance / tax team confirms every ATC code, rate and GL account
+  against the current BIR regulations (the OOTB values are a starting point) before the first BIR 2307, SAWT or QAP.
+- [ ] Finance Manager: assign the Finance Manager role (Finance plus month-end / year-end approval) to the users who
+  approve the close; Finance users prepare it.
+- [ ] Document numbering (Master > Document Numbering): prefixes, format and the starting number of
   each series (e.g. to continue from the legacy system).
 - [ ] E-mail texts and notification recipients; schedule times (Master > Schedules).
 

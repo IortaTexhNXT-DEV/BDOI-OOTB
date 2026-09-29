@@ -416,8 +416,8 @@ export async function settleRemittance(id, b, user) {
 export async function approvers(user) {
   const rows = await many(`SELECT u.id, u.username, u.display_name FROM users u
     WHERE u.status = 'active' AND u.id <> $1 AND EXISTS (
-      SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
-      WHERE ur.user_id = u.id AND (r.code IN ('it-admin', 'ba') OR EXISTS (
+      SELECT 1 FROM user_effective_roles(u.id) er JOIN roles r ON r.id = er.role_id
+      WHERE (r.code IN ('it-admin', 'ba') OR EXISTS (
         SELECT 1 FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id AND p.code = 'write:remittance')))
     ORDER BY lower(COALESCE(u.display_name, u.username))`, [user?.id || '']);
   return rows.map((u) => ({ userId: u.id, username: u.username, displayName: u.display_name || u.username }));

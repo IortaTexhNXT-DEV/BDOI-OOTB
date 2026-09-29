@@ -57,7 +57,7 @@ export const actor = (req) => req.user?.id || null;
 
 /** Users holding one of the given role codes (for workflow notifications). */
 export async function usersWithRoles(roles) {
-  const r = await query(`SELECT DISTINCT u.id, u.email, u.display_name FROM users u JOIN user_roles ur ON ur.user_id = u.id
-    JOIN roles ro ON ro.id = ur.role_id WHERE ro.code = ANY($1) AND u.status = 'active'`, [roles]);
+  const r = await query(`SELECT DISTINCT u.id, u.email, u.display_name FROM users u
+    WHERE u.status = 'active' AND EXISTS (SELECT 1 FROM user_effective_roles(u.id) er WHERE er.code = ANY($1))`, [roles]);
   return r.rows;
 }
