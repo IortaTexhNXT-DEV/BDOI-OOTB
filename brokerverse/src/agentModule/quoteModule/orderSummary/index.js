@@ -32,6 +32,7 @@ import leadService from "../../../services/leadService";
 import CommissionReferralSection, {
   defaultCommissionDetails,
 } from "./CommissionReferralSection";
+import { notifyError } from "../../../utility/dialogs";
 
 // Helper function to transform Redux currentQuoteCreation to component format
 const transformReduxToComponentFormat = (currentQuoteCreation) => {
@@ -306,7 +307,7 @@ const OrderSummary = ({ action, flow }) => {
         const response = await policyRenewalService.getRenewalPrefill(policyId);
         setIsLoadingRenewalData(false);
         if (!response.success || !response.data) {
-          alert(`Failed to load the renewal: ${response.error || "unknown error"}`);
+          notifyError(`Failed to load the renewal: ${response.error || "unknown error"}`);
           return;
         }
         setClientData({
@@ -393,7 +394,7 @@ const OrderSummary = ({ action, flow }) => {
         },
       });
       if (!response.success || !response.data?.quotationId) {
-        alert(`Failed to create the renewal quotation: ${response.error || "unknown error"}`);
+        notifyError(`Failed to create the renewal quotation: ${response.error || "unknown error"}`);
         return;
       }
       setToastMessage(
@@ -612,7 +613,7 @@ const OrderSummary = ({ action, flow }) => {
         };
         console.log("Final quotation data from fallback:", finalQuotationData);
       } else {
-        alert(
+        notifyError(
           "Error: No quote data available. Please go back and fill in the required information."
         );
         return;
@@ -671,14 +672,14 @@ const OrderSummary = ({ action, flow }) => {
             : "Quotation creation failed:",
           result.payload
         );
-        alert(
+        notifyError(
           `Failed to ${existingQuotationId ? "update" : "create"} quotation: ` +
             (result.payload || "Unknown error")
         );
       }
     } catch (error) {
       console.error("Unexpected error:", error);
-      alert("An unexpected error occurred while processing the quotation");
+      notifyError("An unexpected error occurred while processing the quotation");
     }
   };
   const handleBackNavigation = () => {

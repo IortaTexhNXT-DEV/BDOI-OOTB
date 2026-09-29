@@ -8,6 +8,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import endorsementService from "../../../services/endorsementService";
+import { notifyError } from "../../../utility/dialogs";
 
 const PaymentConfirmationEmployeeBenefit = () => {
   const { t } = useTranslation();
@@ -65,11 +66,11 @@ const PaymentConfirmationEmployeeBenefit = () => {
           if (response.success) {
             setEndorsementData(response.data);
           } else {
-            alert(t("endorsement.failedToLoadEndorsement") + ": " + response.error);
+            notifyError(t("endorsement.failedToLoadEndorsement") + ": " + response.error);
           }
         } catch (error) {
           console.error("Error fetching endorsement:", error);
-          alert("Error loading endorsement data");
+          notifyError("Error loading endorsement data");
         } finally {
           setLoading(false);
         }
