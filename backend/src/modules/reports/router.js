@@ -1,8 +1,9 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { isAdmin, requireAuth, requirePermission } from '../../lib/auth.js';
+import { requireAuth, requirePermission, hasPermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { audit } from '../../lib/audit.js';
+import { forbidden } from '../../lib/errors.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Reports', '/reports');
@@ -50,10 +51,7 @@ define({
   method: 'GET', path: '/generated/:id/download', summary: 'Download a generated report file (bearer token or signed ?token= link)', screen: 'Reports > * > Generate (download)',
   auth: false, middleware: [optionalAuth], permissions: ['read:reports (or signed link token)'], query: { token: '<signed link token from downloadUrl>' }, response: '(file: text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet or application/pdf)',
   handler: async (req, res) => {
-    if (req.user && !(isAdmin(req.user) || req.user.permissions.includes('read:reports')) && !req.query.token) {
-      res.status(403).json({ success: false, message: 'Requires permission: read:reports' });
-      return;
-    }
+    if (req.user && !hasPermission(req.user, 'read:reports') && !req.query.token) throw forbidden('Requires permission: read:reports');
     const f = await svc.getGeneratedFile(req.params.id, { user: req.user, token: req.query.token });
     res.type(f.contentType);
     res.download(f.path, f.fileName);

@@ -53,11 +53,14 @@ export async function receivableAgeing() {
   }
   return { updated };
 }
-export async function dailyReports() {
+/** Reports the daily-reports job generates when its params name none (params.reports on Master > Schedules). */
+const DAILY_REPORTS = ['production-register', 'collections-summary', 'claims-position'];
+export async function dailyReports(params = {}) {
   if (!(await tableExists('generated_reports'))) return { skipped: 'generated_reports table missing' };
   const { generateReport } = await import('../modules/reports/service.js');
+  const codes = Array.isArray(params.reports) && params.reports.length ? params.reports : DAILY_REPORTS;
   const out = [];
-  for (const code of ['production-register', 'collections-summary', 'claims-position']) out.push(await generateReport(code, {}, 'schedule'));
+  for (const code of codes) out.push(await generateReport(code, {}, 'schedule'));
   return { reports: out.map((r) => r.id) };
 }
 export async function emailOutbox() {

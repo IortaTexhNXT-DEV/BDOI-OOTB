@@ -5,7 +5,7 @@ import { validate, z } from '../../lib/validate.js';
 import { withTransaction, pool } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { conflict } from '../../lib/errors.js';
+import { conflict, notFound } from '../../lib/errors.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Commission', '/commission');
@@ -126,7 +126,7 @@ define({
   handler: async (req, res) => {
     const acct = await svc.buildAccount(pool, req.params.id);
     const line = [...acct.currentCycle.lines, ...acct.futureCycles.lines, ...acct.past.lines].find((l) => l.id === req.params.lineId);
-    if (!line) { res.status(404).json({ success: false, message: 'Commission line not found' }); return; }
+    if (!line) throw notFound('Commission line not found');
     ok(res, line);
   },
 });
