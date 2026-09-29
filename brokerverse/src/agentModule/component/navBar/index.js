@@ -33,7 +33,7 @@ const AgentNavBar = () => {
 
   // Get user data from localStorage
   const userName = localStorage.getItem("USER_NAME") || "User";
-  const userEmail = localStorage.getItem("USER_EMAIL") || "user@example.com";
+  const userEmail = localStorage.getItem("USER_EMAIL") || "";
   const currentLanguage = (i18n.language && i18n.language.startsWith("th")) ? "th" : "en";
 
   const handleLogOut = async () => {

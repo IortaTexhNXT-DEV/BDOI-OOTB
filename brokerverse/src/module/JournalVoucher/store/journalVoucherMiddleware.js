@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getRequest, postRequest } from "../../../utility/commonServices";
-import { APIROUTES } from "../../../routes/apiRoutes";
 import {
   GET_JOURNAL_VOUCHER,
   GET_JOURNAL_VOUCHER_SEARCH_LIST,
@@ -171,7 +170,7 @@ export const postApproveJournalVoucher = createAsyncThunk(
   async (payload, { rejectWithValue, getState }) => {
     try {
       const { data } = await postRequest(
-        APIROUTES.JOURNALVOUCHER.POST_APPROVE_JOURNAL_VOUCHER,
+        "journal-vouchers",
         payload
       );
       return data;
@@ -210,7 +209,7 @@ export const getJournalVoucherHistory = createAsyncThunk(
       }
 
       const response = await getRequest(
-        APIROUTES.JOURNALVOUCHER.GET_JOURNAL_VOUCHER_HISTORY,
+        "journal-vouchers/history",
         params
       );
 
@@ -290,7 +289,7 @@ export const getJournalVoucherDetails = createAsyncThunk(
       }
 
       const response = await getRequest(
-        APIROUTES.JOURNALVOUCHER.GET_JOURNAL_VOUCHER_DETAILS,
+        "journal-vouchers",
         params
       );
 
