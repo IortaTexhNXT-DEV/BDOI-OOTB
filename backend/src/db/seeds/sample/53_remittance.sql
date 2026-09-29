@@ -164,12 +164,13 @@ BEGIN
                ('Settlement Alert', 'Normal', 'Settlement completed - September', 'Premium settlement for September has been remitted.', 'uw@malayan.example', 'Insurer', 5),
                ('Statement Ready', 'Normal', 'Remittance statement available', 'The August remittance statement is ready for download.', 'uw@pioneer.example', 'Insurer', 12)) AS v(t, p, s, c, r, rt, age);
 
-  -- bank statement lines: two match approved remittances exactly, others are unmatched
-  INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by)
-  SELECT 'bank-txn', next_number('bank_txn', numbering_prefix('bank_txn', 'BNK')), r.net_due, 'unmatched', jsonb_build_object('seed', 'remittance-v1', 'transDate', (r.remittance_date + 3)::text, 'bankReference', 'CR-' || r.remittance_number, 'description', 'Credit - ' || i.name), admin_id, admin_id
+  -- bank statement lines (the one bank statement line table; remittance lines have no bank account): two match
+  -- approved remittances exactly, others are unmatched
+  INSERT INTO bank_statement_lines(txn_number, txn_date, description, reference, debit, credit, amount, source, created_by, updated_by)
+  SELECT next_number('bank_txn', numbering_prefix('bank_txn', 'BNK')), r.remittance_date + 3, 'Credit - ' || i.name, 'CR-' || r.remittance_number, 0, r.net_due, r.net_due, 'remittance', admin_id, admin_id
   FROM remittances r JOIN insurance_companies i ON i.id = r.insurance_company_id WHERE r.status IN ('approved', 'settled') ORDER BY r.remittance_date DESC LIMIT 2;
-  INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by)
-  SELECT 'bank-txn', next_number('bank_txn', numbering_prefix('bank_txn', 'BNK')), v.a, 'unmatched', jsonb_build_object('seed', 'remittance-v1', 'transDate', v.d, 'bankReference', v.r, 'description', v.t), admin_id, admin_id
+  INSERT INTO bank_statement_lines(txn_number, txn_date, description, reference, debit, credit, amount, source, created_by, updated_by)
+  SELECT next_number('bank_txn', numbering_prefix('bank_txn', 'BNK')), v.d::date, v.t, v.r, 0, v.a, v.a, 'remittance', admin_id, admin_id
   FROM (VALUES (7500.00, '2026-09-21', 'REF002', 'Unidentified credit'), (9800.00, '2026-09-23', 'REF004', 'Partial payment'), (4500.00, '2026-09-24', 'REF005', 'InstaPay credit')) AS v(a, d, r, t);
 
   -- automated execution history

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (622 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (660 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -3350,6 +3350,2921 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bank Reconciliation",
+      "item": [
+        {
+          "name": "Run the automatic matching rules for a bank account (exact amounts: reference, date window, 1:many, many:1, contra, adjustments)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/auto-match",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "auto-match"
+              ]
+            },
+            "description": "Run the automatic matching rules for a bank account (exact amounts: reference, date window, 1:many, many:1, contra, adjustments)\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/auto-match",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "auto-match"
+                  ]
+                },
+                "description": "Run the automatic matching rules for a bank account (exact amounts: reference, date window, 1:many, many:1, contra, adjustments)\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"matched\": 9,\n    \"byRule\": {\n      \"REFERENCE\": 4,\n      \"AMOUNT_DATE\": 3,\n      \"ONE_TO_MANY\": 1,\n      \"CONTRA\": 1\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank accounts of the bank account master with their GL cash account, default statement format, last statement and last approved reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/bank-accounts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "bank-accounts"
+              ]
+            },
+            "description": "Bank accounts of the bank account master with their GL cash account, default statement format, last statement and last approved reconciliation\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/bank-accounts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "bank-accounts"
+                  ]
+                },
+                "description": "Bank accounts of the bank account master with their GL cash account, default statement format, last statement and last approved reconciliation\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"ACC-BDO-001\",\n      \"name\": \"BrokerVerse - Operating Account\",\n      \"glAccountCode\": \"1102001\",\n      \"statementFormat\": \"BDO-SAMPLE\",\n      \"lastStatement\": {\n        \"statementNumber\": \"BST-2026-00001\",\n        \"periodTo\": \"2026-09-28\"\n      },\n      \"lastApproved\": {\n        \"period\": \"2026-08\"\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/bank-accounts/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "bank-accounts",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"glAccountCode\": \"1102001\",\n  \"statementFormat\": \"BDO-SAMPLE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/bank-accounts/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "bank-accounts",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"glAccountCode\": \"1102001\",\n  \"statementFormat\": \"BDO-SAMPLE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"ACC-BDO-001\",\n    \"glAccountCode\": \"1102001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create the adjustment for an unrecorded bank item from a bank line (postBankAdjustment: bank charges, interest, final tax, direct credits, returned cheque)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/bank-lines/:id/adjustment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "bank-lines",
+                ":id",
+                "adjustment"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Create the adjustment for an unrecorded bank item from a bank line (postBankAdjustment: bank charges, interest, final tax, direct credits, returned cheque)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Create adjustment\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeCode\": \"BCHG\",\n  \"remarks\": \"September service charge\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/bank-lines/:id/adjustment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "bank-lines",
+                    ":id",
+                    "adjustment"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Create the adjustment for an unrecorded bank item from a bank line (postBankAdjustment: bank charges, interest, final tax, direct credits, returned cheque)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Create adjustment\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"typeCode\": \"BCHG\",\n  \"remarks\": \"September service charge\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"posted\",\n    \"journal\": {\n      \"jv_number\": \"JV-2026-00120\"\n    },\n    \"matchId\": \"brm_9\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve (post) the adjustment journal of a bank line awaiting approval (a different user than its maker) and match it",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/bank-lines/:id/adjustment/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "bank-lines",
+                ":id",
+                "adjustment",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve (post) the adjustment journal of a bank line awaiting approval (a different user than its maker) and match it\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Create adjustment\n\nAccess: write:bank-reconciliation, write:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/bank-lines/:id/adjustment/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "bank-lines",
+                    ":id",
+                    "adjustment",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve (post) the adjustment journal of a bank line awaiting approval (a different user than its maker) and match it\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Create adjustment\n\nAccess: write:bank-reconciliation, write:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"journal\": {\n      \"jvNumber\": \"JV-2026-00121\",\n      \"status\": \"posted\"\n    },\n    \"matched\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark a bank line as a bank error (reconciling item on the bank side, no journal), or clear the flag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/bank-lines/:id/flag",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "bank-lines",
+                ":id",
+                "flag"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Mark a bank line as a bank error (reconciling item on the bank side, no journal), or clear the flag\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flag\": \"bank-error\",\n  \"remarks\": \"Credit belongs to another depositor; bank to reverse\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/bank-lines/:id/flag",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "bank-lines",
+                    ":id",
+                    "flag"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Mark a bank line as a bank error (reconciling item on the bank side, no journal), or clear the flag\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"flag\": \"bank-error\",\n  \"remarks\": \"Credit belongs to another depositor; bank to reverse\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bsl_1\",\n    \"flag\": \"bank-error\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank statement formats (column mapping per bank export) and the supported date formats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/formats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "formats"
+              ]
+            },
+            "description": "Bank statement formats (column mapping per bank export) and the supported date formats\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: read:bank-reconciliation, read:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/formats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "formats"
+                  ]
+                },
+                "description": "Bank statement formats (column mapping per bank export) and the supported date formats\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: read:bank-reconciliation, read:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"code\": \"GENERIC\",\n        \"name\": \"Generic\",\n        \"dateFormat\": \"YYYY-MM-DD\",\n        \"columns\": {\n          \"date\": \"date\"\n        }\n      }\n    ],\n    \"dateFormats\": [\n      \"YYYY-MM-DD\"\n    ],\n    \"columnKeys\": [\n      \"date\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a bank statement format",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/formats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "formats"
+              ]
+            },
+            "description": "Add a bank statement format\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"UB-CSV\",\n  \"name\": \"UnionBank CSV\",\n  \"bankCode\": \"UBP\",\n  \"dateFormat\": \"MM/DD/YYYY\",\n  \"columns\": {\n    \"date\": \"Date\",\n    \"description\": \"Description\",\n    \"reference\": \"Reference\",\n    \"debit\": \"Debit\",\n    \"credit\": \"Credit\",\n    \"balance\": \"Balance\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/formats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "formats"
+                  ]
+                },
+                "description": "Add a bank statement format\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"UB-CSV\",\n  \"name\": \"UnionBank CSV\",\n  \"bankCode\": \"UBP\",\n  \"dateFormat\": \"MM/DD/YYYY\",\n  \"columns\": {\n    \"date\": \"Date\",\n    \"description\": \"Description\",\n    \"reference\": \"Reference\",\n    \"debit\": \"Debit\",\n    \"credit\": \"Credit\",\n    \"balance\": \"Balance\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"UB-CSV\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a bank statement format",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/formats/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "formats",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a bank statement format\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skipRows\": 2,\n  \"dateFormat\": \"DD/MM/YYYY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/formats/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "formats",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a bank statement format\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"skipRows\": 2,\n  \"dateFormat\": \"DD/MM/YYYY\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"BPI-SAMPLE\",\n    \"skipRows\": 2\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a statement format not used by any statement (deactivate it otherwise)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/formats/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "formats",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a statement format not used by any statement (deactivate it otherwise)\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/formats/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "formats",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a statement format not used by any statement (deactivate it otherwise)\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"UB-CSV\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Parse an uploaded file with a format (no bank account needed): the lines it reads and the rows it rejects",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/formats/:code/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "formats",
+                ":code",
+                "test"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Parse an uploaded file with a format (no bank account needed): the lines it reads and the rows it rejects\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: read:bank-reconciliation, read:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(multipart) statement.csv\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/formats/:code/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "formats",
+                    ":code",
+                    "test"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Parse an uploaded file with a format (no bank account needed): the lines it reads and the rows it rejects\n\nFront-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: read:bank-reconciliation, read:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(multipart) statement.csv\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lines\": [\n      {\n        \"date\": \"2026-09-02\",\n        \"description\": \"DEPOSIT\",\n        \"credit\": 1000\n      }\n    ],\n    \"errors\": [],\n    \"skippedRows\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Automatic matching rules in the order they run",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/match-rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "match-rules"
+              ]
+            },
+            "description": "Automatic matching rules in the order they run\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Match rules\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/match-rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "match-rules"
+                  ]
+                },
+                "description": "Automatic matching rules in the order they run\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Match rules\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"REFERENCE\",\n      \"ruleType\": \"reference\",\n      \"sortOrder\": 10,\n      \"confidence\": 100,\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a matching rule: order, active, confidence, date window / most lines",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/match-rules/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "match-rules",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a matching rule: order, active, confidence, date window / most lines\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Match rules\n\nAccess: write:bank-reconciliation, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sortOrder\": 15,\n  \"params\": {\n    \"dateWindowDays\": 3\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/match-rules/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "match-rules",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a matching rule: order, active, confidence, date window / most lines\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Match rules\n\nAccess: write:bank-reconciliation, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sortOrder\": 15,\n  \"params\": {\n    \"dateWindowDays\": 3\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"AMOUNT_DATE\",\n    \"sortOrder\": 15\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Matches of a bank account (active, unmatched or all) with who matched / unmatched them",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/matches?bankAccount=ACC-BDO-001&status=all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "matches"
+              ],
+              "query": [
+                {
+                  "key": "bankAccount",
+                  "value": "ACC-BDO-001"
+                },
+                {
+                  "key": "status",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Matches of a bank account (active, unmatched or all) with who matched / unmatched them\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Matches\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/matches?bankAccount=ACC-BDO-001&status=all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "matches"
+                  ],
+                  "query": [
+                    {
+                      "key": "bankAccount",
+                      "value": "ACC-BDO-001"
+                    },
+                    {
+                      "key": "status",
+                      "value": "all"
+                    }
+                  ]
+                },
+                "description": "Matches of a bank account (active, unmatched or all) with who matched / unmatched them\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Matches\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"brm_1\",\n      \"matchType\": \"auto\",\n      \"rule\": \"REFERENCE\",\n      \"status\": \"active\",\n      \"matchedBy\": \"Finance User\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Match bank lines with book entries by hand; amounts must agree, or the difference is explained (adjustment journal of a bank transaction type, bank error or book error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/matches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "matches"
+              ]
+            },
+            "description": "Match bank lines with book entries by hand; amounts must agree, or the difference is explained (adjustment journal of a bank transaction type, bank error or book error)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Manual match\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"bankLineIds\": [\n    \"bsl_1\"\n  ],\n  \"bookLineIds\": [\n    101,\n    102\n  ],\n  \"difference\": {\n    \"treatment\": \"adjustment\",\n    \"typeCode\": \"BCHG\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/matches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "matches"
+                  ]
+                },
+                "description": "Match bank lines with book entries by hand; amounts must agree, or the difference is explained (adjustment journal of a bank transaction type, bank error or book error)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Manual match\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"bankLineIds\": [\n    \"bsl_1\"\n  ],\n  \"bookLineIds\": [\n    101,\n    102\n  ],\n  \"difference\": {\n    \"treatment\": \"adjustment\",\n    \"typeCode\": \"BCHG\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"brm_1\",\n    \"bankTotal\": 9950,\n    \"bookTotal\": 9950,\n    \"difference\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Undo a match (audited; refused when an approved reconciliation locks it)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/matches/:id/unmatch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "matches",
+                ":id",
+                "unmatch"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Undo a match (audited; refused when an approved reconciliation locks it)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Matches\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong OR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/matches/:id/unmatch",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "matches",
+                    ":id",
+                    "unmatch"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Undo a match (audited; refused when an approved reconciliation locks it)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Matches\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong OR\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"brm_1\",\n    \"status\": \"unmatched\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank reconciliation runs (by bank account, period, status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations?bankAccount=ACC-BDO-001&period=2026-09",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations"
+              ],
+              "query": [
+                {
+                  "key": "bankAccount",
+                  "value": "ACC-BDO-001"
+                },
+                {
+                  "key": "period",
+                  "value": "2026-09"
+                }
+              ]
+            },
+            "description": "Bank reconciliation runs (by bank account, period, status)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliations\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations?bankAccount=ACC-BDO-001&period=2026-09",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations"
+                  ],
+                  "query": [
+                    {
+                      "key": "bankAccount",
+                      "value": "ACC-BDO-001"
+                    },
+                    {
+                      "key": "period",
+                      "value": "2026-09"
+                    }
+                  ]
+                },
+                "description": "Bank reconciliation runs (by bank account, period, status)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliations\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"recNumber\": \"BRC-2026-00001\",\n      \"bankAccount\": \"ACC-BDO-001\",\n      \"period\": \"2026-09\",\n      \"status\": \"approved\",\n      \"difference\": 0\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start the reconciliation of a bank account for a period (as of the period end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations"
+              ]
+            },
+            "description": "Start the reconciliation of a bank account for a period (as of the period end)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliations\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"period\": \"2026-09\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations"
+                  ]
+                },
+                "description": "Start the reconciliation of a bank account for a period (as of the period end)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliations\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"period\": \"2026-09\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"recNumber\": \"BRC-2026-00001\",\n    \"status\": \"draft\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A reconciliation with its Bank Reconciliation Statement (live while draft, frozen once prepared) and history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A reconciliation with its Bank Reconciliation Statement (live while draft, frozen once prepared) and history\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A reconciliation with its Bank Reconciliation Statement (live while draft, frozen once prepared) and history\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"recNumber\": \"BRC-2026-00001\",\n    \"statement\": {\n      \"bankBalance\": 162500,\n      \"depositsInTransit\": 5000,\n      \"outstandingCheques\": 17500,\n      \"adjustedBankBalance\": 150000,\n      \"bookBalance\": 150250,\n      \"unbookedDebits\": 250,\n      \"adjustedBookBalance\": 150000,\n      \"difference\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a prepared reconciliation (approve:bank-reconciliation, not the preparer); locks the matches cleared up to the period end",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a prepared reconciliation (approve:bank-reconciliation, not the preparer); locks the matches cleared up to the period end\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: approve:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Reviewed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a prepared reconciliation (approve:bank-reconciliation, not the preparer); locks the matches cleared up to the period end\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: approve:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Reviewed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a draft reconciliation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a draft reconciliation\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Created for the wrong account\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a draft reconciliation\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Created for the wrong account\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"cancelled\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable Bank Reconciliation Statement (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Printable Bank Reconciliation Statement (PDF)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations",
+                    ":id",
+                    "pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Printable Bank Reconciliation Statement (PDF)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Prepare: freeze the statement (adjusted balances must agree); maker of the maker-checker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/prepare",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations",
+                ":id",
+                "prepare"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Prepare: freeze the statement (adjusted balances must agree); maker of the maker-checker\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"All items explained\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/prepare",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations",
+                    ":id",
+                    "prepare"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Prepare: freeze the statement (adjusted balances must agree); maker of the maker-checker\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"All items explained\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"prepared\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reopen a prepared or approved reconciliation (approver, remarks required): back to draft, matches unlocked",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "reconciliations",
+                ":id",
+                "reopen"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reopen a prepared or approved reconciliation (approver, remarks required): back to draft, matches unlocked\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: approve:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Late bank debit memo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/reconciliations/:id/reopen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "reconciliations",
+                    ":id",
+                    "reopen"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reopen a prepared or approved reconciliation (approver, remarks required): back to draft, matches unlocked\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: approve:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Late bank debit memo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"draft\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Outstanding payments of a bank account older than bank_reconciliation.stale_cheque_days as of a date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/stale-cheques?bankAccount=ACC-BDO-001&asOf=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "stale-cheques"
+              ],
+              "query": [
+                {
+                  "key": "bankAccount",
+                  "value": "ACC-BDO-001"
+                },
+                {
+                  "key": "asOf",
+                  "value": "2026-09-30"
+                }
+              ]
+            },
+            "description": "Outstanding payments of a bank account older than bank_reconciliation.stale_cheque_days as of a date\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Stale cheques\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/stale-cheques?bankAccount=ACC-BDO-001&asOf=2026-09-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "stale-cheques"
+                  ],
+                  "query": [
+                    {
+                      "key": "bankAccount",
+                      "value": "ACC-BDO-001"
+                    },
+                    {
+                      "key": "asOf",
+                      "value": "2026-09-30"
+                    }
+                  ]
+                },
+                "description": "Outstanding payments of a bank account older than bank_reconciliation.stale_cheque_days as of a date\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Stale cheques\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"staleDays\": 180,\n    \"rows\": [\n      {\n        \"journalNumber\": \"JV-2026-00012\",\n        \"chequeNumber\": \"000045\",\n        \"amount\": -12500,\n        \"ageDays\": 212\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a stale cheque: the payment journal is reversed and the payable re-opened (disbursement cancellation)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/stale-cheques/:lineId/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "stale-cheques",
+                ":lineId",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "lineId",
+                  "value": "",
+                  "description": "lineId (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a stale cheque: the payment journal is reversed and the payable re-opened (disbursement cancellation)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Stale cheques\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"reason\": \"Not presented within 180 days\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/stale-cheques/:lineId/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "stale-cheques",
+                    ":lineId",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "lineId",
+                      "value": "",
+                      "description": "lineId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a stale cheque: the payment journal is reversed and the payable re-opened (disbursement cancellation)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Stale cheques\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"reason\": \"Not presented within 180 days\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"chequeNumber\": \"000045\",\n    \"reversal\": {\n      \"jvNumber\": \"JV-2026-00130\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank Reconciliation Statement of a bank account as of any date (no run needed)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statement-preview?bankAccount=ACC-BDO-001&asOf=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statement-preview"
+              ],
+              "query": [
+                {
+                  "key": "bankAccount",
+                  "value": "ACC-BDO-001"
+                },
+                {
+                  "key": "asOf",
+                  "value": "2026-09-30"
+                }
+              ]
+            },
+            "description": "Bank Reconciliation Statement of a bank account as of any date (no run needed)\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statement-preview?bankAccount=ACC-BDO-001&asOf=2026-09-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statement-preview"
+                  ],
+                  "query": [
+                    {
+                      "key": "bankAccount",
+                      "value": "ACC-BDO-001"
+                    },
+                    {
+                      "key": "asOf",
+                      "value": "2026-09-30"
+                    }
+                  ]
+                },
+                "description": "Bank Reconciliation Statement of a bank account as of any date (no run needed)\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"difference\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank statements (optionally of one bank account) with their matched line count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements?bankAccount=ACC-BDO-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements"
+              ],
+              "query": [
+                {
+                  "key": "bankAccount",
+                  "value": "ACC-BDO-001"
+                }
+              ]
+            },
+            "description": "Bank statements (optionally of one bank account) with their matched line count\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements?bankAccount=ACC-BDO-001",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements"
+                  ],
+                  "query": [
+                    {
+                      "key": "bankAccount",
+                      "value": "ACC-BDO-001"
+                    }
+                  ]
+                },
+                "description": "Bank statements (optionally of one bank account) with their matched line count\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"statementNumber\": \"BST-2026-00001\",\n      \"bankAccount\": \"ACC-BDO-001\",\n      \"periodFrom\": \"2026-09-01\",\n      \"periodTo\": \"2026-09-28\",\n      \"lineCount\": 12,\n      \"matchedLines\": 9\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Enter a bank statement by hand (same checks as an import)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements"
+              ]
+            },
+            "description": "Enter a bank statement by hand (same checks as an import)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Manual statement\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"statementRef\": \"SOA 2026-09\",\n  \"openingBalance\": 150000,\n  \"closingBalance\": 149750,\n  \"lines\": [\n    {\n      \"date\": \"2026-09-30\",\n      \"description\": \"SERVICE CHARGE\",\n      \"debit\": 250\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements"
+                  ]
+                },
+                "description": "Enter a bank statement by hand (same checks as an import)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Manual statement\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"statementRef\": \"SOA 2026-09\",\n  \"openingBalance\": 150000,\n  \"closingBalance\": 149750,\n  \"lines\": [\n    {\n      \"date\": \"2026-09-30\",\n      \"description\": \"SERVICE CHARGE\",\n      \"debit\": 250\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"statement\": {\n      \"statementNumber\": \"BST-2026-00002\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A bank statement with its lines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A bank statement with its lines\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A bank statement with its lines\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"statementNumber\": \"BST-2026-00001\",\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"date\": \"2026-09-02\",\n        \"description\": \"DEPOSIT\",\n        \"credit\": 5000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a statement none of whose lines is matched or adjusted",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a statement none of whose lines is matched or adjusted\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: write:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a statement none of whose lines is matched or adjusted\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: write:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"statementNumber\": \"BST-2026-00001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Import a bank statement file (validated: balance, duplicates, rows that cannot be read); auto-matches when bank_reconciliation.auto_match_on_import",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements",
+                "import"
+              ]
+            },
+            "description": "Import a bank statement file (validated: balance, duplicates, rows that cannot be read); auto-matches when bank_reconciliation.auto_match_on_import\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Import statement\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"format\": \"BDO-SAMPLE\",\n  \"statementRef\": \"SOA 2026-09\",\n  \"skipDuplicates\": \"false\",\n  \"file\": \"(multipart) statement.csv\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements",
+                    "import"
+                  ]
+                },
+                "description": "Import a bank statement file (validated: balance, duplicates, rows that cannot be read); auto-matches when bank_reconciliation.auto_match_on_import\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Import statement\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"format\": \"BDO-SAMPLE\",\n  \"statementRef\": \"SOA 2026-09\",\n  \"skipDuplicates\": \"false\",\n  \"file\": \"(multipart) statement.csv\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"statement\": {\n      \"statementNumber\": \"BST-2026-00001\",\n      \"lineCount\": 12\n    },\n    \"autoMatch\": {\n      \"matched\": 9\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Parse a bank statement file with a statement format and show the lines, totals, balance check and duplicates before saving",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements",
+                "preview"
+              ]
+            },
+            "description": "Parse a bank statement file with a statement format and show the lines, totals, balance check and duplicates before saving\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Import statement\n\nAccess: write:bank-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"format\": \"BDO-SAMPLE\",\n  \"statementRef\": \"SOA 2026-09\",\n  \"openingBalance\": \"150000.00\",\n  \"closingBalance\": \"162500.00\",\n  \"file\": \"(multipart) statement.csv\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements",
+                    "preview"
+                  ]
+                },
+                "description": "Parse a bank statement file with a statement format and show the lines, totals, balance check and duplicates before saving\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Import statement\n\nAccess: write:bank-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bankAccount\": \"ACC-BDO-001\",\n  \"format\": \"BDO-SAMPLE\",\n  \"statementRef\": \"SOA 2026-09\",\n  \"openingBalance\": \"150000.00\",\n  \"closingBalance\": \"162500.00\",\n  \"file\": \"(multipart) statement.csv\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lineCount\": 12,\n    \"totalDebits\": 10000,\n    \"totalCredits\": 22500,\n    \"balanced\": true,\n    \"duplicates\": 0,\n    \"lines\": [\n      {\n        \"date\": \"2026-09-02\",\n        \"description\": \"DEPOSIT\",\n        \"credit\": 5000,\n        \"duplicate\": false,\n        \"suggestedType\": null\n      }\n    ],\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank transaction types: unrecorded bank items and the account their adjustment posts to",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/transaction-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "transaction-types"
+              ]
+            },
+            "description": "Bank transaction types: unrecorded bank items and the account their adjustment posts to\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: read:bank-reconciliation, read:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/transaction-types",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "transaction-types"
+                  ]
+                },
+                "description": "Bank transaction types: unrecorded bank items and the account their adjustment posts to\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: read:bank-reconciliation, read:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"code\": \"BCHG\",\n        \"name\": \"Bank charges\",\n        \"direction\": \"debit\",\n        \"action\": \"journal\",\n        \"accountRole\": \"bank_charges\",\n        \"requiresApproval\": false\n      }\n    ],\n    \"accountRoles\": [\n      {\n        \"role\": \"bank_charges\",\n        \"accountCode\": \"4401004\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a bank transaction type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/transaction-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "transaction-types"
+              ]
+            },
+            "description": "Add a bank transaction type\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PESO-FEE\",\n  \"name\": \"PESONet fee\",\n  \"direction\": \"debit\",\n  \"accountRole\": \"bank_charges\",\n  \"matchPattern\": \"pesonet fee\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/transaction-types",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "transaction-types"
+                  ]
+                },
+                "description": "Add a bank transaction type\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"PESO-FEE\",\n  \"name\": \"PESONet fee\",\n  \"direction\": \"debit\",\n  \"accountRole\": \"bank_charges\",\n  \"matchPattern\": \"pesonet fee\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"PESO-FEE\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a bank transaction type (accounts, approval, pattern, active)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/transaction-types/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "transaction-types",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a bank transaction type (accounts, approval, pattern, active)\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requiresApproval\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/transaction-types/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "transaction-types",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a bank transaction type (accounts, approval, pattern, active)\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"requiresApproval\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"BCHG\",\n    \"requiresApproval\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a bank transaction type added by users and never used (deactivate it otherwise)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/transaction-types/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "transaction-types",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a bank transaction type added by users and never used (deactivate it otherwise)\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/transaction-types/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "transaction-types",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a bank transaction type added by users and never used (deactivate it otherwise)\n\nFront-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"PESO-FEE\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Matching workspace of a bank account and period: summary tiles, bank lines and book entries of the period plus older unmatched ones, the period's reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/workspace?bankAccount=ACC-BDO-001&period=2026-09",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "workspace"
+              ],
+              "query": [
+                {
+                  "key": "bankAccount",
+                  "value": "ACC-BDO-001"
+                },
+                {
+                  "key": "period",
+                  "value": "2026-09"
+                }
+              ]
+            },
+            "description": "Matching workspace of a bank account and period: summary tiles, bank lines and book entries of the period plus older unmatched ones, the period's reconciliation\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/workspace?bankAccount=ACC-BDO-001&period=2026-09",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "workspace"
+                  ],
+                  "query": [
+                    {
+                      "key": "bankAccount",
+                      "value": "ACC-BDO-001"
+                    },
+                    {
+                      "key": "period",
+                      "value": "2026-09"
+                    }
+                  ]
+                },
+                "description": "Matching workspace of a bank account and period: summary tiles, bank lines and book entries of the period plus older unmatched ones, the period's reconciliation\n\nFront-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"statementBalance\": 162500,\n      \"bookBalance\": 150000,\n      \"unmatchedBank\": 3,\n      \"unmatchedBook\": 2,\n      \"difference\": 0\n    },\n    \"bankLines\": [],\n    \"bookLines\": [],\n    \"reconciliation\": null\n  }\n}"
             }
           ]
         }

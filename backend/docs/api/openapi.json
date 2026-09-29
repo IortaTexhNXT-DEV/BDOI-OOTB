@@ -27,6 +27,9 @@
       "name": "Auth"
     },
     {
+      "name": "Bank Reconciliation"
+    },
+    {
       "name": "Billing statements"
     },
     {
@@ -4771,6 +4774,3499 @@
             }
           }
         }
+      }
+    },
+    "/bank-reconciliation/auto-match": {
+      "post": {
+        "operationId": "postBankReconciliationAutoMatch",
+        "summary": "Run the automatic matching rules for a bank account (exact amounts: reference, date window, 1:many, many:1, contra, adjustments)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: write:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "matched": {
+                          "type": "integer"
+                        },
+                        "byRule": {
+                          "type": "object",
+                          "properties": {
+                            "REFERENCE": {
+                              "type": "integer"
+                            },
+                            "AMOUNT_DATE": {
+                              "type": "integer"
+                            },
+                            "ONE_TO_MANY": {
+                              "type": "integer"
+                            },
+                            "CONTRA": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "matched": 9,
+                    "byRule": {
+                      "REFERENCE": 4,
+                      "AMOUNT_DATE": 3,
+                      "ONE_TO_MANY": 1,
+                      "CONTRA": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/bank-accounts": {
+      "get": {
+        "operationId": "getBankReconciliationBankAccounts",
+        "summary": "Bank accounts of the bank account master with their GL cash account, default statement format, last statement and last approved reconciliation",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "glAccountCode": {
+                            "type": "string"
+                          },
+                          "statementFormat": {
+                            "type": "string"
+                          },
+                          "lastStatement": {
+                            "type": "object",
+                            "properties": {
+                              "statementNumber": {
+                                "type": "string"
+                              },
+                              "periodTo": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "lastApproved": {
+                            "type": "object",
+                            "properties": {
+                              "period": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "ACC-BDO-001",
+                      "name": "BrokerVerse - Operating Account",
+                      "glAccountCode": "1102001",
+                      "statementFormat": "BDO-SAMPLE",
+                      "lastStatement": {
+                        "statementNumber": "BST-2026-00001",
+                        "periodTo": "2026-09-28"
+                      },
+                      "lastApproved": {
+                        "period": "2026-08"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/bank-accounts/{code}": {
+      "put": {
+        "operationId": "putBankReconciliationBankAccountsCode",
+        "summary": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "glAccountCode": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "ACC-BDO-001",
+                    "glAccountCode": "1102001"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Bank account setup",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "glAccountCode": {
+                    "type": "string"
+                  },
+                  "statementFormat": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "glAccountCode": "1102001",
+                "statementFormat": "BDO-SAMPLE"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/bank-lines/{id}/adjustment": {
+      "post": {
+        "operationId": "postBankReconciliationBankLinesIdAdjustment",
+        "summary": "Create the adjustment for an unrecorded bank item from a bank line (postBankAdjustment: bank charges, interest, final tax, direct credits, returned cheque)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Create adjustment\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "jv_number": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "matchId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "posted",
+                    "journal": {
+                      "jv_number": "JV-2026-00120"
+                    },
+                    "matchId": "brm_9"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Create adjustment",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "typeCode": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "typeCode": "BCHG",
+                "remarks": "September service charge"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/bank-lines/{id}/adjustment/approve": {
+      "post": {
+        "operationId": "postBankReconciliationBankLinesIdAdjustmentApprove",
+        "summary": "Approve (post) the adjustment journal of a bank line awaiting approval (a different user than its maker) and match it",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Create adjustment\n\nAccess: write:bank-reconciliation, write:journal-vouchers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "jvNumber": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "matched": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "journal": {
+                      "jvNumber": "JV-2026-00121",
+                      "status": "posted"
+                    },
+                    "matched": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Create adjustment",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:journal-vouchers"
+        ]
+      }
+    },
+    "/bank-reconciliation/bank-lines/{id}/flag": {
+      "post": {
+        "operationId": "postBankReconciliationBankLinesIdFlag",
+        "summary": "Mark a bank line as a bank error (reconciling item on the bank side, no journal), or clear the flag",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "flag": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "bsl_1",
+                    "flag": "bank-error"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "flag": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "flag": "bank-error",
+                "remarks": "Credit belongs to another depositor; bank to reverse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/formats": {
+      "get": {
+        "operationId": "getBankReconciliationFormats",
+        "summary": "Bank statement formats (column mapping per bank export) and the supported date formats",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: read:bank-reconciliation, read:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "dateFormat": {
+                                "type": "string"
+                              },
+                              "columns": {
+                                "type": "object",
+                                "properties": {
+                                  "date": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "dateFormats": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "columnKeys": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "code": "GENERIC",
+                        "name": "Generic",
+                        "dateFormat": "YYYY-MM-DD",
+                        "columns": {
+                          "date": "date"
+                        }
+                      }
+                    ],
+                    "dateFormats": [
+                      "YYYY-MM-DD"
+                    ],
+                    "columnKeys": [
+                      "date"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Statement Formats",
+        "x-permissions": [
+          "read:bank-reconciliation",
+          "read:masters"
+        ]
+      },
+      "post": {
+        "operationId": "postBankReconciliationFormats",
+        "summary": "Add a bank statement format",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "UB-CSV"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Statement Formats",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "bankCode": {
+                    "type": "string"
+                  },
+                  "dateFormat": {
+                    "type": "string"
+                  },
+                  "columns": {
+                    "type": "object",
+                    "properties": {
+                      "date": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "reference": {
+                        "type": "string"
+                      },
+                      "debit": {
+                        "type": "string"
+                      },
+                      "credit": {
+                        "type": "string"
+                      },
+                      "balance": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "code": "UB-CSV",
+                "name": "UnionBank CSV",
+                "bankCode": "UBP",
+                "dateFormat": "MM/DD/YYYY",
+                "columns": {
+                  "date": "Date",
+                  "description": "Description",
+                  "reference": "Reference",
+                  "debit": "Debit",
+                  "credit": "Credit",
+                  "balance": "Balance"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/formats/{code}": {
+      "put": {
+        "operationId": "putBankReconciliationFormatsCode",
+        "summary": "Change a bank statement format",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "skipRows": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "BPI-SAMPLE",
+                    "skipRows": 2
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Statement Formats",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "skipRows": {
+                    "type": "integer"
+                  },
+                  "dateFormat": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "skipRows": 2,
+                "dateFormat": "DD/MM/YYYY"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBankReconciliationFormatsCode",
+        "summary": "Delete a statement format not used by any statement (deactivate it otherwise)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "UB-CSV"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Statement Formats",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ]
+      }
+    },
+    "/bank-reconciliation/formats/{code}/test": {
+      "post": {
+        "operationId": "postBankReconciliationFormatsCodeTest",
+        "summary": "Parse an uploaded file with a format (no bank account needed): the lines it reads and the rows it rejects",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Statement Formats\n\nAccess: read:bank-reconciliation, read:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "date": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "skippedRows": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "lines": [
+                      {
+                        "date": "2026-09-02",
+                        "description": "DEPOSIT",
+                        "credit": 1000
+                      }
+                    ],
+                    "errors": [],
+                    "skippedRows": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Statement Formats",
+        "x-permissions": [
+          "read:bank-reconciliation",
+          "read:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "file": "(multipart) statement.csv"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/match-rules": {
+      "get": {
+        "operationId": "getBankReconciliationMatchRules",
+        "summary": "Automatic matching rules in the order they run",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Match rules\n\nAccess: read:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "ruleType": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "type": "integer"
+                          },
+                          "confidence": {
+                            "type": "integer"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "REFERENCE",
+                      "ruleType": "reference",
+                      "sortOrder": 10,
+                      "confidence": 100,
+                      "active": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Match rules",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/match-rules/{code}": {
+      "put": {
+        "operationId": "putBankReconciliationMatchRulesCode",
+        "summary": "Change a matching rule: order, active, confidence, date window / most lines",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Match rules\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "sortOrder": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "AMOUNT_DATE",
+                    "sortOrder": 15
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Match rules",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sortOrder": {
+                    "type": "integer"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "dateWindowDays": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "sortOrder": 15,
+                "params": {
+                  "dateWindowDays": 3
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/matches": {
+      "get": {
+        "operationId": "getBankReconciliationMatches",
+        "summary": "Matches of a bank account (active, unmatched or all) with who matched / unmatched them",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Matches\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "bankAccount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-BDO-001"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "all"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "matchType": {
+                            "type": "string"
+                          },
+                          "rule": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "matchedBy": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "brm_1",
+                      "matchType": "auto",
+                      "rule": "REFERENCE",
+                      "status": "active",
+                      "matchedBy": "Finance User"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Matches",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      },
+      "post": {
+        "operationId": "postBankReconciliationMatches",
+        "summary": "Match bank lines with book entries by hand; amounts must agree, or the difference is explained (adjustment journal of a bank transaction type, bank error or book error)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Manual match\n\nAccess: write:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "bankTotal": {
+                          "type": "integer"
+                        },
+                        "bookTotal": {
+                          "type": "integer"
+                        },
+                        "difference": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "brm_1",
+                    "bankTotal": 9950,
+                    "bookTotal": 9950,
+                    "difference": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Manual match",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "bankLineIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "bookLineIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "difference": {
+                    "type": "object",
+                    "properties": {
+                      "treatment": {
+                        "type": "string"
+                      },
+                      "typeCode": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001",
+                "bankLineIds": [
+                  "bsl_1"
+                ],
+                "bookLineIds": [
+                  101,
+                  102
+                ],
+                "difference": {
+                  "treatment": "adjustment",
+                  "typeCode": "BCHG"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/matches/{id}/unmatch": {
+      "post": {
+        "operationId": "postBankReconciliationMatchesIdUnmatch",
+        "summary": "Undo a match (audited; refused when an approved reconciliation locks it)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Matches\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "brm_1",
+                    "status": "unmatched"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Matches",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Wrong OR"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/reconciliations": {
+      "get": {
+        "operationId": "getBankReconciliationReconciliations",
+        "summary": "Bank reconciliation runs (by bank account, period, status)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliations\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "bankAccount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-BDO-001"
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "recNumber": {
+                            "type": "string"
+                          },
+                          "bankAccount": {
+                            "type": "string"
+                          },
+                          "period": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "difference": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "recNumber": "BRC-2026-00001",
+                      "bankAccount": "ACC-BDO-001",
+                      "period": "2026-09",
+                      "status": "approved",
+                      "difference": 0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliations",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      },
+      "post": {
+        "operationId": "postBankReconciliationReconciliations",
+        "summary": "Start the reconciliation of a bank account for a period (as of the period end)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliations\n\nAccess: write:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "recNumber": "BRC-2026-00001",
+                    "status": "draft"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliations",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "period": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001",
+                "period": "2026-09"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/reconciliations/{id}": {
+      "get": {
+        "operationId": "getBankReconciliationReconciliationsId",
+        "summary": "A reconciliation with its Bank Reconciliation Statement (live while draft, frozen once prepared) and history",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recNumber": {
+                          "type": "string"
+                        },
+                        "statement": {
+                          "type": "object",
+                          "properties": {
+                            "bankBalance": {
+                              "type": "integer"
+                            },
+                            "depositsInTransit": {
+                              "type": "integer"
+                            },
+                            "outstandingCheques": {
+                              "type": "integer"
+                            },
+                            "adjustedBankBalance": {
+                              "type": "integer"
+                            },
+                            "bookBalance": {
+                              "type": "integer"
+                            },
+                            "unbookedDebits": {
+                              "type": "integer"
+                            },
+                            "adjustedBookBalance": {
+                              "type": "integer"
+                            },
+                            "difference": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "recNumber": "BRC-2026-00001",
+                    "statement": {
+                      "bankBalance": 162500,
+                      "depositsInTransit": 5000,
+                      "outstandingCheques": 17500,
+                      "adjustedBankBalance": 150000,
+                      "bookBalance": 150250,
+                      "unbookedDebits": 250,
+                      "adjustedBookBalance": 150000,
+                      "difference": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation statement",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/reconciliations/{id}/approve": {
+      "post": {
+        "operationId": "postBankReconciliationReconciliationsIdApprove",
+        "summary": "Approve a prepared reconciliation (approve:bank-reconciliation, not the preparer); locks the matches cleared up to the period end",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: approve:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation statement",
+        "x-permissions": [
+          "approve:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Reviewed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/reconciliations/{id}/cancel": {
+      "post": {
+        "operationId": "postBankReconciliationReconciliationsIdCancel",
+        "summary": "Cancel a draft reconciliation",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "cancelled"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation statement",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Created for the wrong account"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/reconciliations/{id}/pdf": {
+      "get": {
+        "operationId": "getBankReconciliationReconciliationsIdPdf",
+        "summary": "Printable Bank Reconciliation Statement (PDF)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(application/pdf)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation statement",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/reconciliations/{id}/prepare": {
+      "post": {
+        "operationId": "postBankReconciliationReconciliationsIdPrepare",
+        "summary": "Prepare: freeze the statement (adjusted balances must agree); maker of the maker-checker",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "prepared"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation statement",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "All items explained"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/reconciliations/{id}/reopen": {
+      "post": {
+        "operationId": "postBankReconciliationReconciliationsIdReopen",
+        "summary": "Reopen a prepared or approved reconciliation (approver, remarks required): back to draft, matches unlocked",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation statement\n\nAccess: approve:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "draft"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation statement",
+        "x-permissions": [
+          "approve:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Late bank debit memo"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/stale-cheques": {
+      "get": {
+        "operationId": "getBankReconciliationStaleCheques",
+        "summary": "Outstanding payments of a bank account older than bank_reconciliation.stale_cheque_days as of a date",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Stale cheques\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "bankAccount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-BDO-001"
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "staleDays": {
+                          "type": "integer"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "journalNumber": {
+                                "type": "string"
+                              },
+                              "chequeNumber": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              },
+                              "ageDays": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "staleDays": 180,
+                    "rows": [
+                      {
+                        "journalNumber": "JV-2026-00012",
+                        "chequeNumber": "000045",
+                        "amount": -12500,
+                        "ageDays": 212
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Stale cheques",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/stale-cheques/{lineId}/cancel": {
+      "post": {
+        "operationId": "postBankReconciliationStaleChequesLineIdCancel",
+        "summary": "Cancel a stale cheque: the payment journal is reversed and the payable re-opened (disbursement cancellation)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Stale cheques\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "chequeNumber": {
+                          "type": "string"
+                        },
+                        "reversal": {
+                          "type": "object",
+                          "properties": {
+                            "jvNumber": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "chequeNumber": "000045",
+                    "reversal": {
+                      "jvNumber": "JV-2026-00130"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Stale cheques",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001",
+                "reason": "Not presented within 180 days"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/statement-preview": {
+      "get": {
+        "operationId": "getBankReconciliationStatementPreview",
+        "summary": "Bank Reconciliation Statement of a bank account as of any date (no run needed)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "bankAccount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-BDO-001"
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "difference": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "difference": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/statements": {
+      "get": {
+        "operationId": "getBankReconciliationStatements",
+        "summary": "Bank statements (optionally of one bank account) with their matched line count",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "bankAccount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-BDO-001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "statementNumber": {
+                            "type": "string"
+                          },
+                          "bankAccount": {
+                            "type": "string"
+                          },
+                          "periodFrom": {
+                            "type": "string"
+                          },
+                          "periodTo": {
+                            "type": "string"
+                          },
+                          "lineCount": {
+                            "type": "integer"
+                          },
+                          "matchedLines": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "statementNumber": "BST-2026-00001",
+                      "bankAccount": "ACC-BDO-001",
+                      "periodFrom": "2026-09-01",
+                      "periodTo": "2026-09-28",
+                      "lineCount": 12,
+                      "matchedLines": 9
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Statements",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      },
+      "post": {
+        "operationId": "postBankReconciliationStatements",
+        "summary": "Enter a bank statement by hand (same checks as an import)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Manual statement\n\nAccess: write:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "statement": {
+                          "type": "object",
+                          "properties": {
+                            "statementNumber": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "statement": {
+                      "statementNumber": "BST-2026-00002"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Manual statement",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "statementRef": {
+                    "type": "string"
+                  },
+                  "openingBalance": {
+                    "type": "integer"
+                  },
+                  "closingBalance": {
+                    "type": "integer"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "debit": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001",
+                "statementRef": "SOA 2026-09",
+                "openingBalance": 150000,
+                "closingBalance": 149750,
+                "lines": [
+                  {
+                    "date": "2026-09-30",
+                    "description": "SERVICE CHARGE",
+                    "debit": 250
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/statements/{id}": {
+      "get": {
+        "operationId": "getBankReconciliationStatementsId",
+        "summary": "A bank statement with its lines",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "statementNumber": {
+                          "type": "string"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "statementNumber": "BST-2026-00001",
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "date": "2026-09-02",
+                        "description": "DEPOSIT",
+                        "credit": 5000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Statements",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteBankReconciliationStatementsId",
+        "summary": "Delete a statement none of whose lines is matched or adjusted",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Statements\n\nAccess: write:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "statementNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "statementNumber": "BST-2026-00001"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Statements",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ]
+      }
+    },
+    "/bank-reconciliation/statements/import": {
+      "post": {
+        "operationId": "postBankReconciliationStatementsImport",
+        "summary": "Import a bank statement file (validated: balance, duplicates, rows that cannot be read); auto-matches when bank_reconciliation.auto_match_on_import",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Import statement\n\nAccess: write:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "statement": {
+                          "type": "object",
+                          "properties": {
+                            "statementNumber": {
+                              "type": "string"
+                            },
+                            "lineCount": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "autoMatch": {
+                          "type": "object",
+                          "properties": {
+                            "matched": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "statement": {
+                      "statementNumber": "BST-2026-00001",
+                      "lineCount": 12
+                    },
+                    "autoMatch": {
+                      "matched": 9
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Import statement",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "format": {
+                    "type": "string"
+                  },
+                  "statementRef": {
+                    "type": "string"
+                  },
+                  "skipDuplicates": {
+                    "type": "string"
+                  },
+                  "file": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001",
+                "format": "BDO-SAMPLE",
+                "statementRef": "SOA 2026-09",
+                "skipDuplicates": "false",
+                "file": "(multipart) statement.csv"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/statements/preview": {
+      "post": {
+        "operationId": "postBankReconciliationStatementsPreview",
+        "summary": "Parse a bank statement file with a statement format and show the lines, totals, balance check and duplicates before saving",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Import statement\n\nAccess: write:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "totalDebits": {
+                          "type": "integer"
+                        },
+                        "totalCredits": {
+                          "type": "integer"
+                        },
+                        "balanced": {
+                          "type": "boolean"
+                        },
+                        "duplicates": {
+                          "type": "integer"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "date": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "boolean"
+                              },
+                              "suggestedType": {}
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "lineCount": 12,
+                    "totalDebits": 10000,
+                    "totalCredits": 22500,
+                    "balanced": true,
+                    "duplicates": 0,
+                    "lines": [
+                      {
+                        "date": "2026-09-02",
+                        "description": "DEPOSIT",
+                        "credit": 5000,
+                        "duplicate": false,
+                        "suggestedType": null
+                      }
+                    ],
+                    "errors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Import statement",
+        "x-permissions": [
+          "write:bank-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "format": {
+                    "type": "string"
+                  },
+                  "statementRef": {
+                    "type": "string"
+                  },
+                  "openingBalance": {
+                    "type": "string"
+                  },
+                  "closingBalance": {
+                    "type": "string"
+                  },
+                  "file": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "bankAccount": "ACC-BDO-001",
+                "format": "BDO-SAMPLE",
+                "statementRef": "SOA 2026-09",
+                "openingBalance": "150000.00",
+                "closingBalance": "162500.00",
+                "file": "(multipart) statement.csv"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/transaction-types": {
+      "get": {
+        "operationId": "getBankReconciliationTransactionTypes",
+        "summary": "Bank transaction types: unrecorded bank items and the account their adjustment posts to",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: read:bank-reconciliation, read:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "direction": {
+                                "type": "string"
+                              },
+                              "action": {
+                                "type": "string"
+                              },
+                              "accountRole": {
+                                "type": "string"
+                              },
+                              "requiresApproval": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "accountRoles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string"
+                              },
+                              "accountCode": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "code": "BCHG",
+                        "name": "Bank charges",
+                        "direction": "debit",
+                        "action": "journal",
+                        "accountRole": "bank_charges",
+                        "requiresApproval": false
+                      }
+                    ],
+                    "accountRoles": [
+                      {
+                        "role": "bank_charges",
+                        "accountCode": "4401004"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Transaction Types",
+        "x-permissions": [
+          "read:bank-reconciliation",
+          "read:masters"
+        ]
+      },
+      "post": {
+        "operationId": "postBankReconciliationTransactionTypes",
+        "summary": "Add a bank transaction type",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "PESO-FEE"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Transaction Types",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string"
+                  },
+                  "accountRole": {
+                    "type": "string"
+                  },
+                  "matchPattern": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "PESO-FEE",
+                "name": "PESONet fee",
+                "direction": "debit",
+                "accountRole": "bank_charges",
+                "matchPattern": "pesonet fee"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bank-reconciliation/transaction-types/{code}": {
+      "put": {
+        "operationId": "putBankReconciliationTransactionTypesCode",
+        "summary": "Change a bank transaction type (accounts, approval, pattern, active)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "requiresApproval": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "BCHG",
+                    "requiresApproval": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Transaction Types",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requiresApproval": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "requiresApproval": true
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBankReconciliationTransactionTypesCode",
+        "summary": "Delete a bank transaction type added by users and never used (deactivate it otherwise)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Bank Transaction Types\n\nAccess: write:bank-reconciliation, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "PESO-FEE"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Bank Transaction Types",
+        "x-permissions": [
+          "write:bank-reconciliation",
+          "write:masters"
+        ]
+      }
+    },
+    "/bank-reconciliation/workspace": {
+      "get": {
+        "operationId": "getBankReconciliationWorkspace",
+        "summary": "Matching workspace of a bank account and period: summary tiles, bank lines and book entries of the period plus older unmatched ones, the period's reconciliation",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation\n\nAccess: read:bank-reconciliation",
+        "parameters": [
+          {
+            "name": "bankAccount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ACC-BDO-001"
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "statementBalance": {
+                              "type": "integer"
+                            },
+                            "bookBalance": {
+                              "type": "integer"
+                            },
+                            "unmatchedBank": {
+                              "type": "integer"
+                            },
+                            "unmatchedBook": {
+                              "type": "integer"
+                            },
+                            "difference": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "bankLines": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "bookLines": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "reconciliation": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "statementBalance": 162500,
+                      "bookBalance": 150000,
+                      "unmatchedBank": 3,
+                      "unmatchedBook": 2,
+                      "difference": 0
+                    },
+                    "bankLines": [],
+                    "bookLines": [],
+                    "reconciliation": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
       }
     },
     "/receipts/billing-statement/endorsement/{id}/generate": {

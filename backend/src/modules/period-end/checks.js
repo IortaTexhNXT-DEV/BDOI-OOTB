@@ -10,7 +10,6 @@ import { iso, monthEnd, monthStart } from './fiscal.js';
 
 const OPEN_JV = ['pending', 'draft', 'for-approval', 'approved'];
 const SAMPLE = 20;
-const tableExists = async (db, t) => !!(await db.query('SELECT to_regclass($1) AS t', [`public.${t}`])).rows[0].t;
 
 /** Start / end dates of a period row (legacy rows without dates: the calendar month). */
 export const bounds = (p) => {
@@ -51,18 +50,10 @@ export const AUTO_CHECKS = {
     const amount = round2(rows.reduce((s, r) => s + Number(r.unapplied), 0));
     return result(rows.length, `${rows.length} receipt line(s) with ${amount} received but not applied to a bill`, rows.slice(0, SAMPLE), amount);
   },
+  // Bank reconciliation module: bank accounts with activity in the period need an approved reconciliation for it
   async unreconciled_bank(db, p) {
-    const { end } = bounds(p);
-    for (const [table, where] of [['bank_statement_lines', 'NOT COALESCE(reconciled, false)'], ['bank_reconciliation_items', 'status <> \'reconciled\'']]) {
-      if (!(await tableExists(db, table))) continue;
-      try {
-        const n = (await db.query(`SELECT count(*)::int AS n FROM ${table} WHERE ${where} AND COALESCE(transaction_date, created_at::date) <= $1`, [end])).rows[0].n;
-        return result(n, `${n} bank transaction(s) not reconciled up to ${end}`);
-      } catch {
-        return { status: 'not-applicable', count: 0, amount: null, message: `Bank reconciliation table ${table} could not be read`, detail: [] };
-      }
-    }
-    return { status: 'not-applicable', count: 0, amount: null, message: 'Bank reconciliation is not in use; confirm with the manual sign-off', detail: [] };
+    const { monthEndCheck } = await import('../bank-reconciliation/reconcile.js');
+    return monthEndCheck(db, p, bounds(p));
   },
   async policies_without_accounting(db, p) {
     const { end } = bounds(p);

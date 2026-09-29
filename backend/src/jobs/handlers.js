@@ -72,3 +72,6 @@ export async function collectionReminders() {
 
 // Period-end processing (month-end reminder, recurring journals, accrual auto-reversal, period auto soft-close)
 export { monthEndReminder, recurringJournals, accrualReversal, periodAutoSoftClose } from '../modules/period-end/jobs.js';
+
+// Bank reconciliation: daily automatic matching (disabled by default)
+export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
