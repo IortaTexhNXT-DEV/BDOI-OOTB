@@ -10,7 +10,7 @@ import { asBool, isoDate, params, parseStatus, statusLabel } from './helpers.js'
 const IDENT = /^[a-z_][a-z0-9_]*$/;
 /** Reference tables a master type may be stored in (identifiers are never taken from user input). */
 export const TABLES = new Set(['countries', 'states', 'cities', 'currencies', 'banks', 'insurance_companies', 'products',
-  'policy_types', 'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'coverages', 'signatories', 'branches']);
+  'policy_types', 'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'coverages', 'signatories', 'branches', 'write_off_reasons']);
 const SYSTEM_KEYS = new Set(['id', 'status', 'isActive', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy']);
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const q = (s) => {

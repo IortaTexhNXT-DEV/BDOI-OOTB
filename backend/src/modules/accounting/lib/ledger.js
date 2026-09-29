@@ -99,12 +99,12 @@ export async function createJournal(db, j, user) {
     const acct = accounts.get(String(l.accountCode));
     await db.query(`INSERT INTO journal_lines(jv_id, line_no, account_code, account_name, debit, credit, memo, main_account, sub_account,
         main_account_description, sub_account_description, branch_code, branch_description, department_code, department_description,
-        currency_code, foreign_amount, exchange_rate, client_id, policy_id, due_date)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
+        currency_code, foreign_amount, exchange_rate, client_id, policy_id, due_date, insurance_company_id)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
     [h.id, n, String(l.accountCode), acct.name, l.debit, l.credit, l.memo || null, l.mainAccount || null, l.subAccount || null,
       l.mainAccountDescription || null, l.subAccountDescription || null, l.branchCode || null, l.branchDescription || null,
       l.departmentCode || null, l.departmentDescription || null, l.currencyCode || currency, l.foreignAmount ?? null, l.exchangeRate || 1,
-      l.clientId ?? j.clientId ?? null, l.policyId ?? j.policyId ?? null, l.dueDate ?? j.dueDate ?? null]);
+      l.clientId ?? j.clientId ?? null, l.policyId ?? j.policyId ?? null, l.dueDate ?? j.dueDate ?? null, l.insuranceCompanyId ?? null]);
   }
   if (status === 'posted') {
     await db.query('UPDATE journal_vouchers SET status = \'posted\', posted_by = $2, posted_at = now() WHERE id = $1', [h.id, user?.id ?? null]);
@@ -168,7 +168,7 @@ export async function reverseJournal(db, id, user, { date, description, transact
     lines: lines.map((l) => ({ accountCode: l.account_code, debit: l.credit, credit: l.debit, memo: l.memo, clientId: l.client_id, policyId: l.policy_id,
       dueDate: l.due_date, mainAccount: l.main_account, subAccount: l.sub_account, mainAccountDescription: l.main_account_description,
       subAccountDescription: l.sub_account_description, branchCode: l.branch_code, departmentCode: l.department_code, currencyCode: l.currency_code,
-      foreignAmount: l.foreign_amount, exchangeRate: l.exchange_rate })),
+      foreignAmount: l.foreign_amount, exchangeRate: l.exchange_rate, insuranceCompanyId: l.insurance_company_id })),
   }, user);
   if (status === 'posted') await markReversed(db, jv.id, rev.id);
   return rev;

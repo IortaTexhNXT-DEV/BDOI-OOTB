@@ -6,7 +6,8 @@
 import { getSetting } from '../../lib/settings.js';
 import { scopeSql } from '../../lib/scope.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { account, createJournal, reverseJournal } from '../accounting/lib/ledger.js';
+import { reverseJournal } from '../accounting/lib/ledger.js';
+import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, round2, num } from '../accounting/lib/http.js';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -223,12 +224,11 @@ async function approve(db, line, user) {
   if (line.status !== 'Eligible') throw conflict(`Line is ${line.status}; only Eligible lines can be approved`);
   await assertPayable(await getReferrer(db, line.referrer_id));
   await assertChecker(user, line.eligible_by, 'commission line');
-  const jv = await createJournal(db, {
+  const jv = await postEvent('commission.approve', {
     source: 'commission', entryType: 'COMMISSION_ACCRUAL', referenceType: 'Commission', referenceId: line.id, policyId: line.policy_id, policyNumber: line.policy_number,
     description: `Comsub approved – ${line.referrer_name} – ${line.policy_number}`, transactionCode: line.policy_number,
-    lines: [{ accountCode: await account('commission_expense'), debit: Number(line.amount), memo: 'Comsub expense' },
-      { accountCode: await account('commission_payable'), credit: Number(line.amount), memo: `Payable to ${line.referrer_name}` }],
-  }, user);
+    amounts: { amount: Number(line.amount) }, vars: { referrerName: line.referrer_name, policyNumber: line.policy_number },
+  }, { db, user });
   await db.query('UPDATE commissions SET status = \'Approved\', approved_at = now(), approved_by = $2, accrual_jv_id = $3, updated_at = now() WHERE id = $1', [line.id, user.id, jv.id]);
 }
 
@@ -247,13 +247,11 @@ export async function payLines(db, { lines, disbursement, user, checkApprover = 
   const gross = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const wht = round2(lines.reduce((s, l) => s + Number(l.withholding), 0));
   const net = round2(gross - wht);
-  const jv = await createJournal(db, {
+  const jv = await postEvent('commission.payout', {
     source: 'disbursement', entryType: 'COMMISSION_PAYMENT', referenceType: 'Disbursement', referenceId: disbursement.id, transactionCode: disbursement.voucher_number,
     description: `Comsub payout ${disbursement.voucher_number} – ${disbursement.payee_name}`,
-    lines: [{ accountCode: await account('commission_payable'), debit: gross, memo: 'Comsub payable settled' },
-      { accountCode: await account('cash_in_bank'), credit: net, memo: `Paid to ${disbursement.payee_name}` },
-      { accountCode: await account('wht_payable'), credit: wht, memo: 'Withholding tax on commission' }],
-  }, user);
+    amounts: { gross, net, wht }, vars: { voucherNumber: disbursement.voucher_number, payeeName: disbursement.payee_name },
+  }, { db, user });
   await db.query(`UPDATE commissions SET status = 'Paid', paid_at = now(), paid_by = $2, disbursement_id = $3, voucher_no = $4, payment_jv_id = $5, updated_at = now()
     WHERE id = ANY($1)`, [lines.map((l) => l.id), user.id, disbursement.id, disbursement.voucher_number, jv.id]);
   return { gross, wht, net, journalId: jv.id };
@@ -262,12 +260,11 @@ export async function payLines(db, { lines, disbursement, user, checkApprover = 
 async function reverse(db, line, user) {
   if (line.status === 'Reversed') throw conflict('Line is already reversed');
   if (line.status === 'Paid') {
-    await createJournal(db, {
+    await postEvent('commission.clawback', {
       source: 'commission', entryType: 'COMMISSION_CLAWBACK', referenceType: 'Commission', referenceId: line.id, policyId: line.policy_id, policyNumber: line.policy_number,
       description: `Comsub clawback – ${line.referrer_name} – ${line.policy_number}`,
-      lines: [{ accountCode: await account('agent_receivable'), debit: Number(line.amount), memo: 'Clawback receivable from referrer' },
-        { accountCode: await account('commission_expense'), credit: Number(line.amount), memo: 'Comsub clawback' }],
-    }, user);
+      amounts: { amount: Number(line.amount) }, vars: { referrerName: line.referrer_name, policyNumber: line.policy_number },
+    }, { db, user });
   } else if (line.status === 'Approved' && line.accrual_jv_id) {
     if (line.disbursement_id) throw conflict('Line is on a payout voucher; remove it from the voucher first');
     await reverseJournal(db, line.accrual_jv_id, user, { description: `Comsub reversal – ${line.policy_number}` });

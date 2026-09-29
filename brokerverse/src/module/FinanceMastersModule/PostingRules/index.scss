@@ -1,0 +1,115 @@
+.posting-rules,
+.account-determination {
+  padding: 1rem;
+
+  .posting-rules__title {
+    color: #111927;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .posting-rules__crumbs {
+    border: none;
+    padding: 1px 0;
+    background: transparent;
+  }
+
+  .posting-rules__intro {
+    color: #555;
+    margin: 0.5rem 0 0;
+    max-width: 70rem;
+  }
+
+  .posting-rules__card {
+    background: #fff;
+    border: 1px solid #e5e9f0;
+    border-radius: 10px;
+    padding: 1rem;
+  }
+
+  .posting-rules__empty {
+    color: #6c757d;
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .posting-rules__event {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0072d8;
+  }
+
+  .posting-rules__chips {
+    margin: 0.75rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .posting-rules__editor {
+    border-top: 1px dashed #d0d7e2;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: #555;
+      font-size: 0.85rem;
+    }
+  }
+
+  .posting-rules__line {
+    border: 1px solid #eef1f6;
+    border-radius: 8px;
+    margin: 0.35rem 0;
+    padding: 0.5rem;
+    background: #fafbfd;
+  }
+
+  .posting-rules__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+  }
+
+  .posting-rules__no {
+    width: 1.5rem;
+    font-weight: 600;
+  }
+
+  .posting-rules__side {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .posting-rules__type {
+    width: 10rem;
+  }
+
+  .posting-rules__amount {
+    width: 10rem;
+  }
+
+  .posting-rules__grow {
+    flex: 1 1 14rem;
+    min-width: 0;
+
+    .p-dropdown {
+      width: 100%;
+    }
+  }
+
+  .posting-rules__sim {
+    margin-top: 1rem;
+    border-top: 1px solid #e5e9f0;
+    padding-top: 0.75rem;
+  }
+
+  .account-determination__gl {
+    min-width: 22rem;
+  }
+}

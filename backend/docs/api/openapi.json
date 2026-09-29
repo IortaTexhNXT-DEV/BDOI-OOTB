@@ -18,6 +18,9 @@
   ],
   "tags": [
     {
+      "name": "Account Determination"
+    },
+    {
       "name": "Accounting"
     },
     {
@@ -105,6 +108,9 @@
       "name": "Policy renewals"
     },
     {
+      "name": "Posting Rules"
+    },
+    {
       "name": "Product Configurator"
     },
     {
@@ -145,6 +151,616 @@
     }
   ],
   "paths": {
+    "/posting-rules/account-determination": {
+      "get": {
+        "operationId": "getPostingRulesAccountDetermination",
+        "summary": "Account roles the posting rules use (by section), payable account per payee type, cash account per payment mode, write-off reasons",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "sections": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "section": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "role": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "glCode": {
+                                      "type": "string"
+                                    },
+                                    "glName": {
+                                      "type": "string"
+                                    },
+                                    "usedBy": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "payableByPayee": {
+                          "type": "object",
+                          "properties": {
+                            "Insurer": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "cashByPaymentMode": {
+                          "type": "object",
+                          "properties": {
+                            "cash": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "writeOffReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "glAccount": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "sections": [
+                      {
+                        "section": "premium",
+                        "roles": [
+                          {
+                            "role": "premium_receivable",
+                            "label": "Premiums receivable",
+                            "glCode": "1202001",
+                            "glName": "Premiums Receivable – Direct Clients",
+                            "usedBy": [
+                              "policy.issue.broker_billed"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "payableByPayee": {
+                      "Insurer": "2201001"
+                    },
+                    "cashByPaymentMode": {
+                      "cash": "1101001"
+                    },
+                    "writeOffReasons": [
+                      {
+                        "code": "BAD_DEBT",
+                        "name": "Uncollectible premium",
+                        "glAccount": "4401009"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/account-determination/maps/{name}": {
+      "put": {
+        "operationId": "putPostingRulesAccountDeterminationMapsName",
+        "summary": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "cash": {
+                          "type": "string"
+                        },
+                        "check": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "cash": "1101001",
+                    "check": "1102001"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "map": {
+                    "type": "object",
+                    "properties": {
+                      "cash": {
+                        "type": "string"
+                      },
+                      "check": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "map": {
+                  "cash": "1101001",
+                  "check": "1102001"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/account-determination/roles/{role}": {
+      "put": {
+        "operationId": "putPostingRulesAccountDeterminationRolesRole",
+        "summary": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string"
+                        },
+                        "glCode": {
+                          "type": "string"
+                        },
+                        "glName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "role": "premium_receivable",
+                    "glCode": "1202002",
+                    "glName": "Premiums Receivable – Corporate Clients"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "glCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "glCode": "1202002"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/account-determination/write-off-reasons": {
+      "get": {
+        "operationId": "getPostingRulesAccountDeterminationWriteOffReasons",
+        "summary": "Write-off reasons with their GL account (all statuses)",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "glAccount": {
+                            "type": "string"
+                          },
+                          "maxAmount": {},
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "code": "BAD_DEBT",
+                      "name": "Uncollectible premium (bad debt)",
+                      "glAccount": "4401009",
+                      "maxAmount": null,
+                      "status": "active"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      },
+      "post": {
+        "operationId": "postPostingRulesAccountDeterminationWriteOffReasons",
+        "summary": "Add a write-off reason",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "glAccount": {
+                          "type": "string"
+                        },
+                        "maxAmount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "WAIVED_FEE",
+                    "name": "Fee waived",
+                    "glAccount": "4409001",
+                    "maxAmount": 500,
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "glAccount": {
+                    "type": "string"
+                  },
+                  "maxAmount": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "code": "WAIVED_FEE",
+                "name": "Fee waived",
+                "glAccount": "4409001",
+                "maxAmount": 500
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/account-determination/write-off-reasons/{code}": {
+      "put": {
+        "operationId": "putPostingRulesAccountDeterminationWriteOffReasonsCode",
+        "summary": "Update a write-off reason (name, GL account, limit, status)",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "glAccount": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "BAD_DEBT",
+                    "glAccount": "4401009",
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "glAccount": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "glAccount": "4401009",
+                "status": "active"
+              }
+            }
+          }
+        }
+      }
+    },
     "/accounting/account-groups": {
       "get": {
         "operationId": "getAccountingAccountGroups",
@@ -1060,6 +1676,26 @@
                           },
                           "matchedAmount": {
                             "type": "number"
+                          },
+                          "writeOff": {
+                            "type": "object",
+                            "properties": {
+                              "journalNumber": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              },
+                              "reasonCode": {
+                                "type": "string"
+                              },
+                              "glAccount": {
+                                "type": "string"
+                              },
+                              "side": {
+                                "type": "string"
+                              }
+                            }
                           }
                         }
                       }
@@ -1073,7 +1709,14 @@
                       "id": "mt_1",
                       "debitTransactionId": "101",
                       "creditTransactionId": "205",
-                      "matchedAmount": 11862.5
+                      "matchedAmount": 11812.5,
+                      "writeOff": {
+                        "journalNumber": "JV-2026-00042",
+                        "amount": 50,
+                        "reasonCode": "SMALL_BALANCE",
+                        "glAccount": "4409001",
+                        "side": "DEBIT"
+                      }
                     }
                   ]
                 }
@@ -1115,7 +1758,12 @@
                         "matchedAmount": {
                           "type": "number"
                         },
-                        "adjustmentAmount": {}
+                        "adjustmentAmount": {
+                          "type": "integer"
+                        },
+                        "writeOffCode": {
+                          "type": "string"
+                        }
                       }
                     }
                   },
@@ -1137,8 +1785,9 @@
                   {
                     "debitTransactionId": "101",
                     "creditTransactionId": "205",
-                    "matchedAmount": 11862.5,
-                    "adjustmentAmount": null
+                    "matchedAmount": 11812.5,
+                    "adjustmentAmount": 50,
+                    "writeOffCode": "SMALL_BALANCE"
                   }
                 ],
                 "metadata": {
@@ -2548,6 +3197,10 @@
                     },
                     "isCoInsurance": {
                       "type": "boolean"
+                    },
+                    "participants": {
+                      "type": "array",
+                      "items": {}
                     }
                   }
                 },
@@ -2587,7 +3240,8 @@
                     "totalCredits": 11862.5,
                     "balance": 0
                   },
-                  "isCoInsurance": false
+                  "isCoInsurance": false,
+                  "participants": []
                 }
               }
             }
@@ -2763,6 +3417,10 @@
                     },
                     "isCoInsurance": {
                       "type": "boolean"
+                    },
+                    "participants": {
+                      "type": "array",
+                      "items": {}
                     }
                   }
                 },
@@ -2802,7 +3460,8 @@
                     "totalCredits": 11862.5,
                     "balance": 0
                   },
-                  "isCoInsurance": false
+                  "isCoInsurance": false,
+                  "participants": []
                 }
               }
             }
@@ -3228,6 +3887,81 @@
         "x-permissions": [
           "read:journal-vouchers",
           "read:reports"
+        ]
+      }
+    },
+    "/accounting/write-off-reasons": {
+      "get": {
+        "operationId": "getAccountingWriteOffReasons",
+        "summary": "Active write-off reasons with their GL account (Open Entry Matching: adjustmentAmount + writeOffCode posts the write-off)",
+        "tags": [
+          "Accounting"
+        ],
+        "description": "Front-end touchpoint: Accounts > Open Entry Matching\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "glAccount": {
+                            "type": "string"
+                          },
+                          "maxAmount": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "code": "SMALL_BALANCE",
+                      "name": "Small balance difference",
+                      "glAccount": "4409001",
+                      "maxAmount": 100
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Open Entry Matching",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:receipts",
+          "read:disbursements"
         ]
       }
     },
@@ -33749,6 +34483,104 @@
         ]
       }
     },
+    "/payments/petty-cash/disbursements/{id}/reverse": {
+      "post": {
+        "operationId": "postPaymentsPettyCashDisbursementsIdReverse",
+        "summary": "Reverse a petty cash disbursement entered in error (mirror journal, fund cash restored)",
+        "tags": [
+          "Petty Cash"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Disbursement\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "number": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reversalJournalId": {
+                          "type": "string"
+                        },
+                        "availableCash": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcd_1",
+                    "number": "PC-2026-00012",
+                    "status": "reversed",
+                    "reversalJournalId": "jv_2",
+                    "availableCash": 20000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Disbursement",
+        "x-permissions": [
+          "write:disbursements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Entered twice"
+              }
+            }
+          }
+        }
+      }
+    },
     "/payments/petty-cash/funds": {
       "get": {
         "operationId": "getPaymentsPettyCashFunds",
@@ -34489,6 +35321,104 @@
         ]
       }
     },
+    "/payments/petty-cash/receipts/{id}/reverse": {
+      "post": {
+        "operationId": "postPaymentsPettyCashReceiptsIdReverse",
+        "summary": "Reverse a petty cash receipt entered in error (mirror journal, fund cash restored)",
+        "tags": [
+          "Petty Cash"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Receipts\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "number": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reversalJournalId": {
+                          "type": "string"
+                        },
+                        "availableCash": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcd_1",
+                    "number": "PC-2026-00012",
+                    "status": "reversed",
+                    "reversalJournalId": "jv_2",
+                    "availableCash": 20000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Receipts",
+        "x-permissions": [
+          "write:disbursements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Entered twice"
+              }
+            }
+          }
+        }
+      }
+    },
     "/payments/petty-cash/replenishments": {
       "get": {
         "operationId": "getPaymentsPettyCashReplenishments",
@@ -34749,6 +35679,104 @@
         "x-permissions": [
           "read:disbursements"
         ]
+      }
+    },
+    "/payments/petty-cash/replenishments/{id}/reverse": {
+      "post": {
+        "operationId": "postPaymentsPettyCashReplenishmentsIdReverse",
+        "summary": "Reverse a petty cash replenishment entered in error (mirror journal, fund cash restored)",
+        "tags": [
+          "Petty Cash"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Replenish\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "number": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reversalJournalId": {
+                          "type": "string"
+                        },
+                        "availableCash": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcd_1",
+                    "number": "PC-2026-00012",
+                    "status": "reversed",
+                    "reversalJournalId": "jv_2",
+                    "availableCash": 20000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Replenish",
+        "x-permissions": [
+          "write:disbursements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Entered twice"
+              }
+            }
+          }
+        }
       }
     },
     "/payments/petty-cash/requests": {
@@ -41898,6 +42926,1136 @@
         "x-permissions": [
           "read:renewals"
         ]
+      }
+    },
+    "/posting-rules": {
+      "get": {
+        "operationId": "getPostingRules",
+        "summary": "Posting rules with their lines, every version (filter eventCode, module)",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [
+          {
+            "name": "eventCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "receipt.apply"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "eventCode": {
+                            "type": "string"
+                          },
+                          "event": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "entryType": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "narration": {
+                            "type": "string"
+                          },
+                          "branchSource": {
+                            "type": "string"
+                          },
+                          "effectiveFrom": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "lines": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "lineNo": {
+                                  "type": "integer"
+                                },
+                                "side": {
+                                  "type": "string"
+                                },
+                                "accountType": {
+                                  "type": "string"
+                                },
+                                "account": {
+                                  "type": "string"
+                                },
+                                "fallbackRole": {},
+                                "amountKey": {
+                                  "type": "string"
+                                },
+                                "perParticipant": {
+                                  "type": "boolean"
+                                },
+                                "narration": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "eventCode": "policy.issue.broker_billed",
+                      "event": "Policy issued – broker billed",
+                      "version": 1,
+                      "name": "Policy issued – broker billed",
+                      "module": "policies",
+                      "entryType": "NEW_BUSINESS",
+                      "source": "booking",
+                      "narration": "Premium billed – {{policyNumber}} ({{billNumber}})",
+                      "branchSource": "policy_owner",
+                      "effectiveFrom": "2000-01-01",
+                      "active": true,
+                      "lines": [
+                        {
+                          "lineNo": 1,
+                          "side": "Dr",
+                          "accountType": "role",
+                          "account": "premium_receivable",
+                          "fallbackRole": null,
+                          "amountKey": "gross",
+                          "perParticipant": false,
+                          "narration": "Premium receivable {{billNumber}}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/{id}": {
+      "get": {
+        "operationId": "getPostingRulesId",
+        "summary": "One posting rule version with its lines",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "eventCode": {
+                          "type": "string"
+                        },
+                        "event": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        },
+                        "entryType": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "narration": {
+                          "type": "string"
+                        },
+                        "branchSource": {
+                          "type": "string"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "side": {
+                                "type": "string"
+                              },
+                              "accountType": {
+                                "type": "string"
+                              },
+                              "account": {
+                                "type": "string"
+                              },
+                              "fallbackRole": {},
+                              "amountKey": {
+                                "type": "string"
+                              },
+                              "perParticipant": {
+                                "type": "boolean"
+                              },
+                              "narration": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "eventCode": "policy.issue.broker_billed",
+                    "event": "Policy issued – broker billed",
+                    "version": 1,
+                    "name": "Policy issued – broker billed",
+                    "module": "policies",
+                    "entryType": "NEW_BUSINESS",
+                    "source": "booking",
+                    "narration": "Premium billed – {{policyNumber}} ({{billNumber}})",
+                    "branchSource": "policy_owner",
+                    "effectiveFrom": "2000-01-01",
+                    "active": true,
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "side": "Dr",
+                        "accountType": "role",
+                        "account": "premium_receivable",
+                        "fallbackRole": null,
+                        "amountKey": "gross",
+                        "perParticipant": false,
+                        "narration": "Premium receivable {{billNumber}}"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/{id}/history": {
+      "get": {
+        "operationId": "getPostingRulesIdHistory",
+        "summary": "Audit trail of a posting rule (versions saved, activated, deactivated)",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "action": "create-version",
+                      "username": "BrokerVerse",
+                      "at": "2026-09-29T08:00:00Z",
+                      "version": 2
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/{id}/status": {
+      "put": {
+        "operationId": "putPostingRulesIdStatus",
+        "summary": "Activate or deactivate a rule version (an event keeps at least one version in force)",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "eventCode": {
+                          "type": "string"
+                        },
+                        "event": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        },
+                        "entryType": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "narration": {
+                          "type": "string"
+                        },
+                        "branchSource": {
+                          "type": "string"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "side": {
+                                "type": "string"
+                              },
+                              "accountType": {
+                                "type": "string"
+                              },
+                              "account": {
+                                "type": "string"
+                              },
+                              "fallbackRole": {},
+                              "amountKey": {
+                                "type": "string"
+                              },
+                              "perParticipant": {
+                                "type": "boolean"
+                              },
+                              "narration": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "eventCode": "policy.issue.broker_billed",
+                    "event": "Policy issued – broker billed",
+                    "version": 1,
+                    "name": "Policy issued – broker billed",
+                    "module": "policies",
+                    "entryType": "NEW_BUSINESS",
+                    "source": "booking",
+                    "narration": "Premium billed – {{policyNumber}} ({{billNumber}})",
+                    "branchSource": "policy_owner",
+                    "effectiveFrom": "2000-01-01",
+                    "active": false,
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "side": "Dr",
+                        "accountType": "role",
+                        "account": "premium_receivable",
+                        "fallbackRole": null,
+                        "amountKey": "gross",
+                        "perParticipant": false,
+                        "narration": "Premium receivable {{billNumber}}"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "active": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/events": {
+      "get": {
+        "operationId": "getPostingRulesEvents",
+        "summary": "Business events with the rule version in force, the amounts each event supplies and its template variables",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "eventCode": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "amountKeys": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "activeRuleId": {
+                            "type": "integer"
+                          },
+                          "activeVersion": {
+                            "type": "integer"
+                          },
+                          "versions": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "eventCode": "receipt.apply",
+                      "label": "Premium collection applied",
+                      "module": "receipts",
+                      "amountKeys": [
+                        "amount"
+                      ],
+                      "activeRuleId": 7,
+                      "activeVersion": 1,
+                      "versions": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/events/{eventCode}/versions": {
+      "post": {
+        "operationId": "postPostingRulesEventsEventCodeVersions",
+        "summary": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+        "parameters": [
+          {
+            "name": "eventCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "eventCode": {
+                          "type": "string"
+                        },
+                        "event": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        },
+                        "entryType": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "narration": {
+                          "type": "string"
+                        },
+                        "branchSource": {
+                          "type": "string"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "side": {
+                                "type": "string"
+                              },
+                              "accountType": {
+                                "type": "string"
+                              },
+                              "account": {
+                                "type": "string"
+                              },
+                              "fallbackRole": {},
+                              "amountKey": {
+                                "type": "string"
+                              },
+                              "perParticipant": {
+                                "type": "boolean"
+                              },
+                              "narration": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "eventCode": "policy.issue.broker_billed",
+                    "event": "Policy issued – broker billed",
+                    "version": 2,
+                    "name": "Policy issued – broker billed",
+                    "module": "policies",
+                    "entryType": "NEW_BUSINESS",
+                    "source": "booking",
+                    "narration": "Premium billed – {{policyNumber}} ({{billNumber}})",
+                    "branchSource": "policy_owner",
+                    "effectiveFrom": "2000-01-01",
+                    "active": true,
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "side": "Dr",
+                        "accountType": "role",
+                        "account": "premium_receivable",
+                        "fallbackRole": null,
+                        "amountKey": "gross",
+                        "perParticipant": false,
+                        "narration": "Premium receivable {{billNumber}}"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "effectiveFrom": {
+                    "type": "string"
+                  },
+                  "changeNote": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lineNo": {
+                          "type": "integer"
+                        },
+                        "side": {
+                          "type": "string"
+                        },
+                        "accountType": {
+                          "type": "string"
+                        },
+                        "account": {
+                          "type": "string"
+                        },
+                        "fallbackRole": {},
+                        "amountKey": {
+                          "type": "string"
+                        },
+                        "perParticipant": {
+                          "type": "boolean"
+                        },
+                        "narration": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "effectiveFrom": "2026-10-01",
+                "changeNote": "Premium taxes on their own lines",
+                "lines": [
+                  {
+                    "lineNo": 1,
+                    "side": "Dr",
+                    "accountType": "role",
+                    "account": "premium_receivable",
+                    "fallbackRole": null,
+                    "amountKey": "gross",
+                    "perParticipant": false,
+                    "narration": "Premium receivable {{billNumber}}"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/meta": {
+      "get": {
+        "operationId": "getPostingRulesMeta",
+        "summary": "Pickers of the rule editor: sides, account types, account roles (with GL), resolvers, amount keys, branch sources",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "sides": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "accountTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string"
+                              },
+                              "glCode": {
+                                "type": "string"
+                              },
+                              "glName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "resolvers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "amountKeys": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "sides": [
+                      "Dr",
+                      "Cr"
+                    ],
+                    "accountTypes": [
+                      "role",
+                      "gl",
+                      "resolver",
+                      "context"
+                    ],
+                    "roles": [
+                      {
+                        "role": "premium_receivable",
+                        "glCode": "1202001",
+                        "glName": "Premiums Receivable – Direct Clients"
+                      }
+                    ],
+                    "resolvers": [
+                      {
+                        "name": "bank_account",
+                        "label": "Bank account of the receipt / payment"
+                      }
+                    ],
+                    "amountKeys": [
+                      "amount",
+                      "gross"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/simulate": {
+      "post": {
+        "operationId": "postPostingRulesSimulate",
+        "summary": "Journal a rule builds for a sample (or given) context – the saved version (ruleId), unsaved lines or the version in force; nothing is posted",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "eventCode": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "balanced": {
+                          "type": "boolean"
+                        },
+                        "totalDebit": {
+                          "type": "integer"
+                        },
+                        "totalCredit": {
+                          "type": "integer"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "accountCode": {
+                                "type": "string"
+                              },
+                              "accountName": {
+                                "type": "string"
+                              },
+                              "debit": {
+                                "type": "integer"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              },
+                              "memo": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "eventCode": "receipt.apply",
+                    "description": "Premium collected – POL-SAMPLE (OR-SAMPLE)",
+                    "balanced": true,
+                    "totalDebit": 11200,
+                    "totalCredit": 11200,
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "accountCode": "1102001",
+                        "accountName": "Cash in Bank – Operating Account (BDO Current)",
+                        "debit": 11200,
+                        "credit": 0,
+                        "memo": "Premium collection"
+                      },
+                      {
+                        "lineNo": 2,
+                        "accountCode": "1202001",
+                        "accountName": "Premiums Receivable – Direct Clients",
+                        "debit": 0,
+                        "credit": 11200,
+                        "memo": "Settles INV-SAMPLE"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "eventCode": {
+                    "type": "string"
+                  },
+                  "coInsurance": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "eventCode": "receipt.apply",
+                "coInsurance": false
+              }
+            }
+          }
+        }
       }
     },
     "/product-configurator/acceptance-limits": {

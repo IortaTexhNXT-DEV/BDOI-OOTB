@@ -144,6 +144,18 @@ for (const action of ['submit', 'approve', 'reject']) {
     },
   });
 }
+for (const kind of ['disbursements', 'receipts', 'replenishments']) {
+  pcr.define({
+    method: 'POST', path: `/${kind}/:id/reverse`, summary: `Reverse a petty cash ${kind.slice(0, -1)} entered in error (mirror journal, fund cash restored)`,
+    screen: `${S} > ${KINDS[kind][0]}`, middleware: [...pcWrite, validate(z.object({ reason: z.string().optional() }).passthrough())],
+    request: { reason: 'Entered twice' }, response: { success: true, data: { id: 'pcd_1', number: 'PC-2026-00012', status: 'reversed', reversalJournalId: 'jv_2', availableCash: 20000 } },
+    handler: async (req, res) => {
+      const r = await withTransaction((db) => pc.reverseEntry(db, kind, req.params.id, req.user, req.body?.reason || null));
+      await audit(req, { entity: `petty_cash_${kind.slice(0, -1)}`, entityId: r.id, action: 'reverse', after: { ...r, reason: req.body?.reason || null } });
+      ok(res, r, `${r.number} reversed`);
+    },
+  });
+}
 
 export default pay.router;
 export const mount = '/payments';

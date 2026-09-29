@@ -6,7 +6,8 @@
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { account, createJournal } from '../accounting/lib/ledger.js';
+import { account, reverseJournal } from '../accounting/lib/ledger.js';
+import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { notify } from '../notifications/router.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -47,8 +48,9 @@ export async function createFund(db, b, user) {
       main_account, sub_account, currency, branch_code, department_code, custodian_user_id, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$5,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
   [b.code, str(b.description), txn, isoDate(b.transactionDate) || (await today()), size, round2(num(b.maxLimit)), round2(num(b.minimumCashbox)), str(b.bankCode), str(b.bankAccountCode),
     str(b.mainAccountCode), str(b.subAccountCode), b.currency || (await getSetting('currency.default', 'PHP')), str(b.branchCode), str(b.departmentCode), b.custodianUserId || null, user.id])).rows[0];
-  const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_FUND', referenceType: 'PettyCash', referenceId: f.id, transactionCode: txn, description: `Petty cash fund ${f.code} established`,
-    lines: [{ accountCode: await fundAccount(db, f), debit: size, memo: `Fund ${f.code}` }, { accountCode: await account('cash_in_bank'), credit: size, memo: `Cheque to ${f.code} custodian` }] }, user);
+  const jv = await postEvent('pettycash.fund', { source: 'petty-cash', entryType: 'PETTY_CASH_FUND', referenceType: 'PettyCash', referenceId: f.id, transactionCode: txn, description: `Petty cash fund ${f.code} established`,
+    branchCode: f.branch_code, departmentCode: f.department_code, bankAccount: f.bank_account_code, accounts: { fund: await fundAccount(db, f) },
+    amounts: { amount: size }, vars: { fundCode: f.code } }, { db, user });
   return (await db.query('UPDATE petty_cash_funds SET journal_id = $2 WHERE id = $1 RETURNING *', [f.id, jv.id])).rows[0];
 }
 
@@ -143,9 +145,9 @@ export async function createDisbursement(db, b, user) {
   const net = round2(amount - wht);
   const txn = await nextDocumentNumber('petty_cash', { db });
   const vatAccount = b.vatAccount || await account('input_vat'); const whtAccount = b.whtAccount || await account('wht_payable');
-  const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_DISBURSEMENT', referenceType: 'PettyCash', transactionCode: txn, description: `Petty cash ${f.code}: ${b.remarks || req?.purpose || 'disbursement'}`,
-    lines: [{ accountCode: b.expenseAccount, debit: round2(amount - vat), memo: b.remarks }, { accountCode: vatAccount, debit: vat, memo: 'Input VAT' },
-      { accountCode: await fundAccount(db, f), credit: net, memo: `Paid from ${f.code}` }, { accountCode: whtAccount, credit: wht, memo: 'Expanded withholding tax' }] }, user);
+  const jv = await postEvent('pettycash.disbursement', { source: 'petty-cash', entryType: 'PETTY_CASH_DISBURSEMENT', referenceType: 'PettyCash', transactionCode: txn, description: `Petty cash ${f.code}: ${b.remarks || req?.purpose || 'disbursement'}`,
+    branchCode: f.branch_code, departmentCode: f.department_code, accounts: { expense: b.expenseAccount, vat: vatAccount, wht: whtAccount, fund: await fundAccount(db, f) },
+    amounts: { amount, net_of_vat: round2(amount - vat), vat, net, wht }, vars: { fundCode: f.code, purpose: b.remarks || req?.purpose || 'disbursement', remarks: b.remarks } }, { db, user });
   const d = (await db.query(`INSERT INTO petty_cash_disbursements(transaction_number, transaction_code, fund_id, request_id, criteria, expense_account, amount, vat, wht, net_amount, vat_account, wht_account,
       remarks, disbursement_date, journal_id, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
   [txn, str(b.transactionCode), f.id, req?.id || null, str(b.criteria), b.expenseAccount, amount, vat, wht, net, vatAccount, whtAccount, str(b.remarks), isoDate(b.date) || (await today()), jv.id, user.id])).rows[0];
@@ -161,8 +163,9 @@ export async function createReceipt(db, b, user) {
   if (!(amount > 0)) throw badRequest('amount must be greater than zero');
   const no = await nextDocumentNumber('petty_cash_receipt', { db });
   const credit = b.creditAccount || b.subAccountCode || await account('employee_advances');
-  const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_RECEIPT', referenceType: 'PettyCash', transactionCode: no, description: `Cash returned to ${f.code}${b.requesterName ? ` by ${b.requesterName}` : ''}`,
-    lines: [{ accountCode: await fundAccount(db, f), debit: amount, memo: b.remarks }, { accountCode: credit, credit: amount, memo: b.remarks }] }, user);
+  const jv = await postEvent('pettycash.receipt', { source: 'petty-cash', entryType: 'PETTY_CASH_RECEIPT', referenceType: 'PettyCash', transactionCode: no, description: `Cash returned to ${f.code}${b.requesterName ? ` by ${b.requesterName}` : ''}`,
+    branchCode: str(b.branchCode) || f.branch_code, departmentCode: f.department_code, accounts: { fund: await fundAccount(db, f), credit },
+    amounts: { amount }, vars: { fundCode: f.code, remarks: b.remarks } }, { db, user });
   const r = (await db.query(`INSERT INTO petty_cash_receipts(receipt_number, transaction_number, transaction_code, fund_id, requester_name, branch_code, bank_code, credit_account, amount, remarks, receipt_date, journal_id, created_by)
     VALUES ($1,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`, [no, str(b.transactionCode), f.id, str(b.requesterName), str(b.branchCode), str(b.bankCode), credit, amount, str(b.remarks), isoDate(b.date) || (await today()), jv.id, user.id])).rows[0];
   await adjustCash(db, f, amount);
@@ -174,12 +177,35 @@ export async function createReplenishment(db, b, user) {
   const amount = round2(b.amount === undefined || b.amount === '' ? Number(f.fund_size) - Number(f.available_cash) : num(b.amount));
   if (!(amount > 0)) throw conflict(`Fund ${f.code} is already at its full size`);
   const txn = await nextDocumentNumber('petty_cash', { db });
-  const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_REPLENISHMENT', referenceType: 'PettyCash', transactionCode: txn, description: `Replenishment of ${f.code}`,
-    lines: [{ accountCode: await fundAccount(db, f), debit: amount, memo: 'Replenishment' }, { accountCode: await account('cash_in_bank'), credit: amount, memo: `Cheque for ${f.code}` }] }, user);
+  const jv = await postEvent('pettycash.replenishment', { source: 'petty-cash', entryType: 'PETTY_CASH_REPLENISHMENT', referenceType: 'PettyCash', transactionCode: txn, description: `Replenishment of ${f.code}`,
+    branchCode: str(b.branchCode) || f.branch_code, departmentCode: f.department_code, bankAccount: f.bank_account_code, accounts: { fund: await fundAccount(db, f) },
+    amounts: { amount }, vars: { fundCode: f.code } }, { db, user });
   const r = (await db.query(`INSERT INTO petty_cash_replenishments(transaction_number, transaction_code, fund_id, branch_code, bank_code, sub_account, amount, replenish_date, remarks, journal_id, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`, [txn, str(b.transactionCode), f.id, str(b.branchCode), str(b.bankCode), str(b.subAccountCode), amount, isoDate(b.date) || (await today()), str(b.remarks), jv.id, user.id])).rows[0];
   await adjustCash(db, f, amount);
   return r;
+}
+
+/**
+ * Reverse a petty cash disbursement, receipt or replenishment entered in error: mirror journal and the fund's available
+ * cash restored. kind: disbursements | receipts | replenishments.
+ */
+export async function reverseEntry(db, kind, id, user, reason = null) {
+  const table = { disbursements: 'petty_cash_disbursements', receipts: 'petty_cash_receipts', replenishments: 'petty_cash_replenishments' }[kind];
+  if (!table) throw badRequest(`Unknown petty cash entry type ${kind}`);
+  const numberCol = kind === 'receipts' ? 'receipt_number' : 'transaction_number';
+  const e = (await db.query(`SELECT * FROM ${table} WHERE id = $1 OR ${numberCol} = $1 FOR UPDATE`, [String(id)])).rows[0];
+  if (!e) throw notFound('Petty cash entry not found');
+  if (e.status === 'reversed') throw conflict(`${e[numberCol]} is already reversed`);
+  const f = await getFund(db, e.fund_id, true);
+  const effect = kind === 'disbursements' ? Number(e.net_amount) : -Number(e.amount); // cash back into (or out of) the fund
+  if (effect < 0 && Number(f.available_cash) + effect < 0) throw conflict(`Fund ${f.code} does not hold the ${-effect} to reverse`);
+  const rev = e.journal_id ? await reverseJournal(db, e.journal_id, user, { description: `Reversal of petty cash ${e[numberCol]}${reason ? ` – ${reason}` : ''}` }) : null;
+  await db.query(`UPDATE ${table} SET status = 'reversed', reversal_jv_id = $2 WHERE id = $1`, [e.id, rev?.id ?? null]);
+  const next = round2(Number(f.available_cash) + effect);
+  await db.query('UPDATE petty_cash_funds SET available_cash = $2, updated_at = now() WHERE id = $1', [f.id, next]);
+  if (kind === 'disbursements' && e.request_id) await db.query('UPDATE petty_cash_requests SET status = \'approved\', updated_at = now() WHERE id = $1 AND status = \'disbursed\'', [e.request_id]);
+  return { id: e.id, number: e[numberCol], status: 'reversed', reversalJournalId: rev?.id ?? null, availableCash: next };
 }
 
 const LISTS = {

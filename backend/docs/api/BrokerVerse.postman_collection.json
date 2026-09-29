@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (648 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (666 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -123,6 +123,475 @@
               "if (token) { pm.collectionVariables.set('token', token); if (pm.environment) pm.environment.set('token', token); }"
             ]
           }
+        }
+      ]
+    },
+    {
+      "name": "Account Determination",
+      "item": [
+        {
+          "name": "Account roles the posting rules use (by section), payable account per payee type, cash account per payment mode, write-off reasons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/account-determination",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "account-determination"
+              ]
+            },
+            "description": "Account roles the posting rules use (by section), payable account per payee type, cash account per payment mode, write-off reasons\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/account-determination",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "account-determination"
+                  ]
+                },
+                "description": "Account roles the posting rules use (by section), payable account per payee type, cash account per payment mode, write-off reasons\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sections\": [\n      {\n        \"section\": \"premium\",\n        \"roles\": [\n          {\n            \"role\": \"premium_receivable\",\n            \"label\": \"Premiums receivable\",\n            \"glCode\": \"1202001\",\n            \"glName\": \"Premiums Receivable – Direct Clients\",\n            \"usedBy\": [\n              \"policy.issue.broker_billed\"\n            ]\n          }\n        ]\n      }\n    ],\n    \"payableByPayee\": {\n      \"Insurer\": \"2201001\"\n    },\n    \"cashByPaymentMode\": {\n      \"cash\": \"1101001\"\n    },\n    \"writeOffReasons\": [\n      {\n        \"code\": \"BAD_DEBT\",\n        \"name\": \"Uncollectible premium\",\n        \"glAccount\": \"4401009\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/account-determination/maps/:name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "account-determination",
+                "maps",
+                ":name"
+              ],
+              "variable": [
+                {
+                  "key": "name",
+                  "value": "",
+                  "description": "name (path parameter)"
+                }
+              ]
+            },
+            "description": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"map\": {\n    \"cash\": \"1101001\",\n    \"check\": \"1102001\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/account-determination/maps/:name",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "account-determination",
+                    "maps",
+                    ":name"
+                  ],
+                  "variable": [
+                    {
+                      "key": "name",
+                      "value": "",
+                      "description": "name (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"map\": {\n    \"cash\": \"1101001\",\n    \"check\": \"1102001\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cash\": \"1101001\",\n    \"check\": \"1102001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/account-determination/roles/:role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "account-determination",
+                "roles",
+                ":role"
+              ],
+              "variable": [
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "role (path parameter)"
+                }
+              ]
+            },
+            "description": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"glCode\": \"1202002\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/account-determination/roles/:role",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "account-determination",
+                    "roles",
+                    ":role"
+                  ],
+                  "variable": [
+                    {
+                      "key": "role",
+                      "value": "",
+                      "description": "role (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"glCode\": \"1202002\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"role\": \"premium_receivable\",\n    \"glCode\": \"1202002\",\n    \"glName\": \"Premiums Receivable – Corporate Clients\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Write-off reasons with their GL account (all statuses)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "account-determination",
+                "write-off-reasons"
+              ]
+            },
+            "description": "Write-off reasons with their GL account (all statuses)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "account-determination",
+                    "write-off-reasons"
+                  ]
+                },
+                "description": "Write-off reasons with their GL account (all statuses)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"BAD_DEBT\",\n      \"name\": \"Uncollectible premium (bad debt)\",\n      \"glAccount\": \"4401009\",\n      \"maxAmount\": null,\n      \"status\": \"active\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a write-off reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "account-determination",
+                "write-off-reasons"
+              ]
+            },
+            "description": "Add a write-off reason\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"WAIVED_FEE\",\n  \"name\": \"Fee waived\",\n  \"glAccount\": \"4409001\",\n  \"maxAmount\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "account-determination",
+                    "write-off-reasons"
+                  ]
+                },
+                "description": "Add a write-off reason\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"WAIVED_FEE\",\n  \"name\": \"Fee waived\",\n  \"glAccount\": \"4409001\",\n  \"maxAmount\": 500\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"WAIVED_FEE\",\n    \"name\": \"Fee waived\",\n    \"glAccount\": \"4409001\",\n    \"maxAmount\": 500,\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a write-off reason (name, GL account, limit, status)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "account-determination",
+                "write-off-reasons",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a write-off reason (name, GL account, limit, status)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"glAccount\": \"4401009\",\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "account-determination",
+                    "write-off-reasons",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a write-off reason (name, GL account, limit, status)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"glAccount\": \"4401009\",\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"BAD_DEBT\",\n    \"glAccount\": \"4401009\",\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -601,7 +1070,7 @@
             "description": "Match debit and credit open entries on the same account (partial amounts allowed)\n\nFront-end touchpoint: Accounts > Open Entry Matching\n\nAccess: write:journal-vouchers",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"matchPairs\": [\n    {\n      \"debitTransactionId\": \"101\",\n      \"creditTransactionId\": \"205\",\n      \"matchedAmount\": 11862.5,\n      \"adjustmentAmount\": null\n    }\n  ],\n  \"metadata\": {\n    \"documentRef\": \"MATCH-001\",\n    \"narration\": \"Premium settled\"\n  }\n}",
+              "raw": "{\n  \"matchPairs\": [\n    {\n      \"debitTransactionId\": \"101\",\n      \"creditTransactionId\": \"205\",\n      \"matchedAmount\": 11812.5,\n      \"adjustmentAmount\": 50,\n      \"writeOffCode\": \"SMALL_BALANCE\"\n    }\n  ],\n  \"metadata\": {\n    \"documentRef\": \"MATCH-001\",\n    \"narration\": \"Premium settled\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -634,7 +1103,7 @@
                 "description": "Match debit and credit open entries on the same account (partial amounts allowed)\n\nFront-end touchpoint: Accounts > Open Entry Matching\n\nAccess: write:journal-vouchers",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"matchPairs\": [\n    {\n      \"debitTransactionId\": \"101\",\n      \"creditTransactionId\": \"205\",\n      \"matchedAmount\": 11862.5,\n      \"adjustmentAmount\": null\n    }\n  ],\n  \"metadata\": {\n    \"documentRef\": \"MATCH-001\",\n    \"narration\": \"Premium settled\"\n  }\n}",
+                  "raw": "{\n  \"matchPairs\": [\n    {\n      \"debitTransactionId\": \"101\",\n      \"creditTransactionId\": \"205\",\n      \"matchedAmount\": 11812.5,\n      \"adjustmentAmount\": 50,\n      \"writeOffCode\": \"SMALL_BALANCE\"\n    }\n  ],\n  \"metadata\": {\n    \"documentRef\": \"MATCH-001\",\n    \"narration\": \"Premium settled\"\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -652,7 +1121,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"mt_1\",\n      \"debitTransactionId\": \"101\",\n      \"creditTransactionId\": \"205\",\n      \"matchedAmount\": 11862.5\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"mt_1\",\n      \"debitTransactionId\": \"101\",\n      \"creditTransactionId\": \"205\",\n      \"matchedAmount\": 11812.5,\n      \"writeOff\": {\n        \"journalNumber\": \"JV-2026-00042\",\n        \"amount\": 50,\n        \"reasonCode\": \"SMALL_BALANCE\",\n        \"glAccount\": \"4409001\",\n        \"side\": \"DEBIT\"\n      }\n    }\n  ]\n}"
             }
           ]
         },
@@ -1475,7 +1944,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false,\n  \"participants\": []\n}"
             }
           ]
         },
@@ -1570,7 +2039,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"101\",\n      \"transactionId\": \"jv_1\",\n      \"transactionCode\": \"JV-2026-00001\",\n      \"entryType\": \"PAYMENT_RECEIPT\",\n      \"debitCredit\": \"DEBIT\",\n      \"amount\": 11862.5,\n      \"accountCode\": \"1102001\",\n      \"accountName\": \"Cash in Bank – BDO Current\",\n      \"account\": {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\"\n      },\n      \"glCode\": \"1102001\",\n      \"documentDate\": \"2026-09-28\",\n      \"status\": \"Posted\",\n      \"motherPolicyId\": \"pol_1\",\n      \"motherPolicyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\",\n      \"client\": {\n        \"clientId\": \"CL-2026-00001\",\n        \"firstName\": \"Maria\",\n        \"lastName\": \"Santos\"\n      },\n      \"referenceType\": \"Receipt\",\n      \"referenceId\": \"or_1\"\n    }\n  ],\n  \"totals\": {\n    \"totalDebits\": 11862.5,\n    \"totalCredits\": 11862.5,\n    \"balance\": 0\n  },\n  \"isCoInsurance\": false,\n  \"participants\": []\n}"
             }
           ]
         },
@@ -1912,6 +2381,55 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-09-30\",\n    \"rows\": [\n      {\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – BDO Current\",\n        \"debit\": 11862.5,\n        \"credit\": 0\n      }\n    ],\n    \"totals\": {\n      \"debit\": 11862.5,\n      \"credit\": 11862.5,\n      \"balanced\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Active write-off reasons with their GL account (Open Entry Matching: adjustmentAmount + writeOffCode posts the write-off)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/write-off-reasons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "write-off-reasons"
+              ]
+            },
+            "description": "Active write-off reasons with their GL account (Open Entry Matching: adjustmentAmount + writeOffCode posts the write-off)\n\nFront-end touchpoint: Accounts > Open Entry Matching\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/write-off-reasons",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "write-off-reasons"
+                  ]
+                },
+                "description": "Active write-off reasons with their GL account (Open Entry Matching: adjustmentAmount + writeOffCode posts the write-off)\n\nFront-end touchpoint: Accounts > Open Entry Matching\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"SMALL_BALANCE\",\n      \"name\": \"Small balance difference\",\n      \"glAccount\": \"4409001\",\n      \"maxAmount\": 100\n    }\n  ]\n}"
             }
           ]
         }
@@ -21532,6 +22050,103 @@
           ]
         },
         {
+          "name": "Reverse a petty cash disbursement entered in error (mirror journal, fund cash restored)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/petty-cash/disbursements/:id/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "petty-cash",
+                "disbursements",
+                ":id",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a petty cash disbursement entered in error (mirror journal, fund cash restored)\n\nFront-end touchpoint: Accounts > Petty Cash > Disbursement\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/petty-cash/disbursements/:id/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payments",
+                    "petty-cash",
+                    "disbursements",
+                    ":id",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a petty cash disbursement entered in error (mirror journal, fund cash restored)\n\nFront-end touchpoint: Accounts > Petty Cash > Disbursement\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcd_1\",\n    \"number\": \"PC-2026-00012\",\n    \"status\": \"reversed\",\n    \"reversalJournalId\": \"jv_2\",\n    \"availableCash\": 20000\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Petty cash funds (search, fundId / pettyCashCode, status; paging)",
           "request": {
             "method": "GET",
@@ -22077,6 +22692,103 @@
           ]
         },
         {
+          "name": "Reverse a petty cash receipt entered in error (mirror journal, fund cash restored)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/petty-cash/receipts/:id/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "petty-cash",
+                "receipts",
+                ":id",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a petty cash receipt entered in error (mirror journal, fund cash restored)\n\nFront-end touchpoint: Accounts > Petty Cash > Receipts\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/petty-cash/receipts/:id/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payments",
+                    "petty-cash",
+                    "receipts",
+                    ":id",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a petty cash receipt entered in error (mirror journal, fund cash restored)\n\nFront-end touchpoint: Accounts > Petty Cash > Receipts\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcd_1\",\n    \"number\": \"PC-2026-00012\",\n    \"status\": \"reversed\",\n    \"reversalJournalId\": \"jv_2\",\n    \"availableCash\": 20000\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Petty cash replenishments (search, fundId / pettyCashCode, status; paging)",
           "request": {
             "method": "GET",
@@ -22298,6 +23010,103 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pettyCashCode\": \"PCF-MKT\",\n    \"remarks\": \"Weekly replenishment\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse a petty cash replenishment entered in error (mirror journal, fund cash restored)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/petty-cash/replenishments/:id/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "petty-cash",
+                "replenishments",
+                ":id",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a petty cash replenishment entered in error (mirror journal, fund cash restored)\n\nFront-end touchpoint: Accounts > Petty Cash > Replenish\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/petty-cash/replenishments/:id/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payments",
+                    "petty-cash",
+                    "replenishments",
+                    ":id",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a petty cash replenishment entered in error (mirror journal, fund cash restored)\n\nFront-end touchpoint: Accounts > Petty Cash > Replenish\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcd_1\",\n    \"number\": \"PC-2026-00012\",\n    \"status\": \"reversed\",\n    \"reversalJournalId\": \"jv_2\",\n    \"availableCash\": 20000\n  }\n}"
             }
           ]
         },
@@ -26521,6 +27330,561 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobId\": \"15\",\n    \"status\": \"processing\",\n    \"progress\": {\n      \"total\": 10,\n      \"processed\": 4,\n      \"succeeded\": 4,\n      \"failed\": 0\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Posting Rules",
+      "item": [
+        {
+          "name": "Posting rules with their lines, every version (filter eventCode, module)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules?eventCode=receipt.apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules"
+              ],
+              "query": [
+                {
+                  "key": "eventCode",
+                  "value": "receipt.apply"
+                }
+              ]
+            },
+            "description": "Posting rules with their lines, every version (filter eventCode, module)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules?eventCode=receipt.apply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules"
+                  ],
+                  "query": [
+                    {
+                      "key": "eventCode",
+                      "value": "receipt.apply"
+                    }
+                  ]
+                },
+                "description": "Posting rules with their lines, every version (filter eventCode, module)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"eventCode\": \"policy.issue.broker_billed\",\n      \"event\": \"Policy issued – broker billed\",\n      \"version\": 1,\n      \"name\": \"Policy issued – broker billed\",\n      \"module\": \"policies\",\n      \"entryType\": \"NEW_BUSINESS\",\n      \"source\": \"booking\",\n      \"narration\": \"Premium billed – {{policyNumber}} ({{billNumber}})\",\n      \"branchSource\": \"policy_owner\",\n      \"effectiveFrom\": \"2000-01-01\",\n      \"active\": true,\n      \"lines\": [\n        {\n          \"lineNo\": 1,\n          \"side\": \"Dr\",\n          \"accountType\": \"role\",\n          \"account\": \"premium_receivable\",\n          \"fallbackRole\": null,\n          \"amountKey\": \"gross\",\n          \"perParticipant\": false,\n          \"narration\": \"Premium receivable {{billNumber}}\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "One posting rule version with its lines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One posting rule version with its lines\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One posting rule version with its lines\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"eventCode\": \"policy.issue.broker_billed\",\n    \"event\": \"Policy issued – broker billed\",\n    \"version\": 1,\n    \"name\": \"Policy issued – broker billed\",\n    \"module\": \"policies\",\n    \"entryType\": \"NEW_BUSINESS\",\n    \"source\": \"booking\",\n    \"narration\": \"Premium billed – {{policyNumber}} ({{billNumber}})\",\n    \"branchSource\": \"policy_owner\",\n    \"effectiveFrom\": \"2000-01-01\",\n    \"active\": true,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"side\": \"Dr\",\n        \"accountType\": \"role\",\n        \"account\": \"premium_receivable\",\n        \"fallbackRole\": null,\n        \"amountKey\": \"gross\",\n        \"perParticipant\": false,\n        \"narration\": \"Premium receivable {{billNumber}}\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Audit trail of a posting rule (versions saved, activated, deactivated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Audit trail of a posting rule (versions saved, activated, deactivated)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Audit trail of a posting rule (versions saved, activated, deactivated)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"create-version\",\n      \"username\": \"BrokerVerse\",\n      \"at\": \"2026-09-29T08:00:00Z\",\n      \"version\": 2\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Activate or deactivate a rule version (an event keeps at least one version in force)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Activate or deactivate a rule version (an event keeps at least one version in force)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/:id/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    ":id",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Activate or deactivate a rule version (an event keeps at least one version in force)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"eventCode\": \"policy.issue.broker_billed\",\n    \"event\": \"Policy issued – broker billed\",\n    \"version\": 1,\n    \"name\": \"Policy issued – broker billed\",\n    \"module\": \"policies\",\n    \"entryType\": \"NEW_BUSINESS\",\n    \"source\": \"booking\",\n    \"narration\": \"Premium billed – {{policyNumber}} ({{billNumber}})\",\n    \"branchSource\": \"policy_owner\",\n    \"effectiveFrom\": \"2000-01-01\",\n    \"active\": false,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"side\": \"Dr\",\n        \"accountType\": \"role\",\n        \"account\": \"premium_receivable\",\n        \"fallbackRole\": null,\n        \"amountKey\": \"gross\",\n        \"perParticipant\": false,\n        \"narration\": \"Premium receivable {{billNumber}}\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Business events with the rule version in force, the amounts each event supplies and its template variables",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "events"
+              ]
+            },
+            "description": "Business events with the rule version in force, the amounts each event supplies and its template variables\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "events"
+                  ]
+                },
+                "description": "Business events with the rule version in force, the amounts each event supplies and its template variables\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"eventCode\": \"receipt.apply\",\n      \"label\": \"Premium collection applied\",\n      \"module\": \"receipts\",\n      \"amountKeys\": [\n        \"amount\"\n      ],\n      \"activeRuleId\": 7,\n      \"activeVersion\": 1,\n      \"versions\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/events/:eventCode/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "events",
+                ":eventCode",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "eventCode",
+                  "value": "",
+                  "description": "eventCode (path parameter)"
+                }
+              ]
+            },
+            "description": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"effectiveFrom\": \"2026-10-01\",\n  \"changeNote\": \"Premium taxes on their own lines\",\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"side\": \"Dr\",\n      \"accountType\": \"role\",\n      \"account\": \"premium_receivable\",\n      \"fallbackRole\": null,\n      \"amountKey\": \"gross\",\n      \"perParticipant\": false,\n      \"narration\": \"Premium receivable {{billNumber}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/events/:eventCode/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "events",
+                    ":eventCode",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "eventCode",
+                      "value": "",
+                      "description": "eventCode (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"effectiveFrom\": \"2026-10-01\",\n  \"changeNote\": \"Premium taxes on their own lines\",\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"side\": \"Dr\",\n      \"accountType\": \"role\",\n      \"account\": \"premium_receivable\",\n      \"fallbackRole\": null,\n      \"amountKey\": \"gross\",\n      \"perParticipant\": false,\n      \"narration\": \"Premium receivable {{billNumber}}\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"eventCode\": \"policy.issue.broker_billed\",\n    \"event\": \"Policy issued – broker billed\",\n    \"version\": 2,\n    \"name\": \"Policy issued – broker billed\",\n    \"module\": \"policies\",\n    \"entryType\": \"NEW_BUSINESS\",\n    \"source\": \"booking\",\n    \"narration\": \"Premium billed – {{policyNumber}} ({{billNumber}})\",\n    \"branchSource\": \"policy_owner\",\n    \"effectiveFrom\": \"2000-01-01\",\n    \"active\": true,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"side\": \"Dr\",\n        \"accountType\": \"role\",\n        \"account\": \"premium_receivable\",\n        \"fallbackRole\": null,\n        \"amountKey\": \"gross\",\n        \"perParticipant\": false,\n        \"narration\": \"Premium receivable {{billNumber}}\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Pickers of the rule editor: sides, account types, account roles (with GL), resolvers, amount keys, branch sources",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/meta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "meta"
+              ]
+            },
+            "description": "Pickers of the rule editor: sides, account types, account roles (with GL), resolvers, amount keys, branch sources\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/meta",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "meta"
+                  ]
+                },
+                "description": "Pickers of the rule editor: sides, account types, account roles (with GL), resolvers, amount keys, branch sources\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sides\": [\n      \"Dr\",\n      \"Cr\"\n    ],\n    \"accountTypes\": [\n      \"role\",\n      \"gl\",\n      \"resolver\",\n      \"context\"\n    ],\n    \"roles\": [\n      {\n        \"role\": \"premium_receivable\",\n        \"glCode\": \"1202001\",\n        \"glName\": \"Premiums Receivable – Direct Clients\"\n      }\n    ],\n    \"resolvers\": [\n      {\n        \"name\": \"bank_account\",\n        \"label\": \"Bank account of the receipt / payment\"\n      }\n    ],\n    \"amountKeys\": [\n      \"amount\",\n      \"gross\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Journal a rule builds for a sample (or given) context – the saved version (ruleId), unsaved lines or the version in force; nothing is posted",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/simulate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "simulate"
+              ]
+            },
+            "description": "Journal a rule builds for a sample (or given) context – the saved version (ruleId), unsaved lines or the version in force; nothing is posted\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventCode\": \"receipt.apply\",\n  \"coInsurance\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/simulate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "simulate"
+                  ]
+                },
+                "description": "Journal a rule builds for a sample (or given) context – the saved version (ruleId), unsaved lines or the version in force; nothing is posted\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventCode\": \"receipt.apply\",\n  \"coInsurance\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"eventCode\": \"receipt.apply\",\n    \"description\": \"Premium collected – POL-SAMPLE (OR-SAMPLE)\",\n    \"balanced\": true,\n    \"totalDebit\": 11200,\n    \"totalCredit\": 11200,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"accountCode\": \"1102001\",\n        \"accountName\": \"Cash in Bank – Operating Account (BDO Current)\",\n        \"debit\": 11200,\n        \"credit\": 0,\n        \"memo\": \"Premium collection\"\n      },\n      {\n        \"lineNo\": 2,\n        \"accountCode\": \"1202001\",\n        \"accountName\": \"Premiums Receivable – Direct Clients\",\n        \"debit\": 0,\n        \"credit\": 11200,\n        \"memo\": \"Settles INV-SAMPLE\"\n      }\n    ]\n  }\n}"
             }
           ]
         }

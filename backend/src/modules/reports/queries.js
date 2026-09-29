@@ -133,6 +133,47 @@ const marketResponse = `SELECT ic.id::text AS _insurer_id, ic.code AS _insurer_c
 
 const INSURER = "lower(d.payee_type) = 'insurer'";
 const CLIENT = "lower(d.payee_type) IN ('client', 'customer')";
+// Co-insurance: every active participant of a co-insured policy (more than one insurer), with its share of the premium,
+// commission and taxes as booked on the policy's bills (else as recorded on the participant row)
+const coInsurance = `SELECT p.id AS _id, p.policy_number AS "policyNumber", p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate",
+    u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent, u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch,
+    c.id AS _client_id, c.client_code AS _client_code, c.display_name AS client, pr.id::text AS _product_id, pr.code AS _product_code, pr.name AS product,
+    ic.id::text AS _insurer_id, ic.code AS _insurer_code, ic.name AS insurer, lead.name AS "leadInsurer",
+    CASE WHEN rp.is_lead THEN 'Lead' ELSE 'Co-insurer' END AS role, rp.share_percent AS "sharePercent", rp.sum_insured AS "sumInsured",
+    COALESCE(bk.gross, rp.premium_total) AS premium, COALESCE(bk.commission, rp.commission_amount) AS commission, COALESCE(bk.taxes, rp.taxes) AS taxes,
+    COALESCE(bk.due, rp.premium_total - rp.commission_amount - rp.taxes) AS "dueToInsurer", rp.insurer_reference AS "insurerReference", p.status
+  FROM risk_participants rp JOIN policies p ON rp.entity_type = 'policy' AND p.id = rp.entity_id
+  JOIN insurance_companies ic ON ic.id = rp.insurance_company_id
+  LEFT JOIN LATERAL (SELECT i2.name FROM risk_participants r2 JOIN insurance_companies i2 ON i2.id = r2.insurance_company_id
+    WHERE r2.entity_type = 'policy' AND r2.entity_id = p.id AND r2.is_lead AND r2.status = 'active' LIMIT 1) lead ON true
+  LEFT JOIN LATERAL (SELECT sum(x.gross) AS gross, sum(x.commission) AS commission, sum(x.taxes) AS taxes, sum(x.due_to_insurer) AS due FROM receivable_participants x
+    JOIN receivables r ON r.id = x.receivable_id WHERE r.policy_id = p.id AND x.insurance_company_id = rp.insurance_company_id AND r.status <> 'cancelled') bk ON true
+  LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
+  LEFT JOIN users u ON u.id = p.owner_user_id LEFT JOIN branches b ON b.code = u.branch_code
+  WHERE rp.status = 'active' AND p.inception_date BETWEEN $1 AND $2
+    AND (SELECT count(*) FROM risk_participants z WHERE z.entity_type = 'policy' AND z.entity_id = p.id AND z.status = 'active') > 1`;
+
+// Premium due to each insurer per bill (a co-insured bill: each participant's share as booked), how much of it the broker has
+// collected (pro rata to the bill's payments), remitted (insurer payment vouchers) and still holds
+const dueToInsurers = `SELECT x.*, round(x."collectedDue" - x.remitted, 2) AS outstanding, round(x."dueToInsurer" - x."collectedDue", 2) AS uncollected FROM (
+    SELECT r.bill_number AS "billNumber", r.created_at::date AS "billDate", p.policy_number AS "policyNumber",
+      ic.id::text AS _insurer_id, ic.code AS _insurer_code, ic.name AS insurer, CASE WHEN pt.co THEN 'Co-insured' ELSE 'Single insurer' END AS placement,
+      u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent, u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch,
+      c.id AS _client_id, c.client_code AS _client_code, c.display_name AS client, pr.id::text AS _product_id, pr.code AS _product_code, pr.name AS product, r.status,
+      pt.gross AS premium, pt.commission, round(pt.gross - pt.commission, 2) AS "dueToInsurer",
+      round((pt.gross - pt.commission) * (r.amount - r.balance) / NULLIF(r.amount, 0), 2) AS "collectedDue",
+      CASE WHEN pt.co THEN COALESCE((SELECT sum(al.net) FROM remittance_allocations al JOIN receipt_applications a ON a.id = al.receipt_application_id
+          WHERE a.receivable_id = r.id AND al.insurance_company_id = pt.iid AND a.status = 'applied'), 0)
+        ELSE COALESCE((SELECT round(sum(a.amount * (1 - r.commission_amount / NULLIF(r.amount, 0))), 2) FROM receipt_applications a
+          WHERE a.receivable_id = r.id AND a.remitted_invoice_id IS NOT NULL AND a.status = 'applied'), 0) END AS remitted
+    FROM receivables r JOIN policies p ON p.id = r.policy_id
+    JOIN LATERAL (SELECT x.insurance_company_id AS iid, x.gross, x.commission, true AS co FROM receivable_participants x WHERE x.receivable_id = r.id
+      UNION ALL SELECT p.insurance_company_id, r.amount, r.commission_amount, false WHERE NOT EXISTS (SELECT 1 FROM receivable_participants x WHERE x.receivable_id = r.id)) pt ON true
+    JOIN insurance_companies ic ON ic.id = pt.iid
+    LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id) LEFT JOIN products pr ON pr.id = p.product_id
+    LEFT JOIN users u ON u.id = p.owner_user_id LEFT JOIN branches b ON b.code = u.branch_code
+    WHERE r.status <> 'cancelled' AND r.created_at::date BETWEEN $1 AND $2) x`;
+
 export const QUERIES = {
   ...PERIOD_END_QUERIES,
   placementPipeline: {
@@ -156,6 +197,17 @@ export const QUERIES = {
       averageResponseDays: 'round(avg(t."responseDays"), 1)', offeredPremium: 'COALESCE(sum(t."premiumTotal") FILTER (WHERE t.status = \'offered\'), 0)',
     },
     orderBy: (dims) => ['f.selected DESC', ...dims.map((d) => `f."${d}"`)].join(', '),
+  },
+  coInsuranceRegister: {
+    sql: coInsurance, filters: POLICY_FILTERS,
+    criteria: { Overall: {}, 'Co-insurer': { groupBy: 'insurer' }, Policy: { groupBy: 'policyNumber' }, Agent: { groupBy: 'agent' } },
+    orderBy: 'f."inceptionDate", f."policyNumber", f.role DESC, f.insurer',
+  },
+  dueToInsurers: {
+    sql: dueToInsurers, filters: POLICY_FILTERS,
+    criteria: { 'Co-insurer': { dims: ['insurer'] }, 'Co-insurer and Policy': { dims: ['insurer', 'policyNumber'] }, Placement: { dims: ['placement', 'insurer'] } },
+    aggregate: { bills: 'count(*)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', dueToInsurer: 'sum(t."dueToInsurer")', collectedDue: 'sum(t."collectedDue")',
+      remitted: 'sum(t.remitted)', outstanding: 'sum(t.outstanding)', uncollected: 'sum(t.uncollected)' },
   },
   production: {
     sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' } },

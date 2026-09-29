@@ -6,7 +6,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { config } from '../../config.js';
-import { many, one, withTransaction } from '../../db/pool.js';
+import { many, one, pool, withTransaction } from '../../db/pool.js';
+import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
+import { postEvent } from '../accounting/lib/posting.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -124,8 +126,62 @@ export async function getClaim(id) {
     FROM documents WHERE entity = 'claim' AND entity_id = $1 ORDER BY created_at`, [claim.id]))
     .map((d) => ({ ...d, downloadUrl: `${config.publicBaseUrl}/api/s3/object/${d.key}` }));
   claim.history = await many('SELECT at, by_user AS "byUser", status, note FROM claim_history WHERE claim_id = $1 ORDER BY at, id', [claim.id]);
-  return claim;
+  return Object.assign(claim, await coInsuranceOf(claim));
 }
+
+/**
+ * Co-insurance view of a claim: the policy's participating insurers and each one's share of the claim, the settlement and
+ * the recovery due from it (the broker recovers each insurer's share when the settlement is paid through the broker).
+ */
+export async function coInsuranceOf(claim) {
+  const parts = claim.policyId ? await policyParticipants(claim.policyId, pool) : [];
+  if (!isCoInsured(parts)) return { isCoInsurance: false, isCoInsurancePolicy: false, participatingInsurersCount: parts.length ? 1 : 0, participatingInsurers: [], coInsuranceSettlementRows: [] };
+  const w = parts.map((p) => p.share);
+  const claimAmount = Number(claim.approvedAmount ?? claim.estimatedClaimAmount) || 0;
+  const settled = Number(claim.settledAmount ?? claim.settlementAmount ?? claim.approvedAmount) || 0;
+  const cl = allocate(claimAmount, w); const st = allocate(settled, w);
+  const rows = parts.map((p, i) => ({ participantId: String(p.insurerId), insurerId: p.insurerId, insurer: p.insurerName, insurerCode: p.insurerCode, role: p.isLead ? 'Lead Insurer' : 'Co-Insurer',
+    sharePercentage: p.share, claimAmount: cl[i], settlementAmount: st[i], recoveryAmount: st[i], status: claim.claimStatus || '', isTotal: false }));
+  const sum = (k) => round2(rows.reduce((s, r) => s + r[k], 0));
+  const total = { participantId: 'total', insurer: 'TOTAL', role: '', sharePercentage: sum('sharePercentage'), claimAmount: sum('claimAmount'), settlementAmount: sum('settlementAmount'),
+    recoveryAmount: sum('recoveryAmount'), status: claim.claimStatus || '', isTotal: true };
+  return {
+    isCoInsurance: true, isCoInsurancePolicy: true, participatingInsurersCount: parts.length,
+    participatingInsurers: parts.map((p) => ({ insurerId: p.insurerId, insuranceCompanyName: p.insurerName, insurerCode: p.insurerCode, sharePercentage: p.share, isLead: p.isLead, role: p.isLead ? 'Lead Insurer' : 'Co-Insurer' })),
+    coInsuranceSettlementRows: [...rows, total], policy: { ...claim.policy, isCoInsurance: true },
+  };
+}
+
+/**
+ * Settlement paid through the broker (settlement.paidThroughBroker, or a settlement type naming the broker): posting rule
+ * claim.settlement.paid_through_broker books the amount recoverable from each insurer (its share) against the amount
+ * payable to the claimant. Posted once per claim.
+ */
+export async function postBrokerSettlement(claimId, user) {
+  return withTransaction(async (db) => {
+    const c = (await db.query(`SELECT c.*, p.policy_number, p.client_id AS policy_client_id, cl.display_name AS client_name FROM claims c JOIN policies p ON p.id = c.policy_id
+      LEFT JOIN clients cl ON cl.id = COALESCE(c.client_id, p.client_id) WHERE c.id = $1 FOR UPDATE OF c`, [claimId])).rows[0];
+    if (!c || c.settlement_jv_id || c.status !== 'settled' || !c.settlement?.paidThroughBroker) return null;
+    const amount = round2(Number(c.settled_amount ?? c.settlement?.settlementAmount ?? 0));
+    if (!(amount > 0)) return null;
+    const parts = await policyParticipants(c.policy_id, db);
+    const shares = allocate(amount, parts.map((p) => p.share));
+    const jv = await postEvent('claim.settlement.paid_through_broker', {
+      source: 'claims', entryType: 'CLAIM_SETTLEMENT', entrySubType: isCoInsured(parts) ? 'CO_INSURANCE' : null, transactionCode: c.claim_number, referenceType: 'Claim', referenceId: c.id,
+      clientId: c.client_id || c.policy_client_id, policyId: c.policy_id, policyNumber: c.policy_number, amounts: { amount },
+      participants: parts.map((p, i) => ({ insurerId: p.insurerId, insurerName: p.insurerName, share: p.share, amounts: { amount: shares[i] } })),
+      vars: { claimNumber: c.claim_number, policyNumber: c.policy_number, claimant: c.settlement?.payee || c.client_name || 'claimant', insurer: parts[0]?.insurerName || 'insurer' },
+    }, { db, user });
+    await db.query('UPDATE claims SET settlement_jv_id = $2 WHERE id = $1', [c.id, jv.id]);
+    return jv;
+  });
+}
+const throughBroker = (input, prev) => {
+  const v = input.paidThroughBroker ?? input.paidThroughBrokerFlag;
+  if (v !== undefined && v !== null && v !== '') return v === true || String(v).toLowerCase() === 'true';
+  if (input.settlementType && /broker/i.test(String(input.settlementType))) return true;
+  return !!prev?.paidThroughBroker;
+};
 
 /** Paged, filtered list: status (code or label), clientId, policyId, lob, handler, search, dateFrom/dateTo. */
 export async function listClaims(q, pg) {
@@ -420,12 +476,15 @@ export async function settleClaim(id, input, user, files) {
     settlementIssueDate: (await toDate(input.settlementIssueDate)) || row.settlement?.settlementIssueDate || null,
     settlementDate: (await toDate(input.settlementDate)) || row.settlement?.settlementDate || null,
   };
+  settlement.paidThroughBroker = throughBroker(input, row.settlement);
+  if (input.payee) settlement.payee = String(input.payee);
   if (amount !== null) settlement.settlementAmount = amount;
   await saveFiles(files, row.id, user);
   if (from === 'approved') {
     const final = settlement.settlementAmount ?? row.approved_amount;
     if (row.approved_amount != null && final > row.approved_amount) throw unprocessable(`Settlement amount exceeds the approved amount ${row.approved_amount}`);
     await transition(row, 'settled', user, { note: 'Settlement paid', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), settled_amount: final, settled_at: new Date() } });
+    await postBrokerSettlement(row.id, user);
     return { from, claim: await getClaim(row.id) };
   }
   if (from !== 'in-review') throw conflict(`Claim is ${from}; settlement can be submitted only while it is in review`);
@@ -441,6 +500,7 @@ export async function settleClaim(id, input, user, files) {
     return { from, claim: await getClaim(row.id), pendingApproval: true };
   }
   await transition(row, 'settled', user, { note: 'Settled', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), approved_amount: amount, settled_amount: amount, settled_at: new Date() } });
+  await postBrokerSettlement(row.id, user);
   return { from, claim: await getClaim(row.id) };
 }
 
@@ -460,6 +520,7 @@ export async function approveSettlement(id, { decision = 'approve', approvedAmou
   if (await getSetting('claims.auto_settle_on_approval', true)) {
     const settledAmount = Math.min(round2(settlement.settlementAmount ?? amount), round2(amount));
     await transition(row, 'settled', user, { note: 'Settlement released', action: 'Claim Settled', sets: { settled_amount: settledAmount, settled_at: new Date() } });
+    await postBrokerSettlement(row.id, user);
   }
   return { from, claim: await getClaim(row.id) };
 }

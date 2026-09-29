@@ -2,7 +2,8 @@
  * Remittance core: remittances / bills to insurers and agencies, their lines, the approval queue (maker-checker)
  * and automated remittance generation from policies not yet remitted.
  */
-import { many, one, query, withTransaction } from '../../db/pool.js';
+import { many, one, pool, query, withTransaction } from '../../db/pool.js';
+import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
@@ -12,6 +13,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { isoDate, params, round2, toNumber } from '../masters/helpers.js';
 import { createInsurerRemittance } from '../disbursements/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { postEvent } from '../accounting/lib/posting.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -133,9 +135,11 @@ export async function remittanceDetails(id) {
  */
 export async function eligiblePolicies({ insurerId, agentUserId, from, to, productLine, policyIds, kind = 'direct-bill' }) {
   const p = params([kind]);
+  const ins = insurerId ? p.add(Number(insurerId)) : null;
+  // a co-insured policy is remitted to each participating insurer for its share (remittance_lines.insurance_company_id)
   const conds = ['p.status IN (\'issued\', \'active\', \'renewed\')', 'p.billing_mode <> \'direct\'',
-    `NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status NOT IN ('rejected', 'cancelled'))`];
-  if (insurerId) conds.push(`p.insurance_company_id = ${p.add(insurerId)}`);
+    `NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status NOT IN ('rejected', 'cancelled')${ins ? ` AND (rl.insurance_company_id IS NULL OR rl.insurance_company_id = ${ins}::int)` : ''})`];
+  if (ins) conds.push(`((NOT ${CO_INSURED} AND p.insurance_company_id = ${ins}::int) OR (${CO_INSURED} AND EXISTS (SELECT 1 FROM risk_participants x WHERE x.entity_type = 'policy' AND x.entity_id = p.id AND x.status = 'active' AND x.insurance_company_id = ${ins}::int)))`);
   if (agentUserId) conds.push(`p.owner_user_id = ${p.add(agentUserId)}`);
   if (from) conds.push(`p.inception_date >= ${p.add(from)}::date`);
   if (to) conds.push(`p.inception_date <= ${p.add(to)}::date`);
@@ -147,13 +151,38 @@ export async function eligiblePolicies({ insurerId, agentUserId, from, to, produ
                  EXISTS (SELECT 1 FROM receivables rv WHERE rv.policy_id = p.id) AS billed,
                  (SELECT max(received_date) FROM receipts rc WHERE rc.policy_id = p.id AND rc.status <> 'cancelled') AS last_payment
                FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
-               WHERE ${conds.join(' AND ')} ORDER BY p.inception_date, p.policy_number`, p.values);
+               WHERE ${conds.join(' AND ')} ORDER BY p.inception_date, p.policy_number`, p.values).then((rows) => (insurerId ? withShares(rows, Number(insurerId)) : rows));
+}
+
+const CO_INSURED = '((SELECT count(*) FROM risk_participants x WHERE x.entity_type = \'policy\' AND x.entity_id = p.id AND x.status = \'active\') > 1)';
+
+/**
+ * The insurer's share of a co-insured policy: premium, commission and taxes of its participant row (split by share when
+ * the row carries no figures). null for a single-insurer policy or an insurer that does not participate.
+ */
+export async function insurerShare(policy, insurerId) {
+  const parts = await policyParticipants(policy.id, pool);
+  if (!isCoInsured(parts)) return null;
+  const i = parts.findIndex((x) => Number(x.insurerId) === Number(insurerId));
+  if (i < 0) return null;
+  const w = parts.map((x) => x.share);
+  const part = parts[i];
+  const pick = (own, total) => (own > 0 ? own : allocate(Number(total) || 0, w)[i]);
+  return { insurerId: part.insurerId, share: part.share, premium: pick(part.premiumTotal, policy.premium_total), commission: pick(part.commissionAmount, policy.commission_amount),
+    tax: pick(part.taxes, policy.details?.taxTotal) };
+}
+async function withShares(rows, insurerId) {
+  for (const r of rows) {
+    const sh = await insurerShare(r, insurerId);
+    if (sh) Object.assign(r, { premium_total: sh.premium, commission_amount: sh.commission, tax_share: sh.tax, share_percent: sh.share, participant_insurer_id: insurerId });
+  }
+  return rows;
 }
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-/** Lines from explicit input rows or from policies; returns normalised lines. */
-async function buildLines(lines) {
+/** Lines from explicit input rows or from policies (a co-insured policy: the insurer's share); returns normalised lines. */
+async function buildLines(lines, insurerId = null) {
   const out = [];
   for (const l of lines || []) {
     let pol = null;
@@ -162,12 +191,14 @@ async function buildLines(lines) {
                        LEFT JOIN products pr ON pr.id = p.product_id WHERE p.id = $1 OR p.policy_number = $1`, [String(l.policyId || l.policyNo)]);
       if (!pol && l.policyId) throw badRequest('Validation failed', [{ path: 'lines', message: `Policy ${l.policyId} was not found` }]);
     }
-    const premium = toNumber(l.premium ?? pol?.premium_total, NaN);
-    const commission = toNumber(l.commission ?? pol?.commission_amount, 0);
-    const tax = toNumber(l.tax ?? pol?.details?.taxTotal, 0);
+    const share = pol && insurerId ? await insurerShare(pol, insurerId) : null;
+    const premium = toNumber(l.premium ?? share?.premium ?? pol?.premium_total, NaN);
+    const commission = toNumber(l.commission ?? share?.commission ?? pol?.commission_amount, 0);
+    const tax = toNumber(l.tax ?? share?.tax ?? pol?.details?.taxTotal, 0);
     if (!Number.isFinite(premium)) throw badRequest('Validation failed', [{ path: 'lines', message: 'Each line needs a premium' }]);
     out.push({ policyId: pol?.id || null, policyNo: pol?.policy_number || l.policyNo || null, insuredName: pol?.insured_name || l.insuredName || null,
-      product: cap(pol?.product_line) || l.product || null, effectiveDate: pol?.inception_date || isoDate(l.effectiveDate), premium, commission, tax, net: round2(premium - commission - tax) });
+      product: cap(pol?.product_line) || l.product || null, effectiveDate: pol?.inception_date || isoDate(l.effectiveDate), premium, commission, tax, net: round2(premium - commission - tax),
+      insurerId: share ? share.insurerId : null, sharePercent: share ? share.share : null });
   }
   return out;
 }
@@ -185,8 +216,8 @@ async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, bi
     billNumber || null, agency?.userId || null, agency?.code || null, agency?.name || null, previousBalance, configCode || null, JSON.stringify(deliveryMethod || [])]);
   const id = r.rows[0].id;
   for (const l of lines) {
-    await c.query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date)
-                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [id, l.policyId, l.premium, l.commission, l.net, l.policyNo, l.insuredName, l.product, l.tax, l.effectiveDate]);
+    await c.query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date, insurance_company_id, share_percent)
+                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`, [id, l.policyId, l.premium, l.commission, l.net, l.policyNo, l.insuredName, l.product, l.tax, l.effectiveDate, l.insurerId || null, l.sharePercent || null]);
   }
   return id;
 }
@@ -203,7 +234,7 @@ export async function createRemittance(b, user) {
   if (!['direct-bill', 'agency-bill'].includes(kind)) throw badRequest('Validation failed', [{ path: 'kind', message: 'kind must be direct-bill or agency-bill' }]);
   const ins = await findInsurer(b.insurerId ?? b.insurerCode, { required: kind === 'direct-bill' });
   if (!Array.isArray(b.lines) || !b.lines.length) throw badRequest('Validation failed', [{ path: 'lines', message: 'At least one policy line is required' }]);
-  const lines = await buildLines(b.lines);
+  const lines = await buildLines(b.lines, kind === 'direct-bill' ? ins?.id : null);
   const dueDate = isoDate(b.dueDate) || await defaultDueDate(b.remittanceDate);
   const id = await withTransaction((c) => insertRemittance(c, { kind, insurerId: ins?.id, period: b.period, dueDate, lines, remarks: b.remarks, date: isoDate(b.remittanceDate), userId: user.id }));
   return getRemittance(id);
@@ -228,6 +259,38 @@ export async function validateRemittances(ids) {
 }
 
 // ---------------- approvals ----------------
+
+/**
+ * Journal of an approved remittance item (posting rules): a settlement posts its credit / debit notes and other
+ * adjustments (remittance.settlement), an adjustment its amount (remittance.adjustment, a negative amount reverses the
+ * sides), an electronic transfer the payment from the chosen bank account (remittance.transfer).
+ */
+export async function postItemJournal(c, item, user) {
+  if (item.journal_id || !['settlement', 'adjustment', 'transfer'].includes(item.kind)) return null;
+  const d = item.data || {};
+  const insurer = item.insurance_company_id ? (await c.query('SELECT name FROM insurance_companies WHERE id = $1', [item.insurance_company_id])).rows[0]?.name : null;
+  const base = { source: 'remittance', entryType: 'REMITTANCE', transactionCode: item.reference_no, referenceType: 'RemittanceItem', referenceId: item.id, payeeType: 'Insurer' };
+  let jv = null;
+  if (item.kind === 'settlement') {
+    const adjustments = round2(toNumber(d.creditNotes, 0) - toNumber(d.debitNotes, 0) + toNumber(d.otherAdjustments, 0));
+    if (!adjustments) return null;
+    jv = await postEvent('remittance.settlement', { ...base, description: `Settlement ${item.reference_no} adjustments – ${d.insurerName || insurer || 'insurer'}`,
+      amounts: { adjustments, net: toNumber(item.amount, 0) }, vars: { reference: item.reference_no, insurer: d.insurerName || insurer || 'insurer' } }, { db: c, user });
+  } else if (item.kind === 'adjustment') {
+    const amount = round2(toNumber(d.adjustmentAmount ?? item.amount, 0));
+    if (!amount) return null;
+    jv = await postEvent('remittance.adjustment', { ...base, date: d.effectiveDate && d.effectiveDate <= (await businessToday()) ? d.effectiveDate : undefined,
+      description: `Adjustment ${item.reference_no} – ${d.adjustmentType || ''}`.trim(), amounts: { amount },
+      vars: { reference: item.reference_no, adjustmentType: d.adjustmentType || 'Adjustment', reason: d.reason || '', insurer: d.clientName || insurer || 'insurer' } }, { db: c, user });
+  } else {
+    const amount = round2(toNumber(item.amount, 0));
+    if (!(amount > 0)) return null;
+    jv = await postEvent('remittance.transfer', { ...base, description: `Transfer ${item.reference_no} to ${d.beneficiary || insurer || 'beneficiary'}`, bankAccount: d.bankAccount || null,
+      paymentMode: 'bank-transfer', amounts: { amount }, vars: { reference: item.reference_no, beneficiary: d.beneficiary || insurer || '', method: d.method || 'Transfer' } }, { db: c, user });
+  }
+  await c.query('UPDATE remittance_items SET journal_id = $2 WHERE id = $1', [item.id, jv.id]);
+  return jv;
+}
 
 export async function openApproval(c, { entity, entityId, referenceNo, transactionType, amount, description, initiatorId }) {
   const { priority, slaHours } = await priorityFor(amount);
@@ -305,6 +368,7 @@ async function applyDecision(c, a, decision, user, remarks) {
   await c.query(`UPDATE remittance_items SET status = $2, approved_by = CASE WHEN $2 = 'Approved' THEN $3 ELSE approved_by END, approved_at = CASE WHEN $2 = 'Approved' THEN now() ELSE approved_at END,
                  remarks = COALESCE($4, remarks), updated_by = $3, updated_at = now() WHERE id = $1`, [item.id, status, user.id, remarks || null]);
   if (decision !== 'approve') return;
+  await postItemJournal(c, item, user);
   if (item.kind === 'settlement') {
     const remIds = item.data.remittanceIds || [];
     if (remIds.length) await c.query('UPDATE remittances SET status = \'settled\', settled_at = now(), updated_by = $2, updated_at = now() WHERE id = ANY($1) AND status = \'approved\'', [remIds, user.id]);
@@ -553,7 +617,7 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
   for (const cnd of cands) {
     const pols = await eligiblePolicies({ insurerId: cnd.insurerId, kind: 'direct-bill' });
     if (!pols.length) continue;
-    const lines = await buildLines(pols.map((p) => ({ policyId: p.id })));
+    const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), cnd.insurerId);
     const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId: cnd.insurerId, period: new Date().toISOString().slice(0, 7), dueDate: cnd.dueDate, lines, configCode: cnd.scheduleCode, userId: user.id }));
     created.push(await getRemittance(id));
   }

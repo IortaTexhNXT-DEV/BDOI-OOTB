@@ -10,6 +10,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { round2 } from '../accounting/lib/http.js';
 import { notify } from '../notifications/router.js';
 import { ensureBooked, findPolicy } from '../receipts/receivables.js';
+import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 
 async function thresholds() {
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90];
@@ -23,6 +24,7 @@ const BASE = `SELECT * FROM (SELECT ci.*, r.bill_number, r.amount, r.balance, r.
     r.discount, r.source AS receivable_source, r.currency, GREATEST(current_date - r.due_date, 0) AS dpd,
     p.policy_number, p.status AS policy_status, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
     ic.name AS insurer_name, pr.name AS product_name,
+    (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'policy' AND rp.entity_id = p.id AND rp.status = 'active') AS participant_count,
     CASE WHEN r.balance <= 0 OR r.status IN ('paid','written-off') THEN 'Paid'
          WHEN ci.escalated_at IS NOT NULL THEN 'Escalated'
          WHEN ci.commitment_date IS NOT NULL AND ci.commitment_date >= current_date THEN 'Committed'
@@ -45,14 +47,33 @@ const SORTS = { dueDate: 'due_date', daysPastDue: 'dpd', outstandingAmount: 'bal
 export const itemRow = (x) => ({
   id: x.id, collectionId: x.id, receivableId: x.receivable_id, billNumber: x.bill_number, policyId: x.policy_id, policyNumber: x.policy_number, clientId: x.client_id,
   client: { id: x.client_id, clientId: x.client_code, firstName: x.first_name || x.display_name, lastName: x.last_name || '', displayName: x.display_name, email: x.email, phone: x.phone },
-  policy: { id: x.policy_id, policyNumber: x.policy_number, status: x.policy_status, inceptionDate: x.inception_date, expiryDate: x.expiry_date, insurer: x.insurer_name, product: x.product_name, isCoInsurance: false },
+  policy: { id: x.policy_id, policyNumber: x.policy_number, status: x.policy_status, inceptionDate: x.inception_date, expiryDate: x.expiry_date, insurer: x.insurer_name, product: x.product_name, isCoInsurance: x.participant_count > 1 },
   grossPremium: Number(x.amount), netPremium: Number(x.net_premium), valueAddedTax: Number(x.vat), documentaryStampTax: Number(x.dst), localGovernmentTax: Number(x.lgt),
   accountPremiumOthers: Number(x.other_charges), discount: Number(x.discount), paidAmount: round2(Number(x.amount) - Number(x.balance)), outstandingAmount: Number(x.balance),
   currentAmount: Number(x.current_amount), days1to30Amount: Number(x.b1_amount), days31to60Amount: Number(x.b2_amount), days61to90Amount: Number(x.b3_amount), over90DaysAmount: Number(x.b4_amount),
   dueDate: x.due_date, daysPastDue: x.dpd, days: x.dpd, overdueLevel: x.overdue_level, collectionStatus: x.collection_status, commitmentDate: x.commitment_date,
   commitmentReason: x.commitment_reason, escalatedAt: x.escalated_at, lastFollowUpAt: x.last_follow_up_at, lastReminderAt: x.last_reminder_at, currency: x.currency,
-  isCoInsurancePolicy: false, coInsuranceCollectionRows: [],
+  isCoInsurancePolicy: x.participant_count > 1, coInsuranceCollectionRows: [],
 });
+
+/**
+ * Per-insurer view of a co-insured bill: each participant's gross premium (as booked on the bill, else by share), its share
+ * of what the client paid and what is outstanding, plus a total row. [] for a single-insurer policy.
+ */
+export async function coInsuranceRows(db, x) {
+  const parts = x.policy_id ? await policyParticipants(x.policy_id, db) : [];
+  if (!isCoInsured(parts)) return [];
+  const booked = new Map((await db.query('SELECT * FROM receivable_participants WHERE receivable_id = $1', [x.receivable_id])).rows.map((r) => [r.insurance_company_id, Number(r.gross)]));
+  const grossTotal = Number(x.amount);
+  const gross = parts.every((p) => booked.has(p.insurerId)) ? parts.map((p) => booked.get(p.insurerId)) : allocate(grossTotal, parts.map((p) => p.share));
+  const paid = allocate(round2(grossTotal - Number(x.balance)), gross);
+  const status = x.collection_status;
+  const rows = parts.map((p, i) => ({ participantId: String(p.insurerId), insurerId: p.insurerId, insurer: p.insurerName, insurerCode: p.insurerCode, role: p.isLead ? 'Lead Insurer' : 'Co-Insurer',
+    sharePercentage: p.share, grossPremium: gross[i], paidAmount: paid[i], outstandingAmount: round2(gross[i] - paid[i]), status, isTotal: false }));
+  const sum = (k) => round2(rows.reduce((s, r) => s + r[k], 0));
+  return [...rows, { participantId: 'total', insurer: 'TOTAL', role: '', sharePercentage: sum('sharePercentage'), grossPremium: sum('grossPremium'), paidAmount: sum('paidAmount'),
+    outstandingAmount: sum('outstandingAmount'), status, isTotal: true }];
+}
 
 function filters(q) {
   const where = []; const p = [];
@@ -84,8 +105,10 @@ export async function getCollection(db, id) {
   const actions = (await db.query('SELECT * FROM collection_actions WHERE collection_id = $1 ORDER BY action_date DESC', [x.id])).rows;
   const pays = (await db.query(`SELECT a.*, rc.receipt_number, rc.remarks FROM receipt_applications a LEFT JOIN receipts rc ON rc.id = a.receipt_id
     WHERE a.receivable_id = $1 ORDER BY a.applied_at DESC`, [x.receivable_id])).rows;
+  const coRows = x.participant_count > 1 ? await coInsuranceRows(db, x) : [];
   return {
     ...itemRow(x),
+    isCoInsurancePolicy: coRows.length > 0, coInsuranceCollectionRows: coRows,
     followUpActions: actions.map((a) => ({ id: a.id, actionType: a.action_type, actionDate: a.action_date, actionBy: a.action_by, callOutcome: a.call_outcome, notes: a.notes, commitmentDate: a.commitment_date })),
     paymentHistory: pays.map((a) => ({ id: a.id, paymentDate: a.applied_at, paymentAmount: Number(a.amount), paymentMethod: a.payment_mode, referenceNumber: a.receipt_number || a.reference_no,
       remarks: a.status === 'reversed' ? 'Reversed' : a.remarks, status: a.status })),

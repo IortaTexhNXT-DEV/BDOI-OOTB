@@ -9,6 +9,7 @@ import { pageParams, sendList } from './lib/http.js';
 import { toCsv } from './lib/files.js';
 import { cancelJournal, postJournal, resolveJournalId, reverseJournal } from './lib/ledger.js';
 import * as svc from './service.js';
+import { isCoInsured, policyParticipants } from './lib/coinsurance.js';
 import { today } from '../../lib/dates.js';
 
 const { router, define } = moduleRouter('Accounting', '/accounting');
@@ -40,12 +41,16 @@ define({
 for (const [path, summary] of [['/policies/:id/ledger-view', 'Policy ledger (running balance)'], ['/policies/:id/entries', 'Premium accounting entries of a policy (filter startDate, endDate, entryType, status; paging)']]) {
   define({
     method: 'GET', path, summary, screen: 'Agent > Policy detail > Premium accounting entries', middleware: readPolicy, query: { entryType: 'NEW_BUSINESS', page: 1, pageSize: 50 },
-    response: { success: true, data: [entry], totals: { totalDebits: 11862.5, totalCredits: 11862.5, balance: 0 }, isCoInsurance: false },
+    response: { success: true, data: [entry], totals: { totalDebits: 11862.5, totalCredits: 11862.5, balance: 0 }, isCoInsurance: false, participants: [] },
     handler: async (req, res) => {
       const r = await svc.ledger(pool, { ...req.query, policyId: req.params.id });
       const pg = pageParams(req.query, 500);
       const data = r.data.slice(pg.offset, pg.offset + pg.limit);
-      sendList(res, data, r.data.length, pg, { totals: r.totals, isCoInsurance: false });
+      const pid = (await pool.query('SELECT id FROM policies WHERE id = $1 OR policy_number = $1', [String(req.params.id)])).rows[0]?.id;
+      const parts = pid ? await policyParticipants(pid, pool) : [];
+      const co = isCoInsured(parts);
+      sendList(res, data, r.data.length, pg, { totals: r.totals, isCoInsurance: co,
+        participants: co ? parts.map((p) => ({ insurerId: p.insurerId, insurerName: p.insurerName, sharePercentage: p.share, isLead: p.isLead })) : [] });
     },
   });
 }
@@ -70,14 +75,19 @@ define({
 });
 define({
   method: 'POST', path: '/entries/match', summary: 'Match debit and credit open entries on the same account (partial amounts allowed)', screen: 'Accounts > Open Entry Matching',
-  middleware: [...write, validate(z.object({ matchPairs: z.array(z.object({ debitTransactionId: z.union([z.string(), z.number()]), creditTransactionId: z.union([z.string(), z.number()]), matchedAmount: z.number().optional(), adjustmentAmount: z.number().nullable().optional() })).min(1), metadata: z.object({}).passthrough().optional() }))],
-  request: { matchPairs: [{ debitTransactionId: '101', creditTransactionId: '205', matchedAmount: 11862.5, adjustmentAmount: null }], metadata: { documentRef: 'MATCH-001', narration: 'Premium settled' } },
-  response: { success: true, data: [{ id: 'mt_1', debitTransactionId: '101', creditTransactionId: '205', matchedAmount: 11862.5 }] },
+  middleware: [...write, validate(z.object({ matchPairs: z.array(z.object({ debitTransactionId: z.union([z.string(), z.number()]), creditTransactionId: z.union([z.string(), z.number()]), matchedAmount: z.number().optional(), adjustmentAmount: z.number().nullable().optional(), writeOffCode: z.string().optional() })).min(1), metadata: z.object({}).passthrough().optional() }))],
+  request: { matchPairs: [{ debitTransactionId: '101', creditTransactionId: '205', matchedAmount: 11812.5, adjustmentAmount: 50, writeOffCode: 'SMALL_BALANCE' }], metadata: { documentRef: 'MATCH-001', narration: 'Premium settled' } },
+  response: { success: true, data: [{ id: 'mt_1', debitTransactionId: '101', creditTransactionId: '205', matchedAmount: 11812.5, writeOff: { journalNumber: 'JV-2026-00042', amount: 50, reasonCode: 'SMALL_BALANCE', glAccount: '4409001', side: 'DEBIT' } }] },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.matchEntries(db, req.body.matchPairs, req.body.metadata || {}, req.user));
     await audit(req, { entity: 'entry_match', entityId: r.map((m) => m.id).join(','), action: 'match', after: req.body });
     ok(res, r, 'Entries matched successfully');
   },
+});
+define({
+  method: 'GET', path: '/write-off-reasons', summary: 'Active write-off reasons with their GL account (Open Entry Matching: adjustmentAmount + writeOffCode posts the write-off)', screen: 'Accounts > Open Entry Matching',
+  middleware: read, response: { success: true, data: [{ id: 1, code: 'SMALL_BALANCE', name: 'Small balance difference', glAccount: '4409001', maxAmount: 100 }] },
+  handler: async (req, res) => ok(res, await svc.writeOffReasons(pool)),
 });
 const unmatchHandler = async (req, res) => {
   const raw = req.body?.matchingIds ?? req.query.matchingIds;

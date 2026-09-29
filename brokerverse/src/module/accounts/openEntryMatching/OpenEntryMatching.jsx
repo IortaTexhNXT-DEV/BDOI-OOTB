@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,7 @@ import { Column } from "primereact/column";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./OpenEntryMatching.scss";
 import accountingService from "../../../services/accountingService";
+import postingRulesService from "../../../services/postingRulesService";
 import useOpenItemAccounts from "./useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
@@ -45,6 +46,11 @@ const OpenEntryMatching = () => {
     writeOffAmount: "",
     net: "",
   });
+  // write-off reasons (Account Determination): the adjustment is posted to the reason's GL account
+  const [writeOffReasons, setWriteOffReasons] = useState([]);
+  useEffect(() => {
+    postingRulesService.writeOffReasons().then((rows) => setWriteOffReasons(rows || [])).catch(() => setWriteOffReasons([]));
+  }, []);
   const [loading, setLoading] = useState(false);
   const subAccountOptions = useOpenItemAccounts();
 
@@ -664,16 +670,18 @@ const OpenEntryMatching = () => {
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
                   <label>Write off Code</label>
-                  <InputText
+                  <Dropdown
                     value={footerData.writeOffCode}
+                    options={writeOffReasons.map((r) => ({ label: `${r.code} – ${r.name} (${r.glAccount})`, value: r.code }))}
                     onChange={(e) =>
                       setFooterData({
                         ...footerData,
-                        writeOffCode: e.target.value,
+                        writeOffCode: e.value || "",
                       })
                     }
-                    placeholder="Write off Code"
-                    className="input__field__open__entry__matching"
+                    showClear
+                    placeholder="Write off reason"
+                    className="input__field__open__entry__matching w-full"
                   />
                 </div>
               </div>

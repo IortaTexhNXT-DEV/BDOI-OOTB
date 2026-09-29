@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url';
 export const TRANSACTION_TABLES = [
   'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments', 'documents',
   'broker_slips', 'insurer_offers', 'placements', 'risk_participants',
-  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists',
+  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
   'collection_items', 'collection_actions', 'disbursements', 'checkbooks',
   'petty_cash_funds', 'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',

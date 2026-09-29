@@ -253,10 +253,10 @@ import ApprovalWorkflowMaster from "../module/FinanceMastersModule/RemittanceMas
 import ExceptionMaster from "../module/FinanceMastersModule/RemittanceMaster/ExceptionMaster";
 import ReportTemplateMaster from "../module/FinanceMastersModule/RemittanceMaster/ReportTemplateMaster";
 import AgencyBillMaster from "../module/FinanceMastersModule/RemittanceMaster/AgencyBillMaster";
-import PremiumAccountSetup from "../module/FinanceMastersModule/PremiumAccountSetup";
-import MiscellaneousAccountSetup from "../module/FinanceMastersModule/MiscellaneousAccountSetup";
-import CustomerAccountSetup from "../module/FinanceMastersModule/CustomerAccountSetup";
-import RIClaimsAccountSetup from "../module/FinanceMastersModule/RIClaimsAccountSetup";
+import AccountDetermination from "../module/FinanceMastersModule/AccountDetermination";
+import PostingRules from "../module/FinanceMastersModule/PostingRules";
+import CoInsuranceRegister from "../module/Reports/FinancialReports/CoInsuranceRegister";
+import DueToInsurers from "../module/Reports/FinancialReports/DueToInsurers";
 // K13-K17 Remittance Masters
 import DirectBillMaster from "../module/FinanceMastersModule/RemittanceMaster/DirectBillMaster";
 import AdjustmentMaster from "../module/FinanceMastersModule/RemittanceMaster/AdjustmentMaster";
@@ -1101,28 +1101,31 @@ const Maincomponent = () => {
             element={<TransactioncodeEdit />}
           />
 
-          {/* Premium Account Setup Route */}
+          {/* Account Determination (the GL account of every account role the posting rules use); the former
+              Premium / Miscellaneous / Customer / RI-Claims account setup screens open its sections */}
+          <Route
+            path="master/finance/account-determination"
+            element={<AccountDetermination />}
+          />
           <Route
             path="master/finance/premium-account-setup"
-            element={<PremiumAccountSetup />}
+            element={<AccountDetermination section="premium" />}
           />
-
-          {/* Miscellaneous Account Setup Route */}
           <Route
             path="master/finance/miscellaneous-account-setup"
-            element={<MiscellaneousAccountSetup />}
+            element={<AccountDetermination section="miscellaneous" />}
           />
-
-          {/* Customer Account Setup Route */}
           <Route
             path="master/finance/customer-account-setup"
-            element={<CustomerAccountSetup />}
+            element={<AccountDetermination section="customer" />}
           />
-
-          {/* RI-Claims Account Setup Route */}
           <Route
             path="master/finance/ri-claim-account-setup"
-            element={<RIClaimsAccountSetup />}
+            element={<AccountDetermination section="ri-claims" />}
+          />
+          <Route
+            path="master/finance/posting-rules"
+            element={<PostingRules />}
           />
 
           {/* Remittance Master Routes */}
@@ -1867,6 +1870,14 @@ const Maincomponent = () => {
           <Route
             path="/reports/financialreports/trailbalance"
             element={<TrailBalance />}
+          />
+          <Route
+            path="/reports/financialreports/coinsuranceregister"
+            element={<CoInsuranceRegister />}
+          />
+          <Route
+            path="/reports/financialreports/duetoinsurers"
+            element={<DueToInsurers />}
           />
           <Route
             path="/agent/openitemslistdata"
