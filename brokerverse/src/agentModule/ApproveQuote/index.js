@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useFormatCurrency } from '../../hooks/useFormatCurrency';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card } from 'primereact/card';
@@ -11,28 +10,9 @@ import i18n from '../../i18n';
 import './ApproveQuote.scss';
 
 const ApproveQuote = () => {
-  const { t } = useTranslation();
-  const currentLng = i18n.language && i18n.language.startsWith('th') ? 'th' : 'en';
-
-  const languageBar = (
-    <div className="approve-quote-lang-bar">
-      <button
-        type="button"
-        className={currentLng === 'en' ? 'active' : ''}
-        onClick={() => i18n.changeLanguage('en')}
-      >
-        {t('common.english')}
-      </button>
-      <span className="lang-sep">|</span>
-      <button
-        type="button"
-        className={currentLng === 'th' ? 'active' : ''}
-        onClick={() => i18n.changeLanguage('th')}
-      >
-        {t('common.thai')}
-      </button>
-    </div>
-  );
+  // The client approves in English: this public page offers no language switch (Philippine clients; the
+  // system has no configured list of client languages) and never follows the agent's saved app language.
+  const t = i18n.getFixedT('en');
   const { formatCurrency } = useFormatCurrency();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -129,7 +109,6 @@ const ApproveQuote = () => {
   if (loading) {
     return (
       <div className="approve-quote-container">
-        {languageBar}
         <Card>
           <div style={{textAlign: 'center', padding: '40px'}}>
             <i className="pi pi-spin pi-spinner" style={{fontSize: '2rem'}}></i>
@@ -143,10 +122,9 @@ const ApproveQuote = () => {
   if (error) {
     return (
       <div className="approve-quote-container">
-        {languageBar}
         <Card>
           <div style={{textAlign: 'center', padding: '40px'}}>
-            <i className="pi pi-times-circle" style={{fontSize: '3rem', color: '#ef4444'}}></i>
+            <i className="pi pi-times-circle" style={{fontSize: '3rem', color: '#d32f2f'}}></i>
             <h2>{t('approveQuote.error')}</h2>
             <p>{error}</p>
           </div>
@@ -167,10 +145,9 @@ const ApproveQuote = () => {
 
     return (
       <div className="approve-quote-container">
-        {languageBar}
         <Card>
           <div style={{textAlign: 'center', padding: '20px 20px 30px'}}>
-            <i className="pi pi-check-circle" style={{fontSize: '3.5rem', color: '#10b981', marginBottom: '16px'}}></i>
+            <i className="pi pi-check-circle" style={{fontSize: '3.5rem', color: '#1d7f4e', marginBottom: '16px'}}></i>
             <h2 style={{marginBottom: '8px'}}>{t('approveQuote.quoteApprovedSuccess')}</h2>
             <p style={{marginBottom: '30px'}}>{t('approveQuote.thankYouApprove')}</p>
             
@@ -222,7 +199,7 @@ const ApproveQuote = () => {
 
                 {/* Premium Breakdown Table */}
                 <div className="premium-breakdown-section">
-                  <h3 style={{marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#1e293b'}}>
+                  <h3 style={{marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: 'var(--color-heading)'}}>
                     {t('approveQuote.premiumBreakdown')}
                   </h3>
                   <DataTable 
@@ -239,6 +216,8 @@ const ApproveQuote = () => {
                       field="value" 
                       header={t('approveQuote.amount')} 
                       body={(rowData) => formatCurrency(rowData.value)}
+                    headerClassName="bv-num"
+                    bodyClassName="bv-num"
                       style={{textAlign: 'right', fontWeight: '500'}}
                     />
                   </DataTable>
@@ -272,11 +251,10 @@ const ApproveQuote = () => {
 
   return (
     <div className="approve-quote-container">
-      {languageBar}
       <Card>
         <div style={{padding: '20px'}}>
           <h2 style={{textAlign: 'center', marginBottom: '8px'}}>{t('approveQuote.approveInsuranceQuote')}</h2>
-          <p style={{textAlign: 'center', marginBottom: '30px', color: '#64748b'}}>
+          <p style={{textAlign: 'center', marginBottom: '30px', color: 'var(--color-text-muted)'}}>
             {t('approveQuote.reviewBeforeApprove')}
           </p>
           
@@ -418,6 +396,8 @@ const ApproveQuote = () => {
                     field="value" 
                     header={t('approveQuote.amount')} 
                     body={(rowData) => formatCurrency(rowData.value)}
+                    headerClassName="bv-num"
+                    bodyClassName="bv-num"
                     style={{textAlign: 'right', fontWeight: '500'}}
                   />
                 </DataTable>

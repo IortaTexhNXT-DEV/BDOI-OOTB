@@ -387,9 +387,12 @@ export const calculatePremiumBreakdown = (
   // Use centralized tax rates
   const taxRates = getTaxRates(productConfigurator, settingsRates);
   
-  const documentaryStampTax = netPremium * taxRates.documentaryStampTax;
-  const valueAddedTax = netPremium * taxRates.valueAddedTax;
-  const localGovernmentTax = netPremium * taxRates.localGovernmentTax;
+  // Each tax is rounded to the centavo before the gross is added up, as the server does
+  // (backend quotations/premium.js), so the gross shown here equals the order summary's.
+  const toCentavo = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const documentaryStampTax = toCentavo(netPremium * taxRates.documentaryStampTax);
+  const valueAddedTax = toCentavo(netPremium * taxRates.valueAddedTax);
+  const localGovernmentTax = toCentavo(netPremium * taxRates.localGovernmentTax);
 
   // Get discount
   const discount = parseValue(coverageValues.discount || 0);

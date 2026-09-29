@@ -339,6 +339,7 @@ const CoverageDetailsCard = ({
   // Renewal prefill kept as the form's initial values so a later re-initialisation
   // (enableReinitialize, e.g. when the product template loads) does not wipe it.
   const [renewalValues, setRenewalValues] = useState(null);
+  const [renewalVehicleType, setRenewalVehicleType] = useState(null);
   const [show, setshow] = useState(true);
   const [isOverRide, setOverRide] = useState(false);
   const [includeActsOfNature, setIncludeActsOfNature] = useState(
@@ -856,6 +857,10 @@ const CoverageDetailsCard = ({
           : "",
       };
 
+      const renewalVehicle = response.data.vehicle || {};
+      setRenewalVehicleType(
+        renewalVehicle.vehicleType || renewalVehicle.insuranceVehicleDetails?.[0]?.vehicleType || null
+      );
       setRenewalValues(coverageForRenewal);
       formik.setValues(coverageForRenewal);
       setIncludeActsOfNature(Boolean(coverage.actsOfNatureRate));
@@ -870,6 +875,21 @@ const CoverageDetailsCard = ({
     fetchPolicyDataForRenewal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flow, policyId, state]); // Run when flow, policyId, or state changes
+
+  // Renewal without an own damage rate on the expiring term (e.g. a seeded or uploaded policy): prefill the rate of
+  // the vehicle class from the motor tariff (GET /quotations/motor-tariff); a policy with no vehicle class recorded
+  // takes the tariff's first class (private cars). The agent can still change it before Calculate.
+  useEffect(() => {
+    if (flow !== "renewal" || !renewalValues || renewalValues.LossandDamagecoverageRate) return;
+    const tariffClass =
+      findVehicleClass(motorTariff, renewalVehicleType) || motorTariff.vehicleTypes?.[0];
+    const rate = tariffClass?.ownDamageRate;
+    if (rate === null || rate === undefined) return;
+    const next = { ...renewalValues, LossandDamagecoverageRate: String(rate) };
+    setRenewalValues(next);
+    formik.setFieldValue("LossandDamagecoverageRate", next.LossandDamagecoverageRate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, renewalValues, motorTariff, renewalVehicleType]);
 
   return (
     <div className="coverage__details__card__container mt-4">

@@ -27,6 +27,30 @@ describe('masters catalogue', () => {
   });
 });
 
+describe('signatories master (order summary Authorized Signature, D15)', () => {
+  it('lists the seeded signatories with name and position, and a sales user reads them as dropdown options', async () => {
+    const list = await ctx.api('get', '/masters/signatory');
+    expect(list.status).toBe(200);
+    const byName = Object.fromEntries(list.body.data.map((s) => [s.signatoryName, s]));
+    expect(byName['Maria Regina Cruz']).toMatchObject({ designation: 'President & CEO', status: 'Active' });
+    expect(byName['Maria Regina Cruz'].signatoryCode).toMatch(/^SIG-\d{3}$/);
+    const opts = await as(salesToken, 'get', '/masters/signatory/options');
+    expect(opts.status).toBe(200);
+    expect(opts.body.data.map((o) => o.value)).toEqual(expect.arrayContaining(['Maria Regina Cruz', 'Jose Antonio Reyes', 'Ana Patricia Lim']));
+    expect(opts.body.data.map((o) => o.value)).not.toContain('JACINTO');
+  });
+
+  it('a signatory added under Master is offered; an inactive one is not', async () => {
+    const c = await ctx.api('post', '/masters/signatory').send({ signatoryCode: 'SIG-900', signatoryName: 'Carmela Santos', signatoryDescription: 'Operations Head', designation: 'Operations Head' });
+    expect(c.status).toBe(201);
+    let opts = await as(salesToken, 'get', '/masters/signatory/options');
+    expect(opts.body.data.map((o) => o.value)).toContain('Carmela Santos');
+    expect((await ctx.api('patch', `/masters/signatory/${c.body.data.id}/status`).send({ status: 'Inactive' })).status).toBe(200);
+    opts = await as(salesToken, 'get', '/masters/signatory/options');
+    expect(opts.body.data.map((o) => o.value)).not.toContain('Carmela Santos');
+  });
+});
+
 describe('generic master (company)', () => {
   let id;
   it('creates, reads, searches, updates and deactivates', async () => {

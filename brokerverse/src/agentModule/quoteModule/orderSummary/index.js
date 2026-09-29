@@ -12,7 +12,7 @@ import CustomToast from "../../../components/Toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
 import { useFormik } from "formik";
-import { AuthorizedSignatureOptions } from "./mock";
+import useSignatoryOptions from "../utils/useSignatoryOptions";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createQuotationMiddleware,
@@ -730,6 +730,15 @@ const OrderSummary = ({ action, flow }) => {
     },
   });
 
+  // Authorised signatories from the Signatories master; the first one is proposed when none is chosen yet
+  const signatoryOptions = useSignatoryOptions(formik.values.authorizedSignature);
+  useEffect(() => {
+    if (!formik.values.authorizedSignature && signatoryOptions.length) {
+      formik.setFieldValue("authorizedSignature", signatoryOptions[0].value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signatoryOptions, formik.values.authorizedSignature]);
+
   const parseAmount = (val) => {
     if (typeof val === "number") return Number.isFinite(val) ? val : 0;
     if (val == null || val === "") return 0;
@@ -950,7 +959,7 @@ const OrderSummary = ({ action, flow }) => {
               <DropdownField
                 label={t("agent.authorizedSignature")}
                 value={formik.values.authorizedSignature}
-                options={AuthorizedSignatureOptions}
+                options={signatoryOptions}
                 onChange={(e) => {
                   console.log(e.value);
                   formik.setFieldValue("authorizedSignature", e.value);
