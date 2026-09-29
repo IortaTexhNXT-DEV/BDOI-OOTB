@@ -19821,7 +19821,7 @@
         "tags": [
           "Incentive"
         ],
-        "description": "Front-end touchpoint: Master > Incentive Programs > Add Program\n\nAccess: write:incentive",
+        "description": "Front-end touchpoint: Master > Incentive Programs > Add Program\n\nAccess: write:masters",
         "parameters": [],
         "responses": {
           "200": {
@@ -19946,7 +19946,7 @@
         },
         "x-screen": "Master > Incentive Programs > Add Program",
         "x-permissions": [
-          "write:incentive"
+          "write:masters"
         ],
         "requestBody": {
           "required": true,
@@ -20198,7 +20198,7 @@
         "tags": [
           "Incentive"
         ],
-        "description": "Front-end touchpoint: Master > Incentive Programs > Edit\n\nAccess: write:incentive",
+        "description": "Front-end touchpoint: Master > Incentive Programs > Edit\n\nAccess: write:masters",
         "parameters": [
           {
             "name": "id",
@@ -20332,7 +20332,7 @@
         },
         "x-screen": "Master > Incentive Programs > Edit",
         "x-permissions": [
-          "write:incentive"
+          "write:masters"
         ],
         "requestBody": {
           "required": true,
@@ -20359,7 +20359,7 @@
         "tags": [
           "Incentive"
         ],
-        "description": "Front-end touchpoint: Master > Incentive Programs\n\nAccess: write:incentive",
+        "description": "Front-end touchpoint: Master > Incentive Programs\n\nAccess: write:masters",
         "parameters": [
           {
             "name": "id",
@@ -20405,7 +20405,7 @@
         },
         "x-screen": "Master > Incentive Programs",
         "x-permissions": [
-          "write:incentive"
+          "write:masters"
         ]
       }
     },
@@ -29419,7 +29419,7 @@
         "tags": [
           "Policy renewals"
         ],
-        "description": "Front-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals",
+        "description": "Front-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations",
         "parameters": [
           {
             "name": "clientId",
@@ -29585,7 +29585,9 @@
         },
         "x-screen": "Clients > Renewals tab; renewal quote wizard",
         "x-permissions": [
-          "read:renewals"
+          "read:renewals",
+          "write:renewals",
+          "write:quotations"
         ]
       }
     },
@@ -29596,7 +29598,7 @@
         "tags": [
           "Policy renewals"
         ],
-        "description": "Front-end touchpoint: Operations > Renewals\n\nAccess: read:renewals",
+        "description": "Front-end touchpoint: Operations > Renewals\n\nAccess: read:renewals, write:renewals, write:quotations",
         "parameters": [
           {
             "name": "renewalId",
@@ -29730,7 +29732,9 @@
         },
         "x-screen": "Operations > Renewals",
         "x-permissions": [
-          "read:renewals"
+          "read:renewals",
+          "write:renewals",
+          "write:quotations"
         ]
       },
       "put": {
@@ -29739,7 +29743,7 @@
         "tags": [
           "Policy renewals"
         ],
-        "description": "Front-end touchpoint: Operations > Policy > Renew (coverage details)\n\nAccess: write:renewals",
+        "description": "Front-end touchpoint: Operations > Policy > Renew (coverage details)\n\nAccess: write:renewals, write:quotations",
         "parameters": [
           {
             "name": "renewalId",
@@ -29862,7 +29866,8 @@
         },
         "x-screen": "Operations > Policy > Renew (coverage details)",
         "x-permissions": [
-          "write:renewals"
+          "write:renewals",
+          "write:quotations"
         ],
         "requestBody": {
           "required": true,
@@ -31055,7 +31060,7 @@
         "tags": [
           "Policy renewals"
         ],
-        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: read:renewals",
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: read:renewals, write:renewals, write:quotations",
         "parameters": [
           {
             "name": "policyId",
@@ -31169,7 +31174,9 @@
         },
         "x-screen": "Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)",
         "x-permissions": [
-          "read:renewals"
+          "read:renewals",
+          "write:renewals",
+          "write:quotations"
         ]
       }
     },
@@ -31180,7 +31187,7 @@
         "tags": [
           "Policy renewals"
         ],
-        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: write:renewals",
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: write:renewals, write:quotations",
         "parameters": [
           {
             "name": "policyId",
@@ -31340,7 +31347,8 @@
         },
         "x-screen": "Operations > Renewals > Renewal Policy > Renewal > Order summary",
         "x-permissions": [
-          "write:renewals"
+          "write:renewals",
+          "write:quotations"
         ],
         "requestBody": {
           "required": true,
@@ -31406,7 +31414,7 @@
         "tags": [
           "Policy renewals"
         ],
-        "description": "Front-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals",
+        "description": "Front-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
         "parameters": [
           {
             "name": "policyId",
@@ -31529,7 +31537,8 @@
         },
         "x-screen": "Operations > Policy > Renew (coverage details, order summary)",
         "x-permissions": [
-          "write:renewals"
+          "write:renewals",
+          "write:quotations"
         ],
         "requestBody": {
           "required": true,
@@ -46186,7 +46195,7 @@
         "tags": [
           "Reinsurance"
         ],
-        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
         "parameters": [],
         "responses": {
           "200": {
@@ -46230,7 +46239,8 @@
         },
         "x-screen": "Reinsurance > Reconciliation",
         "x-permissions": [
-          "write:reinsurance"
+          "write:reinsurance",
+          "write:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -46267,7 +46277,7 @@
         "tags": [
           "Reinsurance"
         ],
-        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
         "parameters": [
           {
             "name": "id",
@@ -46320,7 +46330,8 @@
         },
         "x-screen": "Reinsurance > Reconciliation",
         "x-permissions": [
-          "write:reinsurance"
+          "write:reinsurance",
+          "write:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -46349,7 +46360,7 @@
         "tags": [
           "Reinsurance"
         ],
-        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: read:reinsurance, write:reinsurance",
+        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: read:reinsurance, write:reinsurance, read:remittance, write:remittance",
         "parameters": [],
         "responses": {
           "200": {
@@ -46444,7 +46455,9 @@
         "x-screen": "Reinsurance > Reconciliation",
         "x-permissions": [
           "read:reinsurance",
-          "write:reinsurance"
+          "write:reinsurance",
+          "read:remittance",
+          "write:remittance"
         ]
       },
       "post": {
@@ -46453,7 +46466,7 @@
         "tags": [
           "Reinsurance"
         ],
-        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
         "parameters": [],
         "responses": {
           "200": {
@@ -46501,7 +46514,8 @@
         },
         "x-screen": "Reinsurance > Reconciliation",
         "x-permissions": [
-          "write:reinsurance"
+          "write:reinsurance",
+          "write:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -46542,7 +46556,7 @@
         "tags": [
           "Reinsurance"
         ],
-        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+        "description": "Front-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
         "parameters": [
           {
             "name": "id",
@@ -46595,7 +46609,8 @@
         },
         "x-screen": "Reinsurance > Reconciliation",
         "x-permissions": [
-          "write:reinsurance"
+          "write:reinsurance",
+          "write:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -46624,7 +46639,7 @@
         "tags": [
           "Reinsurance"
         ],
-        "description": "Front-end touchpoint: Master > Reinsurance Treaty\n\nAccess: read:reinsurance, write:reinsurance",
+        "description": "Front-end touchpoint: Master > Reinsurance Treaty\n\nAccess: read:reinsurance, write:reinsurance, read:remittance, write:remittance",
         "parameters": [
           {
             "name": "status",
@@ -46708,7 +46723,9 @@
         "x-screen": "Master > Reinsurance Treaty",
         "x-permissions": [
           "read:reinsurance",
-          "write:reinsurance"
+          "write:reinsurance",
+          "read:remittance",
+          "write:remittance"
         ]
       },
       "post": {
@@ -49682,6 +49699,72 @@
             }
           }
         }
+      }
+    },
+    "/remittance/approvals/approvers": {
+      "get": {
+        "operationId": "getRemittanceApprovalsApprovers",
+        "summary": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "userId": "usr_1",
+                      "username": "fe.approver",
+                      "displayName": "Fe Approver"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Approval > Delegate",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
       }
     },
     "/remittance/approvals/delegations": {
@@ -61164,6 +61247,71 @@
             }
           }
         }
+      }
+    },
+    "/reports/filters/agents": {
+      "get": {
+        "operationId": "getReportsFiltersAgents",
+        "summary": "Agents a report can be filtered by (active users with the agent role), as { label, value }",
+        "tags": [
+          "Reports"
+        ],
+        "description": "Front-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "label": "Ramon Agent",
+                      "value": "usr_1",
+                      "code": "AG001"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Reports > * (Agent filter)",
+        "x-permissions": [
+          "read:reports"
+        ]
       }
     },
     "/reports/generated": {

@@ -220,6 +220,7 @@ import Collectionreport from "../module/Reports/FinancialReports/CollectionRepor
 import Payables from "../module/Reports/FinancialReports/Payables";
 import Journal from "../module/Reports/FinancialReports/Journal";
 import TrailBalance from "../module/Reports/FinancialReports/TrailBalance";
+import ReportCatalogue, { ReportRunner } from "../module/Reports/ReportCatalogue";
 // import OperationalReports from "../module/Reports/OperationalReports";
 
 // Collections Module
@@ -1775,6 +1776,10 @@ const Maincomponent = () => {
 
           {/* //Reports */}
 
+          {/* every catalogue report (Reports > All Reports) */}
+          <Route path="/reports/catalogue" element={<ReportCatalogue />} />
+          <Route path="/reports/run/:code" element={<ReportRunner />} />
+
           {/* OperationalReports */}
           <Route
             path="/reports/operationalreports/production"
@@ -1808,18 +1813,6 @@ const Maincomponent = () => {
           <Route
             path="/reports/financialreports/collectionreport"
             element={<Collectionreport />}
-          />
-          <Route
-            path="/reports/financialreports/payables"
-            element={<Payables />}
-          />
-          <Route
-            path="/reports/financialreports/journal"
-            element={<Journal />}
-          />
-          <Route
-            path="/reports/financialreports/trailbalance"
-            element={<TrailBalance />}
           />
           <Route
             path="/reports/financialreports/payables"

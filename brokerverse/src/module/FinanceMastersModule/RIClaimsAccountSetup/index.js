@@ -15,6 +15,7 @@ import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
 import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
 import { confirmAction } from "../../../utility/dialogs";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 
 const RIClaimsAccountSetup = () => {
   const { t } = useTranslation();
@@ -711,7 +712,7 @@ const RIClaimsAccountSetup = () => {
                 onChange={(e) =>
                   handleInputChange("effectiveFromDate", e.value)
                 }
-                dateFormat="mm/dd/yy"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 icon="pi pi-calendar"
                 className="input__filed"
@@ -725,7 +726,7 @@ const RIClaimsAccountSetup = () => {
               <Calendar
                 value={formData.effectiveToDate}
                 onChange={(e) => handleInputChange("effectiveToDate", e.value)}
-                dateFormat="mm/dd/yy"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 icon="pi pi-calendar"
                 className="input__filed"

@@ -10,6 +10,7 @@ import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const CollectionsList = () => {
@@ -145,11 +146,7 @@ const CollectionsList = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return formatAppDate(dateString);
   };
 
   // Column templates
@@ -263,7 +260,7 @@ const CollectionsList = () => {
 
       <div className="reminder-button-section">
         <Button
-          label={t("collectionsList.manualTriggerReminder")}
+          label={t("collectionsList.sendPaymentRemindersNow")}
           icon="pi pi-send"
           className="p-button-info p-button-rounded"
           onClick={handleSendDueDateReminders}

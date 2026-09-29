@@ -417,7 +417,7 @@ const EndorsementSummary = ({ action }) => {
       >
         <SvgLeftArrow />
         <div className="left_arrow_text">
-          {t("endorsementSummary.policyNumberColon")} {state.endorsementData?.policyNumber || t("policyDetail.nA")}
+          {t("endorsementSummary.policyNumberColon")} {state?.endorsementData?.policyNumber || t("policyDetail.nA")}
         </div>
       </div>
       <Card className="mt-4">

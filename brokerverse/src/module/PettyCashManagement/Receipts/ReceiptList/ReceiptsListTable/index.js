@@ -3,6 +3,7 @@ import "./index.scss";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const ReceiptListTable = ({ AddReceiptTable }) => {
   const isEmpty = AddReceiptTable.length === 0;
@@ -47,7 +48,7 @@ const ReceiptListTable = ({ AddReceiptTable }) => {
             sortable
             body={(rowData) => rowData.RequestNumber?.toUpperCase()}
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.Date)}
             field="Date"
             header="Date"
             headerStyle={headerStyle}

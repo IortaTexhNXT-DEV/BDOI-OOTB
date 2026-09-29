@@ -13,6 +13,7 @@ import { Toast } from "primereact/toast";
 import authService from "../../../services/authService";
 import { BASE_URL } from "../../../utility/constant";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const pad = (n) => String(n).padStart(2, "0");
@@ -166,9 +167,9 @@ const ClaimsDashboard = () => {
       customer: claim.customerName,
       policy: claim.policyNumber,
       lossDate: claim.dateOfIncident
-        ? new Date(claim.dateOfIncident).toLocaleDateString("en-GB")
+        ? formatAppDate(claim.dateOfIncident)
         : "N/A",
-      reportedDate: new Date(claim.reportedDate).toLocaleDateString("en-GB"),
+      reportedDate: formatAppDate(claim.reportedDate),
       reporter: "System", // This field is not in the API response
       priority: claim.claimPriority?.toLowerCase() || "low",
       status: claim.claimStatus,
@@ -331,6 +332,7 @@ const ClaimsDashboard = () => {
           <h2>{t("claimsDashboard.title")}</h2>
           <div className="header-actions">
             <Calendar
+              dateFormat={calendarDateFormat()}
               value={dateRange}
               onChange={(e) => setDateRange(e.value)}
               selectionMode="range"
@@ -346,6 +348,7 @@ const ClaimsDashboard = () => {
         </div>
         <div className="mobile-header-actions">
           <Calendar
+            dateFormat={calendarDateFormat()}
             value={dateRange}
             onChange={(e) => setDateRange(e.value)}
             selectionMode="range"
@@ -456,12 +459,12 @@ const ClaimsDashboard = () => {
                 <Column field="lob" header={t("claimsDashboard.lob")} />
                 <Column field="customer" header={t("claimsDashboard.customer")} />
                 <Column field="policy" header={t("claimsDashboard.policy")} />
-                <Column field="lossDate" header={t("claimsDashboard.lossDate")} />
-                <Column field="reportedDate" header={t("claimsDashboard.reported")} />
+                <Column body={(row) => formatAppDate(row.lossDate)} field="lossDate" header={t("claimsDashboard.lossDate")} />
+                <Column body={(row) => formatAppDate(row.reportedDate)} field="reportedDate" header={t("claimsDashboard.reported")} />
                 <Column field="reporter" header={t("claimsDashboard.reporter")} />
                 <Column body={priorityBodyTemplate} header={t("claimsDashboard.priority")} />
                 <Column body={statusBodyTemplate} header={t("claimsDashboard.status")} />
-                <Column field="amount" header={t("claimsDashboard.amount")} />
+                <Column field="amount" header={t("claimsDashboard.amount")} className="bv-num" headerClassName="bv-num" />
                 <Column
                   body={actionBodyTemplate}
                   header=""

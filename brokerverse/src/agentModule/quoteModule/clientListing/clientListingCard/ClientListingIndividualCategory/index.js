@@ -22,6 +22,7 @@ import {
 } from "../../store/clientsMiddleware";
 import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import { Avatar } from "primereact/avatar";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const ClientListingIndividualCategory = ({
   data,
@@ -30,10 +31,10 @@ const ClientListingIndividualCategory = ({
 }) => {
   const { t } = useTranslation();
   const individualData = clientListTable?.filter(
-    (item) => item.category === "Retail"
+    (item) => item.category === "Individual"
   );
   const searchMiddleWareData = paymentSearchList?.filter(
-    (val) => val?.category === "Retail"
+    (val) => val?.category === "Individual"
   );
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
@@ -277,7 +278,7 @@ const ClientListingIndividualCategory = ({
     );
   };
   const renderDate = (rowData) => {
-    return <div className="date__text">{rowData.DateofBirth}</div>;
+    return <div className="date__text">{formatAppDate(rowData.DateofBirth)}</div>;
   };
 
   const renderQuotes = (rowData) => {
@@ -392,17 +393,17 @@ const ClientListingIndividualCategory = ({
           ></Column>
           <Column
             body={renderDate}
-            header={renderUncheckedHeader(t("clients.date"))}
+            header={renderUncheckedHeader(t("clients.dateOfBirth"))}
             headerStyle={headerStyle}
           ></Column>
           <Column
             body={renderQuotes}
-            header={renderUncheckedHeader(t("clients.quotes"))}
+            header={renderUncheckedHeader(t("clients.policies"))}
             headerStyle={headerStyle}
           ></Column>
           <Column
             body={renderDes}
-            header={renderUncheckedHeader(t("clients.productDescription"))}
+            header={renderUncheckedHeader(t("clients.latestPolicyStatus"))}
             headerStyle={headerStyle}
           ></Column>
           <Column

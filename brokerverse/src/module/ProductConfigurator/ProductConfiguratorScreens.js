@@ -26,6 +26,7 @@ import { Timeline } from "primereact/timeline";
 import { ProgressBar } from "primereact/progressbar";
 import { Chart } from "primereact/chart";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import FieldError from "../../components/FieldError";
 import productConfiguratorService from "../../services/productConfiguratorService";
 import mastersService from "../../services/mastersService";
 import s3Service from "../../services/s3Service";
@@ -34,6 +35,8 @@ import { fetchProductTemplateByIdMiddleware } from "./store/productConfiguratorM
 import { clearProductTemplate } from "./store/productConfiguratorSlice";
 import { cleanMotorTariff } from "./PoductConfiguratorTab/MotorTariffEditor";
 import { numberLocale } from "../../utility/currencyConverter";
+import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../utility/requiredFields";
 /** Product templates as dropdown options for attaching a component to a product. */
 const useProductOptions = () => {
   const [options, setOptions] = useState([]);
@@ -123,6 +126,7 @@ export const ProductTemplateManager = () => {
   const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [templateErrors, setTemplateErrors] = useState({});
 
   const [showDialog, setShowDialog] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(false);
@@ -261,6 +265,7 @@ export const ProductTemplateManager = () => {
         return value === undefined || value === null;
       });
 
+      setTemplateErrors(Object.fromEntries(missingFields.map((field) => [field, `${fieldLabels[field] || field} is required`])));
       if (missingFields.length) {
         const formattedFields = missingFields.map(
           (field) => fieldLabels[field] || field
@@ -285,10 +290,8 @@ export const ProductTemplateManager = () => {
         description,
       } = selectedTemplate;
 
-      const formattedEffectiveDate =
-        effectiveDate instanceof Date
-          ? effectiveDate.toISOString().split("T")[0]
-          : effectiveDate;
+      // local calendar date (toISOString would give the previous day east of UTC)
+      const formattedEffectiveDate = toIsoDate(effectiveDate);
 
       const payload = {
         templateCode,
@@ -353,6 +356,7 @@ export const ProductTemplateManager = () => {
                   icon="pi pi-plus"
                   onClick={() => {
                     setSelectedTemplate({ status: "Active" });
+                    setTemplateErrors({});
                     setShowDialog(true);
                   }}
                 />
@@ -455,7 +459,7 @@ export const ProductTemplateManager = () => {
                   })
                 }
                 showIcon
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 placeholder={t("productTemplateManager.selectEffectiveDate")}
               />
             </div>
@@ -505,7 +509,7 @@ export const ProductTemplateManager = () => {
       >
         <div className="p-fluid">
           <div className="field">
-            <label>{t("productTemplateManager.templateCode")}</label>
+            <label>{t("productTemplateManager.templateCode")} *</label>
             <InputText
               value={selectedTemplate?.templateCode || ""}
               onChange={(e) =>
@@ -515,9 +519,10 @@ export const ProductTemplateManager = () => {
                 })
               }
             />
+            <FieldError error={templateErrors.templateCode} />
           </div>
           <div className="field">
-            <label>{t("productTemplateManager.productName")}</label>
+            <label>{t("productTemplateManager.productName")} *</label>
             <InputText
               value={selectedTemplate?.name || ""}
               onChange={(e) =>
@@ -527,6 +532,7 @@ export const ProductTemplateManager = () => {
                 })
               }
             />
+            <FieldError error={templateErrors.name} />
           </div>
           <div className="field">
             <label>{t("productTemplateManager.description")}</label>
@@ -543,7 +549,7 @@ export const ProductTemplateManager = () => {
           </div>
           <div className="formgrid grid">
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.category")}</label>
+              <label>{t("productTemplateManager.category")} *</label>
               <Dropdown
                 value={selectedTemplate?.category || null}
                 options={categoryOptions}
@@ -556,9 +562,10 @@ export const ProductTemplateManager = () => {
                 }
                 showClear
               />
+              <FieldError error={templateErrors.category} />
             </div>
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.lineOfBusiness")}</label>
+              <label>{t("productTemplateManager.lineOfBusiness")} *</label>
               <InputText
                 value={selectedTemplate?.lineOfBusiness || ""}
                 onChange={(e) =>
@@ -569,9 +576,10 @@ export const ProductTemplateManager = () => {
                 }
                 placeholder={t("productTemplateManager.lineOfBusinessPlaceholder")}
               />
+              <FieldError error={templateErrors.lineOfBusiness} />
             </div>
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.effectiveDate")}</label>
+              <label>{t("productTemplateManager.effectiveDate")} *</label>
               <Calendar
                 value={
                   selectedTemplate?.effectiveDate
@@ -585,12 +593,13 @@ export const ProductTemplateManager = () => {
                   })
                 }
                 showIcon
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 placeholder={t("productTemplateManager.selectEffectiveDate")}
               />
+              <FieldError error={templateErrors.effectiveDate} />
             </div>
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.status")}</label>
+              <label>{t("productTemplateManager.status")} *</label>
               <Dropdown
                 value={selectedTemplate?.status || "Active"}
                 options={statusOptions}
@@ -601,6 +610,7 @@ export const ProductTemplateManager = () => {
                   })
                 }
               />
+              <FieldError error={templateErrors.status} />
             </div>
           </div>
           <Button
@@ -620,6 +630,7 @@ export const CoverageBuilder = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
   const [selectedCoverage, setSelectedCoverage] = useState(null);
+  const [coverageErrors, setCoverageErrors] = useState({});
   const [showDialog, setShowDialog] = useState(false);
   const toast = useRef(null);
   const productOptions = useProductOptions();
@@ -646,7 +657,17 @@ export const CoverageBuilder = () => {
     setShowDialog(true);
   };
 
+  useEffect(() => {
+    if (showDialog) setCoverageErrors({});
+  }, [showDialog]);
+
   const saveCoverage = async () => {
+    const errors = requiredErrors(selectedCoverage, [["coverageCode", t("coverageBuilder.coverageCode")], ["coverageName", t("coverageBuilder.coverageName")], ["type", t("coverageBuilder.type")]]);
+    setCoverageErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors) });
+      return;
+    }
     const saved = await persist(
       () => productConfiguratorService.saveComponent("coverages", selectedCoverage),
       toast,
@@ -743,7 +764,7 @@ export const CoverageBuilder = () => {
           <div className="grid">
             <div className="col-6">
               <div className="field">
-                <label>{t("coverageBuilder.coverageCode")}</label>
+                <label>{t("coverageBuilder.coverageCode")} *</label>
                 <InputText
                   value={selectedCoverage?.coverageCode}
                   onChange={(e) =>
@@ -753,9 +774,10 @@ export const CoverageBuilder = () => {
                     })
                   }
                 />
+                <FieldError error={coverageErrors.coverageCode} />
               </div>
               <div className="field">
-                <label>{t("coverageBuilder.coverageName")}</label>
+                <label>{t("coverageBuilder.coverageName")} *</label>
                 <InputText
                   value={selectedCoverage?.coverageName}
                   onChange={(e) =>
@@ -765,9 +787,10 @@ export const CoverageBuilder = () => {
                     })
                   }
                 />
+                <FieldError error={coverageErrors.coverageName} />
               </div>
               <div className="field">
-                <label>{t("coverageBuilder.type")}</label>
+                <label>{t("coverageBuilder.type")} *</label>
                 <Dropdown
                   value={selectedCoverage?.type}
                   options={typeOptions}
@@ -777,6 +800,7 @@ export const CoverageBuilder = () => {
                     setSelectedCoverage({ ...selectedCoverage, type: e.value })
                   }
                 />
+                <FieldError error={coverageErrors.type} />
               </div>
             </div>
             <div className="col-6">
@@ -860,6 +884,7 @@ export const CoverageBuilder = () => {
 export const RatingEngine = () => {
   const { t } = useTranslation();
   const [selectedFactor, setSelectedFactor] = useState(null);
+  const [factorErrors, setFactorErrors] = useState({});
   const [showDialog, setShowDialog] = useState(false);
   const [expandedRows, setExpandedRows] = useState(null);
   const toast = useRef(null);
@@ -882,7 +907,17 @@ export const RatingEngine = () => {
     setShowDialog(true);
   };
 
+  useEffect(() => {
+    if (showDialog) setFactorErrors({});
+  }, [showDialog]);
+
   const saveFactor = async () => {
+    const errors = requiredErrors(selectedFactor, [["factorCode", t("ratingEngine.factorCode")], ["factorName", t("ratingEngine.factorName")], ["type", t("ratingEngine.type")]]);
+    setFactorErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors) });
+      return;
+    }
     const saved = await persist(
       () => productConfiguratorService.saveComponent("rating-factors", selectedFactor),
       toast,
@@ -1003,7 +1038,7 @@ export const RatingEngine = () => {
             />
           )}
           <div className="field">
-            <label>{t("ratingEngine.factorCode")}</label>
+            <label>{t("ratingEngine.factorCode")} *</label>
             <InputText
               value={selectedFactor?.factorCode}
               onChange={(e) =>
@@ -1013,9 +1048,10 @@ export const RatingEngine = () => {
                 })
               }
             />
+            <FieldError error={factorErrors.factorCode} />
           </div>
           <div className="field">
-            <label>{t("ratingEngine.factorName")}</label>
+            <label>{t("ratingEngine.factorName")} *</label>
             <InputText
               value={selectedFactor?.factorName}
               onChange={(e) =>
@@ -1025,9 +1061,10 @@ export const RatingEngine = () => {
                 })
               }
             />
+            <FieldError error={factorErrors.factorName} />
           </div>
           <div className="field">
-            <label>{t("ratingEngine.type")}</label>
+            <label>{t("ratingEngine.type")} *</label>
             <Dropdown
               value={selectedFactor?.type}
               options={typeOptions}
@@ -1037,6 +1074,7 @@ export const RatingEngine = () => {
                 setSelectedFactor({ ...selectedFactor, type: e.value })
               }
             />
+            <FieldError error={factorErrors.type} />
           </div>
           <Button label={t("ratingEngine.saveFactor")} icon="pi pi-check" onClick={saveFactor} />
         </div>
@@ -1049,6 +1087,7 @@ export const RatingEngine = () => {
 export const UnderwritingRules = () => {
   const { t } = useTranslation();
   const [selectedRule, setSelectedRule] = useState(null);
+  const [ruleErrors, setRuleErrors] = useState({});
   const [showDialog, setShowDialog] = useState(false);
   const toast = useRef(null);
   const productOptions = useProductOptions();
@@ -1071,7 +1110,17 @@ export const UnderwritingRules = () => {
     { label: t("underwritingRules.applyLoading"), value: "Apply Loading" },
   ];
 
+  useEffect(() => {
+    if (showDialog) setRuleErrors({});
+  }, [showDialog]);
+
   const saveRule = async () => {
+    const errors = requiredErrors(selectedRule, [["ruleCode", t("underwritingRules.ruleCode")], ["ruleName", t("underwritingRules.ruleName")], ["type", t("underwritingRules.type")], ["condition", t("ratingEngine.condition")], ["action", t("underwritingRules.action")]]);
+    setRuleErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors) });
+      return;
+    }
     const saved = await persist(
       () => productConfiguratorService.saveComponent("underwriting-rules", selectedRule),
       toast,
@@ -1206,25 +1255,27 @@ export const UnderwritingRules = () => {
             />
           )}
           <div className="field">
-            <label>{t("underwritingRules.ruleCode")}</label>
+            <label>{t("underwritingRules.ruleCode")} *</label>
             <InputText
               value={selectedRule?.ruleCode}
               onChange={(e) =>
                 setSelectedRule({ ...selectedRule, ruleCode: e.target.value })
               }
             />
+            <FieldError error={ruleErrors.ruleCode} />
           </div>
           <div className="field">
-            <label>{t("underwritingRules.ruleName")}</label>
+            <label>{t("underwritingRules.ruleName")} *</label>
             <InputText
               value={selectedRule?.ruleName}
               onChange={(e) =>
                 setSelectedRule({ ...selectedRule, ruleName: e.target.value })
               }
             />
+            <FieldError error={ruleErrors.ruleName} />
           </div>
           <div className="field">
-            <label>{t("underwritingRules.type")}</label>
+            <label>{t("underwritingRules.type")} *</label>
             <Dropdown
               value={selectedRule?.type}
               options={typeOptions}
@@ -1234,9 +1285,10 @@ export const UnderwritingRules = () => {
                 setSelectedRule({ ...selectedRule, type: e.value })
               }
             />
+            <FieldError error={ruleErrors.type} />
           </div>
           <div className="field">
-            <label>{t("ratingEngine.condition")}</label>
+            <label>{t("ratingEngine.condition")} *</label>
             <InputTextarea
               value={selectedRule?.condition}
               rows={3}
@@ -1244,9 +1296,10 @@ export const UnderwritingRules = () => {
                 setSelectedRule({ ...selectedRule, condition: e.target.value })
               }
             />
+            <FieldError error={ruleErrors.condition} />
           </div>
           <div className="field">
-            <label>{t("underwritingRules.action")}</label>
+            <label>{t("underwritingRules.action")} *</label>
             <Dropdown
               value={selectedRule?.action}
               options={actionOptions}
@@ -1256,6 +1309,7 @@ export const UnderwritingRules = () => {
                 setSelectedRule({ ...selectedRule, action: e.value })
               }
             />
+            <FieldError error={ruleErrors.action} />
           </div>
           <Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={saveRule} />
         </div>

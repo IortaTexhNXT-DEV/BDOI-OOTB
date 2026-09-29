@@ -15,6 +15,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { calendarDateFormat, dateBody, isoDate, showError, showSuccess } from "../shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const SCHEDULE_ROUTE = "/master/finance/remittance/schedulemaster";
@@ -102,7 +103,8 @@ const SchedulingDashboard = () => {
     return (
       <Card className="timeline-card">
         <div className="timeline-header">
-          <Tag value={item.status} />
+          {/* the event's run time (the API sends it as the status text, ISO) in the configured date format */}
+          <Tag value={formatAppDate(item.status, { withTime: /\d{2}:\d{2}/.test(String(item.status)) })} />
         </div>
         <div className="timeline-content">
           <i className={item.icon} style={{ color: item.color }}></i>
@@ -167,27 +169,27 @@ const SchedulingDashboard = () => {
 
       <Dialog header={t("remittance.newSchedule")} visible={showDialog} style={{ width: '40vw' }} footer={dialogFooter} onHide={() => setShowDialog(false)}>
         <div className="p-fluid">
-          <div className="p-field">
+          <div className="p-field field">
             <label>Code *</label>
             <InputText value={form.code} onChange={(e) => setField("code", e.target.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>{t("remittance.scheduleName")} *</label>
             <InputText value={form.name} onChange={(e) => setField("name", e.target.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>{t("remittance.frequency")} *</label>
             <Dropdown value={form.frequency} options={frequencies} onChange={(e) => setField("frequency", e.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>{t("remittance.nextRun")}</label>
             <Calendar dateFormat={calendarDateFormat()} value={form.nextRun} onChange={(e) => setField("nextRun", e.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Time</label>
             <InputText value={form.time} onChange={(e) => setField("time", e.target.value)} placeholder="HH:mm" />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Linked Processes</label>
             <MultiSelect value={form.linkedProcesses} options={processOptions} onChange={(e) => setField("linkedProcesses", e.value)} display="chip" />
           </div>

@@ -216,15 +216,11 @@ const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => 
   // Return empty defaults
   return {
     netPremium: "0.00",
-    valueAddedTax:
-      productConfigurator?.configuration?.taxes?.value_added_tax || "0.00",
+    valueAddedTax: "0.00",
     others: "0.00",
     authorizedSignature: "",
-    documentaryStampTax:
-      productConfigurator?.configuration?.taxes?.documentary_stamp_tax ||
-      "0.00",
-    localGovtTax:
-      productConfigurator?.configuration?.taxes?.local_government_tax || "0.00",
+    documentaryStampTax: "0.00",
+    localGovtTax: "0.00",
     discount: "0.00",
     ncd: "0.00",
     grossPremium: "0.00",

@@ -14,6 +14,7 @@ import { Badge } from "primereact/badge";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import dashboardService from "../../../services/dashboardService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const STATUS_COLORS = ["#4CAF50", "#2196F3", "#FFC107", "#9C27B0", "#FF5252", "#00BCD4"];
@@ -391,7 +392,7 @@ const UnderwritingDashboard = () => {
             <Column field="faceAmount" header={t("underwritingDashboard.faceAmount")} body={(row) => formatCurrency(row.faceAmount)} />
             <Column field="productType" header={t("underwritingDashboard.productType")} />
             <Column body={riskScoreBodyTemplate} header={t("underwritingDashboard.riskScore")} />
-            <Column field="requirementDue" header={t("underwritingDashboard.nextRequirementDue")} />
+            <Column field="requirementDue" header={t("underwritingDashboard.nextRequirementDue")} body={(row) => formatAppDate(row.requirementDue)} />
             <Column body={priorityBodyTemplate} header={t("underwritingDashboard.priority")} />
             <Column body={statusBodyTemplate} header={t("underwritingDashboard.status")} />
             <Column
@@ -471,7 +472,7 @@ const UnderwritingDashboard = () => {
                   ></i>
                   <div>
                     <span className="task-title">{`${task.proposedInsured || "-"} (${task.productType || "-"})`}</span>
-                    <span className="task-meta">{`${task.caseId} • ${task.requirementDue}`}</span>
+                    <span className="task-meta">{`${task.caseId} • ${formatAppDate(task.requirementDue)}`}</span>
                   </div>
                 </div>
                 <Button icon="pi pi-eye" rounded text severity="info" size="small" onClick={() => openCase(task)} />

@@ -54,7 +54,8 @@ const clientReducer = createSlice({
                         ZIPCode: client.zipCode,
                         DateofBirth: client.DOB,
                         createdAt: client.createdAt || client.created_at || client.dateCreated || client.date_created,
-                        category: client.leadCategory || "Retail",
+                        // Individual / Corporate from the client type; the lead category may still say Retail for a company
+                        category: String(client.clientType || "").toLowerCase() === "corporate" || (!client.clientType && client.companyName) ? "Corporate" : "Individual",
                         gender: client.gender,
                         Quotes: client.policies?.length?.toString() || "0",
                         LeadID: client.generatedClientId,

@@ -57,7 +57,8 @@
     "email": "Email",
     "total": "Total",
     "warning": "Warning",
-    "information": "Information"
+    "information": "Information",
+    "validation": "Validation"
   },
   "login": {
     "title": "Welcome to BIBS",
@@ -226,7 +227,9 @@
     "Payables": "Payables",
     "Journal": "Journal",
     "Trail Balance": "Trail Balance",
-    "Login": "Login"
+    "Login": "Login",
+    "All Reports": "All Reports",
+    "Trial Balance": "Trial Balance"
   },
   "header": {
     "notification": "Notification",
@@ -3422,7 +3425,12 @@
     "availableOnRequest": "Available on request",
     "relatedRecords": "Related Records",
     "documentPreview": "Document Preview",
-    "noDocumentToPreview": "No document to preview."
+    "noDocumentToPreview": "No document to preview.",
+    "documentaryStampTaxRate": "Documentary Stamp Tax ({{rate}})",
+    "valueAddedTaxRate": "Value Added Tax ({{rate}})",
+    "localGovernmentTaxRate": "Local Government Tax ({{rate}})",
+    "directBill": "Direct bill",
+    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission."
   },
   "uploadPolicy": {
     "title": "Leads",
@@ -3501,7 +3509,12 @@
     "delete": "Delete",
     "edit": "Edit",
     "clientIdLabel": "Client Id :",
-    "clientIdSearch": "Client ID"
+    "clientIdSearch": "Client ID",
+    "individualTab": "Individual",
+    "dateOfBirth": "Date of Birth",
+    "policies": "Policies",
+    "latestPolicyStatus": "Latest Policy Status",
+    "clientSince": "Client Since"
   },
   "executiveDashboard": {
     "title": "Executive Dashboard",
@@ -5200,7 +5213,8 @@
     "open": "Open",
     "settled": "Settled",
     "rejected": "Rejected",
-    "aging": "Aging"
+    "aging": "Aging",
+    "trialBalance": "Trial Balance"
   },
   "claimsDashboard": {
     "title": "Claims Management Dashboard",
@@ -5321,7 +5335,8 @@
     "productDescription": "Product Description",
     "payment": "Payment",
     "actions": "Actions",
-    "proceed": "Proceed"
+    "proceed": "Proceed",
+    "grossPremiumHeader": "Gross Premium"
   },
   "collectionsList": {
     "view": "View",
@@ -5335,7 +5350,8 @@
     "overdue": "Overdue",
     "partiallyPaid": "Partially Paid",
     "committed": "Committed",
-    "escalated": "Escalated"
+    "escalated": "Escalated",
+    "sendPaymentRemindersNow": "Send Payment Reminders Now"
   },
   "iarLead": {
     "lead": "Lead",

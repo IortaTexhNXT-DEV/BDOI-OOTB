@@ -14,6 +14,7 @@ import accountingService from "../../../services/accountingService";
 import { Dropdown } from "primereact/dropdown";
 import useOpenItemAccounts from "../openEntryMatching/useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const OpenEntryUnmatching = () => {
   const { t } = useTranslation();
@@ -150,12 +151,7 @@ const OpenEntryUnmatching = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    return formatAppDate(dateString, { empty: "" });
   };
 
   const calculateTotal = (entries, field) => {

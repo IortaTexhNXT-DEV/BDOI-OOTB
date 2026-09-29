@@ -20,6 +20,7 @@ import ClientListing from "../../../quoteModule/clientListing";
 import { getexpiringtableMiddleware, getExpiringSearchDataMiddleWare } from "../expiringPolicyCard/store/expiringMiddleware";
 import { collectFromHash } from "@fullcalendar/core/internal";
 import { Avatar } from "primereact/avatar";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const ExpiringPolicyCard = () => {
   const { t } = useTranslation();
@@ -282,7 +283,7 @@ const ExpiringPolicyCard = () => {
     return (
       <div className="expiry__data__container">
         <div className="expiry__data__text">
-          {rowData.policyIssued?.toUpperCase()}
+          {formatAppDate(rowData.policyIssued)}
         </div>
       </div>
     );
@@ -292,7 +293,7 @@ const ExpiringPolicyCard = () => {
     return (
       <div className="expiry__data__container">
         <div className="expiry__data__text">
-          {rowData.ExpiryDate?.toUpperCase()}
+          {formatAppDate(rowData.ExpiryDate)}
         </div>
       </div>
     );

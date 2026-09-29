@@ -37,6 +37,7 @@ import EditCommissionPopup from "../EditCommission/EditCommissionPopup";
 import ViewCommissionPopup from "../ViewCommission/ViewCommissionPopup";
 import { Card } from "primereact/card";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const AddCommission = () => {
   const { t } = useTranslation();
@@ -92,7 +93,7 @@ const AddCommission = () => {
       errors.product = t("validation.fieldRequired");
     }
     if (!values.selectCover) {
-      errors.selectCover = t("validation.fieldCodeRequired");
+      errors.selectCover = t("validation.fieldRequired");
     }
     if (!values.maxRate) {
       errors.maxRate = t("validation.fieldRequired");
@@ -460,7 +461,7 @@ const AddCommission = () => {
                       e.value.toISOString().split("T")[0]
                     );
                   }}
-                  dateFormat="yy-mm-dd"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                   minDate={minDate}
                   className="calender_field_claim"
@@ -496,7 +497,7 @@ const AddCommission = () => {
                       e.value.toISOString().split("T")[0]
                     );
                   }}
-                  dateFormat="yy-mm-dd"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                   minDate={minDate}
                   className="calender_field_claim"
@@ -560,12 +561,12 @@ const AddCommission = () => {
             Add Level Wise Commission Sharing
           </div>
           <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture ">
-            <div className="add__icon__view__petty" onClick={handlePolicy}>
+            <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
               <div className="add__icon__petty">
                 <SvgAdd color={"#fff"} />
               </div>
               <div className="add__text__petty">{t("generalMasters.add")}</div>
-            </div>
+            </button>
           </div>
         </div>
         <div className="col-12 card">

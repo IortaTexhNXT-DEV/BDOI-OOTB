@@ -30,7 +30,7 @@ export const roleMenuPermissions = {
     "product configurator": ["Dashboard", "Product Templates"],
     operations: OPERATIONS_ALL,
     commission: ["Commission Dashboard"],
-    reports: ["Operational Reports"],
+    reports: ["All Reports", "Operational Reports"],
   },
   underwriting: {
     dashboard: ["Underwriting Dashboard", "Executive Dashboard"],
@@ -54,19 +54,19 @@ export const roleMenuPermissions = {
       "Reconciliation",
       "Analytics",
     ],
-    reports: ["Operational Reports"],
+    reports: ["All Reports", "Operational Reports"],
   },
   "customer-services": {
     dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
     operations: OPERATIONS_ALL,
-    reports: ["Operational Reports"],
+    reports: ["All Reports", "Operational Reports"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],
     operations: ["Home", "Clients", "Policy", "Claims"],
     reinsurance: ["Claims Recovery"],
-    reports: ["Operational Reports"],
+    reports: ["All Reports", "Operational Reports"],
   },
   finance: {
     dashboard: ["Executive Dashboard"],
@@ -84,19 +84,25 @@ export const roleMenuPermissions = {
       "Correction JV",
       "Reversal JV",
       "Remittance",
+      // incentives are calculated, approved and paid by finance (D102)
       "Incentive",
     ],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
+    // reinsurer statement reconciliation is a finance task (D103)
     reinsurance: ["Reconciliation"],
-    reports: ["Financial Reports", "Operational Reports"],
+    // the production, claims and renewal registers are not finance reports (report catalogue roles)
+    reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission"],
   },
   // Users, roles and access only; no business screens. Nested grants use "Group > Item".
   "user-access-admin": {
     master: ["Generals > User Management", "Audit Trail"],
   },
+  // Agents renew their own expiring policies (Renewal Policy -> renewal quote wizard, record-scoped on the server). The
+  // renewals workspace (batches, queue, analytics, at-risk, negotiations, lapse, performance) needs the renewals
+  // permission, which the agent role does not hold (D100).
   agent: {
     dashboard: ["Agent Dashboard"],
-    operations: ["Home", "Leads/Prospects", "Clients", "Quotation", "Policy", "Claims", "Renewals"],
+    operations: ["Home", "Leads/Prospects", "Clients", "Quotation", "Policy", "Claims", "Renewals > Renewal Policy"],
     commission: ["Commission Dashboard"],
   },
 };

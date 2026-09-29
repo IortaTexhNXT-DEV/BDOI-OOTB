@@ -21,6 +21,7 @@ import { Badge } from "primereact/badge";
 import { ProgressSpinner } from "primereact/progressspinner";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const QuoteGeneration = () => {
@@ -387,7 +388,7 @@ const QuoteGeneration = () => {
           </div>
           <div className="summary-item">
             <label>Expiry Date:</label>
-            <span>{new Date(policyData?.expiryDate).toLocaleDateString()}</span>
+            <span>{formatAppDate(policyData?.expiryDate)}</span>
           </div>
         </div>
       </div>
@@ -735,7 +736,7 @@ const QuoteGeneration = () => {
                 <Calendar
                   value={formData.validUntil}
                   onChange={(e) => setFormData({...formData, validUntil: e.value})}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   minDate={new Date()}
                 />
               </div>
@@ -924,7 +925,7 @@ const QuoteGeneration = () => {
             {quoteData && (
               <div className="quote-info">
                 <div><strong>Quote Number:</strong> {quoteData.quoteNumber}</div>
-                <div><strong>Valid Until:</strong> {formData.validUntil?.toLocaleDateString()}</div>
+                <div><strong>Valid Until:</strong> {formatAppDate(formData.validUntil)}</div>
               </div>
             )}
           </div>

@@ -22,6 +22,7 @@ import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../components/InputField";
 import incentiveService from "../../../services/incentiveService";
 import { showError, showSuccess } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 /** Last `count` calendar months as { label: "September 2026", value: "2026-09" }. */
@@ -265,7 +266,7 @@ const Calculations = () => {
   };
 
   const dateBodyTemplate = (rowData) => {
-    return new Date(rowData.calculationDate).toLocaleDateString();
+    return formatAppDate(rowData.calculationDate);
   };
 
   const amountBodyTemplate = (rowData) => {
@@ -565,7 +566,7 @@ const Calculations = () => {
                   </div>
                   <div className="review-item">
                     <label>Calculation Date:</label>
-                    <span>{new Date().toLocaleDateString()}</span>
+                    <span>{formatAppDate(new Date())}</span>
                   </div>
                 </div>
                 <div className="warning-note">

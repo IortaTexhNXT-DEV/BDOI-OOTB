@@ -13,6 +13,7 @@ import {
   GET_JOURNAL_VOUCHER_HISTORY,
   GET_JOURNAL_VOUCHER_DETAILS,
 } from "../../../redux/actionTypes";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 export const journalVoucherMiddleware = createAsyncThunk(
   GET_JOURNAL_VOUCHER,
@@ -261,11 +262,7 @@ export const getJournalVoucherHistory = createAsyncThunk(
           try {
             const dateObj = new Date(dateValue);
             if (!isNaN(dateObj.getTime())) {
-              formattedDate = dateObj.toLocaleDateString("en-US", {
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-              });
+              formattedDate = formatAppDate(dateObj);
             } else {
               formattedDate = dateValue;
             }

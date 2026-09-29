@@ -261,6 +261,7 @@ export async function createClaim(input, user, files) {
   if (problems.length) throw unprocessable(`Claim not accepted: ${problems.map((p) => p.message).join('; ')}`, problems);
 
   const reported = (await toDate(input.reportedDate)) || await today();
+  assertReportedAfterLoss(lossDate, reported);
   const sla = Number(await getSetting('claims.sla_days', 20));
   const driver = parseJsonField(input.driverDetails, {});
   if (input.driverName) driver.driverName = input.driverName;
@@ -295,6 +296,13 @@ export async function createClaim(input, user, files) {
   return getClaim(id);
 }
 
+/** A claim cannot be reported before the loss happened (D107). Dates are ISO yyyy-mm-dd strings. */
+function assertReportedAfterLoss(lossDate, reportedDate) {
+  if (lossDate && reportedDate && String(reportedDate) < String(lossDate)) {
+    throw badRequest('Validation failed', [{ path: 'reportedDate', message: `Reported date ${reportedDate} cannot be before the date of loss ${lossDate}` }]);
+  }
+}
+
 const EDITABLE = {
   insuranceCompanyClaimNumber: 'insurer_claim_number', timeOfIncident: 'loss_time', addressOfIncident: 'loss_address',
   cityOfIncident: 'loss_city', provinceOfIncident: 'loss_province', typeOfIncident: 'loss_type', description: 'description',
@@ -323,6 +331,11 @@ export async function updateClaim(id, input, user, files) {
       throw unprocessable(`Date of loss ${lossDate} is outside the policy period ${before.inception_date} to ${before.expiry_date}`);
     }
     set('loss_date', lossDate, 'dateOfIncident');
+  }
+  if (input.reportedDate || input.dateOfIncident) {
+    const loss = input.dateOfIncident ? await toDate(input.dateOfIncident) : before.loss_date;
+    const reported = input.reportedDate ? await toDate(input.reportedDate) : before.reported_date;
+    assertReportedAfterLoss(loss, reported);
   }
   if (input.handlerUserId) set('handler_user_id', await pickHandler(input.handlerUserId), 'handlerUserId');
   const driver = { ...(before.driver || {}), ...parseJsonField(input.driverDetails, {}) };

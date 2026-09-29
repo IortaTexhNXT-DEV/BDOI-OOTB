@@ -25,6 +25,7 @@ import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import { useDispatch, useSelector } from "react-redux";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Dialog } from "primereact/dialog";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const initialValues = {
   AccountNumber: "",
@@ -356,7 +357,7 @@ function ViewAccountDetail() {
               className="fieldvalue_container"
               body={(rowData) => rowData.CustomerCode?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.VoucheDate)}
               field="VoucheDate"
               header="Stats"
               headerStyle={headerStyle}

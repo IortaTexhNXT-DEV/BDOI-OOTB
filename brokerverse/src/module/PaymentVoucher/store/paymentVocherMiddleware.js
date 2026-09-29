@@ -12,6 +12,7 @@ import {
 } from "../../../redux/actionTypes";
 import disbursementService from "../../../services/disbursementService";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 export const paymentVocherMiddleware = createAsyncThunk(
   GET_PAYMENT_VOUCHER,
@@ -37,14 +38,7 @@ export const paymentVocherMiddleware = createAsyncThunk(
           CustomerCode: disbursement.customerCode,
           Insurer: disbursement.insurerName,
           PolicyNumber: disbursement.policyNumber,
-          VoucheDate: new Date(disbursement.voucherDate).toLocaleDateString(
-            "en-US",
-            {
-              month: "2-digit",
-              day: "2-digit",
-              year: "numeric",
-            }
-          ),
+          VoucheDate: formatAppDate(disbursement.voucherDate, { empty: "" }),
           Amount: formatCurrency(disbursement.amount),
           action: disbursement.disbursementId,
           payeeType: disbursement.payeeType,

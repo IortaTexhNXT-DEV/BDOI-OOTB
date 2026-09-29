@@ -10,6 +10,7 @@ import { Message } from "primereact/message";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { getClaimDetails } from "../../claimsModule/adjusterSubmission/store/adjusterSubmissionMiddleWare";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const ClaimDetail = () => {
@@ -41,11 +42,7 @@ const ClaimDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return t("policyDetail.nA");
     try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      return formatAppDate(dateString, { empty: t("policyDetail.nA") });
     } catch {
       return "N/A";
     }
@@ -54,13 +51,7 @@ const ClaimDetail = () => {
   const formatDateTime = (dateString) => {
     if (!dateString) return t("policyDetail.nA");
     try {
-      return new Date(dateString).toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return formatAppDate(dateString, { withTime: true, empty: "N/A" });
     } catch {
       return "N/A";
     }

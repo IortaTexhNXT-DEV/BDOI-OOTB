@@ -27,6 +27,7 @@ import {
 import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 function SpecificVoucher() {
   const { t } = useTranslation();
@@ -449,7 +450,7 @@ function SpecificVoucher() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.VoucheDate)}
             field="VoucheDate"
             header={t("paymentVoucher.lcAmount")}
             style={{ width: "20rem" }}

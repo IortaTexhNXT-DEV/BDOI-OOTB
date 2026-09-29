@@ -3370,7 +3370,7 @@
     }
   ]
 }"
-158,Incentive,POST,/api/incentive/programs,"Create a program (metric, types and frequencies validated against configuration)",Master > Incentive Programs > Add Program,Bearer JWT,write:incentive,"{
+158,Incentive,POST,/api/incentive/programs,"Create a program (metric, types and frequencies validated against configuration)",Master > Incentive Programs > Add Program,Bearer JWT,write:masters,"{
   ""programCode"": ""INC-2026-010"",
   ""programName"": ""Q3 Premium Achievers"",
   ""programType"": ""Target Based"",
@@ -3449,7 +3449,7 @@
     ]
   }
 }"
-160,Incentive,PUT,/api/incentive/programs/:id,Update a program (partial; also used to toggle status),Master > Incentive Programs > Edit,Bearer JWT,write:incentive,"{
+160,Incentive,PUT,/api/incentive/programs/:id,Update a program (partial; also used to toggle status),Master > Incentive Programs > Edit,Bearer JWT,write:masters,"{
   ""status"": ""Inactive""
 }","{
   ""success"": true,
@@ -3479,7 +3479,7 @@
     ]
   }
 }"
-161,Incentive,DELETE,/api/incentive/programs/:id,Delete a program (soft; blocked while calculations are pending or approved),Master > Incentive Programs,Bearer JWT,write:incentive,,"{
+161,Incentive,DELETE,/api/incentive/programs/:id,Delete a program (soft; blocked while calculations are pending or approved),Master > Incentive Programs,Bearer JWT,write:masters,,"{
   ""success"": true,
   ""message"": ""Program deleted successfully""
 }"
@@ -4875,7 +4875,7 @@
     }
   ]
 }"
-242,Policy renewals,GET,/api/policy-renewals,"Renewals (clientId, policyId, status, search, page, limit)",Clients > Renewals tab; renewal quote wizard,Bearer JWT,read:renewals,Query: ?clientId=cl_1&page=1&limit=50,"{
+242,Policy renewals,GET,/api/policy-renewals,"Renewals (clientId, policyId, status, search, page, limit)",Clients > Renewals tab; renewal quote wizard,Bearer JWT,"read:renewals, write:renewals, write:quotations",Query: ?clientId=cl_1&page=1&limit=50,"{
   ""success"": true,
   ""data"": [
     {
@@ -4906,7 +4906,7 @@
     ""totalPages"": 1
   }
 }"
-243,Policy renewals,GET,/api/policy-renewals/:renewalId,"Renewal with quotes, notices and activity timeline",Operations > Renewals,Bearer JWT,read:renewals,,"{
+243,Policy renewals,GET,/api/policy-renewals/:renewalId,"Renewal with quotes, notices and activity timeline",Operations > Renewals,Bearer JWT,"read:renewals, write:renewals, write:quotations",,"{
   ""success"": true,
   ""data"": {
     ""id"": ""rnw_1"",
@@ -4932,7 +4932,7 @@
     ""activities"": []
   }
 }"
-244,Policy renewals,PUT,/api/policy-renewals/:renewalId,"Update the renewal wizard data (coverage, accessories, order summary, dates)",Operations > Policy > Renew (coverage details),Bearer JWT,write:renewals,"{
+244,Policy renewals,PUT,/api/policy-renewals/:renewalId,"Update the renewal wizard data (coverage, accessories, order summary, dates)",Operations > Policy > Renew (coverage details),Bearer JWT,"write:renewals, write:quotations","{
   ""coverageDetails"": {
     ""lossAndDamageCoverage"": ""900000""
   },
@@ -5113,7 +5113,7 @@
     ""policies"": []
   }
 }"
-257,Policy renewals,GET,/api/policy-renewals/policies/:policyId/prefill,"Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)","Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)",Bearer JWT,read:renewals,,"{
+257,Policy renewals,GET,/api/policy-renewals/policies/:policyId/prefill,"Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)","Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)",Bearer JWT,"read:renewals, write:renewals, write:quotations",,"{
   ""success"": true,
   ""data"": {
     ""policyId"": ""pol_1"",
@@ -5135,7 +5135,7 @@
     ""source"": ""policy""
   }
 }"
-258,Policy renewals,POST,/api/policy-renewals/policies/:policyId/quotation,"Renewal wizard ""Completed Quote"": save the wizard data and create (or update) the renewal quotation linked to the expiring policy",Operations > Renewals > Renewal Policy > Renewal > Order summary,Bearer JWT,write:renewals,"{
+258,Policy renewals,POST,/api/policy-renewals/policies/:policyId/quotation,"Renewal wizard ""Completed Quote"": save the wizard data and create (or update) the renewal quotation linked to the expiring policy",Operations > Renewals > Renewal Policy > Renewal > Order summary,Bearer JWT,"write:renewals, write:quotations","{
   ""coverageDetails"": {
     ""lossAndDamageCoverage"": ""850000"",
     ""lossAndDamageCoverageRate"": ""1.6""
@@ -5181,7 +5181,7 @@
     }
   }
 }"
-259,Policy renewals,POST,/api/policy-renewals/policies/:policyId/renewals,Create (or update the open) renewal of a policy with the wizard data,"Operations > Policy > Renew (coverage details, order summary)",Bearer JWT,write:renewals,"{
+259,Policy renewals,POST,/api/policy-renewals/policies/:policyId/renewals,Create (or update the open) renewal of a policy with the wizard data,"Operations > Policy > Renew (coverage details, order summary)",Bearer JWT,"write:renewals, write:quotations","{
   ""coverageDetails"": {
     ""lossAndDamageCoverage"": ""850000"",
     ""bodilyInjury"": ""200000""
@@ -7458,7 +7458,7 @@
     ""status"": ""Processing""
   }
 }"
-395,Reinsurance,POST,/api/reinsurance/exceptions,Log a reconciliation exception,Reinsurance > Reconciliation,Bearer JWT,write:reinsurance,"{
+395,Reinsurance,POST,/api/reinsurance/exceptions,Log a reconciliation exception,Reinsurance > Reconciliation,Bearer JWT,"write:reinsurance, write:remittance","{
   ""type"": ""Missing Policy"",
   ""description"": ""Policy not in reinsurer statement"",
   ""amount"": 45000
@@ -7468,7 +7468,7 @@
     ""status"": ""Under Investigation""
   }
 }"
-396,Reinsurance,POST,/api/reinsurance/exceptions/:id/resolve,Resolve a reconciliation exception,Reinsurance > Reconciliation,Bearer JWT,write:reinsurance,"{
+396,Reinsurance,POST,/api/reinsurance/exceptions/:id/resolve,Resolve a reconciliation exception,Reinsurance > Reconciliation,Bearer JWT,"write:reinsurance, write:remittance","{
   ""resolution"": ""Added to October bordereau""
 }","{
   ""success"": true,
@@ -7476,7 +7476,7 @@
     ""status"": ""Resolved""
   }
 }"
-397,Reinsurance,GET,/api/reinsurance/reconciliation,Statement reconciliations (pending / matched) and exceptions,Reinsurance > Reconciliation,Bearer JWT,"read:reinsurance, write:reinsurance",,"{
+397,Reinsurance,GET,/api/reinsurance/reconciliation,Statement reconciliations (pending / matched) and exceptions,Reinsurance > Reconciliation,Bearer JWT,"read:reinsurance, write:reinsurance, read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""pending"": [
@@ -7496,7 +7496,7 @@
     ""exceptions"": []
   }
 }"
-398,Reinsurance,POST,/api/reinsurance/reconciliation,Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration),Reinsurance > Reconciliation,Bearer JWT,write:reinsurance,"{
+398,Reinsurance,POST,/api/reinsurance/reconciliation,Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration),Reinsurance > Reconciliation,Bearer JWT,"write:reinsurance, write:remittance","{
   ""type"": ""Premium"",
   ""reinsurerId"": ""RE001"",
   ""period"": ""2026-09"",
@@ -7508,7 +7508,7 @@
     ""variance"": 20000
   }
 }"
-399,Reinsurance,POST,/api/reinsurance/reconciliation/:id/resolve,Resolve a reconciliation variance,Reinsurance > Reconciliation,Bearer JWT,write:reinsurance,"{
+399,Reinsurance,POST,/api/reinsurance/reconciliation/:id/resolve,Resolve a reconciliation variance,Reinsurance > Reconciliation,Bearer JWT,"write:reinsurance, write:remittance","{
   ""resolution"": ""Timing difference; booked in October""
 }","{
   ""success"": true,
@@ -7516,7 +7516,7 @@
     ""status"": ""Resolved""
   }
 }"
-400,Reinsurance,GET,/api/reinsurance/reinsurers,Reinsurers with security rating and whether they meet the minimum,Master > Reinsurance Treaty,Bearer JWT,"read:reinsurance, write:reinsurance",Query: ?status=Active,"{
+400,Reinsurance,GET,/api/reinsurance/reinsurers,Reinsurers with security rating and whether they meet the minimum,Master > Reinsurance Treaty,Bearer JWT,"read:reinsurance, write:reinsurance, read:remittance, write:remittance",Query: ?status=Active,"{
   ""success"": true,
   ""data"": [
     {
@@ -8019,7 +8019,17 @@
     ""status"": ""Rejected""
   }
 }"
-428,Remittance,GET,/api/remittance/approvals/delegations,Approval delegations,Accounts > Remittance > Approval > Delegation,Bearer JWT,"read:remittance, write:remittance",,"{
+428,Remittance,GET,/api/remittance/approvals/approvers,"Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",Accounts > Remittance > Approval > Delegate,Bearer JWT,"read:remittance, write:remittance",,"{
+  ""success"": true,
+  ""data"": [
+    {
+      ""userId"": ""usr_1"",
+      ""username"": ""fe.approver"",
+      ""displayName"": ""Fe Approver""
+    }
+  ]
+}"
+429,Remittance,GET,/api/remittance/approvals/delegations,Approval delegations,Accounts > Remittance > Approval > Delegation,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8033,7 +8043,7 @@
     }
   ]
 }"
-429,Remittance,POST,/api/remittance/approvals/delegations,Delegate approval authority for a period,Accounts > Remittance > Approval > Delegation,Bearer JWT,write:remittance,"{
+430,Remittance,POST,/api/remittance/approvals/delegations,Delegate approval authority for a period,Accounts > Remittance > Approval > Delegation,Bearer JWT,write:remittance,"{
   ""delegateTo"": ""finance.head"",
   ""fromDate"": ""2026-10-01"",
   ""toDate"": ""2026-10-07"",
@@ -8049,7 +8059,7 @@
     ""status"": ""Active""
   }
 }"
-430,Remittance,GET,/api/remittance/approvals/history,Approval actions (approved / rejected / delegated),Accounts > Remittance > Approval > History,Bearer JWT,"read:remittance, write:remittance",,"{
+431,Remittance,GET,/api/remittance/approvals/history,Approval actions (approved / rejected / delegated),Accounts > Remittance > Approval > History,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8062,7 +8072,7 @@
     }
   ]
 }"
-431,Remittance,GET,/api/remittance/automated/candidates,Remittances the active automated configurations would generate (unremitted policies per insurer),Accounts > Remittance > Automated Processing,Bearer JWT,"read:remittance, write:remittance",Query: ?configCode=ARM-001,"{
+432,Remittance,GET,/api/remittance/automated/candidates,Remittances the active automated configurations would generate (unremitted policies per insurer),Accounts > Remittance > Automated Processing,Bearer JWT,"read:remittance, write:remittance",Query: ?configCode=ARM-001,"{
   ""success"": true,
   ""data"": [
     {
@@ -8076,7 +8086,7 @@
     }
   ]
 }"
-432,Remittance,POST,/api/remittance/automated/execute,Generate draft remittances now (all ready candidates or the selected ids),Accounts > Remittance > Automated Processing > Execute,Bearer JWT,write:remittance,"{
+433,Remittance,POST,/api/remittance/automated/execute,Generate draft remittances now (all ready candidates or the selected ids),Accounts > Remittance > Automated Processing > Execute,Bearer JWT,write:remittance,"{
   ""configCode"": ""ARM-001"",
   ""ids"": [
     ""ARM-001:MALAYAN""
@@ -8105,7 +8115,7 @@
     ""totalAmount"": 51000
   }
 }"
-433,Remittance,GET,/api/remittance/automated/history,Automated remittance execution history,Accounts > Remittance > Automated Processing,Bearer JWT,"read:remittance, write:remittance",,"{
+434,Remittance,GET,/api/remittance/automated/history,Automated remittance execution history,Accounts > Remittance > Automated Processing,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8118,7 +8128,7 @@
     }
   ]
 }"
-434,Remittance,POST,/api/remittance/bills/:id/send,Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer),Accounts > Remittance > Agency Bill Processing,Bearer JWT,write:remittance,"{
+435,Remittance,POST,/api/remittance/bills/:id/send,Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer),Accounts > Remittance > Agency Bill Processing,Bearer JWT,write:remittance,"{
   ""deliveryMethod"": [
     ""email""
   ],
@@ -8129,7 +8139,7 @@
     ""billStatus"": ""Sent""
   }
 }"
-435,Remittance,GET,/api/remittance/bulk,Bulk uploads (processing history),Accounts > Remittance > Bulk Processing,Bearer JWT,"read:remittance, write:remittance",,"{
+436,Remittance,GET,/api/remittance/bulk,Bulk uploads (processing history),Accounts > Remittance > Bulk Processing,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8144,7 +8154,7 @@
     }
   ]
 }"
-436,Remittance,POST,/api/remittance/bulk/:id/process,Create draft remittances from the valid rows of an upload,Accounts > Remittance > Bulk Processing > Process,Bearer JWT,write:remittance,,"{
+437,Remittance,POST,/api/remittance/bulk/:id/process,Create draft remittances from the valid rows of an upload,Accounts > Remittance > Bulk Processing > Process,Bearer JWT,write:remittance,,"{
   ""success"": true,
   ""data"": {
     ""upload"": {
@@ -8168,7 +8178,7 @@
     ]
   }
 }"
-437,Remittance,POST,/api/remittance/bulk/upload,Upload a remittance file (multipart file + configCode); validates against the bulk-processing master,Accounts > Remittance > Bulk Processing > Upload / Validate,Bearer JWT,write:remittance,"{
+438,Remittance,POST,/api/remittance/bulk/upload,Upload a remittance file (multipart file + configCode); validates against the bulk-processing master,Accounts > Remittance > Bulk Processing > Upload / Validate,Bearer JWT,write:remittance,"{
   ""file"": ""(CSV: PolicyNo,Premium,Commission)"",
   ""configCode"": ""BFM-001""
 }","{
@@ -8187,7 +8197,7 @@
     ""status"": ""Validated""
   }
 }"
-438,Remittance,GET,/api/remittance/direct-bill,"Commission debit notes (insurerCode, status code or label, from / to, search, paging)",Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Open%2CPartially%20Collected&insurerCode=MALAYAN&page=1&perPage=20,"{
+439,Remittance,GET,/api/remittance/direct-bill,"Commission debit notes (insurerCode, status code or label, from / to, search, paging)",Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Open%2CPartially%20Collected&insurerCode=MALAYAN&page=1&perPage=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -8216,7 +8226,7 @@
     }
   ]
 }"
-439,Remittance,POST,/api/remittance/direct-bill,"Raise a commission debit note to an insurer for unbilled direct-bill commission (itemIds / policyIds, else all of the period); submit=true sends it for approval",Accounts > Remittance > Direct Bill Processing > Raise Debit Note,Bearer JWT,write:remittance,"{
+440,Remittance,POST,/api/remittance/direct-bill,"Raise a commission debit note to an insurer for unbilled direct-bill commission (itemIds / policyIds, else all of the period); submit=true sends it for approval",Accounts > Remittance > Direct Bill Processing > Raise Debit Note,Bearer JWT,write:remittance,"{
   ""insurerCode"": ""MALAYAN"",
   ""periodFrom"": ""2026-09-01"",
   ""periodTo"": ""2026-09-30"",
@@ -8254,7 +8264,7 @@
     ""lines"": []
   }
 }"
-440,Remittance,GET,/api/remittance/direct-bill/:id,One commission debit note with its policy lines and collections,Accounts > Remittance > Direct Bill Processing > Debit Notes > View,Bearer JWT,"read:remittance, write:remittance",,"{
+441,Remittance,GET,/api/remittance/direct-bill/:id,One commission debit note with its policy lines and collections,Accounts > Remittance > Direct Bill Processing > Debit Notes > View,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""id"": ""dn_1"",
@@ -8283,7 +8293,7 @@
     ""collections"": []
   }
 }"
-441,Remittance,POST,/api/remittance/direct-bill/:id/approve,Approve (opens it for sending and collection) a debit note; maker-checker: not the maker,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+442,Remittance,POST,/api/remittance/direct-bill/:id/approve,Approve (opens it for sending and collection) a debit note; maker-checker: not the maker,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
   ""remarks"": ""Checked against the placements""
 }","{
   ""success"": true,
@@ -8312,7 +8322,7 @@
     ""currency"": ""PHP""
   }
 }"
-442,Remittance,POST,/api/remittance/direct-bill/:id/cancel,Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+443,Remittance,POST,/api/remittance/direct-bill/:id/cancel,Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
   ""reason"": ""Raised to the wrong insurer""
 }","{
   ""success"": true,
@@ -8341,7 +8351,7 @@
     ""currency"": ""PHP""
   }
 }"
-443,Remittance,POST,/api/remittance/direct-bill/:id/collections,Record a payment from the insurer (partial allowed): Dr Cash in Bank + Dr Creditable Withholding Tax / Cr Commission Receivable,Accounts > Remittance > Direct Bill Processing > Debit Notes > Collect,Bearer JWT,write:remittance,"{
+444,Remittance,POST,/api/remittance/direct-bill/:id/collections,Record a payment from the insurer (partial allowed): Dr Cash in Bank + Dr Creditable Withholding Tax / Cr Commission Receivable,Accounts > Remittance > Direct Bill Processing > Debit Notes > Collect,Bearer JWT,write:remittance,"{
   ""receivedDate"": ""2026-10-15"",
   ""cashAmount"": 6885,
   ""ewtAmount"": 675,
@@ -8378,7 +8388,7 @@
     }
   }
 }"
-444,Remittance,POST,/api/remittance/direct-bill/:id/collections/:collectionId/reverse,Reverse a collection entered in error (reversing journal; balance restored),Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+445,Remittance,POST,/api/remittance/direct-bill/:id/collections/:collectionId/reverse,Reverse a collection entered in error (reversing journal; balance restored),Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
   ""reason"": ""Keyed against the wrong debit note""
 }","{
   ""success"": true,
@@ -8407,8 +8417,8 @@
     ""currency"": ""PHP""
   }
 }"
-445,Remittance,GET,/api/remittance/direct-bill/:id/pdf,"Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)",Accounts > Remittance > Direct Bill Processing > Debit Notes > Print,Bearer JWT,"read:remittance, write:remittance",Query: ?download=1,application/pdf
-446,Remittance,POST,/api/remittance/direct-bill/:id/reject,Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+446,Remittance,GET,/api/remittance/direct-bill/:id/pdf,"Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)",Accounts > Remittance > Direct Bill Processing > Debit Notes > Print,Bearer JWT,"read:remittance, write:remittance",Query: ?download=1,application/pdf
+447,Remittance,POST,/api/remittance/direct-bill/:id/reject,Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
   ""reason"": ""Wrong period""
 }","{
   ""success"": true,
@@ -8437,7 +8447,7 @@
     ""currency"": ""PHP""
   }
 }"
-447,Remittance,POST,/api/remittance/direct-bill/:id/send,E-mail an approved debit note to the insurer (direct_bill.email_subject / email_body),Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+448,Remittance,POST,/api/remittance/direct-bill/:id/send,E-mail an approved debit note to the insurer (direct_bill.email_subject / email_body),Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
   ""email"": ""billing@malayan.example""
 }","{
   ""success"": true,
@@ -8467,7 +8477,7 @@
     ""sentTo"": ""billing@malayan.example""
   }
 }"
-448,Remittance,POST,/api/remittance/direct-bill/:id/submit,Submit a draft debit note for approval,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,,"{
+449,Remittance,POST,/api/remittance/direct-bill/:id/submit,Submit a draft debit note for approval,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,,"{
   ""success"": true,
   ""data"": {
     ""id"": ""dn_1"",
@@ -8494,7 +8504,7 @@
     ""currency"": ""PHP""
   }
 }"
-449,Remittance,POST,/api/remittance/direct-bill/billing-mode,"Change the billing mode of an issued policy (broker billed or direct bill): refused once premium is collected or remitted, or the commission is on a debit note",Accounts > Remittance > Direct Bill Processing > Billing Mode,Bearer JWT,write:remittance,"{
+450,Remittance,POST,/api/remittance/direct-bill/billing-mode,"Change the billing mode of an issued policy (broker billed or direct bill): refused once premium is collected or remitted, or the commission is on a debit note",Accounts > Remittance > Direct Bill Processing > Billing Mode,Bearer JWT,write:remittance,"{
   ""policyNumber"": ""POL-2026-00001"",
   ""billingMode"": ""direct"",
   ""reason"": ""Client pays Malayan directly""
@@ -8513,7 +8523,7 @@
     }
   }
 }"
-450,Remittance,GET,/api/remittance/direct-bill/policies,"Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT",Accounts > Remittance > Direct Bill Processing,Bearer JWT,"read:remittance, write:remittance",Query: ?insurerCode=MALAYAN&from=2026-09-01&to=2026-09-30&productLine=MOTOR,"{
+451,Remittance,GET,/api/remittance/direct-bill/policies,"Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT",Accounts > Remittance > Direct Bill Processing,Bearer JWT,"read:remittance, write:remittance",Query: ?insurerCode=MALAYAN&from=2026-09-01&to=2026-09-30&productLine=MOTOR,"{
   ""success"": true,
   ""data"": [
     {
@@ -8548,7 +8558,7 @@
     ""ewtRate"": 0.1
   }
 }"
-451,Remittance,GET,/api/remittance/direct-bill/summary,"Commission receivable from insurers on direct-bill policies: unbilled, billed outstanding, overdue, notes pending approval",Accounts > Remittance > Direct Bill Processing,Bearer JWT,"read:remittance, write:remittance",,"{
+452,Remittance,GET,/api/remittance/direct-bill/summary,"Commission receivable from insurers on direct-bill policies: unbilled, billed outstanding, overdue, notes pending approval",Accounts > Remittance > Direct Bill Processing,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""unbilled"": 5040,
@@ -8558,7 +8568,7 @@
     ""pendingApproval"": 1
   }
 }"
-452,Remittance,GET,/api/remittance/exceptions,"Remittance exceptions (status: Open, In Progress, Escalated, Resolved)",Accounts > Remittance > Exceptions,Bearer JWT,"read:remittance, write:remittance",,"{
+453,Remittance,GET,/api/remittance/exceptions,"Remittance exceptions (status: Open, In Progress, Escalated, Resolved)",Accounts > Remittance > Exceptions,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8574,7 +8584,7 @@
     }
   ]
 }"
-453,Remittance,POST,/api/remittance/exceptions,Log an exception (type from the exception master),Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
+454,Remittance,POST,/api/remittance/exceptions,Log an exception (type from the exception master),Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
   ""type"": ""Amount Mismatch"",
   ""severity"": ""High"",
   ""remittanceNo"": ""REM-2026-00001"",
@@ -8588,7 +8598,7 @@
     ""status"": ""Open""
   }
 }"
-454,Remittance,POST,/api/remittance/exceptions/:id/assign,Assign an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
+455,Remittance,POST,/api/remittance/exceptions/:id/assign,Assign an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
   ""assignedTo"": ""finance.officer""
 }","{
   ""success"": true,
@@ -8596,7 +8606,7 @@
     ""status"": ""In Progress""
   }
 }"
-455,Remittance,POST,/api/remittance/exceptions/:id/escalate,Escalate an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
+456,Remittance,POST,/api/remittance/exceptions/:id/escalate,Escalate an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
   ""reason"": ""Past SLA""
 }","{
   ""success"": true,
@@ -8604,7 +8614,7 @@
     ""status"": ""Escalated""
   }
 }"
-456,Remittance,POST,/api/remittance/exceptions/:id/resolve,Resolve an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
+457,Remittance,POST,/api/remittance/exceptions/:id/resolve,Resolve an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
   ""resolution"": ""Insurer credited the difference""
 }","{
   ""success"": true,
@@ -8612,7 +8622,7 @@
     ""status"": ""Resolved""
   }
 }"
-457,Remittance,GET,/api/remittance/history,"Transaction history across remittances, settlements, adjustments and transfers",Accounts > Remittance > History,Bearer JWT,"read:remittance, write:remittance",Query: ?search=REM&type=Settlement&page=1,"{
+458,Remittance,GET,/api/remittance/history,"Transaction history across remittances, settlements, adjustments and transfers",Accounts > Remittance > History,Bearer JWT,"read:remittance, write:remittance",Query: ?search=REM&type=Settlement&page=1,"{
   ""success"": true,
   ""data"": [
     {
@@ -8629,7 +8639,7 @@
     }
   ]
 }"
-458,Remittance,GET,/api/remittance/history/audit,Audit trail of remittance records (filter referenceNo),Accounts > Remittance > History > Audit Trail,Bearer JWT,"read:remittance, write:remittance",Query: ?referenceNo=REM-2026-00001,"{
+459,Remittance,GET,/api/remittance/history/audit,Audit trail of remittance records (filter referenceNo),Accounts > Remittance > History > Audit Trail,Bearer JWT,"read:remittance, write:remittance",Query: ?referenceNo=REM-2026-00001,"{
   ""success"": true,
   ""data"": [
     {
@@ -8642,7 +8652,7 @@
     }
   ]
 }"
-459,Remittance,GET,/api/remittance/history/system-logs,"Processing logs (executions, batches, uploads, statements, reports)",Accounts > Remittance > History > System Logs,Bearer JWT,"read:remittance, write:remittance",,"{
+460,Remittance,GET,/api/remittance/history/system-logs,"Processing logs (executions, batches, uploads, statements, reports)",Accounts > Remittance > History > System Logs,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8654,7 +8664,7 @@
     }
   ]
 }"
-460,Remittance,GET,/api/remittance/masters,Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type),Master > Finance > Remittance Master,Bearer JWT,"read:remittance, write:remittance, read:masters",Query: ?type=Automated&search=ARM,"{
+461,Remittance,GET,/api/remittance/masters,Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type),Master > Finance > Remittance Master,Bearer JWT,"read:remittance, write:remittance, read:masters",Query: ?type=Automated&search=ARM,"{
   ""success"": true,
   ""data"": [
     {
@@ -8668,7 +8678,7 @@
     }
   ]
 }"
-461,Remittance,POST,/api/remittance/notifications,Compose and send a notification (e-mails are queued through the outbox),Accounts > Remittance > Notifications > Compose,Bearer JWT,write:remittance,"{
+462,Remittance,POST,/api/remittance/notifications,Compose and send a notification (e-mails are queued through the outbox),Accounts > Remittance > Notifications > Compose,Bearer JWT,write:remittance,"{
   ""type"": ""Payment Reminder"",
   ""subject"": ""Payment due - POL-2026-00001"",
   ""content"": ""Your premium is due on 2026-10-15."",
@@ -8685,7 +8695,7 @@
     ""status"": ""Sent""
   }
 }"
-462,Remittance,GET,/api/remittance/notifications/inbox,Remittance notifications for the signed-in user,Accounts > Remittance > Notifications > Inbox,Bearer JWT,"read:remittance, write:remittance",,"{
+463,Remittance,GET,/api/remittance/notifications/inbox,Remittance notifications for the signed-in user,Accounts > Remittance > Notifications > Inbox,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8698,7 +8708,7 @@
     }
   ]
 }"
-463,Remittance,GET,/api/remittance/notifications/sent,Sent notifications,Accounts > Remittance > Notifications > Sent,Bearer JWT,"read:remittance, write:remittance",,"{
+464,Remittance,GET,/api/remittance/notifications/sent,Sent notifications,Accounts > Remittance > Notifications > Sent,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8712,7 +8722,7 @@
     }
   ]
 }"
-464,Remittance,GET,/api/remittance/notifications/templates,Notification templates (remittance-notification-template master),Accounts > Remittance > Notifications > Templates,Bearer JWT,"read:remittance, write:remittance",,"{
+465,Remittance,GET,/api/remittance/notifications/templates,Notification templates (remittance-notification-template master),Accounts > Remittance > Notifications > Templates,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8724,7 +8734,7 @@
     }
   ]
 }"
-465,Remittance,GET,/api/remittance/processing-history,Processing batches and automated executions,Accounts > Remittance > Automated Processing > History,Bearer JWT,"read:remittance, write:remittance",,"{
+466,Remittance,GET,/api/remittance/processing-history,Processing batches and automated executions,Accounts > Remittance > Automated Processing > History,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8738,7 +8748,7 @@
     }
   ]
 }"
-466,Remittance,GET,/api/remittance/reconciliation,"Bank vs system transactions, exceptions and match summary",Accounts > Remittance > Reconciliation,Bearer JWT,"read:remittance, write:remittance",,"{
+467,Remittance,GET,/api/remittance/reconciliation,"Bank vs system transactions, exceptions and match summary",Accounts > Remittance > Reconciliation,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""bankTransactions"": [
@@ -8768,7 +8778,7 @@
     }
   }
 }"
-467,Remittance,POST,/api/remittance/reconciliation/auto-match,Auto-match bank lines to approved remittances within the tolerance,Accounts > Remittance > Reconciliation > Auto Match,Bearer JWT,write:remittance,"{
+468,Remittance,POST,/api/remittance/reconciliation/auto-match,Auto-match bank lines to approved remittances within the tolerance,Accounts > Remittance > Reconciliation > Auto Match,Bearer JWT,write:remittance,"{
   ""tolerance"": 0.5
 }","{
   ""success"": true,
@@ -8779,7 +8789,7 @@
     ""successRate"": 60
   }
 }"
-468,Remittance,POST,/api/remittance/reconciliation/bank-transactions,Import bank statement lines,Accounts > Remittance > Reconciliation > Import,Bearer JWT,write:remittance,"{
+469,Remittance,POST,/api/remittance/reconciliation/bank-transactions,Import bank statement lines,Accounts > Remittance > Reconciliation > Import,Bearer JWT,write:remittance,"{
   ""transactions"": [
     {
       ""transDate"": ""2026-09-20"",
@@ -8797,7 +8807,7 @@
     }
   ]
 }"
-469,Remittance,POST,/api/remittance/reconciliation/match,Manually match a bank line to a remittance (difference beyond tolerance logs an exception),Accounts > Remittance > Reconciliation > Match,Bearer JWT,write:remittance,"{
+470,Remittance,POST,/api/remittance/reconciliation/match,Manually match a bank line to a remittance (difference beyond tolerance logs an exception),Accounts > Remittance > Reconciliation > Match,Bearer JWT,write:remittance,"{
   ""bankId"": ""rmi_7"",
   ""remittanceId"": ""REM-2026-00001""
 }","{
@@ -8807,7 +8817,7 @@
     ""difference"": 0
   }
 }"
-470,Remittance,POST,/api/remittance/reconciliation/unmatch,Undo a match,Accounts > Remittance > Reconciliation,Bearer JWT,write:remittance,"{
+471,Remittance,POST,/api/remittance/reconciliation/unmatch,Undo a match,Accounts > Remittance > Reconciliation,Bearer JWT,write:remittance,"{
   ""bankId"": ""rmi_7""
 }","{
   ""success"": true,
@@ -8815,7 +8825,7 @@
     ""matched"": 0
   }
 }"
-471,Remittance,GET,/api/remittance/remittances,"Remittances / bills (kind, status label or code, insurer, from, to, search, paging)",Accounts > Remittance > Tracking; Accounts > Remittance > Automated Processing,Bearer JWT,"read:remittance, write:remittance",Query: ?kind=direct-bill&status=Pending%20Approval&insurer=MALAYAN&from=2026-09-01&to=2026-09-30&page=1&perPage=20,"{
+472,Remittance,GET,/api/remittance/remittances,"Remittances / bills (kind, status label or code, insurer, from, to, search, paging)",Accounts > Remittance > Tracking; Accounts > Remittance > Automated Processing,Bearer JWT,"read:remittance, write:remittance",Query: ?kind=direct-bill&status=Pending%20Approval&insurer=MALAYAN&from=2026-09-01&to=2026-09-30&page=1&perPage=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -8843,7 +8853,7 @@
     ""netAmount"": 38250
   }
 }"
-472,Remittance,POST,/api/remittance/remittances,Create a draft remittance from policy lines,Accounts > Remittance > Tracking,Bearer JWT,write:remittance,"{
+473,Remittance,POST,/api/remittance/remittances,Create a draft remittance from policy lines,Accounts > Remittance > Tracking,Bearer JWT,write:remittance,"{
   ""kind"": ""direct-bill"",
   ""insurerCode"": ""MALAYAN"",
   ""period"": ""2026-09"",
@@ -8876,7 +8886,7 @@
     ""statusCode"": ""for-approval""
   }
 }"
-473,Remittance,GET,/api/remittance/remittances/:id,"Remittance details: insurer, policies, documents, activity log",Accounts > Remittance > Tracking > View,Bearer JWT,"read:remittance, write:remittance",,"{
+474,Remittance,GET,/api/remittance/remittances/:id,"Remittance details: insurer, policies, documents, activity log",Accounts > Remittance > Tracking > View,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""id"": ""rm_1"",
@@ -8905,7 +8915,7 @@
     ""activityLog"": []
   }
 }"
-474,Remittance,POST,/api/remittance/remittances/:id/approve,Approve a remittance (maker-checker: not the submitter),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
+475,Remittance,POST,/api/remittance/remittances/:id/approve,Approve a remittance (maker-checker: not the submitter),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
   ""comments"": ""Verified""
 }","{
   ""success"": true,
@@ -8913,7 +8923,7 @@
     ""status"": ""Approved""
   }
 }"
-475,Remittance,POST,/api/remittance/remittances/:id/reject,Reject a remittance (maker-checker: not the submitter),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
+476,Remittance,POST,/api/remittance/remittances/:id/reject,Reject a remittance (maker-checker: not the submitter),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
   ""comments"": ""Missing documents""
 }","{
   ""success"": true,
@@ -8921,7 +8931,7 @@
     ""status"": ""Rejected""
   }
 }"
-476,Remittance,POST,/api/remittance/remittances/:id/settle,Mark an approved remittance as settled (paid to the insurer),Accounts > Remittance > Settlement,Bearer JWT,write:remittance,"{
+477,Remittance,POST,/api/remittance/remittances/:id/settle,Mark an approved remittance as settled (paid to the insurer),Accounts > Remittance > Settlement,Bearer JWT,write:remittance,"{
   ""referenceNo"": ""PESONET-889201"",
   ""paymentMethod"": ""bank_transfer"",
   ""paymentDate"": ""2026-09-30""
@@ -8942,7 +8952,7 @@
     ""statusCode"": ""settled""
   }
 }"
-477,Remittance,POST,/api/remittance/remittances/process,Submit selected draft remittances for approval as one batch,Accounts > Remittance > Automated Processing > Process; Accounts > Remittance > Tracking > Process,Bearer JWT,write:remittance,"{
+478,Remittance,POST,/api/remittance/remittances/process,Submit selected draft remittances for approval as one batch,Accounts > Remittance > Automated Processing > Process; Accounts > Remittance > Tracking > Process,Bearer JWT,write:remittance,"{
   ""ids"": [
     ""rm_1""
   ]
@@ -8957,7 +8967,7 @@
     ""processedAt"": ""2026-09-28T00:00:00Z""
   }
 }"
-478,Remittance,POST,/api/remittance/remittances/validate,Validate selected remittances before processing,Accounts > Remittance > Automated Processing > Validate,Bearer JWT,"read:remittance, write:remittance","{
+479,Remittance,POST,/api/remittance/remittances/validate,Validate selected remittances before processing,Accounts > Remittance > Automated Processing > Validate,Bearer JWT,"read:remittance, write:remittance","{
   ""ids"": [
     ""rm_1""
   ]
@@ -8977,7 +8987,7 @@
     ]
   }
 }"
-479,Remittance,GET,/api/remittance/reports,Generated remittance reports,Accounts > Remittance > Reports,Bearer JWT,"read:remittance, write:remittance",,"{
+480,Remittance,GET,/api/remittance/reports,Generated remittance reports,Accounts > Remittance > Reports,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -8991,7 +9001,7 @@
     }
   ]
 }"
-480,Remittance,POST,/api/remittance/reports/generate,Generate a remittance report (CSV) from a template for a date range,Accounts > Remittance > Reports > Generate,Bearer JWT,write:remittance,"{
+481,Remittance,POST,/api/remittance/reports/generate,Generate a remittance report (CSV) from a template for a date range,Accounts > Remittance > Reports > Generate,Bearer JWT,write:remittance,"{
   ""templateCode"": ""RPT-001"",
   ""from"": ""2026-09-01"",
   ""to"": ""2026-09-28"",
@@ -9004,7 +9014,7 @@
     ""status"": ""Completed""
   }
 }"
-481,Remittance,GET,/api/remittance/reports/templates,Remittance report templates (remittance-report-template master),Accounts > Remittance > Reports,Bearer JWT,"read:remittance, write:remittance",,"{
+482,Remittance,GET,/api/remittance/reports/templates,Remittance report templates (remittance-report-template master),Accounts > Remittance > Reports,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -9016,7 +9026,7 @@
     }
   ]
 }"
-482,Remittance,GET,/api/remittance/schedules,Scheduled remittance jobs (remittance-schedule master) and upcoming runs,Accounts > Remittance > Scheduling,Bearer JWT,"read:remittance, write:remittance",,"{
+483,Remittance,GET,/api/remittance/schedules,Scheduled remittance jobs (remittance-schedule master) and upcoming runs,Accounts > Remittance > Scheduling,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""scheduledJobs"": [
@@ -9037,7 +9047,7 @@
     ]
   }
 }"
-483,Remittance,POST,/api/remittance/schedules,New schedule (stored in the remittance-schedule master),Accounts > Remittance > Scheduling > New Schedule,Bearer JWT,write:remittance,"{
+484,Remittance,POST,/api/remittance/schedules,New schedule (stored in the remittance-schedule master),Accounts > Remittance > Scheduling > New Schedule,Bearer JWT,write:remittance,"{
   ""code"": ""SCH-0003"",
   ""name"": ""Weekly Settlement - Pioneer"",
   ""frequency"": ""Weekly"",
@@ -9054,7 +9064,7 @@
     ""status"": ""Active""
   }
 }"
-484,Remittance,POST,/api/remittance/schedules/:id/run,Run a schedule now (executes its linked automated remittance),Accounts > Remittance > Scheduling > Run Now,Bearer JWT,write:remittance,,"{
+485,Remittance,POST,/api/remittance/schedules/:id/run,Run a schedule now (executes its linked automated remittance),Accounts > Remittance > Scheduling > Run Now,Bearer JWT,write:remittance,,"{
   ""success"": true,
   ""data"": {
     ""schedule"": {
@@ -9066,7 +9076,7 @@
     }
   }
 }"
-485,Remittance,PATCH,/api/remittance/schedules/:id/status,Pause / resume a schedule,Accounts > Remittance > Scheduling,Bearer JWT,write:remittance,"{
+486,Remittance,PATCH,/api/remittance/schedules/:id/status,Pause / resume a schedule,Accounts > Remittance > Scheduling,Bearer JWT,write:remittance,"{
   ""status"": ""Paused""
 }","{
   ""success"": true,
@@ -9074,7 +9084,7 @@
     ""status"": ""Inactive""
   }
 }"
-486,Remittance,GET,/api/remittance/settlements,Settlements (status filter),Accounts > Remittance > Settlement,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Pending%20Approval,"{
+487,Remittance,GET,/api/remittance/settlements,Settlements (status filter),Accounts > Remittance > Settlement,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Pending%20Approval,"{
   ""success"": true,
   ""data"": [
     {
@@ -9086,7 +9096,7 @@
     }
   ]
 }"
-487,Remittance,POST,/api/remittance/settlements,Save a settlement draft (submit=true also submits it for approval),Accounts > Remittance > Settlement > Save Draft / Submit,Bearer JWT,write:remittance,"{
+488,Remittance,POST,/api/remittance/settlements,Save a settlement draft (submit=true also submits it for approval),Accounts > Remittance > Settlement > Save Draft / Submit,Bearer JWT,write:remittance,"{
   ""insurerCode"": ""MALAYAN"",
   ""settlementType"": ""Regular"",
   ""settlementPeriod"": [
@@ -9109,13 +9119,13 @@
     ""netAmount"": 26000
   }
 }"
-488,Remittance,GET,/api/remittance/settlements/:id,One settlement with its policies and totals,Accounts > Remittance > Settlement,Bearer JWT,"read:remittance, write:remittance",,"{
+489,Remittance,GET,/api/remittance/settlements/:id,One settlement with its policies and totals,Accounts > Remittance > Settlement,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""settlementNo"": ""SET-2026-00001""
   }
 }"
-489,Remittance,PUT,/api/remittance/settlements/:id,Update a draft / rejected settlement,Accounts > Remittance > Settlement,Bearer JWT,write:remittance,"{
+490,Remittance,PUT,/api/remittance/settlements/:id,Update a draft / rejected settlement,Accounts > Remittance > Settlement,Bearer JWT,write:remittance,"{
   ""lineIds"": [
     1
   ],
@@ -9126,7 +9136,7 @@
     ""status"": ""Draft""
   }
 }"
-490,Remittance,POST,/api/remittance/settlements/:id/submit,Submit a settlement for approval,Accounts > Remittance > Settlement > Submit For Approval,Bearer JWT,write:remittance,"{
+491,Remittance,POST,/api/remittance/settlements/:id/submit,Submit a settlement for approval,Accounts > Remittance > Settlement > Submit For Approval,Bearer JWT,write:remittance,"{
   ""paymentMethod"": ""bank_transfer"",
   ""bankAccount"": ""ACC-BDO-001""
 }","{
@@ -9135,7 +9145,7 @@
     ""status"": ""Pending Approval""
   }
 }"
-491,Remittance,GET,/api/remittance/settlements/available-policies,Policy lines of approved remittances available for settlement with an insurer,Accounts > Remittance > Settlement,Bearer JWT,"read:remittance, write:remittance",Query: ?insurerCode=MALAYAN,"{
+492,Remittance,GET,/api/remittance/settlements/available-policies,Policy lines of approved remittances available for settlement with an insurer,Accounts > Remittance > Settlement,Bearer JWT,"read:remittance, write:remittance",Query: ?insurerCode=MALAYAN,"{
   ""success"": true,
   ""data"": [
     {
@@ -9151,7 +9161,7 @@
     }
   ]
 }"
-492,Remittance,POST,/api/remittance/settlements/calculate,Settlement totals (premium - commission - tax + previous balance + credit notes - debit notes + other adjustments),Accounts > Remittance > Settlement > Calculate,Bearer JWT,"read:remittance, write:remittance","{
+493,Remittance,POST,/api/remittance/settlements/calculate,Settlement totals (premium - commission - tax + previous balance + credit notes - debit notes + other adjustments),Accounts > Remittance > Settlement > Calculate,Bearer JWT,"read:remittance, write:remittance","{
   ""lineIds"": [
     1,
     2
@@ -9172,7 +9182,7 @@
     ""netAmount"": 26000
   }
 }"
-493,Remittance,GET,/api/remittance/statements,Generated statements,Accounts > Remittance > Statements,Bearer JWT,"read:remittance, write:remittance",,"{
+494,Remittance,GET,/api/remittance/statements,Generated statements,Accounts > Remittance > Statements,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -9184,7 +9194,7 @@
     }
   ]
 }"
-494,Remittance,POST,/api/remittance/statements/generate,Generate a statement file (CSV) for a period and insurers; optionally e-mail it,Accounts > Remittance > Statements > Generate,Bearer JWT,write:remittance,"{
+495,Remittance,POST,/api/remittance/statements/generate,Generate a statement file (CSV) for a period and insurers; optionally e-mail it,Accounts > Remittance > Statements > Generate,Bearer JWT,write:remittance,"{
   ""period"": ""2026-09"",
   ""statementType"": ""Account Statement"",
   ""selectionType"": ""specific"",
@@ -9207,7 +9217,7 @@
     ""previewUrl"": ""http://host/api/s3/object/...""
   }
 }"
-495,Remittance,GET,/api/remittance/statements/preview,Statement rows for a period / insurers (preview before generating),Accounts > Remittance > Statements > Preview,Bearer JWT,"read:remittance, write:remittance",Query: ?period=2026-09&insurers=MALAYAN%2CFPG,"{
+496,Remittance,GET,/api/remittance/statements/preview,Statement rows for a period / insurers (preview before generating),Accounts > Remittance > Statements > Preview,Bearer JWT,"read:remittance, write:remittance",Query: ?period=2026-09&insurers=MALAYAN%2CFPG,"{
   ""success"": true,
   ""data"": {
     ""rows"": [
@@ -9224,7 +9234,7 @@
     ""totalRows"": 1
   }
 }"
-496,Remittance,GET,/api/remittance/transfers,"Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)",Accounts > Remittance > Electronic Transfer,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Pending%2CApproved,"{
+497,Remittance,GET,/api/remittance/transfers,"Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)",Accounts > Remittance > Electronic Transfer,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Pending%2CApproved,"{
   ""success"": true,
   ""data"": [
     {
@@ -9238,7 +9248,7 @@
     }
   ]
 }"
-497,Remittance,POST,/api/remittance/transfers,"New electronic transfer (limit check, then approval)",Accounts > Remittance > Electronic Transfer > New Transfer,Bearer JWT,write:remittance,"{
+498,Remittance,POST,/api/remittance/transfers,"New electronic transfer (limit check, then approval)",Accounts > Remittance > Electronic Transfer > New Transfer,Bearer JWT,write:remittance,"{
   ""beneficiary"": ""Malayan Insurance Co., Inc."",
   ""amount"": 125000,
   ""method"": ""PESONet"",
@@ -9253,7 +9263,7 @@
     ""status"": ""Pending""
   }
 }"
-498,Remittance,POST,/api/remittance/transfers/:id/execute,Record the bank result of an approved transfer (Completed / Failed),Accounts > Remittance > Electronic Transfer,Bearer JWT,write:remittance,"{
+499,Remittance,POST,/api/remittance/transfers/:id/execute,Record the bank result of an approved transfer (Completed / Failed),Accounts > Remittance > Electronic Transfer,Bearer JWT,write:remittance,"{
   ""status"": ""Completed"",
   ""bankReference"": ""PSN-20260930-7781""
 }","{
@@ -9262,7 +9272,7 @@
     ""status"": ""Completed""
   }
 }"
-499,Remittance,GET,/api/remittance/transfers/methods,Transfer methods and limits (configuration),Accounts > Remittance > Electronic Transfer,Bearer JWT,"read:remittance, write:remittance",,"{
+500,Remittance,GET,/api/remittance/transfers/methods,Transfer methods and limits (configuration),Accounts > Remittance > Electronic Transfer,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -9272,7 +9282,7 @@
     }
   ]
 }"
-500,Renewals workspace,GET,/api/policy-renewals/renewals/:id,"Renewal with quotes, notices and activity timeline",Operations > Renewals > Renewal Queue > View,Bearer JWT,read:renewals,,"{
+501,Renewals workspace,GET,/api/policy-renewals/renewals/:id,"Renewal with quotes, notices and activity timeline",Operations > Renewals > Renewal Queue > View,Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": {
     ""id"": ""rnw_1"",
@@ -9303,7 +9313,7 @@
     ""activities"": []
   }
 }"
-501,Renewals workspace,POST,/api/policy-renewals/renewals/:id/activities,Add a negotiation update / contact to the renewal timeline,Operations > Renewals > Negotiations > Add Update,Bearer JWT,write:renewals,"{
+502,Renewals workspace,POST,/api/policy-renewals/renewals/:id/activities,Add a negotiation update / contact to the renewal timeline,Operations > Renewals > Negotiations > Add Update,Bearer JWT,write:renewals,"{
   ""type"": ""Counter Offer"",
   ""method"": ""Email"",
   ""description"": ""Client asked for a 5% discount"",
@@ -9319,7 +9329,7 @@
     ""description"": ""Client asked for a 5% discount""
   }
 }"
-502,Renewals workspace,POST,/api/policy-renewals/renewals/:id/approve,Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter,Operations > Renewals > Negotiations (approval),Bearer JWT,write:renewals,"{
+503,Renewals workspace,POST,/api/policy-renewals/renewals/:id/approve,Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter,Operations > Renewals > Negotiations (approval),Bearer JWT,write:renewals,"{
   ""decision"": ""approve"",
   ""note"": ""Within authority""
 }","{
@@ -9350,7 +9360,7 @@
     ""renewalAttempts"": 1
   }
 }"
-503,Renewals workspace,POST,/api/policy-renewals/renewals/:id/complete,"Complete the renewal: create the new policy term, mark the old policy renewed, raise the premium receivable",Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,"{
+504,Renewals workspace,POST,/api/policy-renewals/renewals/:id/complete,"Complete the renewal: create the new policy term, mark the old policy renewed, raise the premium receivable",Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,"{
   ""inceptionDate"": ""2026-10-31"",
   ""expiryDate"": ""2027-10-30""
 }","{
@@ -9390,7 +9400,7 @@
     }
   }
 }"
-504,Renewals workspace,POST,/api/policy-renewals/renewals/:id/lapse,Lapse a renewal (reason required),Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
+505,Renewals workspace,POST,/api/policy-renewals/renewals/:id/lapse,Lapse a renewal (reason required),Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
   ""reason"": ""Client moved to another broker""
 }","{
   ""success"": true,
@@ -9420,7 +9430,7 @@
     ""renewalAttempts"": 1
   }
 }"
-505,Renewals workspace,POST,/api/policy-renewals/renewals/:id/notices,"Send the next renewal notice (first, second, final in order); stage may be given explicitly",Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,"{
+506,Renewals workspace,POST,/api/policy-renewals/renewals/:id/notices,"Send the next renewal notice (first, second, final in order); stage may be given explicitly",Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,"{
   ""stage"": 1,
   ""method"": ""Email""
 }","{
@@ -9451,7 +9461,7 @@
     ""renewalAttempts"": 1
   }
 }"
-506,Renewals workspace,POST,/api/policy-renewals/renewals/:id/quote,"Generate a renewal quote re-rated at current rates (claims loading, loyalty discount, current taxes) with premium variance",Operations > Renewals > Quote Generation,Bearer JWT,write:renewals,,"{
+507,Renewals workspace,POST,/api/policy-renewals/renewals/:id/quote,"Generate a renewal quote re-rated at current rates (claims loading, loyalty discount, current taxes) with premium variance",Operations > Renewals > Quote Generation,Bearer JWT,write:renewals,,"{
   ""success"": true,
   ""data"": {
     ""quoteNumber"": ""RQ-2026-00001"",
@@ -9474,7 +9484,7 @@
     }
   }
 }"
-507,Renewals workspace,POST,/api/policy-renewals/renewals/:id/reinstate,Reinstate a lapsed renewal within the reinstatement window,Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
+508,Renewals workspace,POST,/api/policy-renewals/renewals/:id/reinstate,Reinstate a lapsed renewal within the reinstatement window,Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
   ""note"": ""Client accepted win-back offer""
 }","{
   ""success"": true,
@@ -9504,7 +9514,7 @@
     ""renewalAttempts"": 1
   }
 }"
-508,Renewals workspace,POST,/api/policy-renewals/renewals/:id/reminders,Send / log a renewal reminder (Email | SMS | Phone | Letter),Operations > Renewals > Renewal Queue > Send Reminder,Bearer JWT,write:renewals,"{
+509,Renewals workspace,POST,/api/policy-renewals/renewals/:id/reminders,Send / log a renewal reminder (Email | SMS | Phone | Letter),Operations > Renewals > Renewal Queue > Send Reminder,Bearer JWT,write:renewals,"{
   ""method"": ""SMS"",
   ""note"": ""Reminded about expiry""
 }","{
@@ -9535,7 +9545,7 @@
     ""renewalAttempts"": 2
   }
 }"
-509,Renewals workspace,POST,/api/policy-renewals/renewals/:id/submit,Submit the quoted renewal terms for checker approval,Operations > Renewals > Quote Generation,Bearer JWT,write:renewals,"{
+510,Renewals workspace,POST,/api/policy-renewals/renewals/:id/submit,Submit the quoted renewal terms for checker approval,Operations > Renewals > Quote Generation,Bearer JWT,write:renewals,"{
   ""note"": ""Loyal client, 5% below re-rated premium""
 }","{
   ""success"": true,
@@ -9565,7 +9575,7 @@
     ""renewalAttempts"": 1
   }
 }"
-510,Renewals workspace,POST,/api/policy-renewals/renewals/:id/win-back,Record a win-back offer on a lapsed renewal (optionally linked to a campaign),Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
+511,Renewals workspace,POST,/api/policy-renewals/renewals/:id/win-back,Record a win-back offer on a lapsed renewal (optionally linked to a campaign),Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
   ""offer"": ""10% discount + waived reinstatement fee"",
   ""method"": ""Phone"",
   ""campaignId"": ""wb_1""
@@ -9577,7 +9587,7 @@
     ""offer"": ""10% discount""
   }
 }"
-511,Renewals workspace,GET,/api/policy-renewals/renewals/approvals,Renewal terms awaiting checker approval,Operations > Renewals > Negotiations (approval queue),Bearer JWT,read:renewals,,"{
+512,Renewals workspace,GET,/api/policy-renewals/renewals/approvals,Renewal terms awaiting checker approval,Operations > Renewals > Negotiations (approval queue),Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": [
     {
@@ -9594,7 +9604,7 @@
     }
   ]
 }"
-512,Renewals workspace,GET,/api/policy-renewals/renewals/at-risk,"At-risk renewals: risk score, factors, recommended actions",Operations > Renewals > At-Risk Policies,Bearer JWT,read:renewals,,"{
+513,Renewals workspace,GET,/api/policy-renewals/renewals/at-risk,"At-risk renewals: risk score, factors, recommended actions",Operations > Renewals > At-Risk Policies,Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": [
     {
@@ -9619,7 +9629,7 @@
     }
   ]
 }"
-513,Renewals workspace,GET,/api/policy-renewals/renewals/campaigns,Win-back campaigns with statistics,Operations > Renewals > Lapse Management,Bearer JWT,read:renewals,,"{
+514,Renewals workspace,GET,/api/policy-renewals/renewals/campaigns,Win-back campaigns with statistics,Operations > Renewals > Lapse Management,Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": [
     {
@@ -9636,7 +9646,7 @@
     }
   ]
 }"
-514,Renewals workspace,POST,/api/policy-renewals/renewals/campaigns,Create a win-back campaign,Operations > Renewals > Lapse Management > Create Campaign,Bearer JWT,write:renewals,"{
+515,Renewals workspace,POST,/api/policy-renewals/renewals/campaigns,Create a win-back campaign,Operations > Renewals > Lapse Management > Create Campaign,Bearer JWT,write:renewals,"{
   ""campaignName"": ""Q4 Win-back"",
   ""targetSegment"": ""Lapsed in Q3"",
   ""startDate"": ""2026-10-01"",
@@ -9653,13 +9663,13 @@
     ""campaignName"": ""Q4 Win-back""
   }
 }"
-515,Renewals workspace,GET,/api/policy-renewals/renewals/campaigns/:id,One win-back campaign,Operations > Renewals > Lapse Management,Bearer JWT,read:renewals,,"{
+516,Renewals workspace,GET,/api/policy-renewals/renewals/campaigns/:id,One win-back campaign,Operations > Renewals > Lapse Management,Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": {
     ""campaignId"": ""WB-2026-00001""
   }
 }"
-516,Renewals workspace,GET,/api/policy-renewals/renewals/lapsed,Lapsed renewals with win-back attempts and reinstatement eligibility,Operations > Renewals > Lapse Management,Bearer JWT,read:renewals,,"{
+517,Renewals workspace,GET,/api/policy-renewals/renewals/lapsed,Lapsed renewals with win-back attempts and reinstatement eligibility,Operations > Renewals > Lapse Management,Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": [
     {
@@ -9674,7 +9684,7 @@
     }
   ]
 }"
-517,Renewals workspace,GET,/api/policy-renewals/renewals/negotiations,Renewals under negotiation with their contact timeline,Operations > Renewals > Negotiations,Bearer JWT,read:renewals,,"{
+518,Renewals workspace,GET,/api/policy-renewals/renewals/negotiations,Renewals under negotiation with their contact timeline,Operations > Renewals > Negotiations,Bearer JWT,read:renewals,,"{
   ""success"": true,
   ""data"": [
     {
@@ -9694,7 +9704,7 @@
     }
   ]
 }"
-518,Renewals workspace,GET,/api/policy-renewals/renewals/performance,"Retention KPIs: renewal rate, premium retention, cycle time, by product, by agent, monthly trend",Operations > Renewals > Performance; Retention Analytics,Bearer JWT,read:renewals,Query: ?from=2025-10-01&to=2026-09-30,"{
+519,Renewals workspace,GET,/api/policy-renewals/renewals/performance,"Retention KPIs: renewal rate, premium retention, cycle time, by product, by agent, monthly trend",Operations > Renewals > Performance; Retention Analytics,Bearer JWT,read:renewals,Query: ?from=2025-10-01&to=2026-09-30,"{
   ""success"": true,
   ""data"": {
     ""overall"": {
@@ -9727,14 +9737,14 @@
     }
   }
 }"
-519,Renewals workspace,POST,/api/policy-renewals/renewals/pipeline/refresh,Add policies expiring within renewals.pipeline_days to the pipeline; lapse renewals past the grace period,Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,,"{
+520,Renewals workspace,POST,/api/policy-renewals/renewals/pipeline/refresh,Add policies expiring within renewals.pipeline_days to the pipeline; lapse renewals past the grace period,Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,,"{
   ""success"": true,
   ""data"": {
     ""created"": 3,
     ""lapsed"": 0
   }
 }"
-520,Renewals workspace,POST,/api/policy-renewals/renewals/policies/:policyId,Put one policy into the renewal pipeline (returns the open renewal),Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,,"{
+521,Renewals workspace,POST,/api/policy-renewals/renewals/policies/:policyId,Put one policy into the renewal pipeline (returns the open renewal),Operations > Renewals > Renewal Queue,Bearer JWT,write:renewals,,"{
   ""success"": true,
   ""data"": {
     ""id"": ""rnw_1"",
@@ -9762,7 +9772,7 @@
     ""renewalAttempts"": 1
   }
 }"
-521,Renewals workspace,GET,/api/policy-renewals/renewals/queue,"Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",Operations > Renewals > Renewal Queue,Bearer JWT,read:renewals,Query: ?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20,"{
+522,Renewals workspace,GET,/api/policy-renewals/renewals/queue,"Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",Operations > Renewals > Renewal Queue,Bearer JWT,read:renewals,Query: ?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -9802,7 +9812,7 @@
   ""perPage"": 20,
   ""totalPages"": 1
 }"
-522,Reports,GET,/api/reports,Report catalogue visible to the caller (by role and permission),Reports (menu) > Operational Reports / Financial Reports,Bearer JWT,read:reports,Query: ?category=operational,"{
+523,Reports,GET,/api/reports,Report catalogue visible to the caller (by role and permission),Reports (menu) > Operational Reports / Financial Reports,Bearer JWT,read:reports,Query: ?category=operational,"{
   ""success"": true,
   ""data"": [
     {
@@ -9824,7 +9834,7 @@
     }
   ]
 }"
-523,Reports,GET,/api/reports/:code,"Report definition: parameters (JSON schema of the filter form), columns, criteria, formats",Reports > * (filter form),Bearer JWT,read:reports,,"{
+524,Reports,GET,/api/reports/:code,"Report definition: parameters (JSON schema of the filter form), columns, criteria, formats",Reports > * (filter form),Bearer JWT,read:reports,,"{
   ""success"": true,
   ""data"": {
     ""code"": ""production-register"",
@@ -9844,7 +9854,7 @@
     ]
   }
 }"
-524,Reports,POST,/api/reports/:code/generate,"Generate a report file (csv, xlsx or pdf) into storage and return its download link",Reports > * > Generate,Bearer JWT,read:reports,"{
+525,Reports,POST,/api/reports/:code/generate,"Generate a report file (csv, xlsx or pdf) into storage and return its download link",Reports > * > Generate,Bearer JWT,read:reports,"{
   ""ReportCriteria"": ""Overall"",
   ""FromDate"": ""2026-01-01"",
   ""ToDate"": ""2026-09-30"",
@@ -9867,7 +9877,7 @@
     ""downloadUrl"": ""http://localhost:8000/api/reports/generated/rpt_1a2b3c4d5e6f7a8b/download?token=eyJ...""
   }
 }"
-525,Reports,POST,/api/reports/:code/run,"Run a report for on-screen display: paged rows, totals, summary and criteria groups",Reports > * > Generate (preview),Bearer JWT,read:reports,"{
+526,Reports,POST,/api/reports/:code/run,"Run a report for on-screen display: paged rows, totals, summary and criteria groups",Reports > * > Generate (preview),Bearer JWT,read:reports,"{
   ""ReportCriteria"": ""Overall"",
   ""FromDate"": ""2026-01-01"",
   ""ToDate"": ""2026-09-30"",
@@ -9915,7 +9925,17 @@
   ""perPage"": 50,
   ""totalPages"": 1
 }"
-526,Reports,GET,/api/reports/generated,History of generated report files (newest first),Reports > Generated reports,Bearer JWT,read:reports,Query: ?code=production-register&page=1&perPage=20,"{
+527,Reports,GET,/api/reports/filters/agents,"Agents a report can be filtered by (active users with the agent role), as { label, value }",Reports > * (Agent filter),Bearer JWT,read:reports,,"{
+  ""success"": true,
+  ""data"": [
+    {
+      ""label"": ""Ramon Agent"",
+      ""value"": ""usr_1"",
+      ""code"": ""AG001""
+    }
+  ]
+}"
+528,Reports,GET,/api/reports/generated,History of generated report files (newest first),Reports > Generated reports,Bearer JWT,read:reports,Query: ?code=production-register&page=1&perPage=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -9934,8 +9954,8 @@
   ""perPage"": 20,
   ""totalPages"": 1
 }"
-527,Reports,GET,/api/reports/generated/:id/download,Download a generated report file (bearer token or signed ?token= link),Reports > * > Generate (download),Public,Public,Query: ?token=%3Csigned%20link%20token%20from%20downloadUrl%3E,"(file: text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet or application/pdf)"
-528,Reports,GET,/api/reports/schedules,Report schedules (e-mailed reports),Reports > Schedules,Bearer JWT,read:reports,Query: ?reportCode=production-register,"{
+529,Reports,GET,/api/reports/generated/:id/download,Download a generated report file (bearer token or signed ?token= link),Reports > * > Generate (download),Public,Public,Query: ?token=%3Csigned%20link%20token%20from%20downloadUrl%3E,"(file: text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet or application/pdf)"
+530,Reports,GET,/api/reports/schedules,Report schedules (e-mailed reports),Reports > Schedules,Bearer JWT,read:reports,Query: ?reportCode=production-register,"{
   ""success"": true,
   ""data"": [
     {
@@ -9956,7 +9976,7 @@
     }
   ]
 }"
-529,Reports,POST,/api/reports/schedules,Create a report schedule (adds a scheduledReport job to scheduled_jobs),Reports > Schedules > Add,Bearer JWT,write:reports,"{
+531,Reports,POST,/api/reports/schedules,Create a report schedule (adds a scheduledReport job to scheduled_jobs),Reports > Schedules > Add,Bearer JWT,write:reports,"{
   ""name"": ""Daily production"",
   ""reportCode"": ""production-register"",
   ""cron"": ""0 6 * * 1-5"",
@@ -9989,7 +10009,7 @@
     ""jobCode"": ""report-rsch_0f1e2d3c4b5a6978""
   }
 }"
-530,Reports,GET,/api/reports/schedules/:id,One report schedule,Reports > Schedules > View,Bearer JWT,read:reports,,"{
+532,Reports,GET,/api/reports/schedules/:id,One report schedule,Reports > Schedules > View,Bearer JWT,read:reports,,"{
   ""success"": true,
   ""data"": {
     ""id"": ""rsch_0f1e2d3c4b5a6978"",
@@ -10008,7 +10028,7 @@
     ""jobCode"": ""report-rsch_0f1e2d3c4b5a6978""
   }
 }"
-531,Reports,PUT,/api/reports/schedules/:id,"Update a report schedule (cron, parameters, format, recipients, enabled)",Reports > Schedules > Edit,Bearer JWT,write:reports,"{
+533,Reports,PUT,/api/reports/schedules/:id,"Update a report schedule (cron, parameters, format, recipients, enabled)",Reports > Schedules > Edit,Bearer JWT,write:reports,"{
   ""cron"": ""0 7 * * *"",
   ""recipients"": [
     ""finance@broker.example""
@@ -10034,14 +10054,14 @@
     ""jobCode"": ""report-rsch_0f1e2d3c4b5a6978""
   }
 }"
-532,Reports,DELETE,/api/reports/schedules/:id,Delete a report schedule (and its scheduled job),Reports > Schedules > Delete,Bearer JWT,write:reports,,"{
+534,Reports,DELETE,/api/reports/schedules/:id,Delete a report schedule (and its scheduled job),Reports > Schedules > Delete,Bearer JWT,write:reports,,"{
   ""success"": true,
   ""message"": ""Report schedule deleted"",
   ""data"": {
     ""id"": ""rsch_0f1e2d3c4b5a6978""
   }
 }"
-533,Reports,POST,/api/reports/schedules/:id/run,Run a report schedule now (generate + e-mail recipients),Reports > Schedules > Run now,Bearer JWT,write:reports,,"{
+535,Reports,POST,/api/reports/schedules/:id/run,Run a report schedule now (generate + e-mail recipients),Reports > Schedules > Run now,Bearer JWT,write:reports,,"{
   ""success"": true,
   ""data"": {
     ""reportId"": ""rpt_1a2b3c4d5e6f7a8b"",
@@ -10051,7 +10071,7 @@
     ""emailed"": 1
   }
 }"
-534,Schedules,GET,/api/schedules,"Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)",Master > Schedules,Bearer JWT,Any authenticated user,,"{
+536,Schedules,GET,/api/schedules,"Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)",Master > Schedules,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
@@ -10062,13 +10082,13 @@
     }
   ]
 }"
-535,Schedules,PUT,/api/schedules/:code,"Change a job schedule, parameters or enabled flag",Master > Schedules > Edit,Bearer JWT,"role:it-admin, role:ba, role:finance","{
+537,Schedules,PUT,/api/schedules/:code,"Change a job schedule, parameters or enabled flag",Master > Schedules > Edit,Bearer JWT,"role:it-admin, role:ba, role:finance","{
   ""cron"": ""0 7 * * *"",
   ""enabled"": true
 }","{
   ""success"": true
 }"
-536,Schedules,POST,/api/schedules/:code/run,Run a job now,Master > Schedules > Run now,Bearer JWT,"role:it-admin, role:ba, role:finance",,"{
+538,Schedules,POST,/api/schedules/:code/run,Run a job now,Master > Schedules > Run now,Bearer JWT,"role:it-admin, role:ba, role:finance",,"{
   ""success"": true,
   ""data"": {
     ""runId"": 1,
@@ -10078,7 +10098,7 @@
     }
   }
 }"
-537,Schedules,GET,/api/schedules/:code/runs,Run history of a job,Master > Schedules > History,Bearer JWT,Any authenticated user,,"{
+539,Schedules,GET,/api/schedules/:code/runs,Run history of a job,Master > Schedules > History,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
@@ -10091,7 +10111,7 @@
     }
   ]
 }"
-538,Search,GET,/api/search,"Global search across leads, clients, quotations, policies, claims and endorsements (number, name, e-mail, phone, plate / chassis); scoped users only find their own book",Header > Global search,Bearer JWT,Any authenticated user,Query: ?q=NQQ%202025&limit=20&types=policy%2Cclaim,"{
+540,Search,GET,/api/search,"Global search across leads, clients, quotations, policies, claims and endorsements (number, name, e-mail, phone, plate / chassis); scoped users only find their own book",Header > Global search,Bearer JWT,Any authenticated user,Query: ?q=NQQ%202025&limit=20&types=policy%2Cclaim,"{
   ""success"": true,
   ""data"": [
     {
@@ -10106,7 +10126,7 @@
   ""total"": 1,
   ""query"": ""NQQ 2025""
 }"
-539,System,GET,/api/version,"Build and runtime information: name, version, git commit (GIT_COMMIT), start time, Node version, database reachability, pending migrations",Operations / monitoring,Public,Public,,"{
+541,System,GET,/api/version,"Build and runtime information: name, version, git commit (GIT_COMMIT), start time, Node version, database reachability, pending migrations",Operations / monitoring,Public,Public,,"{
   ""name"": ""brokerverse-backend"",
   ""version"": ""1.0.0"",
   ""commit"": ""a1b2c3d"",
@@ -10119,7 +10139,7 @@
   },
   ""pendingMigrations"": 0
 }"
-540,System Settings,GET,/api/settings,All configuration values (grouped),Master > System Settings,Bearer JWT,Any authenticated user,Query: ?group=tax,"{
+542,System Settings,GET,/api/settings,All configuration values (grouped),Master > System Settings,Bearer JWT,Any authenticated user,Query: ?group=tax,"{
   ""success"": true,
   ""data"": [
     {
@@ -10131,7 +10151,7 @@
     }
   ]
 }"
-541,System Settings,PUT,/api/settings,Update one or more configuration values,Master > System Settings,Bearer JWT,"role:it-admin, role:ba","{
+543,System Settings,PUT,/api/settings,Update one or more configuration values,Master > System Settings,Bearer JWT,"role:it-admin, role:ba","{
   ""settings"": {
     ""tax.vat_rate"": 0.12,
     ""branding.primary_color"": ""#0072d8""
@@ -10139,7 +10159,7 @@
 }","{
   ""success"": true
 }"
-542,System Settings,GET,/api/settings/audit,Audit trail (filter by entity / entityId / user),Master > Audit trail,Bearer JWT,"role:it-admin, role:ba, read:audit",Query: ?entity=policy&entityId=pol_1&limit=100,"{
+544,System Settings,GET,/api/settings/audit,Audit trail (filter by entity / entityId / user),Master > Audit trail,Bearer JWT,"role:it-admin, role:ba, read:audit",Query: ?entity=policy&entityId=pol_1&limit=100,"{
   ""success"": true,
   ""data"": [
     {
@@ -10150,14 +10170,14 @@
     }
   ]
 }"
-543,System Settings,GET,/api/settings/public,"Branding settings needed before sign-in (logo, colours, names)",Sign-in,Public,Public,,"{
+545,System Settings,GET,/api/settings/public,"Branding settings needed before sign-in (logo, colours, names)",Sign-in,Public,Public,,"{
   ""success"": true,
   ""data"": {
     ""branding.logo_url"": """",
     ""branding.primary_color"": ""#0072d8""
   }
 }"
-544,System Settings,GET,/api/system-settings,"System settings (branding, display currency, language, title); public because the sign-in page needs them",Master > System Settings; Sign-in; App shell,Public,Public,,"{
+546,System Settings,GET,/api/system-settings,"System settings (branding, display currency, language, title); public because the sign-in page needs them",Master > System Settings; Sign-in; App shell,Public,Public,,"{
   ""success"": true,
   ""data"": {
     ""logoUrl"": ""/BDO_insure_logo.png.png"",
@@ -10186,7 +10206,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-545,System Settings,PUT,/api/system-settings,"Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)",Master > System Settings,Bearer JWT,write:settings,"{
+547,System Settings,PUT,/api/system-settings,"Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)",Master > System Settings,Bearer JWT,write:settings,"{
   ""appTitle"": ""Brokerverse"",
   ""displayCurrency"": ""PHP"",
   ""primaryColor"": ""#0072d8"",
@@ -10222,7 +10242,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-546,System Settings,GET,/api/system-settings/configuration,"Configuration catalogue: every app_settings key with group, label, type and value (drives a Configuration screen)",Master > Configuration,Bearer JWT,"read:settings, write:settings",Query: ?group=tax,"{
+548,System Settings,GET,/api/system-settings/configuration,"Configuration catalogue: every app_settings key with group, label, type and value (drives a Configuration screen)",Master > Configuration,Bearer JWT,"read:settings, write:settings",Query: ?group=tax,"{
   ""success"": true,
   ""data"": {
     ""groups"": [
@@ -10244,7 +10264,7 @@
     ""total"": 1
   }
 }"
-547,System Settings,PUT,/api/system-settings/configuration,"Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked",Master > Configuration,Bearer JWT,write:settings,"{
+549,System Settings,PUT,/api/system-settings/configuration,"Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked",Master > Configuration,Bearer JWT,write:settings,"{
   ""settings"": {
     ""tax.vat_rate"": 0.12,
     ""numbering.policy.prefix"": ""POL"",
@@ -10258,7 +10278,7 @@
     ""total"": 0
   }
 }"
-548,System Settings,POST,/api/system-settings/logo-presets,"Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)",Master > System Settings > Add Company Logo,Bearer JWT,write:settings,"{
+550,System Settings,POST,/api/system-settings/logo-presets,"Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)",Master > System Settings > Add Company Logo,Bearer JWT,write:settings,"{
   ""label"": ""Sample Bank"",
   ""url"": ""https://example.com/logo.png"",
   ""setActive"": true
@@ -10291,7 +10311,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-549,System Settings,DELETE,/api/system-settings/logo-presets/:id,Remove a custom logo preset (built-in presets cannot be removed),Master > System Settings > Remove Logo,Bearer JWT,write:settings,,"{
+551,System Settings,DELETE,/api/system-settings/logo-presets/:id,Remove a custom logo preset (built-in presets cannot be removed),Master > System Settings > Remove Logo,Bearer JWT,write:settings,,"{
   ""success"": true,
   ""data"": {
     ""logoUrl"": ""/BDO_insure_logo.png.png"",
@@ -10320,7 +10340,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-550,System Settings,POST,/api/system-settings/upload/:field,"Upload the logo or favicon (multipart ""file""); stored under UPLOAD_DIR and recorded in documents",Master > System Settings > Upload,Bearer JWT,write:settings,"{
+552,System Settings,POST,/api/system-settings/upload/:field,"Upload the logo or favicon (multipart ""file""); stored under UPLOAD_DIR and recorded in documents",Master > System Settings > Upload,Bearer JWT,write:settings,"{
   ""file"": ""(binary)""
 }","{
   ""success"": true,
@@ -10351,7 +10371,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-551,User Management,GET,/api/users,"List users (search, role, status, paging)",Master > User Management > User,Bearer JWT,read:users,Query: ?search=juan&role=sales&status=active&page=1&perPage=10,"{
+553,User Management,GET,/api/users,"List users (search, role, status, paging)",Master > User Management > User,Bearer JWT,read:users,Query: ?search=juan&role=sales&status=active&page=1&perPage=10,"{
   ""success"": true,
   ""data"": [
     {
@@ -10371,7 +10391,7 @@
   ""page"": 1,
   ""perPage"": 10
 }"
-552,User Management,POST,/api/users,"Create a user with roles (persona). Without a password a random temporary password is generated, returned once as temporaryPassword, and must be changed at the first sign-in",Master > User Management > User > Add,Bearer JWT,write:users,"{
+554,User Management,POST,/api/users,"Create a user with roles (persona). Without a password a random temporary password is generated, returned once as temporaryPassword, and must be changed at the first sign-in",Master > User Management > User > Add,Bearer JWT,write:users,"{
   ""username"": ""maria.cruz"",
   ""displayName"": ""Maria Cruz"",
   ""email"": ""maria@example.com"",
@@ -10390,7 +10410,7 @@
     ""temporaryPassword"": ""<shown once>""
   }
 }"
-553,User Management,GET,/api/users/:id,Get one user,Master > User Management > User > View,Bearer JWT,read:users,,"{
+555,User Management,GET,/api/users/:id,Get one user,Master > User Management > User > View,Bearer JWT,read:users,,"{
   ""success"": true,
   ""data"": {
     ""userId"": ""usr_1"",
@@ -10400,7 +10420,7 @@
     ]
   }
 }"
-554,User Management,PUT,/api/users/:id,Update a user and its roles,Master > User Management > User > Edit,Bearer JWT,write:users,"{
+556,User Management,PUT,/api/users/:id,Update a user and its roles,Master > User Management > User > Edit,Bearer JWT,write:users,"{
   ""displayName"": ""Maria Cruz"",
   ""roles"": [
     ""sales"",
@@ -10410,17 +10430,17 @@
 }","{
   ""success"": true
 }"
-555,User Management,DELETE,/api/users/:id,Deactivate (soft delete) a user; ends every session,Master > User Management > User,Bearer JWT,write:users,,"{
+557,User Management,DELETE,/api/users/:id,Deactivate (soft delete) a user; ends every session,Master > User Management > User,Bearer JWT,write:users,,"{
   ""success"": true
 }"
-556,User Management,POST,/api/users/:id/2fa/reset,Administrator turns off a user's two-factor authentication (lost device); the user enrols again,Master > User Management > User > Edit,Bearer JWT,write:users,,"{
+558,User Management,POST,/api/users/:id/2fa/reset,Administrator turns off a user's two-factor authentication (lost device); the user enrols again,Master > User Management > User > Edit,Bearer JWT,write:users,,"{
   ""success"": true,
   ""data"": {
     ""userId"": ""usr_1"",
     ""twoFactorEnabled"": false
   }
 }"
-557,User Management,GET,/api/users/:id/login-history,"Sign-in history of a user (success, from, to; paging)",Master > User Management > User > View > Sign-in history,Bearer JWT,read:users,Query: ?page=1&perPage=20&success=false&from=2026-09-01&to=2026-09-30,"{
+559,User Management,GET,/api/users/:id/login-history,"Sign-in history of a user (success, from, to; paging)",Master > User Management > User > View > Sign-in history,Bearer JWT,read:users,Query: ?page=1&perPage=20&success=false&from=2026-09-01&to=2026-09-30,"{
   ""success"": true,
   ""data"": [
     {
@@ -10440,7 +10460,7 @@
   ""perPage"": 20,
   ""totalPages"": 1
 }"
-558,User Management,POST,/api/users/:id/password,Set a user password (administrator; password policy and history apply),Master > User Management > User > Edit,Bearer JWT,write:users,"{
+560,User Management,POST,/api/users/:id/password,Set a user password (administrator; password policy and history apply),Master > User Management > User > Edit,Bearer JWT,write:users,"{
   ""password"": ""Welcome@123""
 }","{
   ""success"": true,
@@ -10448,7 +10468,7 @@
     ""userId"": ""usr_1""
   }
 }"
-559,User Management,POST,/api/users/:id/reset-password,"Administrator resets a user password. Without newPassword a random temporary password is generated and returned once as temporaryPassword; the user must change it at the next sign-in (mustChangePassword, default true). Ends every session of the user",Master > User Management > User > Reset password,Bearer JWT,write:users,"{
+561,User Management,POST,/api/users/:id/reset-password,"Administrator resets a user password. Without newPassword a random temporary password is generated and returned once as temporaryPassword; the user must change it at the next sign-in (mustChangePassword, default true). Ends every session of the user",Master > User Management > User > Reset password,Bearer JWT,write:users,"{
   ""mustChangePassword"": true
 }","{
   ""success"": true,
@@ -10458,7 +10478,7 @@
     ""temporaryPassword"": ""<shown once>""
   }
 }"
-560,User Management,PATCH,/api/users/:id/status,Activate / deactivate / lock / unlock a user (unlock = status active; clears failed sign-ins). Deactivating or locking ends every session,Master > User Management > User,Bearer JWT,write:users,"{
+562,User Management,PATCH,/api/users/:id/status,Activate / deactivate / lock / unlock a user (unlock = status active; clears failed sign-ins). Deactivating or locking ends every session,Master > User Management > User,Bearer JWT,write:users,"{
   ""status"": ""active""
 }","{
   ""success"": true,
@@ -10467,7 +10487,7 @@
     ""status"": ""active""
   }
 }"
-561,User Management,GET,/api/users/roles,List roles with their permissions and user counts,Master > User Management > Role,Bearer JWT,Any authenticated user,,"{
+563,User Management,GET,/api/users/roles,List roles with their permissions and user counts,Master > User Management > Role,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
@@ -10481,7 +10501,7 @@
     }
   ]
 }"
-562,User Management,POST,/api/users/roles,Create a role,Master > User Management > Role > Add,Bearer JWT,write:roles,"{
+564,User Management,POST,/api/users/roles,Create a role,Master > User Management > Role > Add,Bearer JWT,write:roles,"{
   ""code"": ""branch-manager"",
   ""name"": ""Branch Manager"",
   ""permissions"": [
@@ -10496,7 +10516,7 @@
     ""code"": ""branch-manager""
   }
 }"
-563,User Management,PUT,/api/users/roles/:id,Update a role and its permissions,Master > User Management > Role > Edit,Bearer JWT,write:roles,"{
+565,User Management,PUT,/api/users/roles/:id,Update a role and its permissions,Master > User Management > Role > Edit,Bearer JWT,write:roles,"{
   ""name"": ""Branch Manager"",
   ""permissions"": [
     ""read:leads""
@@ -10504,10 +10524,10 @@
 }","{
   ""success"": true
 }"
-564,User Management,DELETE,/api/users/roles/:id,Delete a non-system role with no users,Master > User Management > Role,Bearer JWT,write:roles,,"{
+566,User Management,DELETE,/api/users/roles/:id,Delete a non-system role with no users,Master > User Management > Role,Bearer JWT,write:roles,,"{
   ""success"": true
 }"
-565,User Management,GET,/api/users/roles/permissions,All permission codes grouped by module,Master > User Management > Role > Add,Bearer JWT,Any authenticated user,,"{
+567,User Management,GET,/api/users/roles/permissions,All permission codes grouped by module,Master > User Management > Role > Add,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
@@ -10517,7 +10537,7 @@
     }
   ]
 }"
-566,User Management,GET,/api/users/stats,"User counts (total, active, by role)",Master > User Management > User,Bearer JWT,read:users,,"{
+568,User Management,GET,/api/users/stats,"User counts (total, active, by role)",Master > User Management > User,Bearer JWT,read:users,,"{
   ""success"": true,
   ""data"": {
     ""totalUsers"": 12,

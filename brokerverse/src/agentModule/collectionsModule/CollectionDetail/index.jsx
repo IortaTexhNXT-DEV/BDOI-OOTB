@@ -10,6 +10,7 @@ import { Tooltip } from "primereact/tooltip";
 import { useParams, useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
 import FollowUpModal from "../FollowUpModal";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const CollectionDetail = () => {
@@ -51,22 +52,12 @@ const CollectionDetail = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return formatAppDate(dateString);
   };
 
   const formatDateTime = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatAppDate(dateString, { withTime: true });
   };
 
   const handleFollowUpAction = (type) => {

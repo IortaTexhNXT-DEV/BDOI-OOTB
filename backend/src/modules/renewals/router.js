@@ -18,6 +18,11 @@ import { toQuote } from '../quotations/shape.js';
 const { router, define } = moduleRouter('Policy renewals', '/policy-renewals');
 const read = [requireAuth, requirePermission('read:renewals')];
 const write = [requireAuth, requirePermission('write:renewals')];
+// Renewal quote wizard on one policy (Operations > Renewals > Renewal Policy > Renewal): anyone who prepares quotations
+// may renew a policy of their book, so agents (no renewals grant; record scope applies) can renew their own expiring
+// policies. Batches, the queue and the rest of the renewals workspace keep the renewals permission (D100).
+const wizardRead = [requireAuth, requirePermission('read:renewals', 'write:renewals', 'write:quotations')];
+const wizardWrite = [requireAuth, requirePermission('write:renewals', 'write:quotations')];
 const captureSchema = z.object({
   coverageDetails: z.record(z.any()).optional(), accessories: z.any().optional(), orderSummary: z.record(z.any()).optional(),
   policyLimits: z.any().optional(), premiumBreakdown: z.record(z.any()).optional(), effectiveDate: z.any().optional(), expiryDate: z.any().optional(),
@@ -131,7 +136,7 @@ define({
 // ---------------------------------------------------------------- renewals of a policy
 define({
   method: 'POST', path: '/policies/:policyId/renewals', summary: 'Create (or update the open) renewal of a policy with the wizard data', screen: 'Operations > Policy > Renew (coverage details, order summary)',
-  middleware: [...write, ownRecord('policy', 'policyId'), validate(captureSchema)],
+  middleware: [...wizardWrite, ownRecord('policy', 'policyId'), validate(captureSchema)],
   request: { coverageDetails: { lossAndDamageCoverage: '850000', bodilyInjury: '200000' }, accessories: [], orderSummary: { netPremium: 17800, grossPremium: 21450.5 }, effectiveDate: '2026-10-31', expiryDate: '2027-10-30' },
   response: { success: true, message: 'Renewal saved', data: renewalExample },
   handler: async (req, res) => {
@@ -143,13 +148,13 @@ define({
 });
 define({
   method: 'GET', path: '/policies/:policyId/prefill', summary: 'Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)',
-  screen: 'Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)', middleware: [...read, ownRecord('policy', 'policyId')],
+  screen: 'Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)', middleware: [...wizardRead, ownRecord('policy', 'policyId')],
   response: { success: true, data: { policyId: 'pol_1', policyNumber: 'POL-2025-00012', clientId: 'cl_1', clientCode: 'CL-2026-00001', insuranceCompanyName: 'MAPFRE Insurance Corporation', sumInsured: 850000, renewal: null, coverageDetails: { lossAndDamageCoverage: 850000, totalSumInsured: 850000 }, accessories: { aircon: '', stereo: '' }, vehicle: {}, source: 'policy' } },
   handler: async (req, res) => ok(res, await svc.renewalPrefill(req.params.policyId)),
 });
 define({
   method: 'POST', path: '/policies/:policyId/quotation', summary: 'Renewal wizard "Completed Quote": save the wizard data and create (or update) the renewal quotation linked to the expiring policy',
-  screen: 'Operations > Renewals > Renewal Policy > Renewal > Order summary', middleware: [...write, ownRecord('policy', 'policyId'), validate(captureSchema)],
+  screen: 'Operations > Renewals > Renewal Policy > Renewal > Order summary', middleware: [...wizardWrite, ownRecord('policy', 'policyId'), validate(captureSchema)],
   request: { coverageDetails: { lossAndDamageCoverage: '850000', lossAndDamageCoverageRate: '1.6' }, accessories: { aircon: '', stereo: '' }, orderSummary: { discount: 0 } },
   response: { success: true, message: 'Renewal quotation created', data: { quotationId: 'qt_1', quotationNumber: 'QT-2026-00002', quotation: { quotationId: 'qt_1', renewal: { policyId: 'pol_1' } }, renewal: renewalExample } },
   handler: async (req, res) => {
@@ -160,18 +165,18 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/', summary: 'Renewals (clientId, policyId, status, search, page, limit)', screen: 'Clients > Renewals tab; renewal quote wizard', middleware: read,
+  method: 'GET', path: '/', summary: 'Renewals (clientId, policyId, status, search, page, limit)', screen: 'Clients > Renewals tab; renewal quote wizard', middleware: wizardRead,
   query: { clientId: 'cl_1', page: 1, limit: 50 }, response: { success: true, data: [renewalExample], pagination: { page: 1, limit: 50, total: 1, totalPages: 1 } },
   handler: async (req, res) => { const pg = paging(req.query, { page: 1, perPage: 50 }); const { total, items } = await svc.listRenewals(await withScope(req), pg); listMeta(res, items, total, pg, 'renewals'); },
 });
 define({
-  method: 'GET', path: '/:renewalId', summary: 'Renewal with quotes, notices and activity timeline', screen: 'Operations > Renewals', middleware: [...read, ownRecord('renewal', 'renewalId')],
+  method: 'GET', path: '/:renewalId', summary: 'Renewal with quotes, notices and activity timeline', screen: 'Operations > Renewals', middleware: [...wizardRead, ownRecord('renewal', 'renewalId')],
   response: { success: true, data: { ...renewalExample, quotes: [], notices: [], activities: [] } },
   handler: async (req, res) => ok(res, await svc.getRenewal(req.params.renewalId)),
 });
 define({
   method: 'PUT', path: '/:renewalId', summary: 'Update the renewal wizard data (coverage, accessories, order summary, dates)', screen: 'Operations > Policy > Renew (coverage details)',
-  middleware: [...write, ownRecord('renewal', 'renewalId'), validate(captureSchema)], request: { coverageDetails: { lossAndDamageCoverage: '900000' }, orderSummary: { grossPremium: 22800 } },
+  middleware: [...wizardWrite, ownRecord('renewal', 'renewalId'), validate(captureSchema)], request: { coverageDetails: { lossAndDamageCoverage: '900000' }, orderSummary: { grossPremium: 22800 } },
   response: { success: true, message: 'Renewal updated', data: renewalExample },
   handler: async (req, res) => {
     const r = await svc.captureRenewal(req.params.renewalId, req.body);

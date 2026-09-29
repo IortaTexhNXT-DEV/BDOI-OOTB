@@ -18,6 +18,7 @@ import { Card } from "primereact/card";
 import remittanceService, { masterService } from "../../../../services/remittanceService";
 import { showError } from "../../../Remittance/shared";
 import { saveAndReturn } from "../masterRecord";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 import "./index.scss";
 
 const ScheduleMaster = () => {
@@ -532,7 +533,7 @@ const ScheduleMaster = () => {
                   value={formData.customHolidays}
                   onChange={(e) => handleInputChange('customHolidays', e.value)}
                   selectionMode="multiple"
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   disabled={mode === "view"}
                   className="w-full"
                   inline

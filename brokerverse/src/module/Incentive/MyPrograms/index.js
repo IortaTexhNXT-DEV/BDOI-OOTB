@@ -19,6 +19,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import incentiveService from "../../../services/incentiveService";
 import { showError } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const MyPrograms = () => {
@@ -250,7 +251,7 @@ const MyPrograms = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <i className="pi pi-dollar card-icon blue"></i>
+              <i className="pi pi-wallet card-icon blue"></i>
               <div className="card-info">
                 <span className="card-value">
                   {formatCurrency(dashboardData.totalPotentialEarning)}
@@ -367,7 +368,7 @@ const MyPrograms = () => {
               {agentData?.recentActivities?.map((activity, index) => (
                 <div key={index} className="activity-item">
                   <div className="activity-date">
-                    {new Date(activity.date).toLocaleDateString()}
+                    {formatAppDate(activity.date)}
                   </div>
                   <div className="activity-content">
                     <div className="activity-title">{activity.activity}</div>

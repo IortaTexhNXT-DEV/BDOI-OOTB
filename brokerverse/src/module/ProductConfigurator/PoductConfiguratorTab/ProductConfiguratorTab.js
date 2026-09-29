@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import { RadioButton } from "primereact/radiobutton";
 import MotorTariffEditor from "./MotorTariffEditor";
+import useTaxRates from "../../../agentModule/quoteModule/utils/useTaxRates";
 
 export const VEHICLE_TYPE_OPTIONS = [
   { label: "AC and Tourist Cars", value: "ac_and_tourist_cars" },
@@ -175,18 +176,12 @@ const CTPL_PREMIUM_BY_VEHICLE_TYPE_INPUT_OPTIONS = [
   },
 ];
 
-const STATUTORY_TAXES_AND_FEES_INPUT_OPTIONS = [
-  {
-    label: "Documentary Stamp Tax (DST)",
-    key: "documentary_stamp_tax",
-    value: "0.5",
-  },
-  { label: "Value Added Tax (VAT)", key: "value_added_tax", value: "12" },
-  {
-    label: "Local Government Tax (LGT)",
-    key: "local_government_tax",
-    value: "5",
-  },
+// Statutory taxes are not set per template: pricing (quotations, endorsements, renewals) applies the configured
+// tax.* rates (Master > Configuration > Taxes, also maintained from Master > Finance > Taxation). The tab shows them.
+const STATUTORY_TAXES = [
+  { label: "Documentary Stamp Tax (DST)", rateKey: "documentaryStampTax" },
+  { label: "Value Added Tax (VAT)", rateKey: "valueAddedTax" },
+  { label: "Local Government Tax (LGT)", rateKey: "localGovernmentTax" },
 ];
 
 const DRIVER_AGE_MULTIPLIERS_INPUT_OPTIONS = [
@@ -272,10 +267,10 @@ const ProductConfiguratorTab = ({
   const {
     riskInformation = {},
     premiumRates = {},
-    taxes = {},
     ratingFactor = {},
   } = selectedTemplate?.configuration;
 
+  const configuredTaxRates = useTaxRates();
   const [isAddLabelDialogVisible, setAddLabelDialogVisible] = useState(false);
   const [newLabelForm, setNewLabelForm] = useState(getInitialNewLabelForm);
   const [formErrors, setFormErrors] = useState({});
@@ -747,18 +742,6 @@ const ProductConfiguratorTab = ({
     });
   };
 
-  const handleTaxesAndFeesChange = (field, value) => {
-    setSelectedTemplate({
-      ...selectedTemplate,
-      configuration: {
-        ...(selectedTemplate?.configuration || {}),
-        taxes: {
-          ...(selectedTemplate?.configuration?.taxes || {}),
-          [field]: value,
-        },
-      },
-    });
-  };
 
   const handleRatingFactorChange = (field, value) => {
     setSelectedTemplate({
@@ -1034,16 +1017,19 @@ const ProductConfiguratorTab = ({
         <TabPanel header="Taxes and fees ">
           <div className="mt-4">
             <h4>Statutory Taxes & Fees (%) </h4>
+            <p className="text-600 mt-0 mb-3">
+              Pricing applies the configured tax rates to every product. Change them in Master &gt; Configuration &gt; Taxes
+              (or Master &gt; Finance &gt; Taxation).
+            </p>
             <div className="formgrid grid">
-              {STATUTORY_TAXES_AND_FEES_INPUT_OPTIONS.map((option) => (
-                <div key={option.key} className="field col-12 lg:col-6">
+              {STATUTORY_TAXES.map((option) => (
+                <div key={option.rateKey} className="field col-12 lg:col-6">
                   <label className={LABEL_CLASS}>{option.label}</label>
                   <InputText
                     className={INPUT_CLASS}
-                    value={taxes[option?.key] ?? option.value}
-                    onChange={(e) => {
-                      handleTaxesAndFeesChange(option?.key, e.target.value);
-                    }}
+                    value={`${Number(((configuredTaxRates[option.rateKey] || 0) * 100).toFixed(4))}`}
+                    readOnly
+                    disabled
                   />
                 </div>
               ))}

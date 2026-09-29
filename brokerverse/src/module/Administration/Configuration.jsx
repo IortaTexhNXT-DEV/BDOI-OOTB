@@ -20,6 +20,35 @@ const GROUP_LABELS = {
   commission: "Commission",
   notification: "Notifications",
   reports: "Reports",
+  accounting: "Accounting",
+  claims: "Claims",
+  collections: "Collections",
+  dashboard: "Dashboard",
+  direct_bill: "Direct bill",
+  email: "E-mail",
+  endorsements: "Endorsements",
+  finance: "Finance",
+  incentive: "Incentives",
+  leads: "Leads",
+  policies: "Policies",
+  policy: "Policy documents",
+  premium: "Premium",
+  product: "Products",
+  quotations: "Quotations",
+  quote: "Quote approval",
+  reinsurance: "Reinsurance",
+  remittance: "Remittance",
+  renewals: "Renewals",
+  security: "Security",
+  system: "System",
+  uploads: "Uploads",
+};
+
+/** Tab label of a settings group: the known label, else the key in words ("direct_bill" -> "Direct bill"). */
+const groupLabel = (group) => {
+  if (GROUP_LABELS[group]) return GROUP_LABELS[group];
+  const words = String(group || "Other").replace(/[_.-]+/g, " ").trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
 const toText = (v) => (typeof v === "string" ? v : JSON.stringify(v));
@@ -52,7 +81,10 @@ const Configuration = () => {
     rows.forEach((r) => {
       (g[r.group] = g[r.group] || []).push(r);
     });
-    return g;
+    // tabs in alphabetical order of their labels, General first
+    return Object.fromEntries(
+      Object.entries(g).sort(([a], [b]) => (a === "general" ? -1 : b === "general" ? 1 : groupLabel(a).localeCompare(groupLabel(b))))
+    );
   }, [rows]);
 
   const value = (r) => (r.key in draft ? draft[r.key] : r.value);
@@ -87,21 +119,21 @@ const Configuration = () => {
 
   const editor = (r) => {
     const v = value(r);
-    if (r.type === "boolean") return <InputSwitch checked={!!v} onChange={(e) => set(r.key, e.value)} />;
+    if (r.type === "boolean") return <InputSwitch inputId={r.key} checked={!!v} onChange={(e) => set(r.key, e.value)} />;
     if (r.type === "number")
       return (
-        <InputNumber value={v} onValueChange={(e) => set(r.key, e.value)} mode="decimal" minFractionDigits={0} maxFractionDigits={6} />
+        <InputNumber inputId={r.key} value={v} onValueChange={(e) => set(r.key, e.value)} mode="decimal" minFractionDigits={0} maxFractionDigits={6} />
       );
     if (r.type === "json")
-      return <InputTextarea value={toText(v)} rows={2} autoResize onChange={(e) => set(r.key, e.target.value)} />;
+      return <InputTextarea id={r.key} value={toText(v)} rows={2} autoResize onChange={(e) => set(r.key, e.target.value)} />;
     if (r.type === "color")
       return (
         <div className="admin__color">
           <span className="admin__swatch" style={{ background: v }} />
-          <InputText value={v || ""} onChange={(e) => set(r.key, e.target.value)} />
+          <InputText id={r.key} value={v || ""} onChange={(e) => set(r.key, e.target.value)} />
         </div>
       );
-    return <InputText value={v ?? ""} onChange={(e) => set(r.key, e.target.value)} />;
+    return <InputText id={r.key} value={v ?? ""} onChange={(e) => set(r.key, e.target.value)} />;
   };
 
   return (
@@ -115,15 +147,14 @@ const Configuration = () => {
         </div>
         <Button label="Save changes" icon="pi pi-check" onClick={save} loading={saving} disabled={!Object.keys(draft).length} />
       </div>
-      <TabView>
+      <TabView scrollable className="admin__tabs">
         {Object.entries(groups).map(([group, items]) => (
-          <TabPanel key={group} header={GROUP_LABELS[group] || group}>
+          <TabPanel key={group} header={groupLabel(group)}>
             <div className="admin__grid">
               {items.map((r) => (
                 <div className="admin__field" key={r.key}>
-                  <label htmlFor={r.key}>{r.label}</label>
+                  <label htmlFor={r.key} title={r.key}>{r.label}</label>
                   {editor(r)}
-                  <small>{r.key}</small>
                 </div>
               ))}
             </div>

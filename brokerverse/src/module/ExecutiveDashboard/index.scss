@@ -36,6 +36,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
 
       @include mobile-sm {
         flex-direction: column;
@@ -44,10 +46,14 @@
       }
 
       .header-left {
+        min-width: 0;
+
+        // white on the navy banner (the theme colours page headings navy)
         h1 {
           margin: 0;
           font-size: 2rem;
           font-weight: 600;
+          color: #fff;
 
           @include tablet-sm {
             font-size: 1.75rem;
@@ -72,8 +78,15 @@
 
       .header-right {
         display: flex;
-        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.75rem;
         align-items: center;
+
+        // the date range must show both dates in full (DD/MM/YYYY - DD/MM/YYYY)
+        .p-calendar {
+          min-width: 15.5rem;
+        }
 
         @include tablet-md {
           display: none;
@@ -128,12 +141,12 @@
   .kpi-section {
     margin-bottom: 2rem;
 
+    // KPI cards wrap onto a second row instead of running past the right edge
     .kpi-scroll-container {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
-      overflow-x: auto;
       padding-bottom: 0.5rem;
-      scroll-behavior: smooth;
 
       @include tablet-sm {
         gap: 1rem;
@@ -164,19 +177,13 @@
     }
 
     .kpi-card {
-      min-width: 280px;
-      flex-shrink: 0;
+      min-width: 0;
       background: white;
       border-radius: 12px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
       transition: transform 0.2s, box-shadow 0.2s;
 
-      @include tablet-sm {
-        min-width: 250px;
-      }
-
       @include mobile-sm {
-        min-width: 220px;
         border-radius: 8px;
       }
 

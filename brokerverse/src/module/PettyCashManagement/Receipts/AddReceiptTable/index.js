@@ -15,6 +15,7 @@ import { Card } from "primereact/card";
 import { useDispatch, useSelector } from "react-redux";
 import { postAddReceiptMiddleware } from "../store/pettyCashReceiptsMiddleware";
 import usePettyCashOptions from "../../usePettyCashOptions";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReceiptsTable = () => {
   const [visible, setVisible] = useState(false);
@@ -221,7 +222,7 @@ const AddReceiptsTable = () => {
               sortable
               body={(rowData) => rowData.RequestNumber?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

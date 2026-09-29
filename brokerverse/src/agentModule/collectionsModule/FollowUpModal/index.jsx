@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { formatDate } from "@fullcalendar/core/index.js";
 import { notifyError } from "../../../utility/dialogs";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 
 const FollowUpModal = ({
   loadingFollowUp,
@@ -161,7 +162,7 @@ This is to inform you that the payment for policy number : ${
                 onChange={(e) => handleInputChange("commitmentDate", e.value)}
                 minDate={new Date()}
                 showIcon
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="form-field">

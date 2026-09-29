@@ -21,6 +21,7 @@ import CustomToast from "../../../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { patchExchangeDetailEdit } from "../store/exchangeMasterMiddleware";
 import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValues = {
   EffectiveFrom: "",
@@ -235,7 +236,7 @@ function EditExchange() {
               onChange={(e) => {
                 formik.setFieldValue("EffectiveFrom", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">
@@ -250,7 +251,7 @@ function EditExchange() {
               onChange={(e) => {
                 formik.setFieldValue("EffectiveTo", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">

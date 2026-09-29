@@ -19,6 +19,7 @@ import { Avatar } from "primereact/avatar";
 import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const PerformanceTracking = () => {
@@ -417,7 +418,7 @@ const PerformanceTracking = () => {
                     value={dateRange}
                     onChange={(e) => setDateRange(e.value)}
                     selectionMode="range"
-                    dateFormat="mm/dd/yy"
+                    dateFormat={calendarDateFormat()}
                   />
                 </div>
               )}

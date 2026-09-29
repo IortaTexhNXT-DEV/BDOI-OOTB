@@ -120,6 +120,16 @@ define({
   },
 });
 
+/* ----- filter options ----- */
+// Report filters must not depend on user administration (GET /users needs read:users): every report reader may list the
+// agents a report can be filtered by (D104).
+define({
+  method: 'GET', path: '/filters/agents', summary: 'Agents a report can be filtered by (active users with the agent role), as { label, value }',
+  screen: 'Reports > * (Agent filter)', middleware: canRead, permissions: ['read:reports'],
+  response: { success: true, data: [{ label: 'Ramon Agent', value: 'usr_1', code: 'AG001' }] },
+  handler: async (_req, res) => ok(res, await svc.agentFilterOptions()),
+});
+
 /* ----- catalogue, run and generate ----- */
 define({
   method: 'GET', path: '/', summary: 'Report catalogue visible to the caller (by role and permission)', screen: 'Reports (menu) > Operational Reports / Financial Reports', middleware: canRead, permissions: ['read:reports'],

@@ -376,7 +376,7 @@ export async function raiseDebitNote(b, user) {
   return out;
 }
 
-const askApproval = (dn) => notify({ type: 'approval', title: 'Commission debit note awaiting approval', message: `${dn.dnNumber} to ${dn.insurerName} for ${dn.currency} ${dn.amount.toFixed(2)} needs approval`,
+const askApproval = (dn) => notify({ audience: 'write:remittance', type: 'approval', title: 'Commission debit note awaiting approval', message: `${dn.dnNumber} to ${dn.insurerName} for ${dn.currency} ${dn.amount.toFixed(2)} needs approval`,
   link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */

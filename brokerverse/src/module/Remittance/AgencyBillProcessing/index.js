@@ -172,16 +172,16 @@ const AgencyBillProcessing = () => {
       <h2>{t("remittance.agencyBillProcessing")}</h2>
 
       <div className="header-section">
-        <div className="p-fluid p-formgrid p-grid">
-          <div className="p-field p-col-12 p-md-3">
+        <div className="p-fluid formgrid grid">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.billPeriod")}</label>
             <Calendar value={billPeriod} onChange={(e) => setBillPeriod(e.value)} view="month" dateFormat="mm/yy" />
           </div>
-          <div className="p-field p-col-12 p-md-3">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.billRunDate")}</label>
             <Calendar value={billRunDate} onChange={(e) => setBillRunDate(e.value)} dateFormat={calendarDateFormat()} />
           </div>
-          <div className="p-field p-col-12 p-md-3">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.billType")}</label>
             <Dropdown value={billType} options={[
               { label: t("remittance.regular"), value: "Regular" },
@@ -189,7 +189,7 @@ const AgencyBillProcessing = () => {
               { label: t("remittance.adjustment"), value: "Adjustment" }
             ]} onChange={(e) => setBillType(e.value)} />
           </div>
-          <div className="p-field p-col-12 p-md-3">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.status")}</label>
             <Tag value="Draft" severity="warning" style={{ marginTop: '1.5rem' }} />
           </div>
@@ -238,7 +238,7 @@ const AgencyBillProcessing = () => {
               </Card>
               <Card className="summary-card">
                 <div className="card-content">
-                  <i className="pi pi-dollar" />
+                  <i className="pi pi-wallet" />
                   <div>
                     <div className="value">{formatCurrency(totals.premium)}</div>
                     <div className="label">{t("remittance.totalPremium")}</div>
@@ -286,24 +286,24 @@ const AgencyBillProcessing = () => {
           <TabPanel header={t("remittance.remittanceAdjustments")}>
             <div className="adjustment-form mb-4">
               <h4>{t("remittance.addAdjustment")}</h4>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-6">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.agencyName")}</label>
                   <Dropdown placeholder={t("remittance.selectAgency")} value={newAdjustment.agencyCode}
                     options={selectedAgencies.map(a => ({ label: a.agencyName, value: a.agencyCode }))}
                     onChange={(e) => setNewAdjustment({ ...newAdjustment, agencyCode: e.value })} />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.adjustmentType")}</label>
                   <Dropdown placeholder={t("remittance.selectType")} value={newAdjustment.adjustmentType} options={adjustmentTypes}
                     onChange={(e) => setNewAdjustment({ ...newAdjustment, adjustmentType: e.value })} />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.amount")}</label>
                   <InputNumber mode="currency" currency={currencyCode} value={newAdjustment.amount}
                     onValueChange={(e) => setNewAdjustment({ ...newAdjustment, amount: e.value })} />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.reason")}</label>
                   <InputTextarea rows={2} value={newAdjustment.reason}
                     onChange={(e) => setNewAdjustment({ ...newAdjustment, reason: e.target.value })} />
@@ -353,26 +353,26 @@ const AgencyBillProcessing = () => {
 
               <div className="processing-options mt-4">
                 <h4>{t("remittance.processingOptions")}</h4>
-                <div className="p-fluid p-formgrid p-grid">
-                  <div className="p-field p-col-12 p-md-6">
+                <div className="p-fluid formgrid grid">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={true} />
                       <label>{t("remittance.generateBills")}</label>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={sendToAgencies} onChange={(e) => setSendToAgencies(e.checked)} />
                       <label>{t("remittance.sendToAgencies")}</label>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={true} />
                       <label>{t("remittance.createGLEntries")}</label>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={false} />
                       <label>{t("remittance.postToAccounts")}</label>

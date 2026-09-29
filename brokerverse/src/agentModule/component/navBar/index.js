@@ -17,6 +17,7 @@ import Cookies from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
 import InitialsAvatar from "../InitialsAvatar";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const AgentNavBar = () => {
   const menuRight = useRef(null);
@@ -91,14 +92,7 @@ const AgentNavBar = () => {
   // Format date for display (use Thai locale when language is Thai)
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const locale = currentLanguage === "th" ? "th-TH" : "en-US";
-    return date.toLocaleDateString(locale, {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return formatAppDate(date, { withTime: true });
   };
 
   // Handle notification click

@@ -10,6 +10,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Skeleton } from "primereact/skeleton";
 import { Message } from "primereact/message";
 import { getClaimAuditTrail } from "./store/auditTrailMiddleWare";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const ClaimAuditTrail = () => {
@@ -78,14 +79,7 @@ const ClaimAuditTrail = () => {
         return t("claimAuditTrail.invalidDate");
       }
 
-      const formatted = date.toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+      const formatted = formatAppDate(date, { withTime: true });
 
       console.log("Formatted date:", formatted);
       return formatted;

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (566 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (568 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -12050,7 +12050,7 @@
                 "programs"
               ]
             },
-            "description": "Create a program (metric, types and frequencies validated against configuration)\n\nFront-end touchpoint: Master > Incentive Programs > Add Program\n\nAccess: write:incentive",
+            "description": "Create a program (metric, types and frequencies validated against configuration)\n\nFront-end touchpoint: Master > Incentive Programs > Add Program\n\nAccess: write:masters",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"programCode\": \"INC-2026-010\",\n  \"programName\": \"Q3 Premium Achievers\",\n  \"programType\": \"Target Based\",\n  \"applicableTo\": [\n    \"Individual Agent\"\n  ],\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-09-30\",\n  \"targetMetric\": \"Premium Volume\",\n  \"baseTarget\": 500000,\n  \"stretchTarget\": 750000,\n  \"Currency\": \"PHP\",\n  \"calculationFrequency\": \"Quarterly\",\n  \"status\": \"Active\",\n  \"structure\": [\n    {\n      \"level\": \"80-90%\",\n      \"type\": \"Percentage\",\n      \"value\": 2,\n      \"maxPayout\": 20000\n    }\n  ]\n}",
@@ -12082,7 +12082,7 @@
                     "programs"
                   ]
                 },
-                "description": "Create a program (metric, types and frequencies validated against configuration)\n\nFront-end touchpoint: Master > Incentive Programs > Add Program\n\nAccess: write:incentive",
+                "description": "Create a program (metric, types and frequencies validated against configuration)\n\nFront-end touchpoint: Master > Incentive Programs > Add Program\n\nAccess: write:masters",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"programCode\": \"INC-2026-010\",\n  \"programName\": \"Q3 Premium Achievers\",\n  \"programType\": \"Target Based\",\n  \"applicableTo\": [\n    \"Individual Agent\"\n  ],\n  \"startDate\": \"2026-07-01\",\n  \"endDate\": \"2026-09-30\",\n  \"targetMetric\": \"Premium Volume\",\n  \"baseTarget\": 500000,\n  \"stretchTarget\": 750000,\n  \"Currency\": \"PHP\",\n  \"calculationFrequency\": \"Quarterly\",\n  \"status\": \"Active\",\n  \"structure\": [\n    {\n      \"level\": \"80-90%\",\n      \"type\": \"Percentage\",\n      \"value\": 2,\n      \"maxPayout\": 20000\n    }\n  ]\n}",
@@ -12200,7 +12200,7 @@
                 }
               ]
             },
-            "description": "Update a program (partial; also used to toggle status)\n\nFront-end touchpoint: Master > Incentive Programs > Edit\n\nAccess: write:incentive",
+            "description": "Update a program (partial; also used to toggle status)\n\nFront-end touchpoint: Master > Incentive Programs > Edit\n\nAccess: write:masters",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"Inactive\"\n}",
@@ -12240,7 +12240,7 @@
                     }
                   ]
                 },
-                "description": "Update a program (partial; also used to toggle status)\n\nFront-end touchpoint: Master > Incentive Programs > Edit\n\nAccess: write:incentive",
+                "description": "Update a program (partial; also used to toggle status)\n\nFront-end touchpoint: Master > Incentive Programs > Edit\n\nAccess: write:masters",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"Inactive\"\n}",
@@ -12288,7 +12288,7 @@
                 }
               ]
             },
-            "description": "Delete a program (soft; blocked while calculations are pending or approved)\n\nFront-end touchpoint: Master > Incentive Programs\n\nAccess: write:incentive"
+            "description": "Delete a program (soft; blocked while calculations are pending or approved)\n\nFront-end touchpoint: Master > Incentive Programs\n\nAccess: write:masters"
           },
           "response": [
             {
@@ -12314,7 +12314,7 @@
                     }
                   ]
                 },
-                "description": "Delete a program (soft; blocked while calculations are pending or approved)\n\nFront-end touchpoint: Master > Incentive Programs\n\nAccess: write:incentive"
+                "description": "Delete a program (soft; blocked while calculations are pending or approved)\n\nFront-end touchpoint: Master > Incentive Programs\n\nAccess: write:masters"
               },
               "status": "OK",
               "code": 200,
@@ -18555,7 +18555,7 @@
                 }
               ]
             },
-            "description": "Renewals (clientId, policyId, status, search, page, limit)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals"
+            "description": "Renewals (clientId, policyId, status, search, page, limit)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations"
           },
           "response": [
             {
@@ -18586,7 +18586,7 @@
                     }
                   ]
                 },
-                "description": "Renewals (clientId, policyId, status, search, page, limit)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals"
+                "description": "Renewals (clientId, policyId, status, search, page, limit)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -18624,7 +18624,7 @@
                 }
               ]
             },
-            "description": "Renewal with quotes, notices and activity timeline\n\nFront-end touchpoint: Operations > Renewals\n\nAccess: read:renewals"
+            "description": "Renewal with quotes, notices and activity timeline\n\nFront-end touchpoint: Operations > Renewals\n\nAccess: read:renewals, write:renewals, write:quotations"
           },
           "response": [
             {
@@ -18649,7 +18649,7 @@
                     }
                   ]
                 },
-                "description": "Renewal with quotes, notices and activity timeline\n\nFront-end touchpoint: Operations > Renewals\n\nAccess: read:renewals"
+                "description": "Renewal with quotes, notices and activity timeline\n\nFront-end touchpoint: Operations > Renewals\n\nAccess: read:renewals, write:renewals, write:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -18692,7 +18692,7 @@
                 }
               ]
             },
-            "description": "Update the renewal wizard data (coverage, accessories, order summary, dates)\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details)\n\nAccess: write:renewals",
+            "description": "Update the renewal wizard data (coverage, accessories, order summary, dates)\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details)\n\nAccess: write:renewals, write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"900000\"\n  },\n  \"orderSummary\": {\n    \"grossPremium\": 22800\n  }\n}",
@@ -18731,7 +18731,7 @@
                     }
                   ]
                 },
-                "description": "Update the renewal wizard data (coverage, accessories, order summary, dates)\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details)\n\nAccess: write:renewals",
+                "description": "Update the renewal wizard data (coverage, accessories, order summary, dates)\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details)\n\nAccess: write:renewals, write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"900000\"\n  },\n  \"orderSummary\": {\n    \"grossPremium\": 22800\n  }\n}",
@@ -19722,7 +19722,7 @@
                 }
               ]
             },
-            "description": "Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: read:renewals"
+            "description": "Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: read:renewals, write:renewals, write:quotations"
           },
           "response": [
             {
@@ -19749,7 +19749,7 @@
                     }
                   ]
                 },
-                "description": "Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: read:renewals"
+                "description": "Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (coverage, accessories, order summary)\n\nAccess: read:renewals, write:renewals, write:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -19794,7 +19794,7 @@
                 }
               ]
             },
-            "description": "Renewal wizard \"Completed Quote\": save the wizard data and create (or update) the renewal quotation linked to the expiring policy\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: write:renewals",
+            "description": "Renewal wizard \"Completed Quote\": save the wizard data and create (or update) the renewal quotation linked to the expiring policy\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: write:renewals, write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"850000\",\n    \"lossAndDamageCoverageRate\": \"1.6\"\n  },\n  \"accessories\": {\n    \"aircon\": \"\",\n    \"stereo\": \"\"\n  },\n  \"orderSummary\": {\n    \"discount\": 0\n  }\n}",
@@ -19835,7 +19835,7 @@
                     }
                   ]
                 },
-                "description": "Renewal wizard \"Completed Quote\": save the wizard data and create (or update) the renewal quotation linked to the expiring policy\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: write:renewals",
+                "description": "Renewal wizard \"Completed Quote\": save the wizard data and create (or update) the renewal quotation linked to the expiring policy\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal > Order summary\n\nAccess: write:renewals, write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"850000\",\n    \"lossAndDamageCoverageRate\": \"1.6\"\n  },\n  \"accessories\": {\n    \"aircon\": \"\",\n    \"stereo\": \"\"\n  },\n  \"orderSummary\": {\n    \"discount\": 0\n  }\n}",
@@ -19889,7 +19889,7 @@
                 }
               ]
             },
-            "description": "Create (or update the open) renewal of a policy with the wizard data\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals",
+            "description": "Create (or update the open) renewal of a policy with the wizard data\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"850000\",\n    \"bodilyInjury\": \"200000\"\n  },\n  \"accessories\": [],\n  \"orderSummary\": {\n    \"netPremium\": 17800,\n    \"grossPremium\": 21450.5\n  },\n  \"effectiveDate\": \"2026-10-31\",\n  \"expiryDate\": \"2027-10-30\"\n}",
@@ -19930,7 +19930,7 @@
                     }
                   ]
                 },
-                "description": "Create (or update the open) renewal of a policy with the wizard data\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals",
+                "description": "Create (or update the open) renewal of a policy with the wizard data\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"850000\",\n    \"bodilyInjury\": \"200000\"\n  },\n  \"accessories\": [],\n  \"orderSummary\": {\n    \"netPremium\": 17800,\n    \"grossPremium\": 21450.5\n  },\n  \"effectiveDate\": \"2026-10-31\",\n  \"expiryDate\": \"2027-10-30\"\n}",
@@ -30031,7 +30031,7 @@
                 "exceptions"
               ]
             },
-            "description": "Log a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+            "description": "Log a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"type\": \"Missing Policy\",\n  \"description\": \"Policy not in reinsurer statement\",\n  \"amount\": 45000\n}",
@@ -30063,7 +30063,7 @@
                     "exceptions"
                   ]
                 },
-                "description": "Log a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+                "description": "Log a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"type\": \"Missing Policy\",\n  \"description\": \"Policy not in reinsurer statement\",\n  \"amount\": 45000\n}",
@@ -30117,7 +30117,7 @@
                 }
               ]
             },
-            "description": "Resolve a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+            "description": "Resolve a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"resolution\": \"Added to October bordereau\"\n}",
@@ -30158,7 +30158,7 @@
                     }
                   ]
                 },
-                "description": "Resolve a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+                "description": "Resolve a reconciliation exception\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"resolution\": \"Added to October bordereau\"\n}",
@@ -30198,7 +30198,7 @@
                 "reconciliation"
               ]
             },
-            "description": "Statement reconciliations (pending / matched) and exceptions\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: read:reinsurance, write:reinsurance"
+            "description": "Statement reconciliations (pending / matched) and exceptions\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: read:reinsurance, write:reinsurance, read:remittance, write:remittance"
           },
           "response": [
             {
@@ -30216,7 +30216,7 @@
                     "reconciliation"
                   ]
                 },
-                "description": "Statement reconciliations (pending / matched) and exceptions\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: read:reinsurance, write:reinsurance"
+                "description": "Statement reconciliations (pending / matched) and exceptions\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: read:reinsurance, write:reinsurance, read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -30252,7 +30252,7 @@
                 "reconciliation"
               ]
             },
-            "description": "Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration)\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+            "description": "Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration)\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"type\": \"Premium\",\n  \"reinsurerId\": \"RE001\",\n  \"period\": \"2026-09\",\n  \"theirAmount\": 3180000\n}",
@@ -30284,7 +30284,7 @@
                     "reconciliation"
                   ]
                 },
-                "description": "Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration)\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+                "description": "Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration)\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"type\": \"Premium\",\n  \"reinsurerId\": \"RE001\",\n  \"period\": \"2026-09\",\n  \"theirAmount\": 3180000\n}",
@@ -30338,7 +30338,7 @@
                 }
               ]
             },
-            "description": "Resolve a reconciliation variance\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+            "description": "Resolve a reconciliation variance\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"resolution\": \"Timing difference; booked in October\"\n}",
@@ -30379,7 +30379,7 @@
                     }
                   ]
                 },
-                "description": "Resolve a reconciliation variance\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance",
+                "description": "Resolve a reconciliation variance\n\nFront-end touchpoint: Reinsurance > Reconciliation\n\nAccess: write:reinsurance, write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"resolution\": \"Timing difference; booked in October\"\n}",
@@ -30425,7 +30425,7 @@
                 }
               ]
             },
-            "description": "Reinsurers with security rating and whether they meet the minimum\n\nFront-end touchpoint: Master > Reinsurance Treaty\n\nAccess: read:reinsurance, write:reinsurance"
+            "description": "Reinsurers with security rating and whether they meet the minimum\n\nFront-end touchpoint: Master > Reinsurance Treaty\n\nAccess: read:reinsurance, write:reinsurance, read:remittance, write:remittance"
           },
           "response": [
             {
@@ -30449,7 +30449,7 @@
                     }
                   ]
                 },
-                "description": "Reinsurers with security rating and whether they meet the minimum\n\nFront-end touchpoint: Master > Reinsurance Treaty\n\nAccess: read:reinsurance, write:reinsurance"
+                "description": "Reinsurers with security rating and whether they meet the minimum\n\nFront-end touchpoint: Master > Reinsurance Treaty\n\nAccess: read:reinsurance, write:reinsurance, read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -32426,6 +32426,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"Rejected\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/approvals/approvers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "approvals",
+                "approvers"
+              ]
+            },
+            "description": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/approvals/approvers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "approvals",
+                    "approvers"
+                  ]
+                },
+                "description": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"usr_1\",\n      \"username\": \"fe.approver\",\n      \"displayName\": \"Fe Approver\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -39764,6 +39815,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"report\": {\n      \"code\": \"production-register\",\n      \"name\": \"Production Register\"\n    },\n    \"columns\": [\n      {\n        \"key\": \"policyNumber\",\n        \"label\": \"Policy No.\"\n      }\n    ],\n    \"rows\": [\n      {\n        \"policyNumber\": \"POL-2026-00001\",\n        \"premium\": 12500\n      }\n    ],\n    \"totals\": {\n      \"premium\": 12500\n    },\n    \"summary\": {\n      \"newBusiness\": 1\n    },\n    \"groups\": null,\n    \"params\": {\n      \"from\": \"2026-01-01\",\n      \"to\": \"2026-09-30\",\n      \"criteria\": \"Overall\",\n      \"filters\": {}\n    }\n  },\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Agents a report can be filtered by (active users with the agent role), as { label, value }",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/filters/agents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "filters",
+                "agents"
+              ]
+            },
+            "description": "Agents a report can be filtered by (active users with the agent role), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/filters/agents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "filters",
+                    "agents"
+                  ]
+                },
+                "description": "Agents a report can be filtered by (active users with the agent role), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"label\": \"Ramon Agent\",\n      \"value\": \"usr_1\",\n      \"code\": \"AG001\"\n    }\n  ]\n}"
             }
           ]
         },

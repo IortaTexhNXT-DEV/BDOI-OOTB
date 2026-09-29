@@ -11,9 +11,11 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
+import FieldError from "../../../../components/FieldError";
 import { MasterLookup, deleteAndReturn, saveAndReturn, useMasterOptions } from "../masterRecord";
 import "./index.scss";
 import { confirmAction } from "../../../../utility/dialogs";
+import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 
 const AutomatedRemittanceMaster = () => {
   const { t } = useTranslation();
@@ -93,7 +95,29 @@ const AutomatedRemittanceMaster = () => {
     }));
   };
 
-  const handleSave = () => saveAndReturn({
+  const [errors, setErrors] = useState({});
+
+  const handleSave = () => {
+    const found = requiredErrors(formData, [
+      ["ruleCode", t("automatedRemittance.ruleCode")],
+      ["ruleName", t("automatedRemittance.ruleName")],
+      ["frequency", t("automatedRemittance.frequency")],
+      ["processingDay", t("automatedRemittance.processingDay"), (v) => v.frequency !== "Monthly" || (v.processingDay >= 1 && v.processingDay <= 31)],
+      ["mainAccount", "Main Account"],
+      ["branchDept", "Branch/Department"],
+    ]);
+    setErrors(found);
+    if (hasErrors(found)) {
+      toast.current?.show({ severity: "warn", summary: "Validation", detail: errorSummary(found), life: 4000 });
+      // the GL fields are on the second tab
+      if (!found.ruleCode && !found.ruleName && !found.frequency && !found.processingDay) setActiveIndex(1);
+      else setActiveIndex(0);
+      return null;
+    }
+    return save();
+  };
+
+  const save = () => saveAndReturn({
     type: TYPE,
     id: data?.id,
     toast,
@@ -163,6 +187,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("automatedRemittance.placeholderRuleCode")}
                       className="full-width"
                     />
+                    <FieldError error={errors.ruleCode} />
                   </div>
 
                   <div className="form-field">
@@ -176,6 +201,7 @@ const AutomatedRemittanceMaster = () => {
                       className="full-width"
                       maxLength={100}
                     />
+                    <FieldError error={errors.ruleName} />
                   </div>
 
                   <div className="form-field checkbox-field">
@@ -204,6 +230,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("automatedRemittance.selectFrequency")}
                       className="full-width"
                     />
+                    <FieldError error={errors.frequency} />
                   </div>
 
                   <div className="form-field">
@@ -220,6 +247,7 @@ const AutomatedRemittanceMaster = () => {
                       max={31}
                       className="full-width"
                     />
+                    <FieldError error={errors.processingDay} />
                   </div>
 
                   <div className="form-field">
@@ -267,6 +295,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("remittance.selectMainAccount")}
                       toast={toast}
                     />
+                    <FieldError error={errors.mainAccount} />
                   </div>
 
                   <div className="form-field">
@@ -292,6 +321,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("remittance.selectBranchDepartment")}
                       className="full-width"
                     />
+                    <FieldError error={errors.branchDept} />
                   </div>
                 </div>
               </div>

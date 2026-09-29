@@ -18,6 +18,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { MultiSelect } from "primereact/multiselect";
 import { Checkbox } from "primereact/checkbox";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import FieldError from "../../../../components/FieldError";
 import { useNavigate, useLocation } from "react-router-dom";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -28,6 +29,8 @@ import ToggleButton from "../../../../components/ToggleButton";
 import InputField from "../../../../components/InputField";
 import incentiveService from "../../../../services/incentiveService";
 import { isoDate, loadSettings, showError, showSuccess } from "../../../Remittance/shared";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 import "./index.scss";
 
 const IncentiveProgramMaster = () => {
@@ -49,6 +52,8 @@ const IncentiveProgramMaster = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [mode, setMode] = useState("add"); // add, edit, view
   const [currentProgram, setCurrentProgram] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     programCode: "",
     programName: "",
@@ -179,6 +184,8 @@ const IncentiveProgramMaster = () => {
       status: "Active",
       structure: []
     });
+    setErrors({});
+    setTabIndex(0);
     setShowDialog(true);
   };
 
@@ -190,6 +197,8 @@ const IncentiveProgramMaster = () => {
       startDate: rowData.startDate ? new Date(rowData.startDate) : null,
       endDate: rowData.endDate ? new Date(rowData.endDate) : null,
     });
+    setErrors({});
+    setTabIndex(0);
     setShowDialog(true);
   };
 
@@ -201,10 +210,29 @@ const IncentiveProgramMaster = () => {
       startDate: rowData.startDate ? new Date(rowData.startDate) : null,
       endDate: rowData.endDate ? new Date(rowData.endDate) : null,
     });
+    setErrors({});
+    setTabIndex(0);
     setShowDialog(true);
   };
 
   const handleSave = async () => {
+    const found = requiredErrors(formData, [
+      ["programName", "Program name"],
+      ["programType", "Program type"],
+      ["applicableTo", "Applicable to"],
+      ["startDate", "Start date"],
+      ["endDate", "End date"],
+      ["endDate", "End date", (v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, "End date must be on or after the start date"],
+      ["targetMetric", "Target metric"],
+      ["calculationFrequency", "Calculation frequency"],
+      ["baseTarget", "Base target", (v) => Number(v.baseTarget) > 0, "Base target must be greater than zero"],
+    ]);
+    setErrors(found);
+    if (hasErrors(found)) {
+      showError(toast, { message: errorSummary(found) }, "Validation");
+      setTabIndex(["targetMetric", "calculationFrequency", "baseTarget"].some((f) => found[f]) && !["programName", "programType", "applicableTo", "startDate", "endDate"].some((f) => found[f]) ? 1 : 0);
+      return;
+    }
     setLoading(true);
     try {
       const programData = {
@@ -280,7 +308,7 @@ const IncentiveProgramMaster = () => {
   };
 
   const dateBodyTemplate = (rowData, field) => {
-    return rowData[field] ? new Date(rowData[field]).toLocaleDateString() : "-";
+    return formatAppDate(rowData[field]);
   };
 
   const amountBodyTemplate = (rowData, field) => {
@@ -444,27 +472,28 @@ const IncentiveProgramMaster = () => {
         footer={dialogFooter}
         maximizable
       >
-        <TabView>
+        <TabView activeIndex={tabIndex} onTabChange={(e) => setTabIndex(e.index)}>
           <TabPanel header="Basic Information">
             <div className="form-grid">
               <div className="form-row">
                 <div className="form-field">
-                  <label>Program Code*</label>
+                  <label>Program Code</label>
                   <InputText
                     value={formData.programCode}
                     onChange={(e) => setFormData({...formData, programCode: e.target.value})}
                     disabled={mode === "view"}
-                    placeholder="Enter program code"
+                    placeholder="Generated when left blank"
                   />
                 </div>
                 <div className="form-field">
-                  <label>Program Name*</label>
+                  <label>Program Name *</label>
                   <InputText
                     value={formData.programName}
                     onChange={(e) => setFormData({...formData, programName: e.target.value})}
                     disabled={mode === "view"}
                     placeholder="Enter program name"
                   />
+                  <FieldError error={errors.programName} />
                 </div>
               </div>
 
@@ -483,7 +512,7 @@ const IncentiveProgramMaster = () => {
 
               <div className="form-row">
                 <div className="form-field">
-                  <label>Program Type*</label>
+                  <label>Program Type *</label>
                   <Dropdown
                     value={formData.programType}
                     options={programTypeOptions}
@@ -491,9 +520,10 @@ const IncentiveProgramMaster = () => {
                     disabled={mode === "view"}
                     placeholder="Select program type"
                   />
+                  <FieldError error={errors.programType} />
                 </div>
                 <div className="form-field">
-                  <label>Applicable To*</label>
+                  <label>Applicable To *</label>
                   <MultiSelect
                     value={formData.applicableTo}
                     options={applicableToOptions}
@@ -501,29 +531,32 @@ const IncentiveProgramMaster = () => {
                     disabled={mode === "view"}
                     placeholder="Select applicable entities"
                   />
+                  <FieldError error={errors.applicableTo} />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-field">
-                  <label>Start Date*</label>
+                  <label>Start Date *</label>
                   <Calendar
                     value={formData.startDate}
                     onChange={(e) => setFormData({...formData, startDate: e.value})}
                     disabled={mode === "view"}
                     placeholder="Select start date"
-                    dateFormat="mm/dd/yy"
+                    dateFormat={calendarDateFormat()}
                   />
+                  <FieldError error={errors.startDate} />
                 </div>
                 <div className="form-field">
-                  <label>End Date*</label>
+                  <label>End Date *</label>
                   <Calendar
                     value={formData.endDate}
                     onChange={(e) => setFormData({...formData, endDate: e.value})}
                     disabled={mode === "view"}
                     placeholder="Select end date"
-                    dateFormat="mm/dd/yy"
+                    dateFormat={calendarDateFormat()}
                   />
+                  <FieldError error={errors.endDate} />
                 </div>
               </div>
 
@@ -541,9 +574,9 @@ const IncentiveProgramMaster = () => {
                 <div className="form-field">
                   <label>Currency</label>
                   <Dropdown
-                    value={formData.currency}
+                    value={formData.Currency ?? formData.currency}
                     options={currencyOptions}
-                    onChange={(e) => setFormData({...formData, currency: e.value})}
+                    onChange={(e) => setFormData({...formData, Currency: e.value})}
                     disabled={mode === "view"}
                     placeholder="Select currency"
                   />
@@ -556,7 +589,7 @@ const IncentiveProgramMaster = () => {
             <div className="form-grid">
               <div className="form-row">
                 <div className="form-field">
-                  <label>Target Metric*</label>
+                  <label>Target Metric *</label>
                   <Dropdown
                     value={formData.targetMetric}
                     options={targetMetricOptions}
@@ -564,9 +597,10 @@ const IncentiveProgramMaster = () => {
                     disabled={mode === "view"}
                     placeholder="Select target metric"
                   />
+                  <FieldError error={errors.targetMetric} />
                 </div>
                 <div className="form-field">
-                  <label>Calculation Frequency*</label>
+                  <label>Calculation Frequency *</label>
                   <Dropdown
                     value={formData.calculationFrequency}
                     options={frequencyOptions}
@@ -574,12 +608,13 @@ const IncentiveProgramMaster = () => {
                     disabled={mode === "view"}
                     placeholder="Select frequency"
                   />
+                  <FieldError error={errors.calculationFrequency} />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-field">
-                  <label>Base Target*</label>
+                  <label>Base Target *</label>
                   <InputNumber
                     value={formData.baseTarget}
                     onValueChange={(e) => setFormData({...formData, baseTarget: e.value})}
@@ -589,6 +624,7 @@ const IncentiveProgramMaster = () => {
                     minFractionDigits={0}
                     maxFractionDigits={2}
                   />
+                  <FieldError error={errors.baseTarget} />
                 </div>
                 <div className="form-field">
                   <label>Stretch Target</label>

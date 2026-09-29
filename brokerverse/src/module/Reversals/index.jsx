@@ -59,7 +59,7 @@ const Reversals = () => {
     const errors = {};
 
     if (!values.transactionCode) {
-      errors.transactionCode = t("validation.fieldCodeRequired");
+      errors.transactionCode = t("validation.fieldRequired");
     }
 
     if (!values.transactionNumber) {

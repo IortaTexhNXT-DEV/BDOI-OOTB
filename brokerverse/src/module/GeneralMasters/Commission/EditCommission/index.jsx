@@ -33,6 +33,7 @@ import {
 import { Card } from "primereact/card";
 import AddCommissionPopup from "../AddCommission/AddCommissionPopup";
 import { useTranslation } from "react-i18next";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const EditCommission = () => {
   const { t } = useTranslation();
@@ -472,7 +473,7 @@ const EditCommission = () => {
                       e.value ? e.value.toLocaleDateString("en-CA") : ""
                     );
                   }}
-                  dateFormat="yy-mm-dd"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                   className="calender_field_claim"
                 />
@@ -507,7 +508,7 @@ const EditCommission = () => {
                       e.value ? e.value.toLocaleDateString("en-CA") : ""
                     );
                   }}
-                  dateFormat="yy-mm-dd"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                   className="calender_field_claim"
                 />
@@ -570,12 +571,12 @@ const EditCommission = () => {
             Add Level Wise Commission Sharing
           </div>
           <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture ">
-            <div className="add__icon__view__petty" onClick={handlePolicy}>
+            <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
               <div className="add__icon__petty">
                 <SvgAdd color={"#fff"} />
               </div>
               <div className="add__text__petty">{t("generalMasters.add")}</div>
-            </div>
+            </button>
           </div>
         </div>
         <div className="col-12 card">

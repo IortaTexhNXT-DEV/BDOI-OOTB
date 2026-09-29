@@ -104,24 +104,28 @@ const PersonalDetails = () => {
 
   // Prepare all data objects BEFORE callbacks
   const personalDetailsData = useMemo(() => {
+    // The client record holds the current details (a completed personal details endorsement updates it); the lead
+    // only has what was captured before the policy, so it is the fallback.
     const lead = policydetailedlist?.lead || {};
+    const client = policydetailedlist?.client || {};
+    const pick = (clientValue, leadValue) => clientValue || leadValue || "";
 
     return {
-      CompanyName: lead?.companyName || "",
-      TaxNumber: lead?.taxNumber || "",
-      FirstName: lead?.firstName || "",
-      LastName: lead?.lastName || "",
+      CompanyName: pick(client.companyName, lead?.companyName),
+      TaxNumber: pick(client.taxNumber, lead?.taxNumber),
+      FirstName: pick(client.firstName, lead?.firstName),
+      LastName: pick(client.lastName, lead?.lastName),
       PreferredName:
-        policydetailedlist?.ClientName || policydetailedlist?.insuredName || "",
-      EmailID: lead?.emailId || "",
-      ContactNumber: lead?.contactNumber || "",
-      HouseNo: lead?.houseNo || "",
-      Barangay: lead?.barangay || "",
-      Country: normalizeCountryName(lead?.country || ""),
-      Province: lead?.province || "",
-      City: lead?.city || "",
-      ZIPCode: lead?.zipCode || "",
-      DateofBirth: lead?.dateOfBirth || "",
+        policydetailedlist?.insuredName || policydetailedlist?.ClientName || client.displayName || "",
+      EmailID: pick(client.emailId || client.email, lead?.emailId),
+      ContactNumber: pick(client.contactNumber || client.phone, lead?.contactNumber),
+      HouseNo: pick(client.houseNo, lead?.houseNo),
+      Barangay: pick(client.barangay, lead?.barangay),
+      Country: normalizeCountryName(pick(client.country, lead?.country)),
+      Province: pick(client.province, lead?.province),
+      City: pick(client.city, lead?.city),
+      ZIPCode: pick(client.zipCode, lead?.zipCode),
+      DateofBirth: pick(client.DOB, lead?.dateOfBirth),
     };
   }, [policydetailedlist]);
 

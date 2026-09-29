@@ -27,6 +27,7 @@ import mastersService from "../../../services/mastersService";
 import clientService from "../../../services/clientService";
 import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 
 const initialValues = {
   VoucherDate: new Date(),
@@ -416,7 +417,7 @@ function Createvoucher() {
     const isAgentPayee = payeeCode === "Agent/Referrer";
 
     if (!values.DepartmentCode) {
-      errors.DepartmentCode = t("paymentVoucher.thisFieldCodeRequired");
+      errors.DepartmentCode = t("paymentVoucher.thisFieldRequired");
     }
     if (!values.BranchCode) {
       errors.BranchCode = t("paymentVoucher.thisFieldRequired");
@@ -563,7 +564,7 @@ function Createvoucher() {
               onChange={(e) => {
                 formik.setFieldValue("VoucherDate", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               disabled={true}
             />
           </div>

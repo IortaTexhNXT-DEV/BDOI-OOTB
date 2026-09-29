@@ -118,7 +118,7 @@ function AddExchange({ action }) {
     const errors = {};
 
     if (!values.CountryName) {
-      errors.CountryName = t("validation.fieldCodeRequired");
+      errors.CountryName = t("validation.fieldRequired");
     }
     if (!values.ISOCode) {
       errors.ISOCode = t("validation.fieldRequired");

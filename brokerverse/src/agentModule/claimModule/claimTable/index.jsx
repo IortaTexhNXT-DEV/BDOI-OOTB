@@ -15,6 +15,7 @@ import { Skeleton } from "primereact/skeleton";
 import claimsService from "../../../services/claimsService";
 import { setPolicyHolderData } from "../../claimsModule/claimDetails/store/claimDetailsReducers";
 import { notifyError } from "../../../utility/dialogs";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -319,12 +320,7 @@ const ClaimTable = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return t("policyDetail.nA");
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return formatAppDate(dateString, { empty: t("policyDetail.nA") });
   };
 
   const fetchClaims = async () => {

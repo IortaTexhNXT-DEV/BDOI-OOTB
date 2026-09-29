@@ -10,6 +10,8 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Incentive', '/incentive');
 const read = canRead('incentive');
 const write = canWrite('incentive');
+// Program set-up is master data (Master > Incentive Programs): business / IT administrators, not the finance users who pay (D102).
+const programWrite = canWrite('masters');
 // Agents see their own programs and statements with the profile permission; incentive readers may look up any agent.
 const self = canRead('incentive', 'read:profile');
 const S = (n) => `Accounts > Incentive > ${n}`;
@@ -38,17 +40,17 @@ define({
   handler: async (req, res) => ok(res, await svc.getProgram(req.params.id)),
 });
 define({
-  method: 'POST', path: '/programs', summary: 'Create a program (metric, types and frequencies validated against configuration)', screen: 'Master > Incentive Programs > Add Program', middleware: write,
+  method: 'POST', path: '/programs', summary: 'Create a program (metric, types and frequencies validated against configuration)', screen: 'Master > Incentive Programs > Add Program', middleware: programWrite,
   request: { ...program, id: undefined, programCode: 'INC-2026-010' }, response: { success: true, data: program },
   handler: async (req, res) => created(res, await run(req, 'incentive_program', 'create', () => svc.createProgram(req.body || {}, req.user)), 'Program created'),
 });
 define({
-  method: 'PUT', path: '/programs/:id', summary: 'Update a program (partial; also used to toggle status)', screen: 'Master > Incentive Programs > Edit', middleware: write,
+  method: 'PUT', path: '/programs/:id', summary: 'Update a program (partial; also used to toggle status)', screen: 'Master > Incentive Programs > Edit', middleware: programWrite,
   request: { status: 'Inactive' }, response: { success: true, data: { ...program, status: 'Inactive' } },
   handler: async (req, res) => ok(res, await run(req, 'incentive_program', 'update', () => svc.updateProgram(req.params.id, req.body || {}, req.user)), 'Program updated'),
 });
 define({
-  method: 'DELETE', path: '/programs/:id', summary: 'Delete a program (soft; blocked while calculations are pending or approved)', screen: 'Master > Incentive Programs', middleware: write,
+  method: 'DELETE', path: '/programs/:id', summary: 'Delete a program (soft; blocked while calculations are pending or approved)', screen: 'Master > Incentive Programs', middleware: programWrite,
   response: { success: true, message: 'Program deleted successfully' },
   handler: async (req, res) => ok(res, await run(req, 'incentive_program', 'delete', () => svc.deleteProgram(req.params.id, req.user)), 'Program deleted successfully'),
 });
@@ -112,7 +114,15 @@ define({
 define({
   method: 'GET', path: '/statement', summary: "Agent incentive statement for a period (own statement, or any agent's for incentive readers)", screen: S('Statement'), middleware: self,
   query: { agentId: 'usr_1', period: '2026-08' }, response: { success: true, data: { agentName: 'Juan Dela Cruz', period: 'August 2026', totalEarnings: 13500, ytdEarnings: 38500, pendingPayment: 13500, programBreakdown: [], monthlyTrend: [] } },
-  handler: async (req, res) => ok(res, await svc.statement(agentFor(req), req.query.period)),
+  handler: async (req, res) => {
+    const agentId = agentFor(req);
+    // A manager (finance, administrator) who is not an agent opens the screen without choosing an agent: answer with an
+    // empty statement flagged eligible: false (the screen then offers GET /incentive/agents) instead of 404 (D101).
+    if (!req.query.agentId && !(await svc.eligibleAgents(agentId)).length) {
+      return ok(res, { ...svc.emptyStatement(req.query.period), eligible: false, selectAgent: isReader(req.user) });
+    }
+    return ok(res, { ...(await svc.statement(agentId, req.query.period)), eligible: true });
+  },
 });
 define({
   method: 'GET', path: '/agents', summary: 'Agents eligible for incentives (roles from configuration)', screen: `${S('Reports')}; ${S('Statement')}`, middleware: read,

@@ -112,10 +112,10 @@ const BankChequeMaster = () => {
         <div className="filterbutton_container">
           {/* <SvgFilters/> */}
 
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd className="addicon" />
             <p className="addtext">{t("financeMasters.add")}</p>
-          </div>
+          </button>
         </div>
       </div>
 

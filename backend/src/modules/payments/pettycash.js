@@ -105,7 +105,7 @@ export async function transitionRequest(db, id, action, user, reason) {
     if (!['draft', 'rejected'].includes(r.status)) throw conflict(`Request is ${r.status}`);
     if (!(Number(r.total_amount) > 0)) throw badRequest('Add at least one line before submitting');
     await db.query('UPDATE petty_cash_requests SET status = \'submitted\', updated_at = now() WHERE id = $1', [r.id]);
-    await notify({ type: 'approval', title: `Petty cash request ${r.request_number} awaiting approval`, message: `${r.requester_name}: ${r.total_amount}`, entity: 'petty_cash_request', entityId: r.id });
+    await notify({ audience: 'write:disbursements', type: 'approval', title: `Petty cash request ${r.request_number} awaiting approval`, message: `${r.requester_name}: ${r.total_amount}`, entity: 'petty_cash_request', entityId: r.id });
   } else {
     if (r.status !== 'submitted') throw conflict(`Request is ${r.status}; only submitted requests can be ${action === 'approve' ? 'approved' : 'rejected'}`);
     await assertChecker(user, r.created_by, 'petty cash request');
@@ -122,7 +122,7 @@ async function adjustCash(db, f, delta) {
   if (next > Number(f.fund_size)) throw conflict(`Fund ${f.code} would exceed its size of ${f.fund_size}`);
   await db.query('UPDATE petty_cash_funds SET available_cash = $2, updated_at = now() WHERE id = $1', [f.id, next]);
   if (delta < 0 && next < Number(f.minimum_cashbox)) {
-    await notify({ userId: f.custodian_user_id || null, type: 'alert', title: `Petty cash ${f.code} below minimum`, message: `Available ${next}; minimum cashbox ${f.minimum_cashbox}. Replenish the fund.`, entity: 'petty_cash_fund', entityId: f.id });
+    await notify({ userId: f.custodian_user_id || null, audience: 'write:disbursements', type: 'alert', title: `Petty cash ${f.code} below minimum`, message: `Available ${next}; minimum cashbox ${f.minimum_cashbox}. Replenish the fund.`, entity: 'petty_cash_fund', entityId: f.id });
   }
 }
 

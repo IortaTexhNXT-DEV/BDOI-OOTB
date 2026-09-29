@@ -607,10 +607,9 @@ export const menuList = [
         name: "Home",
         icon: <SvgAgentHomeIcon color="#9DA4AE" />,
         path: "/agent/home",
+        // the notifications page and the user's own profile are open to every signed-in role (not part of Home)
         includes: [
           "/agent/home",
-          "/agent/notification",
-          "/agent/viewprofile",
           "/agent/openitems",
           "/agent/openitems/upcomingevents",
         ],
@@ -1230,6 +1229,12 @@ export const menuList = [
     icon: <SvgReportsIcon />,
     submenu: [
       {
+        id: 0,
+        name: "All Reports",
+        path: "/reports/catalogue",
+        includes: ["/reports/catalogue", "/reports/run/"],
+      },
+      {
         id: 1,
         name: "Operational Reports",
         // path: "/reports/operationalreports",
@@ -1306,7 +1311,7 @@ export const menuList = [
           },
           {
             id: 5,
-            name: "Trail Balance",
+            name: "Trial Balance",
             path: "/reports/financialreports/trailbalance",
             includes: ["/reports/financialreports/trailbalance"],
           },

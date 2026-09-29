@@ -18,6 +18,7 @@ import SvgDot from "../../../../assets/icons/SvgDot";
 import remittanceService, { apiRequest, masterService } from "../../../../services/remittanceService";
 import { showError } from "../../../Remittance/shared";
 import { saveAndReturn } from "../masterRecord";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import "./index.scss";
 
 const ApprovalWorkflowMaster = () => {
@@ -259,8 +260,8 @@ const ApprovalWorkflowMaster = () => {
                 <SvgDot />
                 Workflow Definition
               </h4>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-4">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-4">
                   <label>Workflow Code *</label>
                   <InputText
                     value={formData.workflowCode}
@@ -268,14 +269,14 @@ const ApprovalWorkflowMaster = () => {
                     placeholder={t("remittance.placeholderWorkflowCode")}
                   />
                 </div>
-                <div className="p-field p-col-12 p-md-4">
+                <div className="p-field field col-12 md:col-4">
                   <label>Workflow Name *</label>
                   <InputText
                     value={formData.workflowName}
                     onChange={(e) => setFormData({ ...formData, workflowName: e.target.value })}
                   />
                 </div>
-                <div className="p-field p-col-12 p-md-4">
+                <div className="p-field field col-12 md:col-4">
                   <label>Active</label>
                   <div className="checkbox-wrapper">
                     <Checkbox
@@ -288,8 +289,8 @@ const ApprovalWorkflowMaster = () => {
               </div>
 
               <h3>Workflow Type</h3>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-6">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-6">
                   <label>Applies To *</label>
                   <MultiSelect
                     value={formData.appliesTo}
@@ -299,7 +300,7 @@ const ApprovalWorkflowMaster = () => {
                     display="chip"
                   />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>Workflow Pattern</label>
                   <Dropdown
                     value={formData.workflowPattern}
@@ -340,8 +341,8 @@ const ApprovalWorkflowMaster = () => {
           <TabPanel header="Conditions">
             <div className="form-section">
               <h3>Escalation Rules</h3>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-6">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-6">
                   <label>Enable Escalation</label>
                   <div className="checkbox-wrapper">
                     <Checkbox
@@ -353,14 +354,14 @@ const ApprovalWorkflowMaster = () => {
                 </div>
                 {formData.enableEscalation && (
                   <>
-                    <div className="p-field p-col-12 p-md-6">
+                    <div className="p-field field col-12 md:col-6">
                       <label>Escalation After (Hours)</label>
                       <InputNumber
                         value={formData.escalationHours}
                         onValueChange={(e) => setFormData({ ...formData, escalationHours: e.value })}
                       />
                     </div>
-                    <div className="p-field p-col-12 p-md-6">
+                    <div className="p-field field col-12 md:col-6">
                       <label>Escalate To</label>
                       <Dropdown
                         value={formData.escalateTo}
@@ -369,7 +370,7 @@ const ApprovalWorkflowMaster = () => {
                         placeholder={t("remittance.selectRole")}
                       />
                     </div>
-                    <div className="p-field p-col-12 p-md-6">
+                    <div className="p-field field col-12 md:col-6">
                       <label>Max Escalation Levels</label>
                       <InputNumber
                         value={formData.maxEscalationLevels}
@@ -410,8 +411,8 @@ const ApprovalWorkflowMaster = () => {
               </DataTable>
 
               <h3 className="mt-4">Reminder Settings</h3>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-4">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-4">
                   <label>Enable Reminders</label>
                   <div className="checkbox-wrapper">
                     <Checkbox
@@ -423,14 +424,14 @@ const ApprovalWorkflowMaster = () => {
                 </div>
                 {formData.enableReminders && (
                   <>
-                    <div className="p-field p-col-12 p-md-4">
+                    <div className="p-field field col-12 md:col-4">
                       <label>First Reminder After (Hours)</label>
                       <InputNumber
                         value={formData.firstReminder}
                         onValueChange={(e) => setFormData({ ...formData, firstReminder: e.value })}
                       />
                     </div>
-                    <div className="p-field p-col-12 p-md-4">
+                    <div className="p-field field col-12 md:col-4">
                       <label>Reminder Frequency (Hours)</label>
                       <InputNumber
                         value={formData.reminderFrequency}
@@ -446,8 +447,8 @@ const ApprovalWorkflowMaster = () => {
           <TabPanel header="Delegation">
             <div className="form-section">
               <h3>Delegation Rules</h3>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-6">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-6">
                   <label>Allow Delegation</label>
                   <div className="checkbox-wrapper">
                     <Checkbox
@@ -457,7 +458,7 @@ const ApprovalWorkflowMaster = () => {
                     <label className="checkbox-label">Allow</label>
                   </div>
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>Allow Permanent Delegation</label>
                   <div className="checkbox-wrapper">
                     <Checkbox
@@ -469,14 +470,14 @@ const ApprovalWorkflowMaster = () => {
                 </div>
                 {formData.allowDelegation && (
                   <>
-                    <div className="p-field p-col-12 p-md-6">
+                    <div className="p-field field col-12 md:col-6">
                       <label>Max Delegation Days</label>
                       <InputNumber
                         value={formData.maxDelegationDays}
                         onValueChange={(e) => setFormData({ ...formData, maxDelegationDays: e.value })}
                       />
                     </div>
-                    <div className="p-field p-col-12 p-md-6">
+                    <div className="p-field field col-12 md:col-6">
                       <label>Require Delegation Approval</label>
                       <div className="checkbox-wrapper">
                         <Checkbox
@@ -526,7 +527,7 @@ const ApprovalWorkflowMaster = () => {
                   header="Requested By"
                   style={{ width: '15%' }}
                 />
-                <Column
+                <Column body={(row) => formatAppDate(row.requestDate)}
                   field="requestDate"
                   header="Request Date"
                   style={{ width: '15%' }}

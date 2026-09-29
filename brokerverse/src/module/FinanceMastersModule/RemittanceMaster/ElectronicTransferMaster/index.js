@@ -20,6 +20,7 @@ import remittanceService from "../../../../services/remittanceService";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { showError } from "../../../Remittance/shared";
 import { saveAndReturn, useMasterOptions } from "../masterRecord";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import "./index.scss";
 
 const ElectronicTransferMaster = () => {
@@ -662,7 +663,7 @@ const ElectronicTransferMaster = () => {
                   header="Method"
                   style={{ width: '15%' }}
                 />
-                <Column
+                <Column body={(row) => formatAppDate(row.scheduledDate)}
                   field="scheduledDate"
                   header="Scheduled Date"
                   style={{ width: '15%' }}

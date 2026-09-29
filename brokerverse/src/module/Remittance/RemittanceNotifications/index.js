@@ -587,28 +587,28 @@ const RemittanceNotifications = () => {
 
       <Dialog header="Compose Notification" visible={showCompose} style={{ width: '50vw' }} footer={composeFooter} onHide={() => setShowCompose(false)}>
         <div className="p-fluid">
-          <div className="p-field">
+          <div className="p-field field">
             <label>Template</label>
             <Dropdown value={message.templateCode} options={templates.map((tpl) => ({ label: tpl.name, value: tpl.code }))} showClear
               onChange={(e) => (e.value ? applyTemplate(templates.find((tpl) => tpl.code === e.value)) : setField("templateCode", null))} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Type</label>
             <InputText value={message.type} onChange={(e) => setField("type", e.target.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Recipients *</label>
             <InputText value={message.recipients} onChange={(e) => setField("recipients", e.target.value)} placeholder="email@example.com, ..." />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Channel</label>
             <Dropdown value={message.channel} options={[...new Set(["Email", ...templates.map((tpl) => tpl.channel).filter(Boolean)])]} onChange={(e) => setField("channel", e.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Subject *</label>
             <InputText value={message.subject} onChange={(e) => setField("subject", e.target.value)} />
           </div>
-          <div className="p-field">
+          <div className="p-field field">
             <label>Message *</label>
             <InputTextarea rows={5} value={message.content} onChange={(e) => setField("content", e.target.value)} />
           </div>

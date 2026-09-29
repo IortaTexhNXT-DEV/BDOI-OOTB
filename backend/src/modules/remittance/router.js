@@ -265,6 +265,12 @@ define({
   handler: async (req, res) => ok(res, await svc.listApprovals(req.query)),
 });
 define({
+  method: 'GET', path: '/approvals/approvers', summary: 'Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down',
+  screen: S('Approval > Delegate'), middleware: read,
+  response: { success: true, data: [{ userId: 'usr_1', username: 'fe.approver', displayName: 'Fe Approver' }] },
+  handler: async (req, res) => ok(res, await svc.approvers(req.user)),
+});
+define({
   method: 'GET', path: '/approvals/history', summary: 'Approval actions (approved / rejected / delegated)', screen: S('Approval > History'), middleware: read,
   response: { success: true, data: [{ referenceNo: 'TRF-2026-00001', transactionType: 'Electronic Transfer', amount: 156000, action: 'Approved', actionDate: '2026-09-20 15:30', remarks: 'Verified' }] },
   handler: async (_req, res) => ok(res, await svc.approvalHistory()),

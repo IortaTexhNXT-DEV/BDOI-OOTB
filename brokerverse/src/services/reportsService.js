@@ -24,6 +24,9 @@ const toOptions = (rows, labelKey, valueKey) =>
   (rows || []).map((row) => ({ label: row[labelKey], value: row[valueKey] }));
 
 const reportsService = {
+  /** Reports the signed-in user may run (filtered by role and permission on the server). */
+  getCatalogue: async () => (await request("/reports")).data || [],
+
   /** Report definition: filter schema (x-options), columns, criteria and formats. */
   getDefinition: async (code) => (await request(`/reports/${code}`)).data,
 
@@ -35,8 +38,9 @@ const reportsService = {
   generateReport: async (code, params, format = "xlsx") =>
     (await post(`/reports/${code}/generate`, { ...params, format })).data,
 
+  /** Agent filter: served to every report reader (GET /users needs user administration rights). */
   getAgentOptions: async () =>
-    toOptions((await request("/users?role=agent&perPage=500")).data, "displayName", "userId"),
+    toOptions((await request("/reports/filters/agents")).data, "label", "value"),
 
   getInsuranceCompanyOptions: async () =>
     toOptions((await request("/masters/insurance-company/options")).data, "label", "value"),

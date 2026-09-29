@@ -15,6 +15,7 @@ import { useFormik } from "formik";
 import { getSearchInsurancePolicyTypeMiddleware, getInsurancePolicyTypeMiddleWare } from "../store/insurancePolicyTypeMiddleware";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
@@ -167,7 +168,7 @@ const TableData = ({ navigate }) => {
           header="Modified by"
           className="fieldvalue_container"
         ></Column>
-        <Column
+        <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
           header="Modified On"
           className="fieldvalue_container"

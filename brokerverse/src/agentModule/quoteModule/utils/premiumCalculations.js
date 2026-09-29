@@ -315,26 +315,17 @@ const validatePremiumCalculation = ({
 };
 
 /**
- * Get centralized tax rates from product configurator
- * @param {Object} productConfigurator - Product configuration object
- * @param {Object} settingsRates - Decimal rates from GET /settings?group=tax (see useTaxRates), used when the template has none
+ * Tax rates used on screen: the configured tax.* rates (GET /settings?group=tax, see useTaxRates), the same rates the
+ * server prices with. Values kept in an old product template ("Taxes and fees") are ignored: one source of truth.
+ * @param {Object} _productConfigurator - kept for the callers' signature; template taxes are not used
+ * @param {Object} settingsRates - decimal rates from useTaxRates
  * @returns {Object} Tax rates as decimals (e.g., 0.12 for 12%)
  */
-export const getTaxRates = (productConfigurator, settingsRates = {}) => {
-  const config = productConfigurator?.configuration?.taxes;
-
-  // Template rates are stored as percentages (e.g., "12" for 12%), so divide by 100
-  const toDecimal = (value, fallback) => {
-    const num = parseFloat(value);
-    return Number.isNaN(num) || !value ? Number(fallback) || 0 : num / 100;
-  };
-
-  return {
-    documentaryStampTax: toDecimal(config?.documentary_stamp_tax, settingsRates.documentaryStampTax),
-    valueAddedTax: toDecimal(config?.value_added_tax, settingsRates.valueAddedTax),
-    localGovernmentTax: toDecimal(config?.local_government_tax, settingsRates.localGovernmentTax),
-  };
-};
+export const getTaxRates = (_productConfigurator, settingsRates = {}) => ({
+  documentaryStampTax: Number(settingsRates.documentaryStampTax) || 0,
+  valueAddedTax: Number(settingsRates.valueAddedTax) || 0,
+  localGovernmentTax: Number(settingsRates.localGovernmentTax) || 0,
+});
 
 /**
  * Calculate all premium components based on coverage details

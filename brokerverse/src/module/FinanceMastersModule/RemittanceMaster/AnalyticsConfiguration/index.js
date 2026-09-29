@@ -575,7 +575,7 @@ const AnalyticsConfiguration = () => {
                 <Card className="setting-group">
                   <h3>Data Processing</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Data Retention (Months)</label>
                       <InputNumber
                         value={analyticsSettings.dataRetention}
@@ -586,7 +586,7 @@ const AnalyticsConfiguration = () => {
                         disabled={isViewMode}
                       />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Aggregation Level</label>
                       <Dropdown
                         value={analyticsSettings.aggregationLevel}
@@ -598,7 +598,7 @@ const AnalyticsConfiguration = () => {
                         disabled={isViewMode}
                       />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Cache Refresh Interval (minutes)</label>
                       <InputNumber
                         value={analyticsSettings.cacheRefreshInterval}
@@ -615,7 +615,7 @@ const AnalyticsConfiguration = () => {
                 <Card className="setting-group">
                   <h3>Real-time Features</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <div className="field-checkbox">
                         <Checkbox
                           id="realTimeUpdates"
@@ -629,7 +629,7 @@ const AnalyticsConfiguration = () => {
                         <label htmlFor="realTimeUpdates">Enable Real-time Updates</label>
                       </div>
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <div className="field-checkbox">
                         <Checkbox
                           id="predictiveAnalytics"
@@ -643,7 +643,7 @@ const AnalyticsConfiguration = () => {
                         <label htmlFor="predictiveAnalytics">Enable Predictive Analytics</label>
                       </div>
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <div className="field-checkbox">
                         <Checkbox
                           id="anomalyDetection"
@@ -663,7 +663,7 @@ const AnalyticsConfiguration = () => {
                 <Card className="setting-group">
                   <h3>Alert Configuration</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Alert Threshold (%)</label>
                       <div className="threshold-slider">
                         <Slider
@@ -685,7 +685,7 @@ const AnalyticsConfiguration = () => {
                 <Card className="setting-group">
                   <h3>Export Options</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Supported Export Formats</label>
                       <MultiSelect
                         value={analyticsSettings.exportFormats}
@@ -831,12 +831,12 @@ const AnalyticsConfiguration = () => {
       >
         {selectedWidget && (
           <div className="widget-form">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12 p-md-6">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12 md:col-6">
                 <label>Widget Name</label>
                 <InputText value={selectedWidget.widgetName} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Widget Type</label>
                 <Dropdown
                   value={selectedWidget.widgetType}
@@ -844,7 +844,7 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Chart Type</label>
                 <Dropdown
                   value={selectedWidget.chartType}
@@ -852,7 +852,7 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Data Source</label>
                 <Dropdown
                   value={selectedWidget.dataSource}
@@ -860,14 +860,14 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Refresh Interval (minutes)</label>
                 <InputNumber
                   value={selectedWidget.refreshInterval}
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Available Filters</label>
                 <MultiSelect
                   value={selectedWidget.filters}
@@ -895,12 +895,12 @@ const AnalyticsConfiguration = () => {
       >
         {selectedKpi && (
           <div className="kpi-form">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12">
                 <label>KPI Name</label>
                 <InputText value={selectedKpi.kpiName} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Description</label>
                 <InputTextarea
                   value={selectedKpi.description}
@@ -908,7 +908,7 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Calculation Formula</label>
                 <InputTextarea
                   value={selectedKpi.calculation}
@@ -916,15 +916,15 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Unit</label>
                 <InputText value={selectedKpi.unit} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Target Value</label>
                 <InputNumber value={selectedKpi.target} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Threshold Configuration</label>
                 <div className="threshold-config">
                   <div className="threshold-item">
@@ -965,16 +965,16 @@ const AnalyticsConfiguration = () => {
       >
         {selectedReport && (
           <div className="report-form">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12 p-md-6">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12 md:col-6">
                 <label>Template Name</label>
                 <InputText value={selectedReport.templateName} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Category</label>
                 <InputText value={selectedReport.category} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Frequency</label>
                 <Dropdown
                   value={selectedReport.frequency}
@@ -982,7 +982,7 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Output Format</label>
                 <Dropdown
                   value={selectedReport.format}
@@ -990,7 +990,7 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Recipients</label>
                 <MultiSelect
                   value={selectedReport.recipients}
@@ -1003,7 +1003,7 @@ const AnalyticsConfiguration = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Data Points to Include</label>
                 <MultiSelect
                   value={selectedReport.dataPoints}

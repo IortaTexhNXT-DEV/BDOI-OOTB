@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useClaimHeader from "../useClaimHeader";
 import { Button } from "primereact/button";
 import { useSelector } from "react-redux";
 import "./index.scss";
@@ -63,9 +64,10 @@ const SettlementApproval = () => {
   }));
 
   // Try to get policy holder name from Redux first, then fallback
-  const policyHolderName = reduxPolicyHolderName || t("agent.loading");
+  const header = useClaimHeader(claimId);
+  const policyHolderName = header.policyHolderName || reduxPolicyHolderName || t("agent.loading");
 
-  const claimNumber = reduxClaimNumber || t("agent.loading");
+  const claimNumber = header.claimNumber || reduxClaimNumber || t("agent.loading");
 
   const handleReject = async () => {
     if (!claimId) {

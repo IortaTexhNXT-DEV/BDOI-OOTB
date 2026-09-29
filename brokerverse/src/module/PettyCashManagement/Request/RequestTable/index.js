@@ -21,6 +21,7 @@ import {
 } from "../store/pettyCashRequestMiddleware";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const RequestTable = () => {
   const { t } = useTranslation();
@@ -233,7 +234,7 @@ const RequestTable = () => {
               className="fieldvalue_container"
               body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

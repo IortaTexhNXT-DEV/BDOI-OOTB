@@ -217,8 +217,7 @@ const QuoteDetailView = ({ action }) => {
     const net = Number(String(calculatedPremiums?.netPremium ?? "").replace(/,/g, ""));
     const amount = Number(String(calculatedPremiums?.[key] ?? "").replace(/,/g, ""));
     if (net > 0 && amount > 0) return Number(((amount / net) * 100).toFixed(2));
-    const template = productConfigurator?.configuration?.taxes?.[templateKey];
-    if (template) return Number(template);
+    // template tax values are not used by pricing (the configured tax.* rates are); they are not a fallback
     return toPct(settingsTaxRates?.[key] || 0);
   };
 

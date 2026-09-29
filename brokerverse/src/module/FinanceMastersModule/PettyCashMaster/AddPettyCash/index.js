@@ -54,7 +54,7 @@ const AddPettyCash = () => {
     const errors = {};
 
     if (!values.pettycashcode) {
-      errors.pettycashcode = t("financeMasters.thisFieldCodeRequired");
+      errors.pettycashcode = t("validation.fieldRequired");
     }
 
     if (!values.pettycashname) {

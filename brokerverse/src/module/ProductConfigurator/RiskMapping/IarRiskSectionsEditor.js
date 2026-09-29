@@ -7,6 +7,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import productConfiguratorService from "../../../services/productConfiguratorService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) => {
   const { t } = useTranslation();
@@ -269,13 +270,7 @@ const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) =
           header={t("productRiskMapping.updatedColumn", "Updated")}
           headerStyle={{ whiteSpace: "nowrap", minWidth: "7rem" }}
           style={{ whiteSpace: "nowrap", minWidth: "7rem" }}
-          body={(row) => {
-            if (!row.updatedAt) return "—";
-            const d = new Date(row.updatedAt);
-            return Number.isNaN(d.getTime())
-              ? "—"
-              : d.toLocaleDateString();
-          }}
+          body={(row) => formatAppDate(row.updatedAt, { empty: "—" })}
         />
         <Column
           rowEditor

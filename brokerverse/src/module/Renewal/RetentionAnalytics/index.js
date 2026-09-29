@@ -18,6 +18,7 @@ import { Knob } from "primereact/knob";
 import { Badge } from "primereact/badge";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const RetentionAnalytics = () => {
@@ -255,7 +256,7 @@ const RetentionAnalytics = () => {
   };
 
   const formatPercentage = (value, decimals = 1) => {
-    return `${value?.toFixed(decimals) || 0}%`;
+    return `${Number(value ?? 0).toFixed(decimals)}%`;
   };
 
   const getRiskSeverity = (risk) => {
@@ -356,7 +357,7 @@ const RetentionAnalytics = () => {
                     value={dateRange}
                     onChange={(e) => setDateRange(e.value)}
                     selectionMode="range"
-                    dateFormat="mm/dd/yy"
+                    dateFormat={calendarDateFormat()}
                   />
                 </div>
               )}
@@ -392,7 +393,7 @@ const RetentionAnalytics = () => {
             <div className="kpi-content">
               <div className="kpi-visual">
                 <Knob
-                  value={analyticsData.overall?.renewalRate}
+                  value={Number(analyticsData.overall?.renewalRate ?? 0)}
                   size={80}
                   readOnly
                   valueColor="#3B82F6"
@@ -402,7 +403,7 @@ const RetentionAnalytics = () => {
               <div className="kpi-info">
                 <span className="kpi-label">Overall Renewal Rate</span>
                 <span className="kpi-value">{formatPercentage(analyticsData.overall?.renewalRate)}</span>
-                <span className="kpi-change positive">+2.3% vs last period</span>
+                <span className="kpi-change">{`${analyticsData.overall?.renewed ?? 0} renewed, ${analyticsData.overall?.lapsed ?? 0} lapsed`}</span>
               </div>
             </div>
           </Card>
@@ -411,7 +412,7 @@ const RetentionAnalytics = () => {
             <div className="kpi-content">
               <div className="kpi-visual">
                 <Knob
-                  value={analyticsData.overall?.premiumRetention}
+                  value={Number(analyticsData.overall?.premiumRetention ?? 0)}
                   size={80}
                   readOnly
                   valueColor="#10B981"
@@ -421,7 +422,7 @@ const RetentionAnalytics = () => {
               <div className="kpi-info">
                 <span className="kpi-label">Premium Retention</span>
                 <span className="kpi-value">{formatPercentage(analyticsData.overall?.premiumRetention)}</span>
-                <span className="kpi-change positive">+1.8% vs last period</span>
+                <span className="kpi-change">{`${analyticsData.overall?.open ?? 0} still open`}</span>
               </div>
             </div>
           </Card>
@@ -431,13 +432,13 @@ const RetentionAnalytics = () => {
               <div className="kpi-visual">
                 <div className="cycle-time-visual">
                   <i className="pi pi-clock"></i>
-                  <span className="cycle-days">{analyticsData.overall?.avgCycleTime}</span>
+                  <span className="cycle-days">{analyticsData.overall?.avgCycleTime ?? 0}</span>
                 </div>
               </div>
               <div className="kpi-info">
                 <span className="kpi-label">Avg Cycle Time</span>
-                <span className="kpi-value">{analyticsData.overall?.avgCycleTime} days</span>
-                <span className="kpi-change negative">+1.2 days vs last period</span>
+                <span className="kpi-value">{analyticsData.overall?.avgCycleTime ?? 0} days</span>
+                <span className="kpi-change">From renewal opened to renewed</span>
               </div>
             </div>
           </Card>
@@ -453,7 +454,7 @@ const RetentionAnalytics = () => {
               <div className="kpi-info">
                 <span className="kpi-label">Customer Satisfaction</span>
                 <span className="kpi-value">{analyticsData.overall?.customerSatisfaction ?? '-'}/5.0</span>
-                <span className="kpi-change positive">+0.3 vs last period</span>
+                <span className="kpi-change">{analyticsData.overall?.customerSatisfaction == null ? "No survey data captured" : "Client survey average"}</span>
               </div>
             </div>
           </Card>

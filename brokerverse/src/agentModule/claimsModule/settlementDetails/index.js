@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useClaimHeader from "../useClaimHeader";
 import { Button } from "primereact/button";
 import DropdownField from "../../component/DropdwonField";
 import InputTextField from "../../component/inputText";
@@ -63,7 +64,9 @@ const SettlementDetails = () => {
     claimNumber: claimDetailsMainReducers?.claimNumber || "",
   }));
 
-  const policyHolderName = reduxPolicyHolderName || t("common.loading");
+  const header = useClaimHeader(claimId);
+  const policyHolderName = header.policyHolderName || reduxPolicyHolderName || t("common.loading");
+  const headerClaimNumber = header.claimNumber || reduxClaimNumber;
 
   useEffect(() => {
     let cancelled = false;
@@ -286,9 +289,9 @@ const SettlementDetails = () => {
           <SvgLeftArrow />
           <div className="claim__details__container__back__btn__title">
             {policyHolderName} /{" "}
-            {reduxClaimNumber
+            {headerClaimNumber
               ? t("settlementDetails.claimLabel", {
-                  claimNumber: reduxClaimNumber,
+                  claimNumber: headerClaimNumber,
                 })
               : t("common.loading")}
           </div>

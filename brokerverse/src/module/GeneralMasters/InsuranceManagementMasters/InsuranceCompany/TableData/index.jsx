@@ -20,6 +20,7 @@ import {
 } from "../store/insuranceCompanyMiddleware";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
@@ -209,7 +210,7 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
           body={(rowData) => rowData.modifiedby?.toUpperCase()}
         ></Column>
-        <Column
+        <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
           header={t("generalMasters.modifiedOn")}
           className="fieldvalue_container"

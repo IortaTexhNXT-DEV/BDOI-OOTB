@@ -23,6 +23,7 @@ import { Column } from "primereact/column";
 import SvgDeleteIcon from "../../../../assets/icons/SvgDeleteIcon";
 import { Dialog } from "primereact/dialog";
 import { Checkbox } from "primereact/checkbox";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValue = {
   Date: new Date(),
@@ -151,7 +152,7 @@ const RequestForm = ({ action }) => {
                 onChange={(e) => {
                   formik.setFieldValue("Date", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-3 lg-col-3 input__view">
@@ -202,7 +203,7 @@ const RequestForm = ({ action }) => {
                 onChange={(e) => {
                   formik.setFieldValue("RequestDate", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
 

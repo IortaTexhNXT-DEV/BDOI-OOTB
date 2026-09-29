@@ -14,6 +14,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
 import { useDispatch, useSelector } from "react-redux";
 import { postAddReplenishMiddleware } from "../store/pettyCashReplenishMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReplenishTable = () => {
   const [visible, setVisible] = useState(false);
@@ -191,7 +192,7 @@ const AddReplenishTable = () => {
               headerStyle={headerStyle}
             ></Column>
 
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

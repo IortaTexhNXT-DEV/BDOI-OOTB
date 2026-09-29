@@ -25,3 +25,58 @@ describe("route guard", () => {
     expect(filterMenuForRoles(menu, ["it-admin"])).toHaveLength(3);
   });
 });
+
+describe("persona walk: menu grants match the API (D100-D104)", () => {
+  const walkMenu = [
+    {
+      name: "Operations",
+      submenu: [
+        {
+          name: "Renewals",
+          submenu: [
+            { name: "Renewal Policy", path: "/agent/expired-policies", includes: ["/agent/expired-policies"] },
+            { name: "Renewal Batch", path: "/agent/renewal-batch", includes: ["/agent/renewal-batch"] },
+            { name: "Renewal Queue", path: "/renewal/queue", includes: ["/renewal/queue"] },
+            { name: "Retention Analytics", path: "/renewal/analytics", includes: ["/renewal/analytics"] },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Accounts",
+      submenu: [{ name: "Incentive", submenu: [{ name: "Statement", path: "/incentive/statement", includes: ["/incentive/statement"] }] }],
+    },
+    { name: "Reinsurance", submenu: [{ name: "Reconciliation", path: "/reinsurance/reconciliation", includes: ["/reinsurance/reconciliation"] }] },
+    {
+      name: "Reports",
+      submenu: [
+        { name: "All Reports", path: "/reports/catalogue", includes: ["/reports/catalogue", "/reports/run/"] },
+        {
+          name: "Operational Reports",
+          submenu: [
+            { name: "Production", path: "/reports/operationalreports/production", includes: ["/reports/operationalreports/production"] },
+            { name: "Remittance", path: "/reports/operationalreports/remittance", includes: ["/reports/operationalreports/remittance"] },
+          ],
+        },
+      ],
+    },
+  ];
+
+  it("agents renew their own policies but do not get the renewals workspace", () => {
+    expect(isPathAllowed("/agent/expired-policies", walkMenu, ["agent"])).toBe(true);
+    for (const p of ["/agent/renewal-batch", "/renewal/queue", "/renewal/analytics"]) {
+      expect(isPathAllowed(p, walkMenu, ["agent"])).toBe(false);
+    }
+  });
+  it("finance reaches incentives and reinsurance reconciliation", () => {
+    expect(isPathAllowed("/incentive/statement", walkMenu, ["finance"])).toBe(true);
+    expect(isPathAllowed("/reinsurance/reconciliation", walkMenu, ["finance"])).toBe(true);
+  });
+  it("finance gets the finance reports and the catalogue, not the production register", () => {
+    expect(isPathAllowed("/reports/catalogue", walkMenu, ["finance"])).toBe(true);
+    expect(isPathAllowed("/reports/run/trial-balance", walkMenu, ["finance"])).toBe(true);
+    expect(isPathAllowed("/reports/operationalreports/remittance", walkMenu, ["finance"])).toBe(true);
+    expect(isPathAllowed("/reports/operationalreports/production", walkMenu, ["finance"])).toBe(false);
+    expect(isPathAllowed("/reports/catalogue", walkMenu, ["agent"])).toBe(false);
+  });
+});

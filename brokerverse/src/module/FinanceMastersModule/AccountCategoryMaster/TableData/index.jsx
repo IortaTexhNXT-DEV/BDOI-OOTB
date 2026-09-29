@@ -142,14 +142,14 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
       >
         <Column
           field="categoryCode"
-          header={t("financeMasters.categoryCodeHeader")}
+          header={t("financeMasters.accountCategoryCodeHeader")}
           className="fieldvalue_container"
           body={(rowData) => rowData.categoryCode?.toUpperCase()}
           sortable
         ></Column>
         <Column
           field="categoryName"
-          header={t("financeMasters.categoryNameHeader")}
+          header={t("financeMasters.accountCategoryNameHeader")}
           className="fieldvalue_container"
           body={(rowData) => rowData.categoryName?.toUpperCase()}
         ></Column>

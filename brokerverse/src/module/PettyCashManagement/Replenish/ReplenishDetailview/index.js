@@ -13,6 +13,7 @@ import LabelWrapper from "../../../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
 
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 const ReplenishtDetailView = () => {
   const navigate = useNavigate();
 
@@ -197,7 +198,7 @@ const ReplenishtDetailView = () => {
               placeholder="Select"
               className="calendar_container"
               value={ViewReplenish.dateValue ? new Date(ViewReplenish.dateValue) : null}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div className="calender__container col-12 md:col-3 lg:col-3 ">
@@ -210,7 +211,7 @@ const ReplenishtDetailView = () => {
               placeholder="Select"
               className="calendar_container"
               value={ViewReplenish.dateValue ? new Date(ViewReplenish.dateValue) : null}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
         </div>

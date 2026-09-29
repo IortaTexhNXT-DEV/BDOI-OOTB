@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValue = {
   TransactionDate: new Date(),
@@ -232,7 +233,7 @@ const InitiateForm = () => {
               onChange={(e) => {
                 formik.setFieldValue("TransactionDate", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               error={formik.errors.TransactionDate}
 
             />

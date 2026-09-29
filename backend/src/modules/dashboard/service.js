@@ -3,6 +3,15 @@ import { many, one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { round2 } from '../documents/common.js';
 import { quoteStatusOut } from '../documents/statuses.js';
+import { scopeSql } from '../../lib/scope.js';
+
+/**
+ * One user's own book, with the same ownership rules as the record scope of security.scoped_roles (lib/scope.js): the
+ * dashboard counts exactly the leads, quotations and policies the user's lists show (D108). null = everyone's book.
+ */
+export const ownBook = (user) => (user ? { userId: user.id, ids: [user.id, user.username].filter(Boolean) } : null);
+/** SQL predicate for `alias` of `entity` limited to `book` (pushes its parameter onto params); TRUE for null. */
+const inBook = (book, entity, alias, params) => scopeSql(book, entity, alias, params);
 
 const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
 const change = (cur, prev) => (prev ? Math.round(((cur - prev) / prev) * 1000) / 10 : (cur ? 100 : 0));
@@ -64,21 +73,26 @@ export async function receivablesPosition() {
     commissionFromInsurers: c.total, commissionUnbilled: c.unbilled, commissionBilled: c.billedOutstanding, commissionOverdue: c.overdue };
 }
 
-/** Premium by product; ownerId limits it to one owner's policies. */
-export async function premiumByProduct(ownerId = null) {
+/** Premium by product; `book` (ownBook) limits it to one user's policies. */
+export async function premiumByProduct(book = null) {
+  const params = [];
   const rows = await many(`SELECT ${PRODUCT} AS product, COALESCE(sum(p.premium_total),0) AS premium, count(*)::int AS policies
-    FROM policies p LEFT JOIN products pr ON pr.id = p.product_id WHERE ($1::text IS NULL OR p.owner_user_id = $1) GROUP BY 1 ORDER BY 2 DESC`, [ownerId]);
+    FROM policies p LEFT JOIN products pr ON pr.id = p.product_id WHERE ${inBook(book, 'policy', 'p', params)} GROUP BY 1 ORDER BY 2 DESC`, params);
   return { labels: rows.map((r) => r.product), data: rows.map((r) => round2(r.premium)), policies: rows.map((r) => r.policies) };
 }
 
-/** Monthly premium / policies / quotes / leads; ownerId limits it to one owner's book. */
-export async function monthlyTrend(months = 12, ownerId = null) {
+/** Monthly premium / policies / quotes / leads; `book` (ownBook) limits it to one user's book. */
+export async function monthlyTrend(months = 12, book = null) {
+  const params = [months];
+  const pol = inBook(book, 'policy', 'p', params);
+  const quo = inBook(book, 'quote', 'q', params);
+  const lea = inBook(book, 'lead', 'l', params);
   const rows = await many(`SELECT to_char(m, 'YYYY-MM') AS month, to_char(m, 'Mon') AS label,
-      COALESCE((SELECT sum(premium_total) FROM policies p WHERE date_trunc('month', p.created_at) = m AND ($2::text IS NULL OR p.owner_user_id = $2)), 0) AS premium,
-      (SELECT count(*)::int FROM policies p WHERE date_trunc('month', p.created_at) = m AND ($2::text IS NULL OR p.owner_user_id = $2)) AS policies,
-      (SELECT count(*)::int FROM quotes q WHERE date_trunc('month', q.created_at) = m AND q.deleted_at IS NULL AND ($2::text IS NULL OR q.created_by = $2)) AS quotes,
-      (SELECT count(*)::int FROM leads l WHERE date_trunc('month', l.created_at) = m AND l.deleted_at IS NULL AND ($2::text IS NULL OR l.owner_user_id = $2)) AS leads
-    FROM generate_series(date_trunc('month', now()) - make_interval(months => $1 - 1), date_trunc('month', now()), interval '1 month') AS m ORDER BY m`, [months, ownerId]);
+      COALESCE((SELECT sum(premium_total) FROM policies p WHERE date_trunc('month', p.created_at) = m AND ${pol}), 0) AS premium,
+      (SELECT count(*)::int FROM policies p WHERE date_trunc('month', p.created_at) = m AND ${pol}) AS policies,
+      (SELECT count(*)::int FROM quotes q WHERE date_trunc('month', q.created_at) = m AND q.deleted_at IS NULL AND ${quo}) AS quotes,
+      (SELECT count(*)::int FROM leads l WHERE date_trunc('month', l.created_at) = m AND l.deleted_at IS NULL AND ${lea}) AS leads
+    FROM generate_series(date_trunc('month', now()) - make_interval(months => $1 - 1), date_trunc('month', now()), interval '1 month') AS m ORDER BY m`, params);
   return { labels: rows.map((r) => r.label), months: rows.map((r) => r.month), premium: rows.map((r) => round2(r.premium)),
     policies: rows.map((r) => r.policies), quotes: rows.map((r) => r.quotes), leads: rows.map((r) => r.leads) };
 }
@@ -109,21 +123,27 @@ async function agents() {
   return rows.map((r) => ({ userId: r.id, name: r.name, branch: r.branch, premium: round2(r.premium), policies: r.policies, quotes: r.quotes, conversion: pct(r.converted, r.quotes) }));
 }
 
-/** Sales funnel: leads -> quotes -> policies, optionally for one owner. */
-export async function sales(ownerId = null) {
-  const leadsBy = await many(`SELECT status, count(*)::int AS count FROM leads WHERE deleted_at IS NULL AND ($1::text IS NULL OR owner_user_id = $1) GROUP BY 1 ORDER BY 2 DESC`, [ownerId]);
-  const quotesBy = await many(`SELECT status, count(*)::int AS count, COALESCE(sum(premium_total),0) AS premium FROM quotes WHERE deleted_at IS NULL AND ($1::text IS NULL OR created_by = $1) GROUP BY 1 ORDER BY 2 DESC`, [ownerId]);
-  const f = await one(`SELECT (SELECT count(*)::int FROM leads WHERE deleted_at IS NULL AND ($1::text IS NULL OR owner_user_id = $1)) AS leads,
-      (SELECT count(DISTINCT lead_id)::int FROM quotes WHERE deleted_at IS NULL AND ($1::text IS NULL OR created_by = $1)) AS quoted_leads,
-      (SELECT count(*)::int FROM quotes WHERE deleted_at IS NULL AND ($1::text IS NULL OR created_by = $1)) AS quotes,
-      (SELECT count(*)::int FROM policies WHERE ($1::text IS NULL OR owner_user_id = $1)) AS policies,
-      (SELECT COALESCE(sum(premium_total),0) FROM policies WHERE ($1::text IS NULL OR owner_user_id = $1) AND date_trunc('month', created_at) = date_trunc('month', now())) AS premium_month,
-      (SELECT count(*)::int FROM policies WHERE ($1::text IS NULL OR owner_user_id = $1) AND status IN ('active','issued') AND expiry_date BETWEEN current_date AND current_date + 60) AS renewals_due`, [ownerId]);
+/** Sales funnel: leads -> quotes -> policies, optionally for one user's book (ownBook). */
+export async function sales(book = null) {
+  const lp = [];
+  const leadsBy = await many(`SELECT status, count(*)::int AS count FROM leads l WHERE l.deleted_at IS NULL AND ${inBook(book, 'lead', 'l', lp)} GROUP BY 1 ORDER BY 2 DESC`, lp);
+  const qp = [];
+  const quotesBy = await many(`SELECT status, count(*)::int AS count, COALESCE(sum(premium_total),0) AS premium FROM quotes q WHERE q.deleted_at IS NULL AND ${inBook(book, 'quote', 'q', qp)} GROUP BY 1 ORDER BY 2 DESC`, qp);
+  const p = [];
+  const lead = inBook(book, 'lead', 'l', p);
+  const quote = inBook(book, 'quote', 'q', p);
+  const policy = inBook(book, 'policy', 'po', p);
+  const f = await one(`SELECT (SELECT count(*)::int FROM leads l WHERE l.deleted_at IS NULL AND ${lead}) AS leads,
+      (SELECT count(DISTINCT q.lead_id)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quoted_leads,
+      (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quotes,
+      (SELECT count(*)::int FROM policies po WHERE ${policy}) AS policies,
+      (SELECT COALESCE(sum(po.premium_total),0) FROM policies po WHERE ${policy} AND date_trunc('month', po.created_at) = date_trunc('month', now())) AS premium_month,
+      (SELECT count(*)::int FROM policies po WHERE ${policy} AND po.status IN ('active','issued') AND po.expiry_date BETWEEN current_date AND current_date + 60) AS renewals_due`, p);
   return {
     funnel: { leads: f.leads, quotedLeads: f.quoted_leads, quotations: f.quotes, policies: f.policies, leadToQuoteRate: pct(f.quoted_leads, f.leads), quoteToPolicyRate: pct(f.policies, f.quotes), leadToPolicyRate: pct(f.policies, f.leads) },
     leadsByStatus: leadsBy, quotationsByStatus: quotesBy.map((r) => ({ status: quoteStatusOut(r.status), count: r.count, premium: round2(r.premium) })),
     premiumThisMonth: round2(f.premium_month), renewalsDueIn60Days: f.renewals_due,
-    premiumByProduct: await premiumByProduct(ownerId), monthlyTrend: await monthlyTrend(6, ownerId),
+    premiumByProduct: await premiumByProduct(book), monthlyTrend: await monthlyTrend(6, book),
   };
 }
 
@@ -158,14 +178,27 @@ export async function claimsSummary() {
 }
 
 /** Agent home: own leads, quotes, policies, premium and renewals due. */
-export async function agentHome(userId) {
-  const s = await sales(userId);
+export async function agentHome(book) {
+  const s = await sales(book);
+  const qp = [];
   const recentQuotes = await many(`SELECT q.id AS "quotationId", q.quote_number AS "quotationNumber", q.status, q.premium_total AS "grossPremium", l.display_name AS "leadName", q.created_at AS "createdAt"
-    FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id WHERE q.deleted_at IS NULL AND q.created_by = $1 ORDER BY q.created_at DESC LIMIT 5`, [userId]);
-  const expiring = await many(`SELECT id AS "policyId", policy_number AS "policyNumber", insured_name AS "insuredName", expiry_date AS "expiry", premium_total AS "grossPremium"
-    FROM policies WHERE owner_user_id = $1 AND status IN ('active','issued') AND expiry_date BETWEEN current_date AND current_date + 60 ORDER BY expiry_date LIMIT 10`, [userId]);
+    FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id WHERE q.deleted_at IS NULL AND ${inBook(book, 'quote', 'q', qp)} ORDER BY q.created_at DESC LIMIT 5`, qp);
+  const pp = [];
+  const expiring = await many(`SELECT p.id AS "policyId", p.policy_number AS "policyNumber", p.insured_name AS "insuredName", p.expiry_date AS "expiry", p.premium_total AS "grossPremium"
+    FROM policies p WHERE ${inBook(book, 'policy', 'p', pp)} AND p.status IN ('active','issued') AND p.expiry_date BETWEEN current_date AND current_date + 60 ORDER BY p.expiry_date LIMIT 10`, pp);
   const commission = await one(`SELECT COALESCE(sum(net_amount) FILTER (WHERE lower(status) <> 'paid'), 0) AS unpaid, COALESCE(sum(net_amount) FILTER (WHERE lower(status) = 'paid'), 0) AS paid
-    FROM commissions WHERE agent_user_id = $1`, [userId]);
+    FROM commissions WHERE agent_user_id = $1`, [book?.userId]);
+  // Premium of the book's policies: collected = paid on the premium bills (receipts applied), receivable = still open.
+  // Bills cancelled because the policy is direct bill (the client pays the insurer) count in neither (D118).
+  const bp = [];
+  const book$ = inBook(book, 'policy', 'p', bp);
+  const premium = await one(`SELECT COALESCE(sum(p.premium_total), 0) AS gross,
+      (SELECT COALESCE(sum(r.amount - r.balance), 0) FROM receivables r JOIN policies p ON p.id = r.policy_id WHERE r.status <> 'cancelled' AND ${book$}) AS collected,
+      (SELECT COALESCE(sum(r.balance), 0) FROM receivables r JOIN policies p ON p.id = r.policy_id WHERE r.status IN ('open', 'partial') AND ${book$}) AS receivable
+    FROM policies p WHERE ${book$}`, bp);
+  const cp = [];
+  const clients = await one(`SELECT count(*)::int AS n FROM clients c WHERE ${inBook(book, 'client', 'c', cp)}`, cp);
   return { ...s, recentQuotations: recentQuotes.map((r) => ({ ...r, status: quoteStatusOut(r.status) })), expiringPolicies: expiring,
-    commission: { unpaid: round2(commission.unpaid), paid: round2(commission.paid) } };
+    commission: { unpaid: round2(commission.unpaid), paid: round2(commission.paid) },
+    premium: { gross: round2(premium.gross), collected: round2(premium.collected), receivable: round2(premium.receivable) }, clients: clients.n };
 }

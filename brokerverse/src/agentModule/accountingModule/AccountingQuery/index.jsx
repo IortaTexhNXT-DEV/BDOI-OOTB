@@ -15,6 +15,7 @@ import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import accountingService from "../../../services/accountingService";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const EntryTypeBadge = ({ entryType }) => {
@@ -588,7 +589,7 @@ const AccountingQuery = () => {
               <Calendar
                 value={startDate}
                 onChange={(e) => setStartDate(e.value)}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
               />
             </div>
@@ -597,7 +598,7 @@ const AccountingQuery = () => {
               <Calendar
                 value={endDate}
                 onChange={(e) => setEndDate(e.value)}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
               />
             </div>

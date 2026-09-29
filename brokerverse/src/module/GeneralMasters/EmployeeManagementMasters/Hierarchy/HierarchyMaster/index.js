@@ -23,6 +23,7 @@ import {
 } from "../store/hierarchyMiddleware";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const HierarchyMaster = () => {
   const { t } = useTranslation();
@@ -170,12 +171,12 @@ const HierarchyMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <div className="add__icon__view__hierarchy" onClick={handleNavigate}>
+        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
           <div className="add__icon__hierarchy">
             <SvgAdd />
           </div>
           <div className="add__text__hierarchy">{t("generalMasters.add")}</div>
-        </div>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">
@@ -239,7 +240,7 @@ const HierarchyMaster = () => {
                   header="Level Number"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.levelNumber?.toUpperCase()}
+                  body={(rowData) => String(rowData.levelNumber ?? "")}
                 ></Column>
                 <Column
                   field="modifiedBy"
@@ -248,7 +249,7 @@ const HierarchyMaster = () => {
                   className="fieldvalue_container"
                   body={(rowData) => rowData.modifiedBy?.toUpperCase()}
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.modifiedOn)}
                   field="modifiedOn"
                   header="Modified On"
                   headerStyle={headerStyle}

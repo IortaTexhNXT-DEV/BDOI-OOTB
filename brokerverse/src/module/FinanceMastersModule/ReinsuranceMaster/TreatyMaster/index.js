@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -17,6 +17,9 @@ import { ProgressBar } from 'primereact/progressbar';
 import { MultiSelect } from 'primereact/multiselect';
 import reinsuranceService from '../../../../services/reinsuranceService';
 import mastersService from '../../../../services/mastersService';
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
+import FieldError from "../../../../components/FieldError";
 import './style.scss';
 
 const toIsoDate = (date) => (date instanceof Date ? date.toLocaleDateString('en-CA') : date);
@@ -77,6 +80,8 @@ const TreatyMaster = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedTreaty, setSelectedTreaty] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     treatyNumber: '',
     name: '',
@@ -146,17 +151,42 @@ const TreatyMaster = () => {
       commission: { type: 'Flat', rate: '' }
     });
     setEditMode(false);
+    setErrors({});
     setShowDialog(true);
   };
+
+  // Reinsurance > Treaty Dashboard "Add Treaty" opens this screen with ?new=1: open the empty form directly
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      handleAdd();
+      setSearchParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEdit = (treaty) => {
     setFormData(toTreatyForm(treaty));
     setSelectedTreaty(treaty);
     setEditMode(true);
+    setErrors({});
     setShowDialog(true);
   };
 
   const handleSave = async () => {
+    const found = requiredErrors(formData, [
+      ['name', t('reinsuranceTreaty.treatyName')],
+      ['type', t('reinsuranceTreaty.treatyType')],
+      ['lineOfBusiness', t('reinsuranceTreaty.lineOfBusiness')],
+      ['reinsurers', t('reinsuranceTreaty.reinsurers')],
+      ['effectiveDate', t('reinsuranceTreaty.effectiveDate')],
+      ['expiryDate', t('reinsuranceTreaty.expiryDate')],
+      ['expiryDate', t('reinsuranceTreaty.expiryDate'), (v) => !v.effectiveDate || !v.expiryDate || v.expiryDate > v.effectiveDate, 'Expiry date must be after the effective date'],
+    ]);
+    setErrors(found);
+    if (hasErrors(found)) {
+      toast.current?.show({ severity: 'warn', summary: t('common.validation', 'Validation'), detail: errorSummary(found), life: 4000 });
+      return;
+    }
     try {
       if (editMode) {
         await reinsuranceService.updateTreaty(selectedTreaty.id, toTreatyPayload(formData));
@@ -290,9 +320,9 @@ const TreatyMaster = () => {
         <TabView>
           <TabPanel header={t('reinsuranceTreaty.basicInfo')}>
             <div className="p-fluid">
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.treatyNumber')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.treatyNumber')}</label>
+                <div>
                   <InputText
                     value={formData.treatyNumber}
                     onChange={(e) => setFormData({...formData, treatyNumber: e.target.value})}
@@ -301,20 +331,21 @@ const TreatyMaster = () => {
                 </div>
               </div>
 
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.treatyName')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.treatyName')} *</label>
+                <div>
                   <InputText
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder={t('reinsuranceTreaty.placeholderTreatyName')}
                   />
                 </div>
+                <FieldError error={errors.name} />
               </div>
 
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.treatyType')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.treatyType')} *</label>
+                <div>
                   <Dropdown
                     value={formData.type}
                     options={treatyTypes}
@@ -322,11 +353,12 @@ const TreatyMaster = () => {
                     placeholder={t('reinsuranceTreaty.selectTreatyType')}
                   />
                 </div>
+                <FieldError error={errors.type} />
               </div>
 
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.lineOfBusiness')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.lineOfBusiness')} *</label>
+                <div>
                   <Dropdown
                     value={formData.lineOfBusiness}
                     options={lobOptions}
@@ -334,11 +366,12 @@ const TreatyMaster = () => {
                     placeholder={t('reinsuranceTreaty.selectLineOfBusiness')}
                   />
                 </div>
+                <FieldError error={errors.lineOfBusiness} />
               </div>
 
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.reinsurers')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.reinsurers')} *</label>
+                <div>
                   <MultiSelect
                     value={formData.reinsurers}
                     options={reinsurers.map(r => ({
@@ -351,30 +384,33 @@ const TreatyMaster = () => {
                     display="chip"
                   />
                 </div>
+                <FieldError error={errors.reinsurers} />
               </div>
 
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.effectiveDate')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.effectiveDate')} *</label>
+                <div>
                   <Calendar
                     value={formData.effectiveDate}
                     onChange={(e) => setFormData({...formData, effectiveDate: e.value})}
-                    dateFormat="dd/mm/yy"
+                    dateFormat={calendarDateFormat()}
                     placeholder={t('reinsuranceTreaty.selectEffectiveDate')}
                   />
                 </div>
+                <FieldError error={errors.effectiveDate} />
               </div>
 
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.expiryDate')}*</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>{t('reinsuranceTreaty.expiryDate')} *</label>
+                <div>
                   <Calendar
                     value={formData.expiryDate}
                     onChange={(e) => setFormData({...formData, expiryDate: e.value})}
-                    dateFormat="dd/mm/yy"
+                    dateFormat={calendarDateFormat()}
                     placeholder={t('reinsuranceTreaty.selectExpiryDate')}
                   />
                 </div>
+                <FieldError error={errors.expiryDate} />
               </div>
             </div>
           </TabPanel>
@@ -383,9 +419,9 @@ const TreatyMaster = () => {
             <div className="p-fluid">
               {formData.type === 'Quota Share' && (
                 <>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.cession')}</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>{t('reinsuranceTreaty.cession')}</label>
+                    <div>
                       <InputNumber
                         value={formData.cession?.percentage}
                         onValueChange={(e) => setFormData({
@@ -398,9 +434,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-<div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.retention')}</label>
-                    <div className="p-col-12 p-md-9">
+<div className="p-field field">
+                    <label>{t('reinsuranceTreaty.retention')}</label>
+                    <div>
                     <InputText
                         value={formData.retention}
                         onChange={(e) => setFormData({...formData, retention: e.target.value})}
@@ -413,9 +449,9 @@ const TreatyMaster = () => {
 
               {formData.type === 'Surplus' && (
                 <>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.numberOfLines')}</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>{t('reinsuranceTreaty.numberOfLines')}</label>
+                    <div>
                       <InputNumber
                         value={formData.lines}
                         onValueChange={(e) => setFormData({...formData, lines: e.value})}
@@ -424,9 +460,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.retentionPerLine')}</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>{t('reinsuranceTreaty.retentionPerLine')}</label>
+                    <div>
                       <InputText
                         value={formData.retention}
                         onChange={(e) => setFormData({...formData, retention: e.target.value})}
@@ -439,9 +475,9 @@ const TreatyMaster = () => {
 
               {formData.type === 'Excess of Loss' && (
                 <>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">{t('reinsuranceTreaty.layerLimit')}</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>{t('reinsuranceTreaty.layerLimit')}</label>
+                    <div>
                       <InputText
                         value={formData.limit}
                         onChange={(e) => setFormData({...formData, limit: e.target.value})}
@@ -449,9 +485,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">Excess Point (THB)</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>Excess Point (THB)</label>
+                    <div>
                       <InputText
                         value={formData.excess}
                         onChange={(e) => setFormData({...formData, excess: e.target.value})}
@@ -459,9 +495,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">Reinstatements</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>Reinstatements</label>
+                    <div>
                       <InputNumber
                         value={formData.reinstatements}
                         onValueChange={(e) => setFormData({...formData, reinstatements: e.value})}
@@ -477,9 +513,9 @@ const TreatyMaster = () => {
 
           <TabPanel header="Commission">
             <div className="p-fluid">
-              <div className="p-field p-grid">
-                <label className="p-col-12 p-md-3">Commission Type</label>
-                <div className="p-col-12 p-md-9">
+              <div className="p-field field">
+                <label>Commission Type</label>
+                <div>
                   <Dropdown
                     value={formData.commission?.type}
                     options={commissionTypes}
@@ -493,9 +529,9 @@ const TreatyMaster = () => {
               </div>
 
               {formData.commission?.type === 'Flat' && (
-                <div className="p-field p-grid">
-                  <label className="p-col-12 p-md-3">Commission Rate</label>
-                  <div className="p-col-12 p-md-9">
+                <div className="p-field field">
+                  <label>Commission Rate</label>
+                  <div>
                     <InputNumber
                       value={parseFloat(formData.commission?.rate) || 0}
                       onValueChange={(e) => setFormData({
@@ -515,9 +551,9 @@ const TreatyMaster = () => {
               {formData.commission?.type === 'Sliding Scale' && (
                 <div className="sliding-scale-section">
                   <h4>Loss Ratio Bands</h4>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">0-50%</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>0-50%</label>
+                    <div>
                       <InputNumber
                         value={35}
                         suffix="%"
@@ -525,9 +561,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">50-60%</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>50-60%</label>
+                    <div>
                       <InputNumber
                         value={32.5}
                         suffix="%"
@@ -535,9 +571,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">60-70%</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>60-70%</label>
+                    <div>
                       <InputNumber
                         value={30}
                         suffix="%"
@@ -545,9 +581,9 @@ const TreatyMaster = () => {
                       />
                     </div>
                   </div>
-                  <div className="p-field p-grid">
-                    <label className="p-col-12 p-md-3">70%+</label>
-                    <div className="p-col-12 p-md-9">
+                  <div className="p-field field">
+                    <label>70%+</label>
+                    <div>
                       <InputNumber
                         value={27.5}
                         suffix="%"
@@ -600,8 +636,8 @@ const TreatyMaster = () => {
           <Column field="type" header={t('reinsuranceTreaty.treatyType')} sortable />
           <Column field="lineOfBusiness" header={t('reinsuranceTreaty.lineOfBusiness')} sortable />
           <Column header={t('reinsuranceTreaty.reinsurers')} body={reinsurersBodyTemplate} />
-          <Column field="effectiveDate" header={t('reinsuranceTreaty.effectiveDate')} sortable />
-          <Column field="expiryDate" header={t('reinsuranceTreaty.expiryDate')} sortable />
+          <Column body={(row) => formatAppDate(row.effectiveDate)} field="effectiveDate" header={t('reinsuranceTreaty.effectiveDate')} sortable />
+          <Column body={(row) => formatAppDate(row.expiryDate)} field="expiryDate" header={t('reinsuranceTreaty.expiryDate')} sortable />
           <Column header={t('reinsuranceTreaty.utilization')} body={utilizationBodyTemplate} sortable />
           <Column header={t('reinsuranceTreaty.status')} body={statusBodyTemplate} sortable />
           <Column header={t('reinsuranceTreaty.actions')} body={actionBodyTemplate} />

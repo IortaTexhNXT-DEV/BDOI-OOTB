@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { patchTaxationEdit } from "../store/taxationMiddleWare";
 import useTaxRateOptions from "../useTaxRateOptions";
 import CustomToast from "../../../../components/Toast";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const AddTaxation = () => {
   const { t } = useTranslation();
@@ -220,7 +221,7 @@ const AddTaxation = () => {
                 onChange={(e) => {
                   formik.setFieldValue("effectiveFrom", e.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>
@@ -238,7 +239,7 @@ const AddTaxation = () => {
                 onChange={(e) => {
                   formik.setFieldValue("effectiveTo", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>

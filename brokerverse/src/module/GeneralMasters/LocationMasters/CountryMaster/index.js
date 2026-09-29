@@ -31,6 +31,7 @@ import { useFormik } from "formik";
 import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const Country = () => {
   const { t } = useTranslation();
@@ -266,7 +267,7 @@ const Country = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.ModifiedOn)}
               field="ModifiedOn"
               header={t("generalMasters.modifiedOn")}
               headerStyle={headerStyle}

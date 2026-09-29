@@ -255,7 +255,7 @@ export async function processRemittances(ids, user) {
     await c.query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('batch', $1, $2, 'Pending Approval', $3, $4, $4)`,
       [batchId, round2(total), JSON.stringify({ processedIds: ok.map((x) => x.id), itemCount: ok.length, durationMs: Date.now() - started }), user.id]);
   });
-  await notify({ type: 'approval', title: 'Remittances awaiting approval', message: `${ok.length} remittance(s) in batch ${batchId} need approval`, link: '/finance/remittance/approval', entity: 'remittance_batch', entityId: batchId });
+  await notify({ audience: 'write:remittance', type: 'approval', title: 'Remittances awaiting approval', message: `${ok.length} remittance(s) in batch ${batchId} need approval`, link: '/finance/remittance/approval', entity: 'remittance_batch', entityId: batchId });
   return { success: true, message: `Successfully submitted ${ok.length} remittance(s) for approval`, processedIds: ok.map((x) => x.id), failed: v.results.filter((x) => !x.valid), batchId, processedAt: new Date().toISOString() };
 }
 
@@ -404,6 +404,20 @@ export async function settleRemittance(id, b, user) {
   await query(`UPDATE remittances SET status = 'settled', settled_at = now(), remarks = COALESCE($2, remarks), data = data || $3, updated_by = $4, updated_at = now() WHERE id = $1`,
     [r.id, b.remarks || null, JSON.stringify({ paymentReference: b.referenceNo || null, paymentMethod: b.paymentMethod || null, paymentDate: isoDate(b.paymentDate) }), user.id]);
   return getRemittance(r.id);
+}
+
+/**
+ * Users an approval can be delegated to: active users who hold write:remittance through a role, or an administrator role,
+ * other than the caller. Finance reads this without read:users (D106).
+ */
+export async function approvers(user) {
+  const rows = await many(`SELECT u.id, u.username, u.display_name FROM users u
+    WHERE u.status = 'active' AND u.id <> $1 AND EXISTS (
+      SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
+      WHERE ur.user_id = u.id AND (r.code IN ('it-admin', 'ba') OR EXISTS (
+        SELECT 1 FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id AND p.code = 'write:remittance')))
+    ORDER BY lower(COALESCE(u.display_name, u.username))`, [user?.id || '']);
+  return rows.map((u) => ({ userId: u.id, username: u.username, displayName: u.display_name || u.username }));
 }
 
 export async function listDelegations() {

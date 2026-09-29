@@ -270,7 +270,7 @@ const ClientListingAllCategory = ({
     const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "" });
     
     // Try multiple possible date fields
-    const dateValue = rowData.createdAt || rowData.created_at || rowData.dateCreated || rowData.date_created || rowData.DateofBirth;
+    const dateValue = rowData.createdAt || rowData.created_at || rowData.dateCreated || rowData.date_created;
     
     return <div className="date__text">{formatDate(dateValue)}</div>;
   };
@@ -406,17 +406,17 @@ const ClientListingAllCategory = ({
           ></Column>
           <Column
             body={renderDate}
-            header={renderUncheckedHeader(t("clients.date"))}
+            header={renderUncheckedHeader(t("clients.clientSince"))}
             headerStyle={headerStyle}
           ></Column>
           <Column
             body={renderQuotes}
-            header={renderUncheckedHeader(t("clients.insurance"))}
+            header={renderUncheckedHeader(t("clients.policies"))}
             headerStyle={headerStyle}
           ></Column>
           <Column
             body={renderDes}
-            header={renderUncheckedHeader(t("clients.productDescription"))}
+            header={renderUncheckedHeader(t("clients.latestPolicyStatus"))}
             headerStyle={headerStyle}
           ></Column>
           <Column

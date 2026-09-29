@@ -15,7 +15,7 @@ define({
   handler: async (req, res) => {
     const scoped = await scopeOf(req);
     const all = !scoped && req.query.scope === 'all' && (isAdmin(req.user) || req.user.permissions.includes('read:reports'));
-    send(res, all ? await svc.sales(null) : await svc.agentHome(req.user.id));
+    send(res, all ? await svc.sales(null) : { ...(await svc.agentHome(svc.ownBook(req.user))), scoped: Boolean(scoped) });
   },
 });
 define({
@@ -28,7 +28,7 @@ define({
   method: 'GET', path: '/dashboard/sales', summary: 'Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)', screen: 'Dashboard > Sales',
   middleware: [requireAuth, requirePermission('read:leads', 'read:quotations')], query: { scope: 'mine' },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8, leadToPolicyRate: 50 }, leadsByStatus: [{ status: 'New', count: 4 }] } },
-  handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' || (await scopeOf(req)) ? req.user.id : null)),
+  handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' || (await scopeOf(req)) ? svc.ownBook(req.user) : null)),
 });
 define({
   method: 'GET', path: '/dashboard/underwriting', summary: 'Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB', screen: 'Dashboard > Underwriting Dashboard',

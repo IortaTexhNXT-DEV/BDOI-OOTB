@@ -305,7 +305,7 @@ export async function submitCalculation(batchId, user) {
   const c = await calcRow(batchId);
   if (!['Calculated', 'Rejected'].includes(c.status)) throw conflict(`Batch is already ${c.status.toLowerCase()}`);
   await query('UPDATE incentive_calculations SET status = \'Pending Approval\', submitted_by = $2, submitted_date = now(), rejection_reason = NULL, updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);
-  await notify({ type: 'approval', title: 'Incentive calculation awaiting approval', message: `${c.batch_id} (${c.period}) needs approval`, link: '/incentive/approvals', entity: 'incentive_calculation', entityId: c.batch_id });
+  await notify({ audience: 'write:incentive', type: 'approval', title: 'Incentive calculation awaiting approval', message: `${c.batch_id} (${c.period}) needs approval`, link: '/incentive/approvals', entity: 'incentive_calculation', entityId: c.batch_id });
   return { before: await calcOut(c, false), after: await getCalculation(c.batch_id) };
 }
 
@@ -372,6 +372,13 @@ export async function agentPrograms(agentId) {
       recentActivities: acts.map((x) => ({ date: x.inception_date, activity: `${x.renewed_from ? 'Policy Renewal' : 'New Policy'} - ${x.product || 'Policy'}`, impact: round2(x.premium_total), points: Math.round(Number(x.premium_total) / 100) })) });
   }
   return out;
+}
+
+/** Statement shape with no agent: the period label and zero totals. */
+export function emptyStatement(periodRef) {
+  const period = parsePeriod(periodRef || today().slice(0, 7));
+  return { agentId: null, agentName: '', agentCode: '', branch: '', period: period.label, statementDate: today(), totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0,
+    lastPayment: 0, lastPaymentDate: null, programBreakdown: [], monthlyTrend: [] };
 }
 
 export async function statement(agentId, periodRef) {

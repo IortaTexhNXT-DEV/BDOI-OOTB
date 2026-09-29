@@ -17,6 +17,7 @@ import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import { useDispatch, useSelector } from "react-redux";
 import { getAddReplenishTableMiddleware } from "../store/pettyCashReplenishMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValue = {
   PettycashCode: "",
@@ -308,7 +309,7 @@ const AddReplenish = () => {
                 onChange={(e) => {
                   formik.setFieldValue("DisbursementFromdate", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="calender__container col-12 md:col-3 lg:col-3 ">
@@ -323,7 +324,7 @@ const AddReplenish = () => {
                 onChange={(e) => {
                   formik.setFieldValue("DisbursementTodate", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>

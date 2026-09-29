@@ -29,6 +29,7 @@ import {
 import journalVoucherService, {
   apiErrorMessage,
 } from "../../../services/journalVoucherService";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 
 const AWAITING_APPROVAL = "for-approval";
 
@@ -467,6 +468,7 @@ const DetailsJournalVocture = () => {
                   classNames="label__sub__add"
                 >
                   {/* <Calendar
+                                        dateFormat={calendarDateFormat()}
                                         value={formik.values.date}
                                         onChange={(e) => setDate(e.value)}
                                         showIcon
@@ -474,6 +476,7 @@ const DetailsJournalVocture = () => {
                                         disabled={true}
                                     /> */}
                   <Calendar
+                    dateFormat={calendarDateFormat()}
                     value={
                       date ||
                       (journalVoucherView?.date
