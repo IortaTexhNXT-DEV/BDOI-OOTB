@@ -112,6 +112,24 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 - [ ] If you use the same-domain option, add the `/api/*` behaviour before the default behaviour and do not cache it.
 - [ ] Push to `dev` (or merge the prepared branch into `dev`) to run the deployment; check the workflow run is green
   and the CloudFront invalidation completed.
+- [ ] **If this whole repository is connected instead** (the front end sits in the `brokerverse/` folder), the
+  workflow inside `brokerverse/.github/` never runs, because GitHub only reads workflows at the repository root. Use
+  `.github/workflows/deploy-frontend.yml` at the root instead: it builds inside `brokerverse/` and publishes
+  `brokerverse/build/`. It needs the same secrets and the `REACT_APP_BASE_URL` variable.
+
+### Blank page with `%PUBLIC_URL%` errors
+
+If the login page is blank and the browser console shows `400` for `%PUBLIC_URL%/favicon.ico`, `icon-192.png` or
+`manifest.json`, the bucket holds the **unbuilt** `public/index.html` from the source code, not the build. The
+unbuilt page has no script tags, so nothing loads. To fix it:
+
+1. Build: in the front-end folder run `npm ci --legacy-peer-deps`, then `npm run build` with `REACT_APP_BASE_URL`
+   set. Check `build/index.html`: it must not contain `%PUBLIC_URL%` and must load `/static/js/main.<hash>.js`.
+2. Publish the **contents of `build/`** to the bucket root (`aws s3 sync build/ s3://<bucket> --delete`), not the
+   repository, the `public/` folder or the `build` folder itself.
+3. Invalidate CloudFront (`/*`) and reload the page with the cache cleared.
+
+Both workflows now refuse to publish a page that still holds `%PUBLIC_URL%`.
 
 ## 4. Smoke test after deployment
 
