@@ -354,7 +354,7 @@ const ApproveQuote = () => {
                   {quotationData.insuranceVehicleDetails[0].vehicleType && (
                     <div className="info-row">
                       <span className="info-label">{t('approveQuote.type')}</span>
-                      <span className="info-value">{quotationData.insuranceVehicleDetails[0].vehicleType}</span>
+                      <span className="info-value">{quotationData.vehicleTypeLabel || quotationData.insuranceVehicleDetails[0].vehicleType}</span>
                     </div>
                   )}
                   

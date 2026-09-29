@@ -239,6 +239,9 @@ export async function issuePolicy(db, src, body, userId) {
   const cols = await columnsFrom(db, body);
   const { billingModeFor } = await import('../remittance/directbill.js');
   const billingMode = await billingModeFor(body.billingMode ?? (body.isDirectBilled === true ? 'direct' : null) ?? src.billingMode);
+  // product from the quotation, else the product whose code is the line of business (MOTOR, FIRE ...) or the product type
+  const productId = src.productId || (await db.query('SELECT id FROM products WHERE upper(code) = ANY($1::text[]) ORDER BY id LIMIT 1',
+    [[src.lob, src.productType].filter(Boolean).map((x) => String(x).toUpperCase())])).rows[0]?.id || null;
   const inception = cols.inception_date || toDate(new Date());
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
@@ -249,7 +252,7 @@ export async function issuePolicy(db, src, body, userId) {
       status, inception_date, expiry_date, issued_date, sum_insured, net_premium, premium_total, commission_amount, currency, insured_name, product_type, lob,
       payment_status, payment_method, paid_at, doc, created_by, billing_mode)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) RETURNING id`,
-  [number, src.quoteId, src.clientId, src.leadId, src.productId, src.policyTypeId, cols.insurance_company_id || src.insuranceCompanyId, src.ownerUserId || userId,
+  [number, src.quoteId, src.clientId, src.leadId, productId, src.policyTypeId, cols.insurance_company_id || src.insuranceCompanyId, src.ownerUserId || userId,
     inception, expiry, cols.issued_date || toDate(new Date()), src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
     JSON.stringify({ ...(src.doc || {}), ...docOf(body) }), userId, billingMode]);

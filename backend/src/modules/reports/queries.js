@@ -73,7 +73,7 @@ const ACCOUNT_TYPES = "'asset', 'liability', 'equity', 'income', 'expense'";
 
 // Direct bill: commission receivable from insurers per item (policy / endorsement), billed on a debit note or not yet;
 // the item's share of the note balance is outstanding. Aged from the note due date (unbilled: from the booking date).
-const directBill = `SELECT p.policy_number AS "policyNumber", COALESCE(e.endorsement_number, it.reference) AS reference, ${POLICY_DIMS}, it.booked_on AS "bookedOn",
+const directBill = `SELECT p.policy_number AS "policyNumber", COALESCE(e.endorsement_number, 'New business') AS reference, ${POLICY_DIMS}, it.booked_on AS "bookedOn",
     it.booked_on >= $1::date AS "_inPeriod", d.dn_number AS "debitNoteNo", d.dn_date AS "debitNoteDate", d.due_date AS "dueDate",
     it.gross_premium AS "grossPremium", it.commission, it.vat, it.amount AS "totalDue",
     CASE WHEN d.id IS NULL OR d.status IN ('draft', 'for-approval') THEN it.amount WHEN d.amount = 0 THEN 0
@@ -83,7 +83,9 @@ const directBill = `SELECT p.policy_number AS "policyNumber", COALESCE(e.endorse
             THEN d.balance - sum(round(it.amount * d.balance / NULLIF(d.amount, 0), 2)) OVER (PARTITION BY d.id) ELSE 0 END END AS balance,
     CASE WHEN d.id IS NULL THEN 'Unbilled' WHEN d.status IN ('draft', 'for-approval') THEN 'Debit note pending approval' WHEN d.status = 'open' THEN 'Billed'
       WHEN d.status = 'partial' THEN 'Partially collected' ELSE 'Collected' END AS status,
-    ($2::date - COALESCE(d.due_date, it.booked_on)) AS "ageDays", rpt_age_bucket($2::date - COALESCE(d.due_date, it.booked_on), $3::int[]) AS "ageBucket"
+    -- days past the debit note's due date (unbilled: since booking); not yet due is 0
+    GREATEST($2::date - COALESCE(d.due_date, it.booked_on), 0) AS "ageDays",
+    rpt_age_bucket(GREATEST($2::date - COALESCE(d.due_date, it.booked_on), 0), $3::int[]) AS "ageBucket"
   FROM direct_bill_items it JOIN policies p ON p.id = it.policy_id ${POLICY_JOINS}
   LEFT JOIN commission_debit_notes d ON d.id = it.debit_note_id LEFT JOIN endorsements e ON e.id = it.endorsement_id
   WHERE it.status <> 'cancelled' AND it.booked_on <= $2`;

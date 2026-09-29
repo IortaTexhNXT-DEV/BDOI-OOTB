@@ -12,7 +12,7 @@ import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { getClient, toClient } from '../clients/service.js';
 import { toQuote } from './shape.js';
 import { premiumBreakdown } from './premium.js';
-import { motorTariff } from './motorTariff.js';
+import { motorTariff, vehicleClass, vehicleOf } from './motorTariff.js';
 import { ownRecord, withScope, assertVisible } from '../../lib/scope.js';
 import * as svc from './service.js';
 import mastersRouter from './masters.js';
@@ -105,6 +105,8 @@ define({
   handler: async (req, res) => {
     const r = await svc.approveByCustomer(req.body.token, req.body.preview);
     const quote = out(r.quote);
+    // the customer sees the vehicle class name, not its code
+    quote.vehicleTypeLabel = vehicleClass(await motorTariff(), vehicleOf(quote).vehicleType)?.label || null;
     if (r.changed) {
       await audit({ ip: req.ip, user: { id: null, username: `customer:${r.quote.approval_sent_to || ''}` } },
         { entity: 'quotation', entityId: quote.id, action: 'customer-accept', before: { quotationStatus: 'PendingCustomer' }, after: { quotationStatus: quote.quotationStatus } });

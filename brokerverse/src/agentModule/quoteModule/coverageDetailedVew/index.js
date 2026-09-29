@@ -11,6 +11,8 @@ import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
 import quotationService from "../../../services/quotationService";
+import systemSettingsService from "../../../services/systemSettingsService";
+import { RadioButton } from "primereact/radiobutton";
 import policyService from "../../../services/policyService";
 import s3Service from "../../../services/s3Service";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
@@ -41,6 +43,17 @@ const CoverageDetailedView = () => {
   const customerInfo = state?.customerInfo || {};
   const vehiclePhotos = state?.vehiclePhotos || {};
   const additionalPolicyData = state?.additionalPolicyData || {};
+  // Who the client pays: the broker (premium bill) or the insurer directly (direct bill: commission debit note).
+  const [billingMode, setBillingMode] = useState("broker");
+  useEffect(() => {
+    systemSettingsService
+      .getConfiguration("direct_bill")
+      .then((rows) => {
+        const mode = (rows || []).find((r) => r.key === "direct_bill.default_billing_mode")?.value;
+        if (mode === "direct" || mode === "broker") setBillingMode(mode);
+      })
+      .catch(() => {});
+  }, []);
   // Don't use stale quotation from state - always use fresh quotationData from API
 
   useEffect(() => {
@@ -202,6 +215,7 @@ const CoverageDetailedView = () => {
         ...additionalPolicyData,
         paymentStatus: "Pending", // Set to Pending, not Completed
         paymentMethod: additionalPolicyData.paymentMethod || "Direct Debit",
+        billingMode,
       };
 
       // Call API to convert quotation to policy (creates client & policy with Pending status)
@@ -835,6 +849,24 @@ const CoverageDetailedView = () => {
                 </label>
               </div>
             )}
+            {Number(quotData?.ctplCoveragePremium) > 0 && (
+              <div className="quote__details">
+                <label className="insurance__text">{t("coverageDetailsCard.ctplTariffPremium")}</label>
+                <label className="alpha__text">{formatCurrency(quotData.ctplCoveragePremium)}</label>
+              </div>
+            )}
+            {Number(quotData?.roadsideAssistancePremium) > 0 && (
+              <div className="quote__details">
+                <label className="insurance__text">{t("coverageDetailsCard.roadsideAssistancePremium")}</label>
+                <label className="alpha__text">{formatCurrency(quotData.roadsideAssistancePremium)}</label>
+              </div>
+            )}
+            {Number(quotData?.personalAccidentCoverPremium) > 0 && (
+              <div className="quote__details">
+                <label className="insurance__text">{t("coverageDetailsCard.personalAccidentCoverPremium")}</label>
+                <label className="alpha__text">{formatCurrency(quotData.personalAccidentCoverPremium)}</label>
+              </div>
+            )}
             {quotData?.autoPassengerPersonalAccident && (
               <div className="quote__details">
                 <label className="insurance__text">
@@ -1015,6 +1047,24 @@ const CoverageDetailedView = () => {
           )}
         </Card>
       )}
+
+      <Card className="mt-3">
+        <div className="policy__text mb-2">{t("coverageDetailsReview.billingMode", "Billing")}</div>
+        <div className="flex flex-column gap-2">
+          <div className="flex align-items-center gap-2">
+            <RadioButton inputId="review-bill-broker" name="billingMode" value="broker" onChange={(e) => setBillingMode(e.value)} checked={billingMode === "broker"} />
+            <label htmlFor="review-bill-broker">
+              {t("coverageDetailsReview.brokerBilled", "Broker billed: the client pays the premium to the broker, who remits it to the insurer net of commission")}
+            </label>
+          </div>
+          <div className="flex align-items-center gap-2">
+            <RadioButton inputId="review-bill-direct" name="billingMode" value="direct" onChange={(e) => setBillingMode(e.value)} checked={billingMode === "direct"} />
+            <label htmlFor="review-bill-direct">
+              {t("coverageDetailsReview.directBilled", "Direct bill: the client pays the premium to the insurer; the broker raises a commission debit note to the insurer")}
+            </label>
+          </div>
+        </div>
+      </Card>
 
       <div className="button__component">
         <Button
