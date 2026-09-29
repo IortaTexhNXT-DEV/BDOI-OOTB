@@ -86,7 +86,11 @@ export const roleMenuPermissions = {
       "Remittance",
       // incentives are calculated, approved and paid by finance (D102)
       "Incentive",
+      // period-end processing and BIR tax
+      "Period End",
+      "Tax",
     ],
+    master: ["Finance > Taxation", "Finance > Close Checklist"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is a finance task (D103)
     reinsurance: ["Reconciliation"],

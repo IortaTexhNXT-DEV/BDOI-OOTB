@@ -15,6 +15,7 @@ import { Message } from "primereact/message";
 import SvgDot from "../../../assets/icons/SvgDot";
 import reportsService from "../../../services/reportsService";
 import mastersService from "../../../services/mastersService";
+import periodEndService from "../../../services/periodEndService";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { formatCurrency, formatNumber } from "../../../utility/currencyConverter";
 import FieldError from "../../../components/FieldError";
@@ -33,6 +34,7 @@ const LOOKUPS = {
   branches: () => reportsService.getBranchOptions(),
   clients: () => reportsService.getClientOptions(),
   products: async () => (await mastersService.options("product")).map((o) => ({ label: o.label, value: o.value })),
+  gl_accounts: async () => (await periodEndService.accounts()).map((a) => ({ label: `${a.code} – ${a.name}`, value: a.code })),
 };
 const HIDDEN = new Set(["format", "period", "ReportCriteria", "FromDate", "ToDate"]);
 const FORMAT_LABELS = { xlsx: "Excel (XLSX)", csv: "CSV", pdf: "PDF" };

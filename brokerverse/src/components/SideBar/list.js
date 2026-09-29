@@ -508,6 +508,12 @@ export const menuList = [
             ],
           },
           {
+            id: 20,
+            name: "Close Checklist",
+            path: "/master/finance/close-checklist",
+            includes: ["/master/finance/close-checklist"],
+          },
+          {
             id: 9,
             name: "Petty cash",
             path: "/master/finance/pettycash",
@@ -966,6 +972,29 @@ export const menuList = [
         permissions: ["read:reversaljv"],
       },
       {
+        id: 20,
+        name: "Period End",
+        submenu: [
+          { id: 1, name: "Period Management", path: "/accounts/period-end/periods", includes: ["/accounts/period-end/periods"] },
+          { id: 2, name: "Month-End Close", path: "/accounts/period-end/close", includes: ["/accounts/period-end/close"] },
+          { id: 3, name: "Year-End Close", path: "/accounts/period-end/year-end", includes: ["/accounts/period-end/year-end"] },
+          { id: 4, name: "Recurring Journals", path: "/accounts/period-end/recurring", includes: ["/accounts/period-end/recurring"] },
+          { id: 5, name: "Financial Statements", path: "/accounts/period-end/statements", includes: ["/accounts/period-end/statements"] },
+        ],
+      },
+      {
+        id: 21,
+        name: "Tax",
+        submenu: [
+          { id: 1, name: "BIR Form 2307", path: "/accounts/tax/2307", includes: ["/accounts/tax/2307"] },
+          { id: 2, name: "VAT Summary", path: "/accounts/tax/reports/bir-vat-summary", includes: ["/accounts/tax/reports/bir-vat-summary"] },
+          { id: 3, name: "SAWT", path: "/accounts/tax/reports/bir-sawt", includes: ["/accounts/tax/reports/bir-sawt"] },
+          { id: 4, name: "QAP", path: "/accounts/tax/reports/bir-qap", includes: ["/accounts/tax/reports/bir-qap"] },
+          { id: 5, name: "SLSP Sales", path: "/accounts/tax/reports/bir-slsp-sales", includes: ["/accounts/tax/reports/bir-slsp-sales"] },
+          { id: 6, name: "SLSP Purchases", path: "/accounts/tax/reports/bir-slsp-purchases", includes: ["/accounts/tax/reports/bir-slsp-purchases"] },
+        ],
+      },
+      {
         id: 7,
         name: "Remittance",
         submenu: [
@@ -1315,6 +1344,12 @@ export const menuList = [
             path: "/reports/financialreports/trailbalance",
             includes: ["/reports/financialreports/trailbalance"],
           },
+          { id: 6, name: "Income Statement", path: "/reports/financialreports/pe/income-statement", includes: ["/reports/financialreports/pe/income-statement"] },
+          { id: 7, name: "Balance Sheet", path: "/reports/financialreports/pe/balance-sheet", includes: ["/reports/financialreports/pe/balance-sheet"] },
+          { id: 8, name: "Trial Balance Movement", path: "/reports/financialreports/pe/trial-balance-ocm", includes: ["/reports/financialreports/pe/trial-balance-ocm"] },
+          { id: 9, name: "General Ledger Detail", path: "/reports/financialreports/pe/gl-detail", includes: ["/reports/financialreports/pe/gl-detail"] },
+          { id: 10, name: "Aged Payables to Insurers", path: "/reports/financialreports/pe/aged-payables-insurers", includes: ["/reports/financialreports/pe/aged-payables-insurers"] },
+          { id: 11, name: "Month-End Close Status", path: "/reports/financialreports/pe/month-end-close-status", includes: ["/reports/financialreports/pe/month-end-close-status"] },
         ],
       },
     ],
