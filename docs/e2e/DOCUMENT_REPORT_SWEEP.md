@@ -1,12 +1,14 @@
 # Document and report generation sweep
 
-Run 2026-09-29 09:50 UTC against http://localhost:8000/api: **176 of 176 passed**.
+Run 2026-09-29 09:54 UTC against http://localhost:8000/api: **178 of 178 passed**.
 
 Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) signature, a CSV header, and that the row count of each report file matches its on-screen preview.
 
 | Area | Item | Output | Result | Detail |
 |---|---|---|---|---|
 | Document | Quotation - motor | PDF | Pass | 4 KB |
+| Document | Quotation - fire | PDF | Pass | 4 KB |
+| Document | Quotation - industrial all risks | PDF | Pass | 4 KB |
 | Document | Policy schedule - motor | PDF | Pass | 5 KB |
 | Document | Policy schedule - fire / non-motor | PDF | Pass | 4 KB |
 | Document | Insurance placing slip | PDF | Pass | 4 KB |

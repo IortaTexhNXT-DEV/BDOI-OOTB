@@ -16,6 +16,8 @@ const OUT = process.argv[2];
 const db = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const q1 = async (sql, p = []) => (await db.query(sql, p)).rows[0] || {};
 const results = [];
+const SAVE = process.env.SWEEP_SAVE_DIR; // optional: keep every generated file here for review
+const save = (name, buf) => { if (SAVE) { fs.mkdirSync(SAVE, { recursive: true }); fs.writeFileSync(`${SAVE}/${name.replace(/[^\w.-]+/g, '_')}`, buf); } };
 let token;
 
 async function call(method, path, body) {
@@ -50,6 +52,7 @@ async function file(area, item, path, expect) {
     const r = await call('GET', path);
     const k = kindOf(r);
     const ok = r.status === 200 && k === expect && r.buf.length > 200;
+    if (ok) save(`${area}-${item}.${expect}`, r.buf);
     record(area, item, expect.toUpperCase(), ok, ok ? `${Math.round(r.buf.length / 1024)} KB` : `HTTP ${r.status} ${k} ${r.buf.toString().slice(0, 120)}`);
   } catch (e) { record(area, item, expect.toUpperCase(), false, e.message); }
 }
@@ -65,6 +68,7 @@ async function linked(area, item, method, path, body, expect, pick = (d) => d.ur
     const f = await call('GET', url);
     const k = kindOf(f);
     const ok = f.status === 200 && k === expect && f.buf.length > 50;
+    if (ok) save(`${area}-${item}.${expect}`, f.buf);
     record(area, item, expect.toUpperCase(), ok, ok ? `${Math.round(f.buf.length / 1024) || '<1'} KB` : `HTTP ${f.status} ${k}`);
   } catch (e) { record(area, item, expect.toUpperCase(), false, e.message); }
 }
@@ -93,6 +97,7 @@ async function reports() {
       const f = await call('GET', d.downloadUrl);
       const k = kindOf(f);
       let ok = f.status === 200 && k === fmt;
+      if (ok) save(`report-${rep.code}.${fmt}`, f.buf);
       let detail = `${d.rowCount} rows, ${Math.round(f.buf.length / 1024) || '<1'} KB`;
       if (ok && rows !== null && d.rowCount !== rows) { ok = false; detail += ` (preview had ${rows})`; }
       if (ok && fmt === 'csv' && !f.buf.toString().split('\n')[0].includes(',')) { ok = false; detail += ' (no CSV header)'; }
@@ -116,8 +121,9 @@ async function reports() {
 }
 
 async function documents() {
-  const motorQ = await q1(`SELECT q.id FROM quotes q JOIN products p ON p.id = q.product_id WHERE p.line = 'motor' ORDER BY q.created_at DESC LIMIT 1`);
-  const fireQ = await q1(`SELECT q.id FROM quotes q JOIN products p ON p.id = q.product_id WHERE p.line <> 'motor' ORDER BY q.created_at DESC LIMIT 1`);
+  const motorQ = await q1(`SELECT id FROM quotes WHERE upper(lob) = 'MOTOR' AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1`);
+  const fireQ = await q1(`SELECT id FROM quotes WHERE upper(lob) = 'FIRE' AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1`);
+  const iarQ = await q1(`SELECT id FROM quotes WHERE upper(lob) = 'IAR' AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1`);
   const motorP = await q1(`SELECT pl.id FROM policies pl JOIN products p ON p.id = pl.product_id WHERE p.line = 'motor' ORDER BY pl.created_at DESC LIMIT 1`);
   const fireP = await q1(`SELECT pl.id FROM policies pl JOIN products p ON p.id = pl.product_id WHERE p.line <> 'motor' ORDER BY pl.created_at DESC LIMIT 1`);
   const anyP = motorP.id ? motorP : await q1('SELECT id FROM policies ORDER BY created_at DESC LIMIT 1');
@@ -130,7 +136,8 @@ async function documents() {
 
   const D = 'Document';
   if (motorQ.id) await file(D, 'Quotation - motor', `/document-templates/quote-template/${motorQ.id}`, 'pdf');
-  if (fireQ.id) await file(D, 'Quotation - fire / non-motor', `/document-templates/quote-template-fire/${fireQ.id}`, 'pdf');
+  if (fireQ.id) await file(D, 'Quotation - fire', `/document-templates/quote-template-fire/${fireQ.id}`, 'pdf');
+  if (iarQ.id) await file(D, 'Quotation - industrial all risks', `/document-templates/quote-template-fire/${iarQ.id}`, 'pdf');
   if (motorP.id) await file(D, 'Policy schedule - motor', `/document-templates/policy-schedule/${motorP.id}`, 'pdf');
   if (fireP.id) await file(D, 'Policy schedule - fire / non-motor', `/document-templates/policy-schedule-fire/${fireP.id}`, 'pdf');
   if (anyP.id) await file(D, 'Insurance placing slip', `/policies/${anyP.id}/documents/insurance-placing-slip-fire`, 'pdf');
