@@ -1,20 +1,22 @@
 title: Receipt, commission payout and remittance to the insurer
-participant F "Finance maker"
-participant K "Finance checker"
+participant F "Accounting (maker)"
+participant K "Accounting (checker)"
 participant R "Receipts / commission / remittance / disbursements"
 participant D "PostgreSQL"
 == Premium receipt ==
 F -> R: POST /receipts: official receipt OR- with lines per policy
-R -> D: receipt_applications to the bill; JV Dr cash / Cr premium receivable; bill balance and status; collection item closed when paid
+R -> D: receipt_applications to the bill; posting rule receipt.apply: Dr cash / Cr premium receivable; bill balance and status; collection item closed when paid
+R -> D: co-insured policy: remittance_allocations split the collection per insurer by share
 R -> D: premium fully collected -> commission lines become eligible
 == Commission payout ==
 F -> R: approve eligible lines; create payment voucher PV- for the referrer
 K -> R: approve voucher (maker cannot approve own voucher)
-R -> D: JV Dr commission payable / Cr cash / Cr WHT payable; lines paid
+R -> D: posting rule commission.payout: Dr commission payable / Cr cash / Cr WHT payable; lines paid
 == Remittance to the insurer (broker bill) ==
-F -> R: create remittance REM- from collected policies: gross - commission = net due
+F -> R: create remittance REM- from collected policies: gross - commission = net due, less refunds due from the insurer
 F -> R: process: approval request (levels and SLA by amount)
 K -> R: approve (different user; delegation honoured)
 F -> R: record settlement SET-; insurer voucher PV- raised
 K -> R: approve and print cheque
-R -> D: JV Dr premium payable to insurer / Cr cash; payable for the policy nil
+R -> D: posting rule remittance.settlement: Dr premium payable to insurer / Cr cash; payable for the policy nil
+note: Every journal is built from the posting rule of its business event (Master > Finance > Posting Rules) and the GL accounts of Account Determination. A journal is refused when it does not balance or when its period is not open.

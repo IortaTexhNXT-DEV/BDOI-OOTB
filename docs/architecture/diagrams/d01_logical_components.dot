@@ -1,32 +1,32 @@
-// BrokerVerse logical component view (document 01). Render: python3 ../tools/render_diagrams.py
+// BrokerVerse OOTB logical component view (document 01). Render: python3 ../tools/render_diagrams.py
 digraph G {
   graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.25, ranksep=0.35, pad=0.2, compound=true, newrank=true];
   node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10.5, margin="0.1,0.05"];
   edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.7];
 
-  user [label="Users (browser): broker staff, agents, approvers", fillcolor="#FFFFFF"];
-  cdn [label="Static hosting: S3 + CloudFront (target) or nginx container", shape=box3d, fillcolor="#FFFFFF"];
-  client [label="Client / customer\n(e-mailed quote approval link)", fillcolor="#FFFFFF"];
+  user [label="Broker staff (browser): Sales & Marketing, Processing Team, Operations,\nClaims, Accounting, Accounting Manager, System Administrator", fillcolor="#FFFFFF"];
+  cdn [label="Static hosting: S3 + CloudFront\n(nginx container in Docker Compose)", shape=box3d, fillcolor="#FFFFFF"];
+  client [label="Client\n(e-mailed quote approval link)", fillcolor="#FFFFFF"];
 
   subgraph cluster_web { label="Presentation tier: BrokerVerse SPA (React 18, PrimeReact, Redux Toolkit)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
-    spa_ops [label="Operations\nleads, clients, quotation,\npolicy, claims, renewals"];
-    spa_fin [label="Accounts / finance\nreceipts, JV, disbursement,\nremittance, incentive"];
+    spa_ops [label="Operations\nleads, quotations, broker slips,\nplacement, policies, endorsements,\nclaims, renewals"];
+    spa_fin [label="Accounts\nbilling, receipts, remittance,\ncommission, JV, disbursements,\nperiod end, bank reconciliation"];
     spa_cfg [label="Product configurator,\nreinsurance, reports,\ndashboards"];
-    spa_adm [label="Master / admin\nusers, roles, settings,\nschedules, audit trail"];
-    spa_core [label="Shared front-end services: API client + token refresh, route guard,\nsystem settings / branding, i18n, dialogs and toasts", fillcolor="#FFFFFF"];
+    spa_adm [label="Master\nusers, roles, configuration,\nnumbering, posting rules,\nuploads, schedules, audit"];
+    spa_core [label="Shared front-end services: API client and token refresh, route guard,\nsystem settings and branding, i18n, dialogs and toasts", fillcolor="#FFFFFF"];
   }
 
   subgraph cluster_api { label="Application tier: BrokerVerse API (Node.js 22, Express 4), stateless"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
     pipeline [label="HTTP pipeline: request id, helmet, CORS, pino-http log, rate limit,\nJSON limit, signed file links, error envelope", fillcolor="#FFFFFF"];
-    modules [label="32 business modules (src/modules, 568 routes)\nauth, users, leads, clients, quotations, policies, endorsements, claims, renewals,\nreceipts, collections, accounting, journal-vouchers, disbursements, payments,\ncommission, remittance, reinsurance, incentive, product-configurator, masters,\nreports, dashboard, documents, uploads, notifications, schedules, ..."];
-    sched [label="Scheduler (node-cron)\n9 jobs, advisory lock per run"];
-    shared [label="Shared services (src/lib)\nauth, permissions, record scope, registry,\nsettings cache, audit, numbering, outbox,\nsecrets, dates / money, validation", fillcolor="#FFFFFF"];
-    docs [label="Document engines\nPDF / XLSX / CSV writers\n(no external libraries)"];
+    modules [label="38 business modules (src/modules, 717 routes)\nsales and policy, placement and co-insurance, claims, renewals,\nbilling and receipts, remittance, commission and rate matrix, posting rules,\nperiod end and BIR tax, bank reconciliation, reinsurance, incentive,\nproduct configurator, masters and uploads, reports, administration"];
+    sched [label="Scheduler (node-cron)\n15 jobs in Asia/Manila time,\nadvisory lock per run"];
+    shared [label="Shared services (src/lib)\nauth, permissions, registry, settings cache,\naudit, document numbering, e-mail outbox,\nsecrets, business dates, money, validation", fillcolor="#FFFFFF"];
+    docs [label="File engines\none PDF engine with the Company\nletterhead; XLSX, CSV, ZIP"];
   }
 
-  db [label="PostgreSQL 16\n102 tables, 32 migrations\n(RDS Multi-AZ target)", shape=cylinder, fillcolor="#FFFFFF"];
-  files [label="File store (UPLOAD_DIR)\nuploads, photos, reports\n(EFS target)", shape=folder, fillcolor="#FFFFFF"];
-  smtp [label="SMTP server\n(SMTP_URL)", shape=component, fillcolor="#FFFFFF"];
+  db [label="PostgreSQL 16\n138 tables, 58 migrations\ntime zone Asia/Manila", shape=cylinder, fillcolor="#FFFFFF"];
+  files [label="File store (UPLOAD_DIR)\npersistent volume:\nuploads, photos, reports", shape=folder, fillcolor="#FFFFFF"];
+  smtp [label="Office 365 SMTP\n(SMTP_URL)", shape=component, fillcolor="#FFFFFF"];
 
   user -> cdn [label=" HTTPS: load SPA"];
   cdn -> spa_fin [lhead=cluster_web];

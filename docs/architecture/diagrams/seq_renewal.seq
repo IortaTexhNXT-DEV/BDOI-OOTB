@@ -1,7 +1,7 @@
 title: Renewal pipeline to renewed policy
 participant J "Scheduler"
 participant N "Renewals module"
-participant U "Agent / renewals team"
+participant U "Operations / Sales & Marketing"
 participant C "Client"
 participant D "PostgreSQL"
 J -> N: renewal-pipeline job (daily): enrol policies expiring within renewals.pipeline_days (90)
