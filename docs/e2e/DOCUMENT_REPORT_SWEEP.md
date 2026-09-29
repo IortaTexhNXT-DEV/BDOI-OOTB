@@ -1,6 +1,6 @@
 # Document and report generation sweep
 
-Run 2026-09-29 11:30 UTC against http://localhost:8000/api: **291 of 291 passed**.
+Run 2026-09-29 15:37 UTC against http://localhost:8000/api: **291 of 291 passed**.
 
 Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) signature, a CSV header, and that the row count of each report file matches its on-screen preview.
 
@@ -13,26 +13,26 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Document | Policy schedule - fire / non-motor | PDF | Pass | 56 KB |
 | Document | Insurance placing slip | PDF | Pass | 59 KB |
 | Document | Billing statement - policy | PDF | Pass | 57 KB |
-| Document | Billing statement - endorsement | PDF | Pass | 57 KB |
+| Document | Billing statement - endorsement | PDF | Pass | 58 KB |
 | Document | Billing statement - renewal | PDF | Pass | 57 KB |
 | Document | Official receipt | PDF | Pass | 56 KB |
 | Document | Receipt print (single) | PDF | Pass | 56 KB |
-| Document | Receipts bulk print (date range) | PDF | Pass | 125 KB |
-| Document | Disbursement vouchers bulk print | PDF | Pass | 207 KB |
+| Document | Receipts bulk print (date range) | PDF | Pass | 128 KB |
+| Document | Disbursement vouchers bulk print | PDF | Pass | 210 KB |
 | Document | Commission debit note (direct bill) | PDF | Pass | 58 KB |
 | Document | Claim - Claims Data Sheet | PDF | Pass | 55 KB |
-| Document | Claim - Claims Discharge Voucher | PDF | Pass | 54 KB |
+| Document | Claim - Claims Discharge Voucher | PDF | Pass | 55 KB |
 | Document | Claim - Claims Acknowledgement Letter | PDF | Pass | 55 KB |
-| Document | Broker slip (to the market) | PDF | Pass | 56 KB |
+| Document | Broker slip (to the market) | PDF | Pass | 57 KB |
 | Document | Broker slip (to one insurer) | PDF | Pass | 57 KB |
-| Document | Placement slip (lead insurer) | PDF | Pass | 59 KB |
+| Document | Placement slip (lead insurer) | PDF | Pass | 60 KB |
 | Document | Placement slip (whole security) | PDF | Pass | 59 KB |
-| Document | Placement slip (co-insurer share) | PDF | Pass | 59 KB |
-| Module export | Claims dashboard report | XLSX | Pass | 25 KB |
-| Module export | Lead report | XLSX | Pass | 3 KB |
+| Document | Placement slip (co-insurer share) | PDF | Pass | 60 KB |
+| Module export | Claims dashboard report | XLSX | Pass | 7 KB |
+| Module export | Lead report | XLSX | Pass | 6 KB |
 | Module export | Lead report (CSV) | CSV | Pass | 3 KB |
-| Module export | Accounting entries export | CSV | Pass | 41 KB |
-| Module export | Renewal batch report | XLSX | Pass | 5 KB |
+| Module export | Accounting entries export | CSV | Pass | 40 KB |
+| Module export | Renewal batch report | XLSX | Pass | 4 KB |
 | Module export | Renewal batch report (CSV) | CSV | Pass | 1 KB |
 | Module export | Remittance statement (default layout) | CSV | Pass | 1 KB |
 | Module export | Remittance statement - Standard Monthly Statement | CSV | Pass | 1 KB |
@@ -84,7 +84,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: operational | Broker Commission Statement (Branch) | Screen preview | Pass | 53 rows |
 | Report: operational | Broker Commission Statement | CSV | Pass | 53 rows, 10 KB |
 | Report: operational | Broker Commission Statement | XLSX | Pass | 53 rows, 9 KB |
-| Report: operational | Broker Commission Statement | PDF | Pass | 53 rows, 135 KB |
+| Report: operational | Broker Commission Statement | PDF | Pass | 53 rows, 137 KB |
 | Report: operational | Premium by Product / Month / Insurer (Overall) | Screen preview | Pass | 16 rows |
 | Report: operational | Premium by Product / Month / Insurer (Product) | Screen preview | Pass | 4 rows |
 | Report: operational | Premium by Product / Month / Insurer (Month) | Screen preview | Pass | 8 rows |
@@ -110,7 +110,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: operational | Lead Conversion Funnel (Source) | Screen preview | Pass | 10 rows |
 | Report: operational | Lead Conversion Funnel | CSV | Pass | 4 rows, <1 KB |
 | Report: operational | Lead Conversion Funnel | XLSX | Pass | 4 rows, 5 KB |
-| Report: operational | Lead Conversion Funnel | PDF | Pass | 4 rows, 54 KB |
+| Report: operational | Lead Conversion Funnel | PDF | Pass | 4 rows, 55 KB |
 | Report: operational | Placement Pipeline (Overall) | Screen preview | Pass | 3 rows |
 | Report: operational | Placement Pipeline (Slip Type) | Screen preview | Pass | 3 rows |
 | Report: operational | Placement Pipeline (Status) | Screen preview | Pass | 3 rows |
@@ -118,7 +118,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: operational | Placement Pipeline (Agent) | Screen preview | Pass | 3 rows |
 | Report: operational | Placement Pipeline | CSV | Pass | 3 rows, 1 KB |
 | Report: operational | Placement Pipeline | XLSX | Pass | 3 rows, 5 KB |
-| Report: operational | Placement Pipeline | PDF | Pass | 3 rows, 59 KB |
+| Report: operational | Placement Pipeline | PDF | Pass | 3 rows, 60 KB |
 | Report: operational | Market Response (Overall) | Screen preview | Pass | 4 rows |
 | Report: operational | Market Response (Line of Business) | Screen preview | Pass | 5 rows |
 | Report: operational | Market Response (Agent) | Screen preview | Pass | 4 rows |
@@ -138,14 +138,14 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: operational | Co-insurance Register (Agent) | Screen preview | Pass | 0 rows |
 | Report: operational | Co-insurance Register | CSV | Pass | 0 rows, <1 KB |
 | Report: operational | Co-insurance Register | XLSX | Pass | 0 rows, 5 KB |
-| Report: operational | Co-insurance Register | PDF | Pass | 0 rows, 55 KB |
+| Report: operational | Co-insurance Register | PDF | Pass | 0 rows, 56 KB |
 | Report: financial | SOA / Premium Receivable (Overall) | Screen preview | Pass | 18 rows |
 | Report: financial | SOA / Premium Receivable (Agent) | Screen preview | Pass | 18 rows |
 | Report: financial | SOA / Premium Receivable (Principal Insurer) | Screen preview | Pass | 18 rows |
 | Report: financial | SOA / Premium Receivable (Branch) | Screen preview | Pass | 18 rows |
 | Report: financial | SOA / Premium Receivable | CSV | Pass | 18 rows, 3 KB |
 | Report: financial | SOA / Premium Receivable | XLSX | Pass | 18 rows, 6 KB |
-| Report: financial | SOA / Premium Receivable | PDF | Pass | 18 rows, 75 KB |
+| Report: financial | SOA / Premium Receivable | PDF | Pass | 18 rows, 76 KB |
 | Report: financial | Collection Report (Overall) | Screen preview | Pass | 15 rows |
 | Report: financial | Collection Report (Agent) | Screen preview | Pass | 15 rows |
 | Report: financial | Collection Report (Principal Insurer) | Screen preview | Pass | 15 rows |
@@ -168,7 +168,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: financial | Commission Receivable – Direct Bill (Overall) | Screen preview | Pass | 1 rows |
 | Report: financial | Commission Receivable – Direct Bill | CSV | Pass | 0 rows, <1 KB |
 | Report: financial | Commission Receivable – Direct Bill | XLSX | Pass | 0 rows, 5 KB |
-| Report: financial | Commission Receivable – Direct Bill | PDF | Pass | 0 rows, 55 KB |
+| Report: financial | Commission Receivable – Direct Bill | PDF | Pass | 0 rows, 56 KB |
 | Report: financial | Receipts Register (Overall) | Screen preview | Pass | 17 rows |
 | Report: financial | Receipts Register (Agent) | Screen preview | Pass | 17 rows |
 | Report: financial | Receipts Register (Principal Insurer) | Screen preview | Pass | 17 rows |
@@ -199,7 +199,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: financial | Trial Balance (Branch) | Screen preview | Pass | 21 rows |
 | Report: financial | Trial Balance | CSV | Pass | 21 rows, 2 KB |
 | Report: financial | Trial Balance | XLSX | Pass | 21 rows, 6 KB |
-| Report: financial | Trial Balance | PDF | Pass | 21 rows, 68 KB |
+| Report: financial | Trial Balance | PDF | Pass | 21 rows, 69 KB |
 | Report: financial | Incentive Results (Overall) | Screen preview | Pass | 18 rows |
 | Report: financial | Incentive Results (Program) | Screen preview | Pass | 18 rows |
 | Report: financial | Incentive Results (Agent) | Screen preview | Pass | 18 rows |
@@ -212,7 +212,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: financial | Due to Insurers by Co-insurer (Placement) | Screen preview | Pass | 8 rows |
 | Report: financial | Due to Insurers by Co-insurer | CSV | Pass | 8 rows, 1 KB |
 | Report: financial | Due to Insurers by Co-insurer | XLSX | Pass | 8 rows, 5 KB |
-| Report: financial | Due to Insurers by Co-insurer | PDF | Pass | 8 rows, 59 KB |
+| Report: financial | Due to Insurers by Co-insurer | PDF | Pass | 8 rows, 60 KB |
 | Report: financial | Income Statement (Detailed) | Screen preview | Pass | 7 rows |
 | Report: financial | Income Statement (Summary) | Screen preview | Pass | 3 rows |
 | Report: financial | Income Statement | CSV | Pass | 7 rows, 1 KB |
@@ -231,21 +231,21 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: financial | Trial Balance (Opening / Movement / Closing) | PDF | Pass | 21 rows, 71 KB |
 | Report: financial | General Ledger Detail (Account) | Screen preview | Pass | 226 rows |
 | Report: financial | General Ledger Detail (Overall) | Screen preview | Pass | 226 rows |
-| Report: financial | General Ledger Detail | CSV | Pass | 226 rows, 31 KB |
+| Report: financial | General Ledger Detail | CSV | Pass | 226 rows, 30 KB |
 | Report: financial | General Ledger Detail | XLSX | Pass | 226 rows, 18 KB |
-| Report: financial | General Ledger Detail | PDF | Pass | 226 rows, 254 KB |
+| Report: financial | General Ledger Detail | PDF | Pass | 226 rows, 250 KB |
 | Report: financial | Aged Payables to Insurers (Ageing Bucket) | Screen preview | Pass | 3 rows |
 | Report: financial | Aged Payables to Insurers (Principal Insurer) | Screen preview | Pass | 3 rows |
 | Report: financial | Aged Payables to Insurers (Overall) | Screen preview | Pass | 3 rows |
 | Report: financial | Aged Payables to Insurers | CSV | Pass | 3 rows, <1 KB |
 | Report: financial | Aged Payables to Insurers | XLSX | Pass | 3 rows, 6 KB |
 | Report: financial | Aged Payables to Insurers | PDF | Pass | 3 rows, 57 KB |
-| Report: financial | Month-End Close Status (Overall) | Screen preview | Pass | 0 rows |
-| Report: financial | Month-End Close Status (Fiscal Year) | Screen preview | Pass | 0 rows |
-| Report: financial | Month-End Close Status (Period Status) | Screen preview | Pass | 0 rows |
-| Report: financial | Month-End Close Status | CSV | Pass | 0 rows, <1 KB |
-| Report: financial | Month-End Close Status | XLSX | Pass | 0 rows, 5 KB |
-| Report: financial | Month-End Close Status | PDF | Pass | 0 rows, 55 KB |
+| Report: financial | Month-End Close Status (Overall) | Screen preview | Pass | 9 rows |
+| Report: financial | Month-End Close Status (Fiscal Year) | Screen preview | Pass | 9 rows |
+| Report: financial | Month-End Close Status (Period Status) | Screen preview | Pass | 9 rows |
+| Report: financial | Month-End Close Status | CSV | Pass | 9 rows, 1 KB |
+| Report: financial | Month-End Close Status | XLSX | Pass | 9 rows, 5 KB |
+| Report: financial | Month-End Close Status | PDF | Pass | 9 rows, 65 KB |
 | Report: financial | VAT Summary (Monthly) | Screen preview | Pass | 8 rows |
 | Report: financial | VAT Summary (Quarterly) | Screen preview | Pass | 3 rows |
 | Report: financial | VAT Summary | CSV | Pass | 8 rows, <1 KB |
@@ -293,7 +293,7 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: financial | Bank Book (Overall) | Screen preview | Pass | 32 rows |
 | Report: financial | Bank Book | CSV | Pass | 32 rows, 4 KB |
 | Report: financial | Bank Book | XLSX | Pass | 32 rows, 8 KB |
-| Report: financial | Bank Book | PDF | Pass | 32 rows, 89 KB |
+| Report: financial | Bank Book | PDF | Pass | 32 rows, 90 KB |
 | Report schedule (run now) | Sweep pdf | PDF | Pass | 17 rows, e-mail queued to 1 |
 | Report schedule (run now) | Sweep csv | CSV | Pass | 17 rows, e-mail queued to 1 |
 | Report schedule (run now) | Sweep xlsx | XLSX | Pass | 17 rows, e-mail queued to 1 |
