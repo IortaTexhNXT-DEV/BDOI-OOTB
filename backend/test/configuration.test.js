@@ -12,6 +12,7 @@ import { many, one } from '../src/db/pool.js';
 import { clearSettingsCache, getSetting, setSetting } from '../src/lib/settings.js';
 import { addDays, businessDate, isoInZone, nowInTz, today } from '../src/lib/dates.js';
 import { formatMoney, round2 } from '../src/lib/money.js';
+import { companyName } from '../src/lib/letterhead.js';
 
 const SRC = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src');
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true })
@@ -125,14 +126,17 @@ describe('former hard-coded texts and limits come from settings', () => {
     const last = () => one('SELECT subject, body_html FROM email_outbox WHERE template = \'password-reset\' ORDER BY id DESC LIMIT 1');
     const lifetime = async () => Number((await one('SELECT extract(epoch FROM expires_at - created_at) AS s FROM password_resets WHERE user_id = $1 ORDER BY id DESC LIMIT 1', [admin.id])).s);
     await request(app).post('/api/auth/forgot-password').send({ username: 'BrokerVerse' }).expect(200);
-    expect((await last()).subject).toBe('Your BrokerVerse password reset code');
+    // {{companyName}} is the letterhead company (primary company of the Company master)
+    const company = await companyName();
+    expect(company).toBe('iorta TechNXT Corp.');
+    expect((await last()).subject).toBe(`Your ${company} password reset code`);
     expect((await last()).body_html).toContain('It expires in 15 minutes.');
     expect(Math.round((await lifetime()) / 60)).toBe(15);
     await setSetting('security.reset_code_minutes', 30, admin.id);
     await setSetting('security.reset_email_subject', '{{companyName}} code', admin.id);
     try {
       await request(app).post('/api/auth/forgot-password').send({ username: 'BrokerVerse' }).expect(200);
-      expect((await last()).subject).toBe('BrokerVerse code');
+      expect((await last()).subject).toBe(`${company} code`);
       expect((await last()).body_html).toContain('It expires in 30 minutes.');
       expect(Math.round((await lifetime()) / 60)).toBe(30);
     } finally {

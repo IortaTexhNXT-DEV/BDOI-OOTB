@@ -12,6 +12,7 @@ import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { fileSize, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
 import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, statusLabels } from './service.js';
+import { companyName } from '../../lib/letterhead.js';
 
 const ts = (d) => (d ? new Date(d).toISOString().replace('T', ' ').slice(0, 16) : null);
 const ITEM_SELECT = `SELECT x.*, (SELECT display_name FROM users u WHERE u.id = x.created_by) AS created_by_name,
@@ -265,7 +266,7 @@ export async function generateStatement(b, user) {
     fileName, fileSize: fileSize(saved.size), generatedAt: new Date().toISOString(), downloadUrl: saved.url, previewUrl: saved.url, rowCount: rows.length, totals };
   await insertItemNoTx({ kind: 'statement', referenceNo: ref, amount: totals.netAmount, status: 'Generated', data, userId: user.id });
   if (Array.isArray(b.emailTo) && b.emailTo.length) {
-    const vars = { period, fileName, downloadUrl: saved.url, companyName: (await getSetting('general.company_name')) ?? '' };
+    const vars = { period, fileName, downloadUrl: saved.url, companyName: await companyName() };
     const subject = renderTemplate(await getSetting('remittance.statement_email_subject'), vars);
     const html = renderTemplate(await getSetting('remittance.statement_email_body'), vars);
     for (const to of b.emailTo) await queueEmail({ to, subject, html, template: 'remittance-statement', entity: 'remittance_statement', entityId: ref });

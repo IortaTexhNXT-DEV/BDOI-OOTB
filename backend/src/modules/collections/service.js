@@ -10,6 +10,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { round2 } from '../accounting/lib/http.js';
 import { notify } from '../notifications/router.js';
 import { ensureBooked, findPolicy } from '../receipts/receivables.js';
+import { companyName } from '../../lib/letterhead.js';
 
 async function thresholds() {
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90];
@@ -120,7 +121,7 @@ async function emailVars(x) {
   const symbol = await getSetting('currency.symbol', '₱');
   return { clientName: x.client.displayName || `${x.client.firstName} ${x.client.lastName}`.trim(), policyNumber: x.policyNumber, billNumber: x.billNumber,
     amount: `${symbol}${Number(x.outstandingAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, dueDate: x.dueDate, daysPastDue: x.daysPastDue,
-    companyName: ((await getSetting('general.company_name')) ?? '') };
+    companyName: await companyName() };
 }
 
 /** Queue a collection e-mail to the client (body = the notes typed on the screen, wrapped in the configured template). */

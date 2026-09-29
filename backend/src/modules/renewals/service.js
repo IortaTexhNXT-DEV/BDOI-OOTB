@@ -12,6 +12,7 @@ import { notify } from '../notifications/router.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { renderTemplate } from '../claims/docs.js';
 import { daysBetween, nextNumber, round2, toDate, today, unprocessable, usersWithRole } from '../claims/util.js';
+import { companyName } from '../../lib/letterhead.js';
 
 export const OPEN = ['pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'];
 const NOTICE_STATUS = ['notice-1', 'notice-2', 'final-notice'];
@@ -272,7 +273,7 @@ async function noticeVars(r, noticeLabel) {
   return {
     noticeLabel, clientName: r.client_name || 'Valued Client', policyNumber: r.policy_number, insurerName: r.insurer_name || '', expiryDate: r.policy_expiry,
     currency: r.currency || await getSetting('currency.default', 'PHP'), premium: fmt(r.premium_new ?? r.premium_old ?? r.premium_total),
-    companyName: ((await getSetting('general.company_name')) ?? ''),
+    companyName: await companyName(),
   };
 }
 

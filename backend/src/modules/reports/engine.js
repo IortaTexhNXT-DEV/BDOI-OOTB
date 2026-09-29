@@ -4,6 +4,7 @@ import { getSetting } from '../../lib/settings.js';
 import { businessTimeZone, isoInZone } from '../../lib/dates.js';
 import { badRequest } from '../../lib/errors.js';
 import { QUERIES } from './queries.js';
+import { companyName } from '../../lib/letterhead.js';
 
 const IDENT = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const NUMERIC_TYPES = new Set(['money', 'number', 'integer']);
@@ -104,7 +105,7 @@ export async function normalizeParams(query, raw = {}) {
     filters[f] = String(v);
   }
   // The screens list the broker itself under "Company"; that means "all insurers", not a filter
-  if (filters.insurer && norm(filters.insurer) === norm(((await getSetting('general.company_name')) ?? ''))) delete filters.insurer;
+  if (filters.insurer && [(await getSetting('general.company_name')) ?? '', await companyName()].some((n) => n && norm(filters.insurer) === norm(n))) delete filters.insurer;
   return { from, to, criteria: criteria || null, filters, ignoredFilters: ignored };
 }
 

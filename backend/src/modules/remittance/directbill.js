@@ -29,6 +29,7 @@ import { account, cashAccountFor, createJournal, reverseJournal } from '../accou
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { renderTemplate } from '../documents/common.js';
 import { formatMoney } from '../../lib/money.js';
+import { companyName } from '../../lib/letterhead.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -446,7 +447,7 @@ export async function sendDebitNote(id, body, user) {
   const to = body?.email || dn.insurerEmail;
   if (!to) throw badRequest('Validation failed', [{ path: 'email', message: `${dn.insurerName} has no e-mail address; enter one` }]);
   const vars = { dnNumber: dn.dnNumber, insurerName: dn.insurerName, amount: `${dn.currency} ${dn.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-    dueDate: dn.dueDate, companyName: ((await getSetting('general.company_name')) ?? '') };
+    dueDate: dn.dueDate, companyName: await companyName() };
   await queueEmail({ to, subject: renderTemplate(await getSetting('direct_bill.email_subject'), vars),
     html: renderTemplate(await getSetting('direct_bill.email_body'), vars), template: 'commission-debit-note', entity: 'commission_debit_note', entityId: dn.id });
   await one('UPDATE commission_debit_notes SET sent_to = $2, sent_at = now(), updated_by = $3, updated_at = now() WHERE id = $1 RETURNING id', [dn.id, to, user.id]);
