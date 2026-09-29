@@ -5,18 +5,24 @@ in brackets is matched on each part.
 
 | Term | Meaning |
 |---|---|
+| Account determination | Settings accounting.account.<role> that give the GL account of each account role (cash in bank, premium receivable, due to insurer, commission income ...) used by the posting rules. |
 | ACM | AWS Certificate Manager: issues and renews the TLS certificates used by the load balancer and CloudFront. |
-| Advisory lock | PostgreSQL application-level lock (pg_try_advisory_lock) used by the scheduler so a job runs on one API instance at a time. |
+| Advisory lock | PostgreSQL application-level lock (pg_try_advisory_lock, pg_advisory_lock) used so a job runs on one API instance at a time and only one instance applies migrations. |
 | ALB | Application Load Balancer (AWS): distributes HTTPS requests over the API containers and checks their health. |
 | API | Application programming interface; here the BrokerVerse REST API under /api served by the Node.js backend. |
+| ATC | Alphanumeric tax code of the BIR for a type of withholding, printed on BIR Form 2307. |
 | Audit log / audit trail | Table audit_log: who changed which record, when, from which IP, with the before and after values. |
 | AZ | Availability Zone: an isolated data-centre group inside an AWS region. |
 | bcrypt | Adaptive password-hashing function (bcryptjs library) used for user passwords. |
 | BIR | Bureau of Internal Revenue (Philippines): tax authority whose rules drive record keeping and withholding tax certificates. |
+| BIR Form 2307 | Certificate of creditable tax withheld at source, issued by the payor to the payee each quarter. |
 | Bordereau | Periodic list of ceded premiums or claims sent to a reinsurer. |
+| Broker slip | Request for quotation (BS-) that the broker sends to several insurers for one client risk; the answers are recorded as insurer offers. |
 | Cession | The share of a policy's risk and premium passed to a reinsurer under a treaty or facultatively. |
 | CloudFront | AWS content delivery network that serves the single-page application and can route /api to the backend. |
 | CloudWatch | AWS monitoring service: logs, metrics, dashboards and alarms. |
+| Co-insurance | Placement of one risk with several insurers, one of them the lead, each taking a share; premium, commission and claims are split by share. |
+| Company master | Master record of the broker company; the primary company is the letterhead printed on every document and report. |
 | CORS | Cross-Origin Resource Sharing: browser rule set that the API restricts to the configured web origins (CORS_ORIGINS). |
 | CRA / craco | Create React App (react-scripts) build tool chain, customised with craco (Create React App Configuration Override). |
 | Cron | Time-based schedule expression (minute hour day month weekday) used by the scheduled jobs. |
@@ -31,10 +37,12 @@ in brackets is matched on each part.
 | EFS | Elastic File System (AWS): shared, multi-AZ network file system proposed for the upload directory. |
 | Endorsement | Change to an issued policy (details, cover, premium or cancellation). |
 | EWT | Expanded Withholding Tax (Philippines), e.g. withheld by an insurer on commission (BIR Form 2307). |
+| Fiscal year | Accounting year (FY2026) with twelve periods and an adjustment period 13 used by the year-end close. |
 | FK | Foreign key: column that references the primary key of another table. |
 | GIN | Generalised inverted index (PostgreSQL), used for JSONB searches. |
 | HA | High availability: design that keeps the service running through the failure of a component. |
 | HMAC | Keyed-hash message authentication code; signs file links and hashes one-time codes. |
+| Housekeeping | Daily job that deletes operational rows (job runs, sent e-mails, sign-in history, expired tokens, read notifications) after the retention days in System Settings. |
 | HS256 | HMAC-SHA256 JSON Web Token signature algorithm, the only one the API accepts. |
 | IC | Insurance Commission (Philippines): regulator of insurers and brokers. |
 | JSONB | PostgreSQL binary JSON column type, used for flexible document parts of records. |
@@ -44,16 +52,20 @@ in brackets is matched on each part.
 | LGT | Local Government Tax (Philippines), part of the gross premium. |
 | Maker-checker | Control in which a record created or submitted by one user must be approved by a different user. |
 | Migration | Numbered SQL file in backend/src/db/migrations applied once, in order, on API start. |
+| Month-end close | Run (MEC-) that posts the accruals, recurring journals and valuations of a period, checks the checklist and, once approved, closes the period. |
 | Multi-AZ | Deployment with a synchronous standby in a second Availability Zone and automatic failover (RDS). |
 | nginx | Web server used in the web container to serve the SPA and forward /api to the API container. |
+| Office 365 | Microsoft 365 mail service; BrokerVerse sends e-mail through smtp.office365.com with the mailbox in SMTP_URL. |
 | OR | Official receipt issued for premium received. |
 | p50 / p95 / p99 | Latency percentiles: the time within which 50 %, 95 % or 99 % of requests completed. |
 | PITR | Point-in-time recovery: restoring a database to any second inside the backup retention window. |
 | PK | Primary key: column(s) that uniquely identify a row. |
-| PV | Payment voucher (disbursement) to an insurer, agent, client or supplier. |
+| Placement slip | Firm order (PS-) sent to the lead insurer and co-insurers; each participant binds before the policy is issued. |
+| Posting rule | Versioned definition of the journal lines for one business event (policy issued, receipt applied ...); every system journal is built from it. |
+| PV | Payment voucher (disbursement) to an insurer, referrer, client or supplier. |
 | RDS | Amazon Relational Database Service, the managed PostgreSQL target. |
 | Receivable / bill | Premium bill (INV-) raised when a policy, endorsement or renewal is issued. |
-| Record scope | Rule that users holding only scoped roles (default: agent) see only their own records (lib/scope.js). |
+| Record scope | Rule that users holding only roles listed in security.scoped_roles see only their own records (lib/scope.js); no role is scoped by default. |
 | Refresh token | Long-lived token (30 days) exchanged for a new access token; rotated on every use. |
 | Remittance | Payment of collected premium, net of commission, from the broker to the insurer. |
 | RPO | Recovery point objective: the maximum acceptable data loss, measured in time. |
@@ -64,6 +76,7 @@ in brackets is matched on each part.
 | SLA | Service level agreement / target time, e.g. for remittance approvals. |
 | SMTP | Simple Mail Transfer Protocol; the API sends e-mail through the server in SMTP_URL. |
 | SNS | Amazon Simple Notification Service: delivers alarm notifications. |
+| Soft close | Period status in which only users with approve:period-end (Accounting Manager) may post. |
 | SPA | Single-page application: the React front end served as static files. |
 | SPOF | Single point of failure. |
 | TLS | Transport Layer Security (HTTPS). |
@@ -75,5 +88,6 @@ in brackets is matched on each part.
 | VPC | Virtual Private Cloud: the isolated AWS network holding the load balancer, containers, database and file system. |
 | WAF | Web Application Firewall. |
 | WAL | Write-ahead log: PostgreSQL change log used for replication and point-in-time recovery. |
-| WHT | Withholding tax deducted from payments such as agent commission. |
+| WHT | Withholding tax deducted from payments such as referrer commission. |
+| Year-end close | Run (YEC-) that posts the closing entries in period 13, carries the balances into the next year and locks the year. |
 | zod | TypeScript-first schema validation library used to validate request bodies and parameters. |

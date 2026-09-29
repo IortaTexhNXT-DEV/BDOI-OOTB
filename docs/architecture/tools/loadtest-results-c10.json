@@ -1,125 +1,125 @@
 {
-  "date": "2026-09-29T09:20:31.793Z",
+  "date": "2026-09-29T15:59:39.810Z",
   "seconds": 15,
   "concurrency": 10,
   "node": "v22.22.2",
   "results": [
     {
       "endpoint": "GET /health (readiness, DB ping)",
-      "requests": 27833,
-      "throughputRps": 1855,
-      "p50ms": 4.5,
-      "p95ms": 10.2,
-      "p99ms": 17.8,
-      "maxMs": 100.1,
-      "errors": 6,
+      "requests": 31540,
+      "throughputRps": 2103,
+      "p50ms": 4,
+      "p95ms": 8.3,
+      "p99ms": 14.7,
+      "maxMs": 151.5,
+      "errors": 3,
       "statuses": {
-        "200": 27827,
-        "503": 6
+        "200": 31537,
+        "503": 3
       }
     },
     {
       "endpoint": "GET /health/live (liveness)",
-      "requests": 56719,
-      "throughputRps": 3781,
+      "requests": 57829,
+      "throughputRps": 3855,
       "p50ms": 2.2,
-      "p95ms": 5.1,
-      "p99ms": 8,
-      "maxMs": 29.9,
+      "p95ms": 4.5,
+      "p99ms": 6.4,
+      "maxMs": 24.9,
       "errors": 0,
       "statuses": {
-        "200": 56719
+        "200": 57829
       }
     },
     {
       "endpoint": "GET /policies?page=1&perPage=10",
-      "requests": 5939,
-      "throughputRps": 396,
-      "p50ms": 23.2,
-      "p95ms": 41.4,
-      "p99ms": 59.6,
-      "maxMs": 127,
+      "requests": 10274,
+      "throughputRps": 685,
+      "p50ms": 13.5,
+      "p95ms": 23.4,
+      "p99ms": 33.5,
+      "maxMs": 148.1,
       "errors": 0,
       "statuses": {
-        "200": 5939
+        "200": 10274
       }
     },
     {
       "endpoint": "GET /leads?page=1&perPage=10",
-      "requests": 11807,
-      "throughputRps": 787,
-      "p50ms": 11.5,
-      "p95ms": 20.7,
-      "p99ms": 33.4,
-      "maxMs": 82.4,
+      "requests": 15181,
+      "throughputRps": 1012,
+      "p50ms": 9.7,
+      "p95ms": 12.1,
+      "p99ms": 14.9,
+      "maxMs": 34.4,
       "errors": 0,
       "statuses": {
-        "200": 11807
+        "200": 15181
       }
     },
     {
       "endpoint": "GET /claims?page=1&perPage=10",
-      "requests": 7150,
-      "throughputRps": 476,
-      "p50ms": 19.6,
-      "p95ms": 31.4,
-      "p99ms": 52.6,
-      "maxMs": 87.4,
+      "requests": 8636,
+      "throughputRps": 575,
+      "p50ms": 16.4,
+      "p95ms": 24.7,
+      "p99ms": 37.3,
+      "maxMs": 79.3,
       "errors": 0,
       "statuses": {
-        "200": 7150
+        "200": 8636
       }
     },
     {
       "endpoint": "GET /dashboard/executive",
-      "requests": 5900,
-      "throughputRps": 393,
-      "p50ms": 21.9,
-      "p95ms": 44.5,
-      "p99ms": 73.7,
-      "maxMs": 245.8,
+      "requests": 6069,
+      "throughputRps": 404,
+      "p50ms": 23.1,
+      "p95ms": 34.7,
+      "p99ms": 46,
+      "maxMs": 216.3,
       "errors": 0,
       "statuses": {
-        "200": 5900
+        "200": 6069
       }
     },
     {
       "endpoint": "GET /notifications/unread-count",
-      "requests": 17402,
-      "throughputRps": 1160,
-      "p50ms": 8.1,
-      "p95ms": 12.6,
-      "p99ms": 21,
-      "maxMs": 49.4,
+      "requests": 18361,
+      "throughputRps": 1224,
+      "p50ms": 7.7,
+      "p95ms": 11.5,
+      "p99ms": 18.9,
+      "maxMs": 124.7,
       "errors": 0,
       "statuses": {
-        "200": 17402
+        "200": 18361
       }
     },
     {
       "endpoint": "GET /search?q=santos",
-      "requests": 10319,
-      "throughputRps": 688,
-      "p50ms": 13,
-      "p95ms": 25.1,
-      "p99ms": 38.7,
-      "maxMs": 84.9,
+      "requests": 12740,
+      "throughputRps": 849,
+      "p50ms": 11.2,
+      "p95ms": 16.6,
+      "p99ms": 22.4,
+      "maxMs": 49.7,
       "errors": 0,
       "statuses": {
-        "200": 10319
+        "200": 12740
       }
     },
     {
       "endpoint": "POST /reports/production-register/run (on-screen preview)",
-      "requests": 5870,
-      "throughputRps": 391,
-      "p50ms": 22.6,
-      "p95ms": 45.4,
-      "p99ms": 66.1,
-      "maxMs": 191.8,
+      "requests": 8076,
+      "throughputRps": 538,
+      "p50ms": 17.7,
+      "p95ms": 25.2,
+      "p99ms": 37.1,
+      "maxMs": 81.9,
       "errors": 0,
       "statuses": {
-        "200": 5870
+        "200": 8076
       }
     }
   ]

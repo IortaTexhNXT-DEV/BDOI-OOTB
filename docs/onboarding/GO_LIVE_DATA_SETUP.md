@@ -2,7 +2,7 @@
 
 For the System Administrator and Accounting. It gives the order in which to set up the company in BrokerVerse before
 users start working, and for each step the screen, what to enter, the template to use and how to check the result.
-The technical installation (servers, database, secrets, SMTP account) is in `docs/GO_LIVE_CHECKLIST.md` and must be
+The technical installation (servers, database, secrets, SMTP account) is in `deploy/README.md` and must be
 finished first.
 
 The templates are in `docs/templates`. Each has a Data sheet with the exact headers and a sample row to delete, a

@@ -2,16 +2,16 @@
 
 ## Purpose and scope
 
-This document defines what must be backed up for BrokerVerse, how (in the AWS target and in the Docker Compose alternative), how long backups are kept, and the step-by-step procedures to restore the database, the files, the front end and the secrets, together with the restore test schedule. The objectives the procedures must meet are in document 08.
+This document defines what must be backed up for BrokerVerse OOTB, how (in the AWS production deployment and in a Docker Compose installation), how long backups are kept, and the step-by-step procedures to restore the database, the files, the front end and the secrets, together with the restore test schedule. The objectives the procedures must meet are in document 08.
 
-> **Recommended / to be confirmed by the business and DevOps:** The baseline contains no backup automation: `docs/GO_LIVE_CHECKLIST.md` requires daily database snapshots with at least 30 days' retention, a backup of the upload volume and of `DATA_ENCRYPTION_KEY`, and one restore test before go-live; `docs/DEPLOY.md` recommends `pg_dump` for Docker installations. Retention periods, schedules and tools in this document are recommendations.
+> **Recommended / to be confirmed by the business and DevOps:** The code contains no backup automation. `deploy/README.md` requires daily automated database snapshots with at least 30 days' retention, a backup of the upload volume and of `DATA_ENCRYPTION_KEY`, and one restore test before go-live. Retention periods, schedules and tools beyond that are recommendations.
 
 # What to back up
 
 {widths: 22,30,48}
 | Asset | Location | Why it matters |
 |---|---|---|
-| Database | PostgreSQL database `brokerverse` (RDS in the target) | All business, financial, configuration, security and audit data (102 tables). The only copy of transactions. |
+| Database | PostgreSQL database `brokerverse` (for example Amazon RDS) | All business, financial, configuration, security and audit data (138 tables). The only copy of transactions. |
 | Uploaded and generated files | `UPLOAD_DIR` (`/app/uploads`; EFS in the target) | Policy documents, IDs, vehicle photos, claim documents, signatures, logos, statements and generated reports. The `documents` table holds only the keys, not the content. |
 | `DATA_ENCRYPTION_KEY` | Secrets Manager / environment | Decrypts the two-factor (TOTP) secrets stored in `users` and keys the reset-code hashes. A database restored without the same key works, but every user with two-factor sign-in must be reset by an administrator and enrol again. |
 | `JWT_SECRET` | Secrets Manager / environment | Signs sessions, signed file links and approval / download tokens. Losing it signs everyone out and invalidates links already sent (for example quotation approval e-mails); no data is lost. |
@@ -22,20 +22,20 @@ This document defines what must be backed up for BrokerVerse, how (in the AWS ta
 
 Application settings, masters, product templates, users and roles are data in the database (edited in the application), so they are covered by the database backup. There is no application function to export the configuration.
 
-> **Recommended / to be confirmed by the business and DevOps:** Take a configuration export before every release and before large configuration changes, for audit and for comparison between environments: `pg_dump --data-only --table=app_settings --table=master_types --table=master_records --table=product_templates --table=product_components --table=product_risk_mappings --table=product_risk_sections --table=report_definitions --table=scheduled_jobs --table=roles --table=permissions --table=role_permissions --table=gl_accounts` into the backup bucket.
+> **Recommended / to be confirmed by the business and DevOps:** Take a configuration export before every release and before large configuration changes, for audit and for comparison between environments: `pg_dump --data-only --table=app_settings --table=master_types --table=master_records --table=product_templates --table=product_components --table=product_risk_mappings --table=product_risk_sections --table=report_definitions --table=scheduled_jobs --table=roles --table=permissions --table=role_permissions --table=gl_accounts --table=posting_rules --table=posting_rule_lines --table=document_numbering --table=commission_rates --table=tax_codes --table=period_close_checklist --table=bank_statement_formats --table=bank_transaction_types --table=bank_match_rules` into the backup bucket.
 
 # Backup design
 
 ![Backup and recovery data flows (recommended)](d09_backup_flow)
 
-## AWS target
+## AWS production deployment
 
 {widths: 24,40,36}
 | Backup | Configuration (Recommended / to be confirmed by the business and DevOps) | Retention |
 |---|---|---|
 | RDS automated backups and PITR | Enabled, backup window 18:00-19:00 UTC (02:00-03:00 Manila), encrypted with KMS, copy tags to snapshots, deletion protection on | 35 days (PITR to any second) |
 | RDS snapshots (AWS Backup plan) | Daily and monthly snapshots; monthly copied to a second region (for example ap-southeast-2 or ap-northeast-1); vault lock against deletion | Daily 35 days; monthly 12 months; yearly 10 years for year-end records (to be confirmed with compliance) |
-| Pre-change snapshots | Manual snapshot before every production release with migrations, before `purge:sample`, before bulk imports and before year-end closing | Until the change is accepted (minimum 30 days) |
+| Pre-change snapshots | Manual snapshot before every production release with migrations, before `purge:sample`, before the go-live imports (opening balances, open items, policies) and bulk imports, and before each year-end close | Until the change is accepted (minimum 30 days) |
 | Logical dump | Monthly `pg_dump -Fc` of the database to an S3 bucket with Object Lock (compliance mode), independent of RDS snapshots; also enables restore into any PostgreSQL 16 | 12 months (Glacier after 30 days) |
 | EFS (`UPLOAD_DIR`) | AWS Backup daily; copy to the second region weekly | Daily 35 days; monthly 12 months |
 | S3 front-end bucket | Versioning on; lifecycle removing non-current versions after 90 days | 90 days |
@@ -50,7 +50,6 @@ Application settings, masters, product templates, users and roles are data in th
 | Database | Daily `docker compose exec -T db pg_dump -U brokerverse -Fc brokerverse > brokerverse-$(date +%F).dump`, copied off the host (object storage), kept 35 days plus monthly copies. For PITR on a self-managed server use WAL archiving (for example pgBackRest or WAL-G). |
 | Uploads | Daily archive of the `uploads` volume (`docker run --rm -v <project>_uploads:/data -v $PWD:/backup alpine tar czf /backup/uploads-$(date +%F).tgz -C /data .`), copied off the host. |
 | Secrets | Keep the environment file with `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `DB_PASSWORD` in a password vault, never in the repository. |
-| Render | Render keeps daily database backups on paid plans; download them regularly; the 1 GB API disk has no automatic backup and must be copied with a scheduled job. |
 
 ## Consistency between database and files
 
@@ -60,12 +59,12 @@ The database and the file store are backed up separately, so a restore can yield
 
 ## Database: point-in-time restore (AWS)
 
-1. Declare the incident, stop user traffic or set the application to maintenance (scale the ECS service to 0 tasks or return a maintenance page from CloudFront) to prevent further writes to the damaged database.
+1. Declare the incident, stop user traffic or set the application to maintenance (scale the API service to 0 containers or return a maintenance page from CloudFront) to prevent further writes to the damaged database.
 2. Determine the recovery time: the last good moment before the incident (from the audit log `audit_log.at`, application logs or the user report). Record it in the incident log.
 3. In RDS, "Restore to point in time" of the production instance to a new instance (same class, Multi-AZ, subnet group, security group, parameter group, KMS key) at the recovery time.
 4. When the new instance is available, connect with `psql` and verify: `SELECT max(at) FROM audit_log;` is just before the recovery time; row counts of `policies`, `receipts`, `journal_vouchers` are plausible; `SELECT count(*) FROM schema_migrations;` equals the number of migration files of the deployed release.
 5. Update the `DATABASE_URL` secret to the new endpoint (or rename the instances so the new one takes the old endpoint name).
-6. Start the ECS service (or restart the tasks). Each task checks `GET /api/health` = 200 (database reachable, no pending migrations) before it receives traffic.
+6. Start the API service (or restart the containers). Each container checks `GET /api/health` = 200 (database reachable, no pending migrations) before it receives traffic.
 7. Smoke test: sign in, open a recent policy and its documents, run the trial balance, check Master > Schedules.
 8. Inform the business of the recovery point; transactions entered after it are re-entered from source documents and the audit trail of the damaged database (keep the damaged instance, renamed, until reconciliation is complete).
 9. Delete the old instance after the retention agreed in the incident review, taking a final snapshot.
@@ -79,7 +78,7 @@ The database and the file store are backed up separately, so a restore can yield
 ## Files (EFS)
 
 1. In AWS Backup, choose the EFS recovery point and restore either the whole file system to a new file system, or selected directories (for example `claim/`, `reports/`) to a new directory of the existing file system.
-2. For a full restore, update the ECS task definition to mount the new file system at `/app/uploads` and redeploy; for a partial restore, move the recovered files into place (paths are the storage keys).
+2. For a full restore, update the container definition to mount the new file system at `/app/uploads` and redeploy; for a partial restore, move the recovered files into place (paths are the storage keys).
 3. Reconcile: list document keys missing on disk with a query such as `SELECT storage_key FROM documents WHERE status = 'uploaded'` compared with the file list (`find /app/uploads -type f`); report missing files to the business.
 
 ## Front end
@@ -90,7 +89,7 @@ The database and the file store are backed up separately, so a restore can yield
 ## Secrets
 
 1. Restore the previous secret version in Secrets Manager (or recreate it from the escrow copy under dual control).
-2. Restart the API tasks so they read the secret.
+2. Restart the API containers so they read the secret.
 3. If `DATA_ENCRYPTION_KEY` is lost permanently: generate a new key; administrators turn two-factor off for the affected users in User Management; the users enrol again. If `JWT_SECRET` is changed: users sign in again; quotation approval links and report download links already sent must be re-sent.
 
 ## Application release rollback

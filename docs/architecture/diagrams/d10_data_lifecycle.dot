@@ -8,7 +8,7 @@ digraph G {
   cold [label="Cold archive\nS3 (Parquet / pg_dump -Fc)\nGlacier Deep Archive,\nObject Lock (WORM)"];
   purge [label="Purge after retention\n(approved, logged in audit_log)"];
   tmp [label="Temporary / operational data\ntokens, outbox, notifications,\njob runs, generated reports"];
-  hk [label="Housekeeping jobs\n(scheduled_jobs, advisory lock)"];
+  hk [label="housekeeping job, daily 02:45 Manila\n(retention days in System Settings >\nHousekeeping; audit trail kept)"];
   live -> arch [label="year-end + N years"]; arch -> cold [label="export + verify"]; cold -> purge [label="statutory period ends"];
   tmp -> hk [label="daily"]; hk -> purge [label="delete older than retention"];
   cold -> live [label="restore on request\n(pg_restore into restore DB)", style=dashed];

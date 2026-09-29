@@ -29,21 +29,33 @@ FONT_BOLD = [os.path.expanduser('~/.fonts/Nunito-700-normal.ttf'), '/usr/share/f
 # ------------------------------------------------------------------ ER diagrams from the database snapshot
 ER_GROUPS = {
     'er_sales_policy': ('Sales and policy', ['leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments']),
+    'er_placement': ('Placement and co-insurance', ['broker_slips', 'insurer_offers', 'placements', 'risk_participants']),
     'er_renewals': ('Renewals', ['renewals', 'renewal_quotes', 'renewal_notices', 'renewal_activities', 'renewal_batches', 'renewal_batch_policies', 'winback_campaigns']),
-    'er_finance_ledger': ('Billing, receipts and ledger', ['receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'collection_items', 'collection_actions',
-                                                  'gl_accounts', 'journal_vouchers', 'journal_lines', 'entry_matches']),
+    'er_billing': ('Billing, receipts and collections', ['receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'receivable_credits',
+                                                          'receivable_participants', 'collection_items', 'collection_actions', 'write_off_reasons']),
+    'er_ledger': ('General ledger and posting rules', ['gl_accounts', 'journal_vouchers', 'journal_lines', 'entry_matches', 'accounting_periods',
+                                                        'posting_rules', 'posting_rule_lines']),
+    'er_period_end': ('Period end and tax', ['fiscal_years', 'period_status_history', 'period_close_checklist', 'period_close_runs', 'period_close_run_checks',
+                                             'period_close_entries', 'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'opening_balances',
+                                             'tax_codes', 'bir_2307_certificates']),
+    'er_bank_reconciliation': ('Bank reconciliation', ['bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'bank_statements',
+                                                       'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations',
+                                                       'bank_reconciliation_history']),
     'er_disbursement_pettycash': ('Disbursements and petty cash', ['disbursements', 'invoice_lists', 'checkbooks', 'petty_cash_funds', 'petty_cash_requests',
                                                                    'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments']),
-    'er_claims': ('Claims', ['claims', 'claim_history', 'claim_field_changes', 'reinsurance_recoveries']),
+    'er_claims': ('Claims', ['claims', 'claim_history', 'claim_field_changes', 'claim_settlement_movements', 'reinsurance_recoveries']),
     'er_remittance_directbill': ('Remittance and direct bill', ['remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_delegations',
-                                                                'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items']),
+                                                                'remittance_allocations', 'insurer_refund_credits', 'commission_debit_notes',
+                                                                'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items']),
     'er_reinsurance': ('Reinsurance', ['reinsurers', 'reinsurance_treaties', 'cessions', 'reinsurance_recoveries', 'reinsurance_bordereaux',
                                        'reinsurance_reconciliations', 'reinsurance_exceptions']),
-    'er_commission_incentive': ('Commission and incentive', ['commissions', 'commission_referrers', 'incentive_programs', 'incentive_calculations', 'incentive_results']),
+    'er_commission_incentive': ('Commission and incentive', ['commissions', 'commission_adjustments', 'commission_rates', 'commission_referrers',
+                                                             'incentive_programs', 'incentive_calculations', 'incentive_results']),
     'er_config_security': ('Security and identity', ['users', 'roles', 'permissions', 'role_permissions', 'user_roles', 'refresh_tokens', 'password_resets',
                                                      'password_history', 'login_history', 'audit_log', 'notifications', 'agent_events']),
     'er_platform': ('Configuration and platform services', ['app_settings', 'email_outbox', 'scheduled_jobs', 'job_runs', 'job_queue', 'documents', 'sequences',
-                                                           'schema_migrations', 'master_types', 'master_records', 'report_definitions', 'report_schedules', 'generated_reports']),
+                                                           'document_numbering', 'schema_migrations', 'master_types', 'master_records', 'report_definitions',
+                                                           'report_schedules', 'generated_reports']),
     'er_masters': ('Reference masters', ['countries', 'states', 'cities', 'districts', 'postal_codes', 'currencies', 'banks', 'insurance_companies', 'products',
                                          'policy_types', 'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'coverages', 'signatories', 'branches']),
     'er_product': ('Product configurator', ['product_templates', 'product_components', 'product_risk_mappings', 'product_risk_sections']),
@@ -110,6 +122,10 @@ def generate_er():
     snap = json.load(open(SNAPSHOT, encoding='utf-8'))
     for name, (title, tables) in ER_GROUPS.items():
         er_dot(name, title, tables, snap)
+    grouped = {t for _, tables in ER_GROUPS.values() for t in tables}
+    missing = sorted(set(snap['tables']) - grouped)
+    if missing:
+        print(f'warning: tables in no ER diagram (add them to ER_GROUPS): {", ".join(missing)}')
 
 
 # ------------------------------------------------------------------ sequence diagrams

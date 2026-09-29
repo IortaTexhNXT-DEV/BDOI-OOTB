@@ -2,25 +2,25 @@
 
 ## Purpose and scope
 
-This document lists the technologies used by BrokerVerse, with the versions resolved in the lock files of the baseline, their purpose and their licence type, together with the runtime, infrastructure, build and test tooling. It is the reference for dependency management, security patching and licence review.
+This document lists the technologies used by BrokerVerse OOTB, with the versions resolved in the lock files of the baseline, their purpose and their licence type, together with the runtime, infrastructure, build and test tooling. It is the reference for dependency management, security patching and licence review.
 
-Sources: `backend/package.json` and `backend/package-lock.json`, `brokerverse/package.json` and `brokerverse/package-lock.json` (licences read from the installed packages), `backend/Dockerfile`, `brokerverse/Dockerfile`, `brokerverse/nginx.conf`, `docker-compose.yml`, `render.yaml`, `brokerverse/.github/workflows/deploy.yml` and `docs/GO_LIVE_CHECKLIST.md`. Versions are the exact versions in the lock files (the manifests use caret ranges; `npm ci` installs the locked versions).
+Sources: `backend/package.json` and `backend/package-lock.json`, `brokerverse/package.json` and `brokerverse/package-lock.json` (licences read from the installed packages), `backend/Dockerfile`, `brokerverse/Dockerfile`, `brokerverse/nginx.conf`, `docker-compose.yml`, `.github/workflows/ci.yml`, `brokerverse/.github/workflows/deploy.yml` and `deploy/README.md`. Versions are the exact versions in the lock files; the manifests use caret ranges and `npm ci` installs the locked versions.
 
 ## Stack overview
 
 {widths: 22,78}
 | Layer | Technology |
 |---|---|
-| Browser | Modern evergreen browsers (build targets `>0.2%, not dead, not op_mini all`) |
-| Front end | React 18.2 single-page application, PrimeReact 10 / PrimeFlex / PrimeIcons, Redux Toolkit 2, React Router 6, Formik, i18next, axios, Chart.js, FullCalendar, Sass; built with Create React App 5 (react-scripts) and craco 7 |
-| Web serving | Amazon S3 + CloudFront (target); nginx 1.27-alpine (container option); Render static site (blueprint) |
+| Browser | Current evergreen browsers (build targets `>0.2%, not dead, not op_mini all`) |
+| Front end | React 18.2 single-page application, PrimeReact 10, PrimeFlex, PrimeIcons, Redux Toolkit 2, React Router 6, Formik, i18next, axios, Chart.js, FullCalendar, Sass; built with Create React App 5 (react-scripts) and craco 7 |
+| Web serving | Amazon S3 and CloudFront on the existing BrokerVerse URL; nginx 1.27-alpine in the Docker Compose option |
 | API | Node.js 22 (ES modules), Express 4.22, node-postgres 8, zod 3, pino 9, helmet 8, jsonwebtoken 9, bcryptjs 2, multer 1.4, nodemailer 10, node-cron 4 |
-| Database | PostgreSQL 16 (local 16.13; `postgres:16-alpine` in Docker Compose; Amazon RDS for PostgreSQL 16 target) with `pgcrypto` |
-| File storage | Local file system / persistent volume (`UPLOAD_DIR`); Amazon EFS target |
-| E-mail | Any SMTP server through `SMTP_URL` (for example Amazon SES) |
-| Containers | Docker images `node:22-alpine` (API), `node:22-alpine` build stage + `nginx:1.27-alpine` (web); Docker Compose |
-| CI/CD | GitHub Actions (front end: build, S3 sync, CloudFront invalidation); backend pipeline to be set up |
-| Cloud | AWS ap-southeast-1 (Singapore): S3, CloudFront, and for the backend ALB, ECS Fargate / App Runner / EC2, RDS, EFS, Secrets Manager / SSM, CloudWatch (recommended) |
+| Database | PostgreSQL 16 (16.13 on the build host; `postgres:16-alpine` in Docker Compose and CI; Amazon RDS for PostgreSQL 16 as the production option) with `pgcrypto`; database time zone Asia/Manila |
+| File storage | Persistent volume at `UPLOAD_DIR` (Amazon EFS or another shared volume in production) |
+| E-mail | Office 365 SMTP (`smtp.office365.com`, port 587, STARTTLS) through `SMTP_URL` |
+| Containers | Docker images `node:22-alpine` (API) and a `node:22-alpine` build stage with an `nginx:1.27-alpine` runtime (web); Docker Compose |
+| CI/CD | GitHub Actions: `.github/workflows/ci.yml` (backend lint and tests on PostgreSQL 16, front-end tests and build, backend image build) and `brokerverse/.github/workflows/deploy.yml` (front-end tests, build, S3 sync, CloudFront invalidation) |
+| Cloud | AWS ap-southeast-1 (Singapore): S3 and CloudFront for the front end; for the backend a load balancer with HTTPS, a container service (ECS Fargate, App Runner or EC2), PostgreSQL, a persistent volume and a secret store (Secrets Manager or SSM); monitoring recommended in CloudWatch |
 
 # Backend (backend/)
 
@@ -30,40 +30,45 @@ Sources: `backend/package.json` and `backend/package-lock.json`, `brokerverse/pa
 | Package | Version | Licence | Purpose in BrokerVerse |
 |---|---|---|---|
 | express | 4.22.3 | MIT | HTTP server, routing, middleware chain (`src/app.js`, module routers) |
-| pg (node-postgres) | 8.23.0 | MIT | PostgreSQL client and connection pool (`src/db/pool.js`, max 10 connections), type parsers for numeric, bigint, date |
+| pg (node-postgres) | 8.23.0 | MIT | PostgreSQL client and connection pool (`src/db/pool.js`, 10 connections), type parsers for numeric, bigint and date |
 | zod | 3.25.76 | MIT | Request validation schemas (`lib/validate.js`) |
-| pino | 9.14.0 | MIT | Structured JSON logging with redaction |
+| pino | 9.14.0 | MIT | Structured JSON logging with redaction (`lib/logger.js`) |
 | pino-http | 10.5.0 | MIT | HTTP access log with request id |
 | helmet | 8.3.0 | MIT | Security headers |
 | cors | 2.8.6 | MIT | Cross-origin policy from `CORS_ORIGINS` |
 | jsonwebtoken | 9.0.3 | MIT | Access, refresh, challenge and approval tokens (HS256) |
-| bcryptjs | 2.4.3 | MIT | Password hashing (pure JavaScript bcrypt, cost 10) |
+| bcryptjs | 2.4.3 | MIT | Password hashing (bcrypt in JavaScript, cost 10) |
 | multer | 1.4.5-lts.2 | MIT | Multipart uploads held in memory with size and count limits |
 | nodemailer | 10.0.12 | MIT-0 | SMTP delivery of the e-mail outbox |
-| node-cron | 4.6.0 | ISC | Cron scheduling of the scheduled jobs |
+| node-cron | 4.6.0 | ISC | Cron scheduling of the jobs, in the business time zone |
 | dotenv | 16.6.1 | BSD-2-Clause | Loads `.env` in development |
 
-The backend has 13 direct runtime dependencies (141 packages including transitive ones, per the code review). The following are implemented in the code base instead of third-party libraries: PDF writers (`src/tools/pdf.js`, `modules/documents/pdf.js`), XLSX writer (`tools/xlsx.js`) and ZIP container (`tools/zip.js` over `node:zlib`), CSV with formula-injection guarding (`tools/csv.js`), TOTP two-factor (`lib/totp.js`), AES-256-GCM secret encryption and HMAC link signing (`lib/secrets.js` over `node:crypto`), rate limiting (`lib/rateLimit.js`), and workbook import with inflate caps (`lib/uploadLimits.js`).
+The backend has 13 direct runtime dependencies (333 packages in the lock file, including development tools). The following are part of the code base instead of third-party libraries: the PDF engine (`lib/pdf`: writer, layout, tables, fonts, images) with the letterhead (`lib/letterhead.js`), the XLSX writer (`lib/xlsx.js`) and ZIP container (`lib/zip.js` over `node:zlib`), CSV with formula-injection guarding (`lib/csv.js`), TOTP two-factor (`lib/totp.js`), AES-256-GCM secret encryption and HMAC link signing (`lib/secrets.js` over `node:crypto`), rate limiting (`lib/rateLimit.js`) and workbook import with inflate caps (`lib/uploadLimits.js`).
 
 ## Development and test dependencies
 
 {widths: 18,11,13,58}
 | Package | Version | Licence | Purpose |
 |---|---|---|---|
-| vitest | 2.1.9 | MIT | Unit and API tests (`backend/test`, 40 files, about 345 test cases) |
+| vitest | 2.1.9 | MIT | Integration tests against a real PostgreSQL (`backend/test`, 50 files, 518 tests) |
 | supertest | 7.3.0 | MIT | HTTP assertions against the in-process app |
-| eslint, @eslint/js, globals | 9.39.5 | MIT | Linting (`npm run lint`; strict rules including `no-console`, `eqeqeq`) |
+| eslint, @eslint/js | 9.39.5 | MIT | Linting (`npm run lint`; `no-console` outside scripts, `no-unused-vars` and `eqeqeq` as errors) |
+| globals | 15.15.0 | MIT | ESLint environment globals |
 
 ## Scripts and tools
 
-{widths: 28,72}
+{widths: 30,70}
 | Command | Purpose |
 |---|---|
-| `npm start` | `node src/server.js`: production configuration check, migrations, seed, HTTP server, scheduler |
+| `npm start` | `node src/server.js`: production configuration check, migrations under an advisory lock, seed, HTTP server, scheduler |
 | `npm run dev` | Development server with `node --watch` |
 | `npm run migrate`, `npm run seed`, `npm run db:reset` | Apply migrations; run the seed; drop and rebuild the schema (development only) |
-| `npm run export:api` | Generate OpenAPI, Postman and Excel API documentation from the route registry |
-| `npm run purge:sample` | Remove sample / demo data before go-live (dry run by default) |
+| `npm run export:api` | Write OpenAPI, Postman and Excel API documentation from the route registry |
+| `npm run purge:sample` | Remove sample data before go-live (dry run by default) |
+| `npm run check:settings` | Compare the setting keys read in code with the keys in the database |
+| `node scripts/provision-users.js` | Create named users from a CSV kept outside the repository |
+| `node scripts/build-upload-templates.js` | Regenerate the upload templates in `docs/templates` |
+| `node scripts/fk-index-report.js` | List foreign keys without a supporting index |
 | `npm test`, `npm run lint` | Tests and lint |
 
 # Front end (brokerverse/)
@@ -87,38 +92,37 @@ The backend has 13 direct runtime dependencies (141 packages including transitiv
 | axios | 1.20.0 | MIT | HTTP client (interceptor with token refresh) |
 | i18next, react-i18next, i18next-browser-languagedetector | 25.8.13 / 16.5.4 / 8.2.1 | MIT | Internationalisation (English, Thai) |
 | chart.js | 4.5.1 | MIT | Dashboard charts |
-| @fullcalendar/core, daygrid, react | 6.1.x | MIT | Calendar views (agent events) |
-| moment | 2.29.4 | MIT | Date handling in older screens |
-| js-cookie | 3.0.8 | MIT | Cookie access (legacy) |
-| react-pro-sidebar | 1.1.0-alpha.1 | MIT | Side menu |
+| @fullcalendar/core, daygrid, react | 6.1.x | MIT | Calendar views (open items) |
+| moment | 2.29.4 | MIT | Date handling in four older screens |
 | sass | 1.69.5 | MIT | SCSS styles and theme |
-| @fontsource/nunito | 5.3.0 | OFL-1.1 | Nunito web font, bundled (no external font CDN) |
+| @fontsource/nunito | 5.3.0 | OFL-1.1 | Nunito web font, bundled (no external font service) |
 | redux-logger | 3.0.6 | MIT | Redux logging in development builds only |
-| web-vitals | 2.1.4 | Apache-2.0 | Performance metrics hook |
+| js-cookie, react-pro-sidebar, web-vitals | 3.0.8 / 1.1.0-alpha.1 / 2.1.4 | MIT, MIT, Apache-2.0 | Listed in `package.json` but no longer imported; to be removed with the next dependency update |
 
-The `@testing-library/*` packages are listed under dependencies but are only used by tests.
+The `@testing-library/*` packages are listed under dependencies but are used only by the 30 front-end tests.
 
 ## Build and delivery
 
 {widths: 28,72}
 | Item | Detail |
 |---|---|
-| Build | `npm run build` (`craco build`); `REACT_APP_BASE_URL` (the API base, for example `https://<brokerverse-url>/api`) is compiled in at build time; `GENERATE_SOURCEMAP=false` in the Docker and Render builds |
-| Pipeline | `.github/workflows/deploy.yml`: on push to `dev`, Node 20, `npm install --legacy-peer-deps`, build with `CI=false`, `aws-actions/configure-aws-credentials@v4` (access keys in secrets), `aws s3 sync build/ s3://$S3_BUCKET --delete`, `aws cloudfront create-invalidation --paths "/*"` |
-| Container | Multi-stage `Dockerfile`: `node:22-alpine` build, `nginx:1.27-alpine` runtime with `nginx.conf` (SPA fallback, `/static/` cached for one year, `index.html` `no-cache`, `/api/` proxied to the API, `client_max_body_size 25m`, security headers) |
+| Build | `npm run build` (`craco build`). `REACT_APP_BASE_URL` (the API base, for example `https://<brokerverse-url>/api`) is compiled in at build time; `GENERATE_SOURCEMAP=false`. |
+| Deployment workflow | `brokerverse/.github/workflows/deploy.yml`: on a push or pull request to `dev`, Node 22, `npm ci --legacy-peer-deps`, `craco test`, a check that the repository variable `REACT_APP_BASE_URL` is set (push only), build; on a push to `dev` the deploy job syncs `build/` to the S3 bucket with `--delete` and invalidates CloudFront `/*`. Secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`. |
+| Repository CI | `.github/workflows/ci.yml`: on every push to `brokerverse-platform` or `main` and on pull requests; backend `npm ci`, `eslint`, `vitest` against a `postgres:16-alpine` service; front end `npm ci`, `craco test`, production build; backend image build after the backend job passes. |
+| Container | Multi-stage `brokerverse/Dockerfile`: `node:22-alpine` build, `nginx:1.27-alpine` runtime with `nginx.conf` (SPA fallback, `/static/` cached for one year, `index.html` not cached, `/api/` proxied to the API, `client_max_body_size 25m`, security headers). |
 
 # Infrastructure and platform
 
 {widths: 24,20,56}
 | Component | Version / service | Purpose and status |
 |---|---|---|
-| Node.js | 22 (image `node:22-alpine`; local v22.22.2) | API runtime. `engines` in `package.json` says `>=20`; the front-end pipeline builds with Node 20 |
-| PostgreSQL | 16 | System of record; RDS target (document 07, 09) |
+| Node.js | 22 (image `node:22-alpine`) | API runtime and both GitHub workflows; `engines` in `backend/package.json` is `>=22` |
+| PostgreSQL | 16 | System of record; time zone Asia/Manila (documents 07 and 09) |
 | nginx | 1.27-alpine | Web container of the Docker Compose option |
-| Docker / Docker Compose | Compose file format without version key | Local and single-server deployment |
-| Render | Blueprint `render.yaml` | Managed demo / UAT hosting option |
-| GitHub Actions | `actions/checkout@v4`, `setup-node@v4`, `configure-aws-credentials@v4` | Front-end CI/CD |
-| AWS | ap-southeast-1 | S3 and CloudFront in use for the front end; backend services per the go-live checklist (ALB, ECS / App Runner / EC2, RDS, EFS, Secrets Manager or SSM) |
+| Docker, Docker Compose | Compose file without a version key | Single-server, test and trial installations |
+| GitHub Actions | `actions/checkout@v4`, `setup-node@v4`, `upload-artifact@v4`, `download-artifact@v4`, `configure-aws-credentials@v4` | CI and front-end deployment |
+| AWS | ap-southeast-1 | S3 and CloudFront for the front end; backend services per `deploy/README.md` (load balancer, container service, PostgreSQL, persistent volume, secret store) |
+| Office 365 | SMTP submission | Outbound e-mail from `connect@iortatechnxt.com` |
 | Monitoring | CloudWatch (recommended) | Logs, metrics, alarms (document 11) |
 
 # Lifecycle and risk notes
@@ -126,9 +130,9 @@ The `@testing-library/*` packages are listed under dependencies but are only use
 {widths: 26,74}
 | Item | Observation (from `docs/review/CODE_REVIEW.md` and the lock files) |
 |---|---|
-| Backend advisories | `npm audit` reported 0 backend advisories after nodemailer 10 and node-cron 4 upgrades (29 Sep 2026). |
-| Front-end advisories | 71 advisories remain (3 critical, 35 high), almost all build-time transitive dependencies of react-scripts 5.0.1; react-router 6 and craco have moderate advisories. Create React App is no longer maintained; a migration to Vite (or another maintained tool chain) and React Router 7 is the planned remediation. |
-| Node.js versions | Align the front-end pipeline (Node 20) and the backend image (Node 22); Node 20 reaches end of life on 30 April 2026 per the Node.js release schedule, so move the pipeline to Node 22 LTS (recommended). |
-| Pipeline credentials | The workflow uses long-lived AWS access keys stored as GitHub secrets. Recommended: GitHub OIDC with an IAM role limited to the bucket and distribution. |
-| Pipeline tests | The test and SonarQube steps of the workflow are commented out; the workflow edits a `tsconfig.json` that the project does not have (harmless, `\|\| true`). Recommended: run `npm test` and the backend tests in CI. |
-| Licences | All listed runtime dependencies use permissive licences (MIT, MIT-0, ISC, BSD-2-Clause, Apache-2.0) and the Nunito font uses the SIL Open Font License; no copyleft licence was found among the direct dependencies. A full transitive licence scan (for example `license-checker`) is recommended before release. |
+| Backend advisories | `npm audit` reported no backend advisories after the nodemailer 10 and node-cron 4 upgrades (29 Sep 2026). |
+| Front-end advisories | 71 advisories were reported at the review (3 critical, 35 high), almost all build-time dependencies of react-scripts 5.0.1; react-router 6 and craco have moderate ones. Create React App is no longer maintained. A move to Vite (and later React Router 7) is the planned remedy; to be scheduled. |
+| Pipeline credentials | The deployment workflow uses long-lived AWS access keys stored as GitHub secrets. Recommended: GitHub OIDC with an IAM role limited to the bucket and the distribution. |
+| Backend release pipeline | CI builds the backend image but does not push it to a registry. The image registry and the release steps are to be confirmed by DevOps. |
+| Unused front-end packages | `js-cookie`, `react-pro-sidebar` and `web-vitals` are no longer imported; `moment` is used by four files. Remove them with the next dependency update. |
+| Licences | All listed runtime dependencies use permissive licences (MIT, MIT-0, ISC, BSD-2-Clause, Apache-2.0) and the Nunito font the SIL Open Font License; no copyleft licence was found among the direct dependencies. A full scan of indirect dependencies (for example `license-checker`) is recommended before each release. |

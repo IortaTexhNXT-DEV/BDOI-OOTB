@@ -1,33 +1,36 @@
-// Module map: front-end areas (menus) and the backend modules (src/modules) they call. Document 01.
+// Module map: front-end areas (side menu, components/SideBar/list.js) and the backend modules (src/modules) they call. Document 01.
 digraph G {
   graph [rankdir=LR, fontname="Nunito", fontsize=11, nodesep=0.12, ranksep=0.9, pad=0.2];
   node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10, width=2.3];
   edge  [color="#9FB3C8", arrowsize=0.5, fontname="Nunito", fontsize=9];
   subgraph cluster_fe { label="Front-end areas (side menu)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
-    f_dash [label="Dashboard\nexecutive, agent, sales,\nunderwriting, claims"];
-    f_ops [label="Operations\nleads, clients, quotation, policy,\nclaims, renewals, open items, payments"];
-    f_acc [label="Accounts\nreceipts, collections, accounting query,\nmatching, disbursement, petty cash,\nJV / correction / reversal, remittance, incentive"];
-    f_com [label="Commission\ndashboard, agent / referrer accounts"];
+    f_dash [label="Dashboard\nexecutive, claims,\nprocessing, sales"];
+    f_ops [label="Operations\nleads, clients, quotation, broker slips,\nplacement slips, policy, claims,\nrenewals, open items, payments"];
+    f_acc [label="Accounts\nreceipts, collections, accounting query,\nmatching, disbursement, petty cash, JV,\nperiod end, bank reconciliation, tax,\nremittance, incentive"];
+    f_com [label="Commission\ndashboard, referrer accounts"];
     f_pc [label="Product configurator\ntemplates, coverage, rating, rules"];
     f_ri [label="Reinsurance\ntreaties, cessions, recoveries,\nreconciliation, analytics"];
     f_rep [label="Reports\nall, operational, financial"];
-    f_mas [label="Master / administration\ngenerals, user management, roles,\nsystem settings, configuration,\nschedules, audit trail"];
+    f_mas [label="Master\nsystem settings, configuration,\ndocument numbering, schedules,\naudit trail, generals, finance masters\n(posting rules, account determination,\ncommission rates, tax codes, uploads)"];
   }
   subgraph cluster_be { label="Backend modules (src/modules)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
     node [fillcolor="#FFFFFF", width=2.6];
     b_dash [label="dashboard, search, notifications"];
     b_sales [label="leads, clients, addresses, quotations,\npolicies, endorsements, documents"];
+    b_plc [label="placement (broker slips,\nplacement slips, co-insurance)"];
     b_claims [label="claims"];
     b_ren [label="renewals"];
     b_fin [label="receipts, collections, accounting,\njournal-vouchers, disbursements, payments"];
-    b_com [label="commission"];
+    b_pe [label="period-end, bank-reconciliation"];
+    b_com [label="commission, commission-rates"];
     b_rem [label="remittance (incl. direct bill)"];
     b_inc [label="incentive"];
     b_pc [label="product-configurator"];
     b_ri [label="reinsurance"];
     b_rep [label="reports"];
-    b_adm [label="auth, users, masters, settings,\nsystem-settings, schedules, system, uploads"];
+    b_adm [label="auth, users, masters, settings, system-settings,\nschedules, system, uploads, document-numbering,\nposting-rules"];
   }
-  f_dash -> b_dash; f_ops -> b_sales; f_ops -> b_claims; f_ops -> b_ren; f_ops -> b_fin;
-  f_acc -> b_fin; f_acc -> b_rem; f_acc -> b_inc; f_com -> b_com; f_pc -> b_pc; f_ri -> b_ri; f_rep -> b_rep; f_mas -> b_adm;
+  f_dash -> b_dash; f_ops -> b_sales; f_ops -> b_plc; f_ops -> b_claims; f_ops -> b_ren; f_ops -> b_fin;
+  f_acc -> b_fin; f_acc -> b_pe; f_acc -> b_rem; f_acc -> b_inc; f_com -> b_com; f_pc -> b_pc; f_ri -> b_ri; f_rep -> b_rep;
+  f_mas -> b_adm; f_mas -> b_com; f_mas -> b_pe;
 }

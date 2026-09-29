@@ -35,6 +35,7 @@ def main():
         WHERE d.objid = p.oid AND d.deptype = 'e') ORDER BY 1""")]
     snap['triggers'] = [{'name': a, 'table': b} for a, b in q("""SELECT t.tgname, c.relname FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid
         WHERE c.relnamespace = 'public'::regnamespace AND NOT t.tgisinternal ORDER BY 2, 1""")]
+    snap['views'] = [r[0] for r in q("SELECT viewname FROM pg_views WHERE schemaname = 'public' UNION ALL SELECT matviewname FROM pg_matviews WHERE schemaname = 'public' ORDER BY 1")]
     snap['sequences'] = [r[0] for r in q("SELECT sequencename FROM pg_sequences WHERE schemaname = 'public' ORDER BY 1")]
     snap['migrations'] = [{'name': a, 'appliedAt': b} for a, b in q('SELECT name, applied_at FROM schema_migrations ORDER BY name')]
     snap['settingsByGroup'] = {g: int(n) for g, n in q('SELECT "group", count(*) FROM app_settings GROUP BY 1 ORDER BY 1')}

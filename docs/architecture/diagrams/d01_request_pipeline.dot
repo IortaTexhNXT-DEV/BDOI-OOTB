@@ -10,7 +10,7 @@ digraph G {
   e [label="5. express.json (JSON_BODY_LIMIT 2 MB);\nsignFileLinks: HMAC-sign every /api/s3/object URL in JSON responses"];
   f [label="6. /api/health, /api/health/live (no auth, not logged, not limited)"];
   g [label="7. Module router (define()): requireAuth first unless auth:false\nHS256 JWT, type=access, user active, token_version matches"];
-  h [label="8. requirePermission / requireRole (admins it-admin, ba pass)\nownRecord / scope: agents see only their own book (404 otherwise)"];
+  h [label="8. requirePermission / requireRole (system-admin passes; accounting-manager\ninherits accounting); record scope for roles in security.scoped_roles (none by default)"];
   i [label="9. multer memory upload limits; zod validate(); handler\n(service + withTransaction), audit(req, ...) on every change"];
   j [label="10. Response envelope { success, message, data } or errorHandler:\n4xx message kept; 5xx generic message + requestId (detail only in log)"];
   a -> b -> c -> d -> e -> f -> g -> h -> i -> j;

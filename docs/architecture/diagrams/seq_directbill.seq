@@ -1,6 +1,6 @@
 title: Direct bill: commission debit note to the insurer
-participant F "Finance maker"
-participant K "Finance checker"
+participant F "Accounting (maker)"
+participant K "Accounting (checker)"
 participant R "Remittance module (direct bill)"
 participant D "PostgreSQL"
 participant I "Insurer"

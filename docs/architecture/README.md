@@ -1,7 +1,7 @@
 # BrokerVerse Solution Architecture
 
-Eleven stand-alone architecture documents for BrokerVerse, the out-of-the-box insurance broking platform of iorta
-TechNXT. Version 1.0, 29 September 2026, prepared by iorta TechNXT. Every document is provided as `.docx` (editable)
+Eleven stand-alone architecture documents for BrokerVerse OOTB, the insurance broking platform of iorta
+TechNXT. Version 1.1, 29 September 2026, prepared by iorta TechNXT. Every document is provided as `.docx` (editable)
 and `.pdf` (same content). Each one has its own cover, document control, table of contents, related documents and
 glossary.
 
@@ -40,6 +40,7 @@ docs/architecture/
     render_diagrams.py                  renders diagrams/*.dot and *.seq, generates the ER diagrams
     collect_db_inventory.py             read-only database snapshot -> tools/data/db_snapshot.json
     table_catalog.py                    domain, purpose, owner module and retention class of every table
+    check_style.py                      wording check of the sources and the built documents
     loadtest.mjs                        indicative load test (document 06)
     loadtest-results-c10.json, -c50.json  load-test results used by document 06
     data/db_snapshot.json               database snapshot used by documents 02 and 03 and the ER diagrams
@@ -59,8 +60,9 @@ python3 docs/manual/tools/install_fonts.py  # Nunito font for LibreOffice (from 
 From the repository root:
 
 ```
-# 1. Optional: refresh the database facts (read-only) from the database the documents should describe
-DATABASE_URL=postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse \
+# 1. Optional: refresh the database facts (read-only). Issue 1.1 used a fresh database: created empty with the
+#    time zone Asia/Manila, then `npm run migrate` and `npm run seed` in backend/ with SEED_SAMPLE_DATA=true
+DATABASE_URL=postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse_arch \
   python3 docs/architecture/tools/collect_db_inventory.py
 
 # 2. Render the diagrams (regenerates the ER diagrams from the snapshot)
@@ -68,6 +70,9 @@ python3 docs/architecture/tools/render_diagrams.py
 
 # 3. Build the eleven .docx and .pdf files (about 30 seconds); pass numbers to build only some, e.g. 03 06
 python3 docs/architecture/tools/build_architecture.py
+
+# 4. Check the wording: stock words, emojis and long dashes in the sources and in the built .docx and .pdf
+python3 docs/architecture/tools/check_style.py
 ```
 
 Optional, to repeat the indicative load test of document 06 (starts an in-process API instance on a free local port
