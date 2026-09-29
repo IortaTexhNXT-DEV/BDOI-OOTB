@@ -19,15 +19,17 @@ import "./index.scss";
 import { numberLocale } from "../../utility/currencyConverter";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
-import { calendarDateFormat } from "../../utility/dateFormat";
+import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
 
 const SETTINGS_PATH = "/master/configuration/system-settings";
-const PERIOD_MONTHS = { month: 1, quarter: 3, year: 12 };
-/** [from, today] of the rolling window the KPIs use for a period (month / quarter / year). */
+/**
+ * [from, today] of the calendar period the KPIs use: This Month = 1st of the month, This Quarter = 1st of the
+ * calendar quarter, This Year = 1 January (the server sends the same range in Manila time as data.period).
+ */
 const rangeFor = (period) => {
   const to = new Date();
-  const from = new Date(to.getFullYear(), to.getMonth() - (PERIOD_MONTHS[period] || 1), to.getDate());
-  return [from, to];
+  const firstMonth = period === "year" ? 0 : period === "quarter" ? Math.floor(to.getMonth() / 3) * 3 : to.getMonth();
+  return [new Date(to.getFullYear(), firstMonth, 1), to];
 };
 
 /** Quick actions of the dashboard; each is shown only when the user's roles may open its screen (same rules as the side menu). */
@@ -60,12 +62,6 @@ const PERCENT_KPIS = ["claimsRatio", "retentionRate", "customerSatisfaction"];
 const formatChange = (change) =>
   change === undefined || change === null ? null : `${change >= 0 ? "+" : ""}${change}%`;
 
-const toIsoDate = (value) => {
-  const d = new Date(value);
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
-
 const ExecutiveDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -87,8 +83,15 @@ const ExecutiveDashboard = () => {
     toast.current?.show({ severity: "error", summary: "Error", detail: error.message });
 
   useEffect(() => {
-    dashboardService.getExecutive(selectedPeriod).then(setDashboard).catch(showError);
     setDateRange(rangeFor(selectedPeriod));
+    dashboardService
+      .getExecutive(selectedPeriod)
+      .then((data) => {
+        setDashboard(data);
+        // the period as the server computed it (business time zone)
+        if (data?.period?.from && data?.period?.to) setDateRange([toDate(data.period.from), toDate(data.period.to)]);
+      })
+      .catch(showError);
   }, [selectedPeriod]);
 
   useEffect(() => {

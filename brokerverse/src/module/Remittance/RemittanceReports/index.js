@@ -12,6 +12,7 @@ import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
 import { calendarDateFormat, isoDate, isoMonth, loadInsurerOptions, loadMasterOptions, showError, showSuccess } from "../shared";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 const SCHEDULE_ROUTE = "/master/finance/remittance/schedulemaster";
 
@@ -126,8 +127,8 @@ const RemittanceReports = () => {
     loadReports();
   });
 
-  const handleEmail = () => {
-    const recipients = window.prompt("Send report to (comma separated e-mails)", "");
+  const handleEmail = async () => {
+    const recipients = await promptText("Send report to (comma separated e-mails)", "");
     if (!recipients) return;
     withBusy(async () => {
       const report = await generate();

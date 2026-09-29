@@ -49,7 +49,7 @@ const PettyCashDetail = () => {
     const errors = {};
 
     if (!values.pettycashcode) {
-      errors.pettycashcode = "This field Code is required";
+      errors.pettycashcode = "This field is required";
     }
 
     if (!values.pettycashname) {

@@ -162,7 +162,7 @@ export async function generateReport(code, params = {}, triggeredBy = 'user', op
     const result = await execute(def, cleanParams, { all: true, maxRows: await getSetting('reports.max_rows', 50000) });
     const generatedAt = new Date().toISOString();
     const meta = {
-      generatedAt, by, companyName: await getSetting('general.company_name', 'BrokerVerse'),
+      generatedAt, by, companyName: ((await getSetting('general.company_name')) ?? ''),
       currency: await getSetting('currency.default', 'PHP'), pageSize: await getSetting('reports.pdf_page_size', 'A4'),
     };
     const buf = await renderFile(format, def, result, meta);
@@ -305,10 +305,10 @@ export async function scheduledReport(params = {}) {
     const rpt = await generateReport(code, { ...(s?.params || params.params || {}) }, 'schedule', { format: s?.format || params.format, scheduleId: s?.id });
     const vars = {
       reportName: rpt.name, from: rpt.params.from, to: rpt.params.to, rows: rpt.rowCount, format: rpt.format.toUpperCase(), fileName: rpt.fileName,
-      downloadUrl: rpt.downloadUrl, companyName: await getSetting('general.company_name', 'BrokerVerse'), generatedAt: rpt.createdAt instanceof Date ? rpt.createdAt.toISOString() : rpt.createdAt,
+      downloadUrl: rpt.downloadUrl, companyName: ((await getSetting('general.company_name')) ?? ''), generatedAt: rpt.createdAt instanceof Date ? rpt.createdAt.toISOString() : rpt.createdAt,
     };
-    const subject = fill(await getSetting('reports.email_subject', '{{reportName}} ({{from}} to {{to}})'), vars, false);
-    const html = fill(await getSetting('reports.email_body', '<p>{{reportName}}: <a href="{{downloadUrl}}">{{fileName}}</a></p>'), vars, true);
+    const subject = fill(await getSetting('reports.email_subject'), vars, false);
+    const html = fill(await getSetting('reports.email_body'), vars, true);
     let emailed = 0;
     if (recipients.length) {
       await queueEmail({ to: recipients.join(','), subject, html, template: 'scheduled-report', entity: 'generated_report', entityId: rpt.id });

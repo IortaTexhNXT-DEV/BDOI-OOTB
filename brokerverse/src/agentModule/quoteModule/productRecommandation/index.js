@@ -665,7 +665,7 @@ const PlanCard = ({
           </svg>
         </div>
         <p className="product__recommendation__plan__deductible__amount">
-          {plan.deductible}
+          {formatCurrency(plan.deductible, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
         </p>
       </div>
 

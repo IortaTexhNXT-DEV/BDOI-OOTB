@@ -112,7 +112,7 @@ const TransactionCodeSetupTable = () => {
     const errors = {};
 
     if (!values.TransactionNumberFrom) {
-      errors.TransactionNumberFrom = "This field Code is required";
+      errors.TransactionNumberFrom = "This field is required";
     }
     if (!values.TransactionNumberTo) {
       errors.TransactionNumberTo = "This field is required";

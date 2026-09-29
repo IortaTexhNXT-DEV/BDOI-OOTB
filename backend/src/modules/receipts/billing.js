@@ -8,10 +8,10 @@ import { findPolicy } from './receivables.js';
 const fmt = (n) => round2(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 async function header(policy, kind) {
-  const company = await getSetting('general.company_name', 'BrokerVerse');
+  const company = ((await getSetting('general.company_name')) ?? '');
   const currency = await getSetting('currency.default', 'PHP');
   return { title: `${company} – ${kind} Billing Statement`, lines: [
-    `Statement date : ${today()}`, `Policy number  : ${policy.policy_number}`, `Insured        : ${policy.client_name || ''} (${policy.client_code || ''})`,
+    `Statement date : ${(await today())}`, `Policy number  : ${policy.policy_number}`, `Insured        : ${policy.client_name || ''} (${policy.client_code || ''})`,
     `Insurer        : ${policy.insurer_name || ''}`, `Product        : ${policy.product_name || ''}`, `Period         : ${policy.inception_date} to ${policy.expiry_date}`,
     `Currency       : ${policy.currency || currency}`, ''] };
 }

@@ -28,6 +28,9 @@ describe('system settings', () => {
     expect(d).toMatchObject({ dateFormat: 'DD/MM/YYYY', phoneCountryCode: '+63', mobilePattern: '^9\\d{9}$', modelYearSpan: 20 });
     expect(d.mobileExample).toBeTruthy();
     expect(d.vehicleColours.length).toBeGreaterThan(0);
+    // Coverage limit dropdowns of the motor quote / endorsement screens come from configuration (quote.*_limits)
+    expect(d.bodilyInjuryLimits).toEqual([100000, 200000, 300000, 400000, 500000]);
+    expect(d.propertyDamageLimits).toEqual([100000, 200000, 300000, 400000, 500000]);
   });
 
   it('PUT saves fields and /settings (key-value) stays consistent', async () => {

@@ -1,4 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
+import { formatMoney } from '../../lib/money.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
@@ -23,7 +24,7 @@ const entryExample = [{ mainAccount: '4401003', subAccount: '4401003001', entryT
 
 async function notifyApprovers(jv, req) {
   if (jv.status !== 'for-approval') return;
-  await notify({ audience: 'write:journal-vouchers', type: 'approval', title: `Journal voucher ${jv.jv_number} awaiting approval`, message: `${req.user.username} submitted ${jv.jv_number} (${jv.total_debit})`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id });
+  await notify({ audience: 'write:journal-vouchers', type: 'approval', title: `Journal voucher ${jv.jv_number} awaiting approval`, message: `${req.user.username} submitted ${jv.jv_number} (${await formatMoney(jv.total_debit)})`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id });
 }
 
 define({

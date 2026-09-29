@@ -19,7 +19,7 @@ const slug = (s) => String(s || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, 
 
 /** The motor tariff of the configured template (empty tables when no template is configured). */
 export async function motorTariff() {
-  const code = await getSetting('motor.pricing_template_code', '');
+  const code = await getSetting('motor.pricing_template_code');
   const row = code ? await one('SELECT template_code, config FROM product_templates WHERE template_code = $1', [code]) : null;
   const cfg = row?.config || {};
   const classes = Array.isArray(cfg.vehicleClasses) ? cfg.vehicleClasses : [];

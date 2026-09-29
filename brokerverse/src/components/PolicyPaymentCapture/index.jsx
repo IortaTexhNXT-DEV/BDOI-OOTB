@@ -13,6 +13,7 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import policyService from "../../services/policyService";
 import S3FileUpload from "../S3FileUpload";
 import { formatDate as formatAppDate } from "../../utility/dateFormat";
+import { promptText } from "../../utility/dialogs";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 const EMPTY_FORM = { referenceNo: "", amount: null, paymentDate: todayIso(), proofKey: "", proofFileName: "", remarks: "" };
@@ -142,7 +143,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
 
   const handleReject = async (capture) => {
     // eslint-disable-next-line no-alert
-    const reason = window.prompt("Reason for rejecting this payment (e.g. no matching credit in the bank statement)");
+    const reason = await promptText("Reason for rejecting this payment (e.g. no matching credit in the bank statement)");
     if (!reason || reason.trim().length < 3) return;
     setSaving(true);
     const r = await policyService.rejectPolicyPayment(policyId, capture.id, reason.trim());

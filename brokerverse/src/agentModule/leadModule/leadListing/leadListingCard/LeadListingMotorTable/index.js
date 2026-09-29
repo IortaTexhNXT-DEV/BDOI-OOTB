@@ -26,8 +26,8 @@ import {
   deleteLeadMiddleware,
 } from "../../../Store/leadMiddleware";
 import { isFireLob, isIarLob } from "../../../../endorsementModule/constants/endorsementCategories";
-import countriesData from "../../../leadCreation/mock";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";
 
 const LeadListingMotorTable = ({ lob = null }) => {
   const { t } = useTranslation();
@@ -114,19 +114,23 @@ const LeadListingMotorTable = ({ lob = null }) => {
     { label: t("leads.company"), value: "Corporate" },
   ];
 
+  // Filter values from the Country / State / City masters
+  const countryMaster = useMasterOptions("country");
+  const stateMaster = useMasterOptions("state");
+  const cityMaster = useMasterOptions("city");
   const countryOptions = [
     { label: "All Countries", value: "" },
-    ...countriesData.countries.map((c) => ({ label: c, value: c })),
+    ...countryMaster.map((c) => ({ label: c.label, value: c.value })),
   ];
 
   const provinceOptions = [
     { label: "All Provinces", value: "" },
-    ...countriesData.state.map((s) => ({ label: s, value: s })),
+    ...stateMaster.map((s) => ({ label: s.label, value: s.value })),
   ];
 
   const cityOptions = [
     { label: "All Cities", value: "" },
-    ...countriesData.city.map((c) => ({ label: c, value: c })),
+    ...cityMaster.map((c) => ({ label: c.label, value: c.value })),
   ];
 
   const handleFilterChange = (field, value) => {

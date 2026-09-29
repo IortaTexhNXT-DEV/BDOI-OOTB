@@ -14,7 +14,6 @@ import { InputNumber } from "primereact/inputnumber";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { SUPPORTED_CURRENCIES_NAME_CODE } from "../../../utility/currencyOptions";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { useSelector, useDispatch } from "react-redux";
@@ -30,6 +29,7 @@ import profileService from "../../../services/profileService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { getDisplayCurrencyConfig, numberLocale } from "../../../utility/currencyConverter";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import useMasterOptions from "../../GeneralMasters/common/useMasterOptions";
 
 /** Receipt modes shown to the user, with the payment mode the receipts API records (cash / check / bank-transfer / online). */
 const RECEIPT_MODES = [
@@ -86,7 +86,9 @@ function BranchAdding() {
     { name: t("accounts.addReceipts.typeRefund"), code: "Refund" },
   ];
   const receiptModeOptions = RECEIPT_MODES.map((m) => ({ name: t(`accounts.addReceipts.${m.key}`), code: m.code }));
-  const defaultCurrency = getDisplayCurrencyConfig().currency || "PHP";
+  const defaultCurrency = getDisplayCurrencyConfig().currency;
+  // Currency codes from the Currency master (Master > Finance > Currency)
+  const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
 
   const loadOpenReceivables = useCallback(async () => {
     setReceivablesLoading(true);
@@ -535,8 +537,8 @@ function BranchAdding() {
               onChange={(e) => setFieldValue("currencyCode", e.value)}
               className="dropdown__container"
               label={t("accounts.addReceipts.currencyCode")}
-              options={SUPPORTED_CURRENCIES_NAME_CODE}
-              optionLabel="name"
+              options={currencyOptions}
+              optionLabel="label"
               optionValue="code"
               placeholder={t("accounts.addReceipts.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}

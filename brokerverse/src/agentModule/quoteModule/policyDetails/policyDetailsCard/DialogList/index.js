@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next';
 import InputTextField from '../../../../component/inputText';
 import DropdownField from '../../../../component/DropdwonField';
 import { Dialog } from 'primereact/dialog';
-import {
-  PremiumCurrency,
-  InsurancePolicycontainer,
-  pesoTypes
-} from "../../mock";
-import { DEFAULT_CURRENCY } from "../../../../../utility/currencyOptions";
+import { getDisplayCurrencyConfig } from "../../../../../utility/currencyConverter";
+import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";
+import useInsuranceCompanyOptions from "../../../../component/useInsuranceCompanyOptions";
 
 import { useDispatch, useSelector } from "react-redux";
 import { postModleDetailsMiddleware } from '../../store/policyDetailsMiddleware'
@@ -18,11 +15,16 @@ import { useFormik } from 'formik';
 const DialogList = ({ setVisible, visible }) => {
   const { t } = useTranslation();
   const [products, setProducts] = useState([]);
+  // Participants from the Insurance Company master; currencies from the Currency master (default: display currency)
+  const InsurancePolicycontainer = useInsuranceCompanyOptions();
+  const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const pesoTypes = currencyOptions;
+  const PremiumCurrency = currencyOptions;
 
   const initialValue = {
     ParticipantName: "",
-    SumInsuredcurrency: DEFAULT_CURRENCY,
-    Premiumcurrencys: DEFAULT_CURRENCY,
+    SumInsuredcurrency: getDisplayCurrencyConfig().currency,
+    Premiumcurrencys: getDisplayCurrencyConfig().currency,
     Sharepercentage: ""
   };
   const { TableList, loading } = useSelector(
@@ -35,30 +37,6 @@ const DialogList = ({ setVisible, visible }) => {
     }
   );
   const dispatch = useDispatch();
-  const getSumInsured = (name) => {
-    if (name == "Apex Assurance") {
-      return "65000"
-    }
-     if (name == "Liberty Shield Insurance") {
-      return "97500"
-    }
-    else {
-      return "32500"
-    }
-  }
-
-  const getPremium = (name) => {
-    console.log(name,"name")
-    if (name == "Apex Assurance") {
-      return "18000"
-    }
-   if (name == "Liberty Shield Insurance") {
-      return "27000"
-    }
-    else {
-      return "9000"
-    }
-  }
   const handleclick = (values) => {
 
     console.log(values, "action");
@@ -66,8 +44,6 @@ const DialogList = ({ setVisible, visible }) => {
     formik.resetForm()
     const valueWithId = {
       ...values,
-      sumInsured: getSumInsured(values?.ParticipantName),
-      premium: getPremium(values?.ParticipantName),
       id: TableList?.length + 1,
     };
     console.log(valueWithId, "action with valuesP")

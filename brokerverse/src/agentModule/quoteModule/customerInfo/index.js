@@ -17,7 +17,6 @@ import {
   patchinformationMiddleWare,
 } from "./store/infoMiddleWare";
 import { useDispatch, useSelector } from "react-redux";
-import { MortgageOptions } from "../../endorsementModule/personalDetails/mock";
 import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import quotationService from "../../../services/quotationService";
 import { Toast } from "primereact/toast";
@@ -32,6 +31,7 @@ import {
   requiredKycFor,
 } from "../../../utility/kyc";
 import { notifyError } from "../../../utility/dialogs";
+import useMasterOptions from "../../../module/GeneralMasters/common/useMasterOptions";
 
 const FieldError = ({ formik, name }) =>
   formik.touched[name] && formik.errors[name] ? (
@@ -42,6 +42,8 @@ const FieldError = ({ formik, name }) =>
 
 const CustomerInfo = ({ action }) => {
   const { t } = useTranslation();
+  // Mortgagee banks from Master > Finance > Bank
+  const MortgageOptions = useMasterOptions("bank");
   const [imageURL, setimageURL] = useState("");
   const [idUploadProgress, setIdUploadProgress] = useState(null);
   const [kycConfig, setKycConfig] = useState({
@@ -361,7 +363,7 @@ const CustomerInfo = ({ action }) => {
   //   const errors = {};
 
   //   if (!values.MotorNumber) {
-  //     errors.MotorNumber = "This field Code is required";
+  //     errors.MotorNumber = "This field is required";
   //   }
   //   if (!values.ChassisNumber) {
   //     errors.ChassisNumber = "This field is required";
@@ -469,9 +471,6 @@ const CustomerInfo = ({ action }) => {
     // if (action === "edit") {
     // }
     if (action === "edit") {
-      if (!formik.values.Mortgage) {
-        formik.setFieldValue("Mortgage", MortgageOptions[0].value);
-      }
       if (!formik.values.Aluminium) {
         formik.setFieldValue("Aluminium", Aluminium[0].value);
       }

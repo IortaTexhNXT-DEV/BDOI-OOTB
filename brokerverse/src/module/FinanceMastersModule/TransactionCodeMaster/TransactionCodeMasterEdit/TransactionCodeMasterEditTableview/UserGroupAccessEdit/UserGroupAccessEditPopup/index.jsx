@@ -44,7 +44,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
         const errors = {};
 
         if (!values.UserRole) {
-            errors.UserRole = "This field Code is required";
+            errors.UserRole = "This field is required";
         }
         if (!values.MinimumTransaction) {
             errors.MinimumTransaction = "This field is required";

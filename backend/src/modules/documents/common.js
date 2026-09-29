@@ -36,7 +36,7 @@ export const num = (v) => {
   const n = Number(String(v).replace(/[^0-9.-]/g, ''));
   return Number.isFinite(n) ? n : 0;
 };
-export const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+export { round2 } from '../../lib/money.js';
 
 /** Parse a date-like value to YYYY-MM-DD (null when empty or invalid). */
 export const toDate = (v) => {

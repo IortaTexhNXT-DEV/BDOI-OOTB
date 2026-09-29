@@ -109,7 +109,8 @@ describe('report catalogue', () => {
   });
   it('returns a definition with the screen filter schema', async () => {
     const r = await as('admin', 'get', '/reports/production-register');
-    expect(r.body.data.parameters.properties.ReportCriteria.enum).toEqual(['Overall', 'Agent', 'Principle Insurance', 'Branch', 'Billing Mode']);
+    expect(r.body.data.parameters.properties.ReportCriteria.enum).toEqual(['Overall', 'Agent', 'Principal Insurer', 'Branch', 'Billing Mode']);
+    expect(r.body.data.parameters.properties.Company['x-enabledWhen']).toEqual({ ReportCriteria: ['Principal Insurer'] });
     expect(r.body.data.parameters.properties.Agent['x-enabledWhen']).toEqual({ ReportCriteria: ['Agent'] });
     expect(r.body.data.columns.find((c) => c.key === 'premium').type).toBe('money');
     expect((await as('admin', 'get', '/reports/nope')).status).toBe(404);
@@ -129,6 +130,8 @@ describe('running reports', () => {
       expect.objectContaining({ group: 'Liza Mercado', count: 1, premium: 15000 }),
       expect.objectContaining({ group: 'Ramon Bautista', count: 2, premium: 30000 })]);
     expect((await run('production-register', { ...Y, ReportCriteria: 'Agent', Agent: 'rpt.agent1' })).data.totals.premium).toBe(30000);
+    expect((await run('production-register', { ...Y, ReportCriteria: 'Principal Insurer', Company: 'MAPFRE' })).data.totals.premium).toBe(25000);
+    // the old spelling (saved schedules, API clients) is still accepted
     expect((await run('production-register', { ...Y, ReportCriteria: 'Principle Insurance', Company: 'MAPFRE' })).data.totals.premium).toBe(25000);
     // the screens list the broker itself under Company: treated as "all insurers"
     const own = (await one('SELECT value FROM app_settings WHERE key = \'general.company_name\'')).value;

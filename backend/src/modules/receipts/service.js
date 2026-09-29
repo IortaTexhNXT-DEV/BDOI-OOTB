@@ -152,7 +152,7 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
       receipt_type, receipt_status, transaction_code, transaction_number, customer_code, customer_name, branch_code, department_code, currency_code, policy_number, external_ref, source)
     VALUES ($1,$2,$3,0,$4,$5,$6,$7,'posted',$8,$9,$10,'Draft',$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING *`,
   [number, policy?.id || null, client?.id || policy?.client_id || null, b.paymentMode || (await getSetting('receipts.default_payment_mode', 'bank-transfer')), str(b.referenceNo),
-    b.bankId || null, isoDate(b.receiptDate || b.receivedDate) || today(), str(b.remarks), user?.id ?? null, b.receiptType || 'Payment', str(b.transactionCode) || 'PAYMENT', txn,
+    b.bankId || null, isoDate(b.receiptDate || b.receivedDate) || (await today()), str(b.remarks), user?.id ?? null, b.receiptType || 'Payment', str(b.transactionCode) || 'PAYMENT', txn,
     client?.client_code || client?.id || str(b.customerCode), str(b.name) || client?.display_name || policy?.client_name || null, str(b.branchCode), str(b.departmentCode),
     b.currencyCode || (await getSetting('currency.default', 'PHP')), policy?.policy_number || null, str(b.receiptNumber), source])).rows[0];
   let n = 0;

@@ -26,6 +26,7 @@ import useTaxRates from "../../quoteModule/utils/useTaxRates";
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
+import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 const ENDORSEMENT_TYPE_KEYS = {
   1: "policyDetail.endorsementTypePersonalDetails",
   2: "policyDetail.endorsementTypeMotorDetails",
@@ -428,31 +429,9 @@ const PolicyDetailView = () => {
     fetchVehiclePhotoUrls();
   }, [rawPolicyData]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "N/A";
-
-    const parsedDate = new Date(dateString);
-    if (Number.isNaN(parsedDate.getTime())) {
-      return dateString;
-    }
-
-    return parsedDate.toLocaleString("en-PH", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Dates in the configured format (System Settings general.date_format)
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
+  const formatDateTime = (dateString) => formatConfiguredDate(dateString, { withTime: true, empty: "N/A" });
 
   const isPolicyExpiringOrExpired = () => {
     const expiryDate = policyDetails?.PolicyExpiry || rawPolicyData?.expiry;

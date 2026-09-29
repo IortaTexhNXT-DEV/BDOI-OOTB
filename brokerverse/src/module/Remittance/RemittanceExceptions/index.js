@@ -14,6 +14,7 @@ import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
 import { dateBody, downloadCsv, formatDateTime, isoDate, showError, showSuccess } from "../shared";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 const emptyResolution = { resolutionType: "", resolutionAmount: 0, resolutionNotes: "" };
 const SEVERITIES = ["Critical", "High", "Medium", "Low"];
@@ -83,14 +84,14 @@ const RemittanceExceptions = () => {
 
   const startException = (row, assignee = currentUser) => run(() => remittanceService.assignException(row.id, assignee), `${row.exceptionId} assigned to ${assignee}`);
 
-  const resolveException = (row, resolution) => {
-    const text = resolution || window.prompt(t("remittance.resolutionNotes"), "");
+  const resolveException = async (row, resolution) => {
+    const text = resolution || await promptText(t("remittance.resolutionNotes"), "");
     if (!text) return;
     run(() => remittanceService.resolveException(row.id, text), `${row.exceptionId} resolved`);
   };
 
-  const escalateException = (row, reason) => {
-    const text = reason || window.prompt(t("remittance.escalate"), "");
+  const escalateException = async (row, reason) => {
+    const text = reason || await promptText(t("remittance.escalate"), "");
     if (!text) return;
     run(() => remittanceService.escalateException(row.id, text), `${row.exceptionId} escalated`);
   };
@@ -98,8 +99,8 @@ const RemittanceExceptions = () => {
   const resolutionText = () => [resolutionData.resolutionType, resolutionData.resolutionAmount ? formatCurrency(resolutionData.resolutionAmount) : null, resolutionData.resolutionNotes]
     .filter(Boolean).join(" - ");
 
-  const handleBulkAssign = () => {
-    const assignee = window.prompt(t("remittance.delegateTo"), currentUser);
+  const handleBulkAssign = async () => {
+    const assignee = await promptText(t("remittance.delegateTo"), currentUser);
     if (assignee && selectedException) startException(selectedException, assignee);
   };
 

@@ -6,10 +6,10 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { today } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
 import { assertChecker, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 
-const today = () => new Date().toISOString().slice(0, 10);
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
     .map((f) => ({ path: f, message: `${f} is required` }));
@@ -302,7 +302,7 @@ export async function createCession(b, user) {
   } else {
     t = await treatyRow(b.treatyId ?? b.treatyNumber);
     if (t.status !== 'Active') throw conflict(`Treaty ${t.treaty_number} is ${t.status}; cessions need an active treaty`);
-    const date = isoDate(b.cessionDate) || today();
+    const date = isoDate(b.cessionDate) || (await today());
     if (date < t.period_from || date > t.period_to) throw badRequest('Validation failed', [{ path: 'cessionDate', message: `Cession date is outside the treaty period ${t.period_from} to ${t.period_to}` }]);
     await assertSecurity(t.reinsurer_ids);
     pct = cededShare(t, sumInsured, toNumber(b.cessionPercentage, NaN));
@@ -322,7 +322,7 @@ export async function createCession(b, user) {
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'Pending',$17,$18) RETURNING id`,
   [t?.id || null, pol?.id || null, cededSum, cededPremium, number, pol?.policy_number || b.policyNumber, b.insured || pol?.display_name || null,
     b.lineOfBusiness || t?.line_of_business || (pol?.line ? pol.line.charAt(0).toUpperCase() + pol.line.slice(1) : null), facultative ? 'Facultative' : 'Treaty', facultative ? String(b.facultativeReinsurer) : null,
-    gross, sumInsured, round2(pct), commission, round2(cededPremium - commission), isoDate(b.cessionDate) || today(), b.notes || null, user.id]);
+    gross, sumInsured, round2(pct), commission, round2(cededPremium - commission), isoDate(b.cessionDate) || (await today()), b.notes || null, user.id]);
   return getCession(r.id);
 }
 
@@ -412,7 +412,7 @@ export async function recoveryAction(id, action, b, user) {
   if (action === 'cash-call') {
     const amt = toNumber(b.amount, NaN);
     if (!(amt > 0)) throw badRequest('Validation failed', [{ path: 'amount', message: 'amount must be greater than zero' }]);
-    await query('UPDATE reinsurance_recoveries SET cash_call = $2, updated_by = $3, updated_at = now() WHERE id = $1', [before.id, JSON.stringify({ requested: true, amount: amt, date: today(), status: 'Requested' }), user.id]);
+    await query('UPDATE reinsurance_recoveries SET cash_call = $2, updated_by = $3, updated_at = now() WHERE id = $1', [before.id, JSON.stringify({ requested: true, amount: amt, date: (await today()), status: 'Requested' }), user.id]);
   }
   return { before, after: await getRecovery(before.id) };
 }
@@ -613,9 +613,9 @@ export async function generateReport(b, user) {
     rows = await listTreaties({});
     columns = ['treatyNumber', 'name', 'type', 'lineOfBusiness', 'status', 'effectiveDate', 'expiryDate', 'premiumCeded', 'claimsRecovered', 'utilization', 'securityRating'].map((k) => ({ key: k, label: k }));
   }
-  const saved = await saveFile({ category: 'reinsurance-reports', fileName: `${tpl.data.code}_${today()}.csv`, content: toCsv(rows, columns), contentType: 'text/csv', entity: 'reinsurance_report', entityId: tpl.data.code, userId: user.id });
+  const saved = await saveFile({ category: 'reinsurance-reports', fileName: `${tpl.data.code}_${(await today())}.csv`, content: toCsv(rows, columns), contentType: 'text/csv', entity: 'reinsurance_report', entityId: tpl.data.code, userId: user.id });
   await query(`INSERT INTO generated_reports(code, name, params, format, storage_key, row_count, generated_by, status) VALUES ($1,$2,$3,'csv',$4,$5,$6,'done')`,
     [`reinsurance:${tpl.data.code}`, tpl.data.name, JSON.stringify(b), saved.key, rows.length, user.id]);
-  await query('UPDATE master_records SET data = data || jsonb_build_object(\'lastGenerated\', $2::text), updated_at = now() WHERE id = $1', [tpl.id, today()]);
-  return { id: tpl.data.code, ...tpl.data, lastGenerated: today(), generatedDate: new Date().toISOString(), fileUrl: saved.url, rowCount: rows.length, format: 'CSV' };
+  await query('UPDATE master_records SET data = data || jsonb_build_object(\'lastGenerated\', $2::text), updated_at = now() WHERE id = $1', [tpl.id, (await today())]);
+  return { id: tpl.data.code, ...tpl.data, lastGenerated: (await today()), generatedDate: new Date().toISOString(), fileUrl: saved.url, rowCount: rows.length, format: 'CSV' };
 }

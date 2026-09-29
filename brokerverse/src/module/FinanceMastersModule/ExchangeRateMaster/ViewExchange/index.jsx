@@ -24,8 +24,8 @@ import { calendarDateFormat } from "../../../../utility/dateFormat";
 const initialValues = {
   EffectiveFrom: new Date(),
   EffectiveTo: new Date(),
-  CurrencyCode: "PHP",
-  ToCurrencyCode: "USD",
+  CurrencyCode: "",
+  ToCurrencyCode: "",
   ExchangeRate: "",
   CurrencyDescription: "",
   ToCurrencyDescription: "",
@@ -85,7 +85,7 @@ function ViewExchange() {
     const errors = {};
 
     if (!values.CurrencyCode) {
-      errors.CurrencyCode = "This field Code is required";
+      errors.CurrencyCode = "This field is required";
     }
     if (!values.ToCurrencyCode) {
       errors.ToCurrencyCode = "This field is required";

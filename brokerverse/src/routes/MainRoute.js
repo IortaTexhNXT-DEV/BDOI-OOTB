@@ -19,7 +19,6 @@ import Paymentvoucher from "../module/PaymentVoucher/index";
 import CreateVoucher from "../module/PaymentVoucher/CreateVoucher/index";
 import Detailview from "../module/PaymentVoucher/DetailView/index";
 import BulkDisburse from "../module/PaymentVoucher/BulkDisburse";
-import AddPolicyReceipts from "../module/Receipts/AddPolicyReceipts";
 // import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategoryMaster";
 import BankAccountMaster from "../module/FinanceMastersModule/BankAccountMaster";
 import BankChequeMaster from "../module/FinanceMastersModule/BankChequeMaster";
@@ -368,7 +367,7 @@ const Maincomponent = () => {
 
           <Route
             path="/accounts/receipts/addpolicyreceipts"
-            element={<AddPolicyReceipts />}
+            element={<Navigate to="/accounts/receipts/addreceipts" replace />}
           />
 
           <Route

@@ -19,6 +19,7 @@ import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
 import { calendarDateFormat, dateBody, isoDate, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 const emptyDelegation = {
   delegateTo: "",
@@ -119,8 +120,8 @@ const RemittanceApproval = () => {
 
   const approveRows = (rows, note) => run(() => Promise.all(rows.map((r) => remittanceService.approve(r.id, note))), `${rows.length} approval(s) recorded`);
 
-  const rejectRows = (rows, note) => {
-    const reason = note || window.prompt(t("remittance.comments"), "");
+  const rejectRows = async (rows, note) => {
+    const reason = note || await promptText(t("remittance.comments"), "");
     if (!reason) return Promise.resolve(false);
     return run(() => Promise.all(rows.map((r) => remittanceService.reject(r.id, reason))), `${rows.length} transaction(s) rejected`);
   };

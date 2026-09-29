@@ -16,6 +16,7 @@ import { Menu } from "primereact/menu";
 import policyRenewalService from "../../../../../services/policyRenewalService";
 import { Skeleton } from "primereact/skeleton";
 import { notifyWarn } from "../../../../../utility/dialogs";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
@@ -521,11 +522,7 @@ const Index = ({ clientId, action }) => {
   const formatDate = (value) => {
     if (!value) return "N/A";
     try {
-      return new Date(value).toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+      return formatConfiguredDate(value);
     } catch (error) {
       return value;
     }

@@ -107,7 +107,7 @@ export async function capturePayment(db, policy, body, user) {
   if (!(amount > 0)) throw badRequest('Amount paid must be greater than zero');
   const paidOn = isoDate(body.paymentDate);
   if (!paidOn) throw badRequest('Payment date is required');
-  if (paidOn > today()) throw badRequest('Payment date cannot be in the future');
+  if (paidOn > (await today())) throw badRequest('Payment date cannot be in the future');
   const bills = await openReceivables(db, policy.id);
   const bill = body.receivableId ? bills.find((b) => b.id === body.receivableId || b.bill_number === body.receivableId) : bills[0];
   if (!bill) throw conflict(body.receivableId ? 'That bill is not open for payment' : `Policy ${policy.policy_number} has no open bill to pay`);

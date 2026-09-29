@@ -22,6 +22,7 @@ import { isoDate, loadSettings, showError, showSuccess } from "../../Remittance/
 import "./index.scss";
 
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { promptText } from "../../../utility/dialogs";
 const PRIORITY_LABEL = { Urgent: "High", High: "High", Normal: "Medium", Low: "Low" };
 
 const Approvals = () => {
@@ -154,8 +155,8 @@ const Approvals = () => {
     runAction(() => incentiveService.rejectCalculation(approval.batchId, comment), "Rejected", `Calculation batch ${approval.batchId} has been rejected`);
   };
 
-  const handlePay = (approval) => {
-    const paymentReference = window.prompt(`Payment reference for ${approval.batchId}`, "");
+  const handlePay = async (approval) => {
+    const paymentReference = await promptText(`Payment reference for ${approval.batchId}`, "");
     if (paymentReference === null) return;
     runAction(
       () => incentiveService.payCalculation(approval.batchId, { paymentDate: isoDate(new Date()), paymentReference }),

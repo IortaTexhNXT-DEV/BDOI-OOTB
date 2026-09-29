@@ -22,6 +22,7 @@ import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
 import { postAddBankMiddleware, postAddBank } from '../store/bankMasterMiddleware';
 import { useDispatch, useSelector } from 'react-redux';
+import { phoneCountryCode } from "../../../../utility/phoneFormat";
 
 
 
@@ -126,7 +127,7 @@ function AddBankMaster() {
     const errors = {};
 
     if (!values.bankCode) {
-      errors.bankCode = "This field Code is required";
+      errors.bankCode = "This field is required";
     }
     if (!values.bankName) {
       errors.bankName = "This field is required";
@@ -430,7 +431,7 @@ function AddBankMaster() {
             <div className="p-inputgroup flex-1">
 
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText placeholder="enter"
@@ -456,7 +457,7 @@ function AddBankMaster() {
             <label className='label_text'>Fax</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText placeholder="enter"

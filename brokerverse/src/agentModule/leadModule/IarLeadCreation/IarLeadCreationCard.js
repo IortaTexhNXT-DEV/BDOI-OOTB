@@ -36,12 +36,12 @@ import {
   IAR_PRODUCT_CODE,
   IAR_SECTION_CATALOG,
   IAR_SECTION_SUGGESTIONS,
-  IAR_VAT_PERCENT,
   buildPremiumSectionsFromRisks,
   makeId,
   recalculateIarPremiumDetails,
 } from "./iarConstants";
 import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
+import useTaxRates from "../../quoteModule/utils/useTaxRates";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -129,6 +129,9 @@ const leadToPersonalFormValues = (lead) => {
 
 const IarLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
+  // VAT from Master > Configuration > Taxes (tax.vat_rate), the rate the server prices the quotation with
+  const taxRates = useTaxRates();
+  const vatPercentConfigured = Number(((Number(taxRates.valueAddedTax) || 0) * 100).toFixed(4));
   const ageLimits = useAgeLimits();
   const navigate = useNavigate();
   const location = useLocation();
@@ -161,10 +164,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   );
   const [premiumDetails, setPremiumDetails] = useState({
     sections: [],
-    vatPercent: IAR_VAT_PERCENT,
+    vatPercent: vatPercentConfigured,
     discount: 0,
     discountPercent: 0,
   });
+  // The configured rate arrives after the first render: re-price with it
+  useEffect(() => {
+    setPremiumDetails((prev) => (prev.vatPercent === vatPercentConfigured ? prev : recalculateIarPremiumDetails({ ...prev, vatPercent: vatPercentConfigured })));
+  }, [vatPercentConfigured]);
   const [discountPct, setDiscountPct] = useState(0);
   const [commissionDetails, setCommissionDetails] = useState(
     defaultCommissionDetails()
@@ -486,7 +493,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     setPremiumDetails((prev) =>
       recalculateIarPremiumDetails({
         ...prev,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
         sections: buildPremiumSectionsFromRisks(iarSections),
       })
     );
@@ -635,7 +642,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     try {
       const premium = recalculateIarPremiumDetails({
         ...calculatedPremium,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
         discount: 0,
         discountPercent: 0,
       });
@@ -689,7 +696,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         ...prev,
         discountPercent: capped,
         discount: discountAmount,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
       })
     );
   };
@@ -700,7 +707,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     }
     const premium = recalculateIarPremiumDetails({
       ...calculatedPremium,
-      vatPercent: IAR_VAT_PERCENT,
+      vatPercent: vatPercentConfigured,
     });
     const values = policyFormik.values;
     const result = await quotationService.updateIarQuotation(createdQuotationId, {
@@ -1502,7 +1509,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
               </div>
               <div className="quote_details">
                 <label className="insurance_text">
-                  {t("agent.valueAddedTax", "Value Added Tax")} ({IAR_VAT_PERCENT}
+                  {t("agent.valueAddedTax", "Value Added Tax")} ({vatPercentConfigured}
                   %)
                 </label>
                 <label className="alpha_text">

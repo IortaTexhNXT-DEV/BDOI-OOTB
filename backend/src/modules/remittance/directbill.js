@@ -28,6 +28,7 @@ import { notify } from '../notifications/router.js';
 import { account, cashAccountFor, createJournal, reverseJournal } from '../accounting/lib/ledger.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { renderTemplate } from '../documents/common.js';
+import { formatMoney } from '../../lib/money.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -57,7 +58,7 @@ export async function billingModeFor(requested) {
 export async function commissionTax(gross) {
   const registered = (await getSetting('direct_bill.broker_vat_registered', true)) !== false;
   const configured = await getSetting('direct_bill.commission_vat_rate', null);
-  const rate = registered ? Number(configured ?? (await getSetting('tax.vat_rate', 0))) || 0 : 0;
+  const rate = registered ? Number(configured ?? (await getSetting('tax.vat_rate', 0.12))) || 0 : 0;
   const inclusive = (await getSetting('direct_bill.commission_vat_inclusive', false)) === true;
   const value = round2(gross);
   if (!rate) return { commission: value, vat: 0, amount: value, vatRate: 0 };
@@ -69,7 +70,7 @@ export async function commissionTax(gross) {
   return { commission: value, vat, amount: round2(value + vat), vatRate: rate };
 }
 
-export const ewtRate = async () => Number(await getSetting('direct_bill.insurer_ewt_rate', 0)) || 0;
+export const ewtRate = async () => Number(await getSetting('direct_bill.insurer_ewt_rate', 0.1)) || 0;
 
 async function policyRow(db, id) {
   const { findPolicy } = await import('../receipts/receivables.js');
@@ -97,7 +98,7 @@ export async function bookDirectBill(db, { policy, amount, breakdown = {}, sourc
   const tax = await commissionTax(base);
   const basis = net > 0 ? net : Math.abs(gross);
   const rate = basis ? Math.round((base / basis) * 1e6) / 1e6 : null;
-  const bookedOn = isoDate(date) || today();
+  const bookedOn = isoDate(date) || (await today());
   const it = (await db.query(`INSERT INTO direct_bill_items(policy_id, endorsement_id, insurance_company_id, source, reference, booked_on, currency, gross_premium, net_premium,
       commission_rate, commission, vat, amount, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
@@ -333,7 +334,7 @@ export async function raiseDebitNote(b, user) {
   const from = isoDate(b.periodFrom ?? b.from);
   const to = isoDate(b.periodTo ?? b.to);
   if (from && to && to < from) throw badRequest('Validation failed', [{ path: 'periodTo', message: 'Period to must not be before period from' }]);
-  const dnDate = isoDate(b.dnDate ?? b.billDate) || today();
+  const dnDate = isoDate(b.dnDate ?? b.billDate) || (await today());
   const id = await withTransaction(async (db) => {
     const itemIds = Array.isArray(b.itemIds) ? b.itemIds.map(String) : null;
     const policyIds = Array.isArray(b.policyIds) ? b.policyIds.map(String) : null;
@@ -376,7 +377,7 @@ export async function raiseDebitNote(b, user) {
   return out;
 }
 
-const askApproval = (dn) => notify({ audience: 'write:remittance', type: 'approval', title: 'Commission debit note awaiting approval', message: `${dn.dnNumber} to ${dn.insurerName} for ${dn.currency} ${dn.amount.toFixed(2)} needs approval`,
+const askApproval = async (dn) => notify({ audience: 'write:remittance', type: 'approval', title: 'Commission debit note awaiting approval', message: `${dn.dnNumber} to ${dn.insurerName} for ${await formatMoney(dn.amount, dn.currency)} needs approval`,
   link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
@@ -445,9 +446,9 @@ export async function sendDebitNote(id, body, user) {
   const to = body?.email || dn.insurerEmail;
   if (!to) throw badRequest('Validation failed', [{ path: 'email', message: `${dn.insurerName} has no e-mail address; enter one` }]);
   const vars = { dnNumber: dn.dnNumber, insurerName: dn.insurerName, amount: `${dn.currency} ${dn.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-    dueDate: dn.dueDate, companyName: await getSetting('general.company_name', '') };
-  await queueEmail({ to, subject: renderTemplate(await getSetting('direct_bill.email_subject', 'Commission debit note {{dnNumber}}'), vars),
-    html: renderTemplate(await getSetting('direct_bill.email_body', '<p>Commission debit note {{dnNumber}}: {{amount}} due {{dueDate}}.</p>'), vars), template: 'commission-debit-note', entity: 'commission_debit_note', entityId: dn.id });
+    dueDate: dn.dueDate, companyName: ((await getSetting('general.company_name')) ?? '') };
+  await queueEmail({ to, subject: renderTemplate(await getSetting('direct_bill.email_subject'), vars),
+    html: renderTemplate(await getSetting('direct_bill.email_body'), vars), template: 'commission-debit-note', entity: 'commission_debit_note', entityId: dn.id });
   await one('UPDATE commission_debit_notes SET sent_to = $2, sent_at = now(), updated_by = $3, updated_at = now() WHERE id = $1 RETURNING id', [dn.id, to, user.id]);
   return { ...(await getDebitNote(dn.id)), emailedTo: to };
 }
@@ -457,8 +458,8 @@ export async function sendDebitNote(id, body, user) {
  * insurer withheld (default: the pro-rata share of the expected EWT on the note). Partial collections are allowed.
  */
 export async function collectDebitNote(id, b, user) {
-  const receivedDate = isoDate(b.receivedDate ?? b.paymentDate) || today();
-  if (receivedDate > today()) throw badRequest('Validation failed', [{ path: 'receivedDate', message: 'The received date cannot be in the future' }]);
+  const receivedDate = isoDate(b.receivedDate ?? b.paymentDate) || (await today());
+  if (receivedDate > (await today())) throw badRequest('Validation failed', [{ path: 'receivedDate', message: 'The received date cannot be in the future' }]);
   const cash = round2(num(b.cashAmount ?? b.amount));
   if (cash < 0) throw badRequest('Validation failed', [{ path: 'cashAmount', message: 'Amount must not be negative' }]);
   const out = await withTransaction(async (db) => {

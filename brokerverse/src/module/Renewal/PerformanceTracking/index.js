@@ -21,6 +21,7 @@ import renewalsWorkspaceService, { periodRange, productLabel } from "../../../se
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
+import { currencySymbol } from "../../../utility/currencyConverter";
 
 const PerformanceTracking = () => {
   const { t } = useTranslation();
@@ -205,7 +206,7 @@ const PerformanceTracking = () => {
             },
             ticks: {
               callback: function(value) {
-                return '₱' + value + 'M';
+                return currencySymbol() + value + 'M';
               }
             }
           }

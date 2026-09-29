@@ -78,7 +78,7 @@ define({
     const w = [16, 14, 11, 26, 16, 13, 10];
     const lines = [padRow(['Receipt', 'Customer', 'Date', 'Received from', 'Policy', 'Amount', 'Status'], w), '-'.repeat(112),
       ...rows.map((r) => padRow([r.receipt_number, r.customer_code, r.received_date, r.customer_name, r.policy_number, Number(r.amount).toFixed(2), r.receipt_status], w))];
-    const title = `${await getSetting('general.company_name', 'BrokerVerse')} – ${await getSetting('receipts.print_title', 'Official Receipts')}`;
+    const title = `${((await getSetting('general.company_name')) ?? '')} – ${await getSetting('receipts.print_title', 'Official Receipts')}`;
     const file = await storeFile(pool, { category: 'print', fileName: rows.length === 1 ? `${rows[0].receipt_number}.pdf` : 'receipts.pdf', contentType: 'application/pdf', buffer: makePdf(title, lines), entity: 'receipt', entityId: rows.length === 1 ? rows[0].id : null, userId: req.user.id });
     ok(res, { url: file.url, filename: file.fileName, key: file.key, count: rows.length }, 'Receipts exported');
   },

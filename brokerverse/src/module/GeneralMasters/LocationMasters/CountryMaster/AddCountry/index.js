@@ -239,7 +239,7 @@ function AddExchange({ action }) {
             <label className="label_text">{t("generalMasters.phoneCode")}</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>+</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText

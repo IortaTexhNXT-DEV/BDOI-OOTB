@@ -51,11 +51,11 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const prefix = await getSetting('numbering.invoice.prefix', 'INV');
   const billNumber = (await db.query('SELECT next_number($1, $2) AS n', ['invoice', prefix])).rows[0].n;
   const commission = await commissionFor(policy, gross, breakdown, source);
-  const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || today(), creditDays])).rows[0].d;
+  const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
       net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by)
     VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
-  [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || 'PHP', round2(breakdown.netPremium || gross),
+  [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await getSetting('currency.default', 'PHP')), round2(breakdown.netPremium || gross),
     round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null])).rows[0];
   const jv = await postBooking(db, r, policy, commission, user);
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
@@ -107,7 +107,7 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   const jv = await createJournal(db, {
     source: ctx.receipt ? 'receipt' : 'payment', entryType: 'PAYMENT_RECEIPT', transactionCode: ctx.receipt?.receipt_number || rcv.bill_number,
     referenceType: ctx.receipt ? 'Receipt' : 'Policy', referenceId: ctx.receipt?.id || policy.id, clientId: rcv.client_id, policyId: policy.id,
-    policyNumber: policy.policy_number, date: ctx.date || today(),
+    policyNumber: policy.policy_number, date: ctx.date || (await today()),
     description: `Premium collected – ${policy.policy_number}${ctx.receipt ? ` (${ctx.receipt.receipt_number})` : ''}`,
     lines: [
       { accountCode: await cashAccountFor(ctx.paymentMode), debit: amount, memo: ctx.referenceNo || 'Premium collection' },

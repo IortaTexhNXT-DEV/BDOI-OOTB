@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -11,18 +11,15 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { ProductService } from "./mock";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgArrow from "../../../assets/icons/SvgArrow";
+import { useMasterRecords } from "../../GeneralMasters/common/useMasterOptions";
 
 const BankAccountMaster = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
-
-  // useEffect(() => {
-  //     ProductService.getProductsMini().then(data => setProducts(data));
-  // }, []);
+  // Records of the Bank Account master (GET /masters/bank-account)
+  const products = useMasterRecords("bank-account");
 
   const template2 = {
     layout:
@@ -166,43 +163,43 @@ const BankAccountMaster = () => {
             scrollHeight="40vh"
           >
             <Column
-              field="name"
+              field="accountNumber"
               header={t("financeMasters.accountNumber")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="name"
+              field="accountName"
               header={t("financeMasters.accountName")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="category"
+              field="bankName"
               header={t("financeMasters.bankName")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="quantity"
+              field="accountType"
               header={t("financeMasters.accountType")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="name"
+              field="currency"
               header={t("financeMasters.currencyCode")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="name"
+              field="transactionLimit"
               header={t("financeMasters.maxTransactionLimit")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="category"
+              field="status"
               header={t("financeMasters.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

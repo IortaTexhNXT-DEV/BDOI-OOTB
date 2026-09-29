@@ -451,7 +451,7 @@ const RemittanceHistory = () => {
             </div>
 
             <DataTable value={visibleLogs} stripedRows className="log-table" loading={loading}>
-              <Column field="timestamp" header="Timestamp" style={{ width: '180px' }} />
+              <Column field="timestamp" header="Timestamp" body={dateBody("timestamp")} style={{ width: '180px' }} />
               <Column field="level" header="Level" body={levelBodyTemplate} style={{ width: '80px' }} />
               <Column field="module" header="Module" style={{ width: '150px' }} />
               <Column field="message" header="Message" />

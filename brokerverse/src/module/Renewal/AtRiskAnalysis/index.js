@@ -23,7 +23,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Knob } from "primereact/knob";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const AtRiskAnalysis = () => {
@@ -204,7 +204,7 @@ const AtRiskAnalysis = () => {
   const handleSaveActionPlan = async () => {
     setLoading(true);
     try {
-      const deadline = actionPlan.deadline?.toLocaleDateString('en-CA');
+      const deadline = toIsoDate(actionPlan.deadline);
       await renewalsWorkspaceService.addActivity(selectedPolicy.id, {
         type: 'Action Plan',
         description: actionPlan.notes || actionPlan.specialOffer || `Retention action plan (${actionPlan.priority})`,

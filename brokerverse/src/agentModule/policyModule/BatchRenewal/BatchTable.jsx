@@ -21,6 +21,7 @@ import BatchRenewalService from "../../../services/batchRenewalService";
 import { useNavigate } from "react-router-dom";
 import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { currencySymbol } from "../../../utility/currencyConverter";
 
 export default function BatchTable() {
   const { t } = useTranslation();
@@ -750,7 +751,7 @@ export default function BatchTable() {
               {/* Premium Min */}
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">
-                  Min Premium (₱)
+                  Min Premium ({currencySymbol()})
                 </label>
                 <InputNumber
                   value={batchCriteria.premiumMin}
@@ -768,7 +769,7 @@ export default function BatchTable() {
               {/* Premium Max */}
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">
-                  Max Premium (₱)
+                  Max Premium ({currencySymbol()})
                 </label>
                 <InputNumber
                   value={batchCriteria.premiumMax}
@@ -1004,7 +1005,7 @@ export default function BatchTable() {
                 {/* Premium Min */}
                 <div className="col-12 md:col-6 lg:col-3">
                   <label className="block mb-2 font-medium">
-                    Min Premium (₱)
+                    Min Premium ({currencySymbol()})
                   </label>
                   <InputNumber
                     value={selectedBatch.criteriaOption?.premiumMin}
@@ -1019,7 +1020,7 @@ export default function BatchTable() {
                 {/* Premium Max */}
                 <div className="col-12 md:col-6 lg:col-3">
                   <label className="block mb-2 font-medium">
-                    Max Premium (₱)
+                    Max Premium ({currencySymbol()})
                   </label>
                   <InputNumber
                     value={selectedBatch.criteriaOption?.premiumMax}

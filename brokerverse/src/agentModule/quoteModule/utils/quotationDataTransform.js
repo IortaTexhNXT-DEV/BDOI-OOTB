@@ -2,7 +2,10 @@
  * Utility functions to transform quotation data between frontend form format and backend API schema
  */
 
-import { DEFAULT_CURRENCY } from "../../../utility/currencyOptions";
+import { getDisplayCurrencyConfig } from "../../../utility/currencyConverter";
+
+/** Default currency of a new quote line: the display currency from System Settings. */
+const defaultCurrency = () => getDisplayCurrencyConfig().currency;
 
 /**
  * Transform form data from multi-step creation to backend API format
@@ -129,8 +132,8 @@ export const transformToBackendFormat = (
       participants.push({
         insuranceCompanyName: policyDetails.insuranceCompanyName,
         participantName: policyDetails.insuranceCompanyName,
-        sumInsuredCurrency: DEFAULT_CURRENCY,
-        premiumCurrency: DEFAULT_CURRENCY,
+        sumInsuredCurrency: defaultCurrency(),
+        premiumCurrency: defaultCurrency(),
         sharePercentage: primaryShare,
       });
     } else {
@@ -154,8 +157,8 @@ export const transformToBackendFormat = (
             p.ParticipantName,
           participantName: p.participantName || p.ParticipantName || null,
           sumInsuredCurrency:
-            p.sumInsuredCurrency || p.SumInsuredcurrency || DEFAULT_CURRENCY,
-          premiumCurrency: p.premiumCurrency || p.Premiumcurrencys || DEFAULT_CURRENCY,
+            p.sumInsuredCurrency || p.SumInsuredcurrency || defaultCurrency(),
+          premiumCurrency: p.premiumCurrency || p.Premiumcurrencys || defaultCurrency(),
           sharePercentage: p.sharePercentage || p.Sharepercentage || null,
         };
         console.log(
@@ -185,8 +188,8 @@ export const transformToBackendFormat = (
         {
           insuranceCompanyName: policyDetails.insuranceCompanyName,
           participantName: policyDetails.insuranceCompanyName,
-          sumInsuredCurrency: DEFAULT_CURRENCY,
-          premiumCurrency: DEFAULT_CURRENCY,
+          sumInsuredCurrency: defaultCurrency(),
+          premiumCurrency: defaultCurrency(),
           sharePercentage: "100",
         },
       ];

@@ -18,7 +18,7 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { calendarDateFormat, downloadCsv, isoDate, showError } from "../shared";
+import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError } from "../shared";
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
@@ -568,7 +568,7 @@ const RemittanceAnalytics = () => {
                     <Column field="type" header="Type" />
                     <Column field="message" header="Message" />
                     <Column field="severity" header="Severity" body={severityBodyTemplate} />
-                    <Column field="timestamp" header="Time" />
+                    <Column field="timestamp" header="Time" body={dateBody("timestamp")} />
                     <Column field="affected" header="Affected" />
                   </DataTable>
                 </Card>

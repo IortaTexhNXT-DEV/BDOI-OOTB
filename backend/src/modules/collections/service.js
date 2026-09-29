@@ -4,6 +4,7 @@
  * app_settings (limits.receivable_ageing_buckets, collections.*).
  */
 import { getSetting } from '../../lib/settings.js';
+import { today } from '../../lib/dates.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { round2 } from '../accounting/lib/http.js';
@@ -108,18 +109,18 @@ export async function addAction(db, id, a, user) {
 
 export async function setCommitment(db, id, date, reason, user) {
   const item = await itemId(db, id);
-  if (date < new Date().toISOString().slice(0, 10)) throw badRequest('Commitment date cannot be in the past');
+  if (date < (await today())) throw badRequest('Commitment date cannot be in the past');
   await db.query('UPDATE collection_items SET commitment_date = $2, commitment_reason = $3, escalated_at = NULL, updated_at = now() WHERE id = $1', [item.id, date, reason || null]);
   await addAction(db, item.id, { actionType: 'Commitment', notes: reason, commitmentDate: date }, user);
   return item.id;
 }
 
-const fill = (tpl, vars) => String(tpl).replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k] ?? ''));
+const fill = (tpl, vars) => String(tpl ?? '').replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k] ?? ''));
 async function emailVars(x) {
   const symbol = await getSetting('currency.symbol', '₱');
   return { clientName: x.client.displayName || `${x.client.firstName} ${x.client.lastName}`.trim(), policyNumber: x.policyNumber, billNumber: x.billNumber,
     amount: `${symbol}${Number(x.outstandingAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, dueDate: x.dueDate, daysPastDue: x.daysPastDue,
-    companyName: await getSetting('general.company_name', 'BrokerVerse') };
+    companyName: ((await getSetting('general.company_name')) ?? '') };
 }
 
 /** Queue a collection e-mail to the client (body = the notes typed on the screen, wrapped in the configured template). */
@@ -128,8 +129,8 @@ export async function sendEmail(db, id, body, user) {
   const to = body.to || x.client.email;
   if (!to) throw badRequest('The client has no e-mail address');
   const vars = await emailVars(x);
-  const subject = fill(body.subject || (await getSetting('collections.email_subject', 'Premium payment reminder – Policy {{policyNumber}}')), vars);
-  const content = body.notes ? String(body.notes).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br/>') : fill(await getSetting('collections.email_template', '<p>Dear {{clientName}},</p><p>{{amount}} is due on {{dueDate}}.</p>'), vars);
+  const subject = fill(body.subject || (await getSetting('collections.email_subject')), vars);
+  const content = body.notes ? String(body.notes).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br/>') : fill(await getSetting('collections.email_template'), vars);
   const emailId = await queueEmail({ to, subject, html: content, template: 'collection-follow-up', entity: 'collection', entityId: x.id });
   await addAction(db, x.id, { actionType: 'Email', notes: body.notes || subject, actionBy: body.actionBy, emailId }, user);
   return { emailId, to, subject };
@@ -145,8 +146,8 @@ export async function sendDueDateReminders(db, user) {
   const repeat = Number(await getSetting('collections.reminder_repeat_days', 7));
   const rows = (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - current_date <= $7
     AND (last_reminder_at IS NULL OR last_reminder_at < now() - ($8 || ' days')::interval)`, [...baseParams(t), before, String(repeat)])).rows;
-  const subjectTpl = await getSetting('collections.email_subject', 'Premium payment reminder – Policy {{policyNumber}}');
-  const bodyTpl = await getSetting('collections.email_template', '<p>Dear {{clientName}},</p><p>{{amount}} is due on {{dueDate}}.</p>');
+  const subjectTpl = await getSetting('collections.email_subject');
+  const bodyTpl = await getSetting('collections.email_template');
   let emails = 0; let notifications = 0; const skipped = [];
   for (const r of rows) {
     const x = itemRow(r);

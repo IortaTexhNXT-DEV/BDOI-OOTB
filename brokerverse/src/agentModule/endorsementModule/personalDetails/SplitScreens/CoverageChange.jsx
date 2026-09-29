@@ -10,12 +10,8 @@ import {
 import { parseNumericValue } from "../../../quoteModule/utils/quotationDataTransform";
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 import { formatNumber } from "../../../../utility/currencyConverter";
-import {
-  amountOptions,
-  BodilyInjuryOptions,
-  PropertyDamageOptions,
-} from "../../../quoteModule/coverageDetails/coverageDetailsCard/mock";
 import useMotorTariff, { appaFigures, findVehicleClass } from "../../../quoteModule/utils/useMotorTariff";
+import { amountOptions, bodilyInjuryOptions, propertyDamageOptions } from "../../../../utility/quoteOptions";
 
 /** Inputs that drive the premium: a change to any of them re-prices the cover. */
 const PRICING_INPUTS = [
@@ -206,8 +202,9 @@ const CoverageChange = ({
     [coverageDetails, setCoverageDetails]
   );
 
-  const bodilyInjury = withStoredAmount(BodilyInjuryOptions, coverageDetails.BodilyInjury);
-  const propertyDamage = withStoredAmount(PropertyDamageOptions, coverageDetails.PropertyDamage);
+  // Limits offered come from Master > Configuration (quote.bodily_injury_limits / quote.property_damage_limits)
+  const bodilyInjury = withStoredAmount(bodilyInjuryOptions(), coverageDetails.BodilyInjury);
+  const propertyDamage = withStoredAmount(propertyDamageOptions(), coverageDetails.PropertyDamage);
   const appa = withStoredAmount(
     amountOptions(motorTariff.appa.limits),
     coverageDetails.AutopassengerpersonalAccident

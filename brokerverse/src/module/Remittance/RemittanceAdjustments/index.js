@@ -20,6 +20,7 @@ import { calendarDateFormat, dateBody, downloadCsv, isoDate, loadMasterOptions, 
 import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import FieldError from "../../../components/FieldError";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 const emptyAdjustment = {
   referenceNo: "",
@@ -128,8 +129,8 @@ const RemittanceAdjustments = () => {
 
   const approveRows = (rows) => run(() => Promise.all(rows.map((r) => remittanceService.approve(approvalFor(r).id))), `${rows.length} adjustment(s) approved`);
 
-  const rejectRows = (rows) => {
-    const reason = window.prompt("Reason for rejection", "");
+  const rejectRows = async (rows) => {
+    const reason = await promptText("Reason for rejection", "");
     if (!reason) return;
     run(() => Promise.all(rows.map((r) => remittanceService.reject(approvalFor(r).id, reason))), `${rows.length} adjustment(s) rejected`);
   };

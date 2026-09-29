@@ -33,7 +33,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
         const errors = {};
 
         if (!values.chequeBookNo) {
-            errors.chequeBookNo = "This field Code is required";
+            errors.chequeBookNo = "This field is required";
         }
         if (!values.chequeLeafBegining) {
             errors.chequeLeafBegining = "This field is required";

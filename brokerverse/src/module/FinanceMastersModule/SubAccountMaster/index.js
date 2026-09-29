@@ -215,19 +215,19 @@ const SubAccountMaster = () => {
     const errors = {};
 
     if (!values.subAccountCode) {
-      errors.subAccountCode = "This Field is Required";
+      errors.subAccountCode = "This field is required";
     }
     if (!values.description) {
-      errors.description = "This Field is Required";
+      errors.description = "This field is required";
     }
     if (!values.subAccountName) {
-      errors.subAccountName = "This Field is Required";
+      errors.subAccountName = "This field is required";
     }
     if (!values.mainAccount) {
-      errors.mainAccount = "This Field is Required";
+      errors.mainAccount = "This field is required";
     }
     if (!values.currencyCode) {
-      errors.currencyCode = "This Field is Required";
+      errors.currencyCode = "This field is required";
     }
     return errors;
   };

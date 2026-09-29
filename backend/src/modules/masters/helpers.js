@@ -20,7 +20,7 @@ export function toNumber(v, fallback = 0) {
   const n = typeof v === 'number' ? v : Number(String(v).replace(/[^0-9.+-]/g, ''));
   return Number.isFinite(n) ? n : fallback;
 }
-export const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+export { round2 } from '../../lib/money.js';
 
 /** YYYY-MM-DD from a Date, ISO string or date string; null when empty or invalid. */
 export function isoDate(v) {

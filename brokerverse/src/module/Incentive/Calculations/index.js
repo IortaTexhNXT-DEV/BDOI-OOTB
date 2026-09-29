@@ -24,6 +24,7 @@ import incentiveService from "../../../services/incentiveService";
 import { showError, showSuccess } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 /** Last `count` calendar months as { label: "September 2026", value: "2026-09" }. */
 const recentMonths = (count = 12) => {
@@ -227,8 +228,8 @@ const Calculations = () => {
     });
   };
 
-  const handleReject = (calculation) => {
-    const reason = window.prompt(t("incentive.rejectCalculationBatch", { batchId: calculation.batchId }), "");
+  const handleReject = async (calculation) => {
+    const reason = await promptText(t("incentive.rejectCalculationBatch", { batchId: calculation.batchId }), "");
     if (!reason) return;
     runAction(
       () => incentiveService.rejectCalculation(calculation.batchId, reason),
@@ -238,9 +239,9 @@ const Calculations = () => {
   };
 
   const handleAdjustLine = async (line) => {
-    const amount = window.prompt(`Adjustment for ${line.agentName} (${line.program})`, String(line.adjustments || 0));
+    const amount = await promptText(`Adjustment for ${line.agentName} (${line.program})`, String(line.adjustments || 0));
     if (amount === null || Number.isNaN(Number(amount))) return;
-    const reason = window.prompt("Reason for adjustment", line.adjustmentReason || "");
+    const reason = await promptText("Reason for adjustment", line.adjustmentReason || "");
     if (!reason) return;
     const done = await runAction(
       () => incentiveService.adjustCalculation(calculationDetails.batchId, [{ id: line.id, adjustments: Number(amount), reason }]),

@@ -63,11 +63,6 @@ function EditExchange() {
     { name: "Trans00123", code: "NY" },
     { name: "Trans001234", code: "RM" },
   ];
-  const SelectInstrumentCurrency = [
-    { name: "PHP", code: "PHP" },
-    { name: "THB", code: "THB" },
-    { name: "USD", code: "USD" },
-  ];
 
   const home = { label: t("financeMasters.master") };
   const items = [

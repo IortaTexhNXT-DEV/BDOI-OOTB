@@ -60736,7 +60736,7 @@
                       "criteria": [
                         "Overall",
                         "Agent",
-                        "Principle Insurance",
+                        "Principal Insurer",
                         "Branch"
                       ],
                       "formats": [

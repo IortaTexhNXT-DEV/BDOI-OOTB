@@ -6,7 +6,6 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import SvgFilters from "../../assets/icons/SvgFilters";
-import { ClientListingData } from "../quoteModule/clientListing/mock";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Column } from "primereact/column";

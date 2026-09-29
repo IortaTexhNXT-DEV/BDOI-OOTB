@@ -119,7 +119,7 @@ define({
     // A manager (finance, administrator) who is not an agent opens the screen without choosing an agent: answer with an
     // empty statement flagged eligible: false (the screen then offers GET /incentive/agents) instead of 404 (D101).
     if (!req.query.agentId && !(await svc.eligibleAgents(agentId)).length) {
-      return ok(res, { ...svc.emptyStatement(req.query.period), eligible: false, selectAgent: isReader(req.user) });
+      return ok(res, { ...(await svc.emptyStatement(req.query.period)), eligible: false, selectAgent: isReader(req.user) });
     }
     return ok(res, { ...(await svc.statement(agentId, req.query.period)), eligible: true });
   },

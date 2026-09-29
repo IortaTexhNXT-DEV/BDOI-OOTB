@@ -4,6 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { config } from '../../config.js';
 import { getSetting } from '../../lib/settings.js';
+import { businessDate } from '../../lib/dates.js';
 import { HttpError } from '../../lib/errors.js';
 import { many, query } from '../../db/pool.js';
 import { detectType } from '../uploads/fileTypes.js';
@@ -19,19 +20,13 @@ export function parseJsonField(v, fallback = {}) {
 
 export const toBool = (v) => v === true || v === 'true' || v === '1' || v === 1;
 export const toNum = (v) => (v === undefined || v === null || v === '' || Number.isNaN(Number(v)) ? null : Number(v));
-export const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+export { round2 } from '../../lib/money.js';
+export { today } from '../../lib/dates.js';
 
 /** Normalise a date input (YYYY-MM-DD or ISO timestamp) to YYYY-MM-DD in the configured time zone. */
 export async function toDate(v) {
-  if (!v) return null;
-  const s = String(v);
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return null;
-  const tz = await getSetting('general.timezone', 'Asia/Manila');
-  try { return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d); } catch { return d.toISOString().slice(0, 10); }
+  return v ? businessDate(v) : null;
 }
-export const today = () => toDate(new Date().toISOString());
 export const daysBetween = (a, b) => Math.round((new Date(`${b}T00:00:00Z`) - new Date(`${a}T00:00:00Z`)) / 86400000);
 
 /** Next document number, e.g. CLM-2026-00001; retries if the number already exists in the target table. */

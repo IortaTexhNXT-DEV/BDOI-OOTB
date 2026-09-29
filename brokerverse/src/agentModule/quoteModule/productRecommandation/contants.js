@@ -186,7 +186,7 @@ export const mockPlans = [
     description:
       "Compulsory Third Party Liability - Basic protection required by law",
     monthlyPremium: 1500,
-    deductible: "₱5,000",
+    deductible: 5000,
     features: [
       "Third-party liability coverage",
       "Bodily injury protection",
@@ -203,7 +203,7 @@ export const mockPlans = [
     name: "Basic",
     description: "Enhanced protection with additional coverage options",
     monthlyPremium: 3500,
-    deductible: "₱10,000",
+    deductible: 10000,
     features: [
       "All CTPL benefits",
       "Own damage coverage",
@@ -220,7 +220,7 @@ export const mockPlans = [
     name: "Comprehensive",
     description: "Complete protection with maximum coverage",
     monthlyPremium: 6500,
-    deductible: "₱15,000",
+    deductible: 15000,
     features: [
       "All Basic benefits",
       "Full comprehensive coverage",
@@ -238,7 +238,7 @@ export const mockPlans = [
     name: "CTPL",
     description: "Competitive basic coverage option",
     monthlyPremium: 1450,
-    deductible: "₱5,000",
+    deductible: 5000,
     features: [
       "Third-party liability coverage",
       "Bodily injury protection",
@@ -254,7 +254,7 @@ export const mockPlans = [
     name: "Basic",
     description: "Enhanced coverage from trusted provider",
     monthlyPremium: 3400,
-    deductible: "₱10,000",
+    deductible: 10000,
     features: ["All CTPL benefits", "Own damage coverage", "Theft protection"],
     highlight: null,
     aiReason:
@@ -266,7 +266,7 @@ export const mockPlans = [
     name: "Comprehensive",
     description: "Premium protection package",
     monthlyPremium: 6800,
-    deductible: "₱15,000",
+    deductible: 15000,
     features: [
       "All Basic benefits",
       "Full comprehensive coverage",

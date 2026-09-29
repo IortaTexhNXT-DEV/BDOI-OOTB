@@ -359,14 +359,14 @@ const LeadListingAllTable = () => {
             field="QuoteId"
             body={renderQuoteId}
             header={rendercheckedHeader(t("quoteListing.quoteId"))}
-            headerStyle={{ ...headerStyle, minWidth: "180px" }}
+            headerStyle={{ ...headerStyle, minWidth: "150px" }}
             sortable
           ></Column>
           <Column
             field="LeadName"
             body={renderLeadName}
             header={renderUncheckedHeader(t("quoteListing.leadName"))}
-            headerStyle={{ ...headerStyle, minWidth: "200px" }}
+            headerStyle={{ ...headerStyle, minWidth: "170px" }}
             sortable
           ></Column>
 
@@ -374,7 +374,7 @@ const LeadListingAllTable = () => {
             field="PolicyType"
             body={renderPolicyType}
             header={renderUncheckedHeader(t("quoteListing.policyType"))}
-            headerStyle={{ ...headerStyle, minWidth: "180px" }}
+            headerStyle={{ ...headerStyle, minWidth: "140px" }}
             sortable
           ></Column>
           <Column
@@ -388,7 +388,7 @@ const LeadListingAllTable = () => {
             field="Date"
             body={renderDate}
             header={renderUncheckedHeader(t("quoteListing.date"))}
-            headerStyle={{ ...headerStyle, minWidth: "130px" }}
+            headerStyle={{ ...headerStyle, minWidth: "120px" }}
             sortable
           ></Column>
 
@@ -396,17 +396,18 @@ const LeadListingAllTable = () => {
             field="Status"
             body={renderStatus}
             header={renderUncheckedHeader(t("quoteListing.status"))}
-            headerStyle={{ ...headeraction, minWidth: "150px" }}
+            headerStyle={{ ...headeraction, minWidth: "130px" }}
             style={{ textAlign: "center" }}
             sortable
           ></Column>
+          {/* column minimum widths add up to less than the card at 1440 px: the Action column stays in view */}
           <Column
             body={renderViewEditButton}
             header={renderUncheckedHeader(t("quoteListing.actions"))}
             headerStyle={{
               ...ViewheaderStyle,
               textAlign: "center",
-              minWidth: "150px",
+              minWidth: "110px",
             }}
             style={{ textAlign: "center" }}
           ></Column>

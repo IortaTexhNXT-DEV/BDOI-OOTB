@@ -20,11 +20,11 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Knob } from 'primereact/knob';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import reinsuranceService from '../../services/reinsuranceService';
-import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate as isoDate } from "../../utility/dateFormat";
 
 const sum = (rows, field) => rows.reduce((total, row) => total + (Number(row[field]) || 0), 0);
 const orDash = (value) => (value === undefined || value === null || value === '' ? '-' : value);
-const toIsoDate = (date) => (date instanceof Date ? date.toLocaleDateString('en-CA') : date);
+const toIsoDate = (date) => (date instanceof Date ? isoDate(date) : date);
 
 /** Last `count` calendar months as { label, value: 'YYYY-MM' }, newest first. */
 const recentPeriods = (count = 6) => {

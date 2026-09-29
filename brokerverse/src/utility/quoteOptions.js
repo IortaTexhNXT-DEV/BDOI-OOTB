@@ -1,3 +1,5 @@
+import { formatNumber } from "./currencyConverter";
+
 /**
  * Quote wizard options from configuration (System Settings quote.vehicle_colours, quote.model_year_span).
  * Applied at runtime by applySystemSettings.
@@ -7,12 +9,27 @@ const DEFAULT_YEAR_SPAN = 20;
 
 let colours = DEFAULT_COLOURS;
 let yearSpan = DEFAULT_YEAR_SPAN;
+let bodilyInjuryLimits = [];
+let propertyDamageLimits = [];
 
-export const setQuoteOptions = ({ vehicleColours, modelYearSpan } = {}) => {
+const amounts = (list) => (Array.isArray(list) ? list.map(Number).filter((n) => Number.isFinite(n) && n > 0) : []);
+
+export const setQuoteOptions = ({ vehicleColours, modelYearSpan, bodilyInjuryLimits: bi, propertyDamageLimits: pd } = {}) => {
   colours = Array.isArray(vehicleColours) && vehicleColours.length ? vehicleColours.map(String) : DEFAULT_COLOURS;
   const span = Number(modelYearSpan);
   yearSpan = Number.isInteger(span) && span > 0 && span <= 100 ? span : DEFAULT_YEAR_SPAN;
+  bodilyInjuryLimits = amounts(bi);
+  propertyDamageLimits = amounts(pd);
 };
+
+/** Amount options in the configured grouping (PHP: 100,000); the stored value is the formatted text. */
+export const amountOptions = (list) => amounts(list).map((a) => ({ label: formatNumber(a), value: formatNumber(a) }));
+
+/** Excess bodily injury limits offered on motor quotes / endorsements (quote.bodily_injury_limits). */
+export const bodilyInjuryOptions = () => amountOptions(bodilyInjuryLimits);
+
+/** Property damage limits offered on motor quotes / endorsements (quote.property_damage_limits). */
+export const propertyDamageOptions = () => amountOptions(propertyDamageLimits);
 
 /** Vehicle colours as dropdown options; the stored value is the colour name itself. */
 export const vehicleColourOptions = () => colours.map((c) => ({ label: c, value: c }));

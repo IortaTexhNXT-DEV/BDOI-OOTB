@@ -8,6 +8,7 @@ import * as masters from '../masters/service.js';
 import * as svc from './service.js';
 import * as items from './items.js';
 import * as directBill from './directbill.js';
+import { businessTimeZone } from '../../lib/dates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { commissionDebitNoteDoc } from '../documents/templates.js';
 
@@ -494,7 +495,7 @@ define({
   response: { success: true, data: { id: 3, code: 'SCH-0003', status: 'Active' } },
   handler: async (req, res) => {
     const t = await masters.getType('remittance-schedule');
-    const s = await masters.createRecord(t, { timezone: 'Asia/Manila', ...(req.body || {}) }, req.user);
+    const s = await masters.createRecord(t, { timezone: await businessTimeZone(), ...(req.body || {}) }, req.user);
     await audit(req, { entity: 'master:remittance-schedule', entityId: s.id, action: 'create', after: s });
     created(res, s, 'Schedule created');
   },

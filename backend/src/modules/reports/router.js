@@ -134,7 +134,7 @@ define({
 define({
   method: 'GET', path: '/', summary: 'Report catalogue visible to the caller (by role and permission)', screen: 'Reports (menu) > Operational Reports / Financial Reports', middleware: canRead, permissions: ['read:reports'],
   query: { category: 'operational' },
-  response: { success: true, data: [{ code: 'production-register', name: 'Production Register', category: 'operational', screen: 'Reports > Operational Reports > Production', criteria: ['Overall', 'Agent', 'Principle Insurance', 'Branch'], formats: ['csv', 'xlsx', 'pdf'] }] },
+  response: { success: true, data: [{ code: 'production-register', name: 'Production Register', category: 'operational', screen: 'Reports > Operational Reports > Production', criteria: ['Overall', 'Agent', 'Principal Insurer', 'Branch'], formats: ['csv', 'xlsx', 'pdf'] }] },
   handler: async (req, res) => ok(res, await svc.listCatalogue(req.user, { category: req.query.category, search: req.query.search })),
 });
 define({

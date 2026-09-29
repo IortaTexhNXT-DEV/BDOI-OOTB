@@ -7,6 +7,7 @@ import {
   setCommissionViewMode,
 } from "../utils/commissionViewMode";
 import "./style.scss";
+import { currencySymbol } from "../../../utility/currencyConverter";
 
 const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
 
@@ -99,7 +100,7 @@ const CommissionDashboard = () => {
     scales: {
       y: {
         ticks: {
-          callback: (v) => "₱" + Math.round(v / 1000) + "k",
+          callback: (v) => currencySymbol() + Math.round(v / 1000) + "k",
         },
         grid: { color: "#edf2f7" },
       },
@@ -363,7 +364,7 @@ const CommissionDashboard = () => {
       </div>
 
       <div className="panel funnel-panel">
-        <h3>PAYABLE FUNNEL — NET PAYABLE (₱) BY LIFECYCLE STAGE</h3>
+        <h3>PAYABLE FUNNEL — NET PAYABLE ({currencySymbol()}) BY LIFECYCLE STAGE</h3>
         <div className="hbar-list funnel">
           {data.payableFunnel.map((f) => (
             <div className="hbar-row" key={f.status}>

@@ -32,7 +32,7 @@ const CREATOR_DIMS = `u.id AS _agent_id, u.username AS _agent_username, u.displa
 /** Billing mode label: broker billed (client pays the broker) or direct bill (client pays the insurer; commission billed by debit note). */
 const BILLING_MODE = "CASE p.billing_mode WHEN 'direct' THEN 'Direct bill' ELSE 'Broker billed' END";
 
-const STANDARD_CRITERIA = { Overall: {}, Agent: { groupBy: 'agent' }, 'Principle Insurance': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' } };
+const STANDARD_CRITERIA = { Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' } };
 const POLICY_FILTERS = ['agent', 'insurer', 'branch', 'client', 'product', 'status'];
 
 const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", p.created_at::date AS "issueDate",
@@ -103,7 +103,7 @@ export const QUERIES = {
   },
   premiumByProduct: {
     sql: production, filters: POLICY_FILTERS,
-    criteria: { Overall: { dims: ['month', 'product', 'insurer'] }, Product: { dims: ['product'] }, Month: { dims: ['month'] }, 'Principle Insurance': { dims: ['insurer'] } },
+    criteria: { Overall: { dims: ['month', 'product', 'insurer'] }, Product: { dims: ['product'] }, Month: { dims: ['month'] }, 'Principal Insurer': { dims: ['insurer'] } },
     aggregate: { policies: 'count(*)', sumInsured: 'sum(t."sumInsured")', premium: 'sum(t.premium)', commission: 'sum(t.commission)' },
   },
   newVsRenewal: {
@@ -121,7 +121,7 @@ export const QUERIES = {
   },
   claimsAgeing: {
     sql: `${claims} AND cl.status = ANY($4::text[])`, extras: claimExtras, filters: POLICY_FILTERS,
-    criteria: { Overall: { dims: ['ageBucket'] }, 'Principle Insurance': { dims: ['insurer', 'ageBucket'] }, Agent: { dims: ['agent', 'ageBucket'] } },
+    criteria: { Overall: { dims: ['ageBucket'] }, 'Principal Insurer': { dims: ['insurer', 'ageBucket'] }, Agent: { dims: ['agent', 'ageBucket'] } },
     aggregate: { claims: 'count(*)', estimateAmount: 'sum(t."estimateAmount")', approvedAmount: 'sum(COALESCE(t."approvedAmount", 0))', averageAgeDays: 'round(avg(t."ageDays"), 1)', _minAge: 'min(t."ageDays")' },
     orderBy: (dims) => dims.map((d) => (d === 'ageBucket' ? 'f."_minAge"' : `f."${d}"`)).join(', '),
   },
@@ -174,7 +174,7 @@ export const QUERIES = {
   collectionsAgeing: {
     sql: `${receivables} WHERE rv.balance > 0 AND rv.status <> 'written-off' AND rv.created_at::date <= $2`, extras: [receivableBuckets],
     filters: POLICY_FILTERS,
-    criteria: { 'Ageing Bucket': { groupBy: 'ageBucket' }, Overall: {}, Agent: { groupBy: 'agent' }, 'Principle Insurance': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' }, Client: { groupBy: 'client' } },
+    criteria: { 'Ageing Bucket': { groupBy: 'ageBucket' }, Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' }, Client: { groupBy: 'client' } },
     orderBy: 'f."ageDays" DESC, f."billNumber"',
   },
   collections: {
@@ -235,7 +235,7 @@ export const QUERIES = {
       FROM journal_lines jl JOIN journal_vouchers jv ON jv.id = jl.jv_id ${creatorJoin('jv.created_by')}
       WHERE jv.jv_date BETWEEN $1 AND $2`,
     filters: ['agent', 'branch', 'status'],
-    criteria: { Overall: {}, Agent: { groupBy: 'agent' }, 'Principle Insurance': {}, Branch: { groupBy: 'branch' }, Account: { groupBy: 'accountCode' } },
+    criteria: { Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': {}, Branch: { groupBy: 'branch' }, Account: { groupBy: 'accountCode' } },
     orderBy: 'f."jvDate", f."jvNumber", f."accountCode"',
   },
   trialBalance: {
@@ -245,7 +245,7 @@ export const QUERIES = {
       WHERE jv.jv_date <= $2 AND jv.status = ANY($3::text[])`,
     extras: [setting('reports.trial_balance_statuses', ['approved', 'posted'], 'text[]')],
     filters: ['agent', 'branch'],
-    criteria: { Overall: { dims: TB_DIMS }, Agent: { dims: TB_DIMS }, 'Principle Insurance': { dims: TB_DIMS }, Branch: { dims: ['branch', ...TB_DIMS] } },
+    criteria: { Overall: { dims: TB_DIMS }, Agent: { dims: TB_DIMS }, 'Principal Insurer': { dims: TB_DIMS }, Branch: { dims: ['branch', ...TB_DIMS] } },
     orderBy: (dims) => dims.map((d) => (d === 'accountType' ? `COALESCE(array_position(ARRAY[${ACCOUNT_TYPES}], f."accountType"), 99)` : `f."${d}"`)).join(', '),
     aggregate: {
       openingBalance: 'COALESCE(sum(t.debit - t.credit) FILTER (WHERE t._date < $1), 0)',
@@ -259,7 +259,7 @@ export const QUERIES = {
   directBillCommission: {
     sql: directBill, extras: [receivableBuckets], filters: POLICY_FILTERS,
     criteria: {
-      'Ageing Bucket': { where: 't.balance > 0', groupBy: 'ageBucket' }, 'Principle Insurance': { where: 't.balance > 0', groupBy: 'insurer' },
+      'Ageing Bucket': { where: 't.balance > 0', groupBy: 'ageBucket' }, 'Principal Insurer': { where: 't.balance > 0', groupBy: 'insurer' },
       Outstanding: { where: 't.balance > 0' }, Overall: { where: 't."_inPeriod"' },
     },
     orderBy: 'f.insurer, f."ageDays" DESC, f."policyNumber"',
@@ -284,7 +284,7 @@ export const QUERIES = {
         round(100.0 * cs.ceded_sum / NULLIF(p.sum_insured, 0), 2) AS "cededPct"
       FROM cessions cs JOIN reinsurance_treaties rt ON rt.id = cs.treaty_id JOIN policies p ON p.id = cs.policy_id ${POLICY_JOINS}
       WHERE cs.created_at::date BETWEEN $1 AND $2`,
-    filters: POLICY_FILTERS, criteria: { Overall: {}, Treaty: { groupBy: 'treaty' }, Reinsurer: { groupBy: 'reinsurer' }, 'Principle Insurance': { groupBy: 'insurer' } },
+    filters: POLICY_FILTERS, criteria: { Overall: {}, Treaty: { groupBy: 'treaty' }, Reinsurer: { groupBy: 'reinsurer' }, 'Principal Insurer': { groupBy: 'insurer' } },
     orderBy: 'f."cessionDate", f."policyNumber"',
   },
   incentives: {

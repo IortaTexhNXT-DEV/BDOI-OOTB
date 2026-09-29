@@ -9,6 +9,7 @@ import { pageParams, sendList } from './lib/http.js';
 import { toCsv } from './lib/files.js';
 import { cancelJournal, postJournal, resolveJournalId, reverseJournal } from './lib/ledger.js';
 import * as svc from './service.js';
+import { today } from '../../lib/dates.js';
 
 const { router, define } = moduleRouter('Accounting', '/accounting');
 const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:receipts', 'read:disbursements')];
@@ -135,7 +136,7 @@ define({
     const csv = toCsv(cols, r.rows.map((e) => ({ ...e, clientCode: e.client?.clientId, clientName: e.client?.displayName })));
     await audit(req, { entity: 'journal', entityId: null, action: 'export', after: { filters: req.query, rows: r.rows.length } });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="accounting-entries-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="accounting-entries-${await today()}.csv"`);
     res.send(csv);
   },
 });

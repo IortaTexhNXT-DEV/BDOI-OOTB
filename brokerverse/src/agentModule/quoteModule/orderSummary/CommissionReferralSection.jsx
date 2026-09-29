@@ -3,7 +3,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import CommissionService from "../../../services/commissionService";
-import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatCurrency, currencySymbol } from "../../../utility/currencyConverter";
 import "./CommissionReferralSection.scss";
 
 const DIRECT_ID = "direct";
@@ -245,7 +245,7 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
           </div>
         ) : (
           <div className="cr-comsub-line">
-            <span className="cr-comsub-label">comsub ₱</span>
+            <span className="cr-comsub-label">comsub {currencySymbol()}</span>
             <InputNumber
               value={details.primary?.comsubFixed ?? 0}
               onValueChange={(e) =>
@@ -303,7 +303,7 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
               />
             </div>
             <div className="cr-comsub-line">
-              <span className="cr-comsub-label">comsub ₱</span>
+              <span className="cr-comsub-label">comsub {currencySymbol()}</span>
               <InputNumber
                 value={row.comsubFixed ?? 0}
                 onValueChange={(e) =>

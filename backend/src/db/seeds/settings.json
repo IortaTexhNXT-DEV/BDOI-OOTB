@@ -452,5 +452,120 @@
     "group": "uploads",
     "label": "File types users may upload (checked against the file signature, not the browser's claim)",
     "type": "json"
+  },
+  {
+    "key": "dashboard.renewals_due_days",
+    "value": 60,
+    "group": "dashboard",
+    "label": "Renewals due window on the dashboards (days before expiry)",
+    "type": "number"
+  },
+  {
+    "key": "product.expiry_warning_days",
+    "value": 60,
+    "group": "product",
+    "label": "Product templates listed as expiring soon (days before the expiry date)",
+    "type": "number"
+  },
+  {
+    "key": "renewals.due_soon_days",
+    "value": 30,
+    "group": "renewals",
+    "label": "Renewal queue \"due soon\" counter (days to expiry)",
+    "type": "number"
+  },
+  {
+    "key": "renewals.risk_thresholds",
+    "value": {
+      "noContactDays": 30,
+      "increasePercent": 10,
+      "dueSoonDays": 15
+    },
+    "group": "renewals",
+    "label": "Retention risk factors: no contact within noContactDays of expiry, premium increase above increasePercent %, due within dueSoonDays",
+    "type": "json"
+  },
+  {
+    "key": "incentive.program_lookback_days",
+    "value": 30,
+    "group": "incentive",
+    "label": "Agent program view includes programs that ended up to this many days ago",
+    "type": "number"
+  },
+  {
+    "key": "security.restricted_token_minutes",
+    "value": 15,
+    "group": "security",
+    "label": "Minutes a restricted sign-in (forced password change, two-step enrolment) stays valid",
+    "type": "number"
+  },
+  {
+    "key": "security.reset_code_minutes",
+    "value": 15,
+    "group": "security",
+    "label": "Minutes a password reset code stays valid",
+    "type": "number"
+  },
+  {
+    "key": "security.reset_email_subject",
+    "value": "Your {{companyName}} password reset code",
+    "group": "security",
+    "label": "Password reset e-mail subject ({{companyName}})"
+  },
+  {
+    "key": "security.reset_email_body",
+    "value": "<p>Your verification code is <b>{{code}}</b>. It expires in {{minutes}} minutes. If you did not ask for it, ignore this e-mail.</p>",
+    "group": "security",
+    "label": "Password reset e-mail body (HTML; {{code}}, {{minutes}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.statement_email_subject",
+    "value": "Remittance statement {{period}}",
+    "group": "remittance",
+    "label": "Remittance statement e-mail subject ({{period}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.statement_email_body",
+    "value": "<p>Your remittance statement for {{period}} is available: <a href=\"{{downloadUrl}}\">{{fileName}}</a></p>",
+    "group": "remittance",
+    "label": "Remittance statement e-mail body (HTML; {{period}}, {{downloadUrl}}, {{fileName}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.bill_email_subject",
+    "value": "Statement of account {{billNumber}}",
+    "group": "remittance",
+    "label": "Agency bill e-mail subject ({{billNumber}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.bill_email_body",
+    "value": "<p>Bill {{billNumber}} dated {{billDate}}: {{currency}} {{amount}}, due {{dueDate}}.</p>",
+    "group": "remittance",
+    "label": "Agency bill e-mail body (HTML; {{billNumber}}, {{billDate}}, {{currency}}, {{amount}}, {{dueDate}}, {{companyName}})"
+  },
+  {
+    "key": "quote.bodily_injury_limits",
+    "value": [
+      100000,
+      200000,
+      300000,
+      400000,
+      500000
+    ],
+    "group": "quote",
+    "label": "Excess bodily injury limits offered on motor quotes and endorsements",
+    "type": "json"
+  },
+  {
+    "key": "quote.property_damage_limits",
+    "value": [
+      100000,
+      200000,
+      300000,
+      400000,
+      500000
+    ],
+    "group": "quote",
+    "label": "Property damage limits offered on motor quotes and endorsements",
+    "type": "json"
   }
 ]

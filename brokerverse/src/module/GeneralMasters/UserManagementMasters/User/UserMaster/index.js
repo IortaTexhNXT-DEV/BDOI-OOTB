@@ -178,12 +178,12 @@ const UserMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <div className="add__icon__view__hierarchy" onClick={handleNavigate}>
-          <div className="add__icon__hierarchy">
+        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
+          <span className="add__icon__hierarchy">
             <SvgAdd />
-          </div>
-          <div className="add__text__hierarchy">{t("generalMasters.add")}</div>
-        </div>
+          </span>
+          <span className="add__text__hierarchy">{t("generalMasters.add")}</span>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">

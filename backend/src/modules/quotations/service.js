@@ -4,6 +4,7 @@ import { config } from '../../config.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/router.js';
 import { nextNumber, lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
@@ -16,6 +17,7 @@ import { createLead } from '../leads/service.js';
 import { premiumBreakdown } from './premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { toQuote, stripReserved, QUOTE_SELECT } from './shape.js';
+import { addDays, today } from '../../lib/dates.js';
 
 export async function getQuoteRow(id, db = null) {
   const r = await (db || { query }).query(`${QUOTE_SELECT} WHERE (q.id = $1 OR q.quote_number = $1) AND q.deleted_at IS NULL`, [id]);
@@ -52,7 +54,7 @@ export async function createQuote(body, userId, db = null) {
     const status = 'draft';
     const data = { quote_number: number, lead_id: leadId, client_id: body.clientId || null, insurance_company_id: icId, status,
       product_type: body.productType || (b.lob === 'MOTOR' ? 'Motor' : body.productType), lob: b.lob, agent_user_id: userId, created_by: userId,
-      valid_until: new Date(Date.now() + validity * 86400000).toISOString().slice(0, 10), remarks: body.remarks || null,
+      valid_until: addDays(await today(), validity), remarks: body.remarks || null,
       doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), ...premiumCols(b) };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO quotes(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
@@ -112,7 +114,7 @@ export async function changeStatus(id, label, user) {
 
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const vars = async (q, extra = {}) => ({
-  companyName: await getSetting('general.company_name', ''), quotationNumber: q.quote_number,
+  companyName: ((await getSetting('general.company_name')) ?? ''), quotationNumber: q.quote_number,
   customerName: [q.lead_row?.first_name, q.lead_row?.last_name].filter(Boolean).join(' ') || q.lead_row?.company_name || 'Customer',
   productType: q.product_type || q.lob, grossPremium: Number(q.premium_total).toLocaleString('en-US', { minimumFractionDigits: 2 }),
   currency: q.currency, validUntil: q.valid_until, insurerName: q.insurer_name || '', ...extra,
@@ -142,7 +144,7 @@ export async function sendForApproval(id, user) {
   if (!to) throw badRequest(q.lead_row ? 'The lead has no e-mail address; add one before sending the quotation' : 'The client has no e-mail address; add one before sending the quotation');
   const hours = Number(await getSetting('quotations.approval_link_ttl_hours', 168));
   const token = approvalToken(q.id, hours);
-  const url = `${String(await getSetting('general.frontend_url', 'http://localhost:3000')).replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
+  const url = `${String((await getSetting('general.frontend_url')) || '').replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
   const t = await emailTemplate('quote_approval');
   const v = await vars(q, { approvalUrl: url, validHours: hours, ...(!q.lead_row?.id && client?.display_name ? { customerName: client.display_name } : {}) });
   await queueEmail({ to, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
@@ -150,7 +152,7 @@ export async function sendForApproval(id, user) {
     [q.id, sha(token), to, user.id]);
   if (await getSetting('notification.approval_requests', true)) {
     for (const u of await usersWithRoles(await getSetting('quotations.approval_notify_roles', ['underwriting']))) {
-      await notify({ userId: u.id, type: 'approval', title: 'Quotation sent for approval', message: `Quotation ${q.quote_number} (${v.customerName}, ${v.currency} ${v.grossPremium}) was sent to the customer for approval`,
+      await notify({ userId: u.id, type: 'approval', title: 'Quotation sent for approval', message: `Quotation ${q.quote_number} (${v.customerName}, ${await formatMoney(q.premium_total, v.currency)}) was sent to the customer for approval`,
         link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
     }
   }

@@ -12,6 +12,7 @@ import SvgFire from "../../assets/agentIcon/SvgFire";
 import SvgAdd from "../../assets/agentIcon/SvgAdd";
 import BulkUploadModal from "./BulkUploadModal";
 import { useLocation, useNavigate } from "react-router-dom";
+import { canOpen, hasPermission } from "../../utils/canOpen";
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
@@ -31,6 +32,11 @@ const ClientListingCard = () => {
     // Refresh the policies table by updating key
     setRefreshKey((prev) => prev + 1);
   };
+
+  // A policy is issued from a lead's quotation: offer Create Policy only to roles that may open Leads (not claims,
+  // as D109 did for Create Lead), and Bulk Upload only to roles the server lets write policies.
+  const mayCreatePolicy = canOpen("/agent/leadlisting");
+  const mayBulkUpload = hasPermission("write:policies");
 
   const handleCreatePolicy = (lob) => {
     // Navigate to lead listing to select a lead for policy creation
@@ -122,22 +128,26 @@ const ClientListingCard = () => {
               gap: "10px",
             }}
           >
-            <Button
-              label={t("policies.bulkUpload")}
-              className="p-button-outlined"
-              onClick={() => setShowBulkUpload(true)}
-            />
-            <Dropdown
-              value={selectedOption}
-              options={dropdownOptions}
-              // a policy is issued from a lead's quotation: choosing a line (mouse or keyboard) opens the leads
-              onChange={(e) => {
-                setSelectedOption(null);
-                handleCreatePolicy(e.value);
-              }}
-              placeholder={t("policies.createPolicy")}
-              dropdownIcon={<SvgAdd />}
-            />
+            {mayBulkUpload && (
+              <Button
+                label={t("policies.bulkUpload")}
+                className="p-button-outlined"
+                onClick={() => setShowBulkUpload(true)}
+              />
+            )}
+            {mayCreatePolicy && (
+              <Dropdown
+                value={selectedOption}
+                options={dropdownOptions}
+                // a policy is issued from a lead's quotation: choosing a line (mouse or keyboard) opens the leads
+                onChange={(e) => {
+                  setSelectedOption(null);
+                  handleCreatePolicy(e.value);
+                }}
+                placeholder={t("policies.createPolicy")}
+                dropdownIcon={<SvgAdd />}
+              />
+            )}
           </div>
         </div>
 

@@ -46,6 +46,40 @@
   flex-direction: column;
   gap: 6px;
 
+  // lists of records (languages, currencies, thresholds) edited as a small table
+  .admin__records {
+    max-height: 18rem;
+    overflow: auto;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 4px 6px;
+    }
+
+    td {
+      padding: 2px 6px;
+    }
+
+    .p-inputtext {
+      width: 100%;
+      min-width: 6rem;
+    }
+  }
+
+  // structured settings (lists of objects, maps) shown as indented JSON
+  .admin__json {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    white-space: pre;
+  }
+
   label {
     font-weight: 600;
   }

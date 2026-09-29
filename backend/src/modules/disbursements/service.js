@@ -78,7 +78,7 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29) RETURNING *`,
   [voucherNumber, payeeType, referrer?.id || client?.id || (insurer ? String(insurer.id) : null), payeeName, round2(num(b.amount)),
     b.paymentMode || (await getSetting('disbursements.default_payment_mode', 'check')), b.bankId || null, str(b.referenceNo), str(b.purpose || b.transactionDescription),
-    status, isoDate(b.voucherDate) || today(), txn, str(b.transactionCode), str(b.transactionDescription), str(b.departmentCode), str(b.branchCode), str(b.criteria),
+    status, isoDate(b.voucherDate) || (await today()), txn, str(b.transactionCode), str(b.transactionDescription), str(b.departmentCode), str(b.branchCode), str(b.criteria),
     str(b.customerCode) || (referrer ? referrer.id : null), client?.id || null, referrer?.id || str(b.referrerId), referrer?.name || str(b.referrerName),
     insurer?.id || null, insurer?.name || str(b.insurerName), policy?.id || null, policy?.policy_number || str(b.policyNumber),
     b.instrumentCurrency || (await getSetting('currency.default', 'PHP')), str(b.remarks), source, user?.id ?? null])).rows[0];
@@ -189,7 +189,7 @@ export async function createCheckbook(db, b, user) {
   const c = (await db.query(`INSERT INTO checkbooks(invoice_list_id, disbursement_id, customer_code, customer_name, main_account, instrument_book_id, instrument_no, instrument_date,
       totale_amount, status, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'Pending',$10) RETURNING *`,
   [inv?.id || null, disbursementId, str(b.customerCode) || inv?.customer_code || null, str(b.customerName), str(b.mainAccount), str(b.instrumentBookId), str(b.instrumentNo),
-    isoDate(b.instrumentDate) || today(), amount, user.id])).rows[0];
+    isoDate(b.instrumentDate) || (await today()), amount, user.id])).rows[0];
   if (inv) await db.query('UPDATE invoice_lists SET status = \'in-voucher\', disbursement_id = COALESCE(disbursement_id, $2), updated_at = now() WHERE id = $1', [inv.id, disbursementId]);
   return c;
 }
