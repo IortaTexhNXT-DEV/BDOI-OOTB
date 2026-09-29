@@ -12,7 +12,7 @@ import CustomToast from "../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
 import { useFormik } from "formik";
-import { AuthorizedSignatureOptions } from "./mock";
+import useSignatoryOptions from "../utils/useSignatoryOptions";
 import { postOrderSummaryMiddleware } from "./store/orderSummaryMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuotationMiddleware, updateQuotationMiddleware } from "../Store/quotationMiddleware";
@@ -66,6 +66,8 @@ const OrderSummary = () => {
   
   const isEditMode = currentQuoteCreation?.isEditMode || false;
   const existingOrderSummary = currentQuoteCreation?.orderSummary;
+  // Authorised signatories from the Signatories master
+  const signatoryOptions = useSignatoryOptions(existingOrderSummary?.authorizedSignature);
   
   // Use useMemo to calculate order summary values without causing re-renders
   const calculatedOrderSummary = useMemo(() => {
@@ -169,7 +171,7 @@ const OrderSummary = () => {
         Discount: existingOrderSummary.discount || "",
         NCD: existingOrderSummary.NCD || "",
         GrossPremium: existingOrderSummary.grossPremium || "",
-        AuthorizedSignature: existingOrderSummary.authorizedSignature || AuthorizedSignatureOptions[0]?.value,
+        AuthorizedSignature: existingOrderSummary.authorizedSignature || signatoryOptions[0]?.value,
       };
     }
     
@@ -183,7 +185,7 @@ const OrderSummary = () => {
         Discount: calculatedOrderSummary.discount || "",
         NCD: calculatedOrderSummary.NCD || "",
         GrossPremium: calculatedOrderSummary.grossPremium || "",
-        AuthorizedSignature: AuthorizedSignatureOptions[0]?.value || "",
+        AuthorizedSignature: signatoryOptions[0]?.value || "",
       };
     }
     
@@ -303,7 +305,7 @@ const OrderSummary = () => {
             <DropdownField
               label={t("agent.authorizedSignature")}
               value={formik.values.AuthorizedSignature}
-              options={AuthorizedSignatureOptions}
+              options={signatoryOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);

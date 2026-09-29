@@ -5,7 +5,7 @@ import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { AuthorizedSignatureOptions } from "./mockdataforcoverDetails"; 
+import useSignatoryOptions from "../quoteModule/utils/useSignatoryOptions";
 import { useDispatch } from "react-redux";
 // import CardComponent from "../../../components/Cardcomponent";
 import { Accordion, AccordionTab } from "primereact/accordion";
@@ -66,6 +66,7 @@ const CQOrderSummary = ({ action, flow }) => {
       handleclick(values);
     },
   });
+  const signatoryOptions = useSignatoryOptions(formik.values.AuthorizedSignature);
 
   const handleDiscountChange = (amount) => {
     const newDiscount = Math.max(0, Math.min(discount + amount, 30));
@@ -172,7 +173,7 @@ const CQOrderSummary = ({ action, flow }) => {
             <DropdownField
               label="Authorized Signature"
               value={formik.values.AuthorizedSignature}
-              options={AuthorizedSignatureOptions}
+              options={signatoryOptions}
               onChange={(e) => {
                 console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);

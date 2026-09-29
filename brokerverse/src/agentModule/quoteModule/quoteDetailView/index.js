@@ -22,6 +22,7 @@ import { BASE_URL } from "../../../utility/constant";
 import authService from "../../../services/authService";
 import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
+import clientService from "../../../services/clientService";
 import { QuotationStatus } from "../../../utils/statusHelpers";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorsementCategories";
@@ -289,6 +290,24 @@ const QuoteDetailView = ({ action }) => {
     }
   }, [dispatch, quotationData?.leadRefId]);
 
+  // A quotation without a lead (e.g. a renewal of a seeded or uploaded policy) takes the assured from its client.
+  const [quoteClient, setQuoteClient] = useState(null);
+  useEffect(() => {
+    const clientId = quotationData?.clientId;
+    if (quotationData?.leadRefId || !clientId) {
+      setQuoteClient(null);
+      return undefined;
+    }
+    let active = true;
+    clientService.getClientById(clientId).then((response) => {
+      const payload = response?.success ? response.data?.data || response.data : null;
+      if (active) setQuoteClient(payload || null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [quotationData?.leadRefId, quotationData?.clientId]);
+
   const handleclick = async () => {
     const quotationId = quotationData?.quotationId;
     const quotationStatus = quotationData?.quotationStatus;
@@ -335,6 +354,19 @@ const QuoteDetailView = ({ action }) => {
   };
   const handleLeadNavigation = () => {
     navigate("/agent/leadlisting");
+  };
+
+  // Assured: the quotation's lead, else (no lead) its client. The lead in the store is used only for a quote that has a lead.
+  const quoteLead = quotationData?.lead?.firstName || quotationData?.lead?.emailId
+    ? quotationData.lead
+    : quotationData?.leadRefId
+    ? currentLeadDetails
+    : null;
+  const joinName = (p) => [p?.firstName, p?.lastName].filter(Boolean).join(" ");
+  const assured = {
+    name: joinName(quoteLead) || quoteClient?.displayName || joinName(quoteClient) || quoteClient?.companyName || "",
+    email: quoteLead?.emailId || quoteClient?.emailId || quoteClient?.email || "",
+    phone: quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
   };
 
   // Send quote for customer approval
@@ -516,10 +548,13 @@ const QuoteDetailView = ({ action }) => {
       >
         <SvgLeftArrow />
         <div className="left_arrow_text">
-          {t("quoteDetailView.leadIdColon")}{" "}
-          {currentLeadDetails?.generatedLeadId ||
-            quotationData?.leadRefId ||
-            "N/A"}
+          {!quotationData?.leadRefId && quoteClient
+            ? [assured.name, `${t("agent.clientIdLabel")} ${quoteClient.clientCode || quoteClient.generatedClientId || ""}`]
+                .filter(Boolean)
+                .join(" / ")
+            : `${t("quoteDetailView.leadIdColon")} ${
+                quoteLead?.generatedLeadId || quotationData?.leadRefId || "N/A"
+              }`}
         </div>
       </div>
       <Card className="mt-4">
@@ -963,23 +998,19 @@ const QuoteDetailView = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.name")}</label>
                 <label className="alpha_text">
-                  {quotationData?.lead?.firstName && quotationData?.lead?.lastName
-                    ? `${quotationData.lead.firstName} ${quotationData.lead.lastName}`
-                    : currentLeadDetails?.firstName && currentLeadDetails?.lastName
-                    ? `${currentLeadDetails.firstName} ${currentLeadDetails.lastName}`
-                    : "N/A"}
+                  {assured.name || "N/A"}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.emailId")}</label>
                 <label className="alpha_text">
-                  {quotationData?.lead?.emailId || currentLeadDetails?.emailId || "N/A"}
+                  {assured.email || "N/A"}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.contactNumber")}</label>
                 <label className="alpha_text">
-                  {quotationData?.lead?.contactNumber || currentLeadDetails?.contactNumber || "N/A"}
+                  {assured.phone || "N/A"}
                 </label>
               </div>
             </div>

@@ -72,20 +72,43 @@ const PaymentConfirmation = () => {
       .catch(() => {});
   }, []);
 
-  const policy = state?.policy || state?.policyData || policydetailedlist || {};
+  // The policy itself (GET /policies/:id) is the source of the premium breakdown and the client shown in the header.
+  // Pages that open this one without a full policy in the navigation state (e.g. the finance "Premium payment to
+  // verify" notification) otherwise only had the gross premium and the internal client id.
+  const [loadedPolicy, setLoadedPolicy] = useState(null);
+  useEffect(() => {
+    if (!policyId) return undefined;
+    let active = true;
+    policyService.getPolicyDetails(policyId).then((r) => {
+      const data = r?.success ? r.data?.data || r.data : null;
+      if (active && data && (data.policyId || data.id)) setLoadedPolicy(data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [policyId]);
+
+  const statePolicy = state?.policy || state?.policyData || {};
+  const reduxPolicy = policydetailedlist && (!policyId || policydetailedlist.policyId === policyId) ? policydetailedlist : {};
+  const policy = loadedPolicy || (statePolicy.policyId || statePolicy.id || !policyId ? statePolicy : reduxPolicy) || {};
+  const quote = policy.quotation || state?.quotation || {};
   const pick = (...vals) => vals.find((v) => v !== undefined && v !== null && v !== "") ?? 0;
   const premium = {
-    net: pick(policy.netPremium, state?.netPremium, state?.quotation?.netPremium),
-    dst: pick(policy.documentaryStampTax, state?.quotation?.documentaryStampTax),
-    vat: pick(policy.valueAddedTax, state?.quotation?.valueAddedTax),
-    lgt: pick(policy.localGovernmentTax, state?.quotation?.localGovernmentTax),
-    others: pick(policy.accountPremiumOthers, state?.quotation?.accountPremiumOthers),
-    discount: pick(policy.discount, state?.quotation?.discount, state?.quotation?.firePremiumDetails?.totalDiscount),
-    gross: pick(policy.grossPremium, state?.grossPremium, state?.GrossPremium, state?.quotation?.grossPremium),
+    net: pick(policy.netPremium, quote.netPremium, state?.netPremium),
+    dst: pick(policy.documentaryStampTax, quote.documentaryStampTax),
+    vat: pick(policy.valueAddedTax, quote.valueAddedTax),
+    lgt: pick(policy.localGovernmentTax, quote.localGovernmentTax),
+    others: pick(policy.accountPremiumOthers, quote.accountPremiumOthers),
+    discount: pick(policy.discount, quote.discount, quote.firePremiumDetails?.totalDiscount),
+    gross: pick(policy.grossPremium, state?.grossPremium, state?.GrossPremium, quote.grossPremium),
   };
 
-  const clientName = state?.clientName || state?.ClientName || policy.insuredName || policy.ClientName;
-  const clientCode = state?.clientNumber || policy.client?.clientCode || policy.ClientCode;
+  // Client code (CL-2026-00001) and name; the internal client id is never shown.
+  const client = policy.client || {};
+  const internalClientId = policy.clientId || client.clientId || client.id || state?.clientId;
+  const clientName = pick(client.displayName, policy.insuredName, policy.ClientName, state?.clientName, state?.ClientName) || null;
+  const stateCode = state?.clientNumber && state.clientNumber !== internalClientId ? state.clientNumber : null;
+  const clientCode = pick(client.clientCode, client.generatedClientId, policy.clientCode, stateCode) || null;
   const displayTitle = useMemo(() => {
     const parts = [];
     if (clientName) parts.push(clientName);
