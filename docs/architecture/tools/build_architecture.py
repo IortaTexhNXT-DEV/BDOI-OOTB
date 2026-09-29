@@ -463,7 +463,7 @@ def gen_db_facts():
             ['Extensions', ', '.join(f'{e["name"]} {e["version"]}' for e in s['extensions'])],
             ['Application functions', ', '.join(s['functions'])],
             ['Triggers', ', '.join(f'{x["name"]} ({x["table"]})' for x in s['triggers'])],
-            ['Views / materialised views', 'none'],
+            ['Views / materialised views', ', '.join(s.get('views') or []) or 'none'],
             ['Migrations applied', f'{len(s["migrations"])} ({s["migrations"][0]["name"]} to {s["migrations"][-1]["name"]})'],
             ['Application settings (app_settings)', f'{sum(s["settingsByGroup"].values())} keys in {len(s["settingsByGroup"])} groups'],
             ['Scheduled jobs (scheduled_jobs)', str(len(s['scheduledJobs']))],
