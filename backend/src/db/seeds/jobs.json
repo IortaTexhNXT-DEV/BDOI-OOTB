@@ -61,5 +61,12 @@
     "description": "E-mail and notify clients about premiums falling due",
     "cron": "0 8 * * *",
     "handler": "collectionReminders"
+  },
+  {
+    "code": "housekeeping",
+    "name": "Housekeeping",
+    "description": "Purge old job runs, sent e-mails, sign-in history, expired sessions and reset codes, read notifications and completed queue jobs after the retention periods in System Settings (Housekeeping tab); the audit trail is kept",
+    "cron": "45 2 * * *",
+    "handler": "housekeeping"
   }
 ]

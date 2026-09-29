@@ -559,8 +559,8 @@ export async function reverseCollection(id, collectionId, body, user) {
 export async function receivableSummary() {
   const r = await one(`SELECT COALESCE((SELECT sum(amount) FROM direct_bill_items WHERE status = 'unbilled'), 0) AS unbilled,
       COALESCE((SELECT sum(balance) FROM commission_debit_notes WHERE status IN ('open','partial')), 0) AS billed,
-      COALESCE((SELECT sum(balance) FROM commission_debit_notes WHERE status IN ('open','partial') AND due_date < current_date), 0) AS overdue,
-      (SELECT count(*)::int FROM commission_debit_notes WHERE status = 'for-approval') AS pending_approval`);
+      COALESCE((SELECT sum(balance) FROM commission_debit_notes WHERE status IN ('open','partial') AND due_date < $1::date), 0) AS overdue,
+      (SELECT count(*)::int FROM commission_debit_notes WHERE status = 'for-approval') AS pending_approval`, [await today()]);
   return { unbilled: round2(r.unbilled), billedOutstanding: round2(r.billed), overdue: round2(r.overdue), total: round2(Number(r.unbilled) + Number(r.billed)), pendingApproval: r.pending_approval };
 }
 

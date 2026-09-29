@@ -17,31 +17,31 @@ async function thresholds() {
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90];
   const levels = (await getSetting('collections.overdue_levels', [30, 60])) || [30, 60];
   return { b1: Number(buckets[0] ?? 30), b2: Number(buckets[1] ?? 60), b3: Number(buckets[2] ?? 90), l1: Number(levels[0] ?? 30), l2: Number(levels[1] ?? 60),
-    window: Number(await getSetting('collections.current_window_days', 7)) };
+    window: Number(await getSetting('collections.current_window_days', 7)), today: await today() };
 }
 
-/** Base query; $1..$6 = b1, b2, b3, l1, l2, window. */
+/** Base query; $1..$7 = b1, b2, b3, l1, l2, window, today (business date in general.timezone, not the DB current_date). */
 const BASE = `SELECT * FROM (SELECT ci.*, r.bill_number, r.amount, r.balance, r.due_date, r.status AS receivable_status, r.net_premium, r.vat, r.dst, r.lgt, r.other_charges,
-    r.discount, r.source AS receivable_source, r.currency, GREATEST(current_date - r.due_date, 0) AS dpd,
+    r.discount, r.source AS receivable_source, r.currency, GREATEST($7::date - r.due_date, 0) AS dpd,
     p.policy_number, p.status AS policy_status, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
     ic.name AS insurer_name, pr.name AS product_name,
     (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'policy' AND rp.entity_id = p.id AND rp.status = 'active') AS participant_count,
     CASE WHEN r.balance <= 0 OR r.status IN ('paid','written-off') THEN 'Paid'
          WHEN ci.escalated_at IS NOT NULL THEN 'Escalated'
-         WHEN ci.commitment_date IS NOT NULL AND ci.commitment_date >= current_date THEN 'Committed'
-         WHEN current_date > r.due_date THEN 'Overdue'
+         WHEN ci.commitment_date IS NOT NULL AND ci.commitment_date >= $7::date THEN 'Committed'
+         WHEN $7::date > r.due_date THEN 'Overdue'
          WHEN r.balance < r.amount THEN 'PartiallyPaid'
-         WHEN r.due_date - current_date <= $6 THEN 'Current'
+         WHEN r.due_date - $7::date <= $6 THEN 'Current'
          ELSE 'Pending' END AS collection_status,
-    CASE WHEN current_date <= r.due_date OR r.balance <= 0 THEN 0 WHEN current_date - r.due_date <= $4 THEN 1 WHEN current_date - r.due_date <= $5 THEN 2 ELSE 3 END AS overdue_level,
-    CASE WHEN current_date <= r.due_date THEN r.balance ELSE 0 END AS current_amount,
-    CASE WHEN current_date - r.due_date BETWEEN 1 AND $1 THEN r.balance ELSE 0 END AS b1_amount,
-    CASE WHEN current_date - r.due_date BETWEEN $1 + 1 AND $2 THEN r.balance ELSE 0 END AS b2_amount,
-    CASE WHEN current_date - r.due_date BETWEEN $2 + 1 AND $3 THEN r.balance ELSE 0 END AS b3_amount,
-    CASE WHEN current_date - r.due_date > $3 THEN r.balance ELSE 0 END AS b4_amount
+    CASE WHEN $7::date <= r.due_date OR r.balance <= 0 THEN 0 WHEN $7::date - r.due_date <= $4 THEN 1 WHEN $7::date - r.due_date <= $5 THEN 2 ELSE 3 END AS overdue_level,
+    CASE WHEN $7::date <= r.due_date THEN r.balance ELSE 0 END AS current_amount,
+    CASE WHEN $7::date - r.due_date BETWEEN 1 AND $1 THEN r.balance ELSE 0 END AS b1_amount,
+    CASE WHEN $7::date - r.due_date BETWEEN $1 + 1 AND $2 THEN r.balance ELSE 0 END AS b2_amount,
+    CASE WHEN $7::date - r.due_date BETWEEN $2 + 1 AND $3 THEN r.balance ELSE 0 END AS b3_amount,
+    CASE WHEN $7::date - r.due_date > $3 THEN r.balance ELSE 0 END AS b4_amount
   FROM collection_items ci JOIN receivables r ON r.id = ci.receivable_id LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id) x`;
-const baseParams = (t) => [t.b1, t.b2, t.b3, t.l1, t.l2, t.window];
+const baseParams = (t) => [t.b1, t.b2, t.b3, t.l1, t.l2, t.window, t.today];
 
 const SORTS = { dueDate: 'due_date', daysPastDue: 'dpd', outstandingAmount: 'balance', overdueLevel: 'overdue_level', collectionStatus: 'collection_status', policyNumber: 'policy_number', client: 'display_name' };
 
@@ -78,7 +78,7 @@ export async function coInsuranceRows(db, x) {
 
 function filters(q) {
   const where = []; const p = [];
-  const add = (sql, v) => { p.push(v); where.push(sql.replaceAll('?', `$${p.length + 6}`)); };
+  const add = (sql, v) => { p.push(v); where.push(sql.replaceAll('?', `$${p.length + 7}`)); };
   if (q.status) add('collection_status = ?', q.status);
   else if (String(q.includePaid) !== 'true') where.push('collection_status <> \'Paid\'');
   if (q.overdueLevel) add('overdue_level = ?::int', Number(q.overdueLevel));
@@ -101,7 +101,7 @@ export async function listCollections(db, q, pg) {
 
 export async function getCollection(db, id) {
   const t = await thresholds();
-  const x = (await db.query(`SELECT * FROM (${BASE}) y WHERE id = $7 OR receivable_id = $7`, [...baseParams(t), id])).rows[0];
+  const x = (await db.query(`SELECT * FROM (${BASE}) y WHERE id = $8 OR receivable_id = $8`, [...baseParams(t), id])).rows[0];
   if (!x) throw notFound('Collection not found');
   const actions = (await db.query('SELECT * FROM collection_actions WHERE collection_id = $1 ORDER BY action_date DESC', [x.id])).rows;
   const pays = (await db.query(`SELECT a.*, rc.receipt_number, rc.remarks FROM receipt_applications a LEFT JOIN receipts rc ON rc.id = a.receipt_id
@@ -168,8 +168,8 @@ export async function sendDueDateReminders(db, user) {
   const t = await thresholds();
   const before = Number(await getSetting('collections.reminder_days_before', 7));
   const repeat = Number(await getSetting('collections.reminder_repeat_days', 7));
-  const rows = (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - current_date <= $7
-    AND (last_reminder_at IS NULL OR last_reminder_at < now() - ($8 || ' days')::interval)`, [...baseParams(t), before, String(repeat)])).rows;
+  const rows = (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - $7::date <= $8
+    AND (last_reminder_at IS NULL OR last_reminder_at < now() - ($9 || ' days')::interval)`, [...baseParams(t), before, String(repeat)])).rows;
   const subjectTpl = await getSetting('collections.email_subject');
   const bodyTpl = await getSetting('collections.email_template');
   let emails = 0; let notifications = 0; const skipped = [];

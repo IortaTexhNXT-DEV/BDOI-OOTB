@@ -217,7 +217,7 @@ export async function trialBalance(db, q) {
 }
 
 export async function listPeriods(db) {
-  const rows = (await db.query(`SELECT to_char(d, 'YYYY-MM') AS period FROM generate_series(date_trunc('month', current_date) - interval '11 months', date_trunc('month', current_date), interval '1 month') d`)).rows;
+  const rows = (await db.query(`SELECT to_char(d, 'YYYY-MM') AS period FROM generate_series(date_trunc('month', $1::date) - interval '11 months', date_trunc('month', $1::date), interval '1 month') d`, [await today()])).rows;
   const stored = new Map((await db.query('SELECT * FROM accounting_periods')).rows.map((p) => [p.period, p]));
   const all = new Set([...rows.map((r) => r.period), ...stored.keys()]);
   return [...all].sort().reverse().map((period) => {

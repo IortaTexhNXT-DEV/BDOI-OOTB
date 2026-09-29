@@ -15,7 +15,7 @@ const short = (v) => (v ? JSON.stringify(v).slice(0, 160) : "");
 const AuditTrail = () => {
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
-  const [filters, setFilters] = useState({ entity: "", entityId: "", username: "" });
+  const [filters, setFilters] = useState({ entity: "", entityId: "", username: "", from: "", to: "" });
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -33,10 +33,10 @@ const AuditTrail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const field = (key, label) => (
+  const field = (key, label, type = "text") => (
     <div className="admin__field">
       <label htmlFor={`audit-${key}`}>{label}</label>
-      <InputText id={`audit-${key}`} value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })} />
+      <InputText id={`audit-${key}`} type={type} value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })} />
     </div>
   );
 
@@ -54,6 +54,8 @@ const AuditTrail = () => {
         {field("entity", "Record type")}
         {field("entityId", "Record ID")}
         {field("username", "User")}
+        {field("from", "From date", "date")}
+        {field("to", "To date", "date")}
         <Button label="Search" icon="pi pi-search" onClick={load} />
       </div>
       <DataTable value={rows} loading={loading} paginator rows={20} size="small" stripedRows emptyMessage="No entries">

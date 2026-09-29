@@ -2,6 +2,7 @@
 import { getSetting } from '../../lib/settings.js';
 import { notFound } from '../../lib/errors.js';
 import { isoDate, round2 } from '../accounting/lib/http.js';
+import { today } from '../../lib/dates.js';
 
 // A premium bill cancelled because the policy moved to direct bill (the client pays the insurer) is DIRECT, not PAID;
 // any other cancelled bill is CANCELLED (D117).
@@ -76,8 +77,8 @@ export async function openItems(db, q, user) {
     COALESCE(c.client_code, l.lead_number) AS client_code, ic.name AS insurer FROM quotes q LEFT JOIN clients c ON c.id = q.client_id LEFT JOIN leads l ON l.id = q.lead_id
     LEFT JOIN insurance_companies ic ON ic.id = q.insurance_company_id WHERE q.status IN ('draft','quoted','sent') AND ($1::text IS NULL OR q.agent_user_id = $1 OR q.created_by = $1) ORDER BY q.created_at DESC LIMIT 200`, [uid])).rows;
   const expiring = (await db.query(`SELECT p.id, p.policy_number, p.expiry_date, p.premium_total, c.client_code, c.display_name, ic.name AS insurer FROM policies p LEFT JOIN clients c ON c.id = p.client_id
-    LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.status IN ('issued','active') AND p.expiry_date BETWEEN current_date AND current_date + $2::int
-    AND ($1::text IS NULL OR p.owner_user_id = $1) ORDER BY p.expiry_date LIMIT 200`, [uid, days])).rows;
+    LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.status IN ('issued','active') AND p.expiry_date BETWEEN $3::date AND $3::date + $2::int
+    AND ($1::text IS NULL OR p.owner_user_id = $1) ORDER BY p.expiry_date LIMIT 200`, [uid, days, await today()])).rows;
   const items = [
     ...pending.map((r) => ({ id: r.id, type: 'payment', status: 'Pending Payments', name: r.display_name, clientId: r.client_code, policyId: r.policy_id, policyNo: r.policy_number, amount: money(r.balance), amountValue: Number(r.balance), dueDate: r.due_date, insurer: r.insurer })),
     ...renewals.map((r) => ({ id: r.id, type: 'renewal', status: 'Renewal Request', name: r.display_name, clientId: r.client_code, policyId: r.policy_id, policyNo: r.policy_number, renewalDate: r.due_date, renewalStatus: r.renewal_status, insurer: r.insurer })),

@@ -14,9 +14,26 @@ export async function pendingMigrations() {
   return files.filter((f) => !done.has(f));
 }
 
-export async function migrate({ reset = false, log = console.log } = {}) {
+/**
+ * Advisory-lock key of the migrate step (int4 pair). Several API instances starting together (and `npm run migrate`)
+ * take this session lock first, so only one applies the pending migrations; the others wait, then find nothing to do.
+ */
+export const MIGRATION_LOCK = "hashtext('brokerverse.migrate'), hashtext('schema_migrations')";
+
+export async function migrate({ reset = false, log = console.log, lockTimeoutMs = Number(process.env.MIGRATION_LOCK_TIMEOUT_MS || 600000) } = {}) {
   const client = await pool.connect();
+  let locked = false;
   try {
+    // Wait for another instance's migrate step (bounded by lockTimeoutMs, default 10 minutes).
+    await client.query(`SET lock_timeout = ${Math.max(0, Math.floor(lockTimeoutMs))}`);
+    const t0 = Date.now();
+    if (!(await client.query(`SELECT pg_try_advisory_lock(${MIGRATION_LOCK}) AS ok`)).rows[0].ok) {
+      log('waiting for another instance to finish migrating');
+      await client.query(`SELECT pg_advisory_lock(${MIGRATION_LOCK})`);
+      log(`migration lock acquired after ${Date.now() - t0} ms`);
+    }
+    locked = true;
+    await client.query('RESET lock_timeout');
     if (reset) {
       await client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
       log('schema reset');
@@ -40,6 +57,8 @@ export async function migrate({ reset = false, log = console.log } = {}) {
       }
     }
   } finally {
+    await client.query('RESET lock_timeout').catch(() => {});
+    if (locked) await client.query(`SELECT pg_advisory_unlock(${MIGRATION_LOCK})`).catch(() => {});
     client.release();
   }
 }

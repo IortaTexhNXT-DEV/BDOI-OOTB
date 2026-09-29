@@ -117,7 +117,7 @@ export async function normalizeParams(query, raw = {}) {
 
 async function extraValues(query) {
   const out = [];
-  for (const e of query.extras || []) out.push((await getSetting(e.key, e.fallback)) ?? e.fallback);
+  for (const e of query.extras || []) out.push(e.today ? isoInZone(new Date(), await businessTimeZone()) : (await getSetting(e.key, e.fallback)) ?? e.fallback);
   return out;
 }
 

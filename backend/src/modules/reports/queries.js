@@ -14,6 +14,8 @@ import { BANK_REC_QUERIES } from './bankRecQueries.js';
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
 const setting = (key, fallback, type) => ({ key, fallback, type });
+/** An extra positional parameter holding today's business date (general.timezone), used instead of the database current_date. */
+const businessToday = { today: true, type: 'date' };
 
 // Standard dimension columns: agent (policy owner), insurer, branch (agent's branch), client, product
 const POLICY_JOINS = `LEFT JOIN clients c ON c.id = p.client_id
@@ -49,14 +51,14 @@ const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", p.cre
 const claims = `SELECT cl.claim_number AS "claimNumber", p.policy_number AS "policyNumber", ${POLICY_DIMS},
     cl.loss_date AS "lossDate", cl.reported_date AS "reportedDate", cl.loss_type AS "lossType", cl.status,
     cl.estimate_amount AS "estimateAmount", cl.approved_amount AS "approvedAmount", cl.settled_amount AS "settledAmount",
-    (COALESCE(cl.settled_at::date, current_date) - cl.reported_date) AS "ageDays",
-    rpt_age_bucket(COALESCE(cl.settled_at::date, current_date) - cl.reported_date, $3::int[]) AS "ageBucket"
+    (COALESCE(cl.settled_at::date, $7::date) - cl.reported_date) AS "ageDays",
+    rpt_age_bucket(COALESCE(cl.settled_at::date, $7::date) - cl.reported_date, $3::int[]) AS "ageBucket"
   FROM claims cl JOIN policies p ON p.id = cl.policy_id ${POLICY_JOINS}
   WHERE cl.reported_date BETWEEN $1 AND $2`;
 const claimExtras = [setting('reports.claim_ageing_buckets', [30, 60, 90, 180], 'int[]'),
   setting('reports.claim_open_statuses', ['registered', 'in-review', 'approved'], 'text[]'),
   setting('reports.claim_settled_statuses', ['settled', 'closed'], 'text[]'),
-  setting('reports.claim_rejected_statuses', ['rejected'], 'text[]')];
+  setting('reports.claim_rejected_statuses', ['rejected'], 'text[]'), businessToday];
 
 const receivables = `SELECT rv.bill_number AS "billNumber", rv.created_at::date AS "billDate", rv.due_date AS "dueDate",
     p.policy_number AS "policyNumber", ${POLICY_DIMS},

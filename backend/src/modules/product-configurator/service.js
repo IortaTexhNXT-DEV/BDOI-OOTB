@@ -376,9 +376,9 @@ export async function analytics() {
                FROM claims cl JOIN policies pol ON pol.id = cl.policy_id WHERE cl.status <> 'rejected' GROUP BY pol.product_id)
     SELECT p.product_id, p.name, p.line, count(*)::int AS policies, COALESCE(sum(p.premium_total), 0) AS premium, COALESCE(sum(p.commission_amount), 0) AS commission,
            COALESCE(max(c.incurred), 0) AS incurred,
-           COALESCE(sum(p.premium_total) FILTER (WHERE p.inception_date > current_date - 365), 0) AS last12,
-           COALESCE(sum(p.premium_total) FILTER (WHERE p.inception_date <= current_date - 365 AND p.inception_date > current_date - 730), 0) AS prev12
-    FROM p LEFT JOIN c ON c.product_id = p.product_id GROUP BY p.product_id, p.name, p.line ORDER BY premium DESC`);
+           COALESCE(sum(p.premium_total) FILTER (WHERE p.inception_date > $1::date - 365), 0) AS last12,
+           COALESCE(sum(p.premium_total) FILTER (WHERE p.inception_date <= $1::date - 365 AND p.inception_date > $1::date - 730), 0) AS prev12
+    FROM p LEFT JOIN c ON c.product_id = p.product_id GROUP BY p.product_id, p.name, p.line ORDER BY premium DESC`, [await today()]);
   const topProducts = top.map((r) => ({
     productId: r.product_id, productName: r.name, totalPolicies: r.policies, totalPremium: round2(r.premium), avgPremium: r.policies ? round2(r.premium / r.policies) : 0,
     lossRatio: r.premium ? round2((r.incurred / r.premium) * 100) : 0, profitMargin: r.premium ? round2(((r.premium - r.incurred - r.commission) / r.premium) * 100) : 0,
@@ -412,7 +412,7 @@ export async function dashboard() {
   const byCategory = await many('SELECT COALESCE(category, \'Other\') AS category, count(*)::int AS n FROM product_templates WHERE status <> \'Retired\' GROUP BY 1 ORDER BY 2 DESC');
   const comps = await many('SELECT kind, count(*)::int AS n FROM product_components WHERE status = \'Active\' GROUP BY kind');
   const recent = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t ORDER BY t.updated_at DESC LIMIT 5`);
-  const expiring = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t WHERE t.status = 'Active' AND t.expiry_date BETWEEN current_date AND current_date + $1::int ORDER BY t.expiry_date`, [Number(await getSetting('product.expiry_warning_days', 60)) || 0]);
+  const expiring = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t WHERE t.status = 'Active' AND t.expiry_date BETWEEN $2::date AND $2::date + $1::int ORDER BY t.expiry_date`, [Number(await getSetting('product.expiry_warning_days', 60)) || 0, await today()]);
   const count = (s) => byStatus.find((x) => x.status === s)?.n || 0;
   const a = await analytics();
   return {

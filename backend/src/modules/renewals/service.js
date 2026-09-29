@@ -144,7 +144,7 @@ export async function listRenewals(q, pg) {
       return labels[t] ? t : Object.entries(labels).find(([, l]) => String(l).toLowerCase() === t.toLowerCase())?.[0] || t.toLowerCase();
     });
     if (codes.includes('open')) codes.push(...OPEN);
-    if (codes.includes('in grace period')) add('r.status = ANY(?) AND p.expiry_date < current_date', OPEN);
+    if (codes.includes('in grace period')) add('r.status = ANY(?) AND p.expiry_date < ?::date', OPEN, await today());
     else add('r.status = ANY(?)', codes);
   }
   if (q.openOnly === 'true' || q.open === 'true') add('r.status = ANY(?)', OPEN);
@@ -414,7 +414,7 @@ export async function lapseRenewal(id, user, reason) {
   const r = await loadRow(id);
   if (!OPEN.includes(r.status)) throw conflict(`Renewal is ${r.status}; it cannot be lapsed`);
   await query(`UPDATE renewals SET status = 'lapsed', lapse_reason = $2, lapsed_at = now(), updated_at = now() WHERE id = $1`, [r.id, reason]);
-  await query('UPDATE policies SET status = \'expired\', updated_at = now() WHERE id = $1 AND expiry_date < current_date AND status IN (\'active\', \'issued\')', [r.policy_id]);
+  await query('UPDATE policies SET status = \'expired\', updated_at = now() WHERE id = $1 AND expiry_date < $2::date AND status IN (\'active\', \'issued\')', [r.policy_id, await today()]);
   await activity(null, r.id, user, { type: 'Lapsed', description: reason });
   if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'alert', title: `Policy lapsed: ${r.policy_number}`, message: reason, link: '/renewal/lapse-management', entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
@@ -440,12 +440,13 @@ export async function reinstateRenewal(id, user, note) {
 export async function refreshPipeline(user = null) {
   const days = Number(await getSetting('renewals.pipeline_days', 90));
   const grace = Number(await getSetting('renewals.grace_period_days', 30));
+  const now = await today(); // business date (general.timezone), not the database server's current_date
   const due = await many(`SELECT p.id FROM policies p WHERE p.status IN ('active', 'issued') AND p.renewed_to IS NULL
-    AND p.expiry_date BETWEEN current_date - $2::int AND current_date + $1::int
-    AND NOT EXISTS (SELECT 1 FROM renewals r WHERE r.policy_id = p.id) ORDER BY p.expiry_date`, [days, grace]);
+    AND p.expiry_date BETWEEN $3::date - $2::int AND $3::date + $1::int
+    AND NOT EXISTS (SELECT 1 FROM renewals r WHERE r.policy_id = p.id) ORDER BY p.expiry_date`, [days, grace, now]);
   let created = 0;
   for (const p of due) { if ((await ensureRenewal(p.id, user)).created) created += 1; }
-  const stale = await many(`SELECT r.id FROM renewals r JOIN policies p ON p.id = r.policy_id WHERE r.status = ANY($1) AND p.expiry_date < current_date - $2::int`, [OPEN, grace]);
+  const stale = await many(`SELECT r.id FROM renewals r JOIN policies p ON p.id = r.policy_id WHERE r.status = ANY($1) AND p.expiry_date < $3::date - $2::int`, [OPEN, grace, now]);
   for (const s of stale) await lapseRenewal(s.id, user, `Not renewed within the ${grace}-day grace period`);
   return { created, lapsed: stale.length };
 }

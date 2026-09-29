@@ -52,6 +52,8 @@ const Schedules = () => {
   const [runs, setRuns] = useState(null);
   const [edit, setEdit] = useState(null);
   const [busy, setBusy] = useState("");
+  // Cron expressions are read in the configured business time zone (general.timezone, e.g. Asia/Manila)
+  const timeZone = jobs.find((j) => j.timeZone)?.timeZone || "";
 
   const load = () =>
     adminService.getSchedules().then(setJobs).catch((e) => toast.current?.show({ severity: "error", summary: "Schedules", detail: e.message }));
@@ -106,14 +108,18 @@ const Schedules = () => {
       <div className="admin__header">
         <div>
           <h2>Schedules</h2>
-          <p>Jobs run automatically on the timetable below (server time). Run a job now to test it.</p>
+          <p>
+            Jobs run automatically on the timetable below, in the {timeZone ? <strong>{timeZone}</strong> : "configured"} time zone (System Settings, General).
+            Run a job now to test it.
+          </p>
         </div>
       </div>
       <DataTable value={jobs} dataKey="code" stripedRows size="small">
         <Column field="name" header="Job" />
         <Column field="description" header="What it does" />
-        <Column header="Schedule" body={(j) => <span title={j.cron}>{describeCron(j.cron)}</span>} />
+        <Column header={timeZone ? `Schedule (${timeZone})` : "Schedule"} body={(j) => <span title={j.cron}>{describeCron(j.cron)}</span>} />
         <Column header="Enabled" body={(j) => (j.enabled ? "Yes" : "No")} />
+        <Column header="Next run" body={(j) => (j.enabled && j.nextRunAt ? fmt(j.nextRunAt) : "-")} />
         <Column header="Last run" body={(j) => fmt(j.lastRunAt)} />
         <Column header="Last status" body={(j) => statusTag(j.lastStatus)} />
         <Column header="" body={actions} />
@@ -137,7 +143,7 @@ const Schedules = () => {
               <label htmlFor="cron">Schedule (cron)</label>
               <InputText id="cron" value={edit.cron} onChange={(e) => setEdit({ ...edit, cron: e.target.value })} />
               <small className="block mt-1">{describeCron(edit.cron)}</small>
-              <small>minute hour day month weekday, for example 0 6 * * * runs daily at 06:00</small>
+              <small>minute hour day month weekday, for example 0 6 * * * runs daily at 06:00{timeZone ? ` ${timeZone} time` : ""}</small>
             </div>
             <div className="admin__field admin__field--inline">
               <label htmlFor="enabled">Enabled</label>

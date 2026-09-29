@@ -101,7 +101,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   const split = await premiumSplit(db, policy, gross, breakdown, source);
   const { commission } = split;
-  const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays])).rows[0].d;
+  const due = dueDate || (await db.query('SELECT (GREATEST($1::date, $3::date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays, await today()])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
       net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by)
     VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,

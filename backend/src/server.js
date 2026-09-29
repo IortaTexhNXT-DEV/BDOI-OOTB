@@ -4,7 +4,7 @@ import { createApp, logger } from './app.js';
 import { migrate } from './db/migrate.js';
 import { seed } from './db/seed.js';
 import { pool } from './db/pool.js';
-import { startScheduler, stopScheduler } from './jobs/scheduler.js';
+import { startScheduler, stopScheduler, watchSchedules } from './jobs/scheduler.js';
 import { setReady } from './lib/health.js';
 
 try {
@@ -20,6 +20,7 @@ await seed({ log: (m) => logger.info(m) });
 const app = await createApp();
 const server = app.listen(config.port, () => logger.info(`BrokerVerse API listening on :${config.port}`));
 await startScheduler(logger);
+watchSchedules(logger); // other instances' schedule / time-zone edits are picked up within SCHEDULER_RELOAD_SECONDS
 setReady(true);
 
 /** Graceful shutdown: stop the scheduler, stop accepting connections and drain in-flight requests, then close the pool. */

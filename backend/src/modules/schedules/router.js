@@ -5,16 +5,20 @@ import { validate, z } from '../../lib/validate.js';
 import { many, one, query } from '../../db/pool.js';
 import { ok } from '../../lib/respond.js';
 import { audit } from '../../lib/audit.js';
-import { runJob, startScheduler } from '../../jobs/scheduler.js';
+import { nextRunOf, runJob, schedulerTimeZone, startScheduler } from '../../jobs/scheduler.js';
 
 const { router, define } = moduleRouter('Schedules', '/schedules');
 const admin = [requireAuth, requireRole('it-admin', 'ba', 'finance')];
-const row = (j) => ({ id: j.id, code: j.code, name: j.name, description: j.description, cron: j.cron, handler: j.handler, params: j.params, enabled: j.enabled, lastRunAt: j.last_run_at, lastStatus: j.last_status, updatedAt: j.updated_at });
+const row = (j, timeZone = null) => ({ id: j.id, code: j.code, name: j.name, description: j.description, cron: j.cron, handler: j.handler, params: j.params, enabled: j.enabled, lastRunAt: j.last_run_at, lastStatus: j.last_status, updatedAt: j.updated_at,
+  timeZone, nextRunAt: j.enabled ? nextRunOf(j.code) : null });
 
 define({
-  method: 'GET', path: '/', summary: 'Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)', screen: 'Master > Schedules', middleware: [requireAuth],
-  response: { success: true, data: [{ code: 'renewal-notices', cron: '0 6 * * *', enabled: true, lastStatus: 'success' }] },
-  handler: async (_req, res) => ok(res, (await many('SELECT * FROM scheduled_jobs ORDER BY id')).map(row)),
+  method: 'GET', path: '/', summary: 'Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)', screen: 'Master > Schedules', middleware: [requireAuth],
+  response: { success: true, timeZone: 'Asia/Manila', data: [{ code: 'renewal-notices', cron: '0 6 * * *', enabled: true, lastStatus: 'success', timeZone: 'Asia/Manila', nextRunAt: '2026-01-02T22:00:00.000Z' }] },
+  handler: async (_req, res) => {
+    const timeZone = await schedulerTimeZone();
+    ok(res, (await many('SELECT * FROM scheduled_jobs ORDER BY id')).map((j) => row(j, timeZone)), 'OK', { timeZone });
+  },
 });
 define({
   method: 'GET', path: '/:code/runs', summary: 'Run history of a job', screen: 'Master > Schedules > History', middleware: [requireAuth],
@@ -34,7 +38,7 @@ define({
     if (!r.rowCount) throw notFound('Job not found');
     await startScheduler(req.log || console);
     await audit(req, { entity: 'scheduled_job', entityId: req.params.code, action: 'update', after: b });
-    ok(res, row(r.rows[0]), 'Schedule updated');
+    ok(res, row(r.rows[0], await schedulerTimeZone()), 'Schedule updated');
   },
 });
 define({
