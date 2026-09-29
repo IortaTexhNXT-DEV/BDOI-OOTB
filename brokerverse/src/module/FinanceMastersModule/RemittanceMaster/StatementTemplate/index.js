@@ -15,6 +15,7 @@ import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
 import { deleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
 
 const ALL_COLUMNS = [
   { name: "Policy Number", code: "policyNo" },
@@ -126,8 +127,8 @@ const StatementTemplateMaster = () => {
     }
   });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this statement template?")) {
+  const handleDelete = async () => {
+    if (await confirmAction("Are you sure you want to delete this statement template?", { danger: true })) {
       deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
     }
   };

@@ -9,6 +9,9 @@ import InputTextField from "../../component/inputText";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import endorsementService from "../../../services/endorsementService";
 import s3Service from "../../../services/s3Service";
+import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
+import { notifyError } from "../../../utility/dialogs";
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -31,6 +34,11 @@ const EndorsementDetailedView = ({ action }) => {
     endorsementTypeIds.includes(5) ||
     endorsementData?.isCancelPolicy === true;
 
+  // Payment is due only for additional premium (D45). No change: nothing to pay. A return premium (negative change on
+  // a non-cancellation endorsement) is refunded by finance through a client refund payment voucher, not collected here.
+  const premiumDelta = Number(endorsementData?.premiumDelta ?? endorsementData?.summary?.premiumDelta ?? 0) || 0;
+  const paymentDue = !isCancelled && premiumDelta > 0;
+
   // Fetch endorsement data if not in state
   useEffect(() => {
     if (!endorsementData && endorsementId) {
@@ -43,11 +51,11 @@ const EndorsementDetailedView = ({ action }) => {
           if (response.success) {
             setEndorsementData(response.data);
           } else {
-            alert(t("endorsement.failedToLoadEndorsement") + " " + (response.error || ""));
+            notifyError(t("endorsement.failedToLoadEndorsement") + " " + (response.error || ""));
           }
         } catch (error) {
           console.error("Error fetching endorsement:", error);
-          alert(t("endorsement.errorLoadingEndorsement"));
+          notifyError(t("endorsement.errorLoadingEndorsement"));
         } finally {
           setLoading(false);
         }
@@ -84,7 +92,7 @@ const EndorsementDetailedView = ({ action }) => {
         endorsementData?.documentKey || endorsementData?.documentUrl;
 
       if (!documentUrl) {
-        alert(t("endorsement.documentNotAvailable"));
+        notifyError(t("endorsement.documentNotAvailable"));
         return;
       }
 
@@ -116,26 +124,14 @@ const EndorsementDetailedView = ({ action }) => {
       window.open(downloadUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
       console.error("Error opening document:", error);
-      alert(t("endorsement.errorLoadingDocument"));
+      notifyError(t("endorsement.errorLoadingDocument"));
     } finally {
       setDocumentLoading(false);
     }
   };
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
+  // Dates in the configured display format (System Settings general.date_format)
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
 
   if (loading) {
     return (
@@ -226,6 +222,27 @@ const EndorsementDetailedView = ({ action }) => {
             </div>
           </div>
 
+          {!isCancelled && (
+            <div className="grid mt-2">
+              <div className="col-12 md:col-6 lg:col-6">
+                <InputTextField
+                  label={t("endorsement.premiumChange")}
+                  value={`${premiumDelta > 0 ? "+" : ""}${formatCurrency(premiumDelta)}`}
+                  disabled={true}
+                />
+              </div>
+              <div className="col-12 md:col-6 lg:col-6 flex align-items-center">
+                <small data-testid="endorsement-premium-note">
+                  {premiumDelta > 0
+                    ? t("endorsement.additionalPremiumDue")
+                    : premiumDelta < 0
+                      ? t("endorsement.returnPremiumNote", { amount: formatCurrency(Math.abs(premiumDelta)) })
+                      : t("endorsement.noPremiumChange")}
+                </small>
+              </div>
+            </div>
+          )}
+
           <div className="detailed__endorsement__card__sub__title mt-2 mb-2">
             {t("endorsement.document")}
           </div>
@@ -264,7 +281,7 @@ const EndorsementDetailedView = ({ action }) => {
                   >
                     {t("endorsement.refundInitiate")}
                   </Button>
-                ) : (
+                ) : paymentDue ? (
                   <Button
                     className="complete__btn"
                     onClick={() => {
@@ -272,6 +289,10 @@ const EndorsementDetailedView = ({ action }) => {
                     }}
                   >
                     {t("endorsement.proceedToPayment")}
+                  </Button>
+                ) : (
+                  <Button className="complete__btn" onClick={handleCommonAction}>
+                    {t("endorsement.done")}
                   </Button>
                 )}
               </div>

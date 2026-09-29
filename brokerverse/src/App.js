@@ -9,6 +9,7 @@ import { isAuthenticated, getUserData } from "./utility/tokenManager";
 import { NotificationProvider } from "./context/NotificationContext";
 import { fetchSystemSettings } from "./module/SystemSettings/store/systemSettingsSlice";
 import { applyAppTitle } from "./utility/applySystemSettings";
+import AppDialogs from "./components/AppDialogs";
 
 const App = () => {
   const [authState, setAuthState] = useState(() => {
@@ -63,6 +64,7 @@ const App = () => {
   return (
     <NotificationProvider>
       <div className="App">
+        <AppDialogs />
         <Routes>
           <Route
             path="/login"

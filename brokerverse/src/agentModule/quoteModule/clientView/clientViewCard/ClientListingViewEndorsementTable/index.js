@@ -14,6 +14,7 @@ import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
 import endorsementService from "../../../../../services/endorsementService";
 import { Skeleton } from "primereact/skeleton";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import { notifyError } from "../../../../../utility/dialogs";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -170,7 +171,7 @@ const LeadListingAllTable = ({ clientId }) => {
     const endorsementRef = endorsementId || endorsementNumber;
 
     if (!policyId) {
-      alert("Policy reference missing for this endorsement.");
+      notifyError("Policy reference missing for this endorsement.");
       return;
     }
 

@@ -20,6 +20,7 @@ import authService from "../../../../services/authService";
 import { showError, showSuccess } from "../../../Remittance/shared";
 import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
 
 const TYPE = "remittance-notification-template";
 const toRow = (template) => ({
@@ -79,7 +80,7 @@ const NotificationMaster = () => {
   };
 
   const deleteTemplate = async (row) => {
-    if (!window.confirm(`Delete template ${row.templateName}?`)) return;
+    if (!(await confirmAction(`Delete template ${row.templateName}?`, { danger: true }))) return;
     try {
       await masterService.remove(TYPE, row.id);
       showSuccess(toast, `${row.templateName} deleted`);

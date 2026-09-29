@@ -18,6 +18,7 @@ import S3FileUpload from "../../../../components/S3FileUpload";
 import policyService from "../../../../services/policyService";
 import { useSelector } from "react-redux";
 import quotationService from "../../../../services/quotationService";
+import { notifyError, notifyWarn } from "../../../../utility/dialogs";
 
 const UploadPolicyCard = ({
   state,
@@ -113,7 +114,7 @@ const UploadPolicyCard = ({
     // Validate policy document upload
     if (!policyDocumentUrl) {
       setShowUploadError(true);
-      alert(t("agent.pleaseUploadPolicy"));
+      notifyWarn(t("agent.pleaseUploadPolicy"));
       // Scroll to upload section
       document
         .querySelector(".upload__policy__card__sub__title")
@@ -126,7 +127,7 @@ const UploadPolicyCard = ({
 
     // Validate policy form data
     if (!value.PolicyNumber || !value.InsuranceCompany) {
-      alert(t("agent.pleaseFillRequired"));
+      notifyWarn(t("agent.pleaseFillRequired"));
       return;
     }
 
@@ -177,7 +178,7 @@ const UploadPolicyCard = ({
 
     if (!quotationId) {
       console.error("❌ Quotation ID not found");
-      alert(t("agent.quotationIdMissing"));
+      notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
 
@@ -188,7 +189,7 @@ const UploadPolicyCard = ({
       resolvedPolicyData?.id;
 
     if (!existingPolicyId) {
-      alert(t("agent.policyNotFound"));
+      notifyError(t("agent.policyNotFound"));
       return;
     }
 
@@ -240,7 +241,7 @@ const UploadPolicyCard = ({
       navigate(`/agent/policydetail/${existingPolicyId}`, {});
     } catch (error) {
       console.error("Failed to update policy (Pay Later):", error);
-      alert(
+      notifyError(
         `Error: ${error.message || "Failed to process. Please try again."}`
       );
     }
@@ -249,7 +250,7 @@ const UploadPolicyCard = ({
     // Validate policy document upload
     if (!policyDocumentUrl) {
       setShowUploadError(true);
-      alert(t("agent.pleaseUploadPolicy"));
+      notifyWarn(t("agent.pleaseUploadPolicy"));
       // Scroll to upload section
       document
         .querySelector(".upload__policy__card__sub__title")
@@ -262,7 +263,7 @@ const UploadPolicyCard = ({
 
     // Validate policy form data
     if (!value.PolicyNumber || !value.InsuranceCompany) {
-      alert(t("agent.pleaseFillRequired"));
+      notifyWarn(t("agent.pleaseFillRequired"));
       return;
     }
 
@@ -313,7 +314,7 @@ const UploadPolicyCard = ({
 
     if (!quotationId) {
       console.error("❌ Quotation ID not found");
-      alert(t("agent.quotationIdMissing"));
+      notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
 
@@ -323,7 +324,7 @@ const UploadPolicyCard = ({
       resolvedPolicyData?.id;
 
     if (!existingPolicyId) {
-      alert(t("agent.policyReferenceMissing"));
+      notifyWarn(t("agent.policyReferenceMissing"));
       return;
     }
 
@@ -789,7 +790,7 @@ const UploadPolicyCard = ({
                 "❌ Failed to extract URL. Full object:",
                 JSON.stringify(url, null, 2)
               );
-              alert(t("agent.uploadUrlFailed"));
+              notifyError(t("agent.uploadUrlFailed"));
               return;
             }
 
@@ -800,7 +801,7 @@ const UploadPolicyCard = ({
           }}
           onUploadError={(error) => {
             console.error("Policy document upload error:", error);
-            alert(t("agent.uploadFailed") + ": " + error.message);
+            notifyError(t("agent.uploadFailed") + ": " + error.message);
           }}
         />
 

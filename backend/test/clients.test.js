@@ -52,6 +52,15 @@ describe('clients', () => {
     expect((await sales('post', '/clients').send({ lastName: 'x' })).status).toBe(400);
     expect((await sales('post', '/clients').send({ firstName: 'x', emailId: 'nope' })).status).toBe(400);
   });
+  it('refuses an implausible date of birth (D68)', async () => {
+    const young = await sales('post', '/clients').send({ firstName: 'Baby', lastName: 'Chua', DOB: new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10) });
+    expect(young.status).toBe(400);
+    expect(young.body.message).toMatch(/the age must be between 18 and 100 years/);
+    expect((await sales('put', `/clients/${clientId}`).send({ DOB: '1890-01-01' })).status).toBe(400);
+    const ok = await sales('put', `/clients/${clientId}`).send({ DOB: '1985-06-30' });
+    expect(ok.status).toBe(200);
+    expect(ok.body.DOB).toBe('1985-06-30');
+  });
   it('converts a lead into a client once', async () => {
     const lead = await sales('post', '/leads').send({ firstName: 'Iris', lastName: 'Macaraeg', emailId: 'iris@example.ph' });
     const a = await sales('post', `/clients/from-lead/${lead.body.leadId}`).send({});

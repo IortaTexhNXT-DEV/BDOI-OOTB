@@ -2,6 +2,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { nextNumber, toDate } from '../documents/common.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
+import { assertBirthDate } from '../../lib/birthDate.js';
 
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
@@ -74,6 +75,7 @@ async function insertClient(db, cols, extra, userId) {
 export async function createClient(body, userId) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
+  await assertBirthDate(cols.birth_date);
   const id = await withTransaction((c) => insertClient(c, cols, extra, userId));
   return getClient(id);
 }
@@ -81,6 +83,7 @@ export async function createClient(body, userId) {
 export async function updateClient(id, body, userId) {
   const before = await getClient(id);
   const { cols, extra } = columnsFrom(body);
+  await assertBirthDate(cols.birth_date);
   const next = { ...before, ...cols };
   const data = { ...cols, display_name: nameOf(next), extra: JSON.stringify({ ...(before.extra || {}), ...extra }), updated_by: userId, updated_at: new Date() };
   const keys = Object.keys(data);
@@ -98,6 +101,7 @@ export async function clientFromLead(db, leadId, overrides = {}, userId = null) 
   if (!lead) throw notFound('Lead not found');
   let clientId = existing?.id;
   if (!clientId) {
+    await assertBirthDate(columnsFrom(overrides).cols.birth_date);
     const cols = {
       first_name: lead.first_name, last_name: lead.last_name, preferred_name: lead.preferred_name, company_name: lead.company_name,
       tin: lead.tax_number, email: lead.email, phone: lead.phone, birth_date: lead.birth_date, gender: lead.gender, house_no: lead.house_no,

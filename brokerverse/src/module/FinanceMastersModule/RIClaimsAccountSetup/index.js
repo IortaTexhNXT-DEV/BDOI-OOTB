@@ -14,6 +14,7 @@ import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
 import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
+import { confirmAction } from "../../../utility/dialogs";
 
 const RIClaimsAccountSetup = () => {
   const { t } = useTranslation();
@@ -142,8 +143,8 @@ const RIClaimsAccountSetup = () => {
     // Add duplicate logic here
   };
 
-  const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset all fields?")) {
+  const handleReset = async () => {
+    if (await confirmAction("Are you sure you want to reset all fields?")) {
       setFormData({
         businessTypeFrom: "",
         businessTypeTo: "",

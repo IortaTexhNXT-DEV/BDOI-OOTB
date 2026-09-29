@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getpolicyDetailedMiddleware } from "../../quoteModule/policyDetailedView/store/policyDetailedMiddleware";
 import endorsementService from "../../../services/endorsementService";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { notifyError } from "../../../utility/dialogs";
 
 const PersonalDetails = () => {
   const { t } = useTranslation();
@@ -404,7 +405,7 @@ const PersonalDetails = () => {
           if (response.success) {
             const endorsementId = response.data?.endorsementId;
             if (!endorsementId) {
-              alert(
+              notifyError(
                 "Endorsement created but ID not returned. Response: " +
                   JSON.stringify(response.data)
               );
@@ -427,11 +428,11 @@ const PersonalDetails = () => {
             }, 2000);
           } else {
             console.error("API returned success: false", response.error);
-            alert(response.error || "Failed to create endorsement");
+            notifyError(response.error || "Failed to create endorsement");
           }
         } catch (error) {
           console.error("Error creating endorsement:", error);
-          alert("Error creating endorsement: " + error.message);
+          notifyError("Error creating endorsement: " + error.message);
         }
         return;
       }
@@ -492,7 +493,7 @@ const PersonalDetails = () => {
           const endorsementId = response.data?.endorsementId;
 
           if (!endorsementId) {
-            alert(
+            notifyError(
               "Endorsement created but ID not returned. Response: " +
                 JSON.stringify(response.data)
             );
@@ -517,11 +518,11 @@ const PersonalDetails = () => {
           }, 2000);
         } else {
           console.error("API returned success: false", response.error);
-          alert(response.error || "Failed to create endorsement");
+          notifyError(response.error || "Failed to create endorsement");
         }
       } catch (error) {
         console.error("Error creating endorsement:", error);
-        alert("Error creating endorsement: " + error.message);
+        notifyError("Error creating endorsement: " + error.message);
       }
     },
     [

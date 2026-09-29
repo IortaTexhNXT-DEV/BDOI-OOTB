@@ -14,6 +14,7 @@ import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
 import { MasterLookup, deleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
 
 const SettlementParameterMaster = () => {
   const { t } = useTranslation();
@@ -108,8 +109,8 @@ const SettlementParameterMaster = () => {
     }
   });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete these settlement parameters?")) {
+  const handleDelete = async () => {
+    if (await confirmAction("Are you sure you want to delete these settlement parameters?", { danger: true })) {
       deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
     }
   };

@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { policyListDataMiddleWare } from "../store/policyMiddleWare";
 import BatchRenewalService from "../../../services/batchRenewalService";
 import { useNavigate } from "react-router-dom";
+import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 
 export default function BatchTable() {
   const { t } = useTranslation();
@@ -150,7 +151,7 @@ export default function BatchTable() {
 
   const generateBatchRenewal = async () => {
     if (selectedPolicies.length === 0) {
-      alert("Please select at least one policy for batch renewal.");
+      notifyWarn("Please select at least one policy for batch renewal.");
       return;
     }
 
@@ -168,7 +169,7 @@ export default function BatchTable() {
 
       const response = await BatchRenewalService.createBatch(batchData);
       if (response.success) {
-        alert(
+        notifySuccess(
           `Batch renewal created successfully! Batch ID: ${response.data.batchId}`
         );
         setShowBatchModal(false);
@@ -177,7 +178,7 @@ export default function BatchTable() {
       }
     } catch (error) {
       console.error("Error creating batch:", error);
-      alert("Failed to create batch renewal. Please try again.");
+      notifyError("Failed to create batch renewal. Please try again.");
     }
   };
 
@@ -644,9 +645,9 @@ export default function BatchTable() {
                     icon="pi pi-trash"
                     className="p-button-outlined p-button-sm p-button-danger"
                     tooltip="Delete Batch"
-                    onClick={() => {
+                    onClick={async () => {
                       if (
-                        window.confirm(
+                        await confirmAction(
                           "Are you sure you want to delete this batch?"
                         )
                       ) {

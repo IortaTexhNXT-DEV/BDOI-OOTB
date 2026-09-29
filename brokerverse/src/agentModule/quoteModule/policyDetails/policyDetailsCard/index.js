@@ -23,6 +23,7 @@ import DialogList from "./DialogList";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgUploadArrowIcon from "../../../../assets/icons/SvgUploadArrowIcon";
 import useMotorTariff, { findVehicleClass } from "../../utils/useMotorTariff";
+import { confirmAction, notifyError, notifyWarn } from "../../../../utility/dialogs";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
@@ -93,12 +94,12 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
     // Validate co-insurance setup
     if (checked) {
       if (!values.InsuranceCompanyName) {
-        alert(t("agent.primaryInsuranceCompanyRequired"));
+        notifyWarn(t("agent.primaryInsuranceCompanyRequired"));
         return;
       }
 
       if (!TableList || TableList.length === 0) {
-        alert(t("agent.addOneCoInsurerRequired"));
+        notifyWarn(t("agent.addOneCoInsurerRequired"));
         return;
       }
 
@@ -112,7 +113,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
       const totalShare = primaryShare + coInsurerShares;
 
       if (Math.abs(totalShare - 100) > 0.01) {
-        alert(
+        notifyWarn(
           t("agent.totalShareMustBe100", {
             total: totalShare.toFixed(2),
             primary: primaryShare,
@@ -255,9 +256,9 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
     setVisible(true);
   };
 
-  const handleDeleteCoInsurer = (rowData) => {
+  const handleDeleteCoInsurer = async (rowData) => {
     if (
-      window.confirm(
+      await confirmAction(
         t("agent.removeCoInsurerConfirm", {
           name: rowData.ParticipantName || "",
         })

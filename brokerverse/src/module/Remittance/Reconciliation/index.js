@@ -12,9 +12,10 @@ import { Toast } from "primereact/toast";
 import { BreadCrumb } from "primereact/breadcrumb";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { downloadCsv, isoDate, showError, showSuccess } from "../shared";
+import { dateBody, downloadCsv, isoDate, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
+import { confirmAction } from "../../../utility/dialogs";
 
 const emptyRecon = { bankTransactions: [], systemTransactions: [], exceptions: [], summary: { total: 0, matched: 0, unmatched: 0, partial: 0, successRate: 0 } };
 
@@ -137,8 +138,8 @@ const ReconciliationProcess = () => {
     );
   };
 
-  const handleForceMatch = () => {
-    if (!window.confirm("Are you sure you want to force match with differences?")) return;
+  const handleForceMatch = async () => {
+    if (!(await confirmAction("Are you sure you want to force match with differences?"))) return;
     run(
       () => Promise.all(pairs().map(([b, s]) => remittanceService.match(b.id, s.id))),
       'Force Match',
@@ -267,7 +268,7 @@ const ReconciliationProcess = () => {
                 size="small"
               >
                 <Column selectionMode="multiple" style={{ width: '3em' }} />
-                <Column field="transDate" header="Date" />
+                <Column field="transDate" body={dateBody("transDate")} header="Date" />
                 <Column field="reference" header="Reference" />
                 <Column field="amount" header="Amount" body={(data) => formatCurrency(data.amount)} />
                 <Column field="status" header="" body={statusBodyTemplate} style={{ width: '3em' }} />
@@ -346,7 +347,7 @@ const ReconciliationProcess = () => {
                 <Column selectionMode="multiple" style={{ width: '3em' }} />
                 <Column field="policyNo" header="Policy" />
                 <Column field="premium" header="Premium" body={(data) => formatCurrency(data.premium)} />
-                <Column field="transDate" header="Date" />
+                <Column field="transDate" body={dateBody("transDate")} header="Date" />
                 <Column field="status" header="" body={statusBodyTemplate} style={{ width: '3em' }} />
               </DataTable>
             </div>
@@ -376,7 +377,7 @@ const ReconciliationProcess = () => {
               <Button label="Generate Report" icon="pi pi-file-pdf" className="p-button-sm" onClick={handleGenerateReport} />
             </div>
             <DataTable value={[]} emptyMessage="No reconciliation history available">
-              <Column field="date" header="Date" />
+              <Column field="date" body={dateBody("date")} header="Date" />
               <Column field="period" header="Period" />
               <Column field="totalTransactions" header="Total Transactions" />
               <Column field="matchRate" header="Match Rate" />

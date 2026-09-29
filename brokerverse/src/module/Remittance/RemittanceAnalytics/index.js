@@ -18,7 +18,7 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { downloadCsv, isoDate, showError } from "../shared";
+import { calendarDateFormat, downloadCsv, isoDate, showError } from "../shared";
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
@@ -340,7 +340,7 @@ const RemittanceAnalytics = () => {
         {selectedPeriod === "Custom Range" && (
           <div className="control-group">
             <label>Date Range:</label>
-            <Calendar
+            <Calendar dateFormat={calendarDateFormat()}
               value={dateRange}
               onChange={(e) => setDateRange(e.value)}
               selectionMode="range"

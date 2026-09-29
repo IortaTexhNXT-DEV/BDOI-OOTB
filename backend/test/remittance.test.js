@@ -33,6 +33,22 @@ describe('remittances and approvals', () => {
     expect(d.body.data.insurerDetails.code).toBeTruthy();
     expect(d.body.data.policies.length).toBe(d.body.data.policyCount);
   });
+  it('every seeded remittance has an insurer, and a seeded agency bill carries one insurer\'s policies (D40)', async () => {
+    const rows = (await pool.query(`SELECT r.remittance_number, r.kind, r.insurance_company_id AS ins,
+        (SELECT array_agg(DISTINCT p.insurance_company_id) FROM remittance_lines l JOIN policies p ON p.id = l.policy_id WHERE l.remittance_id = r.id) AS line_ins
+      FROM remittances r WHERE r.data->>'seed' = 'remittance-v1'`)).rows;
+    expect(rows.filter((r) => r.kind === 'agency-bill').length).toBe(3);
+    expect(rows.filter((r) => !r.ins)).toEqual([]);
+    for (const r of rows.filter((x) => x.kind === 'agency-bill')) expect(r.line_ins).toEqual([r.ins]);
+    // databases seeded before the fix: the migration fills the insurer from the bill's lines, and only for seeded rows
+    const fs = await import('node:fs');
+    const sql = fs.readFileSync(new URL('../src/db/migrations/0084_seeded_agency_bill_insurer.sql', import.meta.url), 'utf8');
+    await pool.query("UPDATE remittances SET insurance_company_id = NULL WHERE kind = 'agency-bill' AND data->>'seed' = 'remittance-v1'");
+    await pool.query(sql);
+    const after = (await pool.query("SELECT remittance_number, insurance_company_id AS ins FROM remittances WHERE kind = 'agency-bill' AND data->>'seed' = 'remittance-v1' ORDER BY 1")).rows;
+    expect(after.map((r) => r.ins)).toEqual(rows.filter((r) => r.kind === 'agency-bill').sort((a, b) => a.remittance_number.localeCompare(b.remittance_number)).map((r) => r.ins));
+  });
+
   it('creates a remittance, validates and processes it, and enforces maker-checker', async () => {
     const bad = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', lines: [] });
     expect(bad.status).toBe(400);

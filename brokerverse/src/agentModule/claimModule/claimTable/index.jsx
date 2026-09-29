@@ -14,6 +14,7 @@ import SvgMotorTable from "../../../assets/agentIcon/SvgMotorTable";
 import { Skeleton } from "primereact/skeleton";
 import claimsService from "../../../services/claimsService";
 import { setPolicyHolderData } from "../../claimsModule/claimDetails/store/claimDetailsReducers";
+import { notifyError } from "../../../utility/dialogs";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -439,7 +440,7 @@ const ClaimTable = () => {
           claimNumber: claim.claimNumber,
           claimRefId: claim.claimRefId,
         });
-        alert("Unable to navigate: No valid claim ID found");
+        notifyError("Unable to navigate: No valid claim ID found");
         return;
       }
 
@@ -456,7 +457,7 @@ const ClaimTable = () => {
           claimNumber: claim.claimNumber,
           claimRefId: claim.claimRefId,
         });
-        alert(
+        notifyError(
           "Unable to navigate: Claim ID appears to be a claim number instead of database ID"
         );
         return;
@@ -523,7 +524,7 @@ const ClaimTable = () => {
         claimNumber: claim.claimNumber,
         claimRefId: claim.claimRefId,
       });
-      alert("Unable to navigate: No valid claim ID found");
+      notifyError("Unable to navigate: No valid claim ID found");
       return;
     }
 
@@ -538,7 +539,7 @@ const ClaimTable = () => {
         claimNumber: claim.claimNumber,
         claimRefId: claim.claimRefId,
       });
-      alert(
+      notifyError(
         "Unable to navigate: Claim ID appears to be a claim number instead of database ID"
       );
       return;

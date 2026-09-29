@@ -17,8 +17,9 @@ import { Tooltip } from "primereact/tooltip";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import remittanceService, { apiRequest } from "../../../services/remittanceService";
-import { isoDate, showError, showSuccess, statusSeverity } from "../shared";
+import { calendarDateFormat, dateBody, isoDate, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+import { confirmAction } from "../../../utility/dialogs";
 
 const TEMPLATE_ROUTE = "/master/finance/remittance/notificationmaster";
 const emptyMessage = { type: "", subject: "", content: "", recipients: "", recipientType: "Client", channel: "Email", priority: "Normal", templateCode: null };
@@ -179,7 +180,7 @@ const RemittanceNotifications = () => {
 
   const deleteRows = async (rows) => {
     const ids = rows.filter(isInbox).map((r) => r.id);
-    if (!ids.length || !window.confirm(`Delete ${ids.length} notification(s)?`)) return;
+    if (!ids.length || !(await confirmAction(`Delete ${ids.length} notification(s)?`, { danger: true }))) return;
     try {
       await apiRequest("DELETE", "/notifications", { body: { notificationIds: ids } });
       showSuccess(toast, `${ids.length} notification(s) deleted`);
@@ -385,7 +386,7 @@ const RemittanceNotifications = () => {
               placeholder="Status"
               className="mr-2"
             />
-            <Calendar
+            <Calendar dateFormat={calendarDateFormat()}
               value={filterDateRange}
               onChange={(e) => setFilterDateRange(e.value)}
               selectionMode="range"
@@ -414,7 +415,7 @@ const RemittanceNotifications = () => {
               <Column field="channel" header="Channel" style={{ width: '10%' }} />
               <Column field="priority" header="Priority" body={priorityBodyTemplate} style={{ width: '8%' }} />
               <Column field="status" header="Status" body={statusBodyTemplate} style={{ width: '8%' }} />
-              <Column field="sentDate" header="Date" style={{ width: '12%' }} />
+              <Column field="sentDate" body={dateBody("sentDate")} header="Date" style={{ width: '12%' }} />
               <Column header="Actions" body={actionsBodyTemplate} style={{ width: '150px' }} />
             </DataTable>
 
@@ -445,7 +446,7 @@ const RemittanceNotifications = () => {
               <Column field="status" header="Status" body={statusBodyTemplate} />
               <Column field="deliveryRate" header="Delivery Rate" />
               <Column field="openRate" header="Open Rate" />
-              <Column field="sentDate" header="Sent Date" />
+              <Column field="sentDate" body={dateBody("sentDate")} header="Sent Date" />
               <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
           </TabPanel>
@@ -569,7 +570,7 @@ const RemittanceNotifications = () => {
               </div>
               <div className="info-row">
                 <label>Sent:</label>
-                <span>{selectedNotification.sentDate}</span>
+                <span>{dateBody("sentDate")(selectedNotification)}</span>
               </div>
             </div>
 

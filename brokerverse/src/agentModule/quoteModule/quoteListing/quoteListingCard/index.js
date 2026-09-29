@@ -42,6 +42,7 @@ import SvgMotor from "../../../../assets/agentIcon/SvgMotor";
 import SvgFire from "../../../../assets/agentIcon/SvgFire";
 import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../../utility/dateFormat";
+import { confirmAction, notifyError, notifySuccess } from "../../../../utility/dialogs";
 const QuoteListingCard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -146,7 +147,7 @@ const QuoteListingCard = () => {
   const handleDelete = async () => {
     if (selectedProducts.length === 0) return;
 
-    const confirmDelete = window.confirm(
+    const confirmDelete = await confirmAction(
       `Are you sure you want to delete ${selectedProducts.length} quotation(s)?`
     );
 
@@ -163,7 +164,7 @@ const QuoteListingCard = () => {
       // Clear selection after deletion
       setSelectedProducts([]);
 
-      alert(t("quoteListing.quotationsDeletedSuccess"));
+      notifySuccess(t("quoteListing.quotationsDeletedSuccess"));
 
       // Refresh the list
       dispatch(
@@ -175,7 +176,7 @@ const QuoteListingCard = () => {
       );
     } catch (error) {
       console.error("Failed to delete quotations:", error);
-      alert(t("quoteListing.failedToDeleteQuotations", { error: error?.message || error }));
+      notifyError(t("quoteListing.failedToDeleteQuotations", { error: error?.message || error }));
     }
   };
 
@@ -485,20 +486,20 @@ const QuoteListingCard = () => {
         );
       } else if (result.type.endsWith("/rejected")) {
         console.error("Failed to fetch quotation details:", result.payload);
-        alert(
+        notifyError(
           t("quoteListing.failedToFetchQuotationError", { error: result.payload || "Unknown error" })
         );
       }
     } catch (error) {
       console.error("Unexpected error:", error);
-      alert(t("quoteListing.unexpectedErrorFetching"));
+      notifyError(t("quoteListing.unexpectedErrorFetching"));
     }
   };
 
   const handleConvertToPolicy = async (rowData) => {
     try {
       // Confirm conversion
-      const confirmConvert = window.confirm(
+      const confirmConvert = await confirmAction(
         `Are you sure you want to convert quotation ${rowData.quotationNumber} to a policy?`
       );
 
@@ -525,7 +526,7 @@ const QuoteListingCard = () => {
       });
     } catch (error) {
       console.error("Unexpected error:", error);
-      alert(t("quoteListing.unexpectedErrorConverting"));
+      notifyError(t("quoteListing.unexpectedErrorConverting"));
     }
   };
 
@@ -546,11 +547,11 @@ const QuoteListingCard = () => {
         });
       } else {
         console.error("Failed to fetch quotation details:", result.payload);
-        alert(t("quoteListing.failedToLoadQuotation"));
+        notifyError(t("quoteListing.failedToLoadQuotation"));
       }
     } catch (error) {
       console.error("Error fetching quotation details:", error);
-      alert(t("quoteListing.errorLoadingQuotation"));
+      notifyError(t("quoteListing.errorLoadingQuotation"));
     }
   };
 

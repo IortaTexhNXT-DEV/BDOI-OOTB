@@ -481,8 +481,8 @@ $tablet-md: 1024px;
   }
 }
 
-// Empty state styling
-.p-datatable .p-datatable-tbody > tr > td {
+// Empty state styling (the "no records" row only; an unscoped td rule made every table in the app italic, D40)
+.p-datatable .p-datatable-tbody > tr.p-datatable-emptymessage > td {
   text-align: center;
   padding: 2rem;
   color: #6c757d;

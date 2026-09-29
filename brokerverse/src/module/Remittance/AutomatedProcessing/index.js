@@ -17,10 +17,9 @@ import { Timeline } from "primereact/timeline";
 import SvgDot from "../../../assets/icons/SvgDot";
 import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
-import { formatDate, isoDate, showError, statusSeverity } from "../shared";
+import { calendarDateFormat, formatDate, formatDateTime, isoDate, showError, statusSeverity } from "../shared";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 const AutomatedRemittanceProcessing = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -159,7 +158,7 @@ const AutomatedRemittanceProcessing = () => {
         <div>
           <p>{t("remittance.youAreAboutToProcess", { count: selectedRemittances.length })}</p>
           <p><strong>{t("remittance.totalAmount")} {formatCurrency(totalAmount)}</strong></p>
-          <p>{t("remittance.processingDate")} {processingDate.toLocaleDateString()}</p>
+          <p>{t("remittance.processingDate")} {formatDate(processingDate)}</p>
           {overrideCutoff && <p style={{color: '#ef4444'}}>⚠ {t("remittance.cutoffOverrideEnabled")}</p>}
           <p>{t("remittance.doYouWantToContinue")}</p>
         </div>
@@ -237,7 +236,7 @@ const AutomatedRemittanceProcessing = () => {
     }
 
     confirmDialog({
-      message: t("remittance.scheduleRemittancesFor", { count: selectedRemittances.length, date: processingDate.toLocaleDateString() }),
+      message: t("remittance.scheduleRemittancesFor", { count: selectedRemittances.length, date: formatDate(processingDate) }),
       header: t("remittance.scheduleProcessing"),
       icon: 'pi pi-clock',
       accept: async () => {
@@ -246,7 +245,7 @@ const AutomatedRemittanceProcessing = () => {
           toast.current.show({
             severity: 'info',
             summary: t("remittance.scheduled"),
-            detail: t("remittance.remittancesScheduledFor", { count: selectedRemittances.length, date: processingDate.toLocaleDateString() }),
+            detail: t("remittance.remittancesScheduledFor", { count: selectedRemittances.length, date: formatDate(processingDate) }),
             life: 4000
           });
           setSelectedRemittances([]);
@@ -294,7 +293,7 @@ const AutomatedRemittanceProcessing = () => {
           </div>
           <div className="history-details">
             <p><i className="pi pi-user"></i> {item.processedBy}</p>
-            <p><i className="pi pi-calendar"></i> {new Date(item.processedAt).toLocaleString(numberLocale())}</p>
+            <p><i className="pi pi-calendar"></i> {formatDateTime(item.processedAt)}</p>
             <p><i className="pi pi-file"></i> {item.itemCount} items</p>
             <p><i className="pi pi-wallet"></i> {formatCurrency(item.totalAmount)}</p>
             <p><i className="pi pi-clock"></i> {item.duration}</p>
@@ -315,11 +314,11 @@ const AutomatedRemittanceProcessing = () => {
           <div className="info-bar">
             <div className="info-item">
               <span className="label">Current Date</span>
-              <span className="value">{headerData.currentDate.toLocaleDateString()}</span>
+              <span className="value">{formatDate(headerData.currentDate)}</span>
             </div>
             <div className="info-item">
               <span className="label">Last Run</span>
-              <span className="value">{headerData.lastRun ? headerData.lastRun.toLocaleDateString() : "-"}</span>
+              <span className="value">{headerData.lastRun ? formatDate(headerData.lastRun) : "-"}</span>
             </div>
             <div className="info-item highlight">
               <span className="label">Pending Batches</span>
@@ -386,7 +385,7 @@ const AutomatedRemittanceProcessing = () => {
                     id="processingDate"
                     value={processingDate}
                     onChange={(e) => setProcessingDate(e.value)}
-                    dateFormat="mm/dd/yy"
+                    dateFormat={calendarDateFormat()}
                     className="full-width"
                   />
                 </div>

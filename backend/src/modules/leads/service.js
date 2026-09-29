@@ -1,6 +1,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextNumber, toDate, lobOf } from '../documents/common.js';
 import { pick } from '../documents/tabular.js';
 import { quoteStatusIn } from '../documents/statuses.js';
@@ -58,6 +59,7 @@ export async function getLead(id, db = null) {
 export async function createLead(body, userId, db = null) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
+  await assertBirthDate(cols.birth_date);
   const run = async (c) => {
     const number = await nextNumber(c, 'lead', 'lead');
     const status = cols.status || await getSetting('leads.default_status', 'New');
@@ -74,6 +76,7 @@ export async function createLead(body, userId, db = null) {
 export async function updateLead(id, body, userId) {
   const before = await getLead(id);
   const { cols, extra } = columnsFrom(body);
+  await assertBirthDate(cols.birth_date);
   const merged = { first_name: before.first_name, last_name: before.last_name, company_name: before.company_name, preferred_name: before.preferred_name };
   const next = { ...merged, ...cols };
   const data = { ...cols, display_name: displayName({ firstName: next.first_name, lastName: next.last_name, companyName: next.company_name, preferredName: next.preferred_name }),

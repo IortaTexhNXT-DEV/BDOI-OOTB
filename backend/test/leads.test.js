@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
+import { ageOn } from '../src/lib/birthDate.js';
 import { writeXlsx, readXlsx } from '../src/modules/documents/xlsx.js';
 
 let ctx;
@@ -51,6 +53,43 @@ describe('leads', () => {
     const bad = await sales('post', '/leads').send({ firstName: 'X', emailId: 'not-an-email' });
     expect(bad.status).toBe(400);
     expect(bad.body.errors[0].path).toBe('emailId');
+  });
+
+  it('checks the date of birth against the configured age range (D68)', async () => {
+    const yearsAgo = (years, days = 0) => {
+      const d = new Date();
+      d.setFullYear(d.getFullYear() - years);
+      d.setDate(d.getDate() - days);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+    const lead = (DOB) => ({ ...body, lastName: 'Dobcheck', emailId: 'dob.check@example.ph', DOB });
+    const young = await sales('post', '/leads').send(lead(yearsAgo(0, 14)));
+    expect(young.status).toBe(400);
+    expect(young.body.message).toMatch(/age of 0; the age must be between 18 and 100 years/);
+    expect(young.body.errors[0].path).toBe('DOB');
+    expect((await sales('post', '/leads').send(lead(yearsAgo(18, -1)))).status).toBe(400);
+    const old = await sales('post', '/leads').send(lead(yearsAgo(101)));
+    expect(old.status).toBe(400);
+    expect(old.body.message).toMatch(/age of 101/);
+    const future = await sales('post', '/leads').send(lead(yearsAgo(0, -3)));
+    expect(future.body.message).toBe('Date of birth cannot be in the future');
+    const ok = await sales('post', '/leads').send(lead(yearsAgo(18)));
+    expect(ok.status).toBe(201);
+    const oldest = await sales('post', '/leads').send(lead(yearsAgo(100)));
+    expect(oldest.status).toBe(201);
+    expect((await sales('put', `/leads/${ok.body.leadId}`).send({ DOB: yearsAgo(5) })).status).toBe(400);
+    expect((await sales('put', `/leads/${ok.body.leadId}`).send({ notes: 'no date change' })).status).toBe(200);
+    // the range comes from System Settings
+    const set = async (key, value) => { await pool.query('UPDATE app_settings SET value = $2 WHERE key = $1', [key, JSON.stringify(value)]); clearSettingsCache(); };
+    await set('leads.min_age_years', 21);
+    try {
+      const r = await sales('post', '/leads').send(lead(yearsAgo(19)));
+      expect(r.status).toBe(400);
+      expect(r.body.message).toMatch(/between 21 and 100 years/);
+    } finally { await set('leads.min_age_years', 18); }
+    for (const id of [ok.body.leadId, oldest.body.leadId]) await pool.query('DELETE FROM leads WHERE id = $1', [id]);
+    expect(ageOn('2000-03-15', new Date(2026, 2, 14))).toBe(25);
+    expect(ageOn('2000-03-15', new Date(2026, 2, 15))).toBe(26);
   });
 
   it('lists with paging, filters and search', async () => {

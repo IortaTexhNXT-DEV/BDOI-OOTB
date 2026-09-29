@@ -8,6 +8,7 @@ import collectionService from "../../../services/collectionService";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { formatDate } from "@fullcalendar/core/index.js";
+import { notifyError } from "../../../utility/dialogs";
 
 const FollowUpModal = ({
   loadingFollowUp,
@@ -88,7 +89,7 @@ This is to inform you that the payment for policy number : ${
       onSaved();
     } catch (error) {
       console.error("Save follow-up error:", error);
-      alert("Failed to save follow-up action");
+      notifyError("Failed to save follow-up action");
     } finally {
       setSaving(false);
     }

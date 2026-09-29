@@ -17,7 +17,7 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { downloadCsv, isoDate, showError, statusSeverity } from "../shared";
+import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError, statusSeverity } from "../shared";
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
@@ -357,7 +357,7 @@ const RemittanceHistory = () => {
               placeholder="User"
               className="mr-2"
             />
-            <Calendar
+            <Calendar dateFormat={calendarDateFormat()}
               value={filterDateRange}
               onChange={(e) => setFilterDateRange(e.value)}
               selectionMode="range"
@@ -394,7 +394,7 @@ const RemittanceHistory = () => {
               />
               <Column field="status" header="Status" body={statusBodyTemplate} />
               <Column field="createdBy" header="Created By" />
-              <Column field="createdDate" header="Created" />
+              <Column field="createdDate" body={dateBody("createdDate")} header="Created" />
               <Column field="version" header="Version" body={versionBodyTemplate} />
               <Column field="hasAuditTrail" header="Audit" body={auditBodyTemplate} />
               <Column header="Actions" body={actionsBodyTemplate} style={{ width: '150px' }} />
@@ -425,7 +425,7 @@ const RemittanceHistory = () => {
               <Column field="previousValue" header="Previous Value" />
               <Column field="newValue" header="New Value" />
               <Column field="changedBy" header="Changed By" />
-              <Column field="changeDate" header="Date" />
+              <Column field="changeDate" body={dateBody("changeDate")} header="Date" />
               <Column field="ipAddress" header="IP Address" />
               <Column field="reason" header="Reason" />
             </DataTable>
@@ -465,7 +465,7 @@ const RemittanceHistory = () => {
 
           <TabPanel header="Archive History">
             <DataTable value={archiveHistory} stripedRows emptyMessage="No archive runs recorded">
-              <Column field="archiveDate" header="Archive Date" />
+              <Column field="archiveDate" body={dateBody("archiveDate")} header="Archive Date" />
               <Column
                 field="recordCount"
                 header="Records"
@@ -611,7 +611,7 @@ const RemittanceHistory = () => {
               <Column field="previousValue" header="Previous" />
               <Column field="newValue" header="New" />
               <Column field="changedBy" header="By" />
-              <Column field="changeDate" header="Date" />
+              <Column field="changeDate" body={dateBody("changeDate")} header="Date" />
               <Column field="reason" header="Reason" />
             </DataTable>
           </div>

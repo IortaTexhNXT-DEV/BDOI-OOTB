@@ -14,6 +14,7 @@ import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
 import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
+import { confirmAction } from "../../../utility/dialogs";
 
 const CustomerAccountSetup = () => {
   const { t } = useTranslation();
@@ -134,8 +135,8 @@ const CustomerAccountSetup = () => {
     // Add duplicate logic here
   };
 
-  const handleReset = () => {
-    if (window.confirm(t("financeMasters.confirmReset"))) {
+  const handleReset = async () => {
+    if (await confirmAction(t("financeMasters.confirmReset"))) {
       setFormData({
         customerCatgFrom: "",
         customerCatgTo: "",

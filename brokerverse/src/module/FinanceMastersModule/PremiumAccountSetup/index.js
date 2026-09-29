@@ -15,6 +15,7 @@ import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
 import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
+import { confirmAction } from "../../../utility/dialogs";
 
 const PremiumAccountSetup = () => {
   const { t } = useTranslation();
@@ -135,8 +136,8 @@ const PremiumAccountSetup = () => {
     // Add duplicate logic here
   };
 
-  const handleReset = () => {
-    if (window.confirm(t("financeMasters.confirmReset"))) {
+  const handleReset = async () => {
+    if (await confirmAction(t("financeMasters.confirmReset"))) {
       setFormData({
         companyFrom: "",
         companyTo: "",

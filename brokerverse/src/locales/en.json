@@ -55,7 +55,9 @@
     "optional": "Optional",
     "continue": "Continue",
     "email": "Email",
-    "total": "Total"
+    "total": "Total",
+    "warning": "Warning",
+    "information": "Information"
   },
   "login": {
     "title": "Welcome to BIBS",
@@ -4296,7 +4298,12 @@
     "vehicleBrand": "Vehicle brand",
     "vehicleColor": "Vehicle color",
     "vehicleModel": "Vehicle model",
-    "zipCode": "Zip code"
+    "zipCode": "Zip code",
+    "premiumChange": "Premium change",
+    "additionalPremiumDue": "Additional premium is due: proceed to payment.",
+    "returnPremiumNote": "Return premium of {{amount}}: nothing to pay. Finance refunds it to the client through a refund payment voucher.",
+    "noPremiumChange": "No premium change: no payment is due.",
+    "done": "Done"
   },
   "endorsementSummary": {
     "leads": "Leads",

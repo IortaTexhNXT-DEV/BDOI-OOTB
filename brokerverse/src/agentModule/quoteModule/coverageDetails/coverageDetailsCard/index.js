@@ -25,6 +25,7 @@ import policyRenewalService from "../../../../services/policyRenewalService";
 import useTaxRates from "../../utils/useTaxRates";
 import useMotorTariff, { appaFigures, findVehicleClass } from "../../utils/useMotorTariff";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { notifyError } from "../../../../utility/dialogs";
 
 const CoverageDetailsCard = ({
   action,
@@ -442,7 +443,7 @@ const CoverageDetailsCard = ({
         .saveRenewalWizard(policyId, { coverageDetails: coverageDetailsData })
         .then((response) => {
           if (!response.success) {
-            alert(`Could not save the renewal: ${response.error}`);
+            notifyError(`Could not save the renewal: ${response.error}`);
             return;
           }
           navigate(

@@ -24,6 +24,7 @@ import { isFireLob } from "../../constants/endorsementCategories";
 import { numberLocale } from "../../../../utility/currencyConverter";
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 import { getTaxRates } from "../../../quoteModule/utils/premiumCalculations";
+import { confirmAction, notifyError } from "../../../../utility/dialogs";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -265,12 +266,12 @@ const EndorsementSummary = ({ action }) => {
   const handleSendForApproval = async () => {
     setIsSending(true);
     if (!state?.endorsementId) {
-      alert(t("endorsementSummary.endorsementIdNotFound"));
+      notifyError(t("endorsementSummary.endorsementIdNotFound"));
       setIsSending(false);
       return;
     }
 
-    if (!window.confirm(t("endorsementSummary.confirmSendToInsurance"))) {
+    if (!(await confirmAction(t("endorsementSummary.confirmSendToInsurance")))) {
       setIsSending(false);
       return;
     }
@@ -329,11 +330,11 @@ const EndorsementSummary = ({ action }) => {
         setIsSending(false);
       } else {
         setIsSending(false);
-        alert(t("endorsementSummary.failedToSend"));
+        notifyError(t("endorsementSummary.failedToSend"));
       }
     } catch (error) {
       setIsSending(false);
-      alert(t("endorsementSummary.errorSending"));
+      notifyError(t("endorsementSummary.errorSending"));
       console.error(error);
     } finally {
       setIsSending(false);

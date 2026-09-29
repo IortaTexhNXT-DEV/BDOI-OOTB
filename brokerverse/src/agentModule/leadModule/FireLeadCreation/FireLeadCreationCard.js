@@ -40,6 +40,7 @@ import {
   FIRE_EXTINGUISHER_DISCOUNT_MAX,
   DISCOUNT_STEP,
 } from "./fireRiskConstants";
+import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -124,7 +125,7 @@ const getSiForCover = (cover, vals) => {
   return 0;
 };
 
-const getPersonalDetailsValidation = (t) => (values) => {
+const getPersonalDetailsValidation = (t, ageLimits) => (values) => {
   const errors = {};
   if (values.category === "Corporate") {
     if (!values.CompanyName) errors.CompanyName = t("fireLead.fieldRequired");
@@ -150,6 +151,7 @@ const getPersonalDetailsValidation = (t) => (values) => {
   if (!values.City) errors.City = t("fireLead.fieldRequired");
   if (!values.ZIPCode) errors.ZIPCode = t("fireLead.fieldRequired");
   if (!values.DateofBirth) errors.DateofBirth = t("fireLead.fieldRequired");
+  else if (birthDateError(values.DateofBirth, ageLimits)) errors.DateofBirth = birthDateError(values.DateofBirth, ageLimits);
   if (!values.category) errors.category = t("fireLead.fieldRequired");
   if (!values.gender) errors.gender = t("fireLead.fieldRequired");
   return errors;
@@ -186,6 +188,7 @@ const leadToPersonalFormValues = (lead) => {
 
 const FireLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
+  const ageLimits = useAgeLimits();
   const { formatCurrency } = useFormatCurrency();
   const location = useLocation();
   const { state: locationState } = location;
@@ -246,7 +249,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       ? leadToPersonalFormValues(existingLeadFromState)
       : personalDetailsInitialValue,
     enableReinitialize: true,
-    validate: getPersonalDetailsValidation(t),
+    validate: getPersonalDetailsValidation(t, ageLimits),
     onSubmit: async (values) => {
       setPersonalDetails(values);
       // When adding quote for existing lead, skip create-lead API and go to step 2
@@ -277,7 +280,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         DOB: values.DateofBirth
           ? (typeof values.DateofBirth === "string"
               ? values.DateofBirth
-              : values.DateofBirth.toISOString?.().split("T")[0])
+              : toIsoDate(values.DateofBirth))
           : "",
         leadCategory: values.category || "Retail",
         gender: values.gender || "Male",
@@ -668,6 +671,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           <DatepickerField
             label={t("fireLead.dateOfBirth") + "*"}
             value={personalFormik.values.DateofBirth}
+            {...birthDateRange(ageLimits)}
             onChange={(date) =>
               personalFormik.setFieldValue("DateofBirth", date.target.value)
             }

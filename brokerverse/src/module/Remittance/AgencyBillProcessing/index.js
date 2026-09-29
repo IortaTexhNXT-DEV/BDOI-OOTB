@@ -14,7 +14,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
-import { isoDate, isoMonth, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
+import { calendarDateFormat, dateBody, isoDate, isoMonth, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 
 const emptyAdjustment = { agencyCode: null, adjustmentType: null, amount: null, reason: "" };
@@ -179,7 +179,7 @@ const AgencyBillProcessing = () => {
           </div>
           <div className="p-field p-col-12 p-md-3">
             <label>{t("remittance.billRunDate")}</label>
-            <Calendar value={billRunDate} onChange={(e) => setBillRunDate(e.value)} dateFormat="yy-mm-dd" />
+            <Calendar value={billRunDate} onChange={(e) => setBillRunDate(e.value)} dateFormat={calendarDateFormat()} />
           </div>
           <div className="p-field p-col-12 p-md-3">
             <label>{t("remittance.billType")}</label>
@@ -269,8 +269,8 @@ const AgencyBillProcessing = () => {
               <Column field="agencyCode" header={t("remittance.agencyCode")} />
               <Column field="agencyName" header={t("remittance.agencyName")} />
               <Column field="billNumber" header={t("remittance.billNumber")} />
-              <Column field="billDate" header={t("remittance.billDate")} />
-              <Column field="dueDate" header={t("remittance.dueDate")} />
+              <Column field="billDate" body={dateBody("billDate")} header={t("remittance.billDate")} />
+              <Column field="dueDate" body={dateBody("dueDate")} header={t("remittance.dueDate")} />
               <Column field="billAmount" header={t("remittance.billAmount")} body={(data) => formatCurrency(data.billAmount)} />
               <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
               <Column header={t("remittance.actions")} body={(rowData) => (
