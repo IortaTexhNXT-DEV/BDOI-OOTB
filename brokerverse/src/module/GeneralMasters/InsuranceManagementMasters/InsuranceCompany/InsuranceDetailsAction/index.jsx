@@ -113,6 +113,13 @@ const InsuranceDetailsAction = ({ action }) => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
       errors.email = "Invalid email address";
     }
+    // credit terms: optional whole numbers of days (empty = the configured default)
+    ["premiumWarrantyDays", "remittanceTermsDays"].forEach((key) => {
+      const v = values[key];
+      if (v !== "" && v !== null && v !== undefined && !/^\d{1,4}$/.test(String(v).trim())) {
+        errors[key] = t("numberingMasters.creditTerms.daysInvalid");
+      }
+    });
     if (!values.phoneNumber) {
       errors.phoneNumber = "Phone Number is required";
     } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.phoneNumber)) {
@@ -156,6 +163,9 @@ const InsuranceDetailsAction = ({ action }) => {
       country: countryData,
       email: getInsurancePatchData?.email,
       phoneNumber: getInsurancePatchData?.phoneNumber,
+      premiumWarrantyDays: getInsurancePatchData?.premiumWarrantyDays ?? "",
+      remittanceTermsDays: getInsurancePatchData?.remittanceTermsDays ?? "",
+      defaultBillingMode: getInsurancePatchData?.defaultBillingMode ?? "",
       modifiedBy: getInsurancePatchData?.modifiedBy,
       modifiedOn: getInsurancePatchData?.modifiedOn,
     };
@@ -181,6 +191,9 @@ const InsuranceDetailsAction = ({ action }) => {
       country: "",
       email: "",
       phoneNumber: "",
+      premiumWarrantyDays: "",
+      remittanceTermsDays: "",
+      defaultBillingMode: "",
       modifiedBy: "",
       modifiedOn: "",
     },
@@ -516,6 +529,47 @@ const InsuranceDetailsAction = ({ action }) => {
                 {formik.errors.email}
               </div>
             )}
+          </div>
+          <div className="col-12 p-0 pl-2 pt-3">
+            <div className="insurance__credit__terms__title">{t("numberingMasters.creditTerms.title")}</div>
+            <div className="insurance__credit__terms__hint">{t("numberingMasters.creditTerms.hint")}</div>
+          </div>
+          {[
+            ["premiumWarrantyDays", "numberingMasters.creditTerms.premiumWarrantyDays"],
+            ["remittanceTermsDays", "numberingMasters.creditTerms.remittanceTermsDays"],
+          ].map(([key, label]) => (
+            <div className="col-12 md:col-3 lg:col-3 xl:col-3 " key={key}>
+              <InputField
+                disabled={action === "view"}
+                classNames="input__field__corrections"
+                className="input__label__corrections"
+                placeholder={t("numberingMasters.creditTerms.useDefault")}
+                label={t(label)}
+                value={(action === "add" || action === "edit" ? formik.values[key] : getInsuranceView?.[key]) ?? ""}
+                onChange={(e) => formik.setFieldValue(key, e.target.value)}
+              />
+              {formik.errors[key] && (
+                <div style={{ fontSize: 12, color: "red" }}>{formik.errors[key]}</div>
+              )}
+            </div>
+          ))}
+          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+            <DropDowns
+              disabled={action === "view"}
+              className="input__field__corrections"
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+              placeholder={t("numberingMasters.creditTerms.useDefault")}
+              classNames="select__label__corrections"
+              optionLabel="label"
+              label={t("numberingMasters.creditTerms.defaultBillingMode")}
+              value={(action === "add" || action === "edit" ? formik.values.defaultBillingMode : getInsuranceView?.defaultBillingMode) || ""}
+              onChange={(e) => formik.setFieldValue("defaultBillingMode", e.value)}
+              options={[
+                { label: t("numberingMasters.creditTerms.useDefault"), value: "" },
+                { label: t("numberingMasters.creditTerms.broker"), value: "broker" },
+                { label: t("numberingMasters.creditTerms.direct"), value: "direct" },
+              ]}
+            />
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField

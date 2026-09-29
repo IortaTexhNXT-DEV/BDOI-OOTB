@@ -10,6 +10,7 @@ import { one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { num, round2, lobOf } from '../documents/common.js';
 import { motorFixedCovers } from './motorTariff.js';
+import { resolveCommissionRate } from '../commission-rates/resolve.js';
 
 const RATE_COVERS = [
   // [premium field, sum-insured field, rate field, default-rate key]
@@ -50,18 +51,14 @@ export async function taxRates(lob) {
 
 /**
  * Commission rate: explicit on the quote, else the brokerage % of the commission rule chosen on the order summary
- * (commissionDetails.brokeragePct, the rate the commission lines use), else the insurer's rate, else
- * commission.default_rate.
+ * (commissionDetails.brokeragePct, the rate the commission lines use), else the Commission Rate Matrix, the insurer's
+ * rate, else commission.default_rate (resolveCommissionRate).
  */
-async function commissionRate(v, insurerId) {
+async function commissionRate(v, insurerId, lob) {
   if (v.commissionRate !== undefined && v.commissionRate !== '') { const r = num(v.commissionRate); return r > 1 ? r / 100 : r; }
   const brokerage = num(v.commissionDetails?.brokeragePct);
   if (brokerage > 0) return brokerage / 100;
-  if (insurerId) {
-    const ic = await one('SELECT commission_rate FROM insurance_companies WHERE id = $1', [insurerId]);
-    if (ic?.commission_rate != null) return Number(ic.commission_rate);
-  }
-  return Number(await getSetting('commission.default_rate', 0.15));
+  return (await resolveCommissionRate({ insurerId, productId: v.productId, lob, policyType: v.isRenewal === true ? 'renewal' : 'new' })).rate;
 }
 
 /**
@@ -99,7 +96,7 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   const si = (k) => (k in amounts ? num(amounts[k]) : num(v[k]));
   const sumInsured = round2(num(v.totalSumInsured) || si('lossAndDamageCoverage') + si('bodilyInjury') + si('propertyDamage') + si('APPAtotalCoverage')
     || num((v.fireRiskDetails || {}).totalSumInsured));
-  const cRate = await commissionRate(v, insurerId);
+  const cRate = await commissionRate(v, insurerId, lob);
   return {
     lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, ctplTermYears: motor.ctplTermYears ?? null, appaSeats: motor.appaSeats ?? null,
       APPAtotalCoverage: amounts.APPAtotalCoverage, APPARate: motor.APPARate ?? null } : {}), netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,

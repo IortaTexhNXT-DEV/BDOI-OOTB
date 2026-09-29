@@ -9,8 +9,9 @@ import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { isoDate, nextNumber, params, round2, toNumber } from '../masters/helpers.js';
+import { isoDate, params, round2, toNumber } from '../masters/helpers.js';
 import { createInsurerRemittance } from '../disbursements/service.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -175,7 +176,7 @@ async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, bi
   const gross = round2(lines.reduce((s, l) => s + l.premium, 0));
   const comm = round2(lines.reduce((s, l) => s + l.commission, 0));
   const tax = round2(lines.reduce((s, l) => s + l.tax, 0));
-  const number = await nextNumber('remittance');
+  const number = await nextDocumentNumber('remittance');
   const currency = await getSetting('currency.default', 'PHP');
   const r = await c.query(`INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, remarks, created_by,
       remittance_date, due_date, policy_count, currency, bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, updated_by)
@@ -244,7 +245,7 @@ export async function processRemittances(ids, user) {
   const v = await validateRemittances(ids);
   const ok = v.results.filter((x) => x.valid);
   if (!ok.length) throw badRequest('None of the selected remittances can be processed', v.results.filter((x) => !x.valid).map((x) => ({ path: x.code || x.id, message: x.errors.join('; ') })));
-  const batchId = await nextNumber('remittance_batch');
+  const batchId = await nextDocumentNumber('remittance_batch');
   let total = 0;
   await withTransaction(async (c) => {
     for (const x of ok) {
@@ -490,7 +491,7 @@ export async function generateAgencyBills(b, user) {
     const pols = await eligiblePolicies({ agentUserId: ag.id, from, to, kind: 'agency-bill' });
     if (!pols.length && !ag.previousBalance) { skipped.push({ agencyCode: ag.agencyCode, reason: 'Nothing to bill' }); continue; }
     const lines = await buildLines(pols.map((p) => ({ policyId: p.id })));
-    const billNumber = await nextNumber('remittance_bill');
+    const billNumber = await nextDocumentNumber('remittance_bill');
     const id = await withTransaction((c) => insertRemittance(c, { kind: 'agency-bill', period, dueDate: due.toISOString().slice(0, 10), lines, billNumber, agency: { userId: ag.id, code: ag.agencyCode, name: ag.agencyName }, previousBalance: ag.previousBalance, configCode: cfg?.data?.code, date: billDate, userId: user.id }));
     bills.push(await getRemittance(id));
   }
@@ -557,7 +558,7 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
     created.push(await getRemittance(id));
   }
   const total = round2(created.reduce((s, r) => s + Number(r.netAmount), 0));
-  const ref = await nextNumber('remittance_batch');
+  const ref = await nextDocumentNumber('remittance_batch');
   await query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('execution', $1, $2, $3, $4, $5, $5)`,
     [ref, total, created.length ? 'Success' : 'No Items', JSON.stringify({ configCode: b.configCode || 'ALL', executionDate: (await businessToday()), recordsProcessed: created.reduce((s, r) => s + r.policyCount, 0),
       itemCount: created.length, remittanceIds: created.map((r) => r.id), durationMs: Date.now() - started, triggeredBy }), user.id]);

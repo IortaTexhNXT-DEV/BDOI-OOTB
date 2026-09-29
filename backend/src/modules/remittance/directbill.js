@@ -10,7 +10,7 @@
  *        Cr Brokerage Commission Income     (commission)
  *        Cr Output VAT Payable              (VAT, when direct_bill.broker_vat_registered)
  *   A return premium books the reverse. Agent / referrer commission accrues exactly as for broker-billed policies.
- * - Finance raises a numbered commission debit note (numbering.commission_debit_note.prefix) to an insurer for the unbilled
+ * - Finance raises a numbered commission debit note (commission_debit_note series, Master > Document Numbering) to an insurer for the unbilled
  *   items of a period. Maker-checker: the maker submits, a different user approves (finance.maker_checker_enabled). The
  *   commission was booked at issue, so approval opens the note for collection without a second posting.
  * - Collections from the insurer (partial allowed) post:
@@ -29,6 +29,8 @@ import { account, cashAccountFor, createJournal, reverseJournal } from '../accou
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { renderTemplate } from '../documents/common.js';
 import { formatMoney } from '../../lib/money.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
+import { resolveCreditTerms } from '../commission-rates/terms.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -45,9 +47,11 @@ export function normaliseBillingMode(v) {
 }
 
 /** Billing mode for a new policy: the requested one, else the configured default. */
-export async function billingModeFor(requested) {
+export async function billingModeFor(requested, insurerId = null) {
   const given = normaliseBillingMode(requested);
   if (given) return given;
+  // the insurer's default billing mode (insurer credit terms), else direct_bill.default_billing_mode
+  if (insurerId) return (await resolveCreditTerms(insurerId)).billingMode;
   return normaliseBillingMode(await getSetting('direct_bill.default_billing_mode', 'broker')) || 'broker';
 }
 
@@ -353,7 +357,7 @@ export async function raiseDebitNote(b, user) {
     if (!(amount > 0)) throw badRequest('Validation failed', [{ path: 'itemIds', message: 'The debit note total must be greater than zero' }]);
     const rate = await ewtRate();
     const commission = sum('commission');
-    const number = (await db.query('SELECT next_number($1, $2) AS n', ['commission_debit_note', await getSetting('numbering.commission_debit_note.prefix', 'DN')])).rows[0].n;
+    const number = await nextDocumentNumber('commission_debit_note', { db });
     const due = isoDate(b.dueDate) || addDays(dnDate, Number(await getSetting('direct_bill.debit_note_due_days', 30)) || 0);
     const submit = b.submit === true || b.submit === 'true';
     const d = (await db.query(`INSERT INTO commission_debit_notes(dn_number, insurance_company_id, period_from, period_to, dn_date, due_date, currency, gross_premium, commission, vat, amount,
@@ -477,7 +481,7 @@ export async function collectDebitNote(id, b, user) {
     if (!(applied > 0)) throw badRequest('Validation failed', [{ path: 'cashAmount', message: 'Enter the amount received' }]);
     if (applied > balance + EPS) throw badRequest('Validation failed', [{ path: 'cashAmount', message: `Cash ${cash.toFixed(2)} + tax withheld ${ewt.toFixed(2)} exceeds the balance of ${d.dn_number} (${balance.toFixed(2)})` }]);
     const cashAccount = b.cashAccount ? String(b.cashAccount) : await cashAccountFor(b.paymentMode);
-    const number = (await db.query('SELECT next_number($1, $2) AS n', ['dn_collection', await getSetting('numbering.dn_collection.prefix', 'DNC')])).rows[0].n;
+    const number = await nextDocumentNumber('dn_collection', { db });
     const insurer = (await db.query('SELECT name FROM insurance_companies WHERE id = $1', [d.insurance_company_id])).rows[0]?.name || 'insurer';
     const jv = await createJournal(db, {
       source: 'receipt', entryType: 'DIRECT_BILL_COLLECTION', transactionCode: number, referenceType: 'CommissionDebitNote', referenceId: d.id, date: receivedDate,

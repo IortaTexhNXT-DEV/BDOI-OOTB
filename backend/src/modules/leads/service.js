@@ -2,10 +2,11 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
-import { nextNumber, toDate, lobOf } from '../documents/common.js';
+import { toDate, lobOf } from '../documents/common.js';
 import { pick } from '../documents/tabular.js';
 import { quoteStatusIn } from '../documents/statuses.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 /** Fields the lead screens send, mapped to columns. Anything else is kept in `extra`. */
 const FIELD_MAP = {
@@ -61,7 +62,7 @@ export async function createLead(body, userId, db = null) {
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   await assertBirthDate(cols.birth_date);
   const run = async (c) => {
-    const number = await nextNumber(c, 'lead', 'lead');
+    const number = await nextDocumentNumber('lead', { db: c, unique: { table: 'leads', column: 'lead_number' } });
     const status = cols.status || await getSetting('leads.default_status', 'New');
     const data = { ...cols, status, lead_number: number, display_name: displayName(body), extra: JSON.stringify(extra),
       lob: cols.lob || 'MOTOR', lead_category: cols.lead_category || 'Retail', created_by: userId, owner_user_id: userId };

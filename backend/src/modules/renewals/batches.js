@@ -2,9 +2,10 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { nextNumber, round2, toDate } from '../claims/util.js';
+import { round2, toDate } from '../claims/util.js';
 import { enqueue, registerJobType } from './queue.js';
 import { ensureRenewal, sendNotice } from './service.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const QUEUE = 'renewal-notices';
 export const JOB_TYPE = 'renewal-batch-notices';
@@ -78,7 +79,7 @@ export async function createBatch(input, user) {
   if (!ids.length) throw badRequest('No policies selected for the batch');
   if (ids.length > max) throw badRequest(`A batch can hold at most ${max} policies`);
   const selected = new Set((input.policies || []).filter((p) => p && p.isSelected).map((p) => String(p.policyId || p.policyNumber || p.id)));
-  const number = await nextNumber('renewal_batch', 'numbering.renewal_batch.prefix', 'RB', { table: 'renewal_batches', column: 'batch_number' });
+  const number = await nextDocumentNumber('renewal_batch', { unique: { table: 'renewal_batches', column: 'batch_number' } });
   const id = await withTransaction(async (db) => {
     const b = await db.query('INSERT INTO renewal_batches(batch_number, status, criteria, created_by) VALUES ($1,\'Draft\',$2,$3) RETURNING id', [number, JSON.stringify(input.criteriaOption || {}), user?.username ?? null]);
     for (const pid of ids) {

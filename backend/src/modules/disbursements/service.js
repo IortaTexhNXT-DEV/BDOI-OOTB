@@ -9,8 +9,8 @@ import { createJournal, payableAccountFor, account, reverseJournal } from '../ac
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { findClient, findPolicy } from '../receipts/receivables.js';
 import { payLines, lineView } from '../commission/service.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
-const nextNo = async (db, seq, key, fallback) => (await db.query('SELECT next_number($1,$2) AS n', [seq, await getSetting(key, fallback)])).rows[0].n;
 const AGENT = 'Agent/Referrer';
 
 export const checkbookRow = (c) => ({
@@ -70,8 +70,8 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
   let referrer = null;
   if (payeeType === AGENT && b.referrerId) referrer = (await db.query('SELECT * FROM commission_referrers WHERE id = $1', [b.referrerId])).rows[0] || null;
   const payeeName = b.payeeName || referrer?.name || b.referrerName || (payeeType === 'Insurer' ? insurer?.name || b.insurerName : null) || client?.display_name || b.customerCode || payeeType;
-  const voucherNumber = await nextNo(db, 'voucher', 'numbering.voucher.prefix', 'PV');
-  const txn = b.transactionNumber || await nextNo(db, 'disbursement-txn', 'numbering.disbursement_txn.prefix', 'DT');
+  const voucherNumber = await nextDocumentNumber('voucher', { db, unique: { table: 'disbursements', column: 'voucher_number' } });
+  const txn = b.transactionNumber || await nextDocumentNumber('disbursement_txn', { db });
   const d = (await db.query(`INSERT INTO disbursements(voucher_number, payee_type, payee_id, payee_name, amount, payment_mode, bank_id, reference_no, purpose, status,
       voucher_date, transaction_number, transaction_code, transaction_description, department_code, branch_code, criteria, customer_code, client_id,
       referrer_id, referrer_name, insurance_company_id, insurer_name, policy_id, policy_number, instrument_currency, remarks, source, created_by)
@@ -153,7 +153,7 @@ export async function updateDisbursement(db, id, b, user) {
 export async function createInvoiceList(db, b, user) {
   const client = await findClient(db, b.customerCode);
   const policy = await findPolicy(db, b.policyNumber || b.policyId);
-  const number = await nextNo(db, 'invoice-list', 'numbering.invoice_list.prefix', 'IL');
+  const number = await nextDocumentNumber('invoice_list', { db });
   const total = round2(num(b.totalAmount) || num(b.lcAmount) || num(b.payables));
   const r = (await db.query(`INSERT INTO invoice_lists(invoice_number, disbursement_id, customer_code, client_id, insurance_company_id, policy_id, policy_number, receipt_id,
       payee_type, payables, outstanding, fc_amount, lc_amount, excess, bal_amount, vat, wht, comsub, total_amount, bank_code, bank_amount, is_invoice_paid, source, created_by)

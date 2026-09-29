@@ -7,7 +7,8 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
-import { assertChecker, fileUrl, isoDate, lastMonths, nextNumber, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
+import { assertChecker, fileUrl, isoDate, lastMonths, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
@@ -87,7 +88,7 @@ async function programValues(b, before) {
 
 export async function createProgram(b, user) {
   need(b, ['programName', 'applicableTo', 'startDate', 'endDate', 'targetMetric', 'calculationFrequency', 'baseTarget']);
-  const code = b.programCode ? String(b.programCode).trim() : await nextNumber('incentive_program');
+  const code = b.programCode ? String(b.programCode).trim() : await nextDocumentNumber('incentive_program');
   if (await one('SELECT 1 FROM incentive_programs WHERE lower(program_code) = lower($1)', [code])) throw conflict(`Program code ${code} already exists`);
   const v = await programValues(b);
   const cols = Object.keys(v);
@@ -257,7 +258,7 @@ export async function runCalculation(b, user) {
     }
   }
   const periodKey = period.from.slice(0, 7);
-  const batchId = await nextNumber('incentive_calc');
+  const batchId = await nextDocumentNumber('incentive_calc');
   await withTransaction(async (c) => {
     for (const l of lines) {
       const prior = (await c.query(`SELECT r.id, k.status FROM incentive_results r LEFT JOIN incentive_calculations k ON k.batch_id = r.calculation_id

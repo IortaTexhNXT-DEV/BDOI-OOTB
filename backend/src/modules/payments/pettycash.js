@@ -9,8 +9,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { account, createJournal } from '../accounting/lib/ledger.js';
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { notify } from '../notifications/router.js';
-
-const nextNo = async (db, seq, key, fallback) => (await db.query('SELECT next_number($1,$2) AS n', [seq, await getSetting(key, fallback)])).rows[0].n;
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const fundRow = (f) => ({ id: f.id, code: f.code, pettyCashCode: f.code, description: f.description, transactionNumber: f.transaction_number, transactionDate: f.transaction_date,
   fundSize: Number(f.fund_size), maxLimit: Number(f.max_limit), minimumCashbox: Number(f.minimum_cashbox), availableCash: Number(f.available_cash), bankCode: f.bank_code,
@@ -43,7 +42,7 @@ export async function createFund(db, b, user) {
   const exists = (await db.query('SELECT 1 FROM petty_cash_funds WHERE code = $1', [b.code])).rows[0];
   if (exists) throw conflict(`Petty cash code ${b.code} already exists`);
   const size = round2(num(b.fundSize));
-  const txn = await nextNo(db, 'petty-cash', 'numbering.petty_cash.prefix', 'PC');
+  const txn = await nextDocumentNumber('petty_cash', { db });
   const f = (await db.query(`INSERT INTO petty_cash_funds(code, description, transaction_number, transaction_date, fund_size, max_limit, minimum_cashbox, available_cash, bank_code, bank_account_code,
       main_account, sub_account, currency, branch_code, department_code, custodian_user_id, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$5,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
   [b.code, str(b.description), txn, isoDate(b.transactionDate) || (await today()), size, round2(num(b.maxLimit)), round2(num(b.minimumCashbox)), str(b.bankCode), str(b.bankAccountCode),
@@ -81,7 +80,7 @@ async function saveLines(db, id, lines) {
 }
 export async function createRequest(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode);
-  const no = await nextNo(db, 'petty-cash-request', 'numbering.petty_cash_request.prefix', 'PCR');
+  const no = await nextDocumentNumber('petty_cash_request', { db });
   const r = (await db.query(`INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, requester_user_id, request_date, department_code, branch_code, purpose, status, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`, [no, f.id, b.requesterName, b.requesterUserId || null, isoDate(b.requestDate) || (await today()), str(b.departmentCode), str(b.branchCode),
     str(b.purpose), b.submit ? 'submitted' : 'draft', user.id])).rows[0];
@@ -142,7 +141,7 @@ export async function createDisbursement(db, b, user) {
     if (amount > Number(req.total_amount)) throw badRequest(`Amount exceeds the approved request total of ${req.total_amount}`);
   }
   const net = round2(amount - wht);
-  const txn = await nextNo(db, 'petty-cash', 'numbering.petty_cash.prefix', 'PC');
+  const txn = await nextDocumentNumber('petty_cash', { db });
   const vatAccount = b.vatAccount || await account('input_vat'); const whtAccount = b.whtAccount || await account('wht_payable');
   const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_DISBURSEMENT', referenceType: 'PettyCash', transactionCode: txn, description: `Petty cash ${f.code}: ${b.remarks || req?.purpose || 'disbursement'}`,
     lines: [{ accountCode: b.expenseAccount, debit: round2(amount - vat), memo: b.remarks }, { accountCode: vatAccount, debit: vat, memo: 'Input VAT' },
@@ -160,7 +159,7 @@ export async function createReceipt(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode, true);
   const amount = round2(num(b.amount));
   if (!(amount > 0)) throw badRequest('amount must be greater than zero');
-  const no = await nextNo(db, 'petty-cash-receipt', 'numbering.petty_cash_receipt.prefix', 'PCRC');
+  const no = await nextDocumentNumber('petty_cash_receipt', { db });
   const credit = b.creditAccount || b.subAccountCode || await account('employee_advances');
   const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_RECEIPT', referenceType: 'PettyCash', transactionCode: no, description: `Cash returned to ${f.code}${b.requesterName ? ` by ${b.requesterName}` : ''}`,
     lines: [{ accountCode: await fundAccount(db, f), debit: amount, memo: b.remarks }, { accountCode: credit, credit: amount, memo: b.remarks }] }, user);
@@ -174,7 +173,7 @@ export async function createReplenishment(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode, true);
   const amount = round2(b.amount === undefined || b.amount === '' ? Number(f.fund_size) - Number(f.available_cash) : num(b.amount));
   if (!(amount > 0)) throw conflict(`Fund ${f.code} is already at its full size`);
-  const txn = await nextNo(db, 'petty-cash', 'numbering.petty_cash.prefix', 'PC');
+  const txn = await nextDocumentNumber('petty_cash', { db });
   const jv = await createJournal(db, { source: 'petty-cash', entryType: 'PETTY_CASH_REPLENISHMENT', referenceType: 'PettyCash', transactionCode: txn, description: `Replenishment of ${f.code}`,
     lines: [{ accountCode: await fundAccount(db, f), debit: amount, memo: 'Replenishment' }, { accountCode: await account('cash_in_bank'), credit: amount, memo: `Cheque for ${f.code}` }] }, user);
   const r = (await db.query(`INSERT INTO petty_cash_replenishments(transaction_number, transaction_code, fund_id, branch_code, bank_code, sub_account, amount, replenish_date, remarks, journal_id, created_by)

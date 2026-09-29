@@ -85,9 +85,13 @@ describe('system settings', () => {
     const tax = cat.body.data.groups.find((g) => g.group === 'tax');
     expect(tax.label).toBe('Taxes');
     expect(tax.items.find((i) => i.key === 'tax.vat_rate').type).toBe('number');
-    const put = await ctx.api('put', '/system-settings/configuration').send({ settings: { 'tax.vat_rate': '0.12', 'numbering.remittance.prefix': 'RMT', 'notification.email_enabled': true } });
+    const put = await ctx.api('put', '/system-settings/configuration').send({ settings: { 'tax.vat_rate': '0.12', 'remittance.default_due_days': 45, 'notification.email_enabled': true } });
     expect(put.status).toBe(200);
-    expect(put.body.data.items.find((i) => i.key === 'numbering.remittance.prefix').value).toBe('RMT');
+    expect(put.body.data.items.find((i) => i.key === 'remittance.default_due_days').value).toBe(45);
+    // numbering prefixes are a read-only mirror of Master > Document Numbering
+    const prefix = await ctx.api('put', '/system-settings/configuration').send({ settings: { 'numbering.remittance.prefix': 'RMT' } });
+    expect(prefix.status).toBe(400);
+    expect(prefix.body.errors[0]).toMatchObject({ path: 'numbering.remittance.prefix', message: 'Setting is read-only' });
     expect(put.body.data.items.find((i) => i.key === 'tax.vat_rate').value).toBe(0.12);
     const bad = await ctx.api('put', '/system-settings/configuration').send({ items: [{ key: 'tax.vat_rate', value: 'abc' }, { key: 'nope.key', value: 1 }, { key: 'product.component_kinds', value: [] }] });
     expect(bad.status).toBe(400);

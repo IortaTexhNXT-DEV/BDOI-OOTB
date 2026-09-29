@@ -150,6 +150,12 @@ export const menuList = [
         includes: ["/master/configuration/settings"],
       },
       {
+        id: 23,
+        name: "Document Numbering",
+        path: "/master/configuration/document-numbering",
+        includes: ["/master/configuration/document-numbering"],
+      },
+      {
         id: 21,
         name: "Schedules",
         path: "/master/configuration/schedules",
@@ -422,6 +428,12 @@ export const menuList = [
             name: "RI-Claims Account Setup",
             path: "/master/finance/ri-claim-account-setup",
             includes: ["/master/finance/ri-claim-account-setup"],
+          },
+          {
+            id: 40,
+            name: "Commission Rate Matrix",
+            path: "/master/finance/commission-rate-matrix",
+            includes: ["/master/finance/commission-rate-matrix"],
           },
           {
             id: 13,

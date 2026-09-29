@@ -122,6 +122,8 @@ function coerce(f, v, errors) {
     case 'number': case 'integer': {
       const n = typeof v === 'number' ? v : Number(String(v).replace(/,/g, ''));
       if (!Number.isFinite(n) || (f.type === 'integer' && !Number.isInteger(n))) { errors.push({ path: f.name, message: `${label} must be a ${f.type}` }); return undefined; }
+      if (typeof f.min === 'number' && n < f.min) errors.push({ path: f.name, message: `${label} must be at least ${f.min}` });
+      if (typeof f.max === 'number' && n > f.max) errors.push({ path: f.name, message: `${label} must be at most ${f.max}` });
       return n;
     }
     case 'boolean': return asBool(v);

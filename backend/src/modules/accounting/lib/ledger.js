@@ -7,6 +7,7 @@
 import { getSetting } from '../../../lib/settings.js';
 import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
+import { nextDocumentNumber } from '../../../lib/numbering.js';
 
 export const periodOf = (date) => String(date).slice(0, 7);
 const OPEN_STATES = ['draft', 'for-approval', 'approved', 'pending'];
@@ -29,11 +30,6 @@ export async function cashAccountFor(paymentMode) {
 export async function assertPeriodOpen(db, date) {
   const r = (await db.query('SELECT status FROM accounting_periods WHERE period = $1', [periodOf(date)])).rows[0];
   if (r?.status === 'closed') throw conflict(`Accounting period ${periodOf(date)} is closed`);
-}
-
-async function nextJournalNumber(db) {
-  const prefix = await getSetting('numbering.journal.prefix', 'JV');
-  return (await db.query('SELECT next_number($1, $2) AS n', ['journal', prefix])).rows[0].n;
 }
 
 function normaliseLines(lines) {
@@ -82,7 +78,7 @@ export async function createJournal(db, j, user) {
   const status = j.status || (autoPost ? 'posted' : 'pending');
   if (status === 'posted') await assertPeriodOpen(db, date);
   const currency = j.currency || (await getSetting('currency.default', 'PHP'));
-  const number = await nextJournalNumber(db);
+  const number = await nextDocumentNumber('journal', { db });
   const h = (await db.query(`INSERT INTO journal_vouchers(jv_number, jv_date, description, status, total_debit, total_credit, source, kind,
       transaction_code, entry_type, entry_sub_type, reference_type, reference_id, client_id, policy_id, policy_number, currency, due_date,
       period, requires_approval, reversal_of, correction_of, created_by)

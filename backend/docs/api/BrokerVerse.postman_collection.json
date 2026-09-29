@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (568 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (580 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -7546,6 +7546,528 @@
       ]
     },
     {
+      "name": "Commission Rate Matrix",
+      "item": [
+        {
+          "name": "Commission rate matrix rows (filters: insuranceCompanyId, productId, lineOfBusiness, policyType, active, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates?insuranceCompanyId=3&active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates"
+              ],
+              "query": [
+                {
+                  "key": "insuranceCompanyId",
+                  "value": "3"
+                },
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Commission rate matrix rows (filters: insuranceCompanyId, productId, lineOfBusiness, policyType, active, search)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: read:masters, write:masters, read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates?insuranceCompanyId=3&active=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates"
+                  ],
+                  "query": [
+                    {
+                      "key": "insuranceCompanyId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "active",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Commission rate matrix rows (filters: insuranceCompanyId, productId, lineOfBusiness, policyType, active, search)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: read:masters, write:masters, read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"insuranceCompanyId\": 3,\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"productId\": 1,\n      \"productName\": \"Motor Car\",\n      \"lineOfBusiness\": null,\n      \"policyType\": \"new\",\n      \"rate\": 0.175,\n      \"ratePercent\": 17.5,\n      \"effectiveFrom\": \"2026-01-01\",\n      \"effectiveTo\": null,\n      \"active\": true,\n      \"level\": \"insurer + product\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates"
+              ]
+            },
+            "description": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCompanyId\": 3,\n  \"productId\": 1,\n  \"policyType\": \"new\",\n  \"rate\": 0.175,\n  \"effectiveFrom\": \"2026-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates"
+                  ]
+                },
+                "description": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insuranceCompanyId\": 3,\n  \"productId\": 1,\n  \"policyType\": \"new\",\n  \"rate\": 0.175,\n  \"effectiveFrom\": \"2026-01-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 1,\n    \"productName\": \"Motor Car\",\n    \"lineOfBusiness\": null,\n    \"policyType\": \"new\",\n    \"rate\": 0.175,\n    \"ratePercent\": 17.5,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true,\n    \"level\": \"insurer + product\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One commission rate row",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One commission rate row\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: read:masters, write:masters, read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One commission rate row\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: read:masters, write:masters, read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 1,\n    \"productName\": \"Motor Car\",\n    \"lineOfBusiness\": null,\n    \"policyType\": \"new\",\n    \"rate\": 0.175,\n    \"ratePercent\": 17.5,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true,\n    \"level\": \"insurer + product\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a commission rate (same overlap rule)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a commission rate (same overlap rule)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 0.18,\n  \"effectiveTo\": \"2026-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a commission rate (same overlap rule)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate\": 0.18,\n  \"effectiveTo\": \"2026-12-31\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 1,\n    \"productName\": \"Motor Car\",\n    \"lineOfBusiness\": null,\n    \"policyType\": \"new\",\n    \"rate\": 0.175,\n    \"ratePercent\": 17.5,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true,\n    \"level\": \"insurer + product\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a commission rate row",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a commission rate row\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a commission rate row\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 1,\n    \"productName\": \"Motor Car\",\n    \"lineOfBusiness\": null,\n    \"policyType\": \"new\",\n    \"rate\": 0.175,\n    \"ratePercent\": 17.5,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true,\n    \"level\": \"insurer + product\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insurer credit terms with fallbacks: premium payment warranty days, remittance terms days, default billing mode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates/credit-terms/:insurerId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates",
+                "credit-terms",
+                ":insurerId"
+              ],
+              "variable": [
+                {
+                  "key": "insurerId",
+                  "value": "",
+                  "description": "insurerId (path parameter)"
+                }
+              ]
+            },
+            "description": "Insurer credit terms with fallbacks: premium payment warranty days, remittance terms days, default billing mode\n\nFront-end touchpoint: Master > Generals > Insurance Company\n\nAccess: read:masters, write:masters, read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates/credit-terms/:insurerId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates",
+                    "credit-terms",
+                    ":insurerId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "insurerId",
+                      "value": "",
+                      "description": "insurerId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Insurer credit terms with fallbacks: premium payment warranty days, remittance terms days, default billing mode\n\nFront-end touchpoint: Master > Generals > Insurance Company\n\nAccess: read:masters, write:masters, read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"premiumWarrantyDays\": 30,\n    \"remittanceTermsDays\": 30,\n    \"billingMode\": \"broker\",\n    \"source\": {\n      \"premiumWarrantyDays\": \"setting\",\n      \"remittanceTermsDays\": \"setting\",\n      \"billingMode\": \"setting\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Test rate: the commission rate that applies to an insurer / product / line of business / policy type on a date, and where it comes from",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/commission-rates/resolve?insurerId=3&productId=1&lob=motor&policyType=new&date=2026-09-29",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission-rates",
+                "resolve"
+              ],
+              "query": [
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                },
+                {
+                  "key": "productId",
+                  "value": "1"
+                },
+                {
+                  "key": "lob",
+                  "value": "motor"
+                },
+                {
+                  "key": "policyType",
+                  "value": "new"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-09-29"
+                }
+              ]
+            },
+            "description": "Test rate: the commission rate that applies to an insurer / product / line of business / policy type on a date, and where it comes from\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix > Test rate\n\nAccess: read:masters, write:masters, read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/commission-rates/resolve?insurerId=3&productId=1&lob=motor&policyType=new&date=2026-09-29",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission-rates",
+                    "resolve"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "productId",
+                      "value": "1"
+                    },
+                    {
+                      "key": "lob",
+                      "value": "motor"
+                    },
+                    {
+                      "key": "policyType",
+                      "value": "new"
+                    },
+                    {
+                      "key": "date",
+                      "value": "2026-09-29"
+                    }
+                  ]
+                },
+                "description": "Test rate: the commission rate that applies to an insurer / product / line of business / policy type on a date, and where it comes from\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix > Test rate\n\nAccess: read:masters, write:masters, read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rate\": 0.175,\n    \"source\": \"matrix\",\n    \"ruleId\": 1,\n    \"level\": \"insurer + product\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Dashboards",
       "item": [
         {
@@ -9010,6 +9532,442 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Disbursements exported\",\n  \"data\": {\n    \"url\": \"http://host/api/s3/object/print/…pdf?exp=1767225600&sig=...\",\n    \"filename\": \"disbursements.pdf\",\n    \"count\": 3\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Document Numbering",
+      "item": [
+        {
+          "name": "Document series with the current counter and a preview of the next number (filters: module, search, active)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering?module=finance&search=receipt&active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering"
+              ],
+              "query": [
+                {
+                  "key": "module",
+                  "value": "finance"
+                },
+                {
+                  "key": "search",
+                  "value": "receipt"
+                },
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Document series with the current counter and a preview of the next number (filters: module, search, active)\n\nFront-end touchpoint: Master > Document Numbering\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering?module=finance&search=receipt&active=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering"
+                  ],
+                  "query": [
+                    {
+                      "key": "module",
+                      "value": "finance"
+                    },
+                    {
+                      "key": "search",
+                      "value": "receipt"
+                    },
+                    {
+                      "key": "active",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Document series with the current counter and a preview of the next number (filters: module, search, active)\n\nFront-end touchpoint: Master > Document Numbering\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"name\": \"Policy\",\n      \"module\": \"policy\",\n      \"prefix\": \"POL\",\n      \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n      \"seqWidth\": 5,\n      \"resetRule\": \"yearly\",\n      \"startNumber\": 1,\n      \"active\": true,\n      \"periodKey\": \"2026\",\n      \"currentValue\": 41,\n      \"nextNumber\": 42,\n      \"nextPreview\": \"POL-2026-00042\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"module\": \"policy\",\n      \"count\": 5\n    }\n  ],\n  \"tokens\": [\n    \"{PREFIX}\",\n    \"{YYYY}\",\n    \"{YY}\",\n    \"{MM}\",\n    \"{FY}\",\n    \"{BRANCH}\",\n    \"{LOB}\",\n    \"{SEQ}\"\n  ],\n  \"resetRules\": [\n    \"yearly\",\n    \"fiscal_yearly\",\n    \"monthly\",\n    \"never\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "One document series",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "One document series\n\nFront-end touchpoint: Master > Document Numbering\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One document series\n\nFront-end touchpoint: Master > Document Numbering\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"nextNumber\": 42,\n    \"nextPreview\": \"POL-2026-00042\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a series (name, module, prefix, pattern, seqWidth, resetRule, startNumber, active, description); prefixes are unique across active series",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a series (name, module, prefix, pattern, seqWidth, resetRule, startNumber, active, description); prefixes are unique across active series\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prefix\": \"POL\",\n  \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n  \"seqWidth\": 6,\n  \"resetRule\": \"yearly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a series (name, module, prefix, pattern, seqWidth, resetRule, startNumber, active, description); prefixes are unique across active series\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prefix\": \"POL\",\n  \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n  \"seqWidth\": 6,\n  \"resetRule\": \"yearly\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"nextNumber\": 42,\n    \"nextPreview\": \"POL-2026-00042\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set the next number of the current period; forward only (never at or below a number already issued)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering/:code/next-number",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering",
+                ":code",
+                "next-number"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Set the next number of the current period; forward only (never at or below a number already issued)\n\nFront-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nextNumber\": 1001\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering/:code/next-number",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering",
+                    ":code",
+                    "next-number"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Set the next number of the current period; forward only (never at or below a number already issued)\n\nFront-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nextNumber\": 1001\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"nextNumber\": 1001,\n    \"nextPreview\": \"POL-2026-01001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering/:code/preview?pattern={PREFIX}-{BRANCH}-{YY}{MM}-{SEQ}&prefix=POL&seqWidth=6&resetRule=monthly&branch=MKT",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering",
+                ":code",
+                "preview"
+              ],
+              "query": [
+                {
+                  "key": "pattern",
+                  "value": "{PREFIX}-{BRANCH}-{YY}{MM}-{SEQ}"
+                },
+                {
+                  "key": "prefix",
+                  "value": "POL"
+                },
+                {
+                  "key": "seqWidth",
+                  "value": "6"
+                },
+                {
+                  "key": "resetRule",
+                  "value": "monthly"
+                },
+                {
+                  "key": "branch",
+                  "value": "MKT"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering/:code/preview?pattern={PREFIX}-{BRANCH}-{YY}{MM}-{SEQ}&prefix=POL&seqWidth=6&resetRule=monthly&branch=MKT",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering",
+                    ":code",
+                    "preview"
+                  ],
+                  "query": [
+                    {
+                      "key": "pattern",
+                      "value": "{PREFIX}-{BRANCH}-{YY}{MM}-{SEQ}"
+                    },
+                    {
+                      "key": "prefix",
+                      "value": "POL"
+                    },
+                    {
+                      "key": "seqWidth",
+                      "value": "6"
+                    },
+                    {
+                      "key": "resetRule",
+                      "value": "monthly"
+                    },
+                    {
+                      "key": "branch",
+                      "value": "MKT"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"valid\": true,\n    \"errors\": [],\n    \"preview\": \"POL-MKT-2609-000001\",\n    \"periodKey\": \"2026-09\",\n    \"currentValue\": 0,\n    \"nextNumber\": 1\n  }\n}"
             }
           ]
         }
@@ -41353,7 +42311,7 @@
             "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"numbering.policy.prefix\": \"POL\",\n    \"notification.email_enabled\": true\n  }\n}",
+              "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"general.app_title\": \"BrokerVerse\",\n    \"notification.email_enabled\": true\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -41385,7 +42343,7 @@
                 "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"numbering.policy.prefix\": \"POL\",\n    \"notification.email_enabled\": true\n  }\n}",
+                  "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"general.app_title\": \"BrokerVerse\",\n    \"notification.email_enabled\": true\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"

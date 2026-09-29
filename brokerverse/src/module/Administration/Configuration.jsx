@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
@@ -136,6 +138,7 @@ const fromText = (text, original) => {
  * limits, notification switches...) is stored in the database and edited here, not in code.
  */
 const Configuration = () => {
+  const { t } = useTranslation();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
   const [draft, setDraft] = useState({});
@@ -156,7 +159,8 @@ const Configuration = () => {
 
   const groups = useMemo(() => {
     const g = {};
-    rows.forEach((r) => {
+    // document number prefixes are a read-only mirror of Master > Document Numbering, edited there
+    rows.filter((r) => r.group !== "numbering").forEach((r) => {
       (g[r.group] = g[r.group] || []).push(r);
     });
     // tabs in alphabetical order of their labels, General first
@@ -245,6 +249,10 @@ const Configuration = () => {
         </div>
         <Button label="Save changes" icon="pi pi-check" onClick={save} loading={saving} disabled={!Object.keys(draft).length} />
       </div>
+      <p className="admin__note">
+        <i className="pi pi-info-circle" /> {t("numberingMasters.documentNumbering.configurationNote")}{" "}
+        <Link to="/master/configuration/document-numbering">{t("numberingMasters.documentNumbering.openScreen")}</Link>
+      </p>
       <TabView scrollable className="admin__tabs">
         {Object.entries(groups).map(([group, items]) => (
           <TabPanel key={group} header={groupLabel(group)}>

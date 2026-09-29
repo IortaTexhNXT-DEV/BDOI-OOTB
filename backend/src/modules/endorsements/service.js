@@ -3,12 +3,13 @@ import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/router.js';
-import { nextNumber, toDate, num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
+import { toDate, num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
 import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses.js';
 import { getPolicyRow, createReceivable } from '../policies/service.js';
 import { publicUrl } from '../uploads/storage.js';
 import { premiumBreakdown } from '../quotations/premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -146,11 +147,15 @@ export async function createEndorsement(body, userId) {
     const newGross = num(changes.coverageChanges?.Grosspremium ?? changes.coverageChanges?.grossPremium);
     if (newGross) delta = round2(newGross - Number(policy.premium_total));
   }
-  const number = await nextNumber(null, 'endorsement', 'endorsement');
-  const r = await one(`INSERT INTO endorsements(endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks,
-      endorsement_type_ids, is_cancel, cancellation_type, created_by) VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
-  [number, policy.id, policy.client_id, await typeOf(ids, isCancel), JSON.stringify(changes), round2(delta), toDate(effectiveDate) || toDate(new Date()), remarks || null,
-    JSON.stringify(ids), isCancel, cancellationType || (isCancel ? 'FULL' : null), userId]);
+  const type = await typeOf(ids, isCancel);
+  // number and row in one transaction: a failed insert does not use up a number
+  const r = await withTransaction(async (db) => {
+    const number = await nextDocumentNumber('endorsement', { db, unique: { table: 'endorsements', column: 'endorsement_number' } });
+    return (await db.query(`INSERT INTO endorsements(endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks,
+        endorsement_type_ids, is_cancel, cancellation_type, created_by) VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+    [number, policy.id, policy.client_id, type, JSON.stringify(changes), round2(delta), toDate(effectiveDate) || toDate(new Date()), remarks || null,
+      JSON.stringify(ids), isCancel, cancellationType || (isCancel ? 'FULL' : null), userId])).rows[0];
+  });
   return getEndorsementRow(r.id);
 }
 
