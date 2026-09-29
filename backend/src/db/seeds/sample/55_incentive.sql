@@ -1,3 +1,4 @@
+-- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Incentive programs and calculation batches for the sample agents (seeded in 53_remittance.sql). Idempotent.
 INSERT INTO incentive_programs(name, description, metric, target, period_from, period_to, status, program_code, program_type, applicable_to, target_metric, stretch_target, currency,
                                calculation_frequency, structure, created_by)

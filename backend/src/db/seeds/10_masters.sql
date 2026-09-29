@@ -79,9 +79,7 @@ SELECT v.kind, t.id, v.label, v.amount, v.premium FROM (VALUES
  ('bi','TPL','Bodily Injury 100,000',100000,560),('pd','TPL','Property Damage 100,000',100000,620),('pa','TPL','Auto PA 50,000 / seat',50000,150)) AS v(kind,tcode,label,amount,premium)
 JOIN policy_types t ON t.code = v.tcode
 WHERE NOT EXISTS (SELECT 1 FROM coverages c WHERE c.label = v.label AND c.policy_type_id = t.id AND c.kind = v.kind);
-INSERT INTO signatories(name, designation)
-SELECT * FROM (VALUES ('Maria Regina Cruz','President & CEO'),('Jose Antonio Reyes','VP - Underwriting'),('Ana Patricia Lim','Finance Director')) AS v(n,d)
-WHERE NOT EXISTS (SELECT 1 FROM signatories s WHERE s.name = v.n);
+-- Head office branch (renamed / extended by the business in Master > Branch).
 INSERT INTO branches(code, name, address)
-SELECT * FROM (VALUES ('HO','Head Office','Makati City'),('CEB','Cebu Branch','Cebu City'),('DAV','Davao Branch','Davao City')) AS v(c,n,a)
+SELECT * FROM (VALUES ('HO','Head Office','Makati City')) AS v(c,n,a)
 WHERE NOT EXISTS (SELECT 1 FROM branches b WHERE b.code = v.c);

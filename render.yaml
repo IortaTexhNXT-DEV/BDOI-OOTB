@@ -13,7 +13,7 @@ services:
     runtime: docker
     rootDir: backend
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/health
+    healthCheckPath: /api/health     # 200 when ready (database reachable, migrations applied), 503 otherwise
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -32,6 +32,10 @@ services:
       # The API refuses to start in production without JWT_SECRET, DATA_ENCRYPTION_KEY, CORS_ORIGINS and PUBLIC_BASE_URL.
       - key: UPLOAD_DIR
         value: /app/uploads
+      - key: SEED_SAMPLE_DATA
+        value: "false"         # reference data only (default in production); "true" seeds demo leads, policies, claims... (UAT only)
+      - key: SCHEDULER_ENABLED
+        value: "true"          # scheduled jobs; safe with several instances (one run per job, PostgreSQL advisory lock)
     disk:
       name: uploads
       mountPath: /app/uploads

@@ -1,3 +1,4 @@
+-- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Sample clients, policies and receivables used by the claims and renewals samples (fictional; idempotent by id).
 -- Dates are relative to the day the seed runs so the pipeline, ageing and grace-period views always have rows.
 INSERT INTO clients(id, client_code, client_type, first_name, last_name, company_name, display_name, email, phone, address, city, state, country, postal_code, source, owner_user_id, created_by)

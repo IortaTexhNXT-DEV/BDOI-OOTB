@@ -1,3 +1,4 @@
+-- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Sample claims across the lifecycle with status history and audit trail (fictional; idempotent by id).
 INSERT INTO claims(id, claim_number, policy_id, client_id, status, loss_date, reported_date, loss_type, description, estimate_amount, approved_amount,
                    settled_amount, settled_at, handler_user_id, lob, claim_type, priority, loss_time, loss_address, loss_city, loss_province,

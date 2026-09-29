@@ -12,6 +12,7 @@ import { errorHandler } from './lib/errors.js';
 import { verify } from './lib/auth.js';
 import { apiRateLimit } from './lib/rateLimit.js';
 import { signFileLinks } from './lib/fileLinks.js';
+import { healthHandler, livenessHandler } from './lib/health.js';
 
 /**
  * Log redaction: bearer tokens, cookies and credentials never reach the log store. Query parameters that carry
@@ -84,7 +85,7 @@ export async function createApp() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins, exposedHeaders: ['x-request-id', 'Retry-After', 'Content-Disposition'] }));
   app.use(pinoHttp({
-    logger, genReqId: (req) => req.id, autoLogging: { ignore: (req) => req.url === '/api/health' },
+    logger, genReqId: (req) => req.id, autoLogging: { ignore: (req) => req.url === '/api/health' || req.url === '/api/health/live' },
     serializers: { req: redactRequest },
   }));
   app.use(apiRateLimit(rateKey));
@@ -93,7 +94,9 @@ export async function createApp() {
 
   const api = express.Router();
   app.use('/api', api);
-  api.get('/health', (_req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+  // Load-balancer readiness (database + migrations, 503 when not ready) and liveness (process only): src/lib/health.js
+  api.get('/health', healthHandler);
+  api.get('/health/live', livenessHandler);
   for (const m of await loadModules()) {
     api.use(m.mount || '/', m.default);
     for (const [prefix, r] of m.extraMounts || []) api.use(prefix, r);

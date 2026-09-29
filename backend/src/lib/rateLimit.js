@@ -75,7 +75,7 @@ export function takeApi(key, { max, windowMs }, now = Date.now()) {
 export function apiRateLimit(keyOf = (req) => `ip:${req.ip || 'unknown'}`) {
   return async (req, res, next) => {
     try {
-      if (req.path === '/api/health' || req.method === 'OPTIONS') return next();
+      if (req.path === '/api/health' || req.path === '/api/health/live' || req.method === 'OPTIONS') return next();
       const limits = await apiLimits();
       const r = takeApi(`api:${keyOf(req)}`, limits);
       if (!r.limited) return next();

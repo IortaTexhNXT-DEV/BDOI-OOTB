@@ -19,8 +19,9 @@ other branches.
    | brokerverse-api | PUBLIC_BASE_URL | the API URL, e.g. `https://brokerverse-api.onrender.com` (required) |
    | brokerverse-web | REACT_APP_BASE_URL | the API URL + `/api` |
 
-4. Apply. The API migrates and seeds the database on start (settings, masters, chart of accounts,
-   scheduled jobs, the administrator `BrokerVerse`). Open the web URL and sign in.
+4. Apply. The API migrates and seeds the database on start with reference data only (settings, masters, chart of
+   accounts, product templates, report catalogue, scheduled jobs, the administrator `BrokerVerse`; see
+   [Seed data](#seed-data-reference-and-sample)). Open the web URL and sign in.
 5. Change the administrator password at once, then create the persona users under
    Master > Generals > User Management.
 
@@ -46,6 +47,67 @@ example Caddy or an AWS/Azure load balancer) in front of port 8080 for the publi
 For a trial on one machine without a public address, run the API in development mode instead:
 `NODE_ENV=development PUBLIC_BASE_URL=http://localhost:8080 CORS_ORIGINS=http://localhost:8080 docker compose up --build`.
 Development mode skips the production start-up check below; never use it for real data.
+
+## Seed data: reference and sample
+
+On every start the API applies the migrations and then the seed, which is idempotent (existing rows and
+administrator edits are kept). The seed has two parts (classification per file in `backend/src/db/seeds/README.md`):
+
+- **Reference data**, always: roles and permissions, the administrator `BrokerVerse`, configuration settings,
+  scheduled jobs, Philippine geography and postal codes, currencies, banks, insurers, products and policy types,
+  vehicle master, covers, the head office branch, master screen definitions and reference master records, the chart
+  of accounts, product templates with the motor / CTPL tariff, the report catalogue, direct-bill and security
+  configuration.
+- **Sample / demo data**, only when `SEED_SAMPLE_DATA` is on: fictional leads, clients, quotations, policies,
+  endorsements, receivables, receipts, collections, disbursements, petty cash, commissions and referrers,
+  remittances, reinsurers / treaties / cessions, incentive programmes and calculations, claims, renewals, journal
+  vouchers, demo branches / signatories / master records and six sample users (`agent.*`, `fin.approver`).
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `SEED_SAMPLE_DATA` | `true` in development and test, `false` with `NODE_ENV=production` | Seed the sample / demo data. An explicit `true` / `false` wins (e.g. `true` on a UAT or demo site). The API logs a warning when it is on in production. |
+
+Removing demo data from a database that was started with it (for example a UAT database promoted to production):
+stop the API instances, take a backup, then
+
+```
+cd backend
+CONFIRM_PURGE=yes npm run purge:sample                        # dry run: row counts per table, nothing changed
+CONFIRM_PURGE=yes npm run purge:sample -- --execute           # purge, in one transaction
+CONFIRM_PURGE=yes npm run purge:sample -- --execute --keep-users=jdoe,mreyes   # also remove every other user
+```
+
+(In the container: `docker compose exec -e CONFIRM_PURGE=yes api node scripts/purge-sample-data.js`.) The script
+refuses to run without `CONFIRM_PURGE=yes`, is a dry run unless `--execute` is given, and runs in one transaction.
+It empties **all** transaction tables (leads to journals, claims, renewals, notifications, job history, document
+numbering counters), not only the seeded rows, so run it before go-live and never on a live book. It deletes the
+sample master rows and the sample users (with `--keep-users`, every user except `BrokerVerse` and those listed),
+keeps all reference data and the audit trail (`--purge-audit` also empties `audit_log` and `login_history`) and
+records the purge in the audit trail. Uploaded files of removed documents stay in `UPLOAD_DIR`; clear that
+directory too if nothing real was uploaded. Then set `SEED_SAMPLE_DATA=false` (or remove it) before starting the API
+again, or the demo data is seeded back.
+
+## Scheduled jobs and several API instances
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `SCHEDULER_ENABLED` | `true` | Run the cron scheduler (Master > Schedules jobs) on this instance. `false` on instances that must not run jobs; "Run now" still works there. |
+
+Several instances may run the scheduler: every job run takes a PostgreSQL advisory lock keyed on the job code
+(`pg_try_advisory_lock`), so a job never runs twice at the same time, and a scheduled run is skipped when another
+instance has already started the same job in the same cron minute. A skipped run records nothing. "Run now" on a
+job that is running elsewhere answers `Job skipped`.
+
+## Health and readiness
+
+| Endpoint | Use | Answer |
+|---|---|---|
+| `GET /api/health` | load balancer / readiness check (Render `healthCheckPath`, Docker `HEALTHCHECK`) | `200` with `{"status":"ok","ready":true,"database":{"reachable":true,"latencyMs":1},"pendingMigrations":0,...}` when start-up (migrations and seed) has finished, PostgreSQL answers and no migration is pending; otherwise `503` with `ready: false` and `status` `starting` or `unavailable` (e.g. `database.reachable: false`). It also answers `503` once the instance starts shutting down, so traffic drains. |
+| `GET /api/health/live` | liveness (restart) probe | `200` while the process serves HTTP; no database check |
+| `GET /api/version` | monitoring | version, commit, database reachability, pending migrations |
+
+Health endpoints need no sign-in, are not rate limited and are not logged. The database check times out after
+`HEALTH_DB_TIMEOUT_MS` (default 2000 ms).
 
 ## Production start-up check
 
@@ -100,7 +162,8 @@ limits are kept in memory per API process; with several API instances each keeps
 
 | Check | How |
 |---|---|
-| API up | `GET <api>/api/health` returns `{"status":"ok"}` |
+| API up | `GET <api>/api/health` returns 200 with `"ready":true` and `"database":{"reachable":true,...}` |
+| No demo data | Leads, Clients and Policies are empty on a production start (`SEED_SAMPLE_DATA` off) |
 | Sign in | BrokerVerse with the ADMIN_PASSWORD |
 | Configuration | Master > System Settings and Master > Configuration load |
 | Schedules | Master > Schedules lists the jobs; run "Receivable ageing" once |
@@ -109,6 +172,8 @@ limits are kept in memory per API process; with several API instances each keeps
 ## Before production use
 
 - Change the default administrator password, and never keep the example value in `docker-compose.yml`.
+- Keep `SEED_SAMPLE_DATA` off (the production default); if the database ever ran with it on, purge the demo data
+  (`npm run purge:sample`, above) before real business is entered.
 - Set up daily database backups (Render does this on paid plans; with Docker, schedule `pg_dump`).
 - Review the open items in `docs/e2e/DEFECTS.md`, in particular payment capture and KYC at policy issue.
 - The container cannot be tested inside this development sandbox (no Docker daemon); the same backend
