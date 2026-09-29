@@ -42,6 +42,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/55_incentive.sql` | sample | incentive programmes, calculations, results |
 | `56_chart_of_accounts_masters.sql` | reference | Main / Sub Account masters mirroring the chart of accounts |
 | `56_motor_tariff.sql`, `57_ctpl_inclusive_tariff.sql` | reference | motor tariff and CTPL premiums on the motor templates |
+| `58_insurer_credit_terms.sql` | reference | credit-term fields (premium warranty days, remittance terms, default billing mode) on the insurance company master screen |
 | `60_reports.sql` | reference | report settings and the report catalogue |
 | `61_direct_bill.sql` | reference | direct-bill configuration and report columns |
 | `70_security.sql` | reference | security configuration |

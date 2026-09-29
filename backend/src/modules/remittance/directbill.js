@@ -30,6 +30,7 @@ import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/ht
 import { renderTemplate } from '../documents/common.js';
 import { formatMoney } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { resolveCreditTerms } from '../commission-rates/terms.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -46,9 +47,11 @@ export function normaliseBillingMode(v) {
 }
 
 /** Billing mode for a new policy: the requested one, else the configured default. */
-export async function billingModeFor(requested) {
+export async function billingModeFor(requested, insurerId = null) {
   const given = normaliseBillingMode(requested);
   if (given) return given;
+  // the insurer's default billing mode (insurer credit terms), else direct_bill.default_billing_mode
+  if (insurerId) return (await resolveCreditTerms(insurerId)).billingMode;
   return normaliseBillingMode(await getSetting('direct_bill.default_billing_mode', 'broker')) || 'broker';
 }
 

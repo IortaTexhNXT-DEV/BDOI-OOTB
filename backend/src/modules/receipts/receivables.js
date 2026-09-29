@@ -9,6 +9,8 @@ import { account, cashAccountFor, createJournal, reverseJournal } from '../accou
 import { round2, today } from '../accounting/lib/http.js';
 import { onPolicyPremiumCollected } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { resolveCommissionRate } from '../commission-rates/resolve.js';
+import { resolveCreditTerms } from '../commission-rates/terms.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
   ic.name AS insurer_name, ic.short_name AS insurer_short, ic.commission_rate AS insurer_commission_rate, pr.name AS product_name, pr.line AS product_line
@@ -36,7 +38,8 @@ export async function commissionFor(policy, amount, breakdown, source) {
   if (breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null) return round2(breakdown.commissionAmount);
   const base = breakdown.netPremium > 0 ? breakdown.netPremium : amount;
   if (source === 'policy' && Number(policy.commission_amount) > 0 && Math.abs(Number(policy.premium_total) - amount) < 0.01) return round2(policy.commission_amount);
-  const rate = Number(policy.insurer_commission_rate) || Number(await getSetting('commission.default_rate', 0.15));
+  const rate = (await resolveCommissionRate({ insurerId: policy.insurance_company_id, productId: policy.product_id, lob: policy.lob || policy.product_line,
+    policyType: source === 'renewal' || policy.renewed_from ? 'renewal' : 'new', date: policy.inception_date })).rate;
   return round2(Math.min(base * rate, amount));
 }
 
@@ -48,7 +51,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   if (policy.billing_mode === 'direct') throw badRequest(`Policy ${policy.policy_number} is direct billed: the client pays the insurer, so no premium is billed or collected by the broker`);
   const gross = round2(amount);
   if (!(gross > 0)) throw badRequest('Receivable amount must be greater than zero');
-  const creditDays = Number(await getSetting('collections.default_credit_days', 30));
+  const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db })).premiumWarrantyDays;
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   const commission = await commissionFor(policy, gross, breakdown, source);
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays])).rows[0].d;

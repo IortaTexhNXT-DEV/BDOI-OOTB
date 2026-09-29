@@ -239,7 +239,7 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
 export async function issuePolicy(db, src, body, userId) {
   const cols = await columnsFrom(db, body);
   const { billingModeFor } = await import('../remittance/directbill.js');
-  const billingMode = await billingModeFor(body.billingMode ?? (body.isDirectBilled === true ? 'direct' : null) ?? src.billingMode);
+  const billingMode = await billingModeFor(body.billingMode ?? (body.isDirectBilled === true ? 'direct' : null) ?? src.billingMode, cols.insurance_company_id || src.insuranceCompanyId);
   // product from the quotation, else the product whose code is the line of business (MOTOR, FIRE ...) or the product type
   const productId = src.productId || (await db.query('SELECT id FROM products WHERE upper(code) = ANY($1::text[]) ORDER BY id LIMIT 1',
     [[src.lob, src.productType].filter(Boolean).map((x) => String(x).toUpperCase())])).rows[0]?.id || null;
