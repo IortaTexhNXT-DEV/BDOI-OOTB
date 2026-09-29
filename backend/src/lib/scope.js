@@ -60,6 +60,8 @@ const PREDICATES = {
   receipt: (a) => `(${a}.created_by = ANY($P))`,
   commission: (a) => `(${a}.agent_user_id = ANY($P) OR ${a}.referrer_id IN (${OWNED_REFERRERS}))`,
   referrer: (a) => `(${a}.user_id = ANY($P))`,
+  broker_slip: (a) => `(${a}.owner_user_id = ANY($P) OR ${a}.created_by = ANY($P) OR ${a}.client_id IN (${OWNED_CLIENTS}) OR ${a}.lead_id IN (${OWNED_LEADS}))`,
+  placement: (a) => `(${a}.owner_user_id = ANY($P) OR ${a}.created_by = ANY($P) OR ${a}.client_id IN (${OWNED_CLIENTS}) OR ${a}.lead_id IN (${OWNED_LEADS}))`,
 };
 
 /** Tables and lookup keys (id or document number) for ownRecord / canSee. */
@@ -73,6 +75,8 @@ export const ENTITIES = {
   renewal: { table: 'renewals', keys: ['id', 'renewal_number'], label: 'Renewal' },
   receipt: { table: 'receipts', keys: ['id', 'receipt_number'], label: 'Receipt' },
   referrer: { table: 'commission_referrers', keys: ['id'], label: 'Referrer' },
+  broker_slip: { table: 'broker_slips', keys: ['id', 'slip_number'], label: 'Broker slip' },
+  placement: { table: 'placements', keys: ['id', 'placement_number'], label: 'Placement slip' },
 };
 
 /**

@@ -88,6 +88,8 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
     net = num(fire.totalCoverPremium ?? fire.netPremium ?? fire.basicPremium) || net;
   }
   if (!net) net = num(v.netPremium);
+  // premium agreed with the insurer (a broker slip offer or a placement slip) replaces the computed cover premiums
+  if (num(v.agreedNetPremium) > 0) net = num(v.agreedNetPremium);
   const ncdPct = num(v.ncdPercent);
   const ncd = ncdPct ? round2((net * ncdPct) / 100) : num(v.NCD);
   net = round2(net - (ncdPct ? ncd : 0));

@@ -80,6 +80,14 @@ export async function createClient(body, userId) {
   return getClient(id);
 }
 
+/** Create a client inside the caller's transaction (direct placement / recorded policy for a new insured); returns its id. */
+export async function createClientInTx(db, body, userId) {
+  const { cols, extra } = columnsFrom(body);
+  if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
+  await assertBirthDate(cols.birth_date);
+  return insertClient(db, cols, extra, userId);
+}
+
 export async function updateClient(id, body, userId) {
   const before = await getClient(id);
   const { cols, extra } = columnsFrom(body);

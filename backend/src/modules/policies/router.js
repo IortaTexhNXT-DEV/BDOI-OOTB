@@ -112,7 +112,8 @@ define({
 });
 define({
   method: 'GET', path: '/:id', summary: 'Get one policy (by id or number) with client, lead and quotation', screen: `${SCREEN} > Policy detail`, middleware: [...canRead, ownRecord('policy')],
-  response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, out(await svc.getPolicyRow(req.params.id))),
+  response: { ...example, participants: [{ insuranceCompanyId: 2, insuranceCompanyName: 'Malayan Insurance Co., Inc.', isLead: true, sharePercent: 100, premium: 18500, premiumTotal: 23171.25 }], success: true },
+  handler: async (req, res) => sendEntity(res, await svc.policyWithParticipants(await svc.getPolicyRow(req.params.id))),
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus', screen: 'Operations > Quotation > Upload policy',
@@ -148,11 +149,11 @@ define({
   handler: async (req, res) => res.json({ success: true, data: await svc.policyDocuments(await svc.getPolicyRow(req.params.id), config.publicBaseUrl) }),
 });
 define({
-  method: 'GET', path: '/:id/documents/insurance-placing-slip-fire', summary: 'Insurance placing slip PDF', screen: `${SCREEN} > Policy detail > Insurance placing slip`,
-  middleware: [...canRead, ownRecord('policy')], response: 'application/pdf',
+  method: 'GET', path: '/:id/documents/insurance-placing-slip-fire', summary: 'Insurance placing slip PDF: the security (each participating insurer with its share); insurerId= gives one participant\'s slip showing its share',
+  screen: `${SCREEN} > Policy detail > Insurance placing slip`, middleware: [...canRead, ownRecord('policy')], query: { insurerId: 2 }, response: 'application/pdf',
   handler: async (req, res) => {
-    const p = out(await svc.getPolicyRow(req.params.id));
-    sendPdf(res, buildPdf(await placingSlipDoc(p)), `placing-slip-${p.policyNumber}.pdf`);
+    const p = await svc.policyWithParticipants(await svc.getPolicyRow(req.params.id));
+    sendPdf(res, buildPdf(await placingSlipDoc(p, req.query.insurerId)), `placing-slip-${p.policyNumber}.pdf`);
   },
 });
 

@@ -9,6 +9,7 @@ import { toLead } from '../leads/service.js';
 import { pick } from '../documents/tabular.js';
 import { publicUrl } from '../uploads/storage.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
+import { writeParticipants, legacyParticipantDetails, leadOf, participantsOf } from '../placement/participants.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
@@ -48,6 +49,13 @@ export const POLICY_SELECT = `SELECT p.*, ic.name AS insurer_name, pr.name AS pr
   row_to_json(q.*) AS quote_row, (SELECT u.display_name FROM users u WHERE u.id = p.created_by) AS created_by_name
   FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN leads l ON l.id = p.lead_id LEFT JOIN quotes q ON q.id = p.quote_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id`;
+
+/** Policy API shape with its co-insurance participants (risk_participants) and the placement it was issued from. */
+export async function policyWithParticipants(row, db = null) {
+  const p = toPolicy(row);
+  const participants = await participantsOf('policy', row.id, db);
+  return { ...p, participants, isCoInsurance: participants.length > 1 || Boolean(p.isCoInsurance), placementId: row.placement_id || null };
+}
 
 export async function getPolicyRow(id, db = null) {
   const r = await (db || { query }).query(`${POLICY_SELECT} WHERE p.id = $1 OR p.policy_number = $1`, [id]);
@@ -237,6 +245,15 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
  */
 export async function issuePolicy(db, src, body, userId) {
   const cols = await columnsFrom(db, body);
+  // Co-insurance: the lead participant is the policy's insurer (src.participants from the quotation or placement slip)
+  const parts = Array.isArray(src.participants) && src.participants.length ? src.participants : null;
+  const lead = parts ? leadOf(parts) : null;
+  if (lead) cols.insurance_company_id = lead.insuranceCompanyId;
+  const policyDoc = { ...(src.doc || {}), ...docOf(body) };
+  if (parts) {
+    policyDoc.participantDetails = await legacyParticipantDetails(parts, db, src.currency);
+    policyDoc.isCoInsurance = parts.length > 1;
+  }
   const { billingModeFor } = await import('../remittance/directbill.js');
   const billingMode = await billingModeFor(body.billingMode ?? (body.isDirectBilled === true ? 'direct' : null) ?? src.billingMode);
   // product from the quotation, else the product whose code is the line of business (MOTOR, FIRE ...) or the product type
@@ -255,8 +272,18 @@ export async function issuePolicy(db, src, body, userId) {
   [number, src.quoteId, src.clientId, src.leadId, productId, src.policyTypeId, cols.insurance_company_id || src.insuranceCompanyId, src.ownerUserId || userId,
     inception, expiry, cols.issued_date || toDate(new Date()), src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
-    JSON.stringify({ ...(src.doc || {}), ...docOf(body) }), userId, billingMode]);
+    JSON.stringify(policyDoc), userId, billingMode]);
   const policyId = r.rows[0].id;
+  if (src.placementId) await db.query('UPDATE policies SET placement_id = $2 WHERE id = $1', [policyId, src.placementId]);
+  // risk_participants (entity policy) are always written: the co-insurance lines, else 100% of the insurer
+  const d = src.doc || {};
+  const taxes = src.taxes ?? round2(num(d.valueAddedTax) + num(d.documentaryStampTax) + num(d.localGovernmentTax) + num(d.fireServiceTax));
+  const insurer = cols.insurance_company_id || src.insuranceCompanyId;
+  const policyParts = parts || (insurer ? [{ insuranceCompanyId: insurer, sharePercent: 100, isLead: true, commissionRate: null, insurerReference: cols.policy_number || null }] : []);
+  if (policyParts.length) {
+    await writeParticipants(db, 'policy', policyId, policyParts, { sumInsured: src.sumInsured, premium: src.netPremium, taxes, premiumTotal: src.grossPremium, commissionAmount: src.commissionAmount },
+      { userId, commissionRate: src.commissionRate ?? null });
+  }
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
   const renewal = src.receivableSource === 'renewal';
   const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId },
