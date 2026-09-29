@@ -23,7 +23,7 @@ export const ROLES = [
   ['agent', 'Agent / Referrer', 'Own leads, quotations and policies', false],
   ['user-access-admin', 'User Access Administrator', 'Creates and maintains users, roles and access; reviews the audit trail and sign-in history. Cannot grant administrator roles or change its own access.', true],
 ];
-const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit'];
+const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end'];
 // write:receipts (official receipts, cash posting, payment verification) is finance-only: segregation of duties (D61).
 // Least privilege (D92): the receipt register (read:receipts) is finance's; sales and customer services see a policy's
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
@@ -33,7 +33,7 @@ const ROLE_PERMS = {
   'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   // Finance calculates, approves (maker-checker) and pays agent incentives (D102); program set-up stays with the business administrator.
-  finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
+  finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'reports', 'notifications', 'masters:read', 'schedules:read'],
   // Agents work their own book (record scoping: security.scoped_roles): endorsements and first notice of loss on their own
   // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
   'user-access-admin': ['profile', 'users', 'roles', 'audit:read', 'notifications', 'settings:read'],

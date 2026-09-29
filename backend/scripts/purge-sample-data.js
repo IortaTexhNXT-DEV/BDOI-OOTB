@@ -42,6 +42,9 @@ export const TRANSACTION_TABLES = [
   'renewals', 'renewal_quotes', 'renewal_notices', 'renewal_activities', 'renewal_batches', 'renewal_batch_policies', 'winback_campaigns',
   'journal_vouchers', 'journal_lines', 'accounting_periods',
   'notifications', 'agent_events', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences',
+  // period-end processing (fiscal years are regenerated from the first journal on demand)
+  'fiscal_years', 'opening_balances', 'period_status_history', 'period_close_runs', 'period_close_run_checks', 'period_close_entries',
+  'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'bir_2307_certificates',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

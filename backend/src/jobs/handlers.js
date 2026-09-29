@@ -69,3 +69,6 @@ export async function collectionReminders() {
   const { pool } = await import('../db/pool.js');
   return (await import('../modules/collections/service.js')).sendDueDateReminders(pool, null);
 }
+
+// Period-end processing (month-end reminder, recurring journals, accrual auto-reversal, period auto soft-close)
+export { monthEndReminder, recurringJournals, accrualReversal, periodAutoSoftClose } from '../modules/period-end/jobs.js';
