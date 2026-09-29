@@ -25,6 +25,7 @@ import {
   getLeadByIdMiddleware,
 } from "../Store/leadMiddleware";
 import quotationService from "../../../services/quotationService";
+import placementService from "../../../services/placementService";
 import { numberLocale } from "../../../utility/currencyConverter";
 import {
   CONSTRUCTION_TYPES,
@@ -1287,6 +1288,13 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         "FIRE"
       );
 
+      if (!result.success && result.code === "PLACEMENT_JOURNEY") {
+        // the line's placement journey requires a Placement Slip: place the risk with the insurer(s) first
+        const placement = await placementService.placeQuotation(createdQuotationId, { inceptionDate, expiryDate, insuredName });
+        toastRef.current?.showToast({ detail: t("placement.quoteJourney.created", { number: placement.placementNumber }), life: 2000 });
+        navigate(`/placement/placement-slips/${placement.id}`);
+        return;
+      }
       if (!result.success) {
         throw new Error(result.error || t("fireLead.failedToCreatePolicy"));
       }

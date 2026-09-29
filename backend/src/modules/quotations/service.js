@@ -19,6 +19,8 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { toQuote, stripReserved, QUOTE_SELECT } from './shape.js';
 import { addDays, today } from '../../lib/dates.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { participantsFromDoc, writeParticipants, legacyParticipantDetails, leadOf, participantsOf, participantInputs } from '../placement/participants.js';
+import { journeyFor, assertStep } from '../placement/journey.js';
 
 export async function getQuoteRow(id, db = null) {
   const r = await (db || { query }).query(`${QUOTE_SELECT} WHERE (q.id = $1 OR q.quote_number = $1) AND q.deleted_at IS NULL`, [id]);
@@ -35,6 +37,27 @@ const withServerCovers = (doc, b) => (b.lob !== 'MOTOR' ? doc : {
   appaSeats: b.appaSeats, APPAtotalCoverage: b.APPAtotalCoverage, APPAcoveragePremium: b.APPAcoveragePremium,
 });
 
+/**
+ * Co-insurance participants of a quotation document: body.participants (new API) or doc.participantDetails (screens),
+ * validated server-side; a single insurer is 100% of the insurer named on the quote. Returns { parts, icId, doc } where
+ * icId is the lead insurer and doc carries the normalised participantDetails the existing screens read.
+ */
+async function quoteParticipants(c, doc, explicit, fallbackIc) {
+  const named = await insurerId(c, insurerRef(doc));
+  const parts = await participantsFromDoc(doc, named || fallbackIc || null, { db: c, explicit: Array.isArray(explicit) && explicit.length ? explicit : null });
+  const lead = leadOf(parts);
+  const next = { ...doc };
+  if (parts.length) {
+    next.participantDetails = await legacyParticipantDetails(parts, c, doc.currency || null);
+    next.isCoInsurance = parts.length > 1;
+  }
+  delete next.participants;
+  return { parts, icId: lead?.insuranceCompanyId || named || fallbackIc || null, doc: next };
+}
+
+const quoteTotals = (b) => ({ sumInsured: b.totalSumInsured, premium: b.netPremium, taxes: round2(num(b.valueAddedTax) + num(b.documentaryStampTax) + num(b.localGovernmentTax) + num(b.fireServiceTax)),
+  premiumTotal: b.grossPremium, commissionAmount: b.commissionAmount });
+
 /** Premium columns from a breakdown. */
 const premiumCols = (b) => ({
   sum_insured: b.totalSumInsured, premium_base: b.netPremium, vat: b.valueAddedTax, dst: b.documentaryStampTax, lgt: b.localGovernmentTax,
@@ -43,12 +66,18 @@ const premiumCols = (b) => ({
 });
 
 export async function createQuote(body, userId, db = null) {
-  const doc = stripReserved(body);
+  const raw = stripReserved(body);
+  delete raw.brokerSlipId;
   const leadId = body.leadRefId || body.leadId || null;
   const run = async (c) => {
     if (leadId && !(await c.query('SELECT 1 FROM leads WHERE id = $1 AND deleted_at IS NULL', [leadId])).rows[0]) throw badRequest(`Lead ${leadId} not found`);
     if (!leadId && !body.clientId) throw badRequest('leadRefId (or clientId) is required');
-    const icId = await insurerId(c, insurerRef(doc));
+    // placement journey: a line that requires a broker slip only takes quotations prepared from one (renewals excepted)
+    if (!body.brokerSlipId && !raw.renewal?.policyId) {
+      const journey = await journeyFor({ lob: body.lob, productType: body.productType, productId: body.productId }, c);
+      assertStep(journey, 'brokerSlip', ['required'], `The ${journey.lob} placement journey starts with a Broker Slip: prepare the Quotation Slip from the broker slip's offers`);
+    }
+    const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const b = await premiumBreakdown(doc, { insurerId: icId });
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     const validity = Number(await getSetting('limits.quote_validity_days', 30));
@@ -56,9 +85,10 @@ export async function createQuote(body, userId, db = null) {
     const data = { quote_number: number, lead_id: leadId, client_id: body.clientId || null, insurance_company_id: icId, status,
       product_type: body.productType || (b.lob === 'MOTOR' ? 'Motor' : body.productType), lob: b.lob, agent_user_id: userId, created_by: userId,
       valid_until: addDays(await today(), validity), remarks: body.remarks || null,
-      doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), ...premiumCols(b) };
+      doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), ...premiumCols(b), broker_slip_id: body.brokerSlipId || null };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO quotes(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
+    if (parts.length) await writeParticipants(c, 'quote', r.rows[0].id, parts, quoteTotals(b), { userId, commissionRate: b.commissionRate });
     if (leadId) await c.query("UPDATE leads SET status = 'QuoteGenerated', updated_at = now() WHERE id = $1 AND status IN ('New','Contacted','Qualified')", [leadId]);
     return r.rows[0].id;
   };
@@ -70,15 +100,20 @@ export async function updateQuote(id, body, userId) {
   const before = await getQuoteRow(id);
   const locked = await getSetting('quotations.locked_statuses', ['ConvertedToPolicy']);
   if (locked.includes(quoteStatusOut(before.status))) throw badRequest(`A ${quoteStatusOut(before.status)} quotation cannot be edited`);
-  const doc = { ...(before.doc || {}), ...stripReserved(body) };
-  delete doc.premiumBreakdown;
-  const icId = await insurerId(null, insurerRef(doc)) || before.insurance_company_id;
-  const b = await premiumBreakdown(doc, { insurerId: icId });
-  const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
-    doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date() };
-  if (body.leadRefId && body.leadRefId !== before.lead_id) data.lead_id = body.leadRefId;
-  const keys = Object.keys(data);
-  await query(`UPDATE quotes SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
+  const merged = { ...(before.doc || {}), ...stripReserved(body) };
+  delete merged.premiumBreakdown;
+  delete merged.brokerSlipId;
+  await withTransaction(async (c) => {
+    const { parts, icId, doc } = await quoteParticipants(c, merged, body.participants, before.insurance_company_id);
+    const b = await premiumBreakdown(doc, { insurerId: icId });
+    const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
+      doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date() };
+    if (body.leadRefId && body.leadRefId !== before.lead_id) data.lead_id = body.leadRefId;
+    const keys = Object.keys(data);
+    await c.query(`UPDATE quotes SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
+    if (parts.length) await writeParticipants(c, 'quote', before.id, parts, quoteTotals(b), { userId, commissionRate: b.commissionRate });
+    else await c.query("DELETE FROM risk_participants WHERE entity_type = 'quote' AND entity_id = $1", [before.id]);
+  });
   return { before, after: await getQuoteRow(before.id) };
 }
 
@@ -204,6 +239,8 @@ export async function convertToPolicy(id, body, user) {
   }
   const allowed = await getSetting('quotations.convertible_statuses', ['CustomerAccepted', 'Approved']);
   if (!allowed.includes(quoteStatusOut(existing.status))) throw badRequest(`Cannot convert quotation with status "${quoteStatusOut(existing.status)}". Quote must be CustomerAccepted or Approved`);
+  // placement journey: a line that requires a Placement Slip issues its policy from the placement slip
+  await assertDirectConversion(existing);
   // KYC and vehicle identifiers (policy.kyc_required_fields): saved on the quotation by the convert steps or sent with the request
   const qdoc = existing.doc || {};
   // Issuance never marks the premium paid: the bill stays open until a payment is captured and confirmed (receipts).
@@ -243,7 +280,8 @@ export async function convertToPolicy(id, body, user) {
       grossPremium: q.premium_total, commissionAmount: q.commission_amount, commissionRate: Number(q.commission_rate || 0), currency: q.currency,
       insuredName: extra.insuredName, productType: q.product_type, lob: q.lob, doc: stripReserved(doc),
       receivableSource: renewalOf ? 'renewal' : 'policy', receivableReference: renewalOf?.renewalNumber || null,
-      billingMode: expiring?.billing_mode || null,
+      billingMode: expiring?.billing_mode || null, participants: await participantInputs('quote', q.id, db),
+      taxes: round2(num(q.vat) + num(q.dst) + num(q.lgt) + num(q.fst)),
     }, extra, user.id);
     if (renewalOf) {
       const link = { businessType: 'Renewal', renewal: { renewalId: renewalOf.renewalId, renewalNumber: renewalOf.renewalNumber, previousPolicyId: expiring.id, previousPolicyNumber: expiring.policy_number, quoteId: q.id } };
@@ -391,4 +429,31 @@ export async function quoteFromRow(db, row, userId) {
   };
 }
 
-export const quoteById = async (id) => toQuote(await getQuoteRow(id));
+/** Journey rule for a direct quotation -> policy conversion (renewals follow placement.journey_applies_to_renewals). */
+export async function assertDirectConversion(q) {
+  const renewal = Boolean(q.doc?.renewal?.policyId);
+  if (renewal && !(await getSetting('placement.journey_applies_to_renewals', false))) return;
+  const journey = await journeyFor({ lob: q.lob, productType: q.product_type, productId: q.product_id });
+  assertStep(journey, 'placementSlip', ['required'],
+    `The ${journey.lob} placement journey requires a Placement Slip: create the placement slip from this quotation and issue the policy from it once the insurer(s) confirm`);
+}
+
+/** The quotation with its co-insurance participants, the journey step links (broker slip, placement slip, policy) and the journey config. */
+export async function quoteById(id) {
+  const row = await getQuoteRow(id);
+  const quote = toQuote(row);
+  const participants = await participantsOf('quote', row.id);
+  const slip = row.broker_slip_id ? await one('SELECT id, slip_number FROM broker_slips WHERE id = $1', [row.broker_slip_id]) : null;
+  const placement = await one(`SELECT id, placement_number, status FROM placements WHERE quote_id = $1 AND status <> 'cancelled' ORDER BY created_at DESC LIMIT 1`, [row.id]);
+  const offers = slip ? await many(`SELECT o.*, ic.name AS insurer_name FROM insurer_offers o JOIN insurance_companies ic ON ic.id = o.insurance_company_id
+    WHERE o.broker_slip_id = $1 ORDER BY o.premium_total NULLS LAST, ic.name`, [slip.id]) : [];
+  const journey = await journeyFor({ lob: row.lob, productType: row.product_type, productId: row.product_id });
+  return {
+    ...quote, participants, isCoInsurance: participants.length > 1 || Boolean(quote.isCoInsurance),
+    brokerSlipId: slip?.id || null, brokerSlipNumber: slip?.slip_number || null, placementId: placement?.id || null, placementNumber: placement?.placement_number || null,
+    placementStatus: placement?.status || null, journey,
+    offers: offers.map((o) => ({ offerId: o.id, insuranceCompanyId: o.insurance_company_id, insuranceCompanyName: o.insurer_name, status: o.status, premium: o.premium === null ? null : Number(o.premium),
+      rate: o.rate === null ? null : Number(o.rate), premiumTotal: o.premium_total === null ? null : Number(o.premium_total), offeredShare: Number(o.offered_share), deductibles: o.deductibles,
+      validityDate: o.validity_date, selected: o.selected })),
+  };
+}

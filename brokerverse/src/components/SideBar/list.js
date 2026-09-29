@@ -724,6 +724,22 @@ export const menuList = [
         permissions: ["read:quotations"],
       },
       {
+        // Placement journey (market submission): Broker Slip -> Quotation Slip
+        name: "Broker Slips",
+        icon: <SvgQuotationIcon color="#9DA4AE" />,
+        path: "/placement/broker-slips",
+        includes: ["/placement/broker-slips"],
+        permissions: ["read:quotations"],
+      },
+      {
+        // Firm orders to the insurers, binding and policy issuance; direct policy entry
+        name: "Placement Slips",
+        icon: <SvgPolicyIcon color="#9DA4AE" />,
+        path: "/placement/placement-slips",
+        includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
+        permissions: ["read:quotations"],
+      },
+      {
         name: "Policy",
         icon: <SvgPolicyIcon color="#9DA4AE" />,
         path: "/agent/policy",

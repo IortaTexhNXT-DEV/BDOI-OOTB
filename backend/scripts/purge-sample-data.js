@@ -31,6 +31,7 @@ import { fileURLToPath } from 'node:url';
 /** Transaction tables, emptied completely (one TRUNCATE, so foreign keys among them are satisfied). */
 export const TRANSACTION_TABLES = [
   'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments', 'documents',
+  'broker_slips', 'insurer_offers', 'placements', 'risk_participants',
   'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists',
   'collection_items', 'collection_actions', 'disbursements', 'checkbooks',
   'petty_cash_funds', 'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',

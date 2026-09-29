@@ -387,6 +387,11 @@ export async function completeRenewal(id, user, input = {}) {
       r.currency, JSON.stringify({ ...(r.policy_details || {}), businessType: 'Renewal', renewal: { renewalId: r.id, renewalNumber: r.renewal_number, previousPolicyId: r.policy_id, previousPolicyNumber: r.policy_number }, coverageDetails: r.coverage_details || undefined }),
       r.policy_id, user?.username ?? null]);
     const newPolicy = np.rows[0];
+    // the renewal term keeps the expiring term's co-insurance participants (shares), split on the renewal premium
+    const { copyParticipants } = await import('../placement/participants.js');
+    await copyParticipants(db, { type: 'policy', id: r.policy_id }, { type: 'policy', id: newPolicy.id },
+      { sumInsured: r.sum_insured, premium: 0, taxes: 0, premiumTotal: premium, commissionAmount: commission },
+      { fallbackInsurerId: r.insurance_company_id, userId: user?.id || null, keepReferences: false });
     await db.query('UPDATE policies SET status = \'renewed\', renewed_to = $2, updated_at = now() WHERE id = $1', [r.policy_id, newPolicy.id]);
     await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now() WHERE id = $1`, [r.id, newPolicy.id, premium]);
     await db.query('UPDATE renewal_quotes SET status = \'accepted\' WHERE renewal_id = $1 AND status = \'generated\'', [r.id]);

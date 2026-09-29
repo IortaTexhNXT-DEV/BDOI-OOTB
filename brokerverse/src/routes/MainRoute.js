@@ -296,6 +296,13 @@ import RemittanceReports from "../module/Remittance/RemittanceReports";
 import AgencyBillProcessing from "../module/Remittance/AgencyBillProcessing";
 // K13-K17 Remittance Transactions
 import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
+// Placement journey: Broker Slip -> Quotation Slip -> Placement Slip -> Policy
+import BrokerSlipList from "../module/Placement/BrokerSlipList";
+import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
+import BrokerSlipDetail from "../module/Placement/BrokerSlipDetail";
+import PlacementList from "../module/Placement/PlacementList";
+import PlacementDetail from "../module/Placement/PlacementDetail";
+import DirectPlacementForm from "../module/Placement/DirectPlacementForm";
 import RemittanceAdjustments from "../module/Remittance/RemittanceAdjustments";
 import RemittanceNotifications from "../module/Remittance/RemittanceNotifications";
 import RemittanceHistory from "../module/Remittance/RemittanceHistory";
@@ -1241,6 +1248,14 @@ const Maincomponent = () => {
             path="finance/remittance/directbill"
             element={<DirectBillProcessing />}
           />
+          {/* Placement journey */}
+          <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
+          <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
+          <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />
+          <Route path="/placement/placement-slips" element={<PlacementList />} />
+          <Route path="/placement/placement-slips/new" element={<DirectPlacementForm mode="placement" />} />
+          <Route path="/placement/placement-slips/:id" element={<PlacementDetail />} />
+          <Route path="/placement/record-issued-policy" element={<DirectPlacementForm mode="record" />} />
           <Route
             path="finance/remittance/adjustments"
             element={<RemittanceAdjustments />}

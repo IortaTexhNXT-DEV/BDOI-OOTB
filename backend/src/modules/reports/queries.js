@@ -94,10 +94,69 @@ const directBill = `SELECT p.policy_number AS "policyNumber", CASE WHEN it.sourc
 
 // voucher payee types are stored as picked on screen (Insurer, Agent/Referrer, Customer / Client)
 const AGENT = "lower(d.payee_type) IN ('agent', 'agent/referrer', 'referrer')";
+// Placement pipeline: broker slips and placement slips created in the period with status and age (days since created,
+// frozen when closed / issued). Agent = the slip owner; insurer = the lead insurer of a placement slip.
+const SLIP_OWNER_DIMS = `u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,
+  u.branch_code AS _branch_code, COALESCE(br.name, u.branch_code) AS branch,
+  c.id AS _client_id, c.client_code AS _client_code, COALESCE(c.display_name, x.insured_name) AS client,
+  pr.id::text AS _product_id, pr.code AS _product_code, COALESCE(pr.name, x.product_type) AS product`;
+const placementPipeline = `SELECT 'Broker Slip' AS "slipType", x.slip_number AS "slipNumber", x.created_at::date AS "createdDate", x.status, x.lob,
+    ${SLIP_OWNER_DIMS}, NULL::text AS _insurer_id, NULL::text AS _insurer_code, NULL::text AS insurer,
+    x.sum_insured AS "sumInsured", (SELECT min(o.premium_total) FROM insurer_offers o WHERE o.broker_slip_id = x.id AND o.status = 'offered') AS premium,
+    (SELECT count(*)::int FROM insurer_offers o WHERE o.broker_slip_id = x.id) AS insurers,
+    (CASE WHEN x.status IN ('closed', 'cancelled') THEN x.updated_at::date ELSE $2::date END - x.created_at::date) AS "ageDays",
+    rpt_age_bucket(CASE WHEN x.status IN ('closed', 'cancelled') THEN x.updated_at::date ELSE $2::date END - x.created_at::date, $3::int[]) AS "ageBucket"
+  FROM broker_slips x LEFT JOIN clients c ON c.id = x.client_id LEFT JOIN products pr ON pr.id = x.product_id
+  LEFT JOIN users u ON u.id = x.owner_user_id LEFT JOIN branches br ON br.code = u.branch_code
+  WHERE x.created_at::date BETWEEN $1 AND $2
+  UNION ALL
+  SELECT 'Placement Slip', x.placement_number, x.created_at::date, x.status, x.lob, ${SLIP_OWNER_DIMS},
+    ic.id::text, ic.code, ic.name, x.sum_insured, x.premium_total,
+    (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'placement' AND rp.entity_id = x.id),
+    (CASE WHEN x.status IN ('issued', 'cancelled') THEN COALESCE(x.issued_at, x.updated_at)::date ELSE $2::date END - x.created_at::date),
+    rpt_age_bucket(CASE WHEN x.status IN ('issued', 'cancelled') THEN COALESCE(x.issued_at, x.updated_at)::date ELSE $2::date END - x.created_at::date, $3::int[])
+  FROM placements x LEFT JOIN clients c ON c.id = x.client_id LEFT JOIN products pr ON pr.id = x.product_id
+  LEFT JOIN insurance_companies ic ON ic.id = x.insurance_company_id
+  LEFT JOIN users u ON u.id = x.owner_user_id LEFT JOIN branches br ON br.code = u.branch_code
+  WHERE x.created_at::date BETWEEN $1 AND $2`;
+
+// Market response: every insurer approached on a broker slip created in the period, with its answer and whether its
+// offer was taken (selected for the Quotation / Placement Slip).
+const marketResponse = `SELECT ic.id::text AS _insurer_id, ic.code AS _insurer_code, ic.name AS insurer, b.slip_number AS "slipNumber", b.created_at::date AS "slipDate",
+    b.lob, o.status, o.selected, o.premium_total AS "premiumTotal", o.offered_share AS "offeredShare",
+    CASE WHEN o.responded_at IS NOT NULL THEN (o.responded_at::date - COALESCE(o.requested_at, b.created_at)::date) END AS "responseDays",
+    u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent, u.branch_code AS _branch_code, COALESCE(br.name, u.branch_code) AS branch,
+    pr.id::text AS _product_id, pr.code AS _product_code, COALESCE(pr.name, b.product_type) AS product
+  FROM insurer_offers o JOIN broker_slips b ON b.id = o.broker_slip_id JOIN insurance_companies ic ON ic.id = o.insurance_company_id
+  LEFT JOIN products pr ON pr.id = b.product_id LEFT JOIN users u ON u.id = b.owner_user_id LEFT JOIN branches br ON br.code = u.branch_code
+  WHERE b.created_at::date BETWEEN $1 AND $2 AND b.status <> 'cancelled'`;
+
 const INSURER = "lower(d.payee_type) = 'insurer'";
 const CLIENT = "lower(d.payee_type) IN ('client', 'customer')";
 export const QUERIES = {
   ...PERIOD_END_QUERIES,
+  placementPipeline: {
+    sql: placementPipeline, extras: [setting('reports.placement_age_buckets', [7, 14, 30, 60], 'int[]'),
+      setting('reports.placement_open_statuses', ['draft', 'submitted', 'responses-in', 'sent', 'bound', 'declined'], 'text[]')],
+    filters: ['agent', 'insurer', 'branch', 'client', 'product', 'status'],
+    criteria: { Overall: {}, 'Slip Type': { groupBy: 'slipType' }, Status: { groupBy: 'status' }, 'Open by Age': { where: 't.status = ANY($4::text[])', groupBy: 'ageBucket' },
+      Agent: { groupBy: 'agent' } },
+    orderBy: 'f."createdDate", f."slipNumber"',
+    summary: { brokerSlips: 'count(*) FILTER (WHERE f."slipType" = \'Broker Slip\')', placementSlips: 'count(*) FILTER (WHERE f."slipType" = \'Placement Slip\')',
+      open: 'count(*) FILTER (WHERE f.status = ANY($4::text[]))', averageAgeDays: 'round(avg(f."ageDays"), 1)' },
+  },
+  marketResponse: {
+    sql: marketResponse, filters: ['agent', 'insurer', 'branch', 'product'],
+    criteria: { Overall: { dims: ['insurer'] }, 'Line of Business': { dims: ['insurer', 'lob'] }, Agent: { dims: ['agent', 'insurer'] } },
+    aggregate: {
+      approached: 'count(*)', offered: 'count(*) FILTER (WHERE t.status = \'offered\')', declined: 'count(*) FILTER (WHERE t.status = \'declined\')',
+      pending: 'count(*) FILTER (WHERE t.status = \'pending\')', selected: 'count(*) FILTER (WHERE t.selected)',
+      responseRate: 'round(100.0 * count(*) FILTER (WHERE t.status <> \'pending\') / NULLIF(count(*), 0), 2)',
+      hitRatio: 'round(100.0 * count(*) FILTER (WHERE t.selected) / NULLIF(count(*) FILTER (WHERE t.status = \'offered\'), 0), 2)',
+      averageResponseDays: 'round(avg(t."responseDays"), 1)', offeredPremium: 'COALESCE(sum(t."premiumTotal") FILTER (WHERE t.status = \'offered\'), 0)',
+    },
+    orderBy: (dims) => ['f.selected DESC', ...dims.map((d) => `f."${d}"`)].join(', '),
+  },
   production: {
     sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',

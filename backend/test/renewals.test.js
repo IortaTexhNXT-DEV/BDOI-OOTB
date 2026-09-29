@@ -117,6 +117,9 @@ describe('renewals', () => {
     expect(newP.renewed_from).toBe('pol_r1');
     expect(newP.inception_date > oldP.expiry_date).toBe(true);
     expect(Number(newP.premium_total)).toBe(np.premium);
+    // the renewal term carries the co-insurance participants (here 100% of the insurer) on the renewal premium
+    const parts = (await pool.query("SELECT insurance_company_id, share_percent, premium_total FROM risk_participants WHERE entity_type = 'policy' AND entity_id = $1", [np.id])).rows;
+    expect(parts.map((x) => [x.insurance_company_id, Number(x.share_percent), Number(x.premium_total)])).toEqual([[newP.insurance_company_id, 100, np.premium]]);
     const rcv = await one('SELECT * FROM receivables WHERE policy_id = $1', [np.id]);
     expect(Number(rcv.balance)).toBe(np.premium);
     expect(c.body.data.renewal.statusCode).toBe('renewed');

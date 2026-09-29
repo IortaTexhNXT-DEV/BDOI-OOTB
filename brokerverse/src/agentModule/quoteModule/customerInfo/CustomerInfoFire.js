@@ -16,6 +16,7 @@ import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
 import quotationService from "../../../services/quotationService";
+import placementService from "../../../services/placementService";
 
 import { numberLocale } from "../../../utility/currencyConverter";
 const CustomerInfoFire = ({ action }) => {
@@ -139,6 +140,13 @@ const CustomerInfoFire = ({ action }) => {
         "FIRE"
       );
 
+      if (!result.success && result.code === "PLACEMENT_JOURNEY") {
+        // the line's placement journey requires a Placement Slip: place the risk with the insurer(s) first
+        const placement = await placementService.placeQuotation(quotationId, { inceptionDate: inception, expiryDate: expiry, insuredName });
+        toast.current?.show({ severity: "info", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t("placement.quoteJourney.createdDetail"), life: 2500 });
+        navigate(`/placement/placement-slips/${placement.id}`);
+        return;
+      }
       if (!result.success) {
         throw new Error(result.error || "Failed to convert quotation to policy");
       }

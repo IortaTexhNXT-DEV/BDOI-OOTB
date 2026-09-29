@@ -951,7 +951,16 @@ const PolicyDetailView = () => {
     policyDetails?.ProductDescription;
   const isFireLOB = isFireLob(productType);
   const isMotorLOB = !isFireLOB;
-  const participantDetails = quotation?.participantDetails || [];
+  // Co-insurance participants: risk_participants from the API (lead first, amounts split by share), else the quotation document
+  const apiParticipants = Array.isArray(rawPolicyData?.participants) ? rawPolicyData.participants : [];
+  const participantDetails = apiParticipants.length
+    ? apiParticipants.map((p) => ({
+        insuranceCompanyName: p.insuranceCompanyName,
+        participantName: p.insurerReference ? `${p.insuranceCompanyName} (${p.insurerReference})` : p.insuranceCompanyName,
+        sharePercentage: String(p.sharePercent),
+        premiumAmount: p.premiumTotal,
+      }))
+    : quotation?.participantDetails || rawPolicyData?.participantDetails || [];
   const hasCoInsuranceParticipants = participantDetails.some(
     (participant) => {
       const name =
@@ -961,7 +970,7 @@ const PolicyDetailView = () => {
     }
   );
   const showCoInsuranceSection =
-    Boolean(rawPolicyData?.isCoInsurance || quotation?.isCoInsurance) &&
+    (apiParticipants.length > 1 || Boolean(rawPolicyData?.isCoInsurance || quotation?.isCoInsurance)) &&
     hasCoInsuranceParticipants;
   const fireRiskDetails =
     rawPolicyData?.fireRiskDetails ||

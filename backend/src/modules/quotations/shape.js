@@ -3,7 +3,9 @@ import { quoteStatusOut } from '../documents/statuses.js';
 /** Fields that describe workflow / identity and must never be stored inside the quotation document. */
 export const RESERVED = ['id', 'quotationId', 'quotationNumber', 'generatedQuotationId', 'quotationStatus', 'status', 'createdAt', 'updatedAt',
   'createdBy', 'updatedBy', 'lead', 'premiumBreakdown', 'policyId', 'approvalSentTo', 'approvalSentAt', 'customerAcceptedAt',
-  'submittedToInsurerAt', 'approvedBy', 'approvedAt', 'success', 'message', 'data'];
+  'submittedToInsurerAt', 'approvedBy', 'approvedAt', 'success', 'message', 'data',
+  // placement journey links and co-insurance rows are served from their own tables, never stored in the document
+  'participants', 'brokerSlipId', 'brokerSlipNumber', 'placementId', 'placementNumber', 'placementStatus', 'journey', 'offers'];
 
 export const stripReserved = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 
@@ -21,7 +23,7 @@ export function toQuote(r) {
     ...doc,
     id: r.id, quotationId: r.id, quotationNumber: r.quote_number, generatedQuotationId: r.quote_number,
     quotationStatus: quoteStatusOut(r.status), status: quoteStatusOut(r.status),
-    leadRefId: r.lead_id, leadId: r.lead_id, clientId: r.client_id, policyId: r.policy_id,
+    leadRefId: r.lead_id, leadId: r.lead_id, clientId: r.client_id, policyId: r.policy_id, brokerSlipId: r.broker_slip_id || null,
     productType: r.product_type || doc.productType, lob: r.lob, insuranceCompanyId: r.insurance_company_id,
     insuranceCompanyName: r.insurer_name || doc.insuranceCompanyName || doc.participantDetails?.[0]?.insuranceCompanyName,
     netPremium: Number(r.premium_base), valueAddedTax: Number(r.vat), documentaryStampTax: Number(r.dst), localGovernmentTax: Number(r.lgt),

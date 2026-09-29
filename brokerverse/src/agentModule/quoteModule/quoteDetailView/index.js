@@ -33,6 +33,7 @@ import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 import { confirmAction, notifyError, notifySuccess } from "../../../utility/dialogs";
+import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -356,6 +357,13 @@ const QuoteDetailView = ({ action }) => {
     navigate("/agent/leadlisting");
   };
 
+  /** Re-read the quotation (after a placement journey action). */
+  const loadQuotation = async () => {
+    if (!quotationData?.quotationId) return;
+    const refreshed = await dispatch(getQuotationByIdMiddleware(quotationData.quotationId));
+    if (refreshed.type.endsWith("/fulfilled")) setQuotationData(refreshed.payload);
+  };
+
   // Assured: the quotation's lead, else (no lead) its client. The lead in the store is used only for a quote that has a lead.
   const quoteLead = quotationData?.lead?.firstName || quotationData?.lead?.emailId
     ? quotationData.lead
@@ -584,6 +592,7 @@ const QuoteDetailView = ({ action }) => {
                 )}
               </div>
             </div>
+            <QuoteJourneyPanel quotation={quotationData} relatedPolicy={relatedPolicy} onChanged={loadQuotation} />
             {!isFireLOB && !isIarLOB && (
               <>
                 <div className="sub_title">
@@ -619,15 +628,27 @@ const QuoteDetailView = ({ action }) => {
                 </div>
 
                 {/* Co-Insurance Participants Table */}
-                {quotationData?.isCoInsurance &&
-                  quotationData?.participantDetails?.length > 0 && (
+                {(quotationData?.participants?.length > 1 || (quotationData?.isCoInsurance &&
+                  quotationData?.participantDetails?.length > 0)) && (
                     <div className="sub_title">
                       <label className="policy_text">
                         {t("quoteDetailView.coInsuranceParticipants")}
                       </label>
                       <div style={{ marginTop: "16px" }}>
                         <DataTable
-                          value={quotationData.participantDetails}
+                          value={
+                            // risk_participants from the API (lead first, split amounts); the stored document as a fallback
+                            quotationData.participants?.length
+                              ? quotationData.participants.map((p) => ({
+                                  insuranceCompanyName: p.insuranceCompanyName,
+                                  participantName: p.insuranceCompanyName,
+                                  sharePercentage: p.sharePercent,
+                                  premiumAmount: p.premiumTotal,
+                                  sumInsuredCurrency: quotationData.currency,
+                                  premiumCurrency: quotationData.currency,
+                                }))
+                              : quotationData.participantDetails
+                          }
                           tableStyle={{ minWidth: "50rem" }}
                           size="small"
                         >

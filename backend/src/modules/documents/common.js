@@ -44,6 +44,8 @@ export function lobOf(...values) {
   for (const v of values) {
     if (!v) continue;
     const u = String(v).toUpperCase();
+    // line codes of the placement journey (products master lines) are kept as they are
+    if (['MARINE', 'CASUALTY', 'ENGINEERING', 'ACCIDENT'].includes(u)) return u;
     if (u === 'IAR' || u.includes('INDUSTRIAL ALL RISK') || u.includes('INDUSTRIAL_ALL_RISK')) return 'IAR';
     if (u.includes('FIRE')) return 'FIRE';
     if (u.includes('EMPLOYEE') || u === 'EB') return 'EB';
