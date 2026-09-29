@@ -175,8 +175,8 @@ const ClaimDocumentUpload = () => {
           </div>
 
           <div className="uploaddoc__conatiner">
-            <img src={document} className="claimtitle__img__container" />
-            <img src={document} className="claimtitle__img__container" />
+            <img src={document} alt="" className="claimtitle__img__container" />
+            <img src={document} alt="" className="claimtitle__img__container" />
           </div>
 
           <div className="col-12 mt-3">

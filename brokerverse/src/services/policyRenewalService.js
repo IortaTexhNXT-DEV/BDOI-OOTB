@@ -137,4 +137,5 @@ class PolicyRenewalService {
   }
 }
 
-export default new PolicyRenewalService();
+const policyRenewalService = new PolicyRenewalService();
+export default policyRenewalService;

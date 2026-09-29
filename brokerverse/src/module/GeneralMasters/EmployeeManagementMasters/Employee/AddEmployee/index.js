@@ -49,7 +49,6 @@ const AddEmployee = ({ action }) => {
   const items = [
     { label: "Employee Management" },
     { label: "Employee", url: "/master/generals/employeemanagement/employee" },
-    ,
     {
       label: `${
         action === "add"

@@ -614,7 +614,6 @@ const LeadListingAllTable = ({
         {/* Advanced Filters Panel */}
         {showFilters && (
           <div
-            className="col-12"
             className="filter-container-bg"
             style={{
               padding: "1.5rem",

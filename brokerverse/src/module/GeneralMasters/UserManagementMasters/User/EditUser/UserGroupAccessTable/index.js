@@ -38,8 +38,6 @@ const UserGroupAccess = () => {
 
   const item = [
     {
-      label: "RC0010",
-      value: "RC0134",
       label: "RC0012",
       value: "RC0012",
 

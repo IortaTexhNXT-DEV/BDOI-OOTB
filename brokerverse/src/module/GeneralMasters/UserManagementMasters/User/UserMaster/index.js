@@ -96,7 +96,6 @@ const UserMaster = () => {
     fontWeight: 500,
     padding: "1rem",
     color: "#000",
-    textAlign: "center",
     border: "none",
     textAlign: "center",
     // marginLeft:"6px"

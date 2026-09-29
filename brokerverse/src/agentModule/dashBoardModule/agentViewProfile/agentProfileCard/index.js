@@ -52,7 +52,6 @@ const AgentProfileCard = () => {
       firstName: profileData[0]?.firstName,
       lastName: profileData[0]?.lastName,
       prefferedName: profileData[0]?.prefferedName,
-      lastName: profileData[0]?.lastName,
       dateOfBirth: profileData[0]?.dateOfBirth,
       gender: profileData[0]?.gender,
       houseNoUnitNoStreet: profileData[0]?.houseNoUnitNoStreet,

@@ -41,7 +41,6 @@ const AddDesignation = ({ action }) => {
       label: t("generalMasters.designation"),
       url: "/master/generals/employeemanagement/designation",
     },
-    ,
     {
       label: action === "add"
         ? t("generalMasters.addDesignation")

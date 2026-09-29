@@ -838,4 +838,5 @@ class AccountingService {
   }
 }
 
-export default new AccountingService();
+const accountingService = new AccountingService();
+export default accountingService;

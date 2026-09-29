@@ -730,4 +730,5 @@ class DisbursementService {
   }
 }
 
-export default new DisbursementService();
+const disbursementService = new DisbursementService();
+export default disbursementService;

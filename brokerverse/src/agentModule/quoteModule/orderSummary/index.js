@@ -100,7 +100,6 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
       currentQuoteCreation.coverageDetails?.localGovernmentTax,
     accountPremiumOthers:
       currentQuoteCreation.coverageDetails?.accountPremiumOthers,
-    discount: currentQuoteCreation.coverageDetails?.discount,
     grossPremium: currentQuoteCreation.coverageDetails?.grossPremium,
 
     // From accessories - camelCase only

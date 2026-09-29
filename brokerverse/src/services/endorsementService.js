@@ -237,4 +237,5 @@ class EndorsementService {
   }
 }
 
-export default new EndorsementService();
+const endorsementService = new EndorsementService();
+export default endorsementService;
