@@ -25,4 +25,3 @@ export const endorsementStatusOut = (s) => ENDORSEMENT[s] || s;
 export const quoteStatusIn = (s) => (s ? (QUOTE_IN[String(s).toLowerCase()] || (QUOTE[s] ? s : null)) : null);
 export const policyStatusIn = (s) => (s ? (POLICY_IN[String(s).toLowerCase()] || (POLICY[s] ? s : null)) : null);
 export const endorsementStatusIn = (s) => (s ? (ENDORSEMENT_IN[String(s).toLowerCase()] || (ENDORSEMENT[s] ? s : null)) : null);
-export const QUOTE_LABELS = [...new Set(Object.values(QUOTE))];

@@ -58,4 +58,4 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/63_bank_reconciliation.sql` | sample | sample bank accounts linked to their GL cash accounts; last month's BDO statement built from the sample ledger (plus interest, final tax, service charge) |
 | `70_security.sql` | reference | security configuration |
 
-No persona test users are seeded: the end-to-end persona walk and the tests create their own users.
+No test users are seeded: the tests and the end-to-end checks create their own users.

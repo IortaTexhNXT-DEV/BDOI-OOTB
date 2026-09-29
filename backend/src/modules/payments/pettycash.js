@@ -9,7 +9,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { account, reverseJournal } from '../accounting/lib/ledger.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const fundRow = (f) => ({ id: f.id, code: f.code, pettyCashCode: f.code, description: f.description, transactionNumber: f.transaction_number, transactionDate: f.transaction_date,

@@ -8,7 +8,7 @@ import { businessTimeZone, calendarPeriod, today } from '../../lib/dates.js';
 
 /**
  * One user's own book, with the same ownership rules as the record scope of security.scoped_roles (lib/scope.js): the
- * dashboard counts exactly the leads, quotations and policies the user's lists show (D108). null = everyone's book.
+ * dashboard counts exactly the leads, quotations and policies the user's lists show. null = everyone's book.
  */
 export const ownBook = (user) => (user ? { userId: user.id, ids: [user.id, user.username].filter(Boolean) } : null);
 /** SQL predicate for `alias` of `entity` limited to `book` (pushes its parameter onto params); TRUE for null. */
@@ -213,7 +213,7 @@ export async function agentHome(book) {
   const commission = await one(`SELECT COALESCE(sum(net_amount) FILTER (WHERE lower(status) <> 'paid'), 0) AS unpaid, COALESCE(sum(net_amount) FILTER (WHERE lower(status) = 'paid'), 0) AS paid
     FROM commissions WHERE agent_user_id = $1`, [book?.userId]);
   // Premium of the book's policies: collected = paid on the premium bills (receipts applied), receivable = still open.
-  // Bills cancelled because the policy is direct bill (the client pays the insurer) count in neither (D118).
+  // Bills cancelled because the policy is direct bill (the client pays the insurer) count in neither.
   const bp = [];
   const book$ = inBook(book, 'policy', 'p', bp);
   const premium = await one(`SELECT COALESCE(sum(p.premium_total), 0) AS gross,

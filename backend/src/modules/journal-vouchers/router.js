@@ -5,7 +5,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
 

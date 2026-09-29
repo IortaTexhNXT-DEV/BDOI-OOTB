@@ -1,9 +1,9 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
-import { toDate } from '../documents/common.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { isoDate } from '../../lib/dates.js';
 
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
@@ -58,7 +58,7 @@ function columnsFrom(body) {
   for (const [k, c] of Object.entries(FIELD_MAP)) if (body[k] !== undefined) cols[c] = body[k] === '' ? null : body[k];
   if (body.emailId === undefined && body.email !== undefined) cols.email = body.email || null;
   if (body.contactNumber === undefined && body.phone !== undefined) cols.phone = body.phone || null;
-  if (body.DOB !== undefined) cols.birth_date = toDate(body.DOB);
+  if (body.DOB !== undefined) cols.birth_date = isoDate(body.DOB);
   const extra = Object.fromEntries(Object.entries(body).filter(([k]) => !KNOWN.has(k)));
   return { cols, extra };
 }

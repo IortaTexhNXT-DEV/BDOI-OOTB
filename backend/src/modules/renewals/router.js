@@ -20,7 +20,7 @@ const read = [requireAuth, requirePermission('read:renewals')];
 const write = [requireAuth, requirePermission('write:renewals')];
 // Renewal quote wizard on one policy (Operations > Renewals > Renewal Policy > Renewal): anyone who prepares quotations
 // may renew a policy of their book, so agents (no renewals grant; record scope applies) can renew their own expiring
-// policies. Batches, the queue and the rest of the renewals workspace keep the renewals permission (D100).
+// policies. Batches, the queue and the rest of the renewals workspace keep the renewals permission.
 const wizardRead = [requireAuth, requirePermission('read:renewals', 'write:renewals', 'write:quotations')];
 const wizardWrite = [requireAuth, requirePermission('write:renewals', 'write:quotations')];
 const captureSchema = z.object({

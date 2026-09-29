@@ -12,6 +12,7 @@ const tableExists = async (t) => !!(await one('SELECT 1 FROM information_schema.
 
 export async function renewalNotices() {
   if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
+  if (!(await getSetting('notification.renewal_reminder', true))) return { skipped: 'renewal reminders are switched off (notification.renewal_reminder)' };
   const days = (await getSetting('limits.renewal_notice_days', [60, 30, 15])) || [60, 30, 15];
   const now = await today();
   let created = 0;
@@ -52,11 +53,14 @@ export async function receivableAgeing() {
   }
   return { updated };
 }
-export async function dailyReports() {
+/** Reports the daily-reports job generates when its params name none (params.reports on Master > Schedules). */
+const DAILY_REPORTS = ['production-register', 'collections-summary', 'claims-position'];
+export async function dailyReports(params = {}) {
   if (!(await tableExists('generated_reports'))) return { skipped: 'generated_reports table missing' };
   const { generateReport } = await import('../modules/reports/service.js');
+  const codes = Array.isArray(params.reports) && params.reports.length ? params.reports : DAILY_REPORTS;
   const out = [];
-  for (const code of ['production-register', 'collections-summary', 'claims-position']) out.push(await generateReport(code, {}, 'schedule'));
+  for (const code of codes) out.push(await generateReport(code, {}, 'schedule'));
   return { reports: out.map((r) => r.id) };
 }
 export async function emailOutbox() {

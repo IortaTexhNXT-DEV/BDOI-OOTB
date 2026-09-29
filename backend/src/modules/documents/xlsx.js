@@ -1,9 +1,9 @@
 /**
- * Minimal XLSX support without dependencies: read the first worksheet of an uploaded workbook into rows, and write a
- * single-sheet workbook for report downloads. XLSX files are ZIP archives of XML parts; zlib handles DEFLATE.
+ * Minimal XLSX support without dependencies: read the first worksheet of an uploaded workbook into rows (XLSX files
+ * are ZIP archives of XML parts; zlib handles DEFLATE), and write a single-sheet workbook through lib/xlsx.js.
  */
-import zlib from 'node:zlib';
 import { assertRowLimit, inflateEntry } from '../../lib/uploadLimits.js';
+import { writeXlsx as writeWorkbook } from '../../lib/xlsx.js';
 
 // ---------- ZIP ----------
 function readZip(buf) {
@@ -37,38 +37,8 @@ function readZip(buf) {
   return { get, names: [...files.keys()] };
 }
 
-function writeZip(entries) {
-  const locals = [];
-  const centrals = [];
-  let offset = 0;
-  for (const { name, data } of entries) {
-    const raw = Buffer.from(data, 'utf8');
-    const comp = zlib.deflateRawSync(raw);
-    const crc = zlib.crc32(raw);
-    const nameBuf = Buffer.from(name, 'utf8');
-    const lh = Buffer.alloc(30);
-    lh.writeUInt32LE(0x04034b50, 0); lh.writeUInt16LE(20, 4); lh.writeUInt16LE(0, 6); lh.writeUInt16LE(8, 8);
-    lh.writeUInt32LE(0, 10); lh.writeUInt32LE(crc, 14); lh.writeUInt32LE(comp.length, 18); lh.writeUInt32LE(raw.length, 22);
-    lh.writeUInt16LE(nameBuf.length, 26); lh.writeUInt16LE(0, 28);
-    const ch = Buffer.alloc(46);
-    ch.writeUInt32LE(0x02014b50, 0); ch.writeUInt16LE(20, 4); ch.writeUInt16LE(20, 6); ch.writeUInt16LE(0, 8); ch.writeUInt16LE(8, 10);
-    ch.writeUInt32LE(0, 12); ch.writeUInt32LE(crc, 16); ch.writeUInt32LE(comp.length, 20); ch.writeUInt32LE(raw.length, 24);
-    ch.writeUInt16LE(nameBuf.length, 28); ch.writeUInt32LE(offset, 42);
-    locals.push(lh, nameBuf, comp);
-    centrals.push(ch, nameBuf);
-    offset += lh.length + nameBuf.length + comp.length;
-  }
-  const central = Buffer.concat(centrals);
-  const end = Buffer.alloc(22);
-  end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(entries.length, 8); end.writeUInt16LE(entries.length, 10);
-  end.writeUInt32LE(central.length, 12); end.writeUInt32LE(offset, 16);
-  return Buffer.concat([...locals, central, end]);
-}
-
 // ---------- XML helpers ----------
 const unxml = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
-const xml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-  .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, ''); // eslint-disable-line no-control-regex
 const texts = (frag) => [...frag.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((m) => unxml(m[1])).join('');
 const colIndex = (ref) => {
   const letters = ref.replace(/[0-9]/g, '');
@@ -76,7 +46,6 @@ const colIndex = (ref) => {
   for (const ch of letters) n = n * 26 + (ch.charCodeAt(0) - 64);
   return n - 1;
 };
-const colName = (i) => { let s = ''; let n = i + 1; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
 
 /** Parse the first worksheet into an array of arrays of strings. */
 export function readXlsx(buf) {
@@ -108,19 +77,5 @@ export function readXlsx(buf) {
 
 /** Build a one-sheet XLSX from a header row and data rows (numbers stay numeric). */
 export function writeXlsx(header, rows, sheetName = 'Report') {
-  const cell = (v, r, c) => {
-    const ref = `${colName(c)}${r}`;
-    if (typeof v === 'number' && Number.isFinite(v)) return `<c r="${ref}"><v>${v}</v></c>`;
-    return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xml(v)}</t></is></c>`;
-  };
-  const all = [header, ...rows];
-  const sheetRows = all.map((r, i) => `<row r="${i + 1}">${r.map((v, c) => cell(v, i + 1, c)).join('')}</row>`).join('');
-  const ns = 'http://schemas.openxmlformats.org';
-  return writeZip([
-    { name: '[Content_Types].xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="${ns}/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>` },
-    { name: '_rels/.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${ns}/package/2006/relationships"><Relationship Id="rId1" Type="${ns}/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
-    { name: 'xl/workbook.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${ns}/spreadsheetml/2006/main" xmlns:r="${ns}/officeDocument/2006/relationships"><sheets><sheet name="${xml(sheetName).slice(0, 31)}" sheetId="1" r:id="rId1"/></sheets></workbook>` },
-    { name: 'xl/_rels/workbook.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${ns}/package/2006/relationships"><Relationship Id="rId1" Type="${ns}/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>` },
-    { name: 'xl/worksheets/sheet1.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${ns}/spreadsheetml/2006/main"><sheetData>${sheetRows}</sheetData></worksheet>` },
-  ]);
+  return writeWorkbook({ sheets: [{ name: sheetName, columns: header.map((h) => ({ header: String(h ?? ''), type: 'auto' })), rows }] });
 }

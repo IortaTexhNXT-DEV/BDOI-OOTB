@@ -2,7 +2,7 @@ import { badRequest } from './errors.js';
 import { getSetting } from './settings.js';
 
 /**
- * Date-of-birth plausibility rule for leads and clients (D68): the age on today's date must be between the configured
+ * Date-of-birth plausibility rule for leads and clients: the age on today's date must be between the configured
  * minimum and maximum (app_settings leads.min_age_years / leads.max_age_years, editable in System Settings).
  */
 export async function birthDateLimits() {

@@ -6,7 +6,7 @@ import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
 import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
 import { pick } from '../documents/tabular.js';
@@ -184,7 +184,7 @@ export async function sendForApproval(id, user) {
   const url = `${String((await getSetting('general.frontend_url')) || '').replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
   const t = await emailTemplate('quote_approval');
   const v = await vars(q, { approvalUrl: url, validHours: hours, ...(!q.lead_row?.id && client?.display_name ? { customerName: client.display_name } : {}) });
-  await queueEmail({ to, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
+  await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
   await query("UPDATE quotes SET status = 'sent', approval_token_hash = $2, approval_sent_to = $3, approval_sent_at = now(), updated_by = $4, updated_at = now() WHERE id = $1",
     [q.id, sha(token), to, user.id]);
   if (await getSetting('notification.approval_requests', true)) {
@@ -221,7 +221,7 @@ export async function submitToInsurer(id, user) {
   if (ic?.contact_email) {
     const t = await emailTemplate('insurer_submission');
     const v = await vars(q, { insurerName: ic.name });
-    await queueEmail({ to: ic.contact_email, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'insurer_submission', entity: 'quotation', entityId: q.id });
+    await queueEmail({ to: ic.contact_email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'insurer_submission', entity: 'quotation', entityId: q.id });
   }
   await query("UPDATE quotes SET status = 'submitted', submitted_to_insurer_at = now(), submitted_by = $2, updated_by = $2, updated_at = now() WHERE id = $1", [q.id, user.id]);
   return { insurer: ic, before: q, after: await getQuoteRow(q.id) };

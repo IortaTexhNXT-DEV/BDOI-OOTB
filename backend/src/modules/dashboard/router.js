@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { isAdmin, requireAuth, requirePermission } from '../../lib/auth.js';
+import { requireAuth, requirePermission, hasPermission } from '../../lib/auth.js';
 import { scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 
@@ -13,7 +13,7 @@ define({
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8 }, premiumThisMonth: 125000, renewalsDueIn60Days: 3, recentQuotations: [], expiringPolicies: [] } },
   handler: async (req, res) => {
     const scoped = await scopeOf(req);
-    const all = !scoped && req.query.scope === 'all' && (isAdmin(req.user) || req.user.permissions.includes('read:reports'));
+    const all = !scoped && req.query.scope === 'all' && hasPermission(req.user, 'read:reports');
     send(res, all ? await svc.sales(null) : { ...(await svc.agentHome(svc.ownBook(req.user))), scoped: Boolean(scoped) });
   },
 });

@@ -4,7 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { badRequest } from '../../lib/errors.js';
+import { badRequest, notFound } from '../../lib/errors.js';
 import { pageParams, sendList } from './lib/http.js';
 import { toCsv } from './lib/files.js';
 import { cancelJournal, postJournal, resolveJournalId, reverseJournal } from './lib/ledger.js';
@@ -139,7 +139,7 @@ define({
   response: '(text/csv attachment)',
   handler: async (req, res) => {
     const r = await svc.searchEntries(pool, req.query, null);
-    if (!r.rows.length) { res.status(404).json({ success: false, message: 'No accounting entries found matching the filters' }); return; }
+    if (!r.rows.length) throw notFound('No accounting entries found matching the filters');
     const cols = [['documentDate', 'Date'], ['transactionCode', 'Transaction'], ['entryType', 'Entry type'], ['accountCode', 'GL code'], ['accountName', 'Account'], ['debit', 'Debit'], ['credit', 'Credit'],
       ['motherPolicyNumber', 'Policy'], ['clientCode', 'Client code'], ['clientName', 'Client'], ['description', 'Description'], ['status', 'Status'], ['referenceType', 'Reference type'], ['referenceId', 'Reference']]
       .map(([key, label]) => ({ key, label }));
@@ -217,7 +217,7 @@ define({
   request: { name: 'Office Supplies Expense' }, response: { success: true, data: { code: '4401008', name: 'Office Supplies Expense' } },
   handler: async (req, res) => {
     const before = (await pool.query('SELECT * FROM gl_accounts WHERE code = $1', [req.params.code])).rows[0];
-    if (!before) { res.status(404).json({ success: false, message: 'Account not found' }); return; }
+    if (!before) throw notFound('Account not found');
     const a = await withTransaction((db) => svc.upsertAccount(db, req.params.code, req.body));
     await audit(req, { entity: 'gl_account', entityId: a.code, action: 'update', before, after: a });
     ok(res, await withRoles(a));

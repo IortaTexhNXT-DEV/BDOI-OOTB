@@ -1,7 +1,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { toDate, num, round2, lobOf } from '../documents/common.js';
+import { num, round2, lobOf } from '../documents/common.js';
 import { policyStatusOut, policyStatusIn } from '../documents/statuses.js';
 import { toQuote } from '../quotations/shape.js';
 import { toClient } from '../clients/service.js';
@@ -11,6 +11,7 @@ import { publicUrl } from '../uploads/storage.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { writeParticipants, legacyParticipantDetails, leadOf, participantsOf } from '../placement/participants.js';
+import { isoDate } from '../../lib/dates.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
@@ -89,10 +90,10 @@ function listWhere(q) {
   if (q.status) add('p.status = ?', policyStatusIn(q.status) || q.status);
   if (q.insuranceCompanyName) add("(ic.name ILIKE '%' || ? || '%' OR p.doc->>'insuranceCompanyName' ILIKE '%' || ? || '%')", q.insuranceCompanyName);
   if (q.clientName) add("(c.display_name ILIKE '%' || ? || '%' OR p.insured_name ILIKE '%' || ? || '%')", q.clientName);
-  if (q.issuedDateFrom) add('COALESCE(p.issued_date, p.created_at::date) >= ?::date', toDate(q.issuedDateFrom));
-  if (q.issuedDateTo) add('COALESCE(p.issued_date, p.created_at::date) <= ?::date', toDate(q.issuedDateTo));
-  if (q.expiryDateFrom) add('p.expiry_date >= ?::date', toDate(q.expiryDateFrom));
-  if (q.expiryDateTo) add('p.expiry_date <= ?::date', toDate(q.expiryDateTo));
+  if (q.issuedDateFrom) add('COALESCE(p.issued_date, p.created_at::date) >= ?::date', isoDate(q.issuedDateFrom));
+  if (q.issuedDateTo) add('COALESCE(p.issued_date, p.created_at::date) <= ?::date', isoDate(q.issuedDateTo));
+  if (q.expiryDateFrom) add('p.expiry_date >= ?::date', isoDate(q.expiryDateFrom));
+  if (q.expiryDateTo) add('p.expiry_date <= ?::date', isoDate(q.expiryDateTo));
   if (q.premiumMin !== undefined && q.premiumMin !== '') add('p.premium_total >= ?::numeric', num(q.premiumMin));
   if (q.premiumMax !== undefined && q.premiumMax !== '') add('p.premium_total <= ?::numeric', num(q.premiumMax));
   const search = q.query || q.policyNumber || q.search;
@@ -117,9 +118,9 @@ async function columnsFrom(db, body) {
   const cols = {};
   if (body.policyNumber) cols.policy_number = String(body.policyNumber);
   if (body.insuredName !== undefined) cols.insured_name = body.insuredName || null;
-  const inception = toDate(body.inception || body.inceptionDate);
-  const expiry = toDate(body.expiry || body.expiryDate);
-  const issued = toDate(body.issuedDate);
+  const inception = isoDate(body.inception || body.inceptionDate);
+  const expiry = isoDate(body.expiry || body.expiryDate);
+  const issued = isoDate(body.issuedDate);
   if (inception) cols.inception_date = inception;
   if (expiry) cols.expiry_date = expiry;
   if (issued) cols.issued_date = issued;
@@ -260,7 +261,7 @@ export async function issuePolicy(db, src, body, userId) {
   // product from the quotation, else the product whose code is the line of business (MOTOR, FIRE ...) or the product type
   const productId = src.productId || (await db.query('SELECT id FROM products WHERE upper(code) = ANY($1::text[]) ORDER BY id LIMIT 1',
     [[src.lob, src.productType].filter(Boolean).map((x) => String(x).toUpperCase())])).rows[0]?.id || null;
-  const inception = cols.inception_date || toDate(new Date());
+  const inception = cols.inception_date || isoDate(new Date());
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
   const number = cols.policy_number || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
@@ -271,7 +272,7 @@ export async function issuePolicy(db, src, body, userId) {
       payment_status, payment_method, paid_at, doc, created_by, billing_mode)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) RETURNING id`,
   [number, src.quoteId, src.clientId, src.leadId, productId, src.policyTypeId, cols.insurance_company_id || src.insuranceCompanyId, src.ownerUserId || userId,
-    inception, expiry, cols.issued_date || toDate(new Date()), src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
+    inception, expiry, cols.issued_date || isoDate(new Date()), src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
     JSON.stringify(policyDoc), userId, billingMode]);
   const policyId = r.rows[0].id;

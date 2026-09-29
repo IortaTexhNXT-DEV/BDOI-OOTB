@@ -1,5 +1,5 @@
 /**
- * Go-live readiness (D200-D202): reference-only seed in production, SEED_SAMPLE_DATA, the purge script, scheduler
+ * Go-live readiness: reference-only seed in production, SEED_SAMPLE_DATA, the purge script, scheduler
  * advisory locks and SCHEDULER_ENABLED, and GET /api/health readiness.
  */
 import { spawn } from 'node:child_process';

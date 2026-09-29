@@ -4,7 +4,7 @@
  * Every base query receives $1 = from date and $2 = to date; `extras` (read from app_settings) follow as $3, $4 ...
  * Columns prefixed with "_" are internal (used for filtering) and never returned. The service wraps the base query:
  *   SELECT * FROM (<sql>) t WHERE <filters> [GROUP BY <dims>]   -- then pages, totals and groups over it.
- * Supported filter keys: agent, insurer, branch, client, product, status (see FILTERS in service.js).
+ * Supported filter keys: agent, insurer, branch, client, product, status, account, bankAccount (FILTERS in engine.js).
  * criteria: allowed values of the screen's "Report Criteria" drop-down. { where } restricts rows, { groupBy } adds a
  * summary by that column, { dims } chooses the aggregation dimensions of aggregate reports.
  */

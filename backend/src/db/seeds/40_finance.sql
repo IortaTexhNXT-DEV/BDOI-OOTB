@@ -49,7 +49,7 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('numbering.petty_cash_receipt.prefix', '"PCRC"', 'numbering', 'Petty cash receipt number prefix', 'string')
 ON CONFLICT (key) DO NOTHING;
 
--- Chart of accounts for a Philippine insurance brokerage (D57), PFRS / BIR style grouping.
+-- Chart of accounts for a Philippine insurance brokerage, PFRS / BIR style grouping.
 -- Codes follow the Journal Voucher screen: 1 assets, 2 liabilities, 3 income, 4 expenses, 5 equity. Every code the system
 -- posts to (accounting.account.* settings, payable / cash maps) keeps its code; fs_group is the statement line group.
 -- Idempotent: a new account is inserted; an existing one is only classified (fs_group, normal balance, description,

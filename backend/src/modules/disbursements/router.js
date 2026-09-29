@@ -189,7 +189,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.approveAgentPayout(db, req.params.id, req.body.lineIds, req.user));
     await audit(req, { entity: 'disbursement', entityId: r.disbursementId, action: 'approve-agent-payout', after: r });
-    ok(res, r, `Approved — voucher ${r.voucherNumber}`);
+    ok(res, r, `Approved: voucher ${r.voucherNumber}`);
   },
 });
 export default router;

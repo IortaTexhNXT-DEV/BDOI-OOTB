@@ -1,4 +1,4 @@
-/** Upgraded dependencies (D93): node-cron 4 and nodemailer 10 keep the behaviour the scheduler and mailer rely on. */
+/** Upgraded dependencies: node-cron 4 and nodemailer 10 keep the behaviour the scheduler and mailer rely on. */
 import fs from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import cron from 'node-cron';

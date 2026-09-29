@@ -6,7 +6,7 @@ import { isoDate, round2 } from '../accounting/lib/http.js';
 import { today } from '../../lib/dates.js';
 
 // A premium bill cancelled because the policy moved to direct bill (the client pays the insurer) is DIRECT, not PAID;
-// any other cancelled bill is CANCELLED (D117).
+// any other cancelled bill is CANCELLED.
 const STATUS_SQL = `CASE WHEN r.status = 'cancelled' AND p.billing_mode = 'direct' THEN 'DIRECT' WHEN r.status = 'cancelled' THEN 'CANCELLED'
   WHEN r.status = 'paid' OR r.balance <= 0 THEN 'PAID' WHEN r.status = 'partial' THEN 'REVIEWING' ELSE 'PENDING' END`;
 const STATUS_LABEL = { DIRECT: 'DIRECT BILL' };

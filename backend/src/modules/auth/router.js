@@ -293,7 +293,7 @@ define({
       // Lifetime and wording from System Settings (security.reset_code_minutes, security.reset_email_subject / _body)
       const minutes = Number(await getSetting('security.reset_code_minutes', 15)) || 15;
       const vars = { code, minutes, companyName: await companyName() };
-      const subject = renderTemplate(await getSetting('security.reset_email_subject'), vars);
+      const subject = renderTemplate(await getSetting('security.reset_email_subject'), vars, { html: false });
       const html = renderTemplate(await getSetting('security.reset_email_body'), vars);
       await withTransaction(async (c) => {
         await c.query('UPDATE password_resets SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [user.id]);

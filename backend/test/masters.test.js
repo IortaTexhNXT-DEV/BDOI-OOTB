@@ -27,7 +27,7 @@ describe('masters catalogue', () => {
   });
 });
 
-describe('signatories master (order summary Authorized Signature, D15)', () => {
+describe('signatories master (order summary Authorized Signature)', () => {
   it('lists the seeded signatories with name and position, and a sales user reads them as dropdown options', async () => {
     const list = await ctx.api('get', '/masters/signatory');
     expect(list.status).toBe(200);

@@ -2,6 +2,8 @@
 import { getSetting } from '../../lib/settings.js';
 import { query } from '../../db/pool.js';
 import { badRequest } from '../../lib/errors.js';
+import { num } from '../../lib/money.js';
+import { formatAmount } from '../../lib/pdf/format.js';
 
 /**
  * Single-record response. Several screens read the record at the top level (response.leadId, response.quotationId)
@@ -10,11 +12,7 @@ import { badRequest } from '../../lib/errors.js';
 export const sendEntity = (res, entity, { status = 200, message = 'OK', extra = {} } = {}) => res.status(status)
   .json({ ...entity, ...extra, success: true, message, data: entity });
 
-/** Replace {{placeholders}} in an e-mail / document template with values (HTML-escaped). */
-export function renderTemplate(tpl, vars) {
-  const escape = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return String(tpl || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => escape(vars[k]));
-}
+export { renderTemplate } from '../../lib/template.js';
 
 /** Read an e-mail template ({subject, html}) from app_settings. */
 export async function emailTemplate(key) {
@@ -23,21 +21,10 @@ export async function emailTemplate(key) {
   return t;
 }
 
-/** Parse a money-like value ("12,345.60", 12345.6, "") to a number. */
-export const num = (v) => {
-  if (v === null || v === undefined || v === '') return 0;
-  const n = Number(String(v).replace(/[^0-9.-]/g, ''));
-  return Number.isFinite(n) ? n : 0;
-};
-export { round2 } from '../../lib/money.js';
+export { num, round2 } from '../../lib/money.js';
 
-/** Parse a date-like value to YYYY-MM-DD (null when empty or invalid). */
-export const toDate = (v) => {
-  if (!v) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return String(v);
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
-};
+/** An amount for an e-mail or letter text: thousand separators and two decimals ("1,250.00"); 0.00 when empty. */
+export const amountText = (v) => formatAmount(num(v));
 
 /** LOB code from free text used by the screens ("Fire and Allied Perils", "FIRE", "Industrial All Risks", "Motor"). */
 export function lobOf(...values) {

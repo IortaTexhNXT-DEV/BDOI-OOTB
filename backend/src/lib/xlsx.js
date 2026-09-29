@@ -57,6 +57,8 @@ class SharedStrings {
 
 function cellXml(ref, value, type, sst) {
   if (value === null || value === undefined || value === '') return '';
+  // 'auto': a JavaScript number stays a number, anything else is text
+  if (type === 'auto' && typeof value === 'number' && Number.isFinite(value)) return `<c r="${ref}"><v>${value}</v></c>`;
   const numeric = ['money', 'integer', 'number', 'percent'].includes(type);
   if (numeric && Number.isFinite(Number(value))) return `<c r="${ref}" s="${STYLE[type]}"><v>${Number(value)}</v></c>`;
   if (type === 'date') {
@@ -104,6 +106,7 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 /**
  * Build an .xlsx workbook.
+ * Column type: text (default), wrap, money, integer, number, percent, date, or auto (numbers numeric, the rest text).
  * @param {{sheets: {name: string, columns: {key?: string, header?: string, label?: string, width?: number, type?: string}[], rows: (Array|Object)[], freeze?: boolean, autoFilter?: boolean}[], creator?: string, title?: string}} wb
  * @returns {Buffer}
  */

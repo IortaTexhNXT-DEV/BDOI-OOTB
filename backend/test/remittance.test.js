@@ -33,7 +33,7 @@ describe('remittances and approvals', () => {
     expect(d.body.data.insurerDetails.code).toBeTruthy();
     expect(d.body.data.policies.length).toBe(d.body.data.policyCount);
   });
-  it('every seeded remittance has an insurer, and a seeded agency bill carries one insurer\'s policies (D40)', async () => {
+  it('every seeded remittance has an insurer, and a seeded agency bill carries one insurer\'s policies', async () => {
     const rows = (await pool.query(`SELECT r.remittance_number, r.kind, r.insurance_company_id AS ins,
         (SELECT array_agg(DISTINCT p.insurance_company_id) FROM remittance_lines l JOIN policies p ON p.id = l.policy_id WHERE l.remittance_id = r.id) AS line_ins
       FROM remittances r WHERE r.data->>'seed' = 'remittance-v1'`)).rows;

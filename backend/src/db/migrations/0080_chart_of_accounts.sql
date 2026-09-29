@@ -1,4 +1,4 @@
--- Chart of accounts (D57): financial-statement classification for the Philippine broker chart.
+-- Chart of accounts: financial-statement classification for the Philippine broker chart.
 --   fs_group        statement line group: Current Assets, Non-current Assets, Current Liabilities, Non-current Liabilities,
 --                   Equity, Revenue, Other Income, Cost of Services, Operating Expenses, Other Expenses, Income Tax
 --   normal_balance  debit | credit (contra accounts such as accumulated depreciation or allowances differ from their type)

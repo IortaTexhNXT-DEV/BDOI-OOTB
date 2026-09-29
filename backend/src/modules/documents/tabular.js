@@ -4,6 +4,7 @@
  */
 import { assertRowLimit, importUpload } from '../../lib/uploadLimits.js';
 import { badRequest } from '../../lib/errors.js';
+import { csvCell } from '../../lib/csv.js';
 import { readXlsx, writeXlsx } from './xlsx.js';
 
 export const uploadFile = importUpload().single('file');
@@ -55,7 +56,6 @@ export const pick = (row, ...aliases) => {
   return undefined;
 };
 
-const csvCell = (v) => { const s = v == null ? '' : String(v); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 export const toCsv = (header, rows) => [header, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n');
 
 /** Send a download as XLSX (default) or CSV. */

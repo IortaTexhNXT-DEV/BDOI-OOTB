@@ -212,3 +212,56 @@ describe('round2: cents, half away from zero', () => {
     expect(copies).toEqual(['lib/money.js']);
   });
 });
+
+describe('shared helpers', () => {
+  it('e-mail subjects are rendered as plain text, bodies HTML-escaped', async () => {
+    const { renderTemplate } = await import('../src/lib/template.js');
+    expect(renderTemplate('Quote for {{name}}', { name: 'Cruz & Sons' }, { html: false })).toBe('Quote for Cruz & Sons');
+    expect(renderTemplate('<p>{{name}}</p>', { name: 'Cruz & Sons' })).toBe('<p>Cruz &amp; Sons</p>');
+    const escapedSubjects = FILES.flatMap(({ file, src }) => src.split('\n')
+      .filter((line) => /subject[^\n]*renderTemplate\(/.test(line) && !line.includes('html: false')).map(() => file));
+    expect(escapedSubjects).toEqual([]);
+  });
+
+  it('CSV cells written by any module are guarded against spreadsheet formulas', async () => {
+    const { toCsv } = await import('../src/modules/masters/helpers.js');
+    expect(toCsv([{ name: '=HYPERLINK("x")', amount: -5 }], [{ key: 'name', label: 'Name' }, { key: 'amount', label: 'Amount' }]))
+      .toBe('Name,Amount\n"\'=HYPERLINK(""x"")",-5');
+    const copies = FILES.filter(({ src }) => /const csvCell\b|function csvCell\b/.test(src)).map((f) => f.file);
+    expect(copies).toEqual(['lib/csv.js']);
+  });
+
+  it('dates, amounts and maker-checker have one implementation each', async () => {
+    const { isoDate } = await import('../src/lib/dates.js');
+    const { toNumber } = await import('../src/lib/money.js');
+    expect([isoDate('2026-09-29'), isoDate('2026-09-29T23:30:00+08:00'), isoDate(''), isoDate('not a date')]).toEqual(['2026-09-29', '2026-09-29', null, null]);
+    expect([toNumber('1,250.50'), toNumber(''), toNumber('', null), toNumber('abc')]).toEqual([1250.5, 0, null, 0]);
+    const defined = (name) => FILES.filter(({ src }) => new RegExp(`(const|function) ${name}\\b`).test(src)).map((f) => f.file);
+    expect(defined('isoDate')).toEqual(['lib/dates.js']);
+    expect(defined('addDays')).toEqual(['lib/dates.js']);
+    expect(defined('toNumber')).toEqual(['lib/money.js']);
+    expect(defined('assertChecker')).toEqual(['lib/makerChecker.js']);
+    expect(defined('renderTemplate')).toEqual(['lib/template.js']);
+  });
+});
+
+describe('settings check script and switches that were not read', () => {
+  it('scripts/check-settings.js: every key read in code exists and only documented keys are left unread', async () => {
+    const { checkSettings } = await import('../scripts/check-settings.js');
+    const r = await checkSettings();
+    expect(r.missing).toEqual([]);
+    // product.component_kinds is a read-only list shown on Master > Configuration; the kinds themselves are fixed in code
+    expect(r.unread.map((u) => u.key)).toEqual(['product.component_kinds']);
+  });
+
+  it('the renewal notice job honours notification.renewal_reminder', async () => {
+    const { renewalNotices } = await import('../src/jobs/handlers.js');
+    await setSetting('notification.renewal_reminder', false);
+    try {
+      expect((await renewalNotices()).skipped).toMatch(/switched off/);
+    } finally {
+      await setSetting('notification.renewal_reminder', true);
+    }
+    expect((await renewalNotices()).skipped).toBeUndefined();
+  });
+});

@@ -1,5 +1,5 @@
 /**
- * Direct bill (D36): the client pays the premium to the insurer; the broker books its commission receivable from the
+ * Direct bill: the client pays the premium to the insurer; the broker books its commission receivable from the
  * insurer at issue and bills it with a commission debit note (maker-checker), then collects it net of the insurer's EWT.
  *
  * Worked example used below (PHP): net premium 100,000.00, gross premium 125,250.00, commission rate 15%

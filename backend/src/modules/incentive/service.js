@@ -6,7 +6,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { assertChecker, fileUrl, isoDate, lastMonths, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { getLetterhead } from '../../lib/letterhead.js';
@@ -314,8 +314,8 @@ export async function submitCalculation(batchId, user) {
 export async function decideCalculation(batchId, action, b, user) {
   const c = await calcRow(batchId);
   if (c.status !== 'Pending Approval') throw conflict(`Batch is ${c.status}; only batches pending approval can be ${action}d`);
-  assertChecker({ user }, c.submitted_by, 'calculation batch');
-  assertChecker({ user }, c.created_by, 'calculation batch');
+  await assertChecker(user, c.submitted_by, 'calculation batch');
+  await assertChecker(user, c.created_by, 'calculation batch');
   await withTransaction(async (tx) => {
     if (action === 'approve') {
       await tx.query('UPDATE incentive_calculations SET status = \'Approved\', approved_by = $2, approval_date = now(), updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);

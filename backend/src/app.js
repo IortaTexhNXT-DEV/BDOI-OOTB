@@ -6,7 +6,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
-import pino from 'pino';
 import { config } from './config.js';
 import { errorHandler } from './lib/errors.js';
 import { verify } from './lib/auth.js';
@@ -14,31 +13,8 @@ import { apiRateLimit } from './lib/rateLimit.js';
 import { signFileLinks } from './lib/fileLinks.js';
 import { requestContext } from './lib/requestContext.js';
 import { healthHandler, livenessHandler } from './lib/health.js';
+import { logger, redactRequest } from './lib/logger.js';
 
-/**
- * Log redaction: bearer tokens, cookies and credentials never reach the log store. Query parameters that carry
- * tokens (signed download links, file signatures) are masked in logged URLs.
- */
-export const REDACT_PATHS = [
-  'req.headers.authorization', 'req.headers.cookie', 'req.headers["x-api-key"]', 'res.headers["set-cookie"]',
-  'req.query.token', 'req.query.sig', 'req.query.code',
-  'req.body.password', 'req.body.newPassword', 'req.body.currentPassword', 'req.body.refreshToken', 'req.body.code',
-];
-const SECRET_PARAMS = /([?&](?:token|sig|access_token|refresh_token|refreshToken|code|password)=)[^&#]*/gi;
-export const redactUrl = (url) => (typeof url === 'string' ? url.replace(SECRET_PARAMS, '$1[redacted]') : url);
-/** pino-http request serializer (receives the standard serialized request): mask token query parameters. */
-export function redactRequest(req) {
-  if (!req || typeof req !== 'object') return req;
-  req.url = redactUrl(req.url);
-  if (req.query && typeof req.query === 'object') {
-    const q = { ...req.query };
-    for (const k of Object.keys(q)) if (/^(token|sig|access_token|refresh_token|refreshToken|code|password)$/i.test(k)) q[k] = '[redacted]';
-    req.query = q;
-  }
-  return req;
-}
-
-export const logger = pino({ level: config.logLevel, redact: { paths: REDACT_PATHS, censor: '[redacted]' } });
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 /** Rate-limit key: the user of a valid access token, else the client IP. */

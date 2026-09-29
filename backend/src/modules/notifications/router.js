@@ -2,23 +2,12 @@ import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query } from '../../db/pool.js';
+import { VISIBLE_TO_USER as MINE } from './service.js';
 import { paging, pageMeta } from '../../lib/respond.js';
 
 const { router, define } = moduleRouter('Notifications', '/notifications');
 const row = (n) => ({ id: n.id, type: n.type, priority: n.priority, title: n.title, message: n.message, link: n.link, entity: n.entity, entityId: n.entity_id, isRead: n.is_read, readAt: n.read_at, createdAt: n.created_at });
 
-/**
- * Create a notification for a user, or for everyone who holds `audience` (a permission code, e.g.
- * 'write:journal-vouchers') when userId is null. A notification with neither is a broadcast to every user.
- */
-export async function notify({ userId = null, type = 'info', priority = 'normal', title, message, link = null, entity = null, entityId = null, audience = null }) {
-  const r = await query('INSERT INTO notifications(user_id, type, priority, title, message, link, entity, entity_id, audience) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
-    [userId, type, priority, title, message, link, entity, entityId == null ? null : String(entityId), userId ? null : audience]);
-  return r.rows[0].id;
-}
-
-/** Notifications visible to the user: their own, and those addressed to a permission they hold (or to everyone). $1 = user id, $2 = permissions. */
-const MINE = '(user_id = $1 OR (user_id IS NULL AND (audience IS NULL OR audience = ANY($2::text[]))))';
 const who = (req) => [req.user.id, req.user.permissions || []];
 
 define({

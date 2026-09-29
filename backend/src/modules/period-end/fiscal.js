@@ -91,9 +91,6 @@ export async function getFiscalYear(db, code) {
   if (!f) throw notFound(`Fiscal year ${code} not found`);
   return f;
 }
-export async function fiscalYearOf(db, date) {
-  return (await db.query('SELECT * FROM fiscal_years WHERE $1::date BETWEEN start_date AND end_date', [iso(date)])).rows[0] || null;
-}
 export async function periodsOf(db, fiscalYear) {
   return (await db.query('SELECT * FROM accounting_periods WHERE fiscal_year = $1 ORDER BY period_no', [fiscalYear])).rows;
 }

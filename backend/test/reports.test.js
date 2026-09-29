@@ -94,6 +94,14 @@ const run = async (code, body, who = 'admin') => {
 };
 
 describe('report catalogue', () => {
+  it('every catalogue entry has its query and every query has a catalogue entry', async () => {
+    const { QUERIES } = await import('../src/modules/reports/queries.js');
+    const defs = (await query('SELECT code, query_name FROM report_definitions')).rows;
+    expect(defs.filter((d) => !QUERIES[d.query_name]).map((d) => d.code)).toEqual([]);
+    const used = new Set(defs.map((d) => d.query_name));
+    expect(Object.keys(QUERIES).filter((k) => !used.has(k))).toEqual([]);
+  });
+
   it('lists every report for admins and filters by role for personas', async () => {
     const all = await as('admin', 'get', '/reports');
     expect(all.status).toBe(200);

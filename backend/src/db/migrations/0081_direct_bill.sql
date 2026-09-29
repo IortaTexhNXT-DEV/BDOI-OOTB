@@ -1,4 +1,4 @@
--- Direct bill (D36): the client pays the premium directly to the insurer; the broker bills the insurer for its commission
+-- Direct bill: the client pays the premium directly to the insurer; the broker bills the insurer for its commission
 -- with a commission debit note.
 --   policies.billing_mode      broker (client pays the broker, who remits to the insurer) | direct (client pays the insurer)
 --   endorsements.billing_mode  billing mode used for the endorsement premium change (defaults to the policy's)

@@ -1,4 +1,4 @@
--- Least privilege for API reads (persona walk 29 Sep 2026, D92):
+-- Least privilege for API reads:
 -- * Claims officers no longer read the lead register. The claim screens get the holder's lead through the policy
 --   (GET /policies/:id embeds it), which claims officers can read.
 -- * Sales and customer services no longer read the finance receipt register (/receipts, /collections,

@@ -1,4 +1,4 @@
--- D40: the three seeded agency bills were saved without an insurer, so the remittance screens showed a blank insurer.
+-- The three seeded agency bills were saved without an insurer, so the remittance screens showed a blank insurer.
 -- The seed now builds each bill from one insurer's policies; existing databases take the insurer carrying the largest
 -- premium on the bill's lines. Only seeded rows without an insurer are touched, so re-running changes nothing.
 UPDATE remittances r

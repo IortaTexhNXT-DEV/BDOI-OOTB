@@ -65,5 +65,19 @@ export async function calendarPeriod(period = 'month', now = new Date()) {
   return { period: code, from, to, end: addDays(next, -1), next, prevFrom, prevTo: addDays(from, -1), timeZone };
 }
 
+/**
+ * YYYY-MM-DD from a request or database value: a date string or timestamp keeps the date it is written with, a Date
+ * object gives its UTC date. null when empty or not a date. Use businessDate() when an instant must be read in the
+ * business time zone.
+ */
+export function isoDate(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (v instanceof Date) return Number.isNaN(v.getTime()) ? null : v.toISOString().slice(0, 10);
+  const s = String(v);
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+}
+
 /** YYYY-MM-DD plus n calendar days (date arithmetic in UTC, so no time-zone shift). */
 export const addDays = (iso, n) => new Date(Date.parse(`${iso}T00:00:00Z`) + Number(n) * DAY_MS).toISOString().slice(0, 10);

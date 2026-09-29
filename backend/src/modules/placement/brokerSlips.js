@@ -7,9 +7,9 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { addDays, today } from '../../lib/dates.js';
+import { addDays, today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
-import { num, round2, renderTemplate, emailTemplate, toDate } from '../documents/common.js';
+import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { insurerId } from '../policies/service.js';
 import { taxRates } from '../quotations/premium.js';
@@ -17,7 +17,6 @@ import { journeyFor, resolveLob, assertStep } from './journey.js';
 
 export const SLIP_STATUSES = ['draft', 'submitted', 'responses-in', 'closed', 'cancelled'];
 const OPEN = ['draft', 'submitted', 'responses-in'];
-const money = (v) => num(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const n = (v) => (v === null || v === undefined ? null : Number(v));
 
 const SLIP_SELECT = `SELECT b.*, row_to_json(l.*) AS lead_row, c.display_name AS client_name, pr.name AS product_name, q.quote_number, q.status AS quote_status,
@@ -152,7 +151,7 @@ export async function createSlip(body, userId) {
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$17) RETURNING id`,
     [number, body.leadRefId || null, body.clientId || null, productId, body.productType || null, lob, body.insuredName || await partyName(db, body),
       JSON.stringify(body.riskDetails || {}), JSON.stringify(body.doc || {}), JSON.stringify(covers), round2(num(body.sumInsured) || coversTotal(covers)),
-      body.currency || await getSetting('currency.default', 'PHP'), toDate(body.inceptionDate), toDate(body.expiryDate), toDate(body.responseDueDate), body.remarks || null, userId]);
+      body.currency || await getSetting('currency.default', 'PHP'), isoDate(body.inceptionDate), isoDate(body.expiryDate), isoDate(body.responseDueDate), body.remarks || null, userId]);
     await addOffers(db, r.rows[0].id, insurers, userId);
     return r.rows[0].id;
   });
@@ -175,7 +174,7 @@ export async function updateSlip(id, body, userId) {
     if (body.doc !== undefined) cols.doc = JSON.stringify(body.doc || {});
     if (body.requestedCovers !== undefined) cols.requested_covers = JSON.stringify(body.requestedCovers || []);
     if (body.sumInsured !== undefined || body.requestedCovers !== undefined) cols.sum_insured = round2(num(body.sumInsured) || coversTotal(body.requestedCovers ?? before.requested_covers));
-    for (const [k, c] of [['inceptionDate', 'inception_date'], ['expiryDate', 'expiry_date'], ['responseDueDate', 'response_due_date']]) if (body[k] !== undefined) cols[c] = toDate(body[k]);
+    for (const [k, c] of [['inceptionDate', 'inception_date'], ['expiryDate', 'expiry_date'], ['responseDueDate', 'response_due_date']]) if (body[k] !== undefined) cols[c] = isoDate(body[k]);
     set('currency', body.currency);
     set('remarks', body.remarks);
     if (Object.keys(cols).length) {
@@ -197,7 +196,7 @@ async function slipVars(slip, offer) {
   const covers = (slip.requested_covers || []).map((c) => c.cover || c.name).filter(Boolean).join(', ');
   return {
     companyName: ((await getSetting('general.company_name')) ?? ''), slipNumber: slip.slip_number, productType: slip.product_type || slip.product_name || slip.lob,
-    insuredName: slip.insured_name || '', currency: slip.currency, sumInsured: money(slip.sum_insured), covers: covers || 'as per the broker slip',
+    insuredName: slip.insured_name || '', currency: slip.currency, sumInsured: amountText(slip.sum_insured), covers: covers || 'as per the broker slip',
     period: slip.inception_date ? `${slip.inception_date} to ${slip.expiry_date || '-'}` : 'to be agreed', responseDueDate: slip.response_due_date || '-',
     insurerName: offer.insuranceCompanyName, offerNumber: offer.offerNumber,
   };
@@ -212,7 +211,7 @@ async function requestQuotes(slip, only = null) {
   for (const o of offers) {
     if (!o.insurerEmail) { failed.push({ insurer: o.insuranceCompanyName, reason: 'No contact e-mail on the insurer record' }); continue; }
     const v = await slipVars(slip, o);
-    const emailId = await queueEmail({ to: o.insurerEmail, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'broker_slip_request', entity: 'broker_slip', entityId: slip.id });
+    const emailId = await queueEmail({ to: o.insurerEmail, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'broker_slip_request', entity: 'broker_slip', entityId: slip.id });
     await query('UPDATE insurer_offers SET requested_at = now(), updated_at = now() WHERE id = $1', [o.id]);
     sent.push({ insurer: o.insuranceCompanyName, email: o.insurerEmail, emailId });
   }
@@ -267,7 +266,7 @@ export async function recordOffer(id, offerId, body, user) {
       const rates = await taxRates(slip.lob);
       taxes = round2(Object.values(rates).reduce((s, r) => s + round2(premium * r), 0));
     }
-    const validity = toDate(body.validityDate) || addDays(await today(), Number(await getSetting('placement.offer_validity_days', 30)));
+    const validity = isoDate(body.validityDate) || addDays(await today(), Number(await getSetting('placement.offer_validity_days', 30)));
     Object.assign(cols, {
       premium, taxes, premium_total: num(body.premiumTotal) > 0 ? round2(num(body.premiumTotal)) : round2(premium + taxes), sum_insured: si || null,
       rate: body.rate !== undefined && body.rate !== null && body.rate !== '' ? num(body.rate) : (si ? Math.round((premium / si) * 100 * 1e6) / 1e6 : null),

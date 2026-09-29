@@ -208,7 +208,7 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(Number((await q("SELECT premium_total FROM policies WHERE id = 'pol_sls_03'"))[0].premium_total)).toBeCloseTo(before + delta, 2);
   });
 
-  it('a premium change marked direct bill books the commission due from the insurer instead of a client bill (D36)', async () => {
+  it('a premium change marked direct bill books the commission due from the insurer instead of a client bill', async () => {
     const rcvBefore = await receivableCount('pol_sls_03');
     const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_03', endorsementTypeIds: [3],
       coverageChanges: { LossandDamagecoverage: '1600000', LossandDamagecoverageRate: '1.50' } });

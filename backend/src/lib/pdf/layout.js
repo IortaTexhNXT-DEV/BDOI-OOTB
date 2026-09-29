@@ -13,7 +13,7 @@
 import { PAGE_SIZES } from './writer.js';
 import { loadImage } from './image.js';
 import { textWidth, wrapText } from './fonts.js';
-import { DEFAULT_FORMAT, formatDate } from './format.js';
+import { DEFAULT_FORMAT } from './format.js';
 import { allocateWidths, prepareTable, CELL_PAD } from './table.js';
 
 const COLORS = { text: '#1a1a1a', muted: '#5f6b76', rule: '#b8c2cc', zebra: '#f3f6f9', total: '#e3e9f0', headingBg: '#e9eff5' };
@@ -289,6 +289,3 @@ export class DocRenderer {
     return this.pages.length;
   }
 }
-
-/** Format a date for display in a spec (used by templates that print dates in meta rows). */
-export const displayDate = (v, fmt) => formatDate(v, { ...DEFAULT_FORMAT, ...(fmt || {}) });

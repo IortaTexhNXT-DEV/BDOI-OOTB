@@ -1,5 +1,6 @@
-// Persona walk fixes (D100-D108): menu and API permissions agree, filter look-ups readable without read:users, empty
-// forms refused with readable messages, claim dates and the agent dashboard counting the same book as the lists.
+// Each role reaches what its menu shows: menu and API permissions agree, filter look-ups are readable without
+// read:users, empty forms are refused with readable messages, claim dates are checked and the own-book dashboard
+// counts the same book as the lists.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,7 +8,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
-import { notify } from '../src/modules/notifications/router.js';
+import { notify } from '../src/modules/notifications/service.js';
 import { nextRunOf } from '../src/modules/remittance/items.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -52,7 +53,6 @@ beforeAll(async () => {
 });
 afterAll(async () => { await new Promise((r) => { setTimeout(r, 50); }); await pool.end(); });
 
-// D100 (the agent role without the renewals workspace) no longer applies: the Agent / Referrer login role was withdrawn.
 describe('own-book renewals: own policies through the wizard', () => {
   it('prefills and saves the renewal wizard of an own policy; another agent\'s policy answers 404', async () => {
     const pre = await as('pw.agent', 'get', '/policy-renewals/policies/pol_pw1/prefill');
@@ -70,7 +70,7 @@ describe('own-book renewals: own policies through the wizard', () => {
   });
 });
 
-describe('finance incentives (D101, D102)', () => {
+describe('finance incentives', () => {
   it('finance reads calculations, approvals and agent programs; program set-up stays with administrators', async () => {
     for (const p of ['/incentive/calculations', '/incentive/approvals', '/incentive/agent-programs', '/incentive/agents']) {
       expect((await as('pw.finance', 'get', p)).status, p).toBe(200);
@@ -109,7 +109,7 @@ describe('finance incentives (D101, D102)', () => {
   });
 });
 
-describe('reinsurance reconciliation is a finance task (D103)', () => {
+describe('reinsurance reconciliation is a finance task', () => {
   it('finance reads and works reconciliations; treaties and cessions stay with reinsurance users', async () => {
     expect((await as('pw.finance', 'get', '/reinsurance/reconciliation')).status).toBe(200);
     expect((await as('pw.finance', 'get', '/reinsurance/reinsurers')).status).toBe(200);
@@ -122,7 +122,7 @@ describe('reinsurance reconciliation is a finance task (D103)', () => {
   });
 });
 
-describe('look-ups without read:users (D104, D106)', () => {
+describe('look-ups without read:users', () => {
   it('GET /reports/filters/agents serves the report Agent filter to every report reader', async () => {
     for (const who of ['pw.finance', 'pw.sales', 'pw.uw', 'pw.claims']) {
       expect((await as(who, 'get', '/users?role=agent')).status, who).toBe(403);
@@ -144,7 +144,7 @@ describe('look-ups without read:users (D104, D106)', () => {
   });
 });
 
-describe('empty forms are refused with field messages (D105)', () => {
+describe('empty forms are refused with field messages', () => {
   it('every create endpoint of the walk answers 400 "Validation failed" with one readable message per field', async () => {
     const rn = (await one('SELECT id FROM renewals ORDER BY id LIMIT 1')).id;
     const cases = [
@@ -164,7 +164,7 @@ describe('empty forms are refused with field messages (D105)', () => {
   });
 });
 
-describe('claim dates (D107)', () => {
+describe('claim dates', () => {
   it('refuses a reported date before the date of loss, on registration and on update', async () => {
     const body = { policyRefId: 'pol_pw3', typeOfIncident: 'Collision', estimatedClaimAmount: 40000, lob: 'MOTOR' };
     const bad = await as('pw.claims', 'post', '/claims').send({ ...body, dateOfIncident: daysAgo(5), reportedDate: daysAgo(8) });
@@ -182,7 +182,7 @@ describe('claim dates (D107)', () => {
   });
 });
 
-describe('agent dashboard counts the book the lists show (D108)', () => {
+describe('agent dashboard counts the book the lists show', () => {
   it('a quotation another user creates on the agent\'s lead is in both the quotation list and the dashboard funnel', async () => {
     const lead = await as('pw.agent', 'post', '/leads').send({ firstName: 'Funnel', lastName: 'Check', emailId: 'funnel@lead.example.ph', lob: 'MOTOR' });
     expect(lead.status).toBe(201);
@@ -201,7 +201,7 @@ describe('agent dashboard counts the book the lists show (D108)', () => {
   });
 });
 
-describe('agent dashboard premium figures (D118)', () => {
+describe('agent dashboard premium figures', () => {
   it('collected and receivable premium come from the premium bills of the agent\'s book', async () => {
     const dash = await as('pw.agent', 'get', '/agent/get-dashboard-details?scope=mine');
     // POL-PW-0001 15,000 of 20,000 collected; POL-PW-0003 paid in full
@@ -215,7 +215,7 @@ describe('agent dashboard premium figures (D118)', () => {
   });
 });
 
-describe('payments list labels direct bill (D117)', () => {
+describe('payments list labels direct bill', () => {
   it('a premium bill cancelled because the policy is direct bill shows DIRECT BILL under Paid, not PAID', async () => {
     const paid = await ctx.api('get', '/payments?status=PAID&pageSize=200');
     const row = paid.body.data.find((x) => x.policyNumber === 'POL-PW-0002');
@@ -226,7 +226,7 @@ describe('payments list labels direct bill (D117)', () => {
   });
 });
 
-describe('notifications reach only the roles that can act on them (D119)', () => {
+describe('notifications reach only the roles that can act on them', () => {
   it('a finance approval notification is shown to finance, not to customer services or sales', async () => {
     const title = `Journal voucher JV-PW-${Date.now()} awaiting approval`;
     await notify({ audience: 'write:journal-vouchers', type: 'approval', title, message: 'test' });

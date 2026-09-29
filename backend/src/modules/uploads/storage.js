@@ -24,9 +24,12 @@ export function resolveKey(key) {
 /** Random part of new keys: 128 bits, so keys cannot be guessed. */
 const nonce = () => crypto.randomBytes(16).toString('hex');
 
+/** A new storage key folder/<time>-<nonce>-<file name>. Every writer of the uploads area takes its keys from here. */
+export const newKey = (folder, fileName = 'file') => `${safeSegment(folder) || 'uploads'}/${Date.now()}-${nonce()}-${safeSegment(fileName) || 'file'}`;
+
 /** Reserve a key (and a documents row) for a file that will be written later. */
 export async function reserveKey({ folder = 'uploads', fileName = 'file', contentType = null, userId = null, entity = null, entityId = null }) {
-  const key = `${safeSegment(folder) || 'uploads'}/${Date.now()}-${nonce()}-${safeSegment(fileName)}`;
+  const key = newKey(folder, fileName);
   await query('INSERT INTO documents(storage_key, file_name, content_type, category, entity, entity_id, uploaded_by) VALUES ($1,$2,$3,$4,$5,$6,$7)',
     [key, fileName, contentType, folder, entity, entityId == null ? null : String(entityId), userId]);
   return key;

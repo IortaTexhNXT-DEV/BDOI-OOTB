@@ -7,7 +7,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
-import { notify } from '../notifications/router.js';
+import { notify } from '../notifications/service.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -214,7 +214,7 @@ export async function updateTreaty(id, b, user) {
 export async function decideTreaty(id, action, b, user) {
   const t = await treatyRow(id);
   if (t.status !== 'Pending Approval') throw conflict(`Treaty is ${t.status}; only treaties pending approval can be ${action}d`);
-  assertChecker({ user }, t.submitted_by || t.created_by, 'treaty');
+  await assertChecker(user, t.submitted_by || t.created_by, 'treaty', { configurable: false });
   if (action === 'approve') {
     await assertSecurity(t.reinsurer_ids);
     await query('UPDATE reinsurance_treaties SET status = \'Active\', approved_by = $2, approved_at = now(), updated_by = $2, updated_at = now() WHERE id = $1', [t.id, user.id]);
@@ -332,7 +332,7 @@ export async function decideCession(id, action, b, user) {
   const c = await one('SELECT * FROM cessions WHERE id::text = $1 OR cession_number = $1', [String(id)]);
   if (!c) throw notFound('Cession not found');
   if (c.status !== 'Pending') throw conflict(`Cession is ${c.status}`);
-  assertChecker({ user }, c.created_by, 'cession');
+  await assertChecker(user, c.created_by, 'cession', { configurable: false });
   if (action === 'confirm') {
     if (c.treaty_id) await assertSecurity((await treatyRow(c.treaty_id)).reinsurer_ids);
     if (c.facultative_reinsurer_id) await assertSecurity([c.facultative_reinsurer_id]);
