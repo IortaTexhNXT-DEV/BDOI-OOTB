@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requireRole } from '../../lib/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
 import { notFound } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query } from '../../db/pool.js';
@@ -9,11 +9,12 @@ import { nextRunOf, runJob, schedulerTimeZone, startScheduler } from '../../jobs
 
 const { router, define } = moduleRouter('Schedules', '/schedules');
 const admin = [requireAuth, requireRole('accounting')];
+const canRead = [requireAuth, requirePermission('read:schedules')];
 const row = (j, timeZone = null) => ({ id: j.id, code: j.code, name: j.name, description: j.description, cron: j.cron, handler: j.handler, params: j.params, enabled: j.enabled, lastRunAt: j.last_run_at, lastStatus: j.last_status, updatedAt: j.updated_at,
   timeZone, nextRunAt: j.enabled ? nextRunOf(j.code) : null });
 
 define({
-  method: 'GET', path: '/', summary: 'Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)', screen: 'Master > Schedules', middleware: [requireAuth],
+  method: 'GET', path: '/', summary: 'Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)', screen: 'Master > Schedules', middleware: canRead,
   response: { success: true, timeZone: 'Asia/Manila', data: [{ code: 'renewal-notices', cron: '0 6 * * *', enabled: true, lastStatus: 'success', timeZone: 'Asia/Manila', nextRunAt: '2026-01-02T22:00:00.000Z' }] },
   handler: async (_req, res) => {
     const timeZone = await schedulerTimeZone();
@@ -21,7 +22,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:code/runs', summary: 'Run history of a job', screen: 'Master > Schedules > History', middleware: [requireAuth],
+  method: 'GET', path: '/:code/runs', summary: 'Run history of a job', screen: 'Master > Schedules > History', middleware: canRead,
   response: { success: true, data: [{ id: 1, status: 'success', startedAt: '2026-01-01T06:00:00Z', output: { notifications: 3 } }] },
   handler: async (req, res) => {
     const job = await one('SELECT id FROM scheduled_jobs WHERE code = $1', [req.params.code]);
