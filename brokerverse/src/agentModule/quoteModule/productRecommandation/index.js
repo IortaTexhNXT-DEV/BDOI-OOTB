@@ -9,7 +9,7 @@ import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfi
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import { mockPlans, PRIORITY_RULES } from "./contants";
+import { PLAN_TIERS, PRIORITY_RULES } from "./constants";
 import { VEHICLE_TYPE_OPTIONS } from "../../../module/ProductConfigurator/PoductConfiguratorTab/ProductConfiguratorTab";
 import leadService from "../../../services/leadService";
 
@@ -284,8 +284,8 @@ const ProductRecommendation = () => {
 
       // Update plans with recommendation and translated content
       // Only one plan is badged RECOMMENDED: the first (selected carrier's) plan of the recommended tier.
-      const recommendedId = mockPlans.find((p) => p.name === recommendedPlanName)?.id;
-      const updatedPlans = mockPlans.map((plan) => {
+      const recommendedId = PLAN_TIERS.find((p) => p.name === recommendedPlanName)?.id;
+      const updatedPlans = PLAN_TIERS.map((plan) => {
         const isRecommended = plan.id === recommendedId;
         const prefix = featureKeys[plan.name];
         const count = featureCounts[plan.name] || 0;
@@ -308,7 +308,7 @@ const ProductRecommendation = () => {
             : plan.highlight === "RECOMMENDED"
             ? null
             : plan.highlight,
-          aiReason: isRecommended
+          reason: isRecommended
             ? getRecommendationReason(
                 quotationData,
                 recommendedPlanName,
@@ -605,8 +605,8 @@ const PlanCard = ({
         "{plan.description}"
       </p>
 
-      {/* AI Insights */}
-      {plan.aiReason && (
+      {/* Why this plan */}
+      {plan.reason && (
         <div
           className={`product__recommendation__plan__insights ${
             isActive ? "product__recommendation__plan__insights--active" : ""
@@ -627,7 +627,7 @@ const PlanCard = ({
               {t("policyDetail.advisorInsights")}
             </p>
             <p className="product__recommendation__plan__insights__text">
-              {plan.aiReason}
+              {plan.reason}
             </p>
           </div>
         </div>

@@ -16,7 +16,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import DocumentUpload from "./Modal/DocumentUpload";
 import SvgPaymentLinkIcon from "../../../assets/agentIcon/SvgPaymentLinkIcon";
-import SvgInxTlinkicon from "../../../assets/agentIcon/SvgInxTlinkicon";
 import ShareOption from "./Modal/ShareOption";
 import InternetBankingList from "./Modal/InternetBankingList";
 import policyService from "../../../services/policyService";
@@ -316,12 +315,6 @@ const PaymentOptions = () => {
               >
                 <SvgInternet />
                 <div className="input__text__style">{t("agent.internetBanking")}</div>
-              </div>
-            </div>
-            <div className="col-6">
-              <div className="atm__text cursor-pointer">
-                <SvgInxTlinkicon />
-                <div className="input__text__style">{t("agent.inxtPayment")}</div>
               </div>
             </div>
             <div className="col-6">

@@ -575,7 +575,7 @@ const RemittanceAnalytics = () => {
                 </Card>
 
                 <Card className="insights-card">
-                  <h4>AI Insights</h4>
+                  <h4>KPI Insights</h4>
                   <div className="insights-list">
                     {kpiData.map((k) => (
                       <div className="insight-item" key={k.id}>

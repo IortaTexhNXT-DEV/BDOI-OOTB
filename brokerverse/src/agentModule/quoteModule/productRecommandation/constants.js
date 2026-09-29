@@ -178,7 +178,8 @@ export const PRIORITY_RULES = [
   },
 ];
 
-export const mockPlans = [
+// Illustrative plan tiers shown on the product recommendation step (not rated premiums).
+export const PLAN_TIERS = [
   {
     id: "1",
     company: "Selected Carrier",
@@ -194,7 +195,7 @@ export const mockPlans = [
       "Legal compliance",
     ],
     highlight: "RECOMMENDED",
-    aiReason:
+    reason:
       "Based on your vehicle profile and driving history, CTPL provides essential legal protection while keeping costs minimal. Perfect for low-risk drivers seeking basic coverage.",
   },
   {
@@ -211,7 +212,7 @@ export const mockPlans = [
       "Fire and lightning coverage",
     ],
     highlight: null,
-    aiReason:
+    reason:
       "Ideal balance between coverage and affordability. Includes essential protections for common risks while maintaining reasonable premiums.",
   },
   {
@@ -229,7 +230,7 @@ export const mockPlans = [
       "24/7 roadside assistance",
     ],
     highlight: null,
-    aiReason:
+    reason:
       "Maximum protection for peace of mind. Comprehensive coverage protects against all major risks including natural disasters and provides additional benefits for you and your passengers.",
   },
   {
@@ -245,7 +246,7 @@ export const mockPlans = [
       "Property damage coverage",
     ],
     highlight: "BEST VALUE",
-    aiReason:
+    reason:
       "Slightly lower premium with similar coverage. Good alternative if price is the primary concern.",
   },
   {
@@ -257,7 +258,7 @@ export const mockPlans = [
     deductible: 10000,
     features: ["All CTPL benefits", "Own damage coverage", "Theft protection"],
     highlight: null,
-    aiReason:
+    reason:
       "Competitive pricing with reliable coverage. Established provider with strong claims processing.",
   },
   {
@@ -274,7 +275,7 @@ export const mockPlans = [
       "Personal accident benefits",
     ],
     highlight: null,
-    aiReason:
+    reason:
       "Premium option with extensive coverage. Higher premium but includes additional benefits and faster claims processing.",
   },
 ];

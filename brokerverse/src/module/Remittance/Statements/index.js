@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { Steps } from "primereact/steps";
@@ -21,6 +22,7 @@ import { Message } from "primereact/message";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { formatDateTime, isoMonth, loadInsurerOptions, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { DEFAULT_SYSTEM_SETTINGS } from "../../../utility/systemCurrencies";
 import "./index.scss";
 
 const EMAIL_PATTERN = /^[\w.-]+@([\w-]+\.)+[\w-]{2,}$/;
@@ -30,6 +32,9 @@ const sum = (rows, field) => rows.reduce((s, r) => s + Number(r[field] || 0), 0)
 const StatementGeneration = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const companyName = useSelector(
+    (state) => state.systemSettingsReducer?.systemName || state.systemSettingsReducer?.appTitle || DEFAULT_SYSTEM_SETTINGS.systemName
+  );
   const [activeStep, setActiveStep] = useState(0);
   const [statementType, setStatementType] = useState(null);
   const [period, setPeriod] = useState(new Date());
@@ -342,8 +347,7 @@ const StatementGeneration = () => {
           <Card title="Statement Preview">
             <div className="preview-header">
               <div className="company-info">
-                <h3>INXT Insurance Broker</h3>
-                <p>123 Main Street, City, State 12345</p>
+                <h3>{companyName}</h3>
                 <p>Remittance Statement - {period.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
               </div>
             </div>

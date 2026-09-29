@@ -792,15 +792,15 @@ class QuotationService {
   }
 
   /**
-   * Compare two quotations with AI-powered insights
+   * Compare two quotations side by side with the rule-based comparison notes from the API
    * @param {string} quotationId1 - First quotation ID
    * @param {string} quotationId2 - Second quotation ID
-   * @returns {Promise<Object>} Result with both quotations and AI insights
+   * @returns {Promise<Object>} { success, data: { quotation1, quotation2, aiInsights } }
    */
   async compareQuotations(quotationId1, quotationId2) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // Longer timeout for AI generation
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       console.log("Comparing quotations:", quotationId1, quotationId2);
 
@@ -838,7 +838,7 @@ class QuotationService {
         success: false,
         error:
           error.name === "AbortError"
-            ? "Request timeout. AI comparison is taking longer than expected."
+            ? "Request timeout. Please try again."
             : error.message || "Failed to compare quotations",
       };
     }
