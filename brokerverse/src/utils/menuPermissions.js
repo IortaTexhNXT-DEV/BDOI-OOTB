@@ -89,8 +89,10 @@ export const roleMenuPermissions = {
       // period-end processing and BIR tax
       "Period End",
       "Tax",
+      // bank reconciliation (approval: finance-manager, approve:bank-reconciliation)
+      "Bank Reconciliation",
     ],
-    master: ["Finance > Taxation", "Finance > Close Checklist"],
+    master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is a finance task (D103)
     reinsurance: ["Reconciliation"],

@@ -1,4 +1,5 @@
 import { isPathAllowed, filterMenuForRoles } from "./menuPermissions";
+import { menuList } from "../components/SideBar/list";
 
 const menu = [
   { name: "Dashboard", submenu: [{ name: "Executive Dashboard", path: "/", includes: ["/"] }] },
@@ -78,5 +79,15 @@ describe("persona walk: menu grants match the API (D100-D104)", () => {
     expect(isPathAllowed("/reports/operationalreports/remittance", walkMenu, ["finance"])).toBe(true);
     expect(isPathAllowed("/reports/operationalreports/production", walkMenu, ["finance"])).toBe(false);
     expect(isPathAllowed("/reports/catalogue", walkMenu, ["agent"])).toBe(false);
+  });
+});
+
+describe("bank reconciliation menu", () => {
+  it("finance (and the finance manager through inheritance) reaches the workspace, runs, reports and masters; sales does not", () => {
+    for (const p of ["/accounts/bank-reconciliation", "/accounts/bank-reconciliation/reconciliations", "/accounts/bank-reconciliation/reports/bank-book",
+      "/master/finance/bank-statement-formats", "/master/finance/bank-transaction-types"]) {
+      expect(isPathAllowed(p, menuList, ["finance"])).toBe(true);
+      expect(isPathAllowed(p, menuList, ["sales"])).toBe(false);
+    }
   });
 });

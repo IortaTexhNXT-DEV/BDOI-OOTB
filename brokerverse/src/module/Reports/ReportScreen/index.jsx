@@ -35,6 +35,7 @@ const LOOKUPS = {
   clients: () => reportsService.getClientOptions(),
   products: async () => (await mastersService.options("product")).map((o) => ({ label: o.label, value: o.value })),
   gl_accounts: async () => (await periodEndService.accounts()).map((a) => ({ label: `${a.code} – ${a.name}`, value: a.code })),
+  bank_accounts: async () => (await mastersService.options("bank-account")).map((o) => ({ label: o.label, value: o.code || o.value })),
 };
 const HIDDEN = new Set(["format", "period", "ReportCriteria", "FromDate", "ToDate"]);
 const FORMAT_LABELS = { xlsx: "Excel (XLSX)", csv: "CSV", pdf: "PDF" };
