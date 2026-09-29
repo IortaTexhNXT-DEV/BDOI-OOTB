@@ -7,7 +7,7 @@ import SvgCountMinusIcon from "../../../assets/icons/SvgCountMinusIcon";
 import CalculaitionTextInputs from "../../component/calculaitionTextInputs";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import CustomToast from "../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";

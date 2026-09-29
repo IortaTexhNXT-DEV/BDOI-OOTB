@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
 import { useNavigate, useLocation } from "react-router-dom";

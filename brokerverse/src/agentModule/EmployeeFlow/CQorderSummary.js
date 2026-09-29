@@ -14,7 +14,7 @@ import CustomToast from "../../components/Toast";
 import CalculaitionTextInputs from "../component/calculaitionTextInputs";
 import SvgCountMinusIcon from "../../assets/icons/SvgCountMinusIcon";
 import SvgCountPlusIcon from "../../assets/icons/SvgCountPlusIcon";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 
 const initialValue = {

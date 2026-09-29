@@ -87,7 +87,7 @@ import SchedulesPage from "../module/Administration/Schedules";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import AuditTrailPage from "../module/Administration/AuditTrail";
-import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster";
+import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/CompanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
 import InsuranceCompany from "../module/GeneralMasters/InsuranceManagementMasters/InsuranceCompany";
 import LineOfBusiness from "../module/GeneralMasters/InsuranceManagementMasters/LineOfBusiness";
@@ -122,7 +122,7 @@ import ClaimSettlement from "../agentModule/claimsModule/claimSettlement";
 import ClaimDetail from "../agentModule/claimModule/claimDetail";
 import ClaimAuditTrail from "../agentModule/claimModule/claimAuditTrail";
 
-import AddCompany from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster/AddCompany";
+import AddCompany from "../module/GeneralMasters/OrganizationMasters/CompanyMaster/AddCompany";
 import AddBranch from "../module/GeneralMasters/OrganizationMasters/BranchMaster/AddBranch";
 import AddCountry from "../module/GeneralMasters/LocationMasters/CountryMaster/AddCountry/index";
 import AddCity from "../module/GeneralMasters/LocationMasters/CityMaster/AddCity";
@@ -144,7 +144,7 @@ import CustomerInfo from "../agentModule/quoteModule/customerInfo";
 import CustomerInfoFire from "../agentModule/quoteModule/customerInfo/CustomerInfoFire";
 import QuoteComparisonView from "../agentModule/quoteModule/quoteComparisonView";
 import UploadVehiclePhotos from "../agentModule/quoteModule/uploadVehiclePhotos";
-import CoverageDetailedVew from "../agentModule/quoteModule/coverageDetailedVew";
+import CoverageDetailedVew from "../agentModule/quoteModule/coverageDetailedView";
 import PolicyApproval from "../agentModule/quoteModule/policyApproval";
 import UploadPolicy from "../agentModule/quoteModule/uploadPolicy";
 import PolicyDetailedView from "../agentModule/quoteModule/policyDetailedView";
@@ -350,7 +350,7 @@ import PCpolicyDetails from "../agentModule/EmployeeFlow/PCpolicydetails";
 import EndorsementSummary from "../agentModule/endorsementModule/personalDetails/endorsementSummary/EndorsementSummary";
 import BatchRenewalModal from "../agentModule/policyModule/BatchRenewal";
 import PaymentConfirmationEmployeeBenefit from "../agentModule/endorsementModule/paymentConfirmationEmployee";
-import ProductRecommendation from "../agentModule/quoteModule/productRecommandation";
+import ProductRecommendation from "../agentModule/quoteModule/productRecommendation";
 
 const Maincomponent = () => {
   return (

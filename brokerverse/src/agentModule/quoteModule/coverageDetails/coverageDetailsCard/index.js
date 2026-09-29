@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import InputTextField from "../../../component/inputText";
 import CalculaitionTextInputs from "../../../component/calculaitionTextInputs";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { useNavigate, useLocation, useParams } from "react-router-dom";

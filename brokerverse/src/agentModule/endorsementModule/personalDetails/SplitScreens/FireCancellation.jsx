@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { useFormik } from "formik";
 
 const FireCancellation = ({

@@ -6,7 +6,7 @@ import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import { InputNumber } from "primereact/inputnumber";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";

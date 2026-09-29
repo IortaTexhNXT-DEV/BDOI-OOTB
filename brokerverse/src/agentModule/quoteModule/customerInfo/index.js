@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
 import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
 import { FileUpload } from "primereact/fileupload";

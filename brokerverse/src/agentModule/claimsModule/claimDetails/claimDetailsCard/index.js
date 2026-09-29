@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { postClaimDetailsData } from "../store/claimDetailsMiddleWare";
 import { mapToApiLob } from "../store/claimDetailsMiddleWare";
 import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
 import addressService from "../../../../services/addressService";

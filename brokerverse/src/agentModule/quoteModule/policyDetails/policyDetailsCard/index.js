@@ -1,7 +1,7 @@
 import { Card } from "primereact/card";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import InputTextField from "../../../component/inputText";
 import { Button } from "primereact/button";
 import { useNavigate, useParams, useLocation } from "react-router-dom";

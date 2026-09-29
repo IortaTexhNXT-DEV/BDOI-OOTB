@@ -4,7 +4,7 @@ import CalculaitionTextInputs from "../../../component/calculaitionTextInputs";
 import DatepickerField from "../../../component/datePicker";
 import { InputTextarea } from "primereact/inputtextarea";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { useFormik } from "formik";
 import { LossandDamagecoverageRateOptions } from "../mock";
 import { bodilyInjuryOptions as configuredBodilyInjuryOptions, propertyDamageOptions as configuredPropertyDamageOptions } from "../../../../utility/quoteOptions";

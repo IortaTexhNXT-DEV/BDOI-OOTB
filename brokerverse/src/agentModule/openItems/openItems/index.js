@@ -6,7 +6,7 @@ import SvgAdd from "../../../assets/agentIcon/SvgAdd";
 import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import DatepickerField from "../../component/datePicker";
 import InputTextField from "../../component/inputText";
 import { InputTextarea } from "primereact/inputtextarea";

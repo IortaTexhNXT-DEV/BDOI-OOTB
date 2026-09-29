@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { Button } from "primereact/button";

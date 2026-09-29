@@ -15,7 +15,7 @@ import {
 import InputTextField from "../component/inputText";
 import { APPATotalCoverageOptions } from "./mockdataforcoverDetails";
 import { postcoverageDetailsMiddleware } from "../quoteModule/coverageDetails/store/coverageDetailsMiddleware";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import CalculaitionTextInputs from "../component/calculaitionTextInputs"; 
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => {

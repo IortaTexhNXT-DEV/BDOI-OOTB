@@ -19,7 +19,7 @@ import {
 import useInsuranceCompanyOptions from "../component/useInsuranceCompanyOptions";
 import SvgTable from "../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import DialogList from "../quoteModule/policyDetails/policyDetailsCard/DialogList";
 import { Checkbox } from "primereact/checkbox";
 import InputTextField from "../component/inputText";

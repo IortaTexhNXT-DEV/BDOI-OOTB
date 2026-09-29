@@ -5,7 +5,7 @@ import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useClaimHeader from "../useClaimHeader";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
 import { FileUpload } from "primereact/fileupload";

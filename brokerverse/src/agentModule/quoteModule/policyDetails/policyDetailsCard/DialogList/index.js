@@ -1,7 +1,7 @@
 import { Button } from 'primereact/button';
 import { useTranslation } from 'react-i18next';
 import InputTextField from '../../../../component/inputText';
-import DropdownField from '../../../../component/DropdwonField';
+import DropdownField from '../../../../component/DropdownField';
 import { Dialog } from 'primereact/dialog';
 import { getDisplayCurrencyConfig } from "../../../../../utility/currencyConverter";
 import useMasterOptions from "../../../../../module/GeneralMasters/common/useMasterOptions";

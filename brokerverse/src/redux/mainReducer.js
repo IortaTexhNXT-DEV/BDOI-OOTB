@@ -25,7 +25,7 @@ import insuranceCompanyReducers from "../module/GeneralMasters/InsuranceManageme
 import hierarchyTableReducers from "../module/GeneralMasters/EmployeeManagementMasters/Hierarchy/store/hierarchyReducers";
 import designationMainReducers from "../module/GeneralMasters/EmployeeManagementMasters/Designation/store/designationReducers";
 import organizationBranchMainReducers from "../module/GeneralMasters/OrganizationMasters/BranchMaster/store/branchReducers";
-import organizationCompanyMainReducers from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster/store/companyReducers";
+import organizationCompanyMainReducers from "../module/GeneralMasters/OrganizationMasters/CompanyMaster/store/companyReducers";
 import countryReducers from "../module/GeneralMasters/LocationMasters/CountryMaster/store/countryReducers";
 import cityReducers from "../module/GeneralMasters/LocationMasters/CityMaster/store/cityReducers";
 import employeeReducers from "../module/GeneralMasters/EmployeeManagementMasters/Employee/store/employeeReducers";

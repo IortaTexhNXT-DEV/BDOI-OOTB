@@ -10,7 +10,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { PLAN_TIERS, PRIORITY_RULES } from "./constants";
-import { VEHICLE_TYPE_OPTIONS } from "../../../module/ProductConfigurator/PoductConfiguratorTab/ProductConfiguratorTab";
+import { VEHICLE_TYPE_OPTIONS } from "../../../module/ProductConfigurator/ProductConfiguratorTab/ProductConfiguratorTab";
 import leadService from "../../../services/leadService";
 
 const slug = (s) => String(s || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");

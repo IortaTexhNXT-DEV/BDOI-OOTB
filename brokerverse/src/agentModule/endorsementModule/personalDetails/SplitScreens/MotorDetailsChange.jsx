@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { useFormik } from "formik";
 import useQuoteOptions from "../../../quoteModule/policyDetails/policyDetailsCard/useQuoteOptions";
 import useMasterOptions from "../../../../module/GeneralMasters/common/useMasterOptions";

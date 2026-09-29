@@ -13,7 +13,7 @@ import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
