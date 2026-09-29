@@ -42,10 +42,16 @@
       "name": "Commission"
     },
     {
+      "name": "Commission Rate Matrix"
+    },
+    {
       "name": "Dashboards"
     },
     {
       "name": "Disbursements"
+    },
+    {
+      "name": "Document Numbering"
     },
     {
       "name": "Documents"
@@ -13158,6 +13164,814 @@
         }
       }
     },
+    "/commission-rates": {
+      "get": {
+        "operationId": "getCommissionRates",
+        "summary": "Commission rate matrix rows (filters: insuranceCompanyId, productId, lineOfBusiness, policyType, active, search)",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: read:masters, write:masters, read:commission",
+        "parameters": [
+          {
+            "name": "insuranceCompanyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "insuranceCompanyId": {
+                            "type": "integer"
+                          },
+                          "insurerName": {
+                            "type": "string"
+                          },
+                          "productId": {
+                            "type": "integer"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "lineOfBusiness": {},
+                          "policyType": {
+                            "type": "string"
+                          },
+                          "rate": {
+                            "type": "number"
+                          },
+                          "ratePercent": {
+                            "type": "number"
+                          },
+                          "effectiveFrom": {
+                            "type": "string"
+                          },
+                          "effectiveTo": {},
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "level": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "insuranceCompanyId": 3,
+                      "insurerName": "Malayan Insurance Co., Inc.",
+                      "productId": 1,
+                      "productName": "Motor Car",
+                      "lineOfBusiness": null,
+                      "policyType": "new",
+                      "rate": 0.175,
+                      "ratePercent": 17.5,
+                      "effectiveFrom": "2026-01-01",
+                      "effectiveTo": null,
+                      "active": true,
+                      "level": "insurer + product"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Commission Rate Matrix",
+        "x-permissions": [
+          "read:masters",
+          "write:masters",
+          "read:commission"
+        ]
+      },
+      "post": {
+        "operationId": "postCommissionRates",
+        "summary": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {},
+                        "policyType": {
+                          "type": "string"
+                        },
+                        "rate": {
+                          "type": "number"
+                        },
+                        "ratePercent": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "level": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "insuranceCompanyId": 3,
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "productId": 1,
+                    "productName": "Motor Car",
+                    "lineOfBusiness": null,
+                    "policyType": "new",
+                    "rate": 0.175,
+                    "ratePercent": 17.5,
+                    "effectiveFrom": "2026-01-01",
+                    "effectiveTo": null,
+                    "active": true,
+                    "level": "insurer + product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Commission Rate Matrix",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "insuranceCompanyId": {
+                    "type": "integer"
+                  },
+                  "productId": {
+                    "type": "integer"
+                  },
+                  "policyType": {
+                    "type": "string"
+                  },
+                  "rate": {
+                    "type": "number"
+                  },
+                  "effectiveFrom": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "insuranceCompanyId": 3,
+                "productId": 1,
+                "policyType": "new",
+                "rate": 0.175,
+                "effectiveFrom": "2026-01-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/commission-rates/{id}": {
+      "get": {
+        "operationId": "getCommissionRatesId",
+        "summary": "One commission rate row",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: read:masters, write:masters, read:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {},
+                        "policyType": {
+                          "type": "string"
+                        },
+                        "rate": {
+                          "type": "number"
+                        },
+                        "ratePercent": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "level": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "insuranceCompanyId": 3,
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "productId": 1,
+                    "productName": "Motor Car",
+                    "lineOfBusiness": null,
+                    "policyType": "new",
+                    "rate": 0.175,
+                    "ratePercent": 17.5,
+                    "effectiveFrom": "2026-01-01",
+                    "effectiveTo": null,
+                    "active": true,
+                    "level": "insurer + product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Commission Rate Matrix",
+        "x-permissions": [
+          "read:masters",
+          "write:masters",
+          "read:commission"
+        ]
+      },
+      "put": {
+        "operationId": "putCommissionRatesId",
+        "summary": "Update a commission rate (same overlap rule)",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {},
+                        "policyType": {
+                          "type": "string"
+                        },
+                        "rate": {
+                          "type": "number"
+                        },
+                        "ratePercent": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "level": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "insuranceCompanyId": 3,
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "productId": 1,
+                    "productName": "Motor Car",
+                    "lineOfBusiness": null,
+                    "policyType": "new",
+                    "rate": 0.175,
+                    "ratePercent": 17.5,
+                    "effectiveFrom": "2026-01-01",
+                    "effectiveTo": null,
+                    "active": true,
+                    "level": "insurer + product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Commission Rate Matrix",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rate": {
+                    "type": "number"
+                  },
+                  "effectiveTo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "rate": 0.18,
+                "effectiveTo": "2026-12-31"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteCommissionRatesId",
+        "summary": "Delete a commission rate row",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {},
+                        "policyType": {
+                          "type": "string"
+                        },
+                        "rate": {
+                          "type": "number"
+                        },
+                        "ratePercent": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "level": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "insuranceCompanyId": 3,
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "productId": 1,
+                    "productName": "Motor Car",
+                    "lineOfBusiness": null,
+                    "policyType": "new",
+                    "rate": 0.175,
+                    "ratePercent": 17.5,
+                    "effectiveFrom": "2026-01-01",
+                    "effectiveTo": null,
+                    "active": true,
+                    "level": "insurer + product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Commission Rate Matrix",
+        "x-permissions": [
+          "write:masters"
+        ]
+      }
+    },
+    "/commission-rates/credit-terms/{insurerId}": {
+      "get": {
+        "operationId": "getCommissionRatesCreditTermsInsurerId",
+        "summary": "Insurer credit terms with fallbacks: premium payment warranty days, remittance terms days, default billing mode",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Generals > Insurance Company\n\nAccess: read:masters, write:masters, read:commission",
+        "parameters": [
+          {
+            "name": "insurerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "premiumWarrantyDays": {
+                          "type": "integer"
+                        },
+                        "remittanceTermsDays": {
+                          "type": "integer"
+                        },
+                        "billingMode": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "premiumWarrantyDays": {
+                              "type": "string"
+                            },
+                            "remittanceTermsDays": {
+                              "type": "string"
+                            },
+                            "billingMode": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "premiumWarrantyDays": 30,
+                    "remittanceTermsDays": 30,
+                    "billingMode": "broker",
+                    "source": {
+                      "premiumWarrantyDays": "setting",
+                      "remittanceTermsDays": "setting",
+                      "billingMode": "setting"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Generals > Insurance Company",
+        "x-permissions": [
+          "read:masters",
+          "write:masters",
+          "read:commission"
+        ]
+      }
+    },
+    "/commission-rates/resolve": {
+      "get": {
+        "operationId": "getCommissionRatesResolve",
+        "summary": "Test rate: the commission rate that applies to an insurer / product / line of business / policy type on a date, and where it comes from",
+        "tags": [
+          "Commission Rate Matrix"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Commission Rate Matrix > Test rate\n\nAccess: read:masters, write:masters, read:commission",
+        "parameters": [
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "lob",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "motor"
+          },
+          {
+            "name": "policyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "new"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-29"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rate": {
+                          "type": "number"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "ruleId": {
+                          "type": "integer"
+                        },
+                        "level": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "rate": 0.175,
+                    "source": "matrix",
+                    "ruleId": 1,
+                    "level": "insurer + product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Commission Rate Matrix > Test rate",
+        "x-permissions": [
+          "read:masters",
+          "write:masters",
+          "read:commission"
+        ]
+      }
+    },
     "/agent/get-dashboard-details": {
       "get": {
         "operationId": "getAgentGetDashboardDetails",
@@ -15738,6 +16552,705 @@
         "x-screen": "Accounts > Disbursement (Payment Voucher) > Bulk print",
         "x-permissions": [
           "read:disbursements"
+        ]
+      }
+    },
+    "/document-numbering": {
+      "get": {
+        "operationId": "getDocumentNumbering",
+        "summary": "Document series with the current counter and a preview of the next number (filters: module, search, active)",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "module",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "finance"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "receipt"
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "prefix": {
+                            "type": "string"
+                          },
+                          "pattern": {
+                            "type": "string"
+                          },
+                          "seqWidth": {
+                            "type": "integer"
+                          },
+                          "resetRule": {
+                            "type": "string"
+                          },
+                          "startNumber": {
+                            "type": "integer"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "periodKey": {
+                            "type": "string"
+                          },
+                          "currentValue": {
+                            "type": "integer"
+                          },
+                          "nextNumber": {
+                            "type": "integer"
+                          },
+                          "nextPreview": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "modules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "module": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "tokens": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "resetRules": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "policy",
+                      "name": "Policy",
+                      "module": "policy",
+                      "prefix": "POL",
+                      "pattern": "{PREFIX}-{YYYY}-{SEQ}",
+                      "seqWidth": 5,
+                      "resetRule": "yearly",
+                      "startNumber": 1,
+                      "active": true,
+                      "periodKey": "2026",
+                      "currentValue": 41,
+                      "nextNumber": 42,
+                      "nextPreview": "POL-2026-00042"
+                    }
+                  ],
+                  "modules": [
+                    {
+                      "module": "policy",
+                      "count": 5
+                    }
+                  ],
+                  "tokens": [
+                    "{PREFIX}",
+                    "{YYYY}",
+                    "{YY}",
+                    "{MM}",
+                    "{FY}",
+                    "{BRANCH}",
+                    "{LOB}",
+                    "{SEQ}"
+                  ],
+                  "resetRules": [
+                    "yearly",
+                    "fiscal_yearly",
+                    "monthly",
+                    "never"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/document-numbering/{code}": {
+      "get": {
+        "operationId": "getDocumentNumberingCode",
+        "summary": "One document series",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        },
+                        "pattern": {
+                          "type": "string"
+                        },
+                        "seqWidth": {
+                          "type": "integer"
+                        },
+                        "resetRule": {
+                          "type": "string"
+                        },
+                        "startNumber": {
+                          "type": "integer"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "currentValue": {
+                          "type": "integer"
+                        },
+                        "nextNumber": {
+                          "type": "integer"
+                        },
+                        "nextPreview": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "policy",
+                    "name": "Policy",
+                    "module": "policy",
+                    "prefix": "POL",
+                    "pattern": "{PREFIX}-{YYYY}-{SEQ}",
+                    "seqWidth": 5,
+                    "resetRule": "yearly",
+                    "startNumber": 1,
+                    "active": true,
+                    "periodKey": "2026",
+                    "currentValue": 41,
+                    "nextNumber": 42,
+                    "nextPreview": "POL-2026-00042"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      },
+      "put": {
+        "operationId": "putDocumentNumberingCode",
+        "summary": "Update a series (name, module, prefix, pattern, seqWidth, resetRule, startNumber, active, description); prefixes are unique across active series",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering > Edit\n\nAccess: write:settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        },
+                        "pattern": {
+                          "type": "string"
+                        },
+                        "seqWidth": {
+                          "type": "integer"
+                        },
+                        "resetRule": {
+                          "type": "string"
+                        },
+                        "startNumber": {
+                          "type": "integer"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "currentValue": {
+                          "type": "integer"
+                        },
+                        "nextNumber": {
+                          "type": "integer"
+                        },
+                        "nextPreview": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "policy",
+                    "name": "Policy",
+                    "module": "policy",
+                    "prefix": "POL",
+                    "pattern": "{PREFIX}-{YYYY}-{SEQ}",
+                    "seqWidth": 5,
+                    "resetRule": "yearly",
+                    "startNumber": 1,
+                    "active": true,
+                    "periodKey": "2026",
+                    "currentValue": 41,
+                    "nextNumber": 42,
+                    "nextPreview": "POL-2026-00042"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering > Edit",
+        "x-permissions": [
+          "write:settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prefix": {
+                    "type": "string"
+                  },
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "seqWidth": {
+                    "type": "integer"
+                  },
+                  "resetRule": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "prefix": "POL",
+                "pattern": "{PREFIX}-{YYYY}-{SEQ}",
+                "seqWidth": 6,
+                "resetRule": "yearly"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/document-numbering/{code}/next-number": {
+      "put": {
+        "operationId": "putDocumentNumberingCodeNextNumber",
+        "summary": "Set the next number of the current period; forward only (never at or below a number already issued)",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        },
+                        "prefix": {
+                          "type": "string"
+                        },
+                        "pattern": {
+                          "type": "string"
+                        },
+                        "seqWidth": {
+                          "type": "integer"
+                        },
+                        "resetRule": {
+                          "type": "string"
+                        },
+                        "startNumber": {
+                          "type": "integer"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "currentValue": {
+                          "type": "integer"
+                        },
+                        "nextNumber": {
+                          "type": "integer"
+                        },
+                        "nextPreview": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "policy",
+                    "name": "Policy",
+                    "module": "policy",
+                    "prefix": "POL",
+                    "pattern": "{PREFIX}-{YYYY}-{SEQ}",
+                    "seqWidth": 5,
+                    "resetRule": "yearly",
+                    "startNumber": 1,
+                    "active": true,
+                    "periodKey": "2026",
+                    "currentValue": 41,
+                    "nextNumber": 1001,
+                    "nextPreview": "POL-2026-01001"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering > Set next number",
+        "x-permissions": [
+          "write:settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nextNumber": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "nextNumber": 1001
+              }
+            }
+          }
+        }
+      }
+    },
+    "/document-numbering/{code}/preview": {
+      "get": {
+        "operationId": "getDocumentNumberingCodePreview",
+        "summary": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pattern",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "{PREFIX}-{BRANCH}-{YY}{MM}-{SEQ}"
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "POL"
+          },
+          {
+            "name": "seqWidth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 6
+          },
+          {
+            "name": "resetRule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "monthly"
+          },
+          {
+            "name": "branch",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "MKT"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "valid": {
+                          "type": "boolean"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "preview": {
+                          "type": "string"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "currentValue": {
+                          "type": "integer"
+                        },
+                        "nextNumber": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "valid": true,
+                    "errors": [],
+                    "preview": "POL-MKT-2609-000001",
+                    "periodKey": "2026-09",
+                    "currentValue": 0,
+                    "nextNumber": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering > Edit",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
         ]
       }
     },
@@ -63463,7 +64976,7 @@
                       "tax.vat_rate": {
                         "type": "number"
                       },
-                      "numbering.policy.prefix": {
+                      "general.app_title": {
                         "type": "string"
                       },
                       "notification.email_enabled": {
@@ -63476,7 +64989,7 @@
               "example": {
                 "settings": {
                   "tax.vat_rate": 0.12,
-                  "numbering.policy.prefix": "POL",
+                  "general.app_title": "BrokerVerse",
                   "notification.email_enabled": true
                 }
               }
