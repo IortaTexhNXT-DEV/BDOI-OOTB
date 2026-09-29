@@ -67,6 +67,6 @@ The developer and production support guide is `docs/developer-guide/README.md`; 
 ## 5. Changes and releases
 
 Fixes and changes are delivered as a new release of the front end and the back end following
-`docs/GO_LIVE_CHECKLIST.md` (sections 2 to 4 and the rollback in section 8). Database migrations only add; a
+`deploy/README.md` (sections 2 to 4 and the rollback in section 8). Database migrations only add; a
 database snapshot is taken before each release. The customer tests a release in a test environment before it goes to
 production, using the scripts in `UAT_SCRIPTS.md`.

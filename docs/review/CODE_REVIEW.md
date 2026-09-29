@@ -1,85 +1,198 @@
-# BrokerVerse code reviews
+# BrokerVerse OOTB code reviews
 
-Two reviews, newest first. Paths are relative to `backend/` or `brokerverse/` as indicated. Where a later review
-fixed something the earlier one found, the earlier text has been brought up to date, so every statement here describes
-the code as it is now.
+Three reviews of 29 September 2026, newest first: the front-end code review, the backend code quality review and the
+security, standards and quality review (second pass). Paths are relative to `backend/` or `brokerverse/` as
+indicated. Where later work changed something a review found, the text has been brought up to date, so every
+statement here describes the code at the head of `brokerverse-platform`. The items still open are collected in
+section 4.
 
 ---
 
-## Code quality review (backend), 29 Sep 2026
+## 1. Front-end code review (brokerverse/)
 
-Scope: `backend/` at the head of `brokerverse-platform` after the follow-up fixes (commit `cb035c2`): 169 source files,
-38 modules, 708 routes, 224 linted files, 49 test files. The question was whether a developer or a support engineer who
-has never seen the code can find their way, and whether the code reads as one consistent code base.
+Review of the React front end at commit `cb035c2`, with the clean-up made on top of it. Scope: code smells,
+standards, naming and branding, disconnects between screens, menu, translations and the API, and how easy the code
+is to support.
 
-### What was checked
+### 1.1 What was checked and how
+
+| Check | Method |
+| --- | --- |
+| Branding and naming | Case-insensitive search of `src`, `public`, `package.json` for names of third-party tools, vendors, other products and companies, and wording that describes generated content |
+| API disconnects | New `scripts/check-api-calls.js` (`npm run check:api`): parses every file, resolves the request helpers of the services and compares each call with `backend/docs/api/openapi.json` |
+| Routes and menu | Every `path` in `components/SideBar/list.js` against `routes/MainRoute.js`; every route against the menu and all path literals in `src` |
+| Translations | New `scripts/check-translations.js` (`npm run check:i18n`): keys used in code against `en.json` and `th.json` |
+| Dead code | Import graph from `src/index.js` and the tests; ESLint `no-unused-vars`; commented-out code detected by parsing comment text |
+| Smells | ESLint (react-app rules), console calls, defect tags and change-log comments, duplicated helpers, hard-coded data and URLs, folder name typos |
+| Behaviour | Build, 30 unit tests, and a browser run that signs in as the administrator and opens all 154 menu entries, before and after the changes |
+
+### 1.2 Results in numbers
+
+| Measure | Before | After |
+| --- | --- | --- |
+| ESLint warnings (whole `src`) | 1,899 | 293 |
+| of which `no-unused-vars` | 1,571 | 0 |
+| `console.*` calls | 1,572 | 0 (173 diagnostics go through `utility/logger`) |
+| Commented-out code blocks | about 1,260 (3,600 lines) | 0 |
+| Source files under `src` | 1,335 | 1,176 |
+| Unused files removed (`src` and `public`) | | 168 |
+| Lines of code removed / added | | about 27,800 / 1,450 |
+| Calls to API routes that do not exist | 0 | 0 |
+| Translation keys used but missing from `en.json` | 86 | 0 |
+| Unit tests | 30 pass | 30 pass |
+| Menu entries with page errors or failed API calls | 0 of 155 | 0 of 154 (the 155th was a commented-out entry) |
+
+The remaining 293 warnings: 163 `react-hooks/exhaustive-deps`, 121 `eqeqeq` (`==` between values of possibly
+different types), 5 `anchor-is-valid`, 3 `no-lone-blocks`, 1 `default-case`. They were left because changing them
+changes behaviour and needs testing per screen.
+
+### 1.3 Findings and what was fixed
+
+**Branding and wording.** The quote Share dialog described the template-based e-mail text (`POST /email/generate`,
+filled by the backend from the `share_quote` template) as machine-generated, with decorative symbols, and
+`emailService` used the same wording in its timeout message. It is now "Use suggested content" with new en and th
+keys; state and props are renamed (`suggestedContent`, `suggestedSubject`, `suggestedHtml`). Quote comparison and
+remittance analytics labelled the backend's rule-based notes the same way, and the product recommendation data used
+mock-style names; all renamed. `package.json` was `finance_module`; `index.html` and the manifest carried another
+product name with Open Graph tags for another domain; translations, a payment tile and the remittance statement
+preview had another broker's name and address; bulk upload templates were downloaded from another company's
+storage bucket; a helper named after the Thai baht formatted pesos; a treaty field was labelled THB. All replaced
+with BrokerVerse and iorta TechNXT wording, system settings or neutral names.
+
+**Defects fixed.**
+
+1. Share dialog: the editable body was the plain-text version but was sent as HTML, so paragraphs were lost; it now
+   edits and sends the HTML. The e-mail is recorded against the quotation (`quotationId` passed to `/email/send`),
+   and the recipient name comes from the lead instead of "Valued Client".
+2. Sales Dashboard > Existing client: every client opened quote creation for a fixed lead id; the list was empty
+   unless the Clients screen had been opened; searching showed the raw result array. It now loads clients, filters
+   and opens the chosen client.
+3. Add Receipts pickers showed the raw keys `accounts.addReceipts.draftCount` and `billsOpen`.
+4. Receipts and Payment Voucher "Download Template" opened files in a third-party bucket; templates are now
+   generated in the browser with the columns the API reads, and `.csv` is accepted.
+5. Transaction code set-up showed a made-up row until loaded.
+6. `th.json` had 48 keys written twice (some whole sections), so earlier values were silently lost; de-duplicated
+   keeping the effective value.
+7. Duplicate object keys and a duplicate `className` prop (the overridden values removed); holes in two breadcrumb
+   arrays; a self-assignment in a reducer.
+8. The renewal waiting screen loaded its picture from an external image host; the top bar showed
+   "user@example.com" when no e-mail was stored; `index.html` preloaded a font through a path the build does not
+   serve.
+
+**Disconnects.**
+
+- API: every front-end call matches a documented route and method. 72 backend routes have no caller
+  (informational, `npm run check:api -- --unused`): mostly legacy aliases kept for compatibility (`/lead/*`,
+  `/master/*`), record detail endpoints the screens do not need, report schedules, `/search`, `/version`.
+- `routes/apiRoutes.js` listed about 60 paths of an older API; only three journal-voucher paths were used. Removed.
+- Menu: every menu entry has a route. 38 routes are not reached from the menu or a literal link; most are edit and
+  detail steps reached through paths built at run time. Removed only `master/finance/bankaccount` and
+  `master/finance/bankcheque` (declared twice, no link, the cheque master showed component-library demo products).
+  Left and listed: `master/finance/branch` and `department` (they use the masters API but have no menu entry),
+  `master/finance/taxation-legacy`, `/underwriting/dashboard` (redirect), `/agent/policy/paymenterror`,
+  `/reports/financialreports/payables`, `/finance/remittance/reports`, `/agent/editprofile`,
+  `/agent/claim/claimtable`, `/agent/quotation/quotationtable`.
+- The `permissions` field on menu entries (46 entries) is not read by the front end; access is decided by
+  `utils/menuPermissions.js` and the API. It serves as documentation.
+- The API export (`backend/src/tools/export-api.js`) documented the routes of secondary routers under the wrong
+  path (for example `/quotations/email/send` for `/email/send`, the notifications routes under `/accounting`).
+  The generator now reads the mounts from the module routers and `backend/docs/api` lists the paths Express serves.
+
+**Code smells cleaned.**
+
+- Console output: 1,033 `console.log` statements (form values, API payloads, marker strings) removed with the
+  debug-only effects they needed; 269 `console.error` and `warn` calls removed where the error was already shown to
+  the user or returned; 174 moved to `utility/logger` (silent in production, enabled per browser with
+  `localStorage.bv.debug = "1"`). ESLint warns on `console`.
+- Comments: defect tags, "BUG #n FIX", "Task n", "(FIXED)", decorative markers and commented-out code removed;
+  explanatory comments kept.
+- Unused code: 944 unused imports, 633 unused variables and handlers, and 143 files nothing imports (old masters,
+  mock data, unused components, icons, fonts, images).
+- Service pattern: `emailService` had four copies of the same fetch block; now one helper. Services export named
+  instances.
+- Folder typos fixed: `PoductConfiguratorTab`, `productRecommandation`, `ComapanyMaster`, `coverageDetailedVew`,
+  `DropdwonField`, file `contants.js`.
+
+### 1.4 How to keep it clean
+
+Run before every merge: `npm run build` (warnings must not grow), `CI=true npm test -- --watchAll=false`,
+`npm run check:api`, `npm run check:i18n`. The GitHub workflows run the tests and the build on every push. The
+developer guide (`docs/developer-guide/frontend.md`) explains the structure, how to trace a defect and how to add a
+screen, menu entry, translation or report.
+
+---
+
+## 2. Code quality review (backend), 29 Sep 2026
+
+Scope: `backend/` after the follow-up fixes (commit `cb035c2`): 169 source files, 38 modules, 708 routes at the time
+(717 now), 224 linted files, 49 test files. The question was whether a developer or a support engineer who has
+never seen the code can find their way, and whether the code reads as one consistent code base.
+
+### 2.1 What was checked
 
 | Check | How |
 |---|---|
-| Names of third-party AI products or vendors, and phrases such as "AI-generated" or "generated by" | Case-insensitive search of code, comments, docs, `package.json` and test names |
+| Names of third-party products or vendors, and phrases such as "generated by" | Case-insensitive search of code, comments, docs, `package.json` and test names |
 | Tracker tags and change-log comments ("(D92)", "persona walk", "was X, now Y", "fixed ...") | Search, then each hit read and rewritten by hand |
 | Duplicated helpers | Search for local definitions of date, amount, CSV, template, maker-checker, storage-key and permission helpers |
 | Unused exports | Every `export` searched for outside its file (source, tests, scripts); job handlers are looked up by name and were excluded |
 | Error handling and logging | Direct `res.status(4xx).json`, `new HttpError`, `throw new Error`, `console`, request id in error bodies and logs |
-| Route registry | All modules loaded through the API export: summary and screen on every route, duplicates, failed modules, permissions required vs permissions that exist and roles that hold them |
-| Settings | New `scripts/check-settings.js`: keys read in code vs keys that migrations and seeds create |
+| Route registry | All modules loaded through the API export: summary and screen on every route, duplicates, failed modules, permissions required against permissions that exist and roles that hold them |
+| Settings | New `scripts/check-settings.js`: keys read in code against keys that migrations and seeds create |
 | Report catalogue, scheduled jobs | Every `report_definitions.query_name` against `QUERIES`; every `scheduled_jobs.handler` against `jobs/handlers.js` |
 | Structure | Each module has `router.js`; which have `service.js`; which need a README |
 
-### What was found
+### 2.2 What was found
 
 | Area | Found | Examples |
 |---|---|---|
 | Third-party product or vendor names | 0 in code, tests or package metadata | Two uses of "generated by" are ordinary English (period-end journals, the report header) and stay. `package.json` had no author. |
-| Tracker tags in comments and test names | 61 lines in 32 files | `(D92)` in `db/seed.js`, `describe('passwords (D83)')`, `persona-walk.test.js`, migration headers `-- D40: ...` |
-| Change-log comments, long dashes | 2 and 2 | "replaces the former mock payment"; `Approved — voucher` |
-| Duplicated helpers | 11 groups, 30 copies | `isoDate`/`toDate` 4 copies with 3 behaviours; `addDays` 3; amount parsers 3; CSV cell writers 5 (4 without formula guarding); `renderTemplate` 2 (one escaped subjects); `assertChecker` 2 with different signatures (one ignored the setting); XLSX writers 3; ZIP writers 3; storage-key generators 3 (two with 32-bit keys); `isAdmin || permissions.includes` 4; the notification visibility SQL 2 |
+| Tracker tags in comments and test names | 61 lines in 32 files | `(D92)` in `db/seed.js`, `describe('passwords (D83)')`, migration headers `-- D40: ...` |
+| Change-log comments, long dashes | 2 and 2 | "replaces the former mock payment" |
+| Duplicated helpers | 11 groups, 30 copies | `isoDate`/`toDate` 4 copies with 3 behaviours; `addDays` 3; amount parsers 3; CSV cell writers 5 (4 without formula guarding); `renderTemplate` 2; `assertChecker` 2 with different signatures (one ignored the setting); XLSX writers 3; ZIP writers 3; storage-key generators 3 (two with 32-bit keys); permission checks 4; the notification visibility SQL 2 |
 | Unused exports | 7 | `displayDate`, `isStarted`, `splitAmounts`, `QUOTE_LABELS`, `nextDay`, `fiscalYearOf`, `userId` |
 | Exported but only used in their own file | about 140 | `computeLine`, `entryWhere`, `buildSql` ... harmless; left |
 | Error responses written by hand | 4 | `accounting/router.js` (2), `commission/router.js`, `reports/router.js` |
-| `console` in API code | 0 (eslint already refused it); the scheduler defaulted to `console` | `jobs/scheduler.js` |
-| Commented-out code | 0 | |
+| `console` in API code | 0 (ESLint refuses it); the scheduler defaulted to `console` | `jobs/scheduler.js` |
 | Routes without summary or screen | 0 of 708 | |
 | Duplicate routes, modules that fail to load | 0, 0 | |
-| Permissions required by a route that do not exist or no role holds | 0 | Every one exists; the System Administrator holds all |
-| Permissions seeded but never required | 6 | `read/write:profile`, `read/write:notifications`, `read/write:schedules` |
+| Permissions required by a route that do not exist or that no role holds | 0 | Every one exists; the System Administrator holds all |
 | Settings read in code but not seeded | 0 of 248 keys | |
-| Settings seeded but not read | 4 of 351 | `notification.renewal_reminder`, `receipts.print_title` (both shown on Master > Configuration with no effect), `product.component_kinds` (read-only list), `limits.session_idle_minutes` (read by the front end only) |
-| Report catalogue vs queries | 39 / 39, consistent | |
-| Scheduled jobs vs handlers | 15 / 15, consistent | |
+| Settings seeded but not read | 4 of 351 | `notification.renewal_reminder`, `receipts.print_title` (both on Master > Configuration with no effect), `product.component_kinds` (read-only list), `limits.session_idle_minutes` (read by the front end only) |
+| Report catalogue against queries | 39 / 39, consistent | |
+| Scheduled jobs against handlers | 15 / 15, consistent | |
 | Magic values | 2 | e-mail outbox retry count and batch size; the list of daily reports |
-| Comments that no longer match the code | 4 | `reports/queries.js` pointed at `FILTERS in service.js` (it is in `engine.js`); `queueEmail` said it may send at once (it never does); `docs/MODULE_GUIDE.md` named the retired admin roles `it-admin` / `ba`, the withdrawn `agent` role and the old `next_number()`; `deploy/REFERENCE.md` pointed at a tracker entry |
-| Modules without `service.js` | 13 of 38 | Most split their logic into named files (period-end, placement, bank-reconciliation); `auth` (405 lines) and `users` (328) keep logic in the router |
+| Comments that no longer matched the code | 4 | `reports/queries.js`, `queueEmail`, `docs/MODULE_GUIDE.md` (retired roles and the old numbering function), `deploy/REFERENCE.md` |
+| Modules without `service.js` | 13 of 38 | Most split their logic into named files (period-end, placement, bank-reconciliation); `auth` and `users` keep logic in the router |
 
-### Defects fixed
+### 2.3 Defects fixed
 
 | # | Defect | Fix |
 |---|---|---|
-| 1 | The switch `notification.renewal_reminder` on Master > Configuration had no effect: renewal reminders were always created | The renewal notice job honours it (test added) |
-| 2 | `receipts.print_title` ("Title printed on receipt PDFs") was never read | Used as the title of a multi-receipt PDF |
-| 3 | CSV downloads of incentive, reinsurance, remittance, claims, renewals, the accounting export and bulk-upload results wrote cells starting with `=`, `+`, `-` or `@` unguarded, so a client name could run as a spreadsheet formula | All CSV writers use the guarded `csvCell` of `lib/csv.js` (test added) |
-| 4 | E-mail subjects were HTML-escaped: "Cruz & Sons" arrived as "Cruz &amp;amp; Sons" (10 subject lines: quotations, endorsements, placement, password reset, direct bill, remittance) | Subjects rendered as plain text (test added) |
-| 5 | Incentive calculation approval ignored `finance.maker_checker_enabled`, unlike every other finance approval | One `assertChecker` in `lib/makerChecker.js`; treaties and cessions keep the rule always, as before |
+| 1 | The switch `notification.renewal_reminder` on Master > Configuration had no effect | The renewal notice job honours it (test added) |
+| 2 | `receipts.print_title` was never read | Used as the title of a multi-receipt PDF |
+| 3 | CSV downloads of incentive, reinsurance, remittance, claims, renewals, the accounting export and bulk-upload results wrote cells starting with `=`, `+`, `-` or `@` unguarded | All CSV writers use the guarded `csvCell` of `lib/csv.js` (test added) |
+| 4 | E-mail subjects were HTML-escaped: "Cruz & Sons" arrived as "Cruz &amp;amp; Sons" (10 subject lines) | Subjects rendered as plain text (test added) |
+| 5 | Incentive calculation approval ignored `finance.maker_checker_enabled`, unlike every other finance approval | One `assertChecker` in `lib/makerChecker.js`; treaties and cessions keep the rule always |
 | 6 | Claim documents and generated finance files were stored under keys with 32 random bits; every other upload uses 128 | One key generator (`newKey` in `uploads/storage.js`) |
 | 7 | A scheduled job that failed was recorded in `job_runs` but never logged, so log-based alerting missed it | Failures logged with job code and run id |
+| 8 | `GET /schedules` and its run history needed only sign-in | They require `read:schedules` |
 
-### What was changed without changing behaviour
+### 2.4 What was changed without changing behaviour
 
 - Tracker tags, persona-walk references and change-log wording removed from 61 comment and test-name lines; the
   reason is kept where it explains the code. `persona-walk.test.js` is now `role-access.test.js`.
 - The helpers above have one implementation each in `src/lib` (`dates.js`, `money.js`, `csv.js`, `template.js`,
   `makerChecker.js`, `xlsx.js`, `zip.js`, `logger.js`); module helper files re-export them. A test fails if a second
   copy of `isoDate`, `addDays`, `toNumber`, `csvCell`, `renderTemplate` or `assertChecker` appears.
-- `notify()` moved from `notifications/router.js` to `notifications/service.js` (thirteen services imported a router).
-- `tools/xlsx.js`, `tools/zip.js`, `tools/csv.js` moved to `lib/` because reports use them at run time; `src/tools` now
-  holds only the API export.
-- Hand-written error responses replaced by `notFound` / `forbidden` (the body now also carries the request id).
-- Named constants for the outbox retry count and batch size; the daily report list is a job parameter with the same
-  default.
-- `package.json`: author iorta TechNXT, description, private, `engines` Node 22 (the version the image runs).
-- New: `scripts/check-settings.js` (`npm run check:settings`), a test that the report catalogue and `QUERIES` agree,
-  READMEs for accounting, placement, period-end, bank-reconciliation, remittance, reports and document-numbering,
-  `docs/developer-guide/` (index and back-end guide), `docs/MODULE_GUIDE.md` brought up to date.
+- `notify()` moved from `notifications/router.js` to `notifications/service.js`.
+- The XLSX, ZIP and CSV writers moved from `src/tools` to `src/lib`; `src/tools` holds only the API export.
+- Hand-written error responses replaced by `notFound` and `forbidden` (the body now also carries the request id).
+- Named constants for the outbox retry count and batch size; the daily report list is a job parameter.
+- `package.json`: author iorta TechNXT, description, private, `engines` Node 22.
+- New: `scripts/check-settings.js` (`npm run check:settings`), a test that the report catalogue and `QUERIES`
+  agree, READMEs for accounting, placement, period-end, bank-reconciliation, remittance, reports and
+  document-numbering, `docs/developer-guide/`, `docs/MODULE_GUIDE.md` brought up to date.
 
 `scripts/check-settings.js` on a freshly migrated and seeded database after the changes:
 
@@ -90,409 +203,134 @@ In the database, named only by the front end (1): limits.session_idle_minutes
 In the database, not named anywhere in code (1): product.component_kinds
 ```
 
-Checks after the changes: 506 tests pass (500 before, 6 added), `npx eslint src test scripts` reports nothing. The
-eslint rules the review asked for (`no-console` outside scripts, `no-unused-vars` as error, `eqeqeq`, `prefer-const`)
-were already in force and the code complies.
-
-### Left open, with a recommendation
-
-| Item | Recommendation |
-|---|---|
-| `GET /schedules` and its run history need only sign-in, while `read:schedules` exists and is granted to Accounting; `PUT /schedules/:code` checks the Accounting role instead of `write:schedules` | Require `read:schedules` / `write:schedules` once the front end hides Master > Schedules from roles without them. The `profile` and `notifications` permissions are never required either: document them as always-on or remove them. |
-| `receivables.due_days` is read only by the sample seed; bills take their due date from the insurer credit terms. Its label on Master > Configuration suggests it sets the bill due date | Relabel it in a migration or remove it after switching the sample seed to credit terms. |
-| `product.component_kinds` is shown on Master > Configuration but the kinds are fixed in `product-configurator/service.js` | Keep as information (it is read-only) or read the list from the setting. |
-| Two XLSX readers (`accounting/lib/sheet.js`, `documents/xlsx.js`) | Merge into `lib/xlsx.js` next to the writer. |
-| Remittance > Reconciliation matches bank transactions in its own tables, separate from the bank-reconciliation module | Product decision: retire the remittance screen or feed it from bank-reconciliation. |
-| `auth/router.js` and `users/router.js` hold their business logic in the router | Move it into `service.js` files when those modules next change. |
-| About 140 functions are exported but used only in their own file | Drop the `export` keyword when the file is next edited. |
-| Legacy route names kept for the front end: 7 camel-case segments (`/receipts/printReceipt`, `/disbursements/printDisbursement`, `/quotations/biCoverage/...`), about 20 verb-style paths, 3 pagination shapes | Keep until the front end moves; new routes use kebab-case nouns and `sendList`. |
-| 186 write routes validate in the service rather than with a zod schema | Unchanged since the second pass; add schemas finance first. |
-| Swallowed errors: `renewals/queue.js` (`processQueue().catch(() => {})`, failures are recorded on the job rows) and the receipt PDF prints without lines if they cannot be read (`documents/router.js`) | Log both at warn level. |
+Checks after the changes: all tests pass (518 in 50 files at the head of the branch), `npx eslint src test scripts`
+reports nothing. The ESLint rules the review asked for (`no-console` outside scripts, `no-unused-vars` as error,
+`eqeqeq`, `prefer-const`) are in force and the code complies.
 
 ---
 
-## Security, standards and quality review (second pass), 29 Sep 2026
+## 3. Security, standards and quality review (second pass), 29 Sep 2026
 
-Scope: front end `brokerverse/` (CRA + craco, 871 JS/JSX and 379 SCSS files) and backend `backend/` (147 JS files,
-565 routes, 32 test files at the time). Baseline: the front-end review of 28 Sep. The review itself changed nothing;
-the "After remediation" column records the fixes merged later on 29 Sep. Figures were produced with ESLint, `npm audit`,
-`jscpd`, a route-walking script that classifies each route's middleware, and a script that checks which routes some
-test calls.
+Scope at the time: front end `brokerverse/` and backend `backend/` (147 JS files, 565 routes, 32 test files).
+Figures were produced with ESLint, `npm audit`, `jscpd`, a script that classifies each route's middleware and a
+script that checks which routes some test calls. The backend findings were fixed on 29 Sep 2026; the front-end
+code findings of this pass were taken up by the front-end review in section 1, whose figures replace the ones of
+this pass.
 
-### Executive summary
+### 3.1 Findings and status
 
-The last column shows the status after the fixes merged on 29 Sep 2026 (defect numbers refer to `docs/e2e/DEFECTS.md`).
-The old source archives mentioned in the second pass have been removed from the repository. Backend rows are
-updated with the result of the backend code quality review above.
+Defect numbers refer to `docs/e2e/DEFECTS.md`.
 
-Status vs baseline: **Fixed**, **Partly** (improved but not closed), **Open** (unchanged or worse), **New** (backend,
-not in baseline scope).
+| # | Area | Finding at the second pass | Severity | Status now |
+|---|------|---------|-------|----|
+| 1 | Security / files | Any signed-in user could overwrite or delete any stored document | High | Fixed (D81): uploader, module writer or administrator only |
+| 2 | Security / files | Uploads kept the client-supplied content type, had no type allow-list and were served inline from the SPA's origin (stored XSS risk) | High | Fixed (D82, D99): type detected from the content, allow-list, signed links, sandbox CSP, downloads for non-image, non-PDF files |
+| 3 | Security / auth | Users created without a password got a fixed password; "must change password" and expiry were not enforced | High | Fixed (D83): random temporary password shown once, restricted token until changed |
+| 4 | Security / config | `JWT_SECRET` and `CORS_ORIGINS` fell back to unsafe defaults | High | Fixed (D84): production start-up check |
+| 5 | Security / logging | Request logs contained the `Authorization` header and download tokens | Medium | Fixed (D85): redaction, tested |
+| 6 | Security / sessions | Access tokens lasted 24 h and were not re-checked; password change did not revoke refresh tokens | Medium | Fixed (D86): 30-minute tokens, token version, rotation and revocation |
+| 7 | Security / 2FA | No front-end challenge or enrolment; TOTP secrets and reset codes stored in plain text | Medium | Fixed (D87, D88); the enrolment screen shows the key and a link, not a QR image |
+| 8 | Security / DoS | XLSX readers inflated without a cap; large uploads held in memory | Medium | Fixed (D93); rate limits still counted per instance |
+| 9 | Input validation | 186 of 297 write routes had no zod schema | Medium | Partly: empty-body validation on the affected forms (D110); schemas not on every write route |
+| 10 | Authorization metadata | Registry roles and permissions were documentation only | Medium | Fixed (D94) |
+| 11 | Authorization coverage | 39 routes needed only sign-in, including file storage, `GET /settings` and `GET /schedules` | Info | Fixed for file storage and `GET /schedules`; `GET /settings` still needs only sign-in |
+| 12 | SQL injection | No string-built SQL with request values; dynamic identifiers white-listed or quoted | - | No finding |
+| 13 | Error handling | 500 responses returned the internal error text | Low | Fixed (D95) |
+| 14 | Dependencies (backend) | `npm audit`: nodemailer (high), node-cron (moderate) | Medium | Fixed (D96): no backend advisories |
+| 15 | Dependencies (front end) | 71 advisories (3 critical, 35 high), almost all build-time dependencies of react-scripts; react-router and craco moderate | High | Open: leave Create React App (Vite) and move to React Router 7 |
+| 16 | Front-end roles | Undefined roles got full access | - | Fixed: deny by default, every route guarded, server enforces permissions |
+| 17 | Front-end token storage | Access and refresh tokens in `localStorage`; no CSP on the SPA | High (with item 2) | Open: tokens still in `localStorage` (accepted for go-live, `deploy/README.md` section 9); no CSP header for the SPA |
+| 18 | Front-end supply chain | CSS loaded from a CDN | - | Fixed: bundled from npm |
+| 19 | Front-end logging | Console calls in production code | Low | Fixed (section 1): no direct `console` calls; diagnostics through `utility/logger` |
+| 20 | Front-end mock data | Production files importing mock data | Medium | Partly: unused mock files removed (section 1); the product recommendation step, the employee benefit flow and the endorsement city list still use fixed lists |
+| 21 | Front-end hard-coded URLs | External hosts in the code | Low | Partly: the third-party storage bucket and image host removed (section 1); remaining links are to public services |
+| 22 | Hard-coded business values | Currency, VAT and bank literals in the front end; backend values in code | Medium | Fixed (D130-D146): values in settings; the administrator role is named once (`ADMIN_ROLE`) |
+| 23 | Hard-coded colours | Hex literals in SCSS and JSX outside `src/theme` (about 6,300 in 314 SCSS files now) and inline styles | Medium (theming) | Open |
+| 24 | ESLint (front end) | Warnings, some real defects (duplicate keys, props, members) | Medium | Fixed defects; 293 warnings left (section 1.2) |
+| 25 | ESLint (backend) | 0 errors, 0 warnings with strict rules | - | Good |
+| 26 | Dead or duplicate code | Never-imported files; duplicated master screens | Low | Dead files removed (section 1); duplicated screens (City and State masters, account set-up screens) remain |
+| 27 | Large files | Over 40 files above 800 lines; `MainRoute.js` without lazy loading | Low | Open: `PolicyDetailView` (2,268 lines), `ProductConfiguratorScreens.js` (1,966), `MainRoute.js` (1,894, 416 routes) |
+| 28 | i18n | Keys missing from `en.json`; Thai incomplete | Low / Medium | `en.json` complete (checked by `npm run check:i18n`); `th.json` misses 1,398 keys; Filipino has no translation file |
+| 29 | Tests | Backend 259 tests in 32 files; front end 3 test files | Medium | Backend 518 tests in 50 files; front end 30 tests in 8 files; both run in GitHub CI |
+| 30 | Consistency | Three list-pagination shapes, legacy verb-style paths | Medium | Backend helpers unified; pagination shapes and legacy paths kept for the screens (section 4) |
+| 31 | XSS sinks (front end) | No `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML=`; `window.open` passes `noopener` | - | No finding |
 
-| # | Area | Finding | Count | Severity | Status | After remediation (29 Sep) |
-|---|------|---------|-------|----------|--------|----|
-| 1 | Security / files | Any signed-in user can overwrite or delete any stored document (`PUT /s3/put/*`, `DELETE /s3/file/*`); no ownership or permission check | 2 routes | High | New | Fixed (D81) |
-| 2 | Security / files | Uploads keep the client-supplied content type, have no type allow-list and are served inline, without sign-in, from the same origin as the SPA; the API CSP (`script-src 'self'`) lets an uploaded HTML page load an uploaded script, which enables stored XSS and theft of the tokens in `localStorage` | 1 serving route, 7 upload handlers | High | New | Fixed (D82, D99) |
-| 3 | Security / auth | Users created without a password get the fixed password `Welcome@1`; "must change password" and password expiry are only flags: the API does not enforce them and the front end never reads them | 1 default, 0 FE references | High | New | Fixed (D83) |
-| 4 | Security / config | `JWT_SECRET` falls back to `dev-only-secret-change-me` and `CORS_ORIGINS` to `*` (any origin reflected, verified); no production start-up guard | 2 | High (depends on deployment) | New | Fixed (D84) |
-| 5 | Security / logging | Every request log line contains the `Authorization: Bearer ...` header (pino-http default serializer, verified); report download tokens are logged in URLs | all requests | Medium | New | Fixed (D85) |
-| 6 | Security / sessions | Access tokens last 24 h and carry roles; `requireAuth` does not re-check the user, so deactivation and role changes take up to 24 h to apply. Password change/reset does not revoke refresh tokens | 4 code paths | Medium | New | Fixed (D86) |
-| 7 | Security / 2FA | The backend implements TOTP 2FA, but the front end has no challenge or enrolment screen (0 references to `twoFactorRequired`/`challengeToken`). TOTP secrets and reset codes are stored in plain text; older reset codes stay valid | 3 | Medium | New | Fixed (D87, D88); QR image not shown |
-| 8 | Security / DoS | XLSX readers inflate without a size cap (zip bomb); uploads are held in memory (up to 20 x 25 MB per request); the only rate limits are in-memory, per process and on sign-in/reset | 2 inflaters, 7 multer configs | Medium | New | Fixed (D93); rate limits still per instance |
-| 9 | Input validation | 186 of 297 write routes have no schema (zod) middleware; they rely on hand-written checks in services | 186 | Medium | New | Partly: empty-body validation added on the affected forms (D110); schemas not on every write route |
-| 10 | Authorization metadata | `registry.js` `auth`/`roles`/`permissions` fields are documentation only (not enforced); roles/permissions filled on 14 of 565 routes; 1 `auth` mismatch | 565 / 14 / 1 | Medium | New | Fixed (D94) |
-| 11 | Authorization coverage | 513 of 565 routes require a permission or role; 13 are public (all intended); 39 need only sign-in, and are acceptable except the 8 file-storage routes (items 1-2) and `GET /settings` / `GET /schedules` | 13 / 39 | Info (see 1) | New | Fixed (file routes protected, D81/D82) |
-| 12 | SQL injection | No string-built SQL with request values found; dynamic identifiers are white-listed or quoted | 0 | - | New | - |
-| 13 | Error handling | 500 responses return the raw internal error text (for example PostgreSQL messages) | 1 handler | Low | New | Fixed (D95) |
-| 14 | Dependencies (BE) | `npm audit`: 1 high (nodemailer, direct), 2 moderate (node-cron -> uuid) | 3 | Medium | New | Fixed (D96): 0 backend advisories |
-| 15 | Dependencies (FE) | `npm audit`: 3 critical, 35 high, 18 moderate, 15 low (71); axios and js-cookie now patched; remaining direct: react-scripts (high), react-router(-dom) and @craco/craco (moderate, major upgrades) | 71 (was 75) | High | Partly | Open: front-end dependency upgrades (react-scripts, react-router) planned |
-| 16 | FE roles | Undefined roles no longer get full access; routes are guarded by `isPathAllowed`; server enforces permissions | - | - | Fixed | Fixed |
-| 17 | FE token storage | Access and refresh tokens still in `localStorage`; no CSP on the SPA. Refresh-on-401 now exists; the unused login module still writes tokens and non-secure cookies | 2 writers | High (with item 2) | Partly | Partly: unused login module removed (D98); tokens still in localStorage |
-| 18 | FE supply chain | `primeflex@latest` CDN link removed; bundled from npm | 0 | - | Fixed | Fixed |
-| 19 | FE logging | `console.*` 1,607 calls in 246 files (was 2,434 / 415); `console.log/info/debug` disabled in production builds; redux-logger development-only; 1 bearer-token log left | 1,607 | Low | Partly | Partly |
-| 20 | FE mock data | 27 production files still import mock data (was 89) | 27 | Medium | Partly | Partly: 14 converted/removed (D130+), remaining listed with reasons |
-| 21 | FE hard-coded URLs | 11 external URLs (was 39); 5 of them in dead files | 11 | Low | Partly | Partly |
-| 22 | Hard-coded business values | FE: `"PHP"` 11, `₱` 33 (outside mocks), IAR VAT fallback 12, `bankCode: "BDO"`. BE: every key read is seeded, code fallbacks equal the seeded values (tested), the administrator role is named once (`ADMIN_ROLE`) | ~60 | Medium | Partly (FE) / New (BE) | Fixed (D130-D146): values in settings |
-| 23 | Hard-coded colours | SCSS 6,943 hex literals in 360 files outside `src/theme` (was 7,458 / 366); JS/JSX 1,889 quoted hex literals in 379 files; 2,056 inline `style={{` | 8,832 | Medium (theming) | Open | Open (theming task) |
-| 24 | ESLint (FE) | 0 errors (was 7), 2,016 warnings (was 2,490); `no-unused-vars` 1,683; real bugs left: 6 `no-dupe-keys`, 2 `no-unreachable`, 1 duplicate class member, 1 duplicate JSX prop, 1 self-assign | 2,016 | Medium | Partly | Partly |
-| 25 | ESLint (BE) | 0 errors, 0 warnings on 224 files (strict rules incl. `no-console`, `eqeqeq`) | 0 | - | New (good) | Good |
-| 26 | Dead / duplicate code | FE: 31 never-imported JS/JSX files, 4,141 lines (was 85 / 10,176); 18 dead SCSS (was 27); 1 byte-identical group (was 13); jscpd 10.9 % duplicated lines. BE: 0 dead files, 0.04 % duplication; helper copies merged into `src/lib` | 31 / 18 | Low | Partly | Partly (FE): unused mock files deleted |
-| 27 | Large files | FE: 43 files > 800 lines (was 60); `MainRoute.js` 1,935 lines, 305 imports, no lazy loading. BE: largest file 696 lines | 43 | Low | Partly | Partly (FE) |
-| 28 | i18n | 84 keys used but missing from `en.json` (was 357); 82 have inline English defaults, 2 render raw keys. `th.json` lacks 468 `en` keys (was 101) | 84 / 468 | Low / Medium | Partly (th worse) | Partly: Filipino not translated; Thai incomplete |
-| 29 | Tests | BE: 259 test cases in 32 files; 455 of 565 routes (81 %) are called by some test; no tests for file storage, notifications, token refresh, lockout. FE: 3 test files, 124 lines | 259 / 3 | Medium | Partly | Improved: backend 506 tests in 49 files, front end 22 tests |
-| 30 | Consistency | API: 3 list-pagination shapes, 6 success responses without the `success` envelope, 20 legacy verb-style paths. BE: one `round2` and one business-date helper (`lib/money.js`, `lib/dates.js`). FE: date helper used in 13 files vs 85 raw `toLocaleDateString` calls; 2 files import the wrong `formatDate` (from FullCalendar) | see Consistency | Medium | New / Open | Partly: BE helpers fixed; pagination shapes and FE formatting remain |
-| 31 | XSS sinks (FE) | No `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML=`; all 29 `window.open` calls now pass `noopener` | 0 | - | Fixed | Fixed |
+### 3.2 Security controls as they are now
 
----
+**Authentication** (`src/lib/auth.js`, `src/modules/auth/router.js`). Passwords are bcrypt hashes with a policy,
+history and maximum age (`lib/password.js`). A user created without a password gets a random temporary one shown
+once; "must change password" and an expired password lead to a restricted token that only reaches the
+change-password step. The first administrator password comes from `ADMIN_PASSWORD`; without it a random one is
+generated and must be changed at the first sign-in. Sign-in, two-factor, forgot and reset password are rate limited
+per IP and per username; accounts lock after `limits.max_login_attempts`; every attempt is in `login_history`.
+Access tokens last 30 minutes; a per-user `token_version` ends every session on deactivation, role change, password
+change or reset; refresh tokens rotate and reuse revokes the family. JWT verification is pinned to HS256. TOTP has
+replay protection, secrets are encrypted at rest and reset codes hashed. The production start-up check refuses
+missing or short secrets, `CORS_ORIGINS=*` and a localhost `PUBLIC_BASE_URL`. Open (Low): a locked or inactive
+account answers "Account locked" or "Account inactive", which tells a caller that the username exists.
 
-### 1. Security
+**Authorization.** `define()` puts `requireAuth` first on every route unless the route declares `auth: false`, and
+a test calls every non-public route without a token and expects 401. The public routes are sign-in, the two-factor
+step, refresh, logout, the password policy, forgot and reset password, the customer quote approval (signed token),
+report download (signed token), the public branding settings, `GET /version`, the health endpoints and
+`GET /s3/object/*` with a signed, expiring link. Seven broker roles are seeded; the System Administrator passes
+every check, and the Accounting Manager inherits Accounting.
 
-The backend findings of this pass were fixed on 29 Sep 2026 (see the executive summary). This section describes the
-controls as they are now and what is still open.
+**Input validation and SQL.** All values are bound parameters; dynamic SQL uses white-listed sort columns, field
+names validated by pattern and quoted identifiers, or column maps. Many write routes validate in the service
+rather than with a zod schema (Remittance, Product Configurator and Reinsurance have the most). The JSON body
+limit is `JSON_BODY_LIMIT` (2 MB).
 
-#### 1.1 Authentication (backend `src/lib/auth.js`, `src/modules/auth/router.js`)
+**Files.** Writing, replacing and deleting a stored file checks the uploader or the permission of the linked
+record. The type is detected from the file signature and checked against `uploads.allowed_types`; the detected type
+is stored. Files other than images and PDF are served as attachments with a sandbox CSP and `nosniff`. Links are
+signed and expire (`FILE_URL_TTL_SECONDS`); storage keys carry 128 random bits. Upload and import sizes come from the
+environment, and workbook decompression is capped.
 
-- Passwords: bcrypt hashes; password policy with history and maximum age (`lib/password.js`). A user created without
-  a password gets a random temporary one shown once; "must change password" and an expired password lead to a
-  restricted token that only reaches the change-password step. The first administrator password comes from
-  `ADMIN_PASSWORD`; without it a random one is generated and must be changed at the first sign-in.
-- Sign-in protection: per-IP and per-username rate limit on sign-in, 2FA code, 2FA enable / disable, forgot and reset
-  password (`security.login_rate_limit`); lockout after `limits.max_login_attempts`; every attempt in `login_history`.
-- Sessions: access tokens last 30 minutes (`JWT_ACCESS_TTL_SECONDS`); a per-user `token_version` ends every session
-  on deactivation, role change, password change or reset; refresh tokens rotate, and reuse of a rotated token revokes
-  the family. JWT verification is pinned to HS256.
-- Two-factor: TOTP with replay protection, secrets encrypted at rest (`DATA_ENCRYPTION_KEY`), reset codes hashed and
-  only the latest valid; forced enrolment for `security.require_2fa_roles`. The front end has the challenge and
-  enrolment screens; the QR image is not shown yet (the secret is typed in).
-- Production start-up check (`assertProductionConfig`): the API refuses to start with a missing or short
-  `JWT_SECRET` / `DATA_ENCRYPTION_KEY`, `CORS_ORIGINS=*` or a localhost `PUBLIC_BASE_URL`.
-- Open (Low): a locked or inactive account answers "Account locked" / "Account inactive" instead of the generic
-  message, which tells a caller that the username exists.
+**Secrets in the repository.** No live secrets in tracked source. `.env` files are git-ignored; `backend/.env.example`
+and `deploy/backend.env.example` hold placeholders. The only literal password is the test administrator password in
+`vitest.config.js`. When `ADMIN_PASSWORD` is unset, the generated first password is written to the log once; set
+`ADMIN_PASSWORD` in production so it never reaches the log store.
 
-#### 1.2 Authorization on every route
+**Headers, CORS and rate limits.** helmet on every API response, `x-powered-by` disabled, `trust proxy 1`. CORS is
+an explicit allow-list, enforced in production. The SPA has no CSP (none in `public/index.html` or `nginx.conf`,
+which sets `nosniff`, `X-Frame-Options` and `Referrer-Policy`). Rate limits are in memory and counted per API
+instance.
 
-`define()` (`lib/registry.js`) puts `requireAuth` first on every route unless the route declares `auth: false`, and
-records the roles and permissions of its middleware in the generated API documentation. A test calls every
-non-public route without a token and expects 401. Of 708 routes, 39 need only sign-in (own profile, password, 2FA,
-login history, own notifications, own open-items events, address look-ups, search (scoped by permission), the roles
-list, file-storage routes with their own ownership checks, `GET /settings` and `GET /schedules`). Open: `GET /settings`
-and `GET /schedules` should require a permission. Public routes: sign-in, refresh, logout, password policy, forgot /
-reset password, customer quote approval (signed token), report download (signed link or bearer), public branding
-settings, `GET /version`, `GET /health`, and `GET /s3/object/*` with a signed, expiring link.
+**Logging.** The backend redacts authorization and cookie headers, credential fields and token query parameters
+(`lib/logger.js`, tested); ESLint refuses `console` outside command-line scripts. The front end logs through
+`utility/logger`, silent in production.
 
-#### 1.3 Input validation and SQL injection
+**Dependencies.** Backend: no advisories (nodemailer 10, node-cron 4). Front end: 71 advisories at the second pass,
+most of them in the build tool chain of react-scripts 5.0.1 (all the critical ones) (no fix except leaving Create React App), react-router
+6.30 and craco (moderate). Both packages pin with committed `package-lock.json` and `npm ci`.
 
-- SQL: all values are bound parameters. Dynamic SQL uses white-listed sort columns, definition-driven field names
-  validated by regex and quoted identifiers, or column maps. No injection found.
-- Many write routes still validate in the service instead of a zod schema (Remittance, Product Configurator and
-  Reinsurance have the most). Empty or malformed bodies on the affected forms are refused with field messages.
-- JSON body limit: `JSON_BODY_LIMIT` (2 MB by default).
-
-#### 1.4 File upload handling (`src/modules/uploads/`)
-
-- Writing, replacing and deleting a stored file checks the uploader or the permission of the linked record.
-- The type is detected from the file signature and checked against an allow-list (`uploads.allowed_types`); the
-  detected type is stored, not the browser's claim. Files other than images and PDF are served as attachments with a
-  sandbox CSP and `nosniff`.
-- Links are signed and expire (`FILE_URL_TTL_SECONDS`); storage keys carry 128 random bits.
-- Upload and import sizes come from the environment (`UPLOAD_MAX_MB`, `UPLOAD_MAX_FILES`, `IMPORT_MAX_MB`,
-  `IMPORT_MAX_INFLATED_MB`, `IMPORT_MAX_ROWS`); workbook decompression is capped.
-
-#### 1.5 Secrets and credentials in the repository
-
-- No live secrets in tracked source. `backend/.env` and `brokerverse/.env` are git-ignored; `backend/.env.example`
-  holds placeholders. The only literal password is the test administrator password in `vitest.config.js`.
-- The old source archives at the repository root have been removed.
-- When `ADMIN_PASSWORD` is unset, the generated first password is written to the log once. Acceptable, but set
-  `ADMIN_PASSWORD` in production so it never reaches the log store.
-
-#### 1.6 CORS, helmet, rate limiting
-
-- helmet on every API response; `x-powered-by` disabled; `trust proxy 1`. CORS is an explicit allow-list
-  (`CORS_ORIGINS`), enforced in production.
-- The SPA itself has **no CSP**: none in `public/index.html`, none in `nginx.conf` (which does set nosniff,
-  X-Frame-Options and Referrer-Policy).
-- Rate limits (sign-in and a global API limit) are in memory and counted per API instance. Open: move them to a
-  shared store when more than one instance runs.
-
-#### 1.7 Logging of sensitive data
-
-- **Backend:** pino redacts the authorization and cookie headers, credential fields of request bodies and token query
-  parameters (`lib/logger.js`, tested). `no-console` is an ESLint error outside command-line scripts.
-- **Front end:** 1,607 `console.*` calls (1,139 `log`, 433 `error`, 34 `warn`, 1 `debug`) in 246 files.
-  `src/utility/productionConsole.js` (imported first in `src/index.js:1`) turns `log/info/debug` into no-ops in
-  production builds, and redux-logger is development-only (`src/redux/store.js:22`). Remaining: `services/quotationService.js:20`
-  logs `authService.getAuthHeader()` (development only now); form-value dumps such as
-  `agentModule/EmployeeFlow/EmployeeCreationCard.js:63` and `claimsModule/claimDetails/claimDetailsCard/index.js:493`
-  (development only); the 433 `console.error` calls still run in production and some print whole API responses.
-
-#### 1.8 Front-end token storage and authorization (baseline 2.1-2.3)
-
-- **Still open:** access token, refresh token, user, roles and permissions are in `localStorage`
-  (`services/authService.js:99-132`, `utility/sessionRefresh.js:28-29`). With the missing SPA CSP (1.6) this is the main
-  XSS exposure. Moving the refresh token to an httpOnly, SameSite cookie needs a backend change (L).
-- **Improved:** refresh on 401 now exists: `utility/sessionRefresh.js` wraps `window.fetch` and the axios interceptor
-  (`utility/interceptor.js:44`) with one shared refresh.
-- **Still open:** the unused login `module/AuthModule/Login/index.jsx` (imported by `routes/MainRoute.js:209`, use
-  commented out at `:358`) still writes `ACCESS_TOKEN`/`REFRESH_TOKEN` and non-secure cookies (`:65-90`);
-  `authService.getAuthHeader` is still declared twice (`services/authService.js:195,271`); three HTTP mechanisms
-  remain (30 services use raw `fetch`, `notificationService.js:9` has its own axios instance, `interceptor.js:7`).
-- **Fixed:** role gating is now deny-by-default (`utils/menuPermissions.js:1-11,93-97`); `routes/ProtectedRoute/index.js:182-184`
-  guards every path with `isPathAllowed`; the backend enforces permissions server-side. Residual: grants are keyed on
-  menu display names (renaming a menu label changes access), and paths not listed in any menu are allowed by default
-  (`menuPermissions.js:218`), acceptable only because the API enforces permissions.
-
-#### 1.9 Dependencies
-
-`npm audit --omit=dev` ran successfully in both packages.
-
-| Package | Critical | High | Moderate | Low | Total | Direct packages flagged |
-|---------|---------:|-----:|---------:|----:|------:|-------------------------|
-| backend | 0 | 0 | 0 | 0 | 0 | none (nodemailer 10 and node-cron 4 since the remediation) |
-| front end (1,622 prod deps) | 3 | 35 | 18 | 15 | 71 (was 75) | react-scripts 5.0.1 (high, no fix except leaving CRA), react-router / react-router-dom 6.30 (moderate, fix is v7), @craco/craco (moderate) |
-
-Front-end criticals are all build-time transitive (`form-data`, `shell-quote`, `websocket-driver` via react-scripts).
-axios (1.20) and js-cookie (3.0.8) are now on patched versions; `flatted` and `caniuse-lite` were removed.
-
-Pinning: both packages use caret ranges with committed `package-lock.json` and `npm ci` in the Dockerfiles, which is
-adequate. Minor: the front end lists four `@testing-library/*` packages under `dependencies` (they inflate the
-production audit).
-
-#### 1.10 XSS sinks
-
-- Front end: 0 `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML =`, `document.write`. All 29
-  `window.open` calls pass `noopener,noreferrer`; the one `target="_blank"` anchor has `rel` (fixed since baseline).
-  `i18n.js:22` still has `escapeValue: false` (safe while nothing renders HTML).
-- Backend HTML: e-mail templates escape variables in the body and render subjects as plain text (`lib/template.js`). Two unescaped paths: `POST /email/send`
-  accepts arbitrary `html` to any address (`quotations/email.js:46-51`, permission-gated), and collections follow-up
-  sends `content` as HTML (`collections/service.js:133`). Low: this is a phishing channel from the company's own
-  sender address rather than XSS.
+**HTML output.** E-mail templates escape variables in the body and render subjects as plain text
+(`lib/template.js`). Two paths send HTML supplied by the caller: `POST /email/send` (`quotations/email.js`,
+permission-gated) and the collections follow-up (`collections/service.js`). Low: this is a phishing channel from the
+company's own sender address rather than XSS. `i18n.js` has `escapeValue: false`, which is safe while nothing
+renders translation values as HTML.
 
 ---
 
-### 2. Hard-coding
+## 4. Open items
 
-#### 2.1 Backend
-
-Every business parameter is a setting: 351 keys in `app_settings`, every key the code reads is seeded (checked by
-`test/configuration.test.js` and `scripts/check-settings.js`), and a code fallback must equal the seeded value (tested).
-The administrator role is named once (`ADMIN_ROLE` in `lib/auth.js`). Deployment values come from the environment
-(`config.js`); the production start-up check refuses a missing `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `CORS_ORIGINS` or
-`PUBLIC_BASE_URL`. Remaining literals are technical limits (bcrypt cost 10, page-size cap 500, report file cap
-50,000 rows, e-mail retries 5), named where they are defined.
-
-#### 2.2 Front end (baseline 1.1-1.5)
-
-- Currency: `"PHP"` literal 11 times in 10 files (was 119), e.g. `module/SystemSettings/index.js`,
-  `module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange/index.jsx`. `₱` 33 times in 10 non-mock files,
-  e.g. `agentModule/policyModule/BatchRenewal/BatchTable.jsx:751,769,1005,1020`,
-  `agentModule/quoteModule/quoteListing/quoteListingCard/store/quoteReducer.js:15`. Partly fixed.
-- VAT: `IAR_VAT_PERCENT = 12` (`agentModule/leadModule/IarLeadCreation/iarConstants.js:5`), now only a fallback
-  (`:125`); the other baseline VAT literals are gone. `bankCode: "BDO"` still at
-  `agentModule/endorsementModule/paymentConfirmation/index.js:377`.
-- Literal ids in `routes/apiRoutes.js` removed (fixed); misspelled keys (`VECHI*`, `ENDROSEMENT*`) remain (21).
-- Branding: `/BDO_insure_logo.png.png` in 12 places (mostly the unused `module/AuthModule/*` pages and the
-  `utility/systemCurrencies.js:73,79` presets); `public/index.html` (10 lines) and `public/manifest.json:2-3` still say
-  "INXT Broker Suite". Needs a product decision.
-- External hosts (11, was 39): SalesVerse S3 template bucket (`module/PaymentVoucher/BulkUploadModal/index.jsx:31`,
-  `module/Receipts/BulkUploadModal/index.jsx:141`), i.ibb.co (`agentModule/renewalModule/WaitingScreen/PolicyRenewalWaiting.jsx:74`,
-  `components/Header/mock.js:3`), tiiny.site x4 in the dead `components/Client/index.jsx:34-55`, plus Gmail, wa.me and
-  PrimeFaces links. Templates should come from the API.
-- No `brokerverse/.env.example`; README does not mention `REACT_APP_BASE_URL` (still open).
-
-#### 2.3 Hard-coded colours (Open)
-
-- SCSS: 6,943 hex literals in 360 files outside `src/theme` (was 7,458 in 366). Top literals unchanged:
-  `#111927` (959), `#0072d8` (759), `#ffffff` (497), `#d1d5db` (434), `#b1b1b1` (201). 54 SCSS files import the
-  colour/token files.
-- JS/JSX: 1,889 quoted hex literals in 379 files; 2,056 inline `style={{` blocks. Top files:
-  `module/FinanceMastersModule/PremiumAccountSetup/index.js` (59), `MiscellaneousAccountSetup/index.js` (57),
-  `RIClaimsAccountSetup/index.js` (53), `CustomerAccountSetup/index.js` (51),
-  `module/PettyCashManagement/Disbursement/AddDisbursementTable/index.js` (31). (The baseline JS figure used a
-  different pattern and is not directly comparable; the direction is not improving.)
-
-#### 2.4 Mock data in production paths (baseline 1.6)
-
-27 production files still import mock modules (was 89); `services/mockData/` is now empty. Most are dropdown option
-lists (`quoteModule/orderSummary/index.js:15`, `coverageDetails/coverageDetailsCard/index.js:14`,
-`quoteModule/customerInfo/index.js:20`). Screens still rendering mock rows: `module/PaymentVoucher/PayAll/index.js:10,17`,
-`module/Receipts/AddPolicyReceipts/index.jsx:14,226`, `module/FinanceMastersModule/BankMaster/AccountDataView/*` (4 files),
-`BankAccountMaster/index.js:14`, `BankChequeMaster/index.js:14`, `CompanyMaster/CompanyMasterTable/index.js:2`,
-`AccountCategoryMaster/CategoryMasterInitial/index.js:14`; `agentModule/paymentsModule/index.js:9`. Odd:
-`agentModule/leadModule/leadCreation/mock.js:1` imports itself.
-
----
-
-### 3. Code quality
-
-#### 3.1 ESLint
-
-Front end (871 files, 341 with issues): **0 errors** (was 7), **2,016 warnings** (was 2,490).
-
-| Rule | Count | Files | Baseline |
-|------|------:|------:|---------:|
-| no-unused-vars | 1,683 | 299 | 2,040 |
-| react-hooks/exhaustive-deps | 170 | 136 | 202 |
-| eqeqeq | 130 | 29 | 168 |
-| no-dupe-keys | 6 | 5 | 34 |
-| no-lone-blocks | 5 | 4 | 17 |
-| jsx-a11y/anchor-is-valid | 5 | 5 | } 11 |
-| jsx-a11y/alt-text | 3 | 2 | } |
-| import/no-anonymous-default-export | 5 | 5 | 7 |
-| no-unreachable | 2 | 2 | 2 |
-| no-sparse-arrays | 2 | 2 | - |
-| no-dupe-class-members, react/jsx-no-duplicate-props, no-self-assign, no-sequences, default-case | 1 each | | |
-
-Warnings that are real defects: `no-dupe-keys` at `agentModule/dashBoardModule/agentViewProfile/agentProfileCard/index.js:101`,
-`agentModule/quoteModule/orderSummary/index.js:114` (`discount`), `module/FinanceMastersModule/TransactionCodeMaster/store/transactionMasterReducer.js:40`,
-`module/GeneralMasters/UserManagementMasters/User/EditUser/UserGroupAccessTable/index.js:47-48`,
-`User/UserMaster/index.js:103`; `react/jsx-no-duplicate-props` `agentModule/policyModule/policyTable/index.jsx:627`;
-`no-self-assign` `module/PaymentVoucher/store/paymentVoucherReducer.js:293`; `no-dupe-class-members`
-`services/authService.js:271`; `no-unreachable` `quoteModule/customerInfo/store/infoMiddleWare.js:31`,
-`quoteModule/uploadPolicy/store/uploadPolicyMiddleWare.js:33`. Worst files: `GeneralMasters/OrganizationMasters/BranchMaster/AddBranch/index.js`
-(53), `ComapanyMaster/AddCompany/index.js` (43), `InsuranceCompany/InsuranceDetailsAction/index.jsx` (37). 56
-`eslint-disable` comments (47 for exhaustive-deps).
-
-Backend (224 files): **0 errors, 0 warnings** with `no-console`, `eqeqeq`, `prefer-const`, `no-unused-vars` as errors.
-1 justified `no-control-regex` disable (`lib/xlsx.js:23`).
-
-#### 3.2 Dead and duplicated code
-
-- Front end: 31 never-imported JS/JSX files, 4,141 lines (was 85 / 10,176), e.g. `components/Client/index.jsx`,
-  `module/FinanceMastersModule/SubAccountMaster/index.js` (512), `MainAccountMaster/*` (5 files), `utility/receiptHelper.js`,
-  `routes/UnProtectedRoutes.js`, `module/ProductConfigurator/RiskMapping/*`; 18 never-imported SCSS (was 27). Full list:
-  `fe-dead.txt`. Effectively dead but still imported: `module/AuthModule/Login` (`MainRoute.js:209`) and
-  `components/AgentSideBar` (`MainRoute.js:201`, never rendered). The two dead sidebars from the baseline are gone.
-- Byte-identical file groups: 1 (was 13): the `BankMaster/AccountDataView/*/mock.js` triple.
-- jscpd: 624 clones, 21,008 duplicated lines of 192,806 (10.9 %). Largest: `LocationMasters/CityMaster/index.js:279`
-  = `StateMaster/index.js:268` (303 lines), `CountryMaster` = `StateMaster` (288), `MiscellaneousAccountSetup` =
-  `PremiumAccountSetup` (175), `Commission/AddCommission` = `EditCommission` (171), `CustomerAccountSetup` =
-  `RIClaimsAccountSetup` (164 and 156).
-- Still duplicated domains: `services/disbursementService.js` (791 lines) and `disbursementsService.js` (84);
-  `authService` and `tokenManager`; `agentModule/claimModule` vs `claimsModule`, `quotationModule` vs `quoteModule`.
-- Backend: no unimported modules; jscpd 1 clone (bulk-upload loop, `disbursements/router.js` = `receipts/router.js`).
-  Helper copies (dates, amounts, CSV, templates, maker-checker, XLSX and ZIP writers, storage keys) were merged into
-  `src/lib` by the backend code quality review. Two XLSX readers remain (`accounting/lib/sheet.js`, `documents/xlsx.js`).
-
-#### 3.3 Large files
-
-Front end: 43 JS/JSX files over 800 lines (was 60): `agentModule/policyModule/PolicyDetailView/index.jsx` 2,273,
-`leadModule/leadCreation/mock.js` 2,067, `EmployeeFlow/mockdata.js` 2,066, `module/ProductConfigurator/ProductConfiguratorScreens.js`
-1,974 (grew from 1,535), `routes/MainRoute.js` 1,935 (408 `<Route>`, 305 imports, no `React.lazy`), `FireLeadCreationCard.js`
-1,873, `IarLeadCreationCard.js` 1,711. Backend: largest `remittance/items.js` 696 lines; all files are a reasonable size.
-
-#### 3.4 Error handling
-
-- Backend: one error envelope (`lib/errors.js`), `wrap()` forwards async errors, the request id is in every error body
-  and error log line. A 5xx answers a generic message; the detail is only logged. Multer and body-parser errors map to
-  400 / 413. Routes throw `badRequest`, `notFound`, `conflict`, `forbidden`; none writes an error body by hand.
-- Swallowed errors left: `renewals/queue.js` `processQueue().catch(() => {})` (failures are recorded on the job rows)
-  and `documents/router.js` (a receipt PDF prints without lines when they cannot be read).
-- Front end: 433 `console.error` catch handlers that only log; no central error reporting.
-
-#### 3.5 i18n
-
-- 84 keys used in `src` are missing from `en.json` (was 357). 82 pass an inline English default (`t("key", "Text")`),
-  so they display English in every language; 2 render the raw key:
-  `module/FinanceMastersModule/AccountCategoryMaster/TableData/index.jsx:145,152` (`financeMasters.categoryCodeHeader`,
-  `categoryNameHeader`). By file: `module/Reinsurance/ReinsuranceScreens.js` 21, `ProductConfiguratorScreens.js` 13,
-  `endorsementModule/personalDetails/SplitScreens/CoverageChange.jsx` 10, `claimsModule/settlementDetails/index.js` 7.
-- `th.json` is missing 468 of 5,210 `en` keys (was 101 of 4,798): new screens are English-only in Thai.
-- 15 dynamic `t(\`...${}\`)` keys are not checked.
-
-#### 3.6 Tests
-
-- Backend: 49 test files, 506 test cases (vitest + supertest against a real PostgreSQL), all passing. They cover
-  sign-in rate limits, lockout, password policy, TOTP, session revocation, file storage, record scoping, every
-  protected route answering 401 without a token, the report catalogue, settings and document numbering consistency.
-  No coverage tool is configured (`@vitest/coverage-v8` absent).
-- Front end: 3 test files, 124 lines (`App.test.js`, `services/__tests__/leadService.test.js`,
-  `utils/menuPermissions.test.js`) for 871 source files. The new menu-permission test is a good start.
-
-#### 3.7 Structure and naming (baseline 3.6)
-
-Misspelled directories still present (9 of the 11 checked, e.g. `ResetPassward`, `ComapanyMaster`, `coverageDetailedVew`);
-`package.json` name is still `finance_module`; root clutter unchanged (`Insurance_Broker_Features (1).xlsx`,
-`dev_oct_dec_2025FE.txt`, `features.csv`, `generate-icons.bat`, `jsons/`, `public/clear-pwa-cache.js`, `public/temp-logo/`).
-
----
-
-### 4. Consistency
-
-#### 4.1 API response shapes (backend)
-
-- Helpers: `ok()` 264 uses, `created()` 57, `sendList()` 21, direct `res.json` 85. 6 success responses have no
-  `success` field: `POST /auth/login`, `/auth/login/2fa`, `/auth/refresh` (`auth/router.js:96,121,138`),
-  `/auth/2fa/enable` in the forced-enrolment case and `GET /version`.
-- Three pagination shapes: flat `{ data, total, page, perPage, totalPages }` (`sendList`, `pageMeta`); nested
-  `pagination: { page, pageSize, total/totalCount/totalRecords, ... }` (`users/router.js`, `clients/router.js`,
-  `accounting/lib/http.js`, `renewals/router.js`); and `data: { claims, pagination }` (`claims/router.js:138`).
-  These mirror legacy front-end contracts; document them, and make new endpoints use `sendList`.
-- Some responses repeat the payload at the top level and in `data` (`uploads/router.js:26`,
-  `quotations/router.js:114`).
-- Paths: 20 legacy verb-style routes (`/lead/get-all-lead`, `/master/vehicle/get-brands`,
-  `/endorsements/get-All-Endorsements`, `/claims/updatestatus/:id`, ...) and 7 with camel-case segments
-  (`/receipts/printReceipt`, `/disbursements/printDisbursement`, `/biCoverage/...`), kept for front-end compatibility.
-  Newer modules use REST nouns consistently.
-
-#### 4.2 Dates and numbers
-
-- Backend business dates: one implementation, `lib/dates.js` (`today()` and `businessDate()` in `general.timezone`,
-  `isoDate()` for request values, `addDays()` for date arithmetic). The remaining `toISOString().slice(0, 10)` calls
-  (42) format dates computed in UTC arithmetic, not "today".
-- Front end: `utility/dateFormat.js` (`formatDate`, configured format) is imported by 13 files, while 85
-  `toLocaleDateString` calls in 44 files and 56 `toLocaleString` calls in 31 files format dates and amounts directly,
-  38 of them with a hard-coded `"en-US"` locale (e.g. `agentModule/policyModule/BatchRenewal/BatchTable.jsx:260`,
-  `agentModule/claimModule/claimDetail/index.js:57`, `agentModule/collectionsModule/CollectionDetail/index.jsx:63`,
-  `agentModule/paymentsModule/store/paymentMiddleware.js:15`). Two files import `formatDate` from
-  `@fullcalendar/core` instead of the app helper (`endorsementModule/personalDetails/endorsementSummary/EndorsementSummary.jsx:19`,
-  `collectionsModule/FollowUpModal/index.jsx:10`), which ignores the configured format.
-- Amounts: `formatCurrency`/`useFormatCurrency` used in 87 files; 105 `toFixed(2)` in 35 files and the `₱` literals
-  bypass the display-currency setting.
-
----
-
-### 5. Open items after the remediation
-
-Items of the second pass that are still open (the fixed ones are in the executive summary above). The backend items
-left by the code quality review are listed in that review.
-
-| # | Action | Findings | Effort |
-|---|--------|----------|--------|
-| 1 | Move sign-in and API rate limiting to a shared store (they count per API instance today) | 8 | S |
-| 2 | Require a permission on `GET /settings` and `GET /schedules` (sign-in only today) | 11 | S |
-| 3 | 2FA enrolment: show the QR image on the front end | 7 | S |
-| 4 | zod schemas for the write routes that still validate only in the service, finance first | 9 | L |
-| 5 | Front end: CSP header in `nginx.conf`; plan moving the refresh token to an httpOnly SameSite cookie (backend change) | 17 | S / L |
-| 6 | Front end: delete the 31 dead JS files and 18 dead SCSS files | 26 | S |
-| 7 | Fix the 11 defect-class ESLint warnings in the front end (duplicate keys/props/members, unreachable, self-assign), then `--fix` `no-unused-vars` and `eqeqeq` | 24 | S |
-| 8 | i18n: add the 2 raw keys and the 82 defaulted keys to `en.json`; send 468 keys for Thai translation | 28 | S (en) / M (th) |
-| 9 | Replace remaining mock-backed screens (PayAll, AddPolicyReceipts, BankMaster account views, bank/cheque masters) with API data or hide them | 20 | M |
-| 10 | Route all front-end date/amount formatting through `formatDate`/`formatCurrency`; fix the two FullCalendar `formatDate` imports; remove `₱`/`"en-US"` literals | 22, 30 | M |
-| 11 | Tests: add `@vitest/coverage-v8`; front-end tests for the sign-in flows | 29 | M |
-| 12 | Lazy-load routes in `MainRoute.js`; split `PolicyDetailView`, `ProductConfiguratorScreens` and the lead-creation cards; collapse the Location master and account-setup clones | 26, 27 | M-L |
-| 13 | Colour tokens via the existing codemod for the top literals | 23 | M |
-| 14 | Front-end dependency upgrades (react-scripts, react-router) | 15 | M |
-
-Items needing a product decision: branding strings in `public/index.html` / `manifest.json`; whether agents may upload
-files that other users open in the browser at all; token storage model; CRA to Vite migration to clear the
-react-scripts advisories.
+| # | Action | From | Effort |
+|---|--------|------|--------|
+| 1 | Move sign-in and API rate limiting to a shared store (they count per API instance today) | 3.1 item 8 | S |
+| 2 | Require a permission on `GET /settings` (sign-in only today); check `write:schedules` on `PUT /schedules/:code` instead of the Accounting role; document `profile` and `notifications` permissions as always-on or remove them | 3.1 item 11, 2.2 | S |
+| 3 | Two-step verification enrolment: show a QR image | 3.1 item 7 | S |
+| 4 | zod schemas for the write routes that still validate only in the service, finance first | 3.1 item 9 | L |
+| 5 | Front end: CSP header for the SPA; plan moving the refresh token to an httpOnly, SameSite cookie (backend change) | 3.1 item 17 | S / L |
+| 6 | Front end: leave Create React App for Vite (`REACT_APP_*` becomes `VITE_*`), then React Router 7; remove `js-cookie`, `react-pro-sidebar` and `web-vitals` (no longer imported) and move the four `moment` users to `utility/dateFormat` | 3.1 item 15, 1 | M |
+| 7 | Front end: fix the 163 `exhaustive-deps` and 121 `eqeqeq` warnings per screen, with a test | 1.2 | M |
+| 8 | Front end: translate the 1,398 missing Thai keys, or offer only English until complete | 3.1 item 28 | M |
+| 9 | Product decisions: the product recommendation step of Motor quote creation (illustrative plans with fixed premiums), the employee benefit flow reachable from the Sales Dashboard (mock option lists), the fixed endorsement city list (use `/addresses/*`) | 3.1 item 20 | M |
+| 10 | Lazy-load routes in `MainRoute.js`; split `PolicyDetailView`, `ProductConfiguratorScreens` and the lead-creation cards along their tabs when changed; collapse the Location master and account set-up clones | 3.1 items 26, 27 | M-L |
+| 11 | Colour tokens instead of hex literals, starting with the most used ones | 3.1 item 23 | M |
+| 12 | Backend: merge the two XLSX readers (`accounting/lib/sheet.js`, `documents/xlsx.js`) into `lib/xlsx.js`; move the business logic of `auth/router.js` and `users/router.js` into `service.js` files when those modules next change; drop the `export` keyword from the about 140 functions used only in their own file | 2.2 | S-M |
+| 13 | Backend: `receivables.due_days` is read only by the sample seed (bills take their due date from the insurer credit terms); relabel or remove it | 2.2 | S |
+| 14 | Backend: log at warn level the two swallowed errors, `renewals/queue.js` (`processQueue().catch(() => {})`, failures are recorded on the job rows) and the receipt PDF printed without lines when they cannot be read (`documents/router.js`) | 2.2 | S |
+| 15 | Remittance > Reconciliation matches bank transactions in its own tables, apart from the bank-reconciliation module: retire the screen or feed it from bank reconciliation (product decision) | 2.2 | M |
+| 16 | Keep the legacy route names the screens use (7 camel-case segments, about 20 verb-style paths, 3 pagination shapes) until the front end moves; new routes use kebab-case nouns and one list envelope | 3.1 item 30 | - |
+| 17 | Add a test coverage tool (`@vitest/coverage-v8`) and front-end tests for the sign-in flows | 3.1 item 29 | M |
