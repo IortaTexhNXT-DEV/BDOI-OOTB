@@ -1,4 +1,5 @@
-import multer from 'multer';
+import { memoryUpload } from '../../lib/uploadLimits.js';
+import { checkUploadedFiles } from '../uploads/fileTypes.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
@@ -14,7 +15,7 @@ import * as svc from './service.js';
  * Multipart bodies (claim document, adjuster file, settlement document) are accepted where the front end sends FormData.
  */
 const { router, define } = moduleRouter('Claims', '/claims');
-const multerAny = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024, files: 5 } }).any();
+const multerAny = memoryUpload({ files: 5 }).any();
 /** Parse multipart bodies (no-op for JSON); upload errors become 400s. */
 const upload = { any: () => (req, res, next) => multerAny(req, res, (e) => next(e ? badRequest(e.message) : undefined)) };
 const read = [requireAuth, requirePermission('read:claims')];
@@ -99,7 +100,7 @@ define({
 });
 define({
   method: 'PUT', path: '/settle/:id', summary: 'Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled', screen: 'Operations > Claims > Settlement details',
-  middleware: [...decide, ownRecord('claim'), upload.any(), validate(settleSchema)],
+  middleware: [...decide, ownRecord('claim'), upload.any(), checkUploadedFiles, validate(settleSchema)],
   request: { settlementType: 'Cash', settlementAmount: 75000, settlementIssueDate: '2026-09-25', settlementDate: '2026-09-28', settlementDocument: '(file)' },
   response: { success: true, message: 'Settlement submitted for approval', data: { ...claimExample, status: 'Pending Approval' } },
   handler: async (req, res) => {
@@ -145,7 +146,7 @@ define({
 });
 define({
   method: 'POST', path: '/', summary: 'Register a claim (multipart). Blocked when premium is unpaid or the loss date is outside the policy period; sends the Preliminary Loss Advice', screen: 'Operations > Claims > Send mail',
-  middleware: [...write, upload.any(), validate(createSchema), ownRecord('policy', policyRef)],
+  middleware: [...write, upload.any(), checkUploadedFiles, validate(createSchema), ownRecord('policy', policyRef)],
   request: { policyNumber: 'POL-2026-00001', policyRefId: 'pol_1', lob: 'MOTOR', claimType: 'Motor', claimPriority: 'High', dateOfIncident: '2026-09-20', timeOfIncident: '14:30', addressOfIncident: 'EDSA cor. Ayala Ave', cityOfIncident: 'Makati', provinceOfIncident: 'Metro Manila', typeOfIncident: 'Collision', estimatedClaimAmount: 85000, policyInfo: '{"policyHolderName":"Maria Santos"}', driverDetails: '{"driverName":"Jose Santos"}', thirdPartyDetails: '{"thirdPartyName":"Pedro Cruz"}', emailData: '{"mailSubject":"New Claim Notification","write":"Please see attached"}', claimDocument: '(file)' },
   response: { success: true, message: 'Claim registered', data: claimExample },
   handler: async (req, res) => {
@@ -156,7 +157,7 @@ define({
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Update claim details / adjuster report (multipart; file stored as FIR)', screen: 'Operations > Claims > Adjuster submission',
-  middleware: [...write, ownRecord('claim'), upload.any()],
+  middleware: [...write, ownRecord('claim'), upload.any(), checkUploadedFiles],
   request: { insuranceCompanyClaimNumber: 'MAPFRE-CL-7781', reportedDate: '2026-09-21', dateOfIncident: '2026-09-20', addressOfIncident: 'EDSA', driverName: 'Jose Santos', adjusterName: 'Cunningham Lindsey PH', adjusterStatus: 'Assigned', 'thirdPartyDetails[thirdPartyName]': 'Pedro Cruz', file: '(file)' },
   response: { success: true, message: 'Claim updated', data: claimExample },
   handler: async (req, res) => {

@@ -32,6 +32,28 @@
       .p-button:focus {
         box-shadow: none !important;
       }
+    // Action column: two fixed-size icon buttons side by side (V10: they rendered squeezed inside a flex table cell).
+    .role__actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .role__action__btn.p-button {
+        width: 2.5rem;
+        height: 2.5rem;
+        min-width: 2.5rem;
+        padding: 0;
+        justify-content: center;
+        background: var(--surface-card, #ffffff);
+        border: 1px solid var(--surface-border, #e5e7eb);
+        border-radius: 10px;
+        svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+    }
     .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
         color: #B1B1B1;
     }

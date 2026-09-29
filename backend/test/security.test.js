@@ -80,7 +80,7 @@ describe('sign-in protection', () => {
 
 describe('password policy', () => {
   it('enforces length, character classes and history on change-password', async () => {
-    const token = await loginAs(ctx.app, 'sec.pw', 'Welcome@123');
+    let token = await loginAs(ctx.app, 'sec.pw', 'Welcome@123');
     const change = (currentPassword, newPassword) => bearer(token, 'post', '/auth/change-password').send({ currentPassword, newPassword });
     const short = await change('Welcome@123', 'Ab1!');
     expect(short.status).toBe(400);
@@ -89,7 +89,12 @@ describe('password policy', () => {
     expect((await change('Welcome@123', 'NoDigits!!x')).status).toBe(400);
     expect((await change('Welcome@123', 'NoSymbol123')).status).toBe(400);
     expect((await change('Welcome@123', 'Welcome@123')).body.message).toMatch(/used recently/);
-    expect((await change('Welcome@123', 'Second@456')).status).toBe(200);
+    const second = await change('Welcome@123', 'Second@456');
+    expect(second.status).toBe(200);
+    // a password change ends the other sessions and returns a fresh token payload for this one
+    expect(second.body).toMatchObject({ accessToken: expect.any(String), refreshToken: expect.any(String) });
+    expect((await change('Second@456', 'Welcome@123')).status).toBe(401);
+    token = second.body.accessToken;
     expect((await change('Second@456', 'Welcome@123')).status).toBe(400);
     expect((await change('Second@456', 'Third@789x')).status).toBe(200);
     const policy = await request(ctx.app).get('/api/auth/password-policy');
@@ -113,8 +118,17 @@ describe('password policy', () => {
     await query("UPDATE users SET password_changed_at = now() - interval '120 days' WHERE id = $1", [ids['sec.pw']]);
     const old = await login('sec.pw', 'Fourth@012y');
     expect(old.status).toBe(200);
-    expect(old.body.user).toMatchObject({ mustChangePassword: true, passwordExpired: true });
-    expect(old.body.accessToken).toBeTruthy();
+    expect(old.body).toMatchObject({ passwordChangeRequired: true, passwordExpired: true, user: { mustChangePassword: true, passwordExpired: true } });
+    // only a restricted token: no refresh token, and nothing but change-password / profile until the password is changed
+    expect(old.body.refreshToken).toBeUndefined();
+    const restricted = old.body.accessToken;
+    expect((await bearer(restricted, 'get', '/leads')).status).toBe(403);
+    expect((await bearer(restricted, 'get', '/auth/profile')).status).toBe(200);
+    const changed = await bearer(restricted, 'post', '/auth/change-password').send({ currentPassword: 'Fourth@012y', newPassword: 'Fifth@345z' });
+    expect(changed.status).toBe(200);
+    expect(changed.body).toMatchObject({ accessToken: expect.any(String), refreshToken: expect.any(String), mustChangePassword: false });
+    expect((await bearer(changed.body.accessToken, 'get', '/leads')).status).toBe(200);
+    expect((await login('sec.pw', 'Fifth@345z')).body.refreshToken).toBeTruthy();
   });
 });
 

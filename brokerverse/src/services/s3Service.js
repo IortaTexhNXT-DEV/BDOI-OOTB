@@ -18,6 +18,8 @@ class S3Service {
    */
   async uploadFile(file, folder = 'uploads', onProgress = null) {
     try {
+      // XMLHttpRequest is not covered by the 401 retry of fetch: renew a nearly expired access token first
+      await authService.freshAccessToken();
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', folder);
@@ -102,6 +104,7 @@ class S3Service {
    */
   async uploadMultipleFiles(files, folder = 'uploads', onProgress = null) {
     try {
+      await authService.freshAccessToken();
       const formData = new FormData();
       files.forEach(file => {
         formData.append('files', file);

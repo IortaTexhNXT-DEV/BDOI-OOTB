@@ -138,6 +138,31 @@
     line-height: normal;
   }
 
+  // "Forgot password" is a real button (keyboard and screen readers) styled as a link
+  .login__link__button {
+    display: block;
+    margin-left: auto;
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .login__password__wrapper {
+    position: relative;
+
+    .input__field {
+      padding-right: 3rem;
+    }
+
+    .login__password__toggle {
+      position: absolute;
+      top: 50%;
+      right: 0.35rem;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+  }
+
   .forget__text {
     text-align: right;
     color: #0072d8;

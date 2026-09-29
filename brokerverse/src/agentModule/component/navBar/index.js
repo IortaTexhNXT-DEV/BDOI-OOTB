@@ -1,4 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { useLanguageOptions } from "../../../utility/languages";
+import { ChangePasswordDialog, TwoFactorDialog } from "../../authModule/security/AccountSecurityDialogs";
 import "./index.scss";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
@@ -16,14 +18,13 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
 import InitialsAvatar from "../InitialsAvatar";
 
-const getLanguageOptions = (t) => [
-  { label: t("common.english"), value: "en" },
-  { label: t("common.thai"), value: "th" },
-];
-
 const AgentNavBar = () => {
   const menuRight = useRef(null);
   const menuProfile = useRef(null);
+  // "password" | "2fa" | "" : the account security dialog that is open
+  const [securityDialog, setSecurityDialog] = useState("");
+  // configured languages that have a translation (see utility/languages.js)
+  const languageOptions = useLanguageOptions();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { notifications, unreadCount, markAsRead, deleteNotification } =
@@ -282,6 +283,32 @@ const AgentNavBar = () => {
         },
         {
           label: (
+            <div style={{ fontFamily: "Nunito, Arial, sans-serif", fontWeight: 400, fontSize: "16px", color: "#111927" }}>
+              {t("security.changePassword")}
+            </div>
+          ),
+          icon: (
+            <div className="mr-3">
+              <i className="pi pi-key" aria-hidden="true" style={{ fontSize: "1.1rem", color: "#6C737F" }} />
+            </div>
+          ),
+          command: () => setSecurityDialog("password"),
+        },
+        {
+          label: (
+            <div style={{ fontFamily: "Nunito, Arial, sans-serif", fontWeight: 400, fontSize: "16px", color: "#111927" }}>
+              {t("security.twoFactor")}
+            </div>
+          ),
+          icon: (
+            <div className="mr-3">
+              <i className="pi pi-shield" aria-hidden="true" style={{ fontSize: "1.1rem", color: "#6C737F" }} />
+            </div>
+          ),
+          command: () => setSecurityDialog("2fa"),
+        },
+        {
+          label: (
             <div
               style={{
                 fontFamily: "Nunito, Arial, sans-serif",
@@ -343,7 +370,7 @@ const AgentNavBar = () => {
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
         <Dropdown
           value={currentLanguage}
-          options={getLanguageOptions(t)}
+          options={languageOptions}
           onChange={(e) => i18n.changeLanguage(e.value)}
           aria-label={t("common.language")}
           style={{ minWidth: "100px" }}
@@ -398,6 +425,8 @@ const AgentNavBar = () => {
       >
         <InitialsAvatar size="40px" className="navbar__container__profile__image" />
       </Button>
+      <ChangePasswordDialog visible={securityDialog === "password"} onHide={() => setSecurityDialog("")} />
+      <TwoFactorDialog visible={securityDialog === "2fa"} onHide={() => setSecurityDialog("")} />
     </div>
   );
 };

@@ -1,12 +1,13 @@
 import bcrypt from 'bcryptjs';
 import { moduleRouter } from '../../lib/registry.js';
-import { loadUser, publicUser, requireAuth, requirePermission } from '../../lib/auth.js';
+import { loadUser, publicUser, requireAuth, requirePermission, revokeSessions } from '../../lib/auth.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
-import { assertPasswordAllowed, recordHistory, savePassword } from '../../lib/password.js';
+import { assertPasswordAllowed, passwordPolicy, recordHistory, savePassword } from '../../lib/password.js';
+import { temporaryPassword as temporaryPasswordFor } from '../../lib/secrets.js';
 import { loginHistory } from '../../lib/loginHistory.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
@@ -16,10 +17,24 @@ const roleAdmin = [requireAuth, requirePermission('write:roles')];
 
 /** Roles that only an IT administrator may grant (segregation of duties). */
 const PRIVILEGED_ROLES = ['it-admin', 'ba'];
+const isItAdmin = (req) => (req.user.roles || []).includes('it-admin');
 function assertCanAssign(req, targetUserId, codes) {
-  const isItAdmin = (req.user.roles || []).includes('it-admin');
-  if (!isItAdmin && codes.some((c) => PRIVILEGED_ROLES.includes(c))) throw forbidden('Only an IT administrator can grant the IT administrator or business administrator role');
-  if (targetUserId && targetUserId === req.user.id && !isItAdmin) throw forbidden('You cannot change your own roles or access');
+  if (!isItAdmin(req) && codes.some((c) => PRIVILEGED_ROLES.includes(c))) throw forbidden('Only an IT administrator can grant the IT administrator or business administrator role');
+  if (targetUserId && targetUserId === req.user.id && !isItAdmin(req)) throw forbidden('You cannot change your own roles or access');
+}
+/**
+ * Password, status, two-factor and profile changes on another account: only an IT administrator may change an IT or
+ * business administrator (otherwise a user administrator could reset an administrator's password and sign in as
+ * them), and only an IT administrator may change their own access this way.
+ */
+async function assertCanManage(req, targetId) {
+  const target = await loadUser('u.id = $1', [targetId]);
+  if (!target) throw notFound('User not found');
+  if (!isItAdmin(req)) {
+    if (target.id === req.user.id) throw forbidden('You cannot change your own access; use Change password in your profile');
+    if ((target.roles || []).some((r) => PRIVILEGED_ROLES.includes(r))) throw forbidden('Only an IT administrator can change an IT or business administrator account');
+  }
+  return target;
 }
 
 const userRow = (u) => ({
@@ -77,9 +92,12 @@ define({
   method: 'POST', path: '/:id/password', summary: 'Set a user password (administrator; password policy and history apply)', screen: 'Master > User Management > User > Edit', middleware: [...admin, validate(z.object({ password: z.string().min(1) }))],
   request: { password: 'Welcome@123' }, response: { success: true, data: { userId: 'usr_1' } },
   handler: async (req, res) => {
-    if (!(await one('SELECT 1 FROM users WHERE id = $1', [req.params.id]))) throw notFound('User not found');
+    await assertCanManage(req, req.params.id);
     await assertPasswordAllowed(req.body.password, { userId: req.params.id });
-    await savePassword(req.params.id, req.body.password, { extraSql: "failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END" });
+    await withTransaction(async (c) => {
+      await savePassword(req.params.id, req.body.password, { db: c, extraSql: "failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END" });
+      await revokeSessions(req.params.id, { refresh: true, db: c });
+    });
     await audit(req, { entity: 'user', entityId: req.params.id, action: 'set-password' });
     ok(res, { userId: req.params.id }, 'Password updated');
   },
@@ -99,6 +117,7 @@ define({
   method: 'POST', path: '/:id/2fa/reset', summary: 'Administrator turns off a user\'s two-factor authentication (lost device); the user enrols again', screen: 'Master > User Management > User > Edit',
   middleware: admin, response: { success: true, data: { userId: 'usr_1', twoFactorEnabled: false } },
   handler: async (req, res) => {
+    await assertCanManage(req, req.params.id);
     const r = await query('UPDATE users SET totp_secret = NULL, totp_pending_secret = NULL, totp_enabled = false, totp_enabled_at = NULL, totp_last_step = NULL WHERE id = $1 RETURNING id', [req.params.id]);
     if (!r.rowCount) throw notFound('User not found');
     await audit(req, { entity: 'user', entityId: req.params.id, action: '2fa-reset' });
@@ -115,15 +134,17 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/', summary: 'Create a user with roles (persona)', screen: 'Master > User Management > User > Add', middleware: [...admin, validate(userSchema)],
-  request: { username: 'maria.cruz', password: 'Welcome@1', displayName: 'Maria Cruz', email: 'maria@example.com', roles: ['sales'] },
-  response: { success: true, data: { userId: 'usr_2', username: 'maria.cruz', roles: ['sales'] } },
+  method: 'POST', path: '/', summary: 'Create a user with roles (persona). Without a password a random temporary password is generated, returned once as temporaryPassword, and must be changed at the first sign-in', screen: 'Master > User Management > User > Add', middleware: [...admin, validate(userSchema)],
+  request: { username: 'maria.cruz', displayName: 'Maria Cruz', email: 'maria@example.com', roles: ['sales'] },
+  response: { success: true, data: { userId: 'usr_2', username: 'maria.cruz', roles: ['sales'], mustChangePassword: true, temporaryPassword: '<shown once>' } },
   handler: async (req, res) => {
     const b = req.body;
     if (await one('SELECT 1 FROM users WHERE lower(username) = lower($1)', [b.username])) throw conflict('Username already exists');
     if (b.password) await assertPasswordAllowed(b.password);
     assertCanAssign(req, null, b.roles);
-    const hash = await bcrypt.hash(b.password || 'Welcome@1', 10);
+    const temporaryPassword = b.password ? null : temporaryPasswordFor(await passwordPolicy());
+    if (temporaryPassword) b.mustChangePassword = true;
+    const hash = await bcrypt.hash(b.password || temporaryPassword, 10);
     const id = await withTransaction(async (c) => {
       const r = await c.query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, phone, employee_code, branch_code, department, designation, reporting_to, status, must_change_password, created_by)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
@@ -134,7 +155,9 @@ define({
     });
     const u = await loadUser('u.id = $1', [id]);
     await audit(req, { entity: 'user', entityId: id, action: 'create', after: { ...b, password: undefined } });
-    created(res, userRow(u), 'User created');
+    // The temporary password is returned once (never stored in clear or logged); the administrator passes it on.
+    if (temporaryPassword) res.set('Cache-Control', 'no-store');
+    created(res, { ...userRow(u), ...(temporaryPassword ? { temporaryPassword } : {}) }, temporaryPassword ? 'User created with a temporary password' : 'User created');
   },
 });
 define({
@@ -146,7 +169,15 @@ define({
     const b = req.body;
     if (b.roles) assertCanAssign(req, before.id, b.roles);
     else if (before.id === req.user.id && b.status) assertCanAssign(req, before.id, []);
-    if (b.password) await assertPasswordAllowed(b.password, { userId: before.id });
+    // Details of an administrator account (e-mail, status) only by an IT administrator: a changed e-mail would let
+    // the password reset code go elsewhere.
+    if (before.id !== req.user.id && !isItAdmin(req) && (before.roles || []).some((r) => PRIVILEGED_ROLES.includes(r))) throw forbidden('Only an IT administrator can change an IT or business administrator account');
+    if (b.password) {
+      await assertCanManage(req, before.id);
+      await assertPasswordAllowed(b.password, { userId: before.id });
+    }
+    const rolesChanged = !!b.roles && [...b.roles].sort().join(',') !== [...(before.roles || [])].sort().join(',');
+    const deactivated = !!b.status && b.status !== 'active' && before.status === 'active';
     await withTransaction(async (c) => {
       await c.query(`UPDATE users SET display_name = COALESCE($2, display_name), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), email = COALESCE($5, email),
         phone = COALESCE($6, phone), employee_code = COALESCE($7, employee_code), branch_code = COALESCE($8, branch_code), department = COALESCE($9, department), designation = COALESCE($10, designation),
@@ -154,6 +185,9 @@ define({
         [before.id, b.displayName, b.firstName, b.lastName, b.email || null, b.phone, b.employeeCode, b.branchCode, b.department, b.designation, b.reportingTo, b.status, b.mustChangePassword, req.user.username]);
       if (b.password) await savePassword(before.id, b.password, { db: c });
       if (b.roles) await setRoles(c, before.id, b.roles);
+      // New roles take effect at once (the next request refreshes the token); a new password or a deactivation ends every session.
+      if (b.password || deactivated) await revokeSessions(before.id, { refresh: true, db: c });
+      else if (rolesChanged) await revokeSessions(before.id, { db: c });
     });
     const after = await loadUser('u.id = $1', [before.id]);
     await audit(req, { entity: 'user', entityId: before.id, action: 'update', before: publicUser(before), after: publicUser(after) });
@@ -161,33 +195,49 @@ define({
   },
 });
 define({
-  method: 'PATCH', path: '/:id/status', summary: 'Activate / deactivate / unlock a user', screen: 'Master > User Management > User', middleware: [...admin, validate(z.object({ status: z.enum(['active', 'inactive', 'locked']) }))],
-  request: { status: 'inactive' }, response: { success: true },
+  method: 'PATCH', path: '/:id/status', summary: 'Activate / deactivate / lock / unlock a user (unlock = status active; clears failed sign-ins). Deactivating or locking ends every session', screen: 'Master > User Management > User', middleware: [...admin, validate(z.object({ status: z.enum(['active', 'inactive', 'locked']) }))],
+  request: { status: 'active' }, response: { success: true, data: { userId: 'usr_1', status: 'active' } },
   handler: async (req, res) => {
-    const r = await query('UPDATE users SET status = $2, failed_logins = 0, updated_by = $3 WHERE id = $1 RETURNING id', [req.params.id, req.body.status, req.user.username]);
-    if (!r.rowCount) throw notFound('User not found');
-    if (req.body.status !== 'active') await query('UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL', [req.params.id]);
-    await audit(req, { entity: 'user', entityId: req.params.id, action: 'status', after: req.body });
-    ok(res, { userId: req.params.id, status: req.body.status }, 'Status updated');
+    const before = await assertCanManage(req, req.params.id);
+    await withTransaction(async (c) => {
+      await c.query('UPDATE users SET status = $2, failed_logins = 0, updated_by = $3 WHERE id = $1', [before.id, req.body.status, req.user.username]);
+      if (req.body.status !== 'active') await revokeSessions(before.id, { refresh: true, db: c });
+    });
+    const action = before.status === 'locked' && req.body.status === 'active' ? 'unlock' : 'status';
+    await audit(req, { entity: 'user', entityId: before.id, action, before: { status: before.status }, after: req.body });
+    ok(res, { userId: before.id, status: req.body.status }, action === 'unlock' ? 'User unlocked' : 'Status updated');
   },
 });
 define({
-  method: 'POST', path: '/:id/reset-password', summary: 'Administrator resets a user password', screen: 'Master > User Management > User', middleware: [...admin, validate(z.object({ newPassword: z.string().min(1), mustChangePassword: z.boolean().optional() }))],
-  request: { newPassword: 'Welcome@1', mustChangePassword: true }, response: { success: true },
+  method: 'POST', path: '/:id/reset-password',
+  summary: 'Administrator resets a user password. Without newPassword a random temporary password is generated and returned once as temporaryPassword; the user must change it at the next sign-in (mustChangePassword, default true). Ends every session of the user',
+  screen: 'Master > User Management > User > Reset password', middleware: [...admin, validate(z.object({ newPassword: z.string().min(1).optional(), mustChangePassword: z.boolean().optional() }))],
+  request: { mustChangePassword: true }, response: { success: true, data: { userId: 'usr_1', mustChangePassword: true, temporaryPassword: '<shown once>' } },
   handler: async (req, res) => {
-    if (!(await one('SELECT 1 FROM users WHERE id = $1', [req.params.id]))) throw notFound('User not found');
-    await assertPasswordAllowed(req.body.newPassword, { userId: req.params.id });
-    await savePassword(req.params.id, req.body.newPassword, { extraSql: `must_change_password = ${(req.body.mustChangePassword ?? true) ? 'true' : 'false'}, failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END` });
-    await audit(req, { entity: 'user', entityId: req.params.id, action: 'admin-reset-password' });
-    ok(res, { userId: req.params.id }, 'Password reset');
+    const target = await assertCanManage(req, req.params.id);
+    const temporaryPassword = req.body.newPassword ? null : temporaryPasswordFor(await passwordPolicy());
+    const password = req.body.newPassword || temporaryPassword;
+    await assertPasswordAllowed(password, { userId: target.id });
+    const mustChange = temporaryPassword ? true : (req.body.mustChangePassword ?? true);
+    await withTransaction(async (c) => {
+      await savePassword(target.id, password, { db: c, extraSql: `must_change_password = ${mustChange ? 'true' : 'false'}, failed_logins = 0, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END` });
+      await c.query('UPDATE password_resets SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [target.id]);
+      await revokeSessions(target.id, { refresh: true, db: c });
+    });
+    await audit(req, { entity: 'user', entityId: target.id, action: 'admin-reset-password', after: { mustChangePassword: mustChange, generated: !!temporaryPassword } });
+    res.set('Cache-Control', 'no-store');
+    ok(res, { userId: target.id, mustChangePassword: mustChange, ...(temporaryPassword ? { temporaryPassword } : {}) }, 'Password reset');
   },
 });
 define({
-  method: 'DELETE', path: '/:id', summary: 'Deactivate (soft delete) a user', screen: 'Master > User Management > User', middleware: admin, response: { success: true },
+  method: 'DELETE', path: '/:id', summary: 'Deactivate (soft delete) a user; ends every session', screen: 'Master > User Management > User', middleware: admin, response: { success: true },
   handler: async (req, res) => {
     if (req.params.id === req.user.id) throw badRequest('You cannot deactivate your own account');
-    const r = await query('UPDATE users SET status = \'inactive\', updated_by = $2 WHERE id = $1 RETURNING id', [req.params.id, req.user.username]);
-    if (!r.rowCount) throw notFound('User not found');
+    await assertCanManage(req, req.params.id);
+    await withTransaction(async (c) => {
+      await c.query('UPDATE users SET status = \'inactive\', updated_by = $2 WHERE id = $1', [req.params.id, req.user.username]);
+      await revokeSessions(req.params.id, { refresh: true, db: c });
+    });
     await audit(req, { entity: 'user', entityId: req.params.id, action: 'deactivate' });
     ok(res, { userId: req.params.id }, 'User deactivated');
   },
@@ -236,7 +286,11 @@ rolesRouter.define({
     const b = req.body;
     await withTransaction(async (c) => {
       await c.query('UPDATE roles SET name = COALESCE($2, name), description = COALESCE($3, description), status = COALESCE($4, status) WHERE id = $1', [role.id, b.name, b.description, b.status]);
-      if (b.permissions) await setPerms(c, role.id, b.permissions);
+      if (b.permissions) {
+        await setPerms(c, role.id, b.permissions);
+        // Permissions travel in the access token: users of the role get new tokens (refreshed automatically).
+        await c.query('UPDATE users SET token_version = token_version + 1 WHERE id IN (SELECT user_id FROM user_roles WHERE role_id = $1)', [role.id]);
+      }
     });
     await audit(req, { entity: 'role', entityId: role.id, action: 'update', before: role, after: b });
     ok(res, { id: role.id, ...b }, 'Role updated');

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
 import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
 import { createReceivable, findPolicy } from '../src/modules/receipts/receivables.js';
@@ -94,7 +95,11 @@ describe('receipts', () => {
 
     const pr = await ctx.api('get', `/receipts/printReceipt?receiptId=${c.body.data.receiptId}&customerCode=${client.client_code}`);
     expect(pr.status).toBe(200);
-    expect(pr.body.data.url).toMatch(/\/api\/upload\/file\/print\//);
+    expect(pr.body.data.url).toMatch(/\/api\/s3\/object\/print\/.+\.pdf\?exp=\d+&sig=/);
+    // the signed link opens without a bearer header (new browser tab), as a PDF
+    const pdf = await request(ctx.app).get(new URL(pr.body.data.url).pathname + new URL(pr.body.data.url).search);
+    expect(pdf.status).toBe(200);
+    expect(pdf.headers['content-type']).toMatch(/application\/pdf/);
     const none = await ctx.api('get', '/receipts/printReceipt?customerCodeFrom=ZZZ&customerCodeTo=ZZZ&createdAtFrom=2020-01-01&createdAtTo=2020-01-02');
     expect(none.status).toBe(404);
     expect(none.body.error.code).toBe('NO_DATA_FOUND');

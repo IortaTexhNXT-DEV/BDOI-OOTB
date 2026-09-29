@@ -6,6 +6,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
+import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { fileSize, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
 import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, statusLabels } from './service.js';
@@ -351,6 +352,7 @@ function parseCsv(text, delimiter = ',') {
     else if (ch === delimiter) { row.push(cur); cur = ''; } else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && text[i + 1] === '\n') i += 1;
       row.push(cur); rows.push(row); row = []; cur = '';
+      assertRowLimit(rows.length - 1);
     } else cur += ch;
   }
   if (cur !== '' || row.length) { row.push(cur); rows.push(row); }

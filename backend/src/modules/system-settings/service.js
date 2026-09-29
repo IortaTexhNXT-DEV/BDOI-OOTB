@@ -7,6 +7,7 @@ import { many, one } from '../../db/pool.js';
 import { getSetting, setSetting } from '../../lib/settings.js';
 import { badRequest } from '../../lib/errors.js';
 import { saveFile } from '../masters/helpers.js';
+import { detectType } from '../uploads/fileTypes.js';
 
 /** Front-end field -> app_settings key. */
 export const FIELD_KEYS = {
@@ -88,12 +89,16 @@ export async function assertImage(file) {
   const max = Number(await getSetting('uploads.image_max_bytes', 2097152));
   const types = (await getSetting('uploads.image_types', [])) || [];
   if (file.size > max) throw badRequest(`File exceeds the maximum size of ${Math.round(max / 1024)} KB`);
-  if (types.length && !types.includes(file.mimetype)) throw badRequest(`File type ${file.mimetype} is not allowed`);
+  // The type is taken from the file signature, not from the browser's claim.
+  const detected = detectType(file.buffer, file.originalname);
+  const allowed = types.length ? types : ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+  if (!detected || !allowed.includes(detected)) throw badRequest(`File type ${detected || file.mimetype || 'unknown'} is not allowed`);
+  file.detectedType = detected;
 }
 
 export async function storeImage(file, category, userId, entityId) {
   await assertImage(file);
-  return saveFile({ category, fileName: file.originalname, content: file.buffer, contentType: file.mimetype, entity: 'system-settings', entityId, userId });
+  return saveFile({ category, fileName: file.originalname, content: file.buffer, contentType: file.detectedType, entity: 'system-settings', entityId, userId });
 }
 
 export async function addLogoPreset({ label, url, setActive }, userId) {

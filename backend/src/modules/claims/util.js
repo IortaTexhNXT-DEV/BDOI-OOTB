@@ -6,6 +6,7 @@ import { config } from '../../config.js';
 import { getSetting } from '../../lib/settings.js';
 import { HttpError } from '../../lib/errors.js';
 import { many, query } from '../../db/pool.js';
+import { detectType } from '../uploads/fileTypes.js';
 
 export const unprocessable = (message, details) => new HttpError(422, message, details);
 
@@ -52,7 +53,7 @@ export async function storeUpload(file, { category, entity, entityId, userId }) 
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, file.buffer);
   await query(`INSERT INTO documents(storage_key, file_name, content_type, size_bytes, category, entity, entity_id, uploaded_by, status)
-               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'uploaded')`, [key, file.originalname || category, file.mimetype || null, file.size ?? file.buffer.length, category, entity, entityId, userId]);
+               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'uploaded')`, [key, file.originalname || category, file.detectedType || detectType(file.buffer, file.originalname) || 'application/octet-stream', file.size ?? file.buffer.length, category, entity, entityId, userId]);
   return key;
 }
 

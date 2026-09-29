@@ -138,7 +138,11 @@ export const isAuthenticated = () => {
 
   // If we have a token, check if it's expired (if expiry exists)
   if (token) {
-    if (expiry) {
+    if (getStorageItem(TOKEN_KEYS.REFRESH_TOKEN)) {
+      // Access tokens are short-lived (30 minutes by default); with a refresh token the session continues and the
+      // next API call (or the renewal timer in sessionRefresh.js) renews the access token.
+      isValid = true;
+    } else if (expiry) {
       isValid = !isTokenExpired(expiry);
     } else {
       // If no expiry is set, assume token is valid

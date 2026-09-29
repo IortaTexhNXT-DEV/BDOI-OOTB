@@ -43,7 +43,9 @@ const mapUserData = (user) => {
     status: user.status || "",
     action: "",
     // Store full user data for view/edit
-    fullUserData: user,
+    fullUserData: { ...user, temporaryPassword: undefined },
+    // shown once in its dialog, never kept in the store
+    temporaryPassword: undefined,
   };
 };
 

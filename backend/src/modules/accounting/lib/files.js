@@ -55,5 +55,5 @@ export async function storeFile(db, { category = 'generated', fileName, contentT
   fs.writeFileSync(full, buffer);
   await db.query(`INSERT INTO documents(storage_key, file_name, content_type, size_bytes, category, entity, entity_id, uploaded_by, status)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'uploaded')`, [key, fileName, contentType, buffer.length, category, entity, entityId, userId]);
-  return { key, url: `${config.publicBaseUrl}/api/upload/file/${key}`, fileName };
+  return { key, url: `${config.publicBaseUrl}/api/s3/object/${key}`, fileName };
 }

@@ -107,15 +107,21 @@ const RoleMaster = () => {
 
   const renderViewButton = (rowData) => {
     return (
-      <div className="center-content">
+      <div className="role__actions">
         <Button
           icon={<SvgEyeIcon />}
-          className="eye__btn"
+          className="role__action__btn"
+          aria-label={t("common.view")}
+          tooltip={t("common.view")}
+          tooltipOptions={{ position: "top" }}
           onClick={() => handleView(rowData)}
         />
         <Button
           icon={<SvgEditIcon />}
-          className="eye__btn"
+          className="role__action__btn"
+          aria-label={t("common.edit")}
+          tooltip={t("common.edit")}
+          tooltipOptions={{ position: "top" }}
           onClick={() => handlEdit(rowData)}
         />
       </div>
@@ -257,7 +263,8 @@ const RoleMaster = () => {
                   body={renderViewButton}
                   header="Action"
                   headerStyle={ViewheaderStyle}
-                  className="fieldvalue_container_centered"
+                  className="fieldvalue_container"
+                  style={{ minWidth: "9rem" }}
                 ></Column>
               </DataTable>
             </div>

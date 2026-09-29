@@ -120,7 +120,7 @@ export async function getClaim(id) {
   const claim = toApi(await loadRow(id), ctx.labels, ctx.todayStr, ctx.open);
   claim.documents = (await many(`SELECT storage_key AS key, file_name AS "fileName", category AS "documentName", created_at AS "createdAt"
     FROM documents WHERE entity = 'claim' AND entity_id = $1 ORDER BY created_at`, [claim.id]))
-    .map((d) => ({ ...d, downloadUrl: `${config.publicBaseUrl}/api/upload/file/${d.key}` }));
+    .map((d) => ({ ...d, downloadUrl: `${config.publicBaseUrl}/api/s3/object/${d.key}` }));
   claim.history = await many('SELECT at, by_user AS "byUser", status, note FROM claim_history WHERE claim_id = $1 ORDER BY at, id', [claim.id]);
   return claim;
 }

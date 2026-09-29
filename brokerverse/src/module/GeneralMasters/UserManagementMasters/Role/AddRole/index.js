@@ -21,7 +21,7 @@ import {
   postAddRoleMiddleware,
 } from "../store/roleMiddleware";
 import userService from "../../../../../services/userService";
-import { accessOptions } from "../store/roleMapping";
+import { accessOptions, toRoleCode } from "../store/roleMapping";
 
 const AddRole = ({ action }) => {
   const { t } = useTranslation();
@@ -74,23 +74,19 @@ const AddRole = ({ action }) => {
   };
   const validate = (values) => {
     const errors = {};
-    if (!values.roleCode) {
-      errors.roleCode = "Role Code is required";
+    if (!values.roleCode || !toRoleCode(values.roleCode)) {
+      errors.roleCode = t("generalMasters.roleCodeRequired");
     }
-    if (!values.roleName) {
-      errors.roleName = "Role Name is required";
+    if (!values.roleName || !String(values.roleName).trim()) {
+      errors.roleName = t("generalMasters.roleNameRequired");
     }
-
+    // Sub-menu access is optional: without it the role covers the menu module only.
     if (!values.menuAccess) {
-      errors.menuAccess = "Menu Access is required";
-    }
-    if (!values.subMenuAccess) {
-      errors.subMenuAccess = "SubMenu Access is required";
+      errors.menuAccess = t("generalMasters.menuAccessRequired");
     }
     if (!values.permissions) {
-      errors.permissions = "Permissions is required";
+      errors.permissions = t("generalMasters.permissionsRequired");
     }
-
     return errors;
   };
   const dispatch = useDispatch()
@@ -104,8 +100,9 @@ const AddRole = ({ action }) => {
 
   const handleSubmit = async (values) => {
     const thunk = action === "add" ? postAddRoleMiddleware : patchRoleEditMiddleware;
+    const payload = { ...values, subMenuAccess: values.subMenuAccess || values.menuAccess };
     try {
-      await dispatch(thunk(values)).unwrap();
+      await dispatch(thunk(payload)).unwrap();
       toastRef.current.showToast(action === "add" ? undefined : { detail: t("financeMasters.saveSuccessfully") });
       setTimeout(() => {
         navigate("/master/generals/usermanagement/role");
@@ -137,6 +134,20 @@ const AddRole = ({ action }) => {
     validate,
     onSubmit: handleSubmit,
   });
+  const fieldError = (name) => (formik.touched[name] || formik.submitCount > 0 ? formik.errors[name] : undefined);
+  /** Save / Update is always enabled: an incomplete form says what is missing instead of doing nothing. */
+  const onSave = async () => {
+    const errors = await formik.validateForm();
+    formik.setTouched({ roleCode: true, roleName: true, menuAccess: true, permissions: true }, false);
+    if (Object.keys(errors).length) {
+      toastRef.current?.showToast({
+        severity: "error",
+        detail: `${t("generalMasters.completeRequiredFields")}: ${Object.values(errors).join(", ")}`,
+      });
+      return;
+    }
+    formik.submitForm();
+  };
   useEffect(() => {
     if (action === "edit" || action === "view") {
       setFormikValues()
@@ -183,7 +194,7 @@ const AddRole = ({ action }) => {
                 value={action === "view" ? roleViewData.roleCode : formik.values.roleCode}
                 
                 onChange={formik.handleChange("roleCode")}
-                // error={formik.errors.roleCode}
+                error={fieldError("roleCode")}
                 label={t("generalMasters.roleCode")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -196,7 +207,7 @@ const AddRole = ({ action }) => {
                 
                 value={action === "view" ? roleViewData.roleName : formik.values.roleName}
                 onChange={formik.handleChange("roleName")}
-                // error={formik.errors.roleName}
+                error={fieldError("roleName")}
                 label={t("generalMasters.roleName")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -222,7 +233,7 @@ const AddRole = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? roleViewData.menuAccess : formik.values.menuAccess}
                 onChange={formik.handleChange("menuAccess")}
-                // error={formik.errors.menuAccess}
+                error={fieldError("menuAccess")}
                 className="dropdown__add__sub"
                 label={t("generalMasters.menuAccess")}
                 classNames="label__sub__add"
@@ -252,7 +263,7 @@ const AddRole = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? roleViewData.permissions : formik.values.permissions}
                 onChange={formik.handleChange("permissions")}
-                // error={formik.errors.permissions}
+                error={fieldError("permissions")}
                 className="dropdown__add__sub"
                 label={t("generalMasters.permissions")}
                 classNames="label__sub__add"
@@ -297,8 +308,9 @@ label={t("generalMasters.modifiedOn")}
 {action === "view" ? <div></div> : <Button
           label={action === "add" ? t("generalMasters.save") : t("generalMasters.update")}
           className="save__add__btn"
-          onClick={formik.handleSubmit}
-          disabled={!formik.isValid}
+          onClick={onSave}
+          disabled={formik.isSubmitting}
+          loading={formik.isSubmitting}
         />}
         
         {/* )}

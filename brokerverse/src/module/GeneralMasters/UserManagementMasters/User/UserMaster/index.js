@@ -15,6 +15,8 @@ import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import UserSecurityActions from "./UserSecurityActions";
+import { Tag } from "primereact/tag";
 import userService from "../../../../../services/userService";
 import { Toast } from "primereact/toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -127,6 +129,7 @@ const UserMaster = () => {
           className="eye__btn"
           onClick={() => handlEdit(rowData)}
         />
+        <UserSecurityActions row={rowData} onChanged={search ? () => dispatch(getSearchUserMiddleware(search)) : reloadList} />
       </div>
     );
   };
@@ -243,7 +246,7 @@ const UserMaster = () => {
                   header="E-mail"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.email || "-"}
+                  body={(rowData) => rowData.email || rowData.fullUserData?.email || "-"}
                 ></Column>
                 <Column
                   field="displayName"
@@ -255,13 +258,18 @@ const UserMaster = () => {
                 <Column
                   field="status"
                   body={(columnData) => (
-                    <MasterStatusToggle
-                      type="user"
-                      record={columnData}
-                      onToggle={toggleUserStatus}
-                      onChanged={reloadList}
-                      onError={showStatusError}
-                    />
+                    <div className="flex align-items-center gap-2">
+                      <MasterStatusToggle
+                        type="user"
+                        record={columnData}
+                        onToggle={toggleUserStatus}
+                        onChanged={reloadList}
+                        onError={showStatusError}
+                      />
+                      {String(columnData.status).toLowerCase() === "locked" && (
+                        <Tag severity="warning" value={t("security.locked")} icon="pi pi-lock" />
+                      )}
+                    </div>
                   )}
                   header="Status"
                   headerStyle={headerStyle}
@@ -272,7 +280,7 @@ const UserMaster = () => {
                   body={renderViewButton}
                   header="Action"
                   headerStyle={ViewheaderStyle}
-                  style={{ minWidth: "8rem" }}
+                  style={{ minWidth: "11rem" }}
                   // className="fieldvalue_container"
                   //  className="fieldvalue_container_centered"
                 ></Column>

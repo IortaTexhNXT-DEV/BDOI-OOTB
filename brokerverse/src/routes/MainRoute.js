@@ -206,7 +206,6 @@ import LeadEdit from "../agentModule/leadModule/leadEdit";
 import LeadDetail from "../agentModule/leadModule/leadDetail";
 import ViewEndorsement from "../agentModule/endorsementModule/viewUploadEndorsement";
 import EndorsementRejected from "../agentModule/endorsementModule/EndorsementRejected";
-import LoginScreen from "../module/AuthModule/Login/index";
 import Production from "../module/Reports/OperationalReports/Production";
 // Dashboard Imports
 import ExecutiveDashboard from "../module/ExecutiveDashboard";
@@ -355,7 +354,7 @@ const Maincomponent = () => {
     <div className="parent__main__container">
       {/* <AuthRoute /> */}
       <Routes>
-        {/* <Route path="/login" element={<LoginScreen />} /> */}
+        {/* sign-in: agentModule/authModule/Login (App.js route /login) */}
         <Route element={<ProtectedLayout />}>
           <Route
             path="/accounts/correctionsjv/correctionsjvdetails"

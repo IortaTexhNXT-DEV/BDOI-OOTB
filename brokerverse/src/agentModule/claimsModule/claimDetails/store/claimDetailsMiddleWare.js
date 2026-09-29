@@ -44,9 +44,17 @@ export const getClaimDetailsViewData = createAsyncThunk(
         );
       }
 
-      // Fetch lead details if leadRefId is available and not default
-      let leadData = null;
-      if (leadRefId && leadRefId !== "LEAD-001") {
+      // The policy embeds the lead it came from; the lead register is read only when it does not and the user may
+      // read leads (claims officers read the lead through the policy: least privilege, D92).
+      const embeddedLead = policyData?.lead || policyData?.data?.lead || null;
+      let canReadLeads = false;
+      try {
+        canReadLeads = JSON.parse(localStorage.getItem("USER_PERMISSIONS") || "[]").includes("read:leads");
+      } catch {
+        canReadLeads = false;
+      }
+      let leadData = embeddedLead;
+      if (!leadData && canReadLeads && leadRefId && leadRefId !== "LEAD-001") {
         console.log("Fetching lead details for leadId:", leadRefId);
         const leadResult = await leadService.getLeadById(leadRefId);
         if (leadResult.success) {
