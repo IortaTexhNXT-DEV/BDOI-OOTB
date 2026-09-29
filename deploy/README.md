@@ -11,6 +11,7 @@ each item. The runtime details (every environment variable, seed data, health ch
 | `REFERENCE.md` | environment variables, seed data, scheduled jobs, health checks, production start-up rules |
 | `backend.env.example` | the backend environment with placeholders; copy the names into the secret store |
 | `frontend.env.example` | the one build variable of the front end |
+| `RAILWAY.md` | the same deployment on Railway (database, API and web services from this repository) |
 
 | Part | Folder in this branch | Where it goes |
 |---|---|---|

@@ -1,0 +1,21 @@
+# Front end on Railway: build the React app, then serve it with nginx on the port Railway gives ($PORT).
+# The browser calls the API service directly, so REACT_APP_BASE_URL must be the API's public address,
+# e.g. https://<api-service>.up.railway.app/api (set it as a variable on this service; Railway passes it to the build).
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
+COPY . .
+ARG REACT_APP_BASE_URL
+RUN test -n "$REACT_APP_BASE_URL" || (echo "Set REACT_APP_BASE_URL on the Railway service (the API address ending in /api)." >&2; exit 1)
+ENV REACT_APP_BASE_URL=$REACT_APP_BASE_URL CI=false GENERATE_SOURCEMAP=false
+RUN npm run build \
+ && ! grep -q "%PUBLIC_URL%" build/index.html \
+ && grep -q "/static/js/" build/index.html
+
+FROM nginx:1.27-alpine
+# the nginx image fills ${PORT} in templates/*.template when the container starts
+ENV PORT=8080
+COPY nginx.railway.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 8080
