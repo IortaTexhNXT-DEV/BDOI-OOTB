@@ -103,6 +103,8 @@ import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/Account
 import SystemSettingsPage from "../module/SystemSettings";
 import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
+import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
+import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import AuditTrailPage from "../module/Administration/AuditTrail";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
@@ -973,6 +975,8 @@ const Maincomponent = () => {
           />
           <Route path="master/configuration/settings" element={<ConfigurationPage />} />
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
+          <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
+          <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
           <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
