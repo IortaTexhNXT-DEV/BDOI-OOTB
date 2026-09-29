@@ -287,7 +287,7 @@ const validatePremiumCalculation = ({
     if (ctplNum > 10000) {
       logger.warn(
         `[${context}] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
-        `CTPL should be a flat rate (typically 200-2000 THB). ` +
+        `CTPL should be a flat rate (typically 200 to 2,000). ` +
         `This may indicate CTPL was incorrectly calculated as a percentage of coverage.`
       );
     }

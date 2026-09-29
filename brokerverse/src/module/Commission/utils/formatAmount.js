@@ -1,9 +1,9 @@
 import { formatCurrency } from "../../../utility/currencyConverter";
 
 /**
- * Format commission amounts as PHP (legacy name kept for call-site compatibility).
+ * Commission amounts in the display currency, optionally with a fixed number of decimals.
  */
-export const formatBaht = (amount, { decimals } = {}) => {
+export const formatAmount = (amount, { decimals } = {}) => {
   const options =
     decimals !== undefined
       ? { minimumFractionDigits: decimals, maximumFractionDigits: decimals }

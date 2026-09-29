@@ -10,7 +10,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import CommissionService from "../../../services/commissionService";
 import disbursementService from "../../../services/disbursementService";
-import { formatBaht } from "../../Commission/utils/formatBaht";
+import { formatAmount } from "../../Commission/utils/formatAmount";
 import "./index.scss";
 import logger from "../../../utility/logger";
 
@@ -123,10 +123,10 @@ const BulkDisburse = () => {
               Agents: <strong>{summary.agentCount}</strong>
             </span>
             <span>
-              COMSUB (GROSS): <strong>{formatBaht(summary.totalComsubGross)}</strong>
+              COMSUB (GROSS): <strong>{formatAmount(summary.totalComsubGross)}</strong>
             </span>
             <span>
-              Net payable: <strong>{formatBaht(summary.totalNet)}</strong>
+              Net payable: <strong>{formatAmount(summary.totalNet)}</strong>
             </span>
           </div>
         ) : null}
@@ -149,12 +149,12 @@ const BulkDisburse = () => {
           <Column
             field="comsubGross"
             header="COMSUB (GROSS)"
-            body={(row) => formatBaht(row.comsubGross)}
+            body={(row) => formatAmount(row.comsubGross)}
           />
           <Column
             field="netPayable"
             header="Net payable"
-            body={(row) => formatBaht(row.netPayable)}
+            body={(row) => formatAmount(row.netPayable)}
           />
           <Column field="bankAccount" header="Bank account" />
         </DataTable>

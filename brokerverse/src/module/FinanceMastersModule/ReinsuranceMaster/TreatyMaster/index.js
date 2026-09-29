@@ -486,7 +486,7 @@ const TreatyMaster = () => {
                     </div>
                   </div>
                   <div className="p-field field">
-                    <label>Excess Point (THB)</label>
+                    <label>Excess Point</label>
                     <div>
                       <InputText
                         value={formData.excess}

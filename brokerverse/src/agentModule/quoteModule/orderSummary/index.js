@@ -721,7 +721,7 @@ const OrderSummary = ({ action, flow }) => {
     applyDiscountPercent(newDiscount);
   };
 
-  // Sync % card from loaded baht discount when quote data initializes
+  // Sync % card from the loaded discount amount when quote data initializes
   useEffect(() => {
     const base = getPremiumBase(initialValue);
     const discountAmt = parseAmount(initialValue?.discount);

@@ -3,7 +3,7 @@ import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
 import CommissionService from "../../../services/commissionService";
-import { formatBaht } from "../utils/formatBaht";
+import { formatAmount } from "../utils/formatAmount";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import logger from "../../../utility/logger";
 
@@ -132,46 +132,46 @@ const LineDetailDrawer = ({
           <h3 className="card-title">CALCULATION</h3>
           <div className="calc-row">
             <span>Gross premium</span>
-            <span>{formatBaht(line.grossPremium)}</span>
+            <span>{formatAmount(line.grossPremium)}</span>
           </div>
           <div className="calc-row muted">
             <span>- Discount ({line.discountLabel})</span>
-            <span>-{formatBaht(line.discountAmount)}</span>
+            <span>-{formatAmount(line.discountAmount)}</span>
           </div>
           <div className="calc-row strong">
             <span>Net premium</span>
-            <span>{formatBaht(line.netPremium)}</span>
+            <span>{formatAmount(line.netPremium)}</span>
           </div>
           <div className="calc-row">
             <span>Brokerage @ {line.brokeragePct}%</span>
             <span className="amt-with-badge">
               <span className="income-amt">
-                {formatBaht(line.brokerageAmount)}
+                {formatAmount(line.brokerageAmount)}
               </span>
               <span className="badge income">INCOME</span>
             </span>
           </div>
           <div className="calc-row">
             <span>
-              Comsub = {formatBaht(line.comsubFixed)} + {line.comsubPct}% of
+              Comsub = {formatAmount(line.comsubFixed)} + {line.comsubPct}% of
               net
             </span>
             <span className="amt-with-badge">
-              <span className="payable-amt">{formatBaht(line.comsub)}</span>
+              <span className="payable-amt">{formatAmount(line.comsub)}</span>
               <span className="badge payable">PAYABLE</span>
             </span>
           </div>
           <div className="calc-row muted">
             <span>{whtLabel}</span>
-            <span>-{formatBaht(line.wht)}</span>
+            <span>-{formatAmount(line.wht)}</span>
           </div>
           <div className="calc-row strong">
             <span>Net payable</span>
-            <span>{formatBaht(line.net)}</span>
+            <span>{formatAmount(line.net)}</span>
           </div>
           <div className="calc-row strong margin-row">
             <span>Net margin</span>
-            <span className="margin-amt">{formatBaht(line.netMargin)}</span>
+            <span className="margin-amt">{formatAmount(line.netMargin)}</span>
           </div>
 
           {canEditRate && (

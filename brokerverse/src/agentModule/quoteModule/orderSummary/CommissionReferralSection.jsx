@@ -41,7 +41,7 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatBaht = (n) => formatCurrency(toNumber(n));
+const formatAmount = (n) => formatCurrency(toNumber(n));
 
 const comsubAmount = (fixed, pct, netPremium) => {
   const f = toNumber(fixed);
@@ -241,7 +241,7 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
         {isDirect ? (
           <div className="cr-direct-line">
             <em>no comsub — broker keeps the full brokerage</em>
-            <span className="cr-amount">{formatBaht(0)}</span>
+            <span className="cr-amount">{formatAmount(0)}</span>
           </div>
         ) : (
           <div className="cr-comsub-line">
@@ -263,7 +263,7 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
               className="cr-pct-input"
             />
             <span className="cr-pct-label">% of net</span>
-            <span className="cr-amount">{formatBaht(primaryComsub)}</span>
+            <span className="cr-amount">{formatAmount(primaryComsub)}</span>
           </div>
         )}
       </div>
@@ -324,7 +324,7 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
               />
               <span className="cr-pct-label">% of net</span>
               <span className="cr-amount">
-                {formatBaht(comsubAmount(row.comsubFixed, row.comsubPct, net))}
+                {formatAmount(comsubAmount(row.comsubFixed, row.comsubPct, net))}
               </span>
             </div>
           </div>
@@ -343,34 +343,34 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
         <div className="cr-metric">
           <span className="cr-metric-label">Brokerage</span>
           <span className="cr-metric-value brokerage">
-            {formatBaht(brokerageAmount)}
+            {formatAmount(brokerageAmount)}
           </span>
           <span className="cr-metric-sub">income</span>
         </div>
         <div className="cr-metric">
           <span className="cr-metric-label">Comsub (gross)</span>
           <span className="cr-metric-value comsub">
-            {formatBaht(comsubGross)}
+            {formatAmount(comsubGross)}
           </span>
           <span className="cr-metric-sub">payable</span>
         </div>
         <div className="cr-metric">
           <span className="cr-metric-label">– Discount</span>
-          <span className="cr-metric-value discount">{formatBaht(disc)}</span>
+          <span className="cr-metric-value discount">{formatAmount(disc)}</span>
           <span className="cr-metric-sub">out of broker</span>
         </div>
         <div className="cr-metric">
           <span className="cr-metric-label">Margin</span>
-          <span className="cr-metric-value margin">{formatBaht(margin)}</span>
+          <span className="cr-metric-value margin">{formatAmount(margin)}</span>
           <span className="cr-metric-sub">brk — comsub — disc</span>
         </div>
       </div>
 
       <p className="cr-footnote">
-        Comsub is on the <strong>full net</strong> premium ({formatBaht(net)}) —
+        Comsub is on the <strong>full net</strong> premium ({formatAmount(net)}) —
         the customer discount comes <strong>out of the broker&apos;s commission</strong>
         , not the referrer&apos;s comsub. Margin = brokerage – comsub – discount.
-        Withholding tax ({formatBaht(wht)}) is deducted at payout at each referrer&apos;s configured rate → net payable {formatBaht(netPayable)}.
+        Withholding tax ({formatAmount(wht)}) is deducted at payout at each referrer&apos;s configured rate → net payable {formatAmount(netPayable)}.
       </p>
     </div>
   );
