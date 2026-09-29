@@ -22,42 +22,45 @@ How the numbers were produced (all under `scratchpad/review2/`):
 
 ## Executive summary
 
+The last column shows the status after the fixes merged on 29 Sep 2026 (defect numbers refer to `docs/e2e/DEFECTS.md`).
+The old source archives mentioned in section 4 have been removed from the repository.
+
 Status vs baseline: **Fixed**, **Partly** (improved but not closed), **Open** (unchanged or worse), **New** (backend,
 not in baseline scope).
 
-| # | Area | Finding | Count | Severity | Status |
-|---|------|---------|-------|----------|--------|
-| 1 | Security / files | Any signed-in user can overwrite or delete any stored document (`PUT /s3/put/*`, `DELETE /s3/file/*`); no ownership or permission check | 2 routes | High | New |
-| 2 | Security / files | Uploads keep the client-supplied content type, have no type allow-list and are served inline, without sign-in, from the same origin as the SPA; the API CSP (`script-src 'self'`) lets an uploaded HTML page load an uploaded script, which enables stored XSS and theft of the tokens in `localStorage` | 1 serving route, 7 upload handlers | High | New |
-| 3 | Security / auth | Users created without a password get the fixed password `Welcome@1`; "must change password" and password expiry are only flags: the API does not enforce them and the front end never reads them | 1 default, 0 FE references | High | New |
-| 4 | Security / config | `JWT_SECRET` falls back to `dev-only-secret-change-me` and `CORS_ORIGINS` to `*` (any origin reflected, verified); no production start-up guard | 2 | High (depends on deployment) | New |
-| 5 | Security / logging | Every request log line contains the `Authorization: Bearer ...` header (pino-http default serializer, verified); report download tokens are logged in URLs | all requests | Medium | New |
-| 6 | Security / sessions | Access tokens last 24 h and carry roles; `requireAuth` does not re-check the user, so deactivation and role changes take up to 24 h to apply. Password change/reset does not revoke refresh tokens | 4 code paths | Medium | New |
-| 7 | Security / 2FA | The backend implements TOTP 2FA, but the front end has no challenge or enrolment screen (0 references to `twoFactorRequired`/`challengeToken`). TOTP secrets and reset codes are stored in plain text; older reset codes stay valid | 3 | Medium | New |
-| 8 | Security / DoS | XLSX readers inflate without a size cap (zip bomb); uploads are held in memory (up to 20 x 25 MB per request); the only rate limits are in-memory, per process and on sign-in/reset | 2 inflaters, 7 multer configs | Medium | New |
-| 9 | Input validation | 186 of 297 write routes have no schema (zod) middleware; they rely on hand-written checks in services | 186 | Medium | New |
-| 10 | Authorization metadata | `registry.js` `auth`/`roles`/`permissions` fields are documentation only (not enforced); roles/permissions filled on 14 of 565 routes; 1 `auth` mismatch | 565 / 14 / 1 | Medium | New |
-| 11 | Authorization coverage | 513 of 565 routes require a permission or role; 13 are public (all intended); 39 need only sign-in, and are acceptable except the 8 file-storage routes (items 1-2) and `GET /settings` / `GET /schedules` | 13 / 39 | Info (see 1) | New |
-| 12 | SQL injection | No string-built SQL with request values found; dynamic identifiers are white-listed or quoted | 0 | - | New |
-| 13 | Error handling | 500 responses return the raw internal error text (for example PostgreSQL messages) | 1 handler | Low | New |
-| 14 | Dependencies (BE) | `npm audit`: 1 high (nodemailer, direct), 2 moderate (node-cron -> uuid) | 3 | Medium | New |
-| 15 | Dependencies (FE) | `npm audit`: 3 critical, 35 high, 18 moderate, 15 low (71); axios and js-cookie now patched; remaining direct: react-scripts (high), react-router(-dom) and @craco/craco (moderate, major upgrades) | 71 (was 75) | High | Partly |
-| 16 | FE roles | Undefined roles no longer get full access; routes are guarded by `isPathAllowed`; server enforces permissions | - | - | Fixed |
-| 17 | FE token storage | Access and refresh tokens still in `localStorage`; no CSP on the SPA. Refresh-on-401 now exists; the unused login module still writes tokens and non-secure cookies | 2 writers | High (with item 2) | Partly |
-| 18 | FE supply chain | `primeflex@latest` CDN link removed; bundled from npm | 0 | - | Fixed |
-| 19 | FE logging | `console.*` 1,607 calls in 246 files (was 2,434 / 415); `console.log/info/debug` disabled in production builds; redux-logger development-only; 1 bearer-token log left | 1,607 | Low | Partly |
-| 20 | FE mock data | 27 production files still import mock data (was 89) | 27 | Medium | Partly |
-| 21 | FE hard-coded URLs | 11 external URLs (was 39); 5 of them in dead files | 11 | Low | Partly |
-| 22 | Hard-coded business values | FE: `"PHP"` 11, `₱` 33 (outside mocks), IAR VAT fallback 12, `bankCode: "BDO"`. BE: all 165 setting keys are seeded and read via `getSetting` (good), but 5 keys have conflicting code fallbacks and the admin-role list is repeated 10 times | ~60 | Medium | Partly (FE) / New (BE) |
-| 23 | Hard-coded colours | SCSS 6,943 hex literals in 360 files outside `src/theme` (was 7,458 / 366); JS/JSX 1,889 quoted hex literals in 379 files; 2,056 inline `style={{` | 8,832 | Medium (theming) | Open |
-| 24 | ESLint (FE) | 0 errors (was 7), 2,016 warnings (was 2,490); `no-unused-vars` 1,683; real bugs left: 6 `no-dupe-keys`, 2 `no-unreachable`, 1 duplicate class member, 1 duplicate JSX prop, 1 self-assign | 2,016 | Medium | Partly |
-| 25 | ESLint (BE) | 0 errors, 0 warnings on 147 files (strict rules incl. `no-console`, `eqeqeq`) | 0 | - | New (good) |
-| 26 | Dead / duplicate code | FE: 31 never-imported JS/JSX files, 4,141 lines (was 85 / 10,176); 18 dead SCSS (was 27); 1 byte-identical group (was 13); jscpd 10.9 % duplicated lines. BE: 0 dead files, 0.04 % duplication | 31 / 18 | Low | Partly |
-| 27 | Large files | FE: 43 files > 800 lines (was 60); `MainRoute.js` 1,935 lines, 305 imports, no lazy loading. BE: largest file 639 lines | 43 | Low | Partly |
-| 28 | i18n | 84 keys used but missing from `en.json` (was 357); 82 have inline English defaults, 2 render raw keys. `th.json` lacks 468 `en` keys (was 101) | 84 / 468 | Low / Medium | Partly (th worse) |
-| 29 | Tests | BE: 259 test cases in 32 files; 455 of 565 routes (81 %) are called by some test; no tests for file storage, notifications, token refresh, lockout. FE: 3 test files, 124 lines | 259 / 3 | Medium | Partly |
-| 30 | Consistency | API: 3 list-pagination shapes, 6 success responses without the `success` envelope, 20 legacy verb-style paths. BE: `round2` defined 4x with two rounding rules; `today()` defined 6x, 4 of them in UTC instead of the configured time zone. FE: date helper used in 13 files vs 85 raw `toLocaleDateString` calls; 2 files import the wrong `formatDate` (from FullCalendar) | see section 4 | Medium | New / Open |
-| 31 | XSS sinks (FE) | No `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML=`; all 29 `window.open` calls now pass `noopener` | 0 | - | Fixed |
+| # | Area | Finding | Count | Severity | Status | After remediation (29 Sep) |
+|---|------|---------|-------|----------|--------|----|
+| 1 | Security / files | Any signed-in user can overwrite or delete any stored document (`PUT /s3/put/*`, `DELETE /s3/file/*`); no ownership or permission check | 2 routes | High | New | Fixed (D81) |
+| 2 | Security / files | Uploads keep the client-supplied content type, have no type allow-list and are served inline, without sign-in, from the same origin as the SPA; the API CSP (`script-src 'self'`) lets an uploaded HTML page load an uploaded script, which enables stored XSS and theft of the tokens in `localStorage` | 1 serving route, 7 upload handlers | High | New | Fixed (D82, D99) |
+| 3 | Security / auth | Users created without a password get the fixed password `Welcome@1`; "must change password" and password expiry are only flags: the API does not enforce them and the front end never reads them | 1 default, 0 FE references | High | New | Fixed (D83) |
+| 4 | Security / config | `JWT_SECRET` falls back to `dev-only-secret-change-me` and `CORS_ORIGINS` to `*` (any origin reflected, verified); no production start-up guard | 2 | High (depends on deployment) | New | Fixed (D84) |
+| 5 | Security / logging | Every request log line contains the `Authorization: Bearer ...` header (pino-http default serializer, verified); report download tokens are logged in URLs | all requests | Medium | New | Fixed (D85) |
+| 6 | Security / sessions | Access tokens last 24 h and carry roles; `requireAuth` does not re-check the user, so deactivation and role changes take up to 24 h to apply. Password change/reset does not revoke refresh tokens | 4 code paths | Medium | New | Fixed (D86) |
+| 7 | Security / 2FA | The backend implements TOTP 2FA, but the front end has no challenge or enrolment screen (0 references to `twoFactorRequired`/`challengeToken`). TOTP secrets and reset codes are stored in plain text; older reset codes stay valid | 3 | Medium | New | Fixed (D87, D88); QR image not shown |
+| 8 | Security / DoS | XLSX readers inflate without a size cap (zip bomb); uploads are held in memory (up to 20 x 25 MB per request); the only rate limits are in-memory, per process and on sign-in/reset | 2 inflaters, 7 multer configs | Medium | New | Fixed (D93); rate limits still per instance |
+| 9 | Input validation | 186 of 297 write routes have no schema (zod) middleware; they rely on hand-written checks in services | 186 | Medium | New | Partly: empty-body validation added on the affected forms (D110); schemas not on every write route |
+| 10 | Authorization metadata | `registry.js` `auth`/`roles`/`permissions` fields are documentation only (not enforced); roles/permissions filled on 14 of 565 routes; 1 `auth` mismatch | 565 / 14 / 1 | Medium | New | Fixed (D94) |
+| 11 | Authorization coverage | 513 of 565 routes require a permission or role; 13 are public (all intended); 39 need only sign-in, and are acceptable except the 8 file-storage routes (items 1-2) and `GET /settings` / `GET /schedules` | 13 / 39 | Info (see 1) | New | Fixed (file routes protected, D81/D82) |
+| 12 | SQL injection | No string-built SQL with request values found; dynamic identifiers are white-listed or quoted | 0 | - | New | - |
+| 13 | Error handling | 500 responses return the raw internal error text (for example PostgreSQL messages) | 1 handler | Low | New | Fixed (D95) |
+| 14 | Dependencies (BE) | `npm audit`: 1 high (nodemailer, direct), 2 moderate (node-cron -> uuid) | 3 | Medium | New | Fixed (D96): 0 backend advisories |
+| 15 | Dependencies (FE) | `npm audit`: 3 critical, 35 high, 18 moderate, 15 low (71); axios and js-cookie now patched; remaining direct: react-scripts (high), react-router(-dom) and @craco/craco (moderate, major upgrades) | 71 (was 75) | High | Partly | Open: front-end dependency upgrades (react-scripts, react-router) planned |
+| 16 | FE roles | Undefined roles no longer get full access; routes are guarded by `isPathAllowed`; server enforces permissions | - | - | Fixed | Fixed |
+| 17 | FE token storage | Access and refresh tokens still in `localStorage`; no CSP on the SPA. Refresh-on-401 now exists; the unused login module still writes tokens and non-secure cookies | 2 writers | High (with item 2) | Partly | Partly: unused login module removed (D98); tokens still in localStorage |
+| 18 | FE supply chain | `primeflex@latest` CDN link removed; bundled from npm | 0 | - | Fixed | Fixed |
+| 19 | FE logging | `console.*` 1,607 calls in 246 files (was 2,434 / 415); `console.log/info/debug` disabled in production builds; redux-logger development-only; 1 bearer-token log left | 1,607 | Low | Partly | Partly |
+| 20 | FE mock data | 27 production files still import mock data (was 89) | 27 | Medium | Partly | Partly: 14 converted/removed (D130+), remaining listed with reasons |
+| 21 | FE hard-coded URLs | 11 external URLs (was 39); 5 of them in dead files | 11 | Low | Partly | Partly |
+| 22 | Hard-coded business values | FE: `"PHP"` 11, `₱` 33 (outside mocks), IAR VAT fallback 12, `bankCode: "BDO"`. BE: all 165 setting keys are seeded and read via `getSetting` (good), but 5 keys have conflicting code fallbacks and the admin-role list is repeated 10 times | ~60 | Medium | Partly (FE) / New (BE) | Fixed (D130–D146): values in settings; admin-role list still repeated |
+| 23 | Hard-coded colours | SCSS 6,943 hex literals in 360 files outside `src/theme` (was 7,458 / 366); JS/JSX 1,889 quoted hex literals in 379 files; 2,056 inline `style={{` | 8,832 | Medium (theming) | Open | Open (theming task) |
+| 24 | ESLint (FE) | 0 errors (was 7), 2,016 warnings (was 2,490); `no-unused-vars` 1,683; real bugs left: 6 `no-dupe-keys`, 2 `no-unreachable`, 1 duplicate class member, 1 duplicate JSX prop, 1 self-assign | 2,016 | Medium | Partly | Partly |
+| 25 | ESLint (BE) | 0 errors, 0 warnings on 147 files (strict rules incl. `no-console`, `eqeqeq`) | 0 | - | New (good) | Good |
+| 26 | Dead / duplicate code | FE: 31 never-imported JS/JSX files, 4,141 lines (was 85 / 10,176); 18 dead SCSS (was 27); 1 byte-identical group (was 13); jscpd 10.9 % duplicated lines. BE: 0 dead files, 0.04 % duplication | 31 / 18 | Low | Partly | Partly: unused mock files deleted |
+| 27 | Large files | FE: 43 files > 800 lines (was 60); `MainRoute.js` 1,935 lines, 305 imports, no lazy loading. BE: largest file 639 lines | 43 | Low | Partly | Partly |
+| 28 | i18n | 84 keys used but missing from `en.json` (was 357); 82 have inline English defaults, 2 render raw keys. `th.json` lacks 468 `en` keys (was 101) | 84 / 468 | Low / Medium | Partly (th worse) | Partly: Filipino not translated; Thai incomplete |
+| 29 | Tests | BE: 259 test cases in 32 files; 455 of 565 routes (81 %) are called by some test; no tests for file storage, notifications, token refresh, lockout. FE: 3 test files, 124 lines | 259 / 3 | Medium | Partly | Improved: backend 357 tests, front end 22 tests |
+| 30 | Consistency | API: 3 list-pagination shapes, 6 success responses without the `success` envelope, 20 legacy verb-style paths. BE: `round2` defined 4x with two rounding rules; `today()` defined 6x, 4 of them in UTC instead of the configured time zone. FE: date helper used in 13 files vs 85 raw `toLocaleDateString` calls; 2 files import the wrong `formatDate` (from FullCalendar) | see section 4 | Medium | New / Open | Partly: one round2 and one Manila-time date helper (D130+); pagination shapes remain |
+| 31 | XSS sinks (FE) | No `dangerouslySetInnerHTML`, `eval`, `new Function`, `innerHTML=`; all 29 `window.open` calls now pass `noopener` | 0 | - | Fixed | Fixed |
 
 ---
 
