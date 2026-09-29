@@ -8,6 +8,8 @@
  * criteria: allowed values of the screen's "Report Criteria" drop-down. { where } restricts rows, { groupBy } adds a
  * summary by that column, { dims } chooses the aggregation dimensions of aggregate reports.
  */
+import { PERIOD_END_QUERIES } from './periodEndQueries.js';
+
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
 const setting = (key, fallback, type) => ({ key, fallback, type });
@@ -95,6 +97,7 @@ const AGENT = "lower(d.payee_type) IN ('agent', 'agent/referrer', 'referrer')";
 const INSURER = "lower(d.payee_type) = 'insurer'";
 const CLIENT = "lower(d.payee_type) IN ('client', 'customer')";
 export const QUERIES = {
+  ...PERIOD_END_QUERIES,
   production: {
     sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',

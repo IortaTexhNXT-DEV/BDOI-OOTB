@@ -414,12 +414,19 @@ describe('route registry (D90)', () => {
     expect(open.filter((r) => !PUBLIC.has(r))).toEqual([]);
   });
   it('every non-public route answers 401 without a token', async () => {
-    resetRateLimits(); // several hundred anonymous requests from one address
+    // several hundred anonymous requests from one address: more than the per-minute API limit, so it is off here
+    await setSettings({ 'security.api_rate_limit': { max: 0, windowSeconds: 60 } });
+    resetRateLimits();
     const failures = [];
-    for (const r of ROUTES.filter((x) => x.auth)) {
-      const p = r.path.replace(/:\w+(\([^)]*\))?\??/g, '1').replace(/\*/g, 'x/y');
-      const res = await request(ctx.app)[r.method.toLowerCase()](`/api${p}`);
-      if (res.status !== 401) failures.push(`${r.method} ${r.path} -> ${res.status}`);
+    try {
+      for (const r of ROUTES.filter((x) => x.auth)) {
+        const p = r.path.replace(/:\w+(\([^)]*\))?\??/g, '1').replace(/\*/g, 'x/y');
+        const res = await request(ctx.app)[r.method.toLowerCase()](`/api${p}`);
+        if (res.status !== 401) failures.push(`${r.method} ${r.path} -> ${res.status}`);
+      }
+    } finally {
+      await setSettings({ 'security.api_rate_limit': { max: 600, windowSeconds: 60 } });
+      resetRateLimits();
     }
     expect(failures).toEqual([]);
     expect(ROUTES.filter((x) => x.auth).length).toBeGreaterThan(500);

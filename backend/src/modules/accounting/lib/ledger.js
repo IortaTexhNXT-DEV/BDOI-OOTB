@@ -8,6 +8,7 @@ import { getSetting } from '../../../lib/settings.js';
 import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
+import { assertPostingAllowed } from '../../period-end/posting.js';
 
 export const periodOf = (date) => String(date).slice(0, 7);
 const OPEN_STATES = ['draft', 'for-approval', 'approved', 'pending'];
@@ -27,9 +28,12 @@ export async function cashAccountFor(paymentMode) {
   return map[paymentMode] ? String(map[paymentMode]) : account('cash_in_bank');
 }
 
-export async function assertPeriodOpen(db, date) {
-  const r = (await db.query('SELECT status FROM accounting_periods WHERE period = $1', [periodOf(date)])).rows[0];
-  if (r?.status === 'closed') throw conflict(`Accounting period ${periodOf(date)} is closed`);
+/**
+ * Refuse a posting into a closed or locked period, or into a soft-closed one unless the user may post there
+ * (approve:period-end). `period` is the journal's period when it carries the adjustment period (yyyy-13).
+ */
+export async function assertPeriodOpen(db, date, user = null, period = null) {
+  await assertPostingAllowed(db, date, user, period);
 }
 
 function normaliseLines(lines) {
@@ -68,15 +72,17 @@ export async function validateLines(db, rawLines, { manual = false } = {}) {
 /**
  * Create a journal. j = { date, description, source, kind, transactionCode, entryType, entrySubType, referenceType,
  * referenceId, clientId, policyId, policyNumber, currency, dueDate, status, requiresApproval, reversalOf, correctionOf,
- * manual, lines: [{ accountCode, debit, credit, memo, clientId, policyId, dueDate, ...manual line fields }] }.
- * status defaults to posted (or pending when accounting.auto_post_system_entries is false).
+ * manual, period, lines: [{ accountCode, debit, credit, memo, clientId, policyId, dueDate, ...manual line fields }] }.
+ * status defaults to posted (or pending when accounting.auto_post_system_entries is false). period defaults to the
+ * month of the date (YYYY-MM); year-end entries pass the adjustment period (yyyy-13, see modules/period-end).
  */
 export async function createJournal(db, j, user) {
   const { lines, totalDebit, totalCredit, accounts } = await validateLines(db, j.lines, { manual: j.manual });
   const date = j.date || (await today());
   const autoPost = await getSetting('accounting.auto_post_system_entries', true);
   const status = j.status || (autoPost ? 'posted' : 'pending');
-  if (status === 'posted') await assertPeriodOpen(db, date);
+  const period = j.period || periodOf(date);
+  if (status === 'posted') await assertPeriodOpen(db, date, user, period);
   const currency = j.currency || (await getSetting('currency.default', 'PHP'));
   const number = await nextDocumentNumber('journal', { db });
   const h = (await db.query(`INSERT INTO journal_vouchers(jv_number, jv_date, description, status, total_debit, total_credit, source, kind,
@@ -85,7 +91,7 @@ export async function createJournal(db, j, user) {
     VALUES ($1,$2,$3,'pending',$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22) RETURNING *`,
   [number, date, j.description || null, totalDebit, totalCredit, j.source || 'manual', j.kind || 'standard', j.transactionCode || null,
     j.entryType || null, j.entrySubType || null, j.referenceType || null, j.referenceId == null ? null : String(j.referenceId),
-    j.clientId || null, j.policyId || null, j.policyNumber || null, currency, j.dueDate || null, periodOf(date), !!j.requiresApproval,
+    j.clientId || null, j.policyId || null, j.policyNumber || null, currency, j.dueDate || null, period, !!j.requiresApproval,
     j.reversalOf || null, j.correctionOf || null, user?.id ?? null])).rows[0];
   let n = 0;
   for (const l of lines) {
@@ -133,7 +139,7 @@ export async function postJournal(db, id, user) {
   if (jv.requires_approval && jv.created_by === user.id && (await getSetting('finance.maker_checker_enabled', true))) {
     throw forbidden('Maker-checker: a journal voucher must be approved by a different user than the one who created it');
   }
-  await assertPeriodOpen(db, jv.jv_date);
+  await assertPeriodOpen(db, jv.jv_date, user, jv.period);
   const original = jv.reversal_of || jv.correction_of;
   if (original) {
     const o = (await db.query('SELECT jv_number, status FROM journal_vouchers WHERE id = $1 FOR UPDATE', [original])).rows[0];

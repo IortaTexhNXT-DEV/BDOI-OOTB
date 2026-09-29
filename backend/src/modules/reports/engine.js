@@ -20,6 +20,8 @@ const FILTERS = {
   client: (p) => `(t._client_id = ${p} OR lower(t._client_code) = lower(${p}) OR lower(t.client) = lower(${p}))`,
   product: (p) => `(t._product_id = ${p} OR lower(t._product_code) = lower(${p}) OR lower(t.product) = lower(${p}))`,
   status: (p) => `lower(t.status) = lower(${p})`,
+  // GL account (exact code or main-account prefix); the ledger reports expose it as _account
+  account: (p) => `(t._account = ${p} OR t._account LIKE ${p} || '%')`,
 };
 /** Accepted parameter names: the screen's formik field names first, then API-style aliases. */
 const ALIASES = {
@@ -32,6 +34,7 @@ const ALIASES = {
   client: ['Client', 'client', 'clientId'],
   product: ['Product', 'product', 'productId'],
   status: ['Status', 'status'],
+  account: ['Account', 'account', 'accountCode', 'glCode'],
   period: ['period', 'datePreset'],
 };
 const pick = (raw, key) => {

@@ -222,6 +222,17 @@ import Payables from "../module/Reports/FinancialReports/Payables";
 import Journal from "../module/Reports/FinancialReports/Journal";
 import TrailBalance from "../module/Reports/FinancialReports/TrailBalance";
 import ReportCatalogue, { ReportRunner } from "../module/Reports/ReportCatalogue";
+// Period-end processing and BIR tax
+import PeriodManagement from "../module/PeriodEnd/PeriodManagement";
+import MonthEndClose from "../module/PeriodEnd/MonthEndClose";
+import MonthEndCloseRun from "../module/PeriodEnd/MonthEndCloseRun";
+import YearEndClose from "../module/PeriodEnd/YearEndClose";
+import RecurringJournals from "../module/PeriodEnd/RecurringJournals";
+import FinancialStatements from "../module/PeriodEnd/FinancialStatements";
+import CloseChecklist from "../module/PeriodEnd/CloseChecklist";
+import TaxCodes from "../module/PeriodEnd/TaxCodes";
+import Bir2307 from "../module/PeriodEnd/Bir2307";
+import PeriodEndReportPage from "../module/PeriodEnd/ReportPage";
 // import OperationalReports from "../module/Reports/OperationalReports";
 
 // Collections Module
@@ -1046,7 +1057,10 @@ const Maincomponent = () => {
             path="master/finance/subaccount"
             element={<ChartOfAccounts level="sub" />}
           />
-          <Route path="master/finance/taxation" element={<TaxationMaster />} />
+          {/* Taxation: the tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT) */}
+          <Route path="master/finance/taxation" element={<TaxCodes />} />
+          <Route path="master/finance/taxation-legacy" element={<TaxationMaster />} />
+          <Route path="master/finance/close-checklist" element={<CloseChecklist />} />
           <Route
             path="master/finance/taxation/addtaxation"
             element={<AddTaxation />}
@@ -1782,6 +1796,16 @@ const Maincomponent = () => {
           {/* every catalogue report (Reports > All Reports) */}
           <Route path="/reports/catalogue" element={<ReportCatalogue />} />
           <Route path="/reports/run/:code" element={<ReportRunner />} />
+          <Route path="/reports/financialreports/pe/:code" element={<PeriodEndReportPage area="financial" />} />
+          {/* Period-end processing */}
+          <Route path="/accounts/period-end/periods" element={<PeriodManagement />} />
+          <Route path="/accounts/period-end/close" element={<MonthEndClose />} />
+          <Route path="/accounts/period-end/close/:id" element={<MonthEndCloseRun />} />
+          <Route path="/accounts/period-end/year-end" element={<YearEndClose />} />
+          <Route path="/accounts/period-end/recurring" element={<RecurringJournals />} />
+          <Route path="/accounts/period-end/statements" element={<FinancialStatements />} />
+          <Route path="/accounts/tax/2307" element={<Bir2307 />} />
+          <Route path="/accounts/tax/reports/:code" element={<PeriodEndReportPage area="tax" />} />
 
           {/* OperationalReports */}
           <Route
