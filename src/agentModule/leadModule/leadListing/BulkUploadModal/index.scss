@@ -1,0 +1,169 @@
+.bulk-upload-modal {
+  .p-dialog-content {
+    padding: 1.5rem;
+  }
+
+  .bulk-upload-content {
+    .upload-instructions {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+
+      .instructions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        h4 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 500;
+        }
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 1.5rem;
+
+        li {
+          margin-bottom: 0.5rem;
+          color: #666;
+          font-size: 0.875rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    .upload-area {
+      margin-bottom: 1.5rem;
+      text-align: center;
+
+      .p-fileupload {
+        width: 100%;
+
+        .p-button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      .upload-placeholder {
+        margin-top: 1rem;
+        padding: 2rem;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        color: #666;
+
+        svg {
+          width: 48px;
+          height: 48px;
+          margin-bottom: 1rem;
+        }
+
+        p {
+          margin: 0 0 0.5rem 0;
+          font-size: 1rem;
+        }
+
+        span {
+          font-size: 0.875rem;
+          color: #999;
+        }
+      }
+    }
+
+    .upload-progress {
+      margin: 1.5rem 0;
+      text-align: center;
+
+      p {
+        margin: 0.5rem 0 0 0;
+        color: #666;
+        font-size: 0.875rem;
+      }
+    }
+
+    .upload-result {
+      .result-summary {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+
+        .result-item {
+          text-align: center;
+
+          .result-label {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #666;
+            font-size: 0.875rem;
+          }
+
+          .result-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+          }
+
+          &.success .result-value {
+            color: #22c55e;
+          }
+
+          &.failed .result-value {
+            color: #ef4444;
+          }
+
+          &.total .result-value {
+            color: #333;
+          }
+        }
+      }
+
+      .error-details {
+        .error-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+
+          h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #dc2626;
+          }
+        }
+
+        .error-table {
+          .error-row {
+            padding: 0.5rem 0;
+
+            .error-message {
+              margin-bottom: 0.25rem;
+              color: #dc2626;
+              font-size: 0.875rem;
+            }
+
+            .error-lead-info {
+              color: #666;
+              font-size: 0.875rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .bulk-upload-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}

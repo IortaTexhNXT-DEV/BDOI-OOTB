@@ -1,0 +1,430 @@
+.overall__quotecomparision__view__container {
+  .header_title {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 34px;
+    font-weight: 600;
+  }
+  .table_header {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 34px;
+    font-weight: 600;
+    padding: 1.5rem;
+  }
+  .quote_details {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 8px 0px;
+    justify-content: space-between;
+    display: flex;
+    padding: 0 1.5rem;
+  }
+  .quote__id__text {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 0 1.5rem;
+  }
+  .quote__id {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .sub_title {
+    margin: 16px 0;
+  }
+  .policy_text {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 24px;
+    font-weight: 400;
+    align-items: center;
+    display: flex;
+    background-color: #f8f8f8;
+    height: 45px;
+    padding: 0 1.5rem;
+  }
+  .insurance_details {
+    margin: 10px 0px;
+    justify-content: space-between;
+    display: flex;
+  }
+  .insurance_text {
+    color: #6c737f;
+    font-family: Poppins;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 10px 0;
+  }
+  .alpha_text {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 10px 0;
+  }
+  .gross_text {
+    color: #6366f1;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 10px 0;
+  }
+  .gross_count {
+    color: #6366f1;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 10px 0;
+  }
+  .gross_texts {
+    color: #05cd99;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 10px 0;
+  }
+  .gross_counts {
+    color: #05cd99;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 10px 0;
+  }
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 0 !important;
+    }
+  }
+  .policy_button {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    justify-content: space-between;
+    gap: 5%;
+  }
+  .button_component {
+    align-items: flex-end;
+    justify-content: flex-end;
+    display: flex;
+    gap: 2%;
+    margin: 24px 0px;
+  }
+
+  .download_button {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    margin-left: 10px;
+  }
+
+  .p-button {
+    margin: 0;
+    display: inline-flex;
+    cursor: pointer;
+    user-select: none;
+    align-items: center;
+    vertical-align: bottom;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    padding: 8px;
+    border-radius: 6px;
+  }
+  .left_arrow {
+    display: flex;
+    gap: 10px;
+  }
+  .left_arrow_text {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  // Loading and error states
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    min-height: 400px;
+
+    p {
+      color: #6c737f;
+      font-family: Poppins;
+      font-size: 16px;
+      text-align: center;
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+
+    h3 {
+      color: #111927;
+      font-family: Poppins;
+      font-size: 24px;
+      font-weight: 600;
+      margin: 1rem 0;
+    }
+
+    p {
+      color: #6c737f;
+      font-family: Poppins;
+      font-size: 16px;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  // AI Insights Card
+  .ai-insights-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #3b82f6 !important;
+
+    .ai-insights-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.5rem;
+      border-bottom: 1px solid #bfdbfe;
+
+      i {
+        font-size: 1.5rem;
+        color: #3b82f6;
+      }
+
+      h3 {
+        margin: 0;
+        color: #1e40af;
+        font-family: Poppins;
+        font-size: 24px;
+        font-weight: 600;
+      }
+    }
+
+    .ai-section {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e0f2fe;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      h4 {
+        color: #1e40af;
+        font-family: Poppins;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+      }
+
+      p {
+        color: #334155;
+        font-family: Poppins;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0;
+      }
+    }
+
+    .key-differences-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .difference-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        border-left: 3px solid #3b82f6;
+
+        .impact-badge {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          white-space: nowrap;
+
+          &.impact-badge-high {
+            background: #fee2e2;
+            color: #dc2626;
+          }
+
+          &.impact-badge-medium {
+            background: #fef3c7;
+            color: #d97706;
+          }
+
+          &.impact-badge-low {
+            background: #dbeafe;
+            color: #2563eb;
+          }
+        }
+
+        strong {
+          color: #1e40af;
+        }
+      }
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 1rem;
+
+      .pricing-item {
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        &.highlight {
+          background: #dbeafe;
+          border: 2px solid #3b82f6;
+        }
+
+        .label {
+          color: #6c737f;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .value {
+          color: #111927;
+          font-size: 16px;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .recommendation-section {
+      background: #f0fdf4;
+      border-radius: 8px;
+      margin: 0;
+
+      .recommendation-box {
+        .recommendation-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 1rem;
+
+          i {
+            font-size: 1.25rem;
+            color: #10b981;
+          }
+
+          span {
+            color: #047857;
+            font-size: 16px;
+            font-weight: 600;
+          }
+        }
+
+        p {
+          color: #065f46;
+          margin-bottom: 1rem;
+        }
+
+        .considerations {
+          background: white;
+          padding: 1rem;
+          border-radius: 8px;
+          margin-top: 1rem;
+
+          strong {
+            color: #047857;
+            display: block;
+            margin-bottom: 0.5rem;
+          }
+
+          ul {
+            margin: 0;
+            padding-left: 1.5rem;
+
+            li {
+              color: #065f46;
+              font-size: 14px;
+              margin: 0.5rem 0;
+            }
+          }
+        }
+      }
+    }
+
+    .pros-cons-section {
+      .col-6 {
+        h4 {
+          color: #1e40af;
+          font-size: 16px;
+          margin-bottom: 1rem;
+        }
+      }
+
+      .pros-list,
+      .cons-list {
+        margin-bottom: 1.5rem;
+
+        ul {
+          margin: 0.5rem 0 0 0;
+          padding-left: 1.5rem;
+
+          li {
+            color: #334155;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0.5rem 0;
+          }
+        }
+
+        .pros-label {
+          color: #10b981;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .cons-label {
+          color: #ef4444;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .pro-item {
+          color: #065f46;
+        }
+
+        .con-item {
+          color: #991b1b;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,149 @@
+.container__login {
+    justify-content: center;
+    align-items: center;
+
+    .left__side__login {
+        // background-color: #1C2536 !important;
+        background-image: url('../../../assets/images/bgImg.png');
+        background-size: cover;
+        height: 100vh;
+        display: grid;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .login__header {
+        font-family: Inter;
+        font-size: 24px;
+        font-weight: 600;
+
+        text-align: left;
+
+    }
+
+    .register {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 500;
+
+        text-align: left;
+        color: #6366F1;
+
+    }
+    .logo__icon{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    }
+    .forget__text{
+        font-family: Inter;
+font-size: 14px;
+font-weight: 500;
+color: #6366F1;
+text-align: left;
+
+    }
+    .check__icon{
+        background-color: #6366F1;
+       border-radius: 5px;
+    }
+
+    .dont__have__text {
+        font-family: Inter;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 17px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #B1B1B1;
+
+    }
+
+    .welcome__content {
+        color: #B1B1B1;
+        font-family: Inter;
+        font-size: 16px;
+        font-weight: 400;
+
+    }
+
+    .welcome__text {
+        color: #FFF;
+        font-family: Inter;
+
+        font-weight: 700 !important;
+        margin-right: 5px !important;
+    }
+
+    .logo__cover___white {
+        color: #fff;
+
+        font-weight: 300;
+    }
+
+    .side__logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .right__side__login {
+        display: grid;
+        justify-content: center;
+        // align-items: center;
+
+    }
+
+    .input__filed {
+        width: 100% !important;
+    }
+
+    .login__button {
+        width: 100%;
+        background-color: #6366F1;
+        height: 48px;
+        border-radius: 30px
+    }
+
+    @layer primereact {
+
+        .p-input-icon-left>i,
+        .p-input-icon-right>i,
+        .p-input-icon-left>svg,
+        .p-input-icon-right>svg,
+        .p-input-icon-left>.p-input-prefix,
+        .p-input-icon-right>.p-input-suffix {
+            position: absolute;
+            top: 50%;
+            margin-top: -0.3rem;
+        }
+    }
+
+    .input__filed.p-inputtext::placeholder {
+        color: #B1B1B1;
+        font-weight: 600;
+        font-size: 14px;
+
+    }
+
+}
+
+@media screen and (min-width:320px) {
+    .logo__cover___white {
+        font-size: 25px !important;
+    }
+
+    .welcome__text {
+        font-size: 33px !important;
+    }
+}
+
+@media screen and (min-width:767px) {
+    .logo__cover___white {
+        font-size: 30px !important;
+    }
+
+    .welcome__text {
+        font-size: 40px !important;
+    }
+}

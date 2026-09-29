@@ -1,0 +1,261 @@
+{
+  "feature_id": "H6",
+  "feature_name": "Renewal Negotiation Tracking",
+  "description": "Track and manage renewal negotiations, special terms, and client interactions throughout the renewal process",
+  "mvp_scope": {
+    "included": [
+      "Negotiation timeline tracking",
+      "Special terms documentation",
+      "Discount approval workflow",
+      "Client communication log",
+      "Negotiation outcome tracking",
+      "Competitor quote comparison"
+    ],
+    "excluded": [
+      "Automated negotiation",
+      "AI-powered recommendations",
+      "Voice call recording",
+      "Complex approval matrices"
+    ]
+  },
+  "screens": {
+    "negotiation_workspace": {
+      "name": "Renewal Negotiation Workspace",
+      "purpose": "Central workspace for managing ongoing renewal negotiations",
+      "navigation": "/renewal/negotiations",
+      "components": {
+        "active_negotiations": {
+          "type": "kanban_board",
+          "stages": [
+            {
+              "name": "Initial Contact",
+              "description": "First renewal discussion initiated"
+            },
+            {
+              "name": "Quote Presented",
+              "description": "Renewal quote shared with client"
+            },
+            {
+              "name": "Under Negotiation",
+              "description": "Active negotiation in progress"
+            },
+            {
+              "name": "Pending Approval",
+              "description": "Special terms awaiting approval"
+            },
+            {
+              "name": "Final Decision",
+              "description": "Client making final decision"
+            },
+            {
+              "name": "Closed",
+              "description": "Negotiation completed (Won/Lost)"
+            }
+          ],
+          "card_details": [
+            "Policy Number",
+            "Client Name",
+            "Premium (Current/Quoted)",
+            "Days to Expiry",
+            "Last Contact",
+            "Assigned Agent"
+          ]
+        },
+        "quick_actions": {
+          "actions": [
+            "Log Call/Meeting",
+            "Update Quote",
+            "Request Approval",
+            "Add Competitor Info",
+            "Send Email",
+            "Schedule Follow-up"
+          ]
+        }
+      }
+    },
+    "negotiation_details": {
+      "name": "Negotiation Details & History",
+      "purpose": "Detailed view of specific renewal negotiation",
+      "navigation": "/renewal/negotiation/:id",
+      "components": {
+        "client_info": {
+          "displays": [
+            "Client Name & Contact",
+            "Policy Details",
+            "Relationship Duration",
+            "Total Premium Portfolio",
+            "Claims History Summary"
+          ]
+        },
+        "negotiation_timeline": {
+          "type": "vertical_timeline",
+          "events": [
+            {
+              "type": "Initial Contact",
+              "date": "timestamp",
+              "method": "Phone/Email/Meeting",
+              "notes": "text",
+              "outcome": "text"
+            },
+            {
+              "type": "Quote Sent",
+              "date": "timestamp",
+              "quote_details": "Premium, Coverage, Terms",
+              "client_response": "text"
+            },
+            {
+              "type": "Counter Offer",
+              "date": "timestamp",
+              "client_request": "text",
+              "our_response": "text"
+            },
+            {
+              "type": "Competitor Quote",
+              "date": "timestamp",
+              "competitor": "name",
+              "their_premium": "number",
+              "their_terms": "text"
+            },
+            {
+              "type": "Special Approval",
+              "date": "timestamp",
+              "requested_by": "agent",
+              "approved_by": "manager",
+              "special_terms": "text"
+            }
+          ]
+        },
+        "negotiation_parameters": {
+          "sections": [
+            {
+              "name": "Pricing Flexibility",
+              "fields": [
+                {"field": "base_premium", "type": "number", "readonly": true},
+                {"field": "minimum_acceptable", "type": "number", "editable": true},
+                {"field": "current_offer", "type": "number", "editable": true},
+                {"field": "max_discount", "type": "percentage", "approval_required": true}
+              ]
+            },
+            {
+              "name": "Special Terms",
+              "fields": [
+                {"field": "payment_terms", "type": "dropdown", "options": ["Standard", "Extended", "Installments"]},
+                {"field": "coverage_modifications", "type": "textarea"},
+                {"field": "additional_benefits", "type": "multiselect"},
+                {"field": "loyalty_rewards", "type": "text"}
+              ]
+            },
+            {
+              "name": "Competitor Intelligence",
+              "type": "comparison_table",
+              "columns": ["Competitor", "Premium", "Coverage", "Terms", "Our Advantage"],
+              "editable": true
+            }
+          ]
+        },
+        "communication_log": {
+          "type": "activity_feed",
+          "activities": [
+            "Phone Calls",
+            "Emails",
+            "Meetings",
+            "SMS",
+            "Internal Notes"
+          ],
+          "fields_per_activity": [
+            "Date/Time",
+            "Type",
+            "Participants",
+            "Summary",
+            "Next Action",
+            "Attachments"
+          ]
+        }
+      }
+    },
+    "approval_center": {
+      "name": "Special Terms Approval Center",
+      "purpose": "Review and approve special negotiation terms",
+      "navigation": "/renewal/approvals/special-terms",
+      "components": {
+        "pending_approvals": {
+          "columns": [
+            "Request ID",
+            "Policy Number",
+            "Client Name",
+            "Standard Premium",
+            "Requested Premium",
+            "Discount %",
+            "Special Terms",
+            "Business Justification",
+            "Requested By",
+            "Priority"
+          ],
+          "approval_matrix": {
+            "levels": [
+              {"discount": "0-10%", "approver": "Team Lead"},
+              {"discount": "10-15%", "approver": "Branch Manager"},
+              {"discount": "15-25%", "approver": "Regional Head"},
+              {"discount": ">25%", "approver": "CEO/CFO"}
+            ]
+          },
+          "actions": [
+            "Approve",
+            "Approve with Conditions",
+            "Reject",
+            "Request More Info",
+            "Escalate"
+          ]
+        },
+        "approval_history": {
+          "filters": ["Date Range", "Approver", "Status", "Discount Range"],
+          "export": ["PDF", "Excel"]
+        }
+      }
+    }
+  },
+  "data_model": {
+    "negotiation": {
+      "negotiation_id": "string",
+      "policy_id": "string",
+      "start_date": "date",
+      "current_stage": "enum",
+      "assigned_agent": "string",
+      "original_quote": "number",
+      "current_offer": "number",
+      "client_counter": "number",
+      "special_terms": "array",
+      "competitor_quotes": "array",
+      "status": "enum",
+      "outcome": "enum",
+      "close_date": "date"
+    },
+    "negotiation_event": {
+      "event_id": "string",
+      "negotiation_id": "string",
+      "event_type": "enum",
+      "event_date": "timestamp",
+      "performed_by": "string",
+      "details": "json",
+      "attachments": "array"
+    },
+    "special_approval": {
+      "approval_id": "string",
+      "negotiation_id": "string",
+      "requested_terms": "json",
+      "justification": "text",
+      "approval_level": "string",
+      "status": "enum",
+      "approved_by": "string",
+      "conditions": "text"
+    }
+  },
+  "business_rules": [
+    "All negotiations must be linked to valid policies",
+    "Discounts beyond authority require approval within 24 hours",
+    "Competitor quotes must be documented with evidence",
+    "Final negotiation outcome must be recorded within 48 hours of decision",
+    "Special terms approved for one client cannot be auto-applied to others",
+    "All client communications must be logged in the system"
+  ]
+}

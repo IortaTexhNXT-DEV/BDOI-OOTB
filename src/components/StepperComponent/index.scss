@@ -1,0 +1,107 @@
+@import "../../Color.scss";
+// .custom-steps .p-steps-item:first-child::before {  border-left: none !important; } .custom-steps .p-steps-item:last-child::after {     background-color: transparent !important; }
+// .stepper_block {
+//   .stepper__block__yellow {
+//     @layer primereact {
+//       .p-steps .p-steps-item .p-menuitem-link {
+//         background: transparent !important;
+//         transition: box-shadow 0.2s;
+//         border-radius: 6px;
+//       }
+//     }
+
+//     @layer primereact {
+//       .p-disabled,
+//       .p-component:disabled {
+//         opacity: 1 !important;
+//       }
+//     }
+
+//     @layer primereact {
+//       .p-steps .p-steps-item::before {
+//         content: " ";
+//         border-top: 4px solid $light-silver !important;
+//         width: 100%;
+//         top: 50%;
+//         display: block;
+//         position: absolute;
+//         margin-top: 0rem;
+//         // transform: translateX(-50%);
+//       }
+//     }
+//     @layer primereact {
+//       .p-steps .p-steps-item.p-highlight .p-steps-number {
+//         background: $light-silver !important;
+//         color: $light-silver !important;
+//       }
+//     }
+//     @layer primereact {
+//       .p-steps .p-steps-item .p-menuitem-link .p-steps-number {
+//         color: $yellow;
+//         border: 0px solid $Selective-yellow !important;
+//         background: $Selective-yellow;
+//         min-width: 2rem;
+//         height: 2rem;
+//         line-height: 2rem;
+//         font-size: 1.143rem;
+//         z-index: 1;
+//         border-radius: 50%;
+
+//       }
+//     }
+//   }
+//   .stepper__block__green {
+//     @layer primereact {
+//       .p-steps .p-steps-item .p-menuitem-link {
+//         background: transparent !important;
+//         transition: box-shadow 0.2s;
+//         border-radius: 6px;
+
+//       }
+//     }
+//     @layer primereact {
+//       .p-steps .p-steps-item::before {
+//         content: " ";
+//         border-top: 4px solid $light-green !important;
+//         width: 100%;
+//         top: 50%;
+//         left: 100%;
+//         display: block;
+//         position: absolute;
+//         margin-top: 0rem;
+//         transform: translateX(-100%);
+//         background-color: $light-green;
+
+//       }
+//     }
+
+//     @layer primereact {
+//       .p-disabled,
+//       .p-component:disabled {
+//         opacity: 1 !important;
+//       }
+//     }
+//     @layer primereact {
+//       .p-steps .p-steps-item.p-highlight .p-steps-number {
+//         background: $light-green !important;
+//         color: $light-green !important;
+
+//       }
+//     }
+
+//     @layer primereact {
+//       .p-steps .p-steps-item .p-menuitem-link .p-steps-number {
+//         color: $light-green;
+//         border: 0px solid $light-green !important;
+//         background: $light-green;
+//         min-width: 2rem;
+//         height: 2rem;
+//         line-height: 2rem;
+//         font-size: 1.143rem;
+//         z-index: 1;
+//         border-radius: 50%;
+//         transform: translateX(-100%);
+//       }
+//     }
+//   }
+// }

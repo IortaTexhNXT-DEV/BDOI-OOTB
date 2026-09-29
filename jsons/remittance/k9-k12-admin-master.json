@@ -1,0 +1,1265 @@
+{
+  "remittance_admin_masters_k9_k12": {
+    "k9_approval_workflow_master": {
+      "featureId": "K9-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Remittance Approval Workflow Master",
+      "screenCode": "FIN_MAS_REM_009",
+      "menuPath": "Finance > Master > Remittance Master > Approval Workflow",
+      "accessRoles": ["ADMIN"],
+      "tabs": [
+        {
+          "tabId": "workflow",
+          "tabLabel": "Workflow Configuration",
+          "sections": [
+            {
+              "sectionTitle": "Workflow Definition",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Workflow Code",
+                  "fieldId": "workflowCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "WFL-{0000}",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Workflow Name",
+                  "fieldId": "workflowName",
+                  "type": "text",
+                  "required": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Active",
+                  "fieldId": "isActive",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "33%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Workflow Type",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Applies To",
+                  "fieldId": "appliesTo",
+                  "type": "multiselect",
+                  "options": ["Settlement", "Statement", "Electronic Transfer", "Bulk Processing", "Adjustment"],
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Workflow Pattern",
+                  "fieldId": "workflowPattern",
+                  "type": "dropdown",
+                  "options": ["Sequential", "Parallel", "Hierarchical", "Matrix"],
+                  "defaultValue": "Sequential",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Approval Levels",
+              "type": "dynamic-form-builder",
+              "fields": [
+                {
+                  "fieldName": "Approval Stages",
+                  "fieldId": "approvalStages",
+                  "type": "stage-builder",
+                  "allowAdd": true,
+                  "allowDelete": true,
+                  "allowReorder": true,
+                  "stageFields": [
+                    {
+                      "field": "stageName",
+                      "label": "Stage Name",
+                      "type": "text",
+                      "required": true
+                    },
+                    {
+                      "field": "approverRole",
+                      "label": "Approver Role",
+                      "type": "dropdown",
+                      "source": "rolesMaster"
+                    },
+                    {
+                      "field": "minAmount",
+                      "label": "Min Amount",
+                      "type": "decimal"
+                    },
+                    {
+                      "field": "maxAmount",
+                      "label": "Max Amount",
+                      "type": "decimal"
+                    },
+                    {
+                      "field": "approvalType",
+                      "label": "Approval Type",
+                      "type": "dropdown",
+                      "options": ["Any One", "All Required", "Majority", "Two of Three"]
+                    },
+                    {
+                      "field": "slaHours",
+                      "label": "SLA (Hours)",
+                      "type": "number",
+                      "defaultValue": 24
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "conditions",
+          "tabLabel": "Conditions",
+          "sections": [
+            {
+              "sectionTitle": "Conditional Rules",
+              "type": "rule-builder",
+              "fields": [
+                {
+                  "fieldName": "Condition Rules",
+                  "fieldId": "conditionRules",
+                  "type": "condition-builder",
+                  "operators": ["equals", "not equals", "greater than", "less than", "contains", "between"],
+                  "fields": ["amount", "insurerType", "productLine", "transactionType", "urgency"],
+                  "actions": ["Skip Level", "Add Approver", "Send Alert", "Auto-Approve", "Reject"]
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Escalation Rules",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Enable Escalation",
+                  "fieldId": "enableEscalation",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Escalation After (Hours)",
+                  "fieldId": "escalationHours",
+                  "type": "number",
+                  "defaultValue": 48,
+                  "conditional": "enableEscalation=true",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Escalate To",
+                  "fieldId": "escalateTo",
+                  "type": "dropdown",
+                  "source": "rolesMaster",
+                  "conditional": "enableEscalation=true",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Max Escalation Levels",
+                  "fieldId": "maxEscalationLevels",
+                  "type": "number",
+                  "defaultValue": 2,
+                  "conditional": "enableEscalation=true",
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "notifications",
+          "tabLabel": "Notifications",
+          "sections": [
+            {
+              "sectionTitle": "Email Templates",
+              "type": "template-grid",
+              "columns": [
+                {
+                  "field": "event",
+                  "header": "Event",
+                  "type": "dropdown",
+                  "options": ["Approval Request", "Approved", "Rejected", "Escalated", "Reminder"],
+                  "width": "20%",
+                  "editable": true
+                },
+                {
+                  "field": "template",
+                  "header": "Email Template",
+                  "type": "dropdown",
+                  "source": "emailTemplates",
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "recipients",
+                  "header": "Recipients",
+                  "type": "multiselect",
+                  "options": ["Initiator", "Approver", "Next Approver", "Manager", "Custom"],
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "ccList",
+                  "header": "CC",
+                  "type": "text",
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "active",
+                  "header": "Active",
+                  "type": "checkbox",
+                  "width": "5%",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Reminder Settings",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Enable Reminders",
+                  "fieldId": "enableReminders",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "First Reminder After",
+                  "fieldId": "firstReminder",
+                  "type": "number",
+                  "defaultValue": 24,
+                  "unit": "hours",
+                  "conditional": "enableReminders=true",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Reminder Frequency",
+                  "fieldId": "reminderFrequency",
+                  "type": "number",
+                  "defaultValue": 12,
+                  "unit": "hours",
+                  "conditional": "enableReminders=true",
+                  "width": "33%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "delegation",
+          "tabLabel": "Delegation",
+          "sections": [
+            {
+              "sectionTitle": "Delegation Rules",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Allow Delegation",
+                  "fieldId": "allowDelegation",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Allow Permanent Delegation",
+                  "fieldId": "allowPermanent",
+                  "type": "checkbox",
+                  "defaultValue": false,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Max Delegation Days",
+                  "fieldId": "maxDelegationDays",
+                  "type": "number",
+                  "defaultValue": 30,
+                  "conditional": "allowDelegation=true",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Require Delegation Approval",
+                  "fieldId": "requireDelegationApproval",
+                  "type": "checkbox",
+                  "defaultValue": false,
+                  "conditional": "allowDelegation=true",
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "k10_exception_handling_master": {
+      "featureId": "K10-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Remittance Exception Master",
+      "screenCode": "FIN_MAS_REM_010",
+      "menuPath": "Finance > Master > Remittance Master > Exception Configuration",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "exceptionTypes",
+          "tabLabel": "Exception Types",
+          "sections": [
+            {
+              "sectionTitle": "Exception Type Configuration",
+              "type": "editable-grid",
+              "toolbar": [
+                {"label": "Add Exception Type", "action": "addException", "icon": "plus"},
+                {"label": "Import", "action": "import", "icon": "upload"}
+              ],
+              "columns": [
+                {
+                  "field": "exceptionCode",
+                  "header": "Code",
+                  "type": "text",
+                  "width": "10%",
+                  "editable": true,
+                  "required": true,
+                  "unique": true
+                },
+                {
+                  "field": "exceptionName",
+                  "header": "Exception Name",
+                  "type": "text",
+                  "width": "20%",
+                  "editable": true,
+                  "required": true
+                },
+                {
+                  "field": "category",
+                  "header": "Category",
+                  "type": "dropdown",
+                  "options": ["Amount Mismatch", "Missing Document", "Date Discrepancy", "Duplicate Entry", "System Error", "Policy Not Found", "Commission Error"],
+                  "width": "15%",
+                  "editable": true
+                },
+                {
+                  "field": "severity",
+                  "header": "Severity",
+                  "type": "dropdown",
+                  "options": ["Low", "Medium", "High", "Critical"],
+                  "width": "10%",
+                  "editable": true
+                },
+                {
+                  "field": "autoResolve",
+                  "header": "Auto-Resolve",
+                  "type": "checkbox",
+                  "width": "10%",
+                  "editable": true
+                },
+                {
+                  "field": "resolutionAction",
+                  "header": "Resolution Action",
+                  "type": "dropdown",
+                  "options": ["Manual Review", "Auto-Adjust", "Create Adjustment", "Reject", "Hold for Approval"],
+                  "width": "15%",
+                  "editable": true
+                },
+                {
+                  "field": "notifyRole",
+                  "header": "Notify",
+                  "type": "dropdown",
+                  "source": "rolesMaster",
+                  "width": "10%",
+                  "editable": true
+                },
+                {
+                  "field": "active",
+                  "header": "Active",
+                  "type": "checkbox",
+                  "width": "5%",
+                  "editable": true
+                },
+                {
+                  "field": "actions",
+                  "header": "",
+                  "type": "row-actions",
+                  "actions": ["edit", "delete"],
+                  "width": "5%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "thresholds",
+          "tabLabel": "Thresholds",
+          "sections": [
+            {
+              "sectionTitle": "Exception Thresholds",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Amount Variance Threshold",
+                  "fieldId": "amountVarianceThreshold",
+                  "type": "decimal",
+                  "defaultValue": 100.00,
+                  "helpText": "Minimum variance to trigger exception",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Percentage Variance Threshold",
+                  "fieldId": "percentVarianceThreshold",
+                  "type": "percentage",
+                  "defaultValue": 5,
+                  "helpText": "Minimum percentage variance",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Date Variance (Days)",
+                  "fieldId": "dateVarianceDays",
+                  "type": "number",
+                  "defaultValue": 30,
+                  "helpText": "Days difference to trigger exception",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Duplicate Check Period (Days)",
+                  "fieldId": "duplicateCheckPeriod",
+                  "type": "number",
+                  "defaultValue": 90,
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Auto-Resolution Limits",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Auto-Resolve Amount Limit",
+                  "fieldId": "autoResolveLimit",
+                  "type": "decimal",
+                  "defaultValue": 1000.00,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Write-off Limit",
+                  "fieldId": "writeOffLimit",
+                  "type": "decimal",
+                  "defaultValue": 50.00,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Adjustment Approval Limit",
+                  "fieldId": "adjustmentApprovalLimit",
+                  "type": "decimal",
+                  "defaultValue": 5000.00,
+                  "width": "33%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "glAccounts",
+          "tabLabel": "GL Mapping",
+          "sections": [
+            {
+              "sectionTitle": "Exception GL Accounts",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Exception Holding Account",
+                  "fieldId": "exceptionHoldingAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "lookupScreen": "glAccountMaster",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Write-off Account",
+                  "fieldId": "writeOffAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Adjustment Account",
+                  "fieldId": "adjustmentAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Variance Account",
+                  "fieldId": "varianceAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "routing",
+          "tabLabel": "Routing Rules",
+          "sections": [
+            {
+              "sectionTitle": "Exception Routing",
+              "type": "routing-matrix",
+              "fields": [
+                {
+                  "fieldName": "Routing Rules",
+                  "fieldId": "routingRules",
+                  "type": "matrix-grid",
+                  "rows": ["Low", "Medium", "High", "Critical"],
+                  "columns": ["Amount Mismatch", "Missing Document", "Date Discrepancy", "Duplicate Entry", "System Error"],
+                  "cellType": "dropdown",
+                  "cellOptions": "userRoles",
+                  "defaultValue": "Supervisor"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "k11_report_template_master": {
+      "featureId": "K11-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Remittance Report Template Master",
+      "screenCode": "FIN_MAS_REM_011",
+      "menuPath": "Finance > Master > Remittance Master > Report Templates",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "templates",
+          "tabLabel": "Report Templates",
+          "sections": [
+            {
+              "sectionTitle": "Template Library",
+              "type": "card-grid",
+              "cards": [
+                {
+                  "title": "Daily Remittance Summary",
+                  "code": "RPT001",
+                  "category": "Operational",
+                  "frequency": "Daily",
+                  "lastModified": "dynamic",
+                  "actions": ["edit", "copy", "delete"]
+                },
+                {
+                  "title": "Monthly Settlement Report",
+                  "code": "RPT002",
+                  "category": "Financial",
+                  "frequency": "Monthly",
+                  "lastModified": "dynamic",
+                  "actions": ["edit", "copy", "delete"]
+                },
+                {
+                  "title": "Commission Analysis",
+                  "code": "RPT003",
+                  "category": "Analytical",
+                  "frequency": "On-Demand",
+                  "lastModified": "dynamic",
+                  "actions": ["edit", "copy", "delete"]
+                },
+                {
+                  "title": "Exception Report",
+                  "code": "RPT004",
+                  "category": "Control",
+                  "frequency": "Weekly",
+                  "lastModified": "dynamic",
+                  "actions": ["edit", "copy", "delete"]
+                },
+                {
+                  "title": "Aging Analysis",
+                  "code": "RPT005",
+                  "category": "Financial",
+                  "frequency": "Monthly",
+                  "lastModified": "dynamic",
+                  "actions": ["edit", "copy", "delete"]
+                },
+                {
+                  "title": "Electronic Transfer Log",
+                  "code": "RPT006",
+                  "category": "Operational",
+                  "frequency": "Daily",
+                  "lastModified": "dynamic",
+                  "actions": ["edit", "copy", "delete"]
+                }
+              ],
+              "addNewButton": {
+                "label": "Create New Template",
+                "action": "createTemplate",
+                "icon": "plus"
+              }
+            }
+          ]
+        },
+        {
+          "tabId": "designer",
+          "tabLabel": "Report Designer",
+          "sections": [
+            {
+              "sectionTitle": "Report Configuration",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Report Code",
+                  "fieldId": "reportCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "RPT{000}",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Report Name",
+                  "fieldId": "reportName",
+                  "type": "text",
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Report Category",
+                  "fieldId": "reportCategory",
+                  "type": "dropdown",
+                  "options": ["Operational", "Financial", "Analytical", "Control", "Regulatory"],
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Report Type",
+                  "fieldId": "reportType",
+                  "type": "dropdown",
+                  "options": ["Tabular", "Summary", "Detailed", "Matrix", "Dashboard"],
+                  "defaultValue": "Tabular",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Data Source",
+              "layout": "single-column",
+              "fields": [
+                {
+                  "fieldName": "Primary Table",
+                  "fieldId": "primaryTable",
+                  "type": "dropdown",
+                  "source": "dataTablesMaster",
+                  "required": true
+                },
+                {
+                  "fieldName": "Join Tables",
+                  "fieldId": "joinTables",
+                  "type": "query-builder",
+                  "allowJoins": true,
+                  "maxJoins": 5
+                },
+                {
+                  "fieldName": "Filter Conditions",
+                  "fieldId": "filterConditions",
+                  "type": "condition-builder",
+                  "allowGrouping": true
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Column Selection",
+              "type": "dual-listbox",
+              "fields": [
+                {
+                  "fieldName": "Report Columns",
+                  "fieldId": "reportColumns",
+                  "leftTitle": "Available Fields",
+                  "rightTitle": "Selected Fields",
+                  "source": "dynamic_from_tables",
+                  "allowReorder": true,
+                  "showDataType": true
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Grouping & Sorting",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Group By",
+                  "fieldId": "groupBy",
+                  "type": "multiselect",
+                  "source": "selectedColumns",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Sort By",
+                  "fieldId": "sortBy",
+                  "type": "sort-builder",
+                  "source": "selectedColumns",
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "scheduling",
+          "tabLabel": "Schedule",
+          "sections": [
+            {
+              "sectionTitle": "Report Schedule",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Enable Scheduling",
+                  "fieldId": "enableSchedule",
+                  "type": "checkbox",
+                  "defaultValue": false,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Frequency",
+                  "fieldId": "frequency",
+                  "type": "dropdown",
+                  "options": ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"],
+                  "conditional": "enableSchedule=true",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Run Time",
+                  "fieldId": "runTime",
+                  "type": "time",
+                  "conditional": "enableSchedule=true",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Start Date",
+                  "fieldId": "startDate",
+                  "type": "date",
+                  "conditional": "enableSchedule=true",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Distribution",
+              "fields": [
+                {
+                  "fieldName": "Email Recipients",
+                  "fieldId": "emailRecipients",
+                  "type": "tag-input",
+                  "placeholder": "Enter email addresses",
+                  "validation": "email"
+                },
+                {
+                  "fieldName": "Output Format",
+                  "fieldId": "outputFormat",
+                  "type": "checkbox-group",
+                  "options": [
+                    {"value": "pdf", "label": "PDF"},
+                    {"value": "excel", "label": "Excel"},
+                    {"value": "csv", "label": "CSV"},
+                    {"value": "html", "label": "HTML"}
+                  ],
+                  "defaultChecked": ["pdf"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "k12_agency_bill_master": {
+      "featureId": "K12-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Agency Bill Processing Master",
+      "screenCode": "FIN_MAS_REM_012",
+      "menuPath": "Finance > Master > Remittance Master > Agency Bill Setup",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "configuration",
+          "tabLabel": "Configuration",
+          "sections": [
+            {
+              "sectionTitle": "Agency Bill Settings",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Config Code",
+                  "fieldId": "configCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "ABL-{000}",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Config Name",
+                  "fieldId": "configName",
+                  "type": "text",
+                  "required": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Active",
+                  "fieldId": "isActive",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "33%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Processing Rules",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Bill Generation Frequency",
+                  "fieldId": "billFrequency",
+                  "type": "dropdown",
+                  "options": ["Monthly", "Quarterly", "Semi-Annual", "Annual", "On-Demand"],
+                  "defaultValue": "Monthly",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Bill Generation Day",
+                  "fieldId": "billDay",
+                  "type": "number",
+                  "min": 1,
+                  "max": 31,
+                  "defaultValue": 1,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Payment Terms (Days)",
+                  "fieldId": "paymentTerms",
+                  "type": "number",
+                  "defaultValue": 30,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Grace Period (Days)",
+                  "fieldId": "gracePeriod",
+                  "type": "number",
+                  "defaultValue": 5,
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Commission Settings",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Commission Calculation",
+                  "fieldId": "commissionCalc",
+                  "type": "dropdown",
+                  "options": ["Flat Rate", "Tiered", "Product-Based", "Custom Formula"],
+                  "defaultValue": "Product-Based",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Default Commission Rate (%)",
+                  "fieldId": "defaultCommRate",
+                  "type": "decimal",
+                  "min": 0,
+                  "max": 100,
+                  "defaultValue": 10.00,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Include Service Tax",
+                  "fieldId": "includeServiceTax",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Service Tax Rate (%)",
+                  "fieldId": "serviceTaxRate",
+                  "type": "decimal",
+                  "defaultValue": 18.00,
+                  "conditional": "includeServiceTax=true",
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "agencies",
+          "tabLabel": "Agency Setup",
+          "sections": [
+            {
+              "sectionTitle": "Agency Configuration",
+              "type": "editable-grid",
+              "toolbar": [
+                {"label": "Add Agency", "action": "addAgency", "icon": "plus"},
+                {"label": "Import", "action": "importAgencies", "icon": "upload"}
+              ],
+              "columns": [
+                {
+                  "field": "agencyCode",
+                  "header": "Agency Code",
+                  "type": "text",
+                  "width": "10%",
+                  "editable": true,
+                  "required": true
+                },
+                {
+                  "field": "agencyName",
+                  "header": "Agency Name",
+                  "type": "text",
+                  "width": "20%",
+                  "editable": true,
+                  "required": true
+                },
+                {
+                  "field": "agencyType",
+                  "header": "Type",
+                  "type": "dropdown",
+                  "options": ["Direct", "Broker", "Corporate", "Bancassurance"],
+                  "width": "12%",
+                  "editable": true
+                },
+                {
+                  "field": "billMethod",
+                  "header": "Bill Method",
+                  "type": "dropdown",
+                  "options": ["Agency Bill", "Direct Bill", "Account Current"],
+                  "width": "12%",
+                  "editable": true
+                },
+                {
+                  "field": "commissionRate",
+                  "header": "Comm Rate (%)",
+                  "type": "decimal",
+                  "width": "10%",
+                  "editable": true
+                },
+                {
+                  "field": "creditLimit",
+                  "header": "Credit Limit",
+                  "type": "decimal",
+                  "width": "12%",
+                  "editable": true
+                },
+                {
+                  "field": "paymentTerms",
+                  "header": "Payment Terms",
+                  "type": "number",
+                  "width": "10%",
+                  "editable": true
+                },
+                {
+                  "field": "active",
+                  "header": "Active",
+                  "type": "checkbox",
+                  "width": "7%",
+                  "editable": true
+                },
+                {
+                  "field": "actions",
+                  "header": "",
+                  "type": "row-actions",
+                  "actions": ["edit", "delete"],
+                  "width": "7%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "glMapping",
+          "tabLabel": "GL Accounts",
+          "sections": [
+            {
+              "sectionTitle": "Agency Bill GL Configuration",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Agency Receivable Account",
+                  "fieldId": "agencyReceivableAcc",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "lookupScreen": "glAccountMaster",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Commission Payable Account",
+                  "fieldId": "commissionPayableAcc",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Premium Account",
+                  "fieldId": "premiumAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Service Tax Account",
+                  "fieldId": "serviceTaxAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Product-wise GL Mapping",
+              "type": "mapping-grid",
+              "columns": [
+                {
+                  "field": "productCode",
+                  "header": "Product Code",
+                  "type": "dropdown",
+                  "source": "productMaster",
+                  "width": "20%",
+                  "editable": true
+                },
+                {
+                  "field": "premiumGL",
+                  "header": "Premium GL",
+                  "type": "text",
+                  "lookupButton": true,
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "commissionGL",
+                  "header": "Commission GL",
+                  "type": "text",
+                  "lookupButton": true,
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "taxGL",
+                  "header": "Tax GL",
+                  "type": "text",
+                  "lookupButton": true,
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "actions",
+                  "header": "",
+                  "type": "row-actions",
+                  "actions": ["delete"],
+                  "width": "5%"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "remittance_setups_k9_k12": {
+    "approval_matrix_setup": {
+      "featureId": "K9-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Remittance Approval Matrix",
+      "screenCode": "FIN_SET_REM_009",
+      "menuPath": "Finance > Setups > Remittance Setup > Approval Matrix",
+      "accessRoles": ["ADMIN"],
+      "sections": [
+        {
+          "sectionTitle": "Approval Limits by Transaction Type",
+          "type": "matrix-grid",
+          "rows": [
+            "Settlement",
+            "Electronic Transfer",
+            "Bulk Processing",
+            "Statement Generation",
+            "Adjustments"
+          ],
+          "columns": [
+            "User",
+            "Supervisor",
+            "Manager",
+            "Finance Head",
+            "CFO"
+          ],
+          "cellType": "decimal",
+          "cellFormat": "currency",
+          "editable": true,
+          "defaultValues": {
+            "User": 10000,
+            "Supervisor": 50000,
+            "Manager": 100000,
+            "Finance Head": 500000,
+            "CFO": 999999999
+          }
+        }
+      ]
+    },
+    "exception_resolution_setup": {
+      "featureId": "K10-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Exception Resolution Setup",
+      "screenCode": "FIN_SET_REM_010",
+      "menuPath": "Finance > Setups > Remittance Setup > Exception Resolution",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "sections": [
+        {
+          "sectionTitle": "Auto-Resolution Settings",
+          "layout": "two-column",
+          "fields": [
+            {
+              "fieldName": "Enable Auto-Resolution",
+              "fieldId": "enableAutoResolution",
+              "type": "checkbox",
+              "defaultValue": true,
+              "width": "50%"
+            },
+            {
+              "fieldName": "Resolution Confidence Level",
+              "fieldId": "confidenceLevel",
+              "type": "slider",
+              "min": 50,
+              "max": 100,
+              "defaultValue": 75,
+              "unit": "%",
+              "width": "50%"
+            },
+            {
+              "fieldName": "Max Auto-Resolution Amount",
+              "fieldId": "maxAutoAmount",
+              "type": "decimal",
+              "defaultValue": 5000.00,
+              "width": "50%"
+            },
+            {
+              "fieldName": "Review Required Above",
+              "fieldId": "reviewThreshold",
+              "type": "decimal",
+              "defaultValue": 1000.00,
+              "width": "50%"
+            }
+          ]
+        }
+      ]
+    },
+    "report_distribution_setup": {
+      "featureId": "K11-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Report Distribution Setup",
+      "screenCode": "FIN_SET_REM_011",
+      "menuPath": "Finance > Setups > Remittance Setup > Report Distribution",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "sections": [
+        {
+          "sectionTitle": "Default Distribution Lists",
+          "type": "distribution-grid",
+          "columns": [
+            {
+              "field": "reportCategory",
+              "header": "Report Category",
+              "type": "dropdown",
+              "options": ["Operational", "Financial", "Analytical", "Control", "Regulatory"],
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "recipientRole",
+              "header": "Recipient Role",
+              "type": "multiselect",
+              "source": "rolesMaster",
+              "width": "25%",
+              "editable": true
+            },
+            {
+              "field": "emailList",
+              "header": "Email List",
+              "type": "tag-input",
+              "width": "25%",
+              "editable": true
+            },
+            {
+              "field": "frequency",
+              "header": "Frequency",
+              "type": "dropdown",
+              "options": ["Daily", "Weekly", "Monthly", "On-Demand"],
+              "width": "15%",
+              "editable": true
+            },
+            {
+              "field": "format",
+              "header": "Format",
+              "type": "multiselect",
+              "options": ["PDF", "Excel", "CSV"],
+              "width": "15%",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    },
+    "agency_commission_setup": {
+      "featureId": "K12-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Agency Commission Setup",
+      "screenCode": "FIN_SET_REM_012",
+      "menuPath": "Finance > Setups > Remittance Setup > Agency Commission",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "sections": [
+        {
+          "sectionTitle": "Commission Structure",
+          "type": "tiered-grid",
+          "columns": [
+            {
+              "field": "fromAmount",
+              "header": "From Amount",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "toAmount",
+              "header": "To Amount",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "commissionRate",
+              "header": "Commission Rate (%)",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "bonusRate",
+              "header": "Bonus Rate (%)",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "effectiveDate",
+              "header": "Effective Date",
+              "type": "date",
+              "width": "20%",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

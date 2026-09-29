@@ -1,0 +1,36 @@
+.custom-table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    min-width: 50rem;
+    background-color: #ffffff;
+    
+}
+
+.table-header {
+    display: flex;
+    background-color: #f4f4f4;
+    font-weight: bold;
+    
+}
+
+.header-cell, .row-cell {
+    flex: 1;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.table-body {
+    display: flex;
+    flex-direction: column;
+    
+}
+
+.table-row {
+    display: flex;
+    /* &:nth-child(even) {
+        background-color: #fafafa;
+    } */
+}

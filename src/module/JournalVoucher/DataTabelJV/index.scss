@@ -1,0 +1,152 @@
+.journal__table__container {
+    .action__button {
+        background: transparent;
+        border: none;
+    }
+    .fieldvalue_container {
+        font-size: 16px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 400;
+        padding: 1rem  !important;
+        cursor: pointer;
+    }
+
+
+    .reversal__table__main {
+        tr {
+            height: 50px;
+        }
+
+        thead {
+            tr {
+                th {
+                    border: 0 !important;
+                }
+
+                .p-column-header-content {
+                    justify-content: center;
+
+                    .p-column-title {
+                        color: #111927;
+                        font-family: 'Inter', sans-serif;
+                        font-size: 16px;
+                        font-style: normal;
+                        font-weight: 500;
+                        line-height: normal;
+                    }
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                td {
+                    color: #111927;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 16px;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: normal;
+                    text-align: center !important;
+                }
+            }
+        }
+
+        .p-paginator-first,
+        .p-paginator .p-paginator-prev,
+        .p-paginator .p-paginator-next,
+        .p-paginator .p-paginator-last {
+            background-color: transparent;
+            border: 0 none;
+            color: #1c2536;
+            min-width: 0.5rem;
+            height: 3rem;
+            margin: 0.143rem;
+            transition: box-shadow 0.2s;
+            border-radius: 50%;
+        }
+
+        .p-paginator-bottom {
+            border-width: 0;
+            justify-content: flex-end;
+
+            span {
+                color: #1c2536 !important;
+                font-family: 'Inter', sans-serif;
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+            }
+
+            .table__selector {
+                padding-right: 25%;
+
+                .pagedropdown_container {
+                    border: none;
+                    margin: 0 !important;
+                }
+            }
+        }
+
+        @media only screen and (min-width: 768px) and (max-width: 991px) {
+            thead {
+                tr {
+                    th {
+                        padding: 0.5rem 0.5rem;
+                    }
+
+                    .p-column-header-content {
+                        .p-column-title {
+                            font-size: 12px;
+                        }
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    td {
+                        font-size: 12px;
+                    }
+                }
+            }
+
+            .p-paginator-bottom {
+                span {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        @media only screen and (min-width: 992px) and (max-width: 1440px) {
+            thead {
+                tr {
+                    th {
+                        padding: 0.5rem 0.5rem;
+                    }
+
+                    .p-column-header-content {
+                        .p-column-title {
+                            font-size: 14px;
+                        }
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    td {
+                        font-size: 14px;
+                    }
+                }
+            }
+
+            .p-paginator-bottom {
+                span {
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+}

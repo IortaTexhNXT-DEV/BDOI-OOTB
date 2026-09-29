@@ -1,0 +1,295 @@
+// Responsive Design Foundation
+// =============================
+
+// Breakpoints
+$mobile-xs: 320px; // Small mobile
+$mobile-sm: 480px; // Large mobile
+$mobile-md: 576px; // Extra large mobile
+$tablet-sm: 768px; // Small tablet
+$tablet-md: 1024px; // Large tablet
+$desktop-sm: 1200px; // Small desktop
+$desktop-md: 1440px; // Large desktop
+
+// Media Query Mixins
+@mixin mobile-xs {
+  @media (max-width: #{$mobile-xs - 1px}) {
+    @content;
+  }
+}
+
+@mixin mobile-sm {
+  @media (max-width: #{$mobile-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin mobile-md {
+  @media (max-width: #{$mobile-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-sm {
+  @media (max-width: #{$tablet-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-md {
+  @media (max-width: #{$tablet-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-sm {
+  @media (max-width: #{$desktop-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop-md {
+  @media (max-width: #{$desktop-md - 1px}) {
+    @content;
+  }
+}
+
+// Responsive Utility Classes
+.responsive-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+
+  @include mobile-sm {
+    padding: 0 0.75rem;
+  }
+}
+
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+
+  @include mobile-sm {
+    gap: 0.75rem;
+  }
+}
+
+.responsive-flex {
+  display: flex;
+  gap: 1rem;
+
+  @include mobile-sm {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+// Responsive Typography
+.responsive-text {
+  font-size: 1rem;
+  line-height: 1.5;
+
+  @include mobile-sm {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+}
+
+.responsive-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+
+  @include mobile-sm {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+// Responsive Spacing
+.responsive-padding {
+  padding: 1rem;
+
+  @include mobile-sm {
+    padding: 0.75rem;
+  }
+}
+
+.responsive-margin {
+  margin: 1rem;
+
+  @include mobile-sm {
+    margin: 0.75rem;
+  }
+}
+
+// Responsive Buttons
+.responsive-button {
+  min-height: 44px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+
+  @include mobile-sm {
+    min-height: 48px;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+}
+
+// Responsive Forms
+.responsive-input {
+  min-height: 44px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+
+  @include mobile-sm {
+    min-height: 48px;
+    font-size: 16px; // Prevent zoom on iOS
+    border-radius: 8px;
+  }
+}
+
+// Responsive Cards
+.responsive-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  @include mobile-sm {
+    padding: 1rem;
+    border-radius: 6px;
+  }
+}
+
+// Responsive Tables
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+
+  @include mobile-sm {
+    font-size: 0.9rem;
+  }
+}
+
+// Responsive Images
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+
+  @include mobile-sm {
+    border-radius: 4px;
+  }
+}
+
+// Responsive Navigation
+.responsive-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @include mobile-sm {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+// Responsive Modals
+.responsive-modal {
+  width: 90vw;
+  max-width: 600px;
+  margin: 1rem;
+
+  @include mobile-sm {
+    width: 95vw;
+    margin: 0.5rem;
+  }
+}
+
+// Responsive Sidebar
+.responsive-sidebar {
+  width: 280px;
+  min-width: 280px;
+
+  @include tablet-sm {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  @include mobile-sm {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+// Responsive Content Area
+.responsive-content {
+  flex: 1;
+  padding: 1rem;
+
+  @include mobile-sm {
+    padding: 0.75rem;
+  }
+}
+
+// Responsive Footer
+.responsive-footer {
+  padding: 2rem 1rem;
+  text-align: center;
+
+  @include mobile-sm {
+    padding: 1.5rem 0.75rem;
+  }
+}
+
+// Responsive Header
+.responsive-header {
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  @include mobile-sm {
+    padding: 0.75rem;
+  }
+}
+
+// Responsive Loading States
+.responsive-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+
+  @include mobile-sm {
+    padding: 1.5rem;
+  }
+}
+
+// Responsive Error States
+.responsive-error {
+  padding: 1rem;
+  border-radius: 6px;
+  background: #fee;
+  color: #c33;
+  text-align: center;
+
+  @include mobile-sm {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+// Responsive Success States
+.responsive-success {
+  padding: 1rem;
+  border-radius: 6px;
+  background: #efe;
+  color: #363;
+  text-align: center;
+
+  @include mobile-sm {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}

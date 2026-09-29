@@ -1,0 +1,65 @@
+@import "../../Color.scss";
+.password__block {
+  margin-top: 0.6rem;
+  .label__block {
+    height: 40px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .label__title {
+    font-family: Poppins;
+    color: #000000;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .password__field {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: $white;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .password__field input::placeholder {
+    color: $sky-Blue;
+    font-family: "Poppins";
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 22.5pxpx;
+  }
+  @layer primereact {
+    .p-input-icon-right > i:last-of-type,
+    .p-input-icon-right > svg:last-of-type,
+    .p-input-icon-right > .p-input-suffix {
+      color: $sky-Blue;
+    }
+  }
+  .p-inputtext {
+    border: 0px;
+    width: 100%;
+    border-radius: 20px;
+  }
+  @layer primereact {
+    .p-inputtext:enabled:focus {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0rem $pale-Blue;
+      border-color: $royal-Blue;
+    }
+  }
+  .formik__error {
+    color: $red;
+    font-size: 10px;
+    display: flex;
+    justify-content: flex-start;
+    margin-left: 12px;
+    margin-top: 5px;
+  }
+  .required__label {
+    color: $red;
+  }
+}

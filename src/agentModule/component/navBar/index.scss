@@ -1,0 +1,155 @@
+// Responsive mixins
+$mobile-sm: 480px;
+$tablet-sm: 768px;
+$tablet-md: 1024px;
+@import "../../../Color.scss";
+@mixin mobile-sm {
+  @media (max-width: #{$mobile-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-sm {
+  @media (max-width: #{$tablet-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-md {
+  @media (max-width: #{$tablet-md - 1px}) {
+    @content;
+  }
+}
+
+.Agentnavbar__container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  translate: 0 -10px;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  // Adjust padding on mobile and tablet for better spacing
+  @include tablet-md {
+    padding-left: 10px;
+    padding-right: 15px;
+  }
+
+  @include tablet-sm {
+    padding-left: 10px;
+    padding-right: 15px;
+  }
+
+  @include mobile-sm {
+    padding-left: 5px;
+    padding-right: 10px;
+    gap: 15px; // Reduce gap on mobile for better space utilization
+  }
+
+  .bdo-logo-section {
+    display: flex;
+    align-items: center;
+
+    .bdo-logo-nav {
+      height: 35px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    // Move logo to the right on mobile and tablet to avoid hamburger menu overlap
+    @include tablet-md {
+      margin-left: 60px; // Move logo right to clear hamburger menu space
+    }
+
+    @include tablet-sm {
+      margin-left: 60px; // Move logo right to clear hamburger menu space
+    }
+
+    @include mobile-sm {
+      margin-left: 50px; // Slightly less margin on mobile
+    }
+  }
+
+  .nav-spacer {
+    flex: 1;
+  }
+  .navbar__container__profile__image {
+    border-radius: 100%;
+  }
+  .navbar__container__profile__image__container {
+    border-radius: 100%;
+  }
+  .p-button {
+    color: #000;
+    background: #ffffff;
+    border: 1px solid #ffffff;
+    padding: 0.75rem 1.25rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+      box-shadow 0.2s;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+  }
+  .notification__title {
+    font-size: 24px;
+    font-weight: 500;
+    font-family: Poppins, sans-serif;
+    line-height: 36px;
+    color: #111927;
+  }
+  .close__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .notification-button-hover {
+    &:hover {
+      color: #007bff;
+      background-color: $main-background;
+    }
+  }
+
+  // Notification badge styles
+  .notification-badge-container {
+    position: relative;
+    display: inline-block;
+
+    .notification-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: #dc3545;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      line-height: 1;
+      padding: 0 4px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+  }
+}

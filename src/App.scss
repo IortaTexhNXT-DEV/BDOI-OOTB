@@ -1,0 +1,25 @@
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+:root {
+  --bv-primary: #0056b3;
+  --bv-secondary: #003d82;
+  --bv-primary-hover: #003d82;
+}
+
+.css-esmk4o {
+  position: relative;
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-color: #efefef;
+  -webkit-transition: width, left, right, 300ms;
+  transition: width, left, right, 300ms;
+  // width: 23vw !important;
+  min-width: 20vw !important;
+  background-color: #1c2536 !important;
+}
+.p-card {
+  border-radius: 20px !important;
+}

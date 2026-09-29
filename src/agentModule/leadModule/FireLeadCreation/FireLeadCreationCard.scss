@@ -1,0 +1,106 @@
+// Sum Insured & Premium: make number inputs match dropdown/text field style (single border, no inner line)
+.dropdown__container {
+  .p-inputnumber.dropdown__field {
+    .p-inputnumber-input {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent;
+      outline: none;
+    }
+    .p-inputnumber-button-group {
+      display: none;
+    }
+  }
+}
+
+// Fire discount card - same styling as Motor order summary
+.fire-lead-discounts {
+  .discount__dynamic__card {
+    border-radius: 10px;
+    background: #eeefff;
+    padding: 16px;
+    display: grid;
+    gap: 8px;
+
+    .discount__dynamic__card__title {
+      color: #111927;
+      font-family: Poppins;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .discount__dynamic__card__subtitle {
+      color: #111927;
+      font-family: Poppins;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .discount__dynamic__card__bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+
+      .discount__btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+        flex-shrink: 0;
+
+        svg {
+          width: 24px;
+          height: 24px;
+          flex-shrink: 0;
+        }
+
+        &:hover {
+          background: rgba(67, 56, 202, 0.1);
+        }
+      }
+
+      .discount__reflection__text {
+        color: #4338ca;
+        text-align: center;
+        font-family: Poppins;
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        flex: 1;
+      }
+    }
+  }
+
+  .discount__action__container {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+
+    .discount__action__text {
+      font-family: Poppins;
+      font-size: 12px;
+    }
+  }
+}
+
+// Fire quote preview - consistent button sizing to match quote detail view
+.fire-quote-preview-actions {
+  .fire-preview-btn {
+    min-width: 200px;
+    justify-content: center;
+  }
+
+  .fire-preview-btn-wrapper {
+    display: inline-flex;
+  }
+}

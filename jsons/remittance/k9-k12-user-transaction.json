@@ -1,0 +1,1354 @@
+{
+  "remittance_user_transactions_k9_k12": {
+    "k9_remittance_approval": {
+      "featureId": "K9-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Remittance Approval Workflow",
+      "screenCode": "FIN_TRN_REM_009",
+      "menuPath": "Finance > Remittance > Approvals > Pending Approvals",
+      "accessRoles": ["SUPERVISOR", "MANAGER", "FINANCE_HEAD", "CFO"],
+      "dashboardSection": {
+        "layout": "kpi-cards",
+        "cards": [
+          {
+            "title": "Pending My Approval",
+            "value": "pendingCount",
+            "icon": "clock",
+            "color": "orange",
+            "clickable": true,
+            "filter": "myPending"
+          },
+          {
+            "title": "Total Pending",
+            "value": "totalPending",
+            "icon": "hourglass",
+            "color": "blue"
+          },
+          {
+            "title": "Overdue",
+            "value": "overdueCount",
+            "icon": "alert",
+            "color": "red",
+            "clickable": true,
+            "filter": "overdue"
+          },
+          {
+            "title": "Approved Today",
+            "value": "approvedToday",
+            "icon": "check",
+            "color": "green"
+          }
+        ]
+      },
+      "mainSection": {
+        "layout": "tabbed-view",
+        "tabs": [
+          {
+            "tabId": "pending",
+            "tabLabel": "Pending Approvals",
+            "badgeCount": "pendingCount",
+            "sections": [
+              {
+                "filterSection": {
+                  "layout": "horizontal",
+                  "fields": [
+                    {
+                      "fieldName": "Transaction Type",
+                      "fieldId": "transType",
+                      "type": "dropdown",
+                      "options": ["All", "Settlement", "Electronic Transfer", "Bulk Processing", "Adjustment"],
+                      "defaultValue": "All",
+                      "width": "20%"
+                    },
+                    {
+                      "fieldName": "Priority",
+                      "fieldId": "priority",
+                      "type": "dropdown",
+                      "options": ["All", "Urgent", "High", "Normal", "Low"],
+                      "defaultValue": "All",
+                      "width": "15%"
+                    },
+                    {
+                      "fieldName": "Amount Range",
+                      "fieldId": "amountRange",
+                      "type": "range-slider",
+                      "min": 0,
+                      "max": 1000000,
+                      "width": "25%"
+                    },
+                    {
+                      "fieldName": "Age (Days)",
+                      "fieldId": "age",
+                      "type": "dropdown",
+                      "options": ["All", "< 1 Day", "1-3 Days", "3-7 Days", "> 7 Days"],
+                      "defaultValue": "All",
+                      "width": "15%"
+                    },
+                    {
+                      "buttons": [
+                        {
+                          "label": "Filter",
+                          "action": "filter",
+                          "type": "primary"
+                        },
+                        {
+                          "label": "Clear",
+                          "action": "clear",
+                          "type": "link"
+                        }
+                      ],
+                      "width": "25%"
+                    }
+                  ]
+                },
+                "gridSection": {
+                  "columns": [
+                    {
+                      "field": "select",
+                      "type": "checkbox",
+                      "width": "5%"
+                    },
+                    {
+                      "field": "priority",
+                      "header": "",
+                      "type": "priority-flag",
+                      "width": "5%",
+                      "colors": {
+                        "Urgent": "red",
+                        "High": "orange",
+                        "Normal": "blue",
+                        "Low": "gray"
+                      }
+                    },
+                    {
+                      "field": "referenceNo",
+                      "header": "Reference No",
+                      "width": "12%",
+                      "type": "link",
+                      "linkAction": "viewDetails"
+                    },
+                    {
+                      "field": "transactionType",
+                      "header": "Type",
+                      "width": "10%"
+                    },
+                    {
+                      "field": "initiator",
+                      "header": "Initiated By",
+                      "width": "12%"
+                    },
+                    {
+                      "field": "submissionDate",
+                      "header": "Submitted",
+                      "width": "10%",
+                      "format": "datetime"
+                    },
+                    {
+                      "field": "amount",
+                      "header": "Amount",
+                      "width": "12%",
+                      "align": "right",
+                      "format": "currency"
+                    },
+                    {
+                      "field": "description",
+                      "header": "Description",
+                      "width": "15%"
+                    },
+                    {
+                      "field": "slaStatus",
+                      "header": "SLA",
+                      "width": "8%",
+                      "type": "sla-indicator",
+                      "format": "hours-remaining"
+                    },
+                    {
+                      "field": "currentLevel",
+                      "header": "Level",
+                      "width": "6%"
+                    },
+                    {
+                      "field": "actions",
+                      "header": "Actions",
+                      "width": "15%",
+                      "type": "action-buttons",
+                      "actions": [
+                        {
+                          "label": "View",
+                          "icon": "view",
+                          "action": "view",
+                          "type": "link"
+                        },
+                        {
+                          "label": "Approve",
+                          "icon": "check",
+                          "action": "approve",
+                          "type": "success"
+                        },
+                        {
+                          "label": "Reject",
+                          "icon": "close",
+                          "action": "reject",
+                          "type": "danger"
+                        }
+                      ]
+                    }
+                  ],
+                  "features": {
+                    "sortable": true,
+                    "pagination": true,
+                    "pageSize": 20,
+                    "selectable": true
+                  }
+                },
+                "bulkActions": {
+                  "conditional": "hasSelection",
+                  "actions": [
+                    {
+                      "label": "Bulk Approve",
+                      "action": "bulkApprove",
+                      "type": "success",
+                      "icon": "check-all",
+                      "requireConfirmation": true
+                    },
+                    {
+                      "label": "Bulk Reject",
+                      "action": "bulkReject",
+                      "type": "danger",
+                      "icon": "close-all",
+                      "requireConfirmation": true
+                    },
+                    {
+                      "label": "Delegate",
+                      "action": "delegate",
+                      "type": "secondary",
+                      "icon": "forward"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "tabId": "history",
+            "tabLabel": "Approval History",
+            "sections": [
+              {
+                "filterSection": {
+                  "layout": "horizontal",
+                  "fields": [
+                    {
+                      "fieldName": "Date Range",
+                      "fieldId": "dateRange",
+                      "type": "date-range",
+                      "defaultValue": "last7days",
+                      "width": "30%"
+                    },
+                    {
+                      "fieldName": "Action",
+                      "fieldId": "action",
+                      "type": "dropdown",
+                      "options": ["All", "Approved", "Rejected", "Delegated"],
+                      "defaultValue": "All",
+                      "width": "20%"
+                    }
+                  ]
+                },
+                "gridSection": {
+                  "columns": [
+                    {
+                      "field": "referenceNo",
+                      "header": "Reference No",
+                      "width": "15%"
+                    },
+                    {
+                      "field": "transactionType",
+                      "header": "Type",
+                      "width": "12%"
+                    },
+                    {
+                      "field": "amount",
+                      "header": "Amount",
+                      "width": "15%",
+                      "align": "right",
+                      "format": "currency"
+                    },
+                    {
+                      "field": "action",
+                      "header": "Action",
+                      "width": "10%",
+                      "type": "status-badge",
+                      "statusColors": {
+                        "Approved": "green",
+                        "Rejected": "red",
+                        "Delegated": "blue"
+                      }
+                    },
+                    {
+                      "field": "actionDate",
+                      "header": "Action Date",
+                      "width": "15%",
+                      "format": "datetime"
+                    },
+                    {
+                      "field": "remarks",
+                      "header": "Remarks",
+                      "width": "33%"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "tabId": "delegation",
+            "tabLabel": "Delegation",
+            "sections": [
+              {
+                "currentDelegations": {
+                  "sectionTitle": "Active Delegations",
+                  "type": "delegation-list",
+                  "items": [
+                    {
+                      "delegatedTo": "userName",
+                      "fromDate": "date",
+                      "toDate": "date",
+                      "scope": "transactionTypes",
+                      "status": "active/expired",
+                      "actions": ["revoke", "extend"]
+                    }
+                  ]
+                },
+                "addDelegation": {
+                  "sectionTitle": "Add New Delegation",
+                  "layout": "two-column",
+                  "fields": [
+                    {
+                      "fieldName": "Delegate To",
+                      "fieldId": "delegateTo",
+                      "type": "searchable-dropdown",
+                      "source": "userMaster",
+                      "filter": "sameOrHigherLevel",
+                      "required": true,
+                      "width": "50%"
+                    },
+                    {
+                      "fieldName": "Delegation Period",
+                      "fieldId": "delegationPeriod",
+                      "type": "date-range",
+                      "required": true,
+                      "maxDays": 30,
+                      "width": "50%"
+                    },
+                    {
+                      "fieldName": "Transaction Types",
+                      "fieldId": "transTypes",
+                      "type": "multiselect",
+                      "options": ["All", "Settlement", "Electronic Transfer", "Bulk Processing", "Adjustment"],
+                      "defaultValue": ["All"],
+                      "width": "50%"
+                    },
+                    {
+                      "fieldName": "Amount Limit",
+                      "fieldId": "amountLimit",
+                      "type": "decimal",
+                      "placeholder": "Leave blank for no limit",
+                      "width": "50%"
+                    },
+                    {
+                      "fieldName": "Reason",
+                      "fieldId": "reason",
+                      "type": "textarea",
+                      "rows": 2,
+                      "required": true,
+                      "width": "100%"
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "label": "Add Delegation",
+                      "action": "addDelegation",
+                      "type": "primary"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "detailModal": {
+        "title": "Approval Details",
+        "size": "large",
+        "sections": [
+          {
+            "sectionTitle": "Transaction Information",
+            "layout": "view-only",
+            "fields": "dynamic_based_on_transaction_type"
+          },
+          {
+            "sectionTitle": "Approval History",
+            "type": "timeline",
+            "entries": "dynamic_approval_chain"
+          },
+          {
+            "sectionTitle": "Supporting Documents",
+            "type": "document-viewer",
+            "documents": "dynamic_attachments"
+          },
+          {
+            "sectionTitle": "Approval Action",
+            "fields": [
+              {
+                "fieldName": "Action",
+                "fieldId": "approvalAction",
+                "type": "radio-group",
+                "options": [
+                  {"value": "approve", "label": "Approve", "color": "green"},
+                  {"value": "reject", "label": "Reject", "color": "red"},
+                  {"value": "hold", "label": "Hold for Review", "color": "orange"}
+                ],
+                "required": true
+              },
+              {
+                "fieldName": "Comments",
+                "fieldId": "comments",
+                "type": "textarea",
+                "rows": 3,
+                "required": true,
+                "conditional": "approvalAction=reject||hold"
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "label": "Submit",
+            "action": "submitApproval",
+            "type": "primary"
+          },
+          {
+            "label": "Cancel",
+            "action": "closeModal",
+            "type": "link"
+          }
+        ]
+      }
+    },
+    "k10_remittance_exceptions": {
+      "featureId": "K10-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Remittance Exceptions",
+      "screenCode": "FIN_TRN_REM_010",
+      "menuPath": "Finance > Remittance > Exceptions > Manage Exceptions",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER"],
+      "headerSection": {
+        "layout": "summary-bar",
+        "fields": [
+          {
+            "label": "Total Exceptions",
+            "value": "totalExceptions",
+            "type": "number",
+            "icon": "warning"
+          },
+          {
+            "label": "Unresolved",
+            "value": "unresolvedCount",
+            "type": "number",
+            "color": "red",
+            "clickable": true
+          },
+          {
+            "label": "In Progress",
+            "value": "inProgressCount",
+            "type": "number",
+            "color": "orange"
+          },
+          {
+            "label": "Resolved Today",
+            "value": "resolvedToday",
+            "type": "number",
+            "color": "green"
+          },
+          {
+            "label": "Total Value at Risk",
+            "value": "totalValueAtRisk",
+            "type": "currency",
+            "highlight": true
+          }
+        ]
+      },
+      "mainSection": {
+        "layout": "split-view",
+        "leftPanel": {
+          "title": "Exception List",
+          "width": "65%",
+          "filterSection": {
+            "layout": "compact",
+            "fields": [
+              {
+                "fieldName": "Exception Type",
+                "fieldId": "exceptionType",
+                "type": "dropdown",
+                "options": ["All", "Amount Mismatch", "Missing Document", "Duplicate Entry", "Date Discrepancy", "Policy Not Found"],
+                "defaultValue": "All"
+              },
+              {
+                "fieldName": "Severity",
+                "fieldId": "severity",
+                "type": "button-group",
+                "options": [
+                  {"value": "all", "label": "All"},
+                  {"value": "critical", "label": "Critical", "color": "red"},
+                  {"value": "high", "label": "High", "color": "orange"},
+                  {"value": "medium", "label": "Medium", "color": "yellow"},
+                  {"value": "low", "label": "Low", "color": "green"}
+                ],
+                "defaultValue": "all"
+              },
+              {
+                "fieldName": "Status",
+                "fieldId": "status",
+                "type": "dropdown",
+                "options": ["All", "New", "In Progress", "Resolved", "Escalated"],
+                "defaultValue": "All"
+              }
+            ]
+          },
+          "gridSection": {
+            "columns": [
+              {
+                "field": "severity",
+                "header": "",
+                "width": "5%",
+                "type": "severity-icon",
+                "sortable": true
+              },
+              {
+                "field": "exceptionId",
+                "header": "ID",
+                "width": "10%",
+                "type": "link"
+              },
+              {
+                "field": "type",
+                "header": "Type",
+                "width": "15%",
+                "sortable": true
+              },
+              {
+                "field": "remittanceNo",
+                "header": "Remittance No",
+                "width": "15%"
+              },
+              {
+                "field": "amount",
+                "header": "Amount",
+                "width": "12%",
+                "align": "right",
+                "format": "currency"
+              },
+              {
+                "field": "age",
+                "header": "Age",
+                "width": "8%",
+                "format": "days",
+                "colorCode": true
+              },
+              {
+                "field": "assignedTo",
+                "header": "Assigned To",
+                "width": "15%"
+              },
+              {
+                "field": "status",
+                "header": "Status",
+                "width": "10%",
+                "type": "status-badge"
+              },
+              {
+                "field": "actions",
+                "header": "",
+                "width": "10%",
+                "type": "action-buttons",
+                "actions": [
+                  {
+                    "icon": "play",
+                    "tooltip": "Start",
+                    "action": "start",
+                    "conditional": "status=New"
+                  },
+                  {
+                    "icon": "check",
+                    "tooltip": "Resolve",
+                    "action": "resolve",
+                    "conditional": "status=In Progress"
+                  },
+                  {
+                    "icon": "escalate",
+                    "tooltip": "Escalate",
+                    "action": "escalate"
+                  }
+                ]
+              }
+            ],
+            "rowClick": "showDetails",
+            "features": {
+              "sortable": true,
+              "pagination": true,
+              "pageSize": 15
+            }
+          }
+        },
+        "rightPanel": {
+          "title": "Exception Details",
+          "width": "35%",
+          "conditional": "hasSelection",
+          "sections": [
+            {
+              "sectionTitle": "Exception Information",
+              "layout": "key-value",
+              "fields": [
+                {"label": "Exception ID", "value": "exceptionId"},
+                {"label": "Type", "value": "exceptionType"},
+                {"label": "Severity", "value": "severity", "type": "badge"},
+                {"label": "Created", "value": "createdDate", "format": "datetime"},
+                {"label": "Due By", "value": "dueDate", "format": "datetime", "highlight": true}
+              ]
+            },
+            {
+              "sectionTitle": "Transaction Details",
+              "layout": "key-value",
+              "fields": [
+                {"label": "Remittance No", "value": "remittanceNo", "type": "link"},
+                {"label": "Insurer", "value": "insurerName"},
+                {"label": "Expected Amount", "value": "expectedAmount", "format": "currency"},
+                {"label": "Actual Amount", "value": "actualAmount", "format": "currency"},
+                {"label": "Difference", "value": "difference", "format": "currency", "highlight": true}
+              ]
+            },
+            {
+              "sectionTitle": "Resolution",
+              "fields": [
+                {
+                  "fieldName": "Resolution Type",
+                  "fieldId": "resolutionType",
+                  "type": "dropdown",
+                  "options": ["Manual Adjustment", "Write-off", "Create Credit Note", "Create Debit Note", "Reverse Transaction"],
+                  "required": true
+                },
+                {
+                  "fieldName": "Resolution Amount",
+                  "fieldId": "resolutionAmount",
+                  "type": "decimal",
+                  "format": "currency",
+                  "required": true
+                },
+                {
+                  "fieldName": "Resolution Notes",
+                  "fieldId": "resolutionNotes",
+                  "type": "textarea",
+                  "rows": 3,
+                  "required": true
+                },
+                {
+                  "fieldName": "Attachments",
+                  "fieldId": "attachments",
+                  "type": "file-upload",
+                  "multiple": true,
+                  "accept": ".pdf,.jpg,.png,.doc"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Actions",
+              "buttons": [
+                {
+                  "label": "Save Progress",
+                  "action": "saveProgress",
+                  "type": "secondary"
+                },
+                {
+                  "label": "Resolve Exception",
+                  "action": "resolveException",
+                  "type": "success",
+                  "requireValidation": true
+                },
+                {
+                  "label": "Escalate",
+                  "action": "escalate",
+                  "type": "warning"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "actionButtons": {
+        "position": "top-right",
+        "buttons": [
+          {
+            "label": "Export Exceptions",
+            "action": "export",
+            "type": "secondary",
+            "icon": "download"
+          },
+          {
+            "label": "Bulk Assign",
+            "action": "bulkAssign",
+            "type": "secondary",
+            "icon": "assign",
+            "conditional": "hasSelection"
+          },
+          {
+            "label": "Create Report",
+            "action": "createReport",
+            "type": "primary",
+            "icon": "report"
+          }
+        ]
+      }
+    },
+    "k11_remittance_reports": {
+      "featureId": "K11-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Remittance Reports",
+      "screenCode": "FIN_TRN_REM_011",
+      "menuPath": "Finance > Remittance > Reports > Generate Reports",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER", "VIEWER"],
+      "mainSection": {
+        "layout": "report-center",
+        "leftPanel": {
+          "title": "Report Categories",
+          "width": "25%",
+          "type": "tree-menu",
+          "categories": [
+            {
+              "name": "Operational Reports",
+              "icon": "folder",
+              "reports": [
+                {"code": "RPT001", "name": "Daily Remittance Summary"},
+                {"code": "RPT007", "name": "Processing Status Report"},
+                {"code": "RPT008", "name": "Pending Remittances"}
+              ]
+            },
+            {
+              "name": "Financial Reports",
+              "icon": "folder",
+              "reports": [
+                {"code": "RPT002", "name": "Monthly Settlement Report"},
+                {"code": "RPT005", "name": "Aging Analysis"},
+                {"code": "RPT009", "name": "Commission Summary"},
+                {"code": "RPT010", "name": "Cash Flow Report"}
+              ]
+            },
+            {
+              "name": "Analytical Reports",
+              "icon": "folder",
+              "reports": [
+                {"code": "RPT003", "name": "Commission Analysis"},
+                {"code": "RPT011", "name": "Trend Analysis"},
+                {"code": "RPT012", "name": "Comparative Analysis"}
+              ]
+            },
+            {
+              "name": "Control Reports",
+              "icon": "folder",
+              "reports": [
+                {"code": "RPT004", "name": "Exception Report"},
+                {"code": "RPT013", "name": "Audit Trail Report"},
+                {"code": "RPT014", "name": "Reconciliation Report"}
+              ]
+            },
+            {
+              "name": "Regulatory Reports",
+              "icon": "folder",
+              "reports": [
+                {"code": "RPT015", "name": "Compliance Report"},
+                {"code": "RPT016", "name": "Statutory Returns"}
+              ]
+            }
+          ]
+        },
+        "centerPanel": {
+          "title": "Report Parameters",
+          "width": "50%",
+          "conditional": "reportSelected",
+          "sections": [
+            {
+              "sectionTitle": "Report Information",
+              "layout": "info-display",
+              "fields": [
+                {"label": "Report Name", "value": "selectedReportName"},
+                {"label": "Report Code", "value": "selectedReportCode"},
+                {"label": "Description", "value": "selectedReportDesc"}
+              ]
+            },
+            {
+              "sectionTitle": "Report Parameters",
+              "layout": "dynamic-form",
+              "fields": "dynamic_based_on_report",
+              "commonFields": [
+                {
+                  "fieldName": "Report Period",
+                  "fieldId": "reportPeriod",
+                  "type": "date-range",
+                  "required": true
+                },
+                {
+                  "fieldName": "Insurer",
+                  "fieldId": "insurer",
+                  "type": "multiselect",
+                  "source": "insurerMaster",
+                  "placeholder": "All Insurers"
+                },
+                {
+                  "fieldName": "Branch",
+                  "fieldId": "branch",
+                  "type": "multiselect",
+                  "source": "branchMaster",
+                  "placeholder": "All Branches"
+                },
+                {
+                  "fieldName": "Product Line",
+                  "fieldId": "productLine",
+                  "type": "multiselect",
+                  "options": ["Motor", "Health", "Life", "Property", "Marine", "Aviation"],
+                  "placeholder": "All Products"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Output Options",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Output Format",
+                  "fieldId": "outputFormat",
+                  "type": "radio-group",
+                  "options": [
+                    {"value": "pdf", "label": "PDF", "icon": "pdf"},
+                    {"value": "excel", "label": "Excel", "icon": "excel"},
+                    {"value": "csv", "label": "CSV", "icon": "csv"}
+                  ],
+                  "defaultValue": "pdf",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Report Layout",
+                  "fieldId": "reportLayout",
+                  "type": "dropdown",
+                  "options": ["Summary", "Detailed", "Consolidated"],
+                  "defaultValue": "Detailed",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Include Charts",
+                  "fieldId": "includeCharts",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "conditional": "outputFormat=pdf",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Page Orientation",
+                  "fieldId": "orientation",
+                  "type": "dropdown",
+                  "options": ["Portrait", "Landscape"],
+                  "defaultValue": "Portrait",
+                  "conditional": "outputFormat=pdf",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "actionButtons": {
+                "layout": "center",
+                "buttons": [
+                  {
+                    "label": "Preview",
+                    "action": "preview",
+                    "type": "secondary",
+                    "icon": "preview"
+                  },
+                  {
+                    "label": "Generate Report",
+                    "action": "generate",
+                    "type": "primary",
+                    "icon": "report"
+                  },
+                  {
+                    "label": "Schedule",
+                    "action": "schedule",
+                    "type": "secondary",
+                    "icon": "calendar"
+                  },
+                  {
+                    "label": "Email",
+                    "action": "email",
+                    "type": "secondary",
+                    "icon": "mail"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "rightPanel": {
+          "title": "Recent Reports",
+          "width": "25%",
+          "sections": [
+            {
+              "sectionTitle": "Recently Generated",
+              "type": "recent-list",
+              "items": [
+                {
+                  "name": "reportName",
+                  "date": "generatedDate",
+                  "size": "fileSize",
+                  "actions": ["download", "view", "email"]
+                }
+              ],
+              "maxItems": 10
+            },
+            {
+              "sectionTitle": "Scheduled Reports",
+              "type": "schedule-list",
+              "items": [
+                {
+                  "name": "reportName",
+                  "frequency": "schedule",
+                  "nextRun": "nextRunDate",
+                  "actions": ["edit", "pause", "delete"]
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Favorites",
+              "type": "favorites-list",
+              "items": [
+                {
+                  "name": "reportName",
+                  "lastRun": "lastRunDate",
+                  "actions": ["run", "remove"]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "previewModal": {
+        "title": "Report Preview",
+        "size": "extra-large",
+        "content": {
+          "type": "iframe-viewer",
+          "controls": ["zoom", "download", "print", "fullscreen"]
+        }
+      }
+    },
+    "k12_agency_bill_processing": {
+      "featureId": "K12-USER",
+      "screenCategory": "TRANSACTION",
+      "screenTitle": "Agency Bill Processing",
+      "screenCode": "FIN_TRN_REM_012",
+      "menuPath": "Finance > Remittance > Agency Bill > Process Bills",
+      "accessRoles": ["USER", "SUPERVISOR", "MANAGER"],
+      "headerSection": {
+        "layout": "four-column",
+        "fields": [
+          {
+            "fieldName": "Bill Period",
+            "fieldId": "billPeriod",
+            "type": "month-picker",
+            "required": true,
+            "defaultValue": "currentMonth",
+            "width": "25%"
+          },
+          {
+            "fieldName": "Bill Run Date",
+            "fieldId": "billRunDate",
+            "type": "date",
+            "required": true,
+            "defaultValue": "currentDate",
+            "width": "25%"
+          },
+          {
+            "fieldName": "Bill Type",
+            "fieldId": "billType",
+            "type": "dropdown",
+            "options": ["Regular", "Supplementary", "Adjustment"],
+            "defaultValue": "Regular",
+            "width": "25%"
+          },
+          {
+            "fieldName": "Status",
+            "fieldId": "status",
+            "type": "text",
+            "readonly": true,
+            "defaultValue": "Draft",
+            "statusColor": true,
+            "width": "25%"
+          }
+        ]
+      },
+      "mainSection": {
+        "layout": "tabbed-view",
+        "tabs": [
+          {
+            "tabId": "agencies",
+            "tabLabel": "Select Agencies",
+            "sections": [
+              {
+                "filterSection": {
+                  "layout": "horizontal",
+                  "fields": [
+                    {
+                      "fieldName": "Agency Type",
+                      "fieldId": "agencyType",
+                      "type": "dropdown",
+                      "options": ["All", "Direct", "Broker", "Corporate", "Bancassurance"],
+                      "defaultValue": "All",
+                      "width": "25%"
+                    },
+                    {
+                      "fieldName": "Region",
+                      "fieldId": "region",
+                      "type": "dropdown",
+                      "source": "regionMaster",
+                      "width": "25%"
+                    },
+                    {
+                      "buttons": [
+                        {
+                          "label": "Load Agencies",
+                          "action": "loadAgencies",
+                          "type": "primary"
+                        }
+                      ],
+                      "width": "50%"
+                    }
+                  ]
+                },
+                "gridSection": {
+                  "columns": [
+                    {
+                      "field": "select",
+                      "type": "checkbox",
+                      "width": "5%"
+                    },
+                    {
+                      "field": "agencyCode",
+                      "header": "Agency Code",
+                      "width": "10%"
+                    },
+                    {
+                      "field": "agencyName",
+                      "header": "Agency Name",
+                      "width": "20%"
+                    },
+                    {
+                      "field": "agencyType",
+                      "header": "Type",
+                      "width": "10%"
+                    },
+                    {
+                      "field": "policyCount",
+                      "header": "Policies",
+                      "width": "8%",
+                      "align": "center"
+                    },
+                    {
+                      "field": "grossPremium",
+                      "header": "Gross Premium",
+                      "width": "12%",
+                      "align": "right",
+                      "format": "currency"
+                    },
+                    {
+                      "field": "commission",
+                      "header": "Commission",
+                      "width": "10%",
+                      "align": "right",
+                      "format": "currency"
+                    },
+                    {
+                      "field": "previousBalance",
+                      "header": "Previous Balance",
+                      "width": "12%",
+                      "align": "right",
+                      "format": "currency"
+                    },
+                    {
+                      "field": "totalDue",
+                      "header": "Total Due",
+                      "width": "13%",
+                      "align": "right",
+                      "format": "currency",
+                      "bold": true
+                    }
+                  ],
+                  "features": {
+                    "selectAll": true,
+                    "sortable": true,
+                    "showSelectedSummary": true
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "tabId": "billDetails",
+            "tabLabel": "Bill Details",
+            "sections": [
+              {
+                "sectionTitle": "Bill Summary",
+                "layout": "cards",
+                "cards": [
+                  {
+                    "title": "Total Agencies",
+                    "value": "agencyCount",
+                    "icon": "building"
+                  },
+                  {
+                    "title": "Total Premium",
+                    "value": "totalPremium",
+                    "format": "currency",
+                    "icon": "dollar"
+                  },
+                  {
+                    "title": "Total Commission",
+                    "value": "totalCommission",
+                    "format": "currency",
+                    "icon": "percent"
+                  },
+                  {
+                    "title": "Net Payable",
+                    "value": "netPayable",
+                    "format": "currency",
+                    "icon": "calculator",
+                    "highlight": true
+                  }
+                ]
+              },
+              {
+                "sectionTitle": "Agency-wise Bills",
+                "type": "expandable-grid",
+                "columns": [
+                  {
+                    "field": "expand",
+                    "type": "expand-icon",
+                    "width": "5%"
+                  },
+                  {
+                    "field": "agencyCode",
+                    "header": "Agency Code",
+                    "width": "10%"
+                  },
+                  {
+                    "field": "agencyName",
+                    "header": "Agency Name",
+                    "width": "20%"
+                  },
+                  {
+                    "field": "billNumber",
+                    "header": "Bill Number",
+                    "width": "12%"
+                  },
+                  {
+                    "field": "billDate",
+                    "header": "Bill Date",
+                    "width": "10%",
+                    "format": "date"
+                  },
+                  {
+                    "field": "dueDate",
+                    "header": "Due Date",
+                    "width": "10%",
+                    "format": "date"
+                  },
+                  {
+                    "field": "billAmount",
+                    "header": "Bill Amount",
+                    "width": "12%",
+                    "align": "right",
+                    "format": "currency"
+                  },
+                  {
+                    "field": "status",
+                    "header": "Status",
+                    "width": "8%",
+                    "type": "status-badge"
+                  },
+                  {
+                    "field": "actions",
+                    "header": "Actions",
+                    "width": "13%",
+                    "type": "action-buttons",
+                    "actions": [
+                      {"icon": "view", "tooltip": "View", "action": "view"},
+                      {"icon": "edit", "tooltip": "Edit", "action": "edit"},
+                      {"icon": "print", "tooltip": "Print", "action": "print"}
+                    ]
+                  }
+                ],
+                "expandedContent": {
+                  "type": "policy-details-grid",
+                  "columns": [
+                    {"field": "policyNo", "header": "Policy No", "width": "15%"},
+                    {"field": "insuredName", "header": "Insured", "width": "25%"},
+                    {"field": "product", "header": "Product", "width": "15%"},
+                    {"field": "premium", "header": "Premium", "width": "15%", "align": "right", "format": "currency"},
+                    {"field": "commissionRate", "header": "Comm %", "width": "10%", "align": "center"},
+                    {"field": "commission", "header": "Commission", "width": "20%", "align": "right", "format": "currency"}
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "tabId": "adjustments",
+            "tabLabel": "Adjustments",
+            "sections": [
+              {
+                "sectionTitle": "Add Adjustments",
+                "layout": "two-column",
+                "fields": [
+                  {
+                    "fieldName": "Agency",
+                    "fieldId": "adjustmentAgency",
+                    "type": "dropdown",
+                    "source": "selectedAgencies",
+                    "required": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Adjustment Type",
+                    "fieldId": "adjustmentType",
+                    "type": "dropdown",
+                    "options": ["Credit Note", "Debit Note", "Refund", "Additional Charge"],
+                    "required": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Amount",
+                    "fieldId": "adjustmentAmount",
+                    "type": "decimal",
+                    "required": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Reason",
+                    "fieldId": "adjustmentReason",
+                    "type": "textarea",
+                    "rows": 2,
+                    "required": true,
+                    "width": "50%"
+                  }
+                ],
+                "actions": [
+                  {
+                    "label": "Add Adjustment",
+                    "action": "addAdjustment",
+                    "type": "secondary"
+                  }
+                ]
+              },
+              {
+                "sectionTitle": "Adjustment List",
+                "type": "simple-grid",
+                "columns": [
+                  {"field": "agencyName", "header": "Agency", "width": "25%"},
+                  {"field": "type", "header": "Type", "width": "15%"},
+                  {"field": "amount", "header": "Amount", "width": "15%", "align": "right", "format": "currency"},
+                  {"field": "reason", "header": "Reason", "width": "35%"},
+                  {"field": "actions", "header": "", "width": "10%", "type": "action-buttons", "actions": [{"icon": "delete", "action": "delete"}]}
+                ]
+              }
+            ]
+          },
+          {
+            "tabId": "finalize",
+            "tabLabel": "Finalize",
+            "sections": [
+              {
+                "sectionTitle": "Final Bill Summary",
+                "type": "summary-table",
+                "rows": [
+                  {"label": "Total Gross Premium", "value": "totalGrossPremium", "format": "currency"},
+                  {"label": "Total Commission Earned", "value": "totalCommissionEarned", "format": "currency"},
+                  {"label": "Service Tax", "value": "serviceTax", "format": "currency"},
+                  {"label": "Previous Balance", "value": "previousBalance", "format": "currency"},
+                  {"label": "Adjustments", "value": "adjustments", "format": "currency"},
+                  {"separator": true},
+                  {"label": "Net Amount Payable", "value": "netAmountPayable", "format": "currency", "bold": true, "highlight": true}
+                ]
+              },
+              {
+                "sectionTitle": "Processing Options",
+                "layout": "two-column",
+                "fields": [
+                  {
+                    "fieldName": "Generate Bills",
+                    "fieldId": "generateBills",
+                    "type": "checkbox",
+                    "defaultValue": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Send to Agencies",
+                    "fieldId": "sendToAgencies",
+                    "type": "checkbox",
+                    "defaultValue": false,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Create GL Entries",
+                    "fieldId": "createGLEntries",
+                    "type": "checkbox",
+                    "defaultValue": true,
+                    "width": "50%"
+                  },
+                  {
+                    "fieldName": "Post to Accounts",
+                    "fieldId": "postToAccounts",
+                    "type": "checkbox",
+                    "defaultValue": false,
+                    "width": "50%"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "actionButtons": {
+        "position": "bottom-right",
+        "buttons": [
+          {
+            "label": "Save Draft",
+            "action": "saveDraft",
+            "type": "secondary"
+          },
+          {
+            "label": "Validate",
+            "action": "validate",
+            "type": "secondary",
+            "icon": "check"
+          },
+          {
+            "label": "Process Bills",
+            "action": "processBills",
+            "type": "primary",
+            "requireValidation": true,
+            "confirmation": true
+          },
+          {
+            "label": "Cancel",
+            "action": "cancel",
+            "type": "link"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+.transactioncode__master__table__Detail__view {
+    .empty-table-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 2%;
+      padding-bottom: 2%;
+    }
+    
+    .paginator__container {
+      margin-right: 30%;
+      display: flex;
+    }
+    
+
+   
+
+
+    .no__data__found {
+      color: #b1b1b1;
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      text-align: center;
+    }
+    .p-paginator-bottom.p-paginator.p-component {
+      display: flex !important;
+      justify-content: flex-end !important;
+    }
+    .p-dropdown {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      margin-top: 0.5rem !important;
+      width: 100% !important;
+    }
+    .input__block .p-inputtext {
+      font-family: var(--font-family);
+      font-feature-settings: var(--font-feature-settings, normal);
+      font-size: 1rem;
+      color: #4b5563;
+      background: #ffffff;
+      padding: 0.75rem 0.75rem;
+      border: 1px solid #d1d5db;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      border-radius: 6px;
+      margin-top: 0.5rem !important;
+      width: 100%;
+    }
+  }

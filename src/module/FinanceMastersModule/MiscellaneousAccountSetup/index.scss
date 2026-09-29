@@ -1,0 +1,453 @@
+@import "../../../Color.scss";
+
+.miscellaneous-account-setup {
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+  }
+
+  .label_header {
+    color: #111927;
+    font-family: "Inter", sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .advance-btn,
+  .remittance-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: darken(#6c757d, 10%);
+    }
+
+    &:focus {
+      outline: 0 none;
+      box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.2);
+    }
+  }
+
+  .breadCrums {
+    padding: 0;
+    border: none !important;
+    font-weight: 500;
+    color: #000;
+    font-size: 16px;
+  }
+
+  .p-breadcrumb {
+    background: #ffffff;
+    border: none !important;
+    border-radius: 6px;
+    padding: 0rem;
+    margin-top: 1rem;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1 !important;
+  }
+
+  @layer primereact {
+    .p-card {
+      background: #ffffff;
+      color: #4b5563;
+      box-shadow: none !important;
+      fill: #fff !important;
+      filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    }
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111927;
+    font-family: "Inter", sans-serif;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .range-column-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: $primary-blue;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid $primary-blue;
+  }
+
+  .input__view {
+    margin-bottom: 1rem;
+
+    // Ensure consistent height for all input fields
+    .input__block {
+      .p-inputtext,
+      .p-inputwrapper {
+        height: 40px;
+        min-height: 40px;
+        max-height: 40px;
+        box-sizing: border-box;
+      }
+    }
+  }
+
+  .input__filed {
+    width: 100%;
+  }
+
+  .input__block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 16px;
+      font-weight: 500;
+      color: #111927;
+      font-family: "Inter", sans-serif;
+
+      &.required-label::after {
+        content: " *";
+        color: $dark-red;
+      }
+    }
+
+    // Ensure InputText has consistent styling
+    .p-inputtext.input__filed {
+      height: 40px;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      color: #4b5563;
+      background: #ffffff;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+
+      &:focus {
+        outline: 0 none;
+        outline-offset: 0;
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.2);
+        border-color: #6366f1;
+      }
+
+      &::placeholder {
+        color: #9ca3af;
+      }
+    }
+
+    .input-with-lookup {
+      display: flex;
+      gap: 0;
+      align-items: center;
+      height: 40px;
+      width: 100%;
+
+      .p-inputtext {
+        flex: 1;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        padding: 0.5rem 0.75rem !important;
+        border: 1px solid #d1d5db;
+        border-right: none;
+        border-radius: 6px 0 0 6px;
+        font-size: 1rem;
+        color: #4b5563;
+        background: #ffffff;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        box-sizing: border-box !important;
+        line-height: 1.5;
+        margin: 0 !important;
+        display: flex;
+        align-items: center;
+
+        &:focus {
+          outline: 0 none;
+          outline-offset: 0;
+          box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.2);
+          border-color: #6366f1;
+          border-right: none;
+        }
+
+        &::placeholder {
+          color: #9ca3af;
+        }
+      }
+
+      .lookup-button {
+        background: $primary-blue !important;
+        border: 1px solid $primary-blue !important;
+        border-left: none !important;
+        border-radius: 0 6px 6px 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 40px !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        flex-shrink: 0;
+        box-sizing: border-box !important;
+        vertical-align: top;
+        line-height: 1 !important;
+
+        &::before {
+          display: none !important;
+        }
+
+        .p-button-label {
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        &:hover {
+          background: darken($primary-blue, 10%) !important;
+          border-color: darken($primary-blue, 10%) !important;
+        }
+
+        &:focus {
+          outline: 0 none;
+          box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.2);
+        }
+
+        svg {
+          width: 18px;
+          height: 18px;
+          fill: white;
+          display: block;
+          margin: 0;
+        }
+      }
+    }
+
+    .field-description {
+      font-size: 12px;
+      color: #6c757d;
+      font-style: italic;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+  }
+
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1.5rem;
+
+    .p-checkbox {
+      width: 20px;
+      height: 20px;
+
+      .p-checkbox-box {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
+        border-radius: 4px;
+
+        &.p-highlight {
+          background: $primary-blue;
+          border-color: $primary-blue;
+        }
+      }
+    }
+
+    .checkbox-label {
+      font-size: 16px;
+      color: #111927;
+      font-weight: 500;
+      font-family: "Inter", sans-serif;
+      cursor: pointer;
+      user-select: none;
+      margin: 0;
+    }
+  }
+
+  .btn__container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .add__btn {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500 !important;
+    background-color: #05cd99;
+    border-radius: 8px !important;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    border: none;
+
+    &:hover {
+      background-color: darken(#05cd99, 10%);
+    }
+  }
+
+  .delete__btn {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500 !important;
+    background-color: $dark-red;
+    border-radius: 60px !important;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    margin: 10px;
+    font-family: "Inter", sans-serif;
+    border: none;
+
+    &:hover {
+      background-color: darken($dark-red, 10%);
+    }
+  }
+
+  .close__btn {
+    color: #111927;
+    font-size: 18px;
+    font-weight: 500 !important;
+    background-color: #f3f4f6;
+    border-radius: 8px !important;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    border: 1px solid #e5e7eb;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+  }
+
+  .p-calendar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    box-sizing: border-box;
+
+    .p-inputtext {
+      flex: 1;
+      height: 40px !important;
+      min-height: 40px !important;
+      max-height: 40px !important;
+      padding: 0.5rem 0.75rem !important;
+      border: 1px solid #d1d5db;
+      border-right: none;
+      border-radius: 6px 0 0 6px;
+      font-size: 1rem;
+      color: #4b5563;
+      background: #ffffff;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      box-sizing: border-box !important;
+      line-height: 1.5;
+      margin: 0 !important;
+
+      &:focus {
+        outline: 0 none;
+        outline-offset: 0;
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.2);
+        border-color: #6366f1;
+        border-right: none;
+      }
+    }
+
+    .p-datepicker-trigger {
+      background: $primary-blue !important;
+      border: 1px solid $primary-blue !important;
+      border-left: none !important;
+      border-radius: 0 6px 6px 0 !important;
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      max-height: 40px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      vertical-align: top;
+      line-height: 1 !important;
+
+      &:hover {
+        background: darken($primary-blue, 10%) !important;
+        border-color: darken($primary-blue, 10%) !important;
+      }
+
+      &:focus {
+        outline: 0 none;
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.2);
+      }
+
+      .p-icon {
+        color: white;
+        width: 18px;
+        height: 18px;
+        display: block;
+        margin: 0;
+      }
+    }
+  }
+
+  // Override InputField component styling to match height
+  :global(.input__block) {
+    .p-inputtext {
+      height: 40px !important;
+      min-height: 40px !important;
+      max-height: 40px !important;
+      box-sizing: border-box !important;
+      padding: 0.75rem !important;
+    }
+  }
+}

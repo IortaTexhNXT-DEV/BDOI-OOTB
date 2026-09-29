@@ -1,0 +1,317 @@
+.claim__settlementdetails__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    margin-top: 24px;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .claim__details__container__titles {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: Poppins;
+    line-height: 51px;
+    color: #111927;
+  }
+  .next_but_container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: 10px;
+  }
+
+  .claim__details__container__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .claim__details__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .claim__details__card__container__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: Poppins;
+    line-height: 51px;
+    color: #111927 !important;
+  }
+  .check__box__container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    .check__box__container__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927 !important;
+    }
+  }
+  .claim__details__card__sub__title {
+    font-size: 24px;
+    font-weight: 400;
+    font-family: Poppins;
+    line-height: 36px;
+    color: #111927 !important;
+  }
+  .claim__write__field {
+    width: 100%;
+    height: 266px;
+    // padding-top: 30px;
+
+    font-size: 16px;
+    font-weight: 500;
+    font-family: Poppins;
+    line-height: 24px;
+    color: #111927;
+    border-radius: 10px;
+  }
+  .claim__request__upload__subtitle {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .upload__card__container {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    height: 162px;
+    .file_icon_selector {
+      position: relative;
+      width: 100%;
+      display: grid;
+      gap: 4px;
+      padding: 20px;
+      border-radius: 10px;
+
+      .icon_click_option {
+        text-align: center;
+        margin-top: -56px;
+        height: max-content;
+        width: max-content;
+        text-align: center;
+        justify-self: center;
+      }
+      .p-fileupload .p-icon {
+        display: none;
+      }
+      .p-fileupload .p-button-label {
+        display: none;
+      }
+      .p-fileupload {
+        z-index: 1;
+        text-align: center;
+      }
+      .p-fileupload-choose {
+        background-color: transparent;
+        height: 50px;
+        width: 50px;
+        border-radius: none !important;
+        border: white;
+        border-style: none !important;
+      }
+    }
+  }
+  .claimrequest__back__but {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 24px;
+  }
+  .claim__back__but {
+    color: #000;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 8px 16px;
+  }
+  .claim__snd__but {
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 8px 16px;
+    border-radius: 6px;
+  }
+
+  .co-insurance-settlement-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 20px 18px;
+    background: #fff;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    &__title {
+      color: #6b7280;
+      font-family: Poppins;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  }
+
+  .co-insurance-policy-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    font-family: Poppins;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .co-insurance-settlement-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: none;
+      border-bottom: 1px solid #e5e7eb;
+      font-family: Poppins;
+      font-size: 13px;
+      line-height: 20px;
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    th {
+      color: #9ca3af;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    td {
+      color: #111927;
+      font-weight: 400;
+    }
+
+    .insurer-cell {
+      font-weight: 600;
+    }
+
+    .numeric {
+      text-align: right;
+    }
+
+    .settlement {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    th.settlement {
+      color: #16a34a;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 20%;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 16%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 12%;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 17%;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+      width: 18%;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+      width: 17%;
+    }
+
+    .total-row td {
+      font-weight: 700;
+      border-bottom: none;
+    }
+
+    .total-row .settlement {
+      color: #15803d;
+    }
+  }
+
+  .role-pill,
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: Poppins;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    white-space: nowrap;
+  }
+
+  .role-pill--lead {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .role-pill--co {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .status-pill {
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+
+  .status-pill--settled {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .co-insurance-settlement-note {
+    margin-top: 12px;
+    color: #3b82f6;
+    font-family: Poppins;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 18px;
+  }
+}

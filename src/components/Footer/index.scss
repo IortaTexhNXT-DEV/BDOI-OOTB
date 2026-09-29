@@ -1,0 +1,353 @@
+@import "../../Color.scss";
+.footer__block {
+  width: 100%;
+  padding: 3rem 8rem 3rem 8rem;
+  background: #fff;
+  .img__block {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .contact__block {
+    .contact__block__text {
+      display: flex;
+      justify-content: flex-start;
+      text-align: start;
+      font-size: 18px;
+      line-height: 27px;
+      // font-family: poppins;
+      font-weight: 400;
+      color: $black !important;
+    }
+    @layer primereact {
+      .p-button {
+        color: $white;
+        background: $Light-green;
+        border: 1px solid $Light-green;
+        padding: 0.75rem 1.25rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        border-radius: 10px;
+        font-size: 18px !important;
+        line-height: 27px !important;
+        // font-family: poppins;
+      }
+    }
+    @layer primereact {
+      .p-button-label {
+        font-weight: 400 !important;
+      }
+    }
+  }
+  .media__block {
+    .media__block__text {
+      display: flex;
+      justify-content: flex-start;
+      text-align: start;
+      font-size: 18px;
+      line-height: 27px;
+      // font-family: poppins;
+      font-weight: 400;
+      color: $black !important;
+    }
+  }
+  .email__block {
+    .email__block__btn {
+      padding-top: 14.5px;
+      .btn {
+        background-color: $Light-green;
+        height: 2.5rem;
+        margin-top: 0.1rem;
+      }
+      @layer primereact {
+        .p-button:enabled:hover,
+        .p-button:not(button):not(a):not(.p-disabled):hover {
+          background: $Light-green;
+          background-color: $Light-green;
+          color: #ffffff;
+          border-color: $Light-green;
+        }
+      }
+      @layer primereact {
+        .p-button {
+          color: #ffffff;
+          background: $Light-green;
+          border: 1px solid $Light-green;
+          border-top-color: $Light-green;
+          border-right-color: $Light-green;
+          border-bottom-color: $Light-green;
+          border-left-color: $Light-green;
+          padding: 0.49rem 0.25rem;
+          font-size: 1rem;
+          transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+            box-shadow 0.2s;
+          border-radius: 0px;
+        }
+      }
+      @layer primereact {
+        .p-button:focus {
+          box-shadow: 0 0 0 2px $white, 0 0 0 4px Light-green,
+            0 1px 2px 0 $black !important;
+        }
+      }
+    }
+  }
+  .policy__block {
+    display: flex;
+    justify-content: flex-start;
+    .policy__block__text {
+      font-size: 18px;
+      line-height: 27px;
+      // font-family: poppins;
+      font-weight: 300;
+      color: $black !important;
+    }
+  }
+  .terms__block {
+    display: flex;
+    justify-content: flex-start;
+    .terms__block__text {
+      font-size: 18px;
+      line-height: 27px;
+      // font-family: poppins;
+      font-weight: 300;
+      color: $black !important;
+    }
+  }
+  .copyrigt__block {
+    .p-2 {
+      padding: 0.5rem 0.5rem 0.5rem 14rem !important;
+    }
+    .copyrigt__block__text {
+      font-size: 14;
+      color: $medium-Gray !important;
+      // font-family: kumbhsans;
+      font-weight: 400;
+      line-height: 16.8px;
+    }
+  }
+}
+
+@media only screen and (max-width: 992px) and (min-width: 498px) {
+  .footer__block {
+    padding: 3rem;
+    background: #fff;
+    margin-top: 9rem;
+
+    .footer__text {
+      font-size: 14;
+      color: $medium-Gray;
+      // font-family: kumbhsans;
+      font-weight: 400;
+      line-height: 16.8px;
+    }
+    .email__block {
+      display: grid;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      .email__block__btn {
+        padding-top: 14.5px;
+        .btn {
+          background-color: $Light-green;
+          height: 2.7rem;
+          margin-top: 0.1rem;
+        }
+        @layer primereact {
+          .p-button:enabled:hover,
+          .p-button:not(button):not(a):not(.p-disabled):hover {
+            background: $Light-green;
+            background-color: $Light-green;
+            color: #ffffff;
+            border-color: $Light-green;
+          }
+        }
+        @layer primereact {
+          .p-button {
+            color: #ffffff;
+            background: $Light-green;
+            border: 1px solid $Light-green;
+            border-top-color: $Light-green;
+            border-right-color: $Light-green;
+            border-bottom-color: $Light-green;
+            border-left-color: $Light-green;
+            padding: 0.49rem 0.25rem;
+            font-size: 1rem;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+              box-shadow 0.2s;
+            border-radius: 0px;
+          }
+        }
+        @layer primereact {
+          .p-button:focus {
+            box-shadow: 0 0 0 2px $white, 0 0 0 4px Light-green,
+              0 1px 2px 0 $black !important;
+          }
+        }
+      }
+    }
+    .media__block {
+      display: grid;
+      justify-content: flex-end;
+      align-items: center;
+      .media__block__text {
+        display: flex;
+        justify-content: flex-start;
+        text-align: start;
+        font-size: 18px;
+        line-height: 27px;
+        // font-family: poppins;
+        font-weight: 400;
+        color: $black !important;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 498px) {
+  .footer__block {
+    padding: 0.5rem;
+    background: #fff;
+    margin-top: 3.5rem;
+    .img__block {
+      display: flex;
+      justify-content: center;
+    }
+    .copyrigt__block {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      .copyrigt__block__text {
+        font-size: 14;
+        color: $medium-Gray;
+        // font-family: kumbhsans;
+        font-weight: 400;
+        line-height: 16.8px;
+      }
+      .p-2 {
+        padding: 0rem !important;
+      }
+    }
+    .policy__block {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      .policy__block__text {
+        font-size: 18px;
+        line-height: 27px;
+        // font-family: poppins;
+        font-weight: 300;
+        color: $black !important;
+      }
+    }
+    .terms__block {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      .terms__block__text {
+        font-size: 18px;
+        line-height: 27px;
+        // font-family: poppins;
+        font-weight: 300;
+        color: $black !important;
+      }
+    }
+    .media__block {
+      display: grid;
+      justify-content: center;
+      width: 100%;
+      .media__block__icon {
+        display: flex;
+        justify-content: center;
+      }
+      .media__block__text {
+        display: flex;
+        justify-content: flex-start;
+        text-align: start;
+        font-size: 18px;
+        line-height: 27px;
+        // font-family: poppins;
+        font-weight: 400;
+        color: $black !important;
+      }
+    }
+    .email__block {
+      text-align: center;
+      .email__block__btn {
+        padding-top: 14.5px;
+        .btn {
+          background-color: $Light-green;
+          height: 2.7rem;
+          margin-top: 0.1rem;
+        }
+        @layer primereact {
+          .p-button:enabled:hover,
+          .p-button:not(button):not(a):not(.p-disabled):hover {
+            background: $Light-green;
+            background-color: $Light-green;
+            color: #ffffff;
+            border-color: $Light-green;
+          }
+        }
+        @layer primereact {
+          .p-button {
+            color: #ffffff;
+            background: $Light-green;
+            border: 1px solid $Light-green;
+            border-top-color: $Light-green;
+            border-right-color: $Light-green;
+            border-bottom-color: $Light-green;
+            border-left-color: $Light-green;
+            padding: 0.49rem 0.25rem;
+            font-size: 1rem;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+              box-shadow 0.2s;
+            border-radius: 0px;
+          }
+        }
+        @layer primereact {
+          .p-button:focus {
+            box-shadow: 0 0 0 2px $white, 0 0 0 4px Light-green,
+              0 1px 2px 0 $black !important;
+          }
+        }
+      }
+    }
+    .contact__block {
+      display: grid;
+      justify-content: center;
+      .contact__block__btn {
+        display: grid;
+        justify-content: center;
+      }
+      .contact__block__text {
+        display: flex;
+        justify-content: flex-start;
+        text-align: start;
+        font-size: 18px;
+        line-height: 27px;
+        // font-family: poppins;
+        font-weight: 400;
+        color: $black !important;
+      }
+      @layer primereact {
+        .p-button {
+          color: $white;
+          background: $Light-green;
+          border: 1px solid $Light-green;
+          padding: 0.75rem 1.25rem;
+          transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+            box-shadow 0.2s;
+          border-radius: 10px;
+          font-size: 18px !important;
+          line-height: 27px !important;
+          // font-family: poppins;
+        }
+      }
+      @layer primereact {
+        .p-button-label {
+          font-weight: 400 !important;
+        }
+      }
+    }
+  }
+}

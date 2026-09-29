@@ -1,0 +1,122 @@
+@import "../../Color.scss";
+
+.radiobutton__container {
+  margin: 10px;
+}
+.radio-button-label {
+  margin-left: 0.55rem !important;
+}
+.radiobutton__content {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  .radiobutton__label {
+    margin-left: 8px;
+  }
+  .border__color {
+    border: 1px solid $red;
+  }
+
+  .background__color {
+    background-color: #c2daff;
+  }
+}
+.radiobutton__container {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+
+.radiobutton__label {
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+.p-radiobutton__box {
+  border: 2px solid dodger $blue;
+}
+
+.p-radiobutton__icon {
+  background: dodger $blue;
+}
+.selected__value {
+  margin-top: 30px;
+}
+.options__style {
+  margin-top: 30px;
+}
+.label__wrapper {
+  margin-left: 10px;
+}
+.options__style .p-radiobutton-box.p-highlight .p-radiobutton-icon {
+  transform: translateZ(0) scale(1, 1);
+  visibility: visible;
+  background-color: #c2daff;
+}
+.p-radiobutton .p-radiobutton-box {
+  border: 2px solid #c2daff;
+  background: #c2daff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+    box-shadow 0.2s;
+}
+.p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+  width: 12px;
+  height: 12px;
+  transition-duration: 0.2s;
+  background-color: #0062ff;
+}
+
+/* Multi-Select Checkbox Styling */
+.multi-select-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  .p-field-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #e8e8e8;
+    }
+
+    label {
+      margin-left: 8px;
+      margin-bottom: 0;
+      cursor: pointer;
+      font-size: 14px;
+      user-select: none;
+    }
+  }
+
+  .p-checkbox .p-checkbox-box {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #c2daff;
+    background: white;
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    &.p-highlight {
+      background-color: #0062ff;
+      border-color: #0062ff;
+    }
+  }
+
+  .p-checkbox .p-checkbox-box .p-checkbox-icon {
+    font-size: 12px;
+    color: white;
+  }
+}

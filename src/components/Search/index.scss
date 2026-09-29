@@ -1,0 +1,52 @@
+@import "../../Color.scss";
+.search__block {
+  .input__field {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: $white;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem !important;
+  }
+  .p-input-icon-left {
+    width: 100%;
+  }
+  @layer primereact {
+    .p-input-icon-left > i,
+    .p-input-icon-right > i,
+    .p-input-icon-left > svg,
+    .p-input-icon-right > svg,
+    .p-input-icon-left > .p-input-prefix,
+    .p-input-icon-right > .p-input-suffix {
+      position: absolute;
+      top: 50%;
+      margin-top: -0.3rem;
+    }
+  }
+  .input__field.p-inputtext::placeholder {
+    color: $grey;
+    font-family: Poppins;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .input__field__dark {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: $light-white;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem !important;
+  }
+  .input__field.p-inputtext::placeholder {
+    color: $grey;
+    font-family: Poppins;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+  }
+}

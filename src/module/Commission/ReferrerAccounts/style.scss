@@ -1,0 +1,123 @@
+.referrer-accounts-page {
+  padding: 1.5rem 2rem 2.5rem;
+  background: #f7f8fa;
+  min-height: 100%;
+
+  .page-header {
+    margin-bottom: 1.25rem;
+
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .page-desc {
+      margin: 0;
+      max-width: 920px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #718096;
+    }
+  }
+
+  .referrer-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem 0.5rem;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .search-wrap {
+      width: min(320px, 100%);
+
+      .search-input {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #cbd5e0;
+      }
+    }
+
+    .toolbar-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+      color: #718096;
+
+      .due {
+        color: #e53e3e;
+        font-weight: 700;
+      }
+
+      .ready {
+        color: #1a202c;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .referrer-table {
+    .p-datatable-thead > tr > th {
+      background: transparent;
+      color: #718096;
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+      border-color: #e2e8f0;
+      padding: 0.75rem 0.85rem;
+    }
+
+    .p-datatable-tbody > tr > td {
+      border-color: #e2e8f0;
+      padding: 0.95rem 0.85rem;
+      color: #4a5568;
+      font-size: 0.9rem;
+    }
+
+    .name-cell {
+      color: #1a202c;
+      font-weight: 700;
+    }
+
+    .net-payable {
+      color: #e53e3e;
+      font-weight: 600;
+    }
+
+    .clickable-row {
+      cursor: pointer;
+
+      &:hover {
+        background: #f7fafc !important;
+      }
+    }
+  }
+
+  .ref-status {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &.active {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    &.on-hold {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+  }
+}

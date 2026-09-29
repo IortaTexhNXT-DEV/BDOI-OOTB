@@ -1,0 +1,523 @@
+.remittance-analytics {
+  padding: 1rem;
+
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      color: #495057;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  .controls-section {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    flex-wrap: wrap;
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 500;
+        color: #495057;
+        white-space: nowrap;
+      }
+
+      .period-dropdown,
+      .metrics-selector {
+        min-width: 200px;
+      }
+    }
+  }
+
+  .kpi-section {
+    margin-bottom: 2rem;
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+
+      .kpi-card {
+        .p-card-body {
+          padding: 1.5rem;
+
+          .kpi-content {
+            text-align: center;
+
+            .kpi-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 1rem;
+
+              h4 {
+                margin: 0;
+                color: #495057;
+                font-size: 1rem;
+                font-weight: 600;
+                text-align: left;
+                flex: 1;
+              }
+
+              .kpi-trend {
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+                font-size: 0.85rem;
+                font-weight: 600;
+
+                &.positive {
+                  color: #28a745;
+                }
+
+                &.negative {
+                  color: #dc3545;
+                }
+
+                i {
+                  font-size: 0.75rem;
+                }
+              }
+            }
+
+            .kpi-gauge {
+              margin: 1rem 0;
+              display: flex;
+              justify-content: center;
+            }
+
+            .kpi-details {
+              .kpi-value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 0.25rem;
+              }
+
+              .kpi-target {
+                font-size: 0.85rem;
+                color: #6c757d;
+                margin-bottom: 0.5rem;
+              }
+
+              .kpi-description {
+                font-size: 0.8rem;
+                color: #6c757d;
+                line-height: 1.3;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+
+    .chart-card {
+      .p-card-body {
+        padding: 1.5rem;
+
+        h4 {
+          margin-top: 0;
+          margin-bottom: 1rem;
+          color: #495057;
+          font-size: 1.1rem;
+        }
+
+        .chart-container {
+          height: 300px;
+          cursor: pointer;
+          transition: transform 0.2s;
+
+          &:hover {
+            transform: translateY(-2px);
+          }
+        }
+
+        &.summary-stats {
+          .stats-list {
+            .stat-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 0.75rem 0;
+              border-bottom: 1px solid #e9ecef;
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              .stat-label {
+                color: #6c757d;
+                font-size: 0.9rem;
+              }
+
+              .stat-value {
+                color: #2c3e50;
+                font-weight: 600;
+                font-size: 1rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .performers-section {
+    .performers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+
+      .performers-card {
+        .p-card-body {
+          padding: 1.5rem;
+
+          h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #495057;
+          }
+        }
+      }
+    }
+  }
+
+  .success-rate {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span {
+      min-width: 40px;
+      font-weight: 500;
+    }
+
+    .rate-bar {
+      flex: 1;
+      height: 8px;
+
+      .p-progressbar-value {
+        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+      }
+    }
+  }
+
+  .performance-bar {
+    height: 8px;
+
+    .p-progressbar-value {
+      background: linear-gradient(90deg, #007bff, #28a745);
+    }
+  }
+
+  .trends-section {
+    .trend {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 500;
+
+      &.positive {
+        color: #28a745;
+      }
+
+      &.negative {
+        color: #dc3545;
+      }
+
+      i {
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .alerts-section {
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+
+      .alerts-card {
+        .p-card-body {
+          padding: 1.5rem;
+
+          h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #495057;
+            display: flex;
+            align-items: center;
+          }
+        }
+      }
+
+      .insights-card {
+        .p-card-body {
+          padding: 1.5rem;
+
+          h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #495057;
+          }
+
+          .insights-list {
+            .insight-item {
+              display: flex;
+              align-items: flex-start;
+              gap: 1rem;
+              margin-bottom: 1.5rem;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
+
+              .insight-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+
+                i {
+                  font-size: 1.2rem;
+                  color: white;
+                }
+
+                &.success {
+                  background: #28a745;
+                }
+
+                &.warning {
+                  background: #ffc107;
+                }
+
+                &.info {
+                  background: #007bff;
+                }
+              }
+
+              .insight-content {
+                flex: 1;
+
+                strong {
+                  display: block;
+                  margin-bottom: 0.25rem;
+                  color: #2c3e50;
+                  font-size: 0.95rem;
+                }
+
+                p {
+                  margin: 0;
+                  color: #6c757d;
+                  font-size: 0.9rem;
+                  line-height: 1.4;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .chart-detail {
+    h3 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #495057;
+    }
+
+    .detail-chart-container {
+      height: 400px;
+      margin-bottom: 2rem;
+    }
+
+    .chart-insights {
+      h4 {
+        margin-bottom: 1rem;
+        color: #495057;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 1.5rem;
+
+        li {
+          margin-bottom: 0.5rem;
+          color: #6c757d;
+          line-height: 1.4;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      background-color: #f8f9fa;
+      color: #495057;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+
+  .p-tabview {
+    .p-tabview-nav {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #e0e0e0;
+
+      .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+
+        &:not(.p-disabled):not(.p-highlight):hover {
+          background: #f8f9fa;
+          color: #495057;
+        }
+      }
+
+      .p-highlight .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #007bff;
+        color: #007bff;
+      }
+    }
+
+    .p-tabview-panels {
+      background: transparent;
+      padding: 1.5rem 0;
+    }
+  }
+
+  .p-badge {
+    &.p-badge-danger {
+      background: #dc3545;
+    }
+  }
+
+  .p-tag {
+    &.p-tag-info {
+      background: #007bff;
+    }
+    &.p-tag-warning {
+      background: #ffc107;
+    }
+    &.p-tag-danger {
+      background: #dc3545;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .charts-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .performers-grid {
+      grid-template-columns: 1fr !important;
+    }
+
+    .alerts-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .controls-section {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+
+      .control-group {
+        flex-direction: column;
+        align-items: stretch;
+
+        label {
+          margin-bottom: 0.5rem;
+        }
+
+        .period-dropdown,
+        .metrics-selector {
+          min-width: auto;
+        }
+      }
+    }
+
+    .kpi-grid {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+
+    .header-section {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+
+      .header-actions {
+        justify-content: center;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .p-datatable {
+      font-size: 0.8rem;
+    }
+
+    .chart-container {
+      height: 250px !important;
+    }
+
+    .detail-chart-container {
+      height: 300px !important;
+    }
+
+    .kpi-content {
+      .kpi-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+
+        h4 {
+          text-align: center !important;
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+}

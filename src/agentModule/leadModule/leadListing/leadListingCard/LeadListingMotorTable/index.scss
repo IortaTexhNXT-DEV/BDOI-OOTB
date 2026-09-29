@@ -1,0 +1,602 @@
+@import "../../../../../Color.scss";
+
+// Responsive mixins
+$mobile-sm: 480px;
+$tablet-sm: 768px;
+$tablet-md: 1024px;
+
+@mixin mobile-sm {
+  @media (max-width: #{$mobile-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-sm {
+  @media (max-width: #{$tablet-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-md {
+  @media (max-width: #{$tablet-md - 1px}) {
+    @content;
+  }
+}
+
+.lead-listing-container {
+  padding: 2rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+
+  @include tablet-sm {
+    padding: 1rem;
+  }
+
+  @include mobile-sm {
+    padding: 0.75rem;
+  }
+
+  .lead-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @include tablet-sm {
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @include mobile-sm {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .header-left {
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+
+        @include tablet-sm {
+          font-size: 1.5rem;
+        }
+
+        @include mobile-sm {
+          font-size: 1.25rem;
+          text-align: center;
+        }
+      }
+
+      .breadcrumb {
+        margin-top: 0.5rem;
+
+        @include mobile-sm {
+          text-align: center;
+        }
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      @include mobile-sm {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .p-button {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+
+        @include mobile-sm {
+          min-height: 48px;
+          padding: 0.875rem 1.25rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .lead-filters {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @include tablet-sm {
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @include mobile-sm {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      @include mobile-sm {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+
+        @include mobile-sm {
+          font-size: 1rem;
+          text-align: center;
+        }
+      }
+
+      .filter-toggle {
+        @include mobile-sm {
+          align-self: center;
+        }
+      }
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+
+      @include tablet-sm {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+      }
+
+      @include mobile-sm {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        @include mobile-sm {
+          gap: 0.375rem;
+        }
+
+        label {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #374151;
+
+          @include mobile-sm {
+            font-size: 0.85rem;
+          }
+        }
+
+        .p-inputtext,
+        .p-dropdown,
+        .p-multiselect {
+          min-height: 44px;
+
+          @include mobile-sm {
+            min-height: 48px;
+            font-size: 16px; // Prevent zoom on iOS
+          }
+        }
+      }
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      justify-content: flex-end;
+
+      @include mobile-sm {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .p-button {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+
+        @include mobile-sm {
+          min-height: 48px;
+          padding: 0.875rem 1.25rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .lead-table-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    @include tablet-sm {
+      padding: 1rem;
+    }
+
+    @include mobile-sm {
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      @include mobile-sm {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+
+      .table-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+
+        @include mobile-sm {
+          font-size: 1rem;
+          text-align: center;
+        }
+      }
+
+      .table-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+
+        @include mobile-sm {
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        .p-inputtext {
+          min-width: 200px;
+
+          @include tablet-sm {
+            min-width: 150px;
+          }
+
+          @include mobile-sm {
+            min-width: 120px;
+            min-height: 48px;
+            font-size: 16px;
+          }
+        }
+
+        .p-button {
+          min-height: 44px;
+
+          @include mobile-sm {
+            min-height: 48px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+
+    .responsive-datatable {
+      .p-datatable {
+        @include mobile-sm {
+          font-size: 0.8rem;
+        }
+      }
+
+      .p-datatable-thead > tr > th {
+        background: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 1rem 0.75rem;
+
+        @include tablet-sm {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.75rem;
+        }
+
+        @include mobile-sm {
+          padding: 0.5rem 0.25rem;
+          font-size: 0.7rem;
+        }
+      }
+
+      .p-datatable-tbody > tr {
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &:nth-child(even) {
+          background-color: #fafbfc;
+        }
+
+        > td {
+          padding: 1rem 0.75rem;
+          border: none;
+          border-bottom: 1px solid #e9ecef;
+          font-size: 0.9rem;
+          vertical-align: middle;
+
+          @include tablet-sm {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+          }
+
+          @include mobile-sm {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+          }
+        }
+      }
+
+      .p-paginator {
+        padding: 1rem 0.75rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+
+        @include mobile-sm {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.8rem;
+
+          .p-paginator-pages .p-paginator-page {
+            min-width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+          }
+
+          .p-paginator-first,
+          .p-paginator-prev,
+          .p-paginator-next,
+          .p-paginator-last {
+            min-width: 32px;
+            height: 32px;
+          }
+        }
+      }
+    }
+
+    .table-actions-cell {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+
+      @include mobile-sm {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .p-button {
+        min-height: 36px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+
+        @include mobile-sm {
+          min-height: 40px;
+          padding: 0.625rem 1rem;
+          font-size: 0.85rem;
+          width: 100%;
+        }
+      }
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      @include mobile-sm {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+      }
+
+      &.status-active {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      &.status-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      &.status-expired {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    }
+  }
+
+  .bulk-actions {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @include mobile-sm {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+
+    .bulk-info {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+
+      @include mobile-sm {
+        text-align: center;
+        font-size: 0.85rem;
+      }
+    }
+
+    .bulk-buttons {
+      display: flex;
+      gap: 0.5rem;
+
+      @include mobile-sm {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .p-button {
+        min-height: 40px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+
+        @include mobile-sm {
+          min-height: 44px;
+          padding: 0.75rem 1.25rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+
+    @include mobile-sm {
+      padding: 2rem 0.75rem;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+
+      @include mobile-sm {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+      }
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #495057;
+
+      @include mobile-sm {
+        font-size: 1.1rem;
+      }
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+
+      @include mobile-sm {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .p-button {
+      min-height: 44px;
+      padding: 0.75rem 1.5rem;
+
+      @include mobile-sm {
+        min-height: 48px;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+
+    @include mobile-sm {
+      min-height: 150px;
+    }
+
+    .p-progress-spinner {
+      width: 2rem;
+      height: 2rem;
+
+      @include mobile-sm {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+  }
+}
+
+// Responsive utilities for lead module
+.lead-mobile-hidden {
+  @include mobile-sm {
+    display: none !important;
+  }
+}
+
+.lead-mobile-visible {
+  display: none !important;
+
+  @include mobile-sm {
+    display: block !important;
+  }
+}
+
+.lead-tablet-hidden {
+  @include tablet-sm {
+    display: none !important;
+  }
+}
+
+.lead-tablet-visible {
+  display: none !important;
+
+  @include tablet-sm {
+    display: block !important;
+  }
+}
+
+.filter-container-bg {
+  background-color: $main-background;
+}

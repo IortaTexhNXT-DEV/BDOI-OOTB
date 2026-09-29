@@ -1,0 +1,122 @@
+.overall_list {
+  .subhead_list {
+    display: flex;
+    justify-content: space-between;
+    // align-items: center;
+    padding-top: 1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-bottom: 10px;
+  }
+ 
+  .table__selector {
+    text-align: center;
+    flex: 1 0;
+    .pagedropdown_container {
+      border: none;
+      margin: 0 !important;
+      background-color: #FAFAFA;
+    }
+  }
+  .fieldactionvalue_container{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .action_icons{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:20px
+  }
+  .head_lable {
+    color: #111927;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+
+    font-weight: 600;
+  }
+  .addbutton_container {
+    background-color: #6366f1;
+    border-radius: 60px;
+    padding: 0px 22px;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+    gap: 4px;
+  }
+  .addtext {
+    color: #fff;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    gap: 10px;
+  }
+  .p-datatable .p-datatable-tbody > tr > td {
+    text-align: left;
+    border: 1px solid #fff;
+    border-width: 0 0 1px 0;
+    padding: 1rem 1rem;
+  }
+  .cardlist_container {
+    padding: 0px;
+    background: #ffffff;
+    color: #4b5563;
+    /* box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12); */
+    border-radius: 6px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1) !important;
+    margin-top: 30px;
+  }
+  .pagedropdown_container {
+    margin-right: 30%;
+    border-style: hidden;
+    background-color: #fafafa;
+  }
+  .submit_button {
+    padding: 0px 34px !important;
+    height: 42px !important;
+    border-radius: 30px;
+    background: #6366f1;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .next_container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: 50px;
+  }
+  .fieldvalue_container{
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    padding: 1rem 0.5rem;
+  cursor: pointer;
+}
+}
+.dialog__addstyle{
+  .p-dialog .p-dialog-content:last-of-type {
+    border-bottom-right-radius: 20px !important;
+    border-bottom-left-radius: 20px !important;
+}
+}
+.submittextlabel_button {
+  padding: 0px 34px !important;
+  height: 42px !important;
+  border-radius: 30px;
+  background: #6366f1;
+  font-size: 16px;
+  font-weight: 500;
+}
+.nexttextlable_container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: 8px;
+  width: 100%;
+}

@@ -1,0 +1,77 @@
+.renewal__waiting__screen {
+  .claim__requestapproval__upload__main__title {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 34px;
+    font-weight: 600;
+  }
+  .claim__request__uploadarrow__back__btn {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .claim__request__upload__back__btn__title {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .claimrequest__overall__card {
+    height: 568px;
+
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .claim__title_txt {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 34px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .claimtitle__img__overallcontainer {
+    display: flex;
+    justify-content: center;
+  }
+  .claimtitle__txt_container {
+    text-align: center;
+    padding: 0px 40px;
+    color: #111927;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .claimtitle__butt_container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 26px;
+  }
+  .claim__back__but {
+    color: #000;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .claim__snd__but {
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+  }
+}

@@ -1,0 +1,113 @@
+.datepicker__container {
+  position: relative;
+
+  .icon__calender {
+    position: absolute;
+    z-index: 3;
+    right: 12px;
+    top: 20px;
+    pointer-events: none;
+  }
+
+  .datepicker__field {
+    height: 4rem;
+    width: 100%;
+  }
+
+  .label {
+    position: absolute;
+    top: 25px;
+    left: 10px;
+    color: #6c737f;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: Poppins;
+    line-height: 21px;
+    z-index: 1;
+
+    &.focused {
+      top: 4px;
+      left: 10px;
+      font-size: 14px;
+      color: #6366f1;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 21px;
+    }
+  }
+
+  .p-calendar {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    margin-top: 0rem !important;
+    width: 100%;
+    height: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus-within,
+    &.p-calendar-focused {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0.1rem #e5e7eb;
+      border-color: #6366f1;
+    }
+
+    .p-inputtext {
+      font-family: Poppins;
+      color: #111927;
+      padding-top: 30px;
+      padding-left: 10px;
+      padding-right: 50px;
+      padding-bottom: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      border: none;
+      border-radius: 10px;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+
+      &:focus {
+        outline: 0 none;
+        box-shadow: none;
+        border: none;
+      }
+    }
+
+    .p-datepicker-trigger {
+      background: transparent;
+      border: none;
+      width: 3rem;
+      height: 100%;
+      padding: 0;
+      position: relative;
+      z-index: 2;
+
+      &:hover {
+        background: transparent;
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+
+      svg {
+        display: none;
+      }
+    }
+  }
+
+  .p-inputtext {
+    font-family: Poppins;
+    color: #111927;
+    background: transparent;
+    border: none;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+      box-shadow 0.2s;
+    appearance: none;
+  }
+}

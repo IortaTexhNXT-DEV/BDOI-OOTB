@@ -1,0 +1,115 @@
+.step-number {
+  position: relative;
+}
+.step {
+  display: flex;
+}
+.step-numbers {
+  margin: 0;
+  padding: 8px 12px;
+  color: #ffffff;
+  width: 100% !important;
+  border-radius: 20px;
+  position: relative;
+  border: 0px solid #d1d5db;
+  font-size: 14px;
+  font-weight: 400;
+}
+.step-number.steping.step-bg-text.activeBorder {
+  background-color: #0062ff !important;
+}
+
+.step-label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21.84px;
+}
+.activeBorder {
+  width: max-content;
+  height: 100%;
+  border-radius: 20px;
+}
+.border {
+  background-color: #c2daff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+.txt {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111127;
+}
+.activeText {
+  color: #ffba00;
+  font-size: 16px;
+  font-weight: 600;
+}
+.activeSemiCircle {
+  position: absolute;
+  width: 10px;
+  height: 9px;
+  background-color: #0863f3;
+  border-radius: 50%;
+}
+.semiCircle {
+  display: none;
+}
+
+.step-bg {
+  background-color: #0863f3;
+  border-color: #0863f3;
+}
+
+.step-divider {
+  border: none;
+  height: 2px;
+  background-color: #c2daff;
+  width: 100%;
+  margin: 0;
+}
+.step-divider-active {
+  border: none;
+  height: 2px;
+  background-color: #0863f3;
+  margin: 0;
+}
+.step-theme-color {
+  background-color: #0863f3 !important;
+}
+.round-container {
+  border-radius: 50%;
+}
+
+.curved-container {
+  border-radius: 30% 70% 70% 30% / 70% 30% 30% 70%;
+}
+@media screen and (max-width: 767px) and (min-width: 320px) {
+  .step-numbers {
+    font-size: 8px;
+    margin: 0;
+    padding: 4px 8px;
+    color: #ffffff;
+    width: 100% !important;
+    border-radius: 20px;
+    position: relative;
+    border: 0px solid #d1d5db;
+    font-weight: 400;
+  }
+  .activeBorder {
+    border: 3px solid #0062ff !important;
+    width: max-content;
+    height: 100%;
+    border-radius: 20px;
+  }
+  .border {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .parent-controller {
+    display: flex;
+    align-items: center;
+    width: 200%;
+  }
+}

@@ -1,0 +1,12 @@
+@import "../../Color.scss";
+
+.p-inputswitch.p-inputswitch-checked.custom-checked .p-inputswitch-slider {
+  background: $royal-Blue;
+}
+
+.customStyle .p-inputswitch-slider {
+  background-color: $pink;
+}
+.p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
+  background: $green;
+}
