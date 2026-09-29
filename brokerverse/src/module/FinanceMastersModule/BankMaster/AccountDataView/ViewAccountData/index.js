@@ -63,7 +63,7 @@ function ViewAccountDetail() {
     const errors = {};
 
     if (!values.AccountNumber) {
-      errors.AccountNumber = "This field Code is required";
+      errors.AccountNumber = "This field is required";
     }
     if (!values.AccountName) {
       errors.AccountName = "This field is required";

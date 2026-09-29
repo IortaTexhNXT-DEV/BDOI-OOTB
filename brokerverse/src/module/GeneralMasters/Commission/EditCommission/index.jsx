@@ -33,7 +33,7 @@ import {
 import { Card } from "primereact/card";
 import AddCommissionPopup from "../AddCommission/AddCommissionPopup";
 import { useTranslation } from "react-i18next";
-import { calendarDateFormat } from "../../../../utility/dateFormat";
+import { calendarDateFormat, toIsoDate } from "../../../../utility/dateFormat";
 
 const EditCommission = () => {
   const { t } = useTranslation();
@@ -470,7 +470,7 @@ const EditCommission = () => {
                   }
                   onChange={(e) => {
                     formik.handleChange("effectiveFrom")(
-                      e.value ? e.value.toLocaleDateString("en-CA") : ""
+                      e.value ? toIsoDate(e.value) : ""
                     );
                   }}
                   dateFormat={calendarDateFormat()}
@@ -505,7 +505,7 @@ const EditCommission = () => {
                   }
                   onChange={(e) => {
                     formik.handleChange("effectiveTo")(
-                      e.value ? e.value.toLocaleDateString("en-CA") : ""
+                      e.value ? toIsoDate(e.value) : ""
                     );
                   }}
                   dateFormat={calendarDateFormat()}

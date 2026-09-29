@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { toIsoDate } from "../utility/dateFormat";
 
 /** Operations > Renewals workspace: /renewals/* (queue, quotes, notices, approvals, lapse, win-back, analytics). */
 const QUEUE_PAGE_SIZE = 500;
@@ -47,7 +48,7 @@ const MONTHS_BACK = { "Current Month": 0, "Last 3 Months": 3, "Last 6 Months": 6
 /** { from, to } (YYYY-MM-DD) for the analytics time filters; custom uses the [start, end] calendar range. */
 export const periodRange = (timeFilter, customRange = []) => {
   const today = new Date();
-  const iso = (d) => d.toLocaleDateString("en-CA");
+  const iso = (d) => toIsoDate(d);
   if (timeFilter === "Custom Range") {
     const [start, end] = customRange || [];
     return start && end ? { from: iso(start), to: iso(end) } : {};

@@ -22,6 +22,7 @@ import {
   SYSTEM_CURRENCY_OPTIONS,
 } from "../../utility/systemCurrencies";
 import { getUserData } from "../../utility/tokenManager";
+import { getDisplayCurrencyConfig } from "../../utility/currencyConverter";
 import "./index.scss";
 
 const LANGUAGE_OPTIONS = [
@@ -54,7 +55,7 @@ const SystemSettingsPage = () => {
 
   const [form, setForm] = useState({
     logoUrl: "",
-    displayCurrency: "PHP",
+    displayCurrency: getDisplayCurrencyConfig().currency,
     primaryColor: "#0072d8",
     secondaryColor: "#004ea8",
     defaultLanguage: "en",

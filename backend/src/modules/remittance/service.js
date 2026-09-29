@@ -5,6 +5,8 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { renderTemplate } from '../documents/common.js';
+import { today as businessToday } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { isoDate, nextNumber, params, round2, toNumber } from '../masters/helpers.js';
@@ -190,7 +192,7 @@ async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, bi
 
 async function defaultDueDate(from) {
   const days = Number(await getSetting('remittance.default_due_days', 30)) || 30;
-  const d = new Date(`${isoDate(from) || new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+  const d = new Date(`${isoDate(from) || (await businessToday())}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
@@ -423,7 +425,7 @@ export async function approvers(user) {
 export async function listDelegations() {
   const rows = await many(`SELECT d.*, (SELECT display_name FROM users u WHERE u.id = d.delegate_id) AS delegate_name, (SELECT display_name FROM users u WHERE u.id = d.delegator_id) AS delegator_name
                            FROM remittance_delegations d ORDER BY d.from_date DESC`);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await businessToday();
   return rows.map((d) => ({ id: Number(d.id), delegatedTo: d.delegate_name, delegatedBy: d.delegator_name, fromDate: d.from_date, toDate: d.to_date, transTypes: d.trans_types,
     amountLimit: d.amount_limit, reason: d.reason, status: d.status === 'Active' && d.to_date < today ? 'Expired' : d.status }));
 }
@@ -448,7 +450,7 @@ export async function createDelegation(b, user) {
 /** Agents / agencies with their production for a bill period and unpaid balance of earlier agency bills. */
 export async function agencies(qs) {
   const period = qs.billPeriod ? String(qs.billPeriod).slice(0, 7) : null;
-  const roles = (await getSetting('incentive.eligible_roles', ['agent'])) || ['agent'];
+  const roles = (await getSetting('incentive.eligible_roles', [])) || [];
   const p = params([roles]);
   const periodCond = period ? `AND to_char(p.inception_date, 'YYYY-MM') = ${p.add(period)}` : '';
   const rows = await many(`
@@ -470,7 +472,7 @@ export async function generateAgencyBills(b, user) {
   const codes = Array.isArray(b.agencyCodes) ? b.agencyCodes : [];
   if (!codes.length) throw badRequest('Validation failed', [{ path: 'agencyCodes', message: 'Select at least one agency' }]);
   const all = await agencies({ billPeriod: period });
-  const billDate = isoDate(b.billRunDate) || new Date().toISOString().slice(0, 10);
+  const billDate = isoDate(b.billRunDate) || (await businessToday());
   const cfg = await one('SELECT data FROM master_records WHERE type_code = \'remittance-agency-bill\' AND status = \'active\' ORDER BY id LIMIT 1');
   const dueDays = Number(b.dueDays ?? cfg?.data?.dueDays ?? (await getSetting('remittance.default_due_days', 30)));
   const due = new Date(`${billDate}T00:00:00Z`);
@@ -505,7 +507,10 @@ export async function sendBill(id, b, user) {
   if (!to && r.insurance_company_id) to = r.insurer_email;
   if (to) {
     const currency = r.currency || (await getSetting('currency.default', 'PHP'));
-    await queueEmail({ to, subject: `Statement of account ${r.bill_number}`, html: `<p>Bill ${r.bill_number} dated ${r.remittance_date}: ${currency} ${round2(Number(r.net_due) + Number(r.previous_balance)).toLocaleString('en-US', { minimumFractionDigits: 2 })}, due ${r.due_date}.</p>`, template: 'remittance-bill', entity: 'remittance', entityId: r.id });
+    const vars = { billNumber: r.bill_number, billDate: r.remittance_date, currency, amount: round2(Number(r.net_due) + Number(r.previous_balance)).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+      dueDate: r.due_date, companyName: (await getSetting('general.company_name')) ?? '' };
+    await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.bill_email_subject'), vars), html: renderTemplate(await getSetting('remittance.bill_email_body'), vars),
+      template: 'remittance-bill', entity: 'remittance', entityId: r.id });
   }
   await query('UPDATE remittances SET sent_at = now(), delivery_method = $2, updated_by = $3, updated_at = now() WHERE id = $1', [r.id, JSON.stringify(b.deliveryMethod || r.delivery_method || ['email']), user.id]);
   return { ...(await getRemittance(r.id)), emailedTo: to || null };
@@ -554,11 +559,11 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
   const total = round2(created.reduce((s, r) => s + Number(r.netAmount), 0));
   const ref = await nextNumber('remittance_batch');
   await query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('execution', $1, $2, $3, $4, $5, $5)`,
-    [ref, total, created.length ? 'Success' : 'No Items', JSON.stringify({ configCode: b.configCode || 'ALL', executionDate: new Date().toISOString().slice(0, 10), recordsProcessed: created.reduce((s, r) => s + r.policyCount, 0),
+    [ref, total, created.length ? 'Success' : 'No Items', JSON.stringify({ configCode: b.configCode || 'ALL', executionDate: (await businessToday()), recordsProcessed: created.reduce((s, r) => s + r.policyCount, 0),
       itemCount: created.length, remittanceIds: created.map((r) => r.id), durationMs: Date.now() - started, triggeredBy }), user.id]);
   for (const code of [...new Set(cands.map((c) => c.scheduleCode))]) {
     await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text, 'nextRun', $3::text), updated_at = now() WHERE type_code = 'remittance-automated' AND code = $1`,
-      [code, new Date().toISOString().slice(0, 10), cands.find((c) => c.scheduleCode === code).dueDate]);
+      [code, (await businessToday()), cands.find((c) => c.scheduleCode === code).dueDate]);
   }
   return { executionId: ref, remittances: created, recordsProcessed: created.reduce((s, r) => s + r.policyCount, 0), totalAmount: total, duration: `${Math.max(1, Math.round((Date.now() - started) / 1000))}s` };
 }

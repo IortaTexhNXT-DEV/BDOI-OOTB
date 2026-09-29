@@ -4,13 +4,14 @@ import { getSetting } from '../../lib/settings.js';
 import { round2, today, daysBetween, nextNumber, toDate } from '../claims/util.js';
 import { BASE, OPEN, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
 
-/** Renewal queue with the dashboard counters (total, due in 30 days, at risk, in grace period). */
+/** Renewal queue with the dashboard counters (total, due within renewals.due_soon_days, at risk, in grace period). */
 export async function renewalQueue(q, pg) {
   const { total, items, all } = await listRenewals({ ...q, openOnly: q.status ? undefined : 'true' }, pg);
+  const dueSoonDays = Number(await getSetting('renewals.due_soon_days', 30)) || 0;
   return {
     total, items,
     dashboard: {
-      totalPolicies: all.length, dueSoon: all.filter((p) => p.daysToExpiry <= 30 && p.daysToExpiry > 0).length,
+      totalPolicies: all.length, dueSoon: all.filter((p) => p.daysToExpiry <= dueSoonDays && p.daysToExpiry > 0).length,
       atRisk: all.filter((p) => ['High', 'Critical'].includes(p.retentionRisk)).length, inGracePeriod: all.filter((p) => p.inGracePeriod).length,
       totalPremium: round2(all.reduce((s, p) => s + (p.currentPremium || 0), 0)),
     },

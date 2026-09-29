@@ -13,11 +13,12 @@ import { loginHistory, recordLogin } from '../../lib/loginHistory.js';
 import { clearKey, hit, ipKey, isLimited, loginLimits, userKey } from '../../lib/rateLimit.js';
 import { generateSecret, otpauthUrl, verifyTotp } from '../../lib/totp.js';
 import { decryptSecret, encryptSecret, hashCode, sameHash } from '../../lib/secrets.js';
+import { renderTemplate } from '../documents/common.js';
 
 const { router, define } = moduleRouter('Auth', '/auth');
 
-/** Lifetime of restricted tokens (two-factor enrolment, forced password change). */
-const RESTRICTED_TTL = 900;
+/** Lifetime in seconds of restricted tokens (two-factor enrolment, forced password change): security.restricted_token_minutes. */
+const restrictedTtl = async () => (Number(await getSetting('security.restricted_token_minutes', 15)) || 15) * 60;
 /**
  * A rotated refresh token presented again within this many seconds is refused without further action (two browser tabs
  * refreshing at the same moment); later it is treated as theft and the whole sign-in family is revoked.
@@ -59,7 +60,7 @@ async function completeSignIn(req, user, { deviceId, method }) {
     return {
       success: true, message: change.expired ? 'Your password has expired; choose a new one' : 'Choose a new password to continue',
       passwordChangeRequired: true, mustChangePassword: true, ...(change.expired ? { passwordExpired: true } : {}),
-      accessToken: signAccess(user, { restrict: 'pwchange', expiresIn: RESTRICTED_TTL }), expiresIn: RESTRICTED_TTL,
+      accessToken: signAccess(user, { restrict: 'pwchange', expiresIn: await restrictedTtl() }), expiresIn: await restrictedTtl(),
       user: { ...publicUser(user), mustChangePassword: true, ...(change.expired ? { passwordExpired: true } : {}) },
     };
   }
@@ -127,7 +128,7 @@ define({
       await query('UPDATE users SET failed_logins = 0 WHERE id = $1', [user.id]);
       await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: '2fa-setup-required' });
       return res.json({ success: true, message: 'Two-factor authentication must be set up for your role', twoFactorSetupRequired: true,
-        accessToken: signAccess(user, { restrict: 'enrol2fa', expiresIn: RESTRICTED_TTL }), expiresIn: RESTRICTED_TTL, user: publicUser(user) });
+        accessToken: signAccess(user, { restrict: 'enrol2fa', expiresIn: await restrictedTtl() }), expiresIn: await restrictedTtl(), user: publicUser(user) });
     }
     return res.json(await completeSignIn(req, user, { deviceId, method: 'password' }));
   },
@@ -288,11 +289,16 @@ define({
     const user = await loadUser(username ? 'lower(u.username) = lower($1)' : 'lower(u.email) = lower($1)', [username || email]);
     if (user && user.status !== 'inactive' && user.email) {
       const code = String(crypto.randomInt(100000, 1000000));
+      // Lifetime and wording from System Settings (security.reset_code_minutes, security.reset_email_subject / _body)
+      const minutes = Number(await getSetting('security.reset_code_minutes', 15)) || 15;
+      const vars = { code, minutes, companyName: (await getSetting('general.company_name')) ?? '' };
+      const subject = renderTemplate(await getSetting('security.reset_email_subject'), vars);
+      const html = renderTemplate(await getSetting('security.reset_email_body'), vars);
       await withTransaction(async (c) => {
         await c.query('UPDATE password_resets SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [user.id]);
-        await c.query('INSERT INTO password_resets(user_id, code_hash, expires_at) VALUES ($1,$2, now() + interval \'15 minutes\')', [user.id, hashCode(code, user.id)]);
+        await c.query('INSERT INTO password_resets(user_id, code_hash, expires_at) VALUES ($1,$2, now() + ($3 || \' minutes\')::interval)', [user.id, hashCode(code, user.id), String(minutes)]);
         await c.query('INSERT INTO email_outbox(to_address, subject, body_html, template, entity, entity_id) VALUES ($1,$2,$3,$4,$5,$6)',
-          [user.email, 'Your BrokerVerse password reset code', `<p>Your verification code is <b>${code}</b>. It expires in 15 minutes. If you did not ask for it, ignore this e-mail.</p>`, 'password-reset', 'user', user.id]);
+          [user.email, subject, html, 'password-reset', 'user', user.id]);
       });
     }
     res.json({ success: true, message: 'If the account exists, a verification code has been sent' });

@@ -141,7 +141,7 @@ export async function unmatch(db, ids, user) {
 
 // ---------- trial balance, periods, chart of accounts ----------
 export async function trialBalance(db, q) {
-  const asOf = isoDate(q.asOf) || (q.period ? (await db.query('SELECT (to_date($1, \'YYYY-MM\') + interval \'1 month - 1 day\')::date AS d', [q.period])).rows[0].d : today());
+  const asOf = isoDate(q.asOf) || (q.period ? (await db.query('SELECT (to_date($1, \'YYYY-MM\') + interval \'1 month - 1 day\')::date AS d', [q.period])).rows[0].d : (await today()));
   const from = isoDate(q.from) || null;
   const rows = (await db.query(`SELECT a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance, COALESCE(sum(l.debit),0) AS d, COALESCE(sum(l.credit),0) AS c
     FROM gl_accounts a LEFT JOIN journal_lines l ON l.account_code = a.code AND EXISTS (SELECT 1 FROM journal_vouchers j WHERE j.id = l.jv_id
@@ -181,7 +181,7 @@ export async function setPeriodStatus(db, period, status, remarks, user) {
   if (status === 'closed') {
     const open = (await db.query(`SELECT count(*)::int AS n FROM journal_vouchers WHERE period = $1 AND status IN ('pending','draft','for-approval','approved')`, [period])).rows[0].n;
     if (open) throw conflict(`Period ${period} has ${open} unposted journal(s); post or cancel them before closing`);
-    if (period >= periodOf(today()) && !(remarks || '').length) throw badRequest('Closing the current or a future period requires remarks');
+    if (period >= periodOf((await today())) && !(remarks || '').length) throw badRequest('Closing the current or a future period requires remarks');
     await db.query(`INSERT INTO accounting_periods(period, status, closed_by, closed_at, remarks) VALUES ($1,'closed',$2,now(),$3)
       ON CONFLICT (period) DO UPDATE SET status = 'closed', closed_by = $2, closed_at = now(), remarks = COALESCE($3, accounting_periods.remarks), updated_at = now()`, [period, user.id, remarks || null]);
   } else {
@@ -309,7 +309,7 @@ export async function paymentEntries(db, b, user) {
     const had = items.length > 0;
     if (!had) {
       const it = await bookDirectBill(db, { policy, amount: round2(num(b.grossPremium) || Number(policy.premium_total) || amount), breakdown: { netPremium: breakdown.netPremium },
-        source: 'policy', reference: policy.policy_number, date: isoDate(b.paymentDate) || today(), user });
+        source: 'policy', reference: policy.policy_number, date: isoDate(b.paymentDate) || (await today()), user });
       if (it) items.push(it);
     }
     return { journals: items.map((i) => i.booking_jv_id).filter(Boolean), applied: 0, alreadyApplied: had, directBilled: true };
@@ -318,7 +318,7 @@ export async function paymentEntries(db, b, user) {
   const outstanding = round2(open.reduce((s, r) => s + Number(r.balance), 0));
   const toApply = round2(Math.min(amount, outstanding));
   if (toApply > 0) {
-    await applyToPolicy(db, { policy, amount: toApply, paymentMode: b.paymentMode, referenceNo: b.referenceNo, date: isoDate(b.paymentDate) || today(), user });
+    await applyToPolicy(db, { policy, amount: toApply, paymentMode: b.paymentMode, referenceNo: b.referenceNo, date: isoDate(b.paymentDate) || (await today()), user });
   }
   const ids = (await db.query('SELECT id FROM journal_vouchers WHERE policy_id = $1 AND status <> \'cancelled\' ORDER BY created_at', [policy.id])).rows.map((r) => r.id);
   return { journals: ids, applied: toApply, alreadyApplied: toApply === 0 && amount > 0, directBilled: false };

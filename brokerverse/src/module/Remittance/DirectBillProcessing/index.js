@@ -21,6 +21,7 @@ import remittanceService, { masterService } from "../../../services/remittanceSe
 import reportsService from "../../../services/reportsService";
 import { calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 const firstOfMonth = () => {
@@ -231,7 +232,7 @@ const DirectBillProcessing = () => {
 
   const reverseCollection = async (note, col) => {
     // eslint-disable-next-line no-alert
-    const reason = window.prompt(`Reason for reversing ${col.collectionNumber}`);
+    const reason = await promptText(`Reason for reversing ${col.collectionNumber}`);
     if (!reason || reason.trim().length < 3) return;
     const out = await run(() => remittanceService.reverseDebitNoteCollection(note.id, col.id, reason.trim()), `${col.collectionNumber} reversed`);
     if (out) setViewNote(out);

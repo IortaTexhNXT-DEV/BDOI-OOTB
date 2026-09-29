@@ -5,6 +5,7 @@
  */
 import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
+import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
@@ -37,26 +38,30 @@ export const BASE = `SELECT r.*, p.policy_number, p.inception_date, p.expiry_dat
   LEFT JOIN products pr ON pr.id = p.product_id
   LEFT JOIN users ou ON ou.id = COALESCE(r.owner_user_id, p.owner_user_id)`;
 
+/** Neutral risk-factor thresholds used only when renewals.risk_thresholds lacks a value (the seed sets all three). */
+const RISK_THRESHOLDS = { noContactDays: 30, increasePercent: 10, dueSoonDays: 15 };
 export async function readContext() {
   return {
     todayStr: await today(), labels: (await getSetting('renewals.status_labels', {})) || {},
     grace: Number(await getSetting('renewals.grace_period_days', 30)),
     weights: (await getSetting('renewals.risk_weights', {})) || {}, bands: (await getSetting('renewals.risk_bands', { Low: 0 })) || { Low: 0 },
     stages: (await getSetting('renewals.notice_stages', [])) || [],
+    thresholds: { ...RISK_THRESHOLDS, ...((await getSetting('renewals.risk_thresholds', {})) || {}) },
   };
 }
 
 /** Retention risk score with the contributing factors (weights from renewals.risk_weights). */
 export function riskOf(r, ctx, daysToExpiry, variancePct) {
   const w = ctx.weights;
+  const th = ctx.thresholds || RISK_THRESHOLDS;
   const factors = [];
   const add = (factor, score, details) => { if (score) factors.push({ factor, score, details }); };
   if (r.claims_count > 0) add('Claims History', w.claims || 0, `${r.claims_count} claim(s) on the expiring term`);
   if (r.unpaid > 0) add('Unpaid Premium', w.unpaid || 0, `Outstanding premium ${r.unpaid}`);
   if (!r.loyalty_years) add('First Renewal', w.firstRenewal || 0, 'Statistically higher lapse rate');
-  if (!r.contact_attempts && !r.notice_stage && daysToExpiry <= 30) add('No Contact', w.noContact || 0, 'No notice or contact yet');
-  if (variancePct > 10) add('Premium Increase', w.increase || 0, `${variancePct}% increase quoted`);
-  if (daysToExpiry <= 15) add('Due Soon', w.dueSoon || 0, `${daysToExpiry} day(s) to expiry`);
+  if (!r.contact_attempts && !r.notice_stage && daysToExpiry <= th.noContactDays) add('No Contact', w.noContact || 0, 'No notice or contact yet');
+  if (variancePct > th.increasePercent) add('Premium Increase', w.increase || 0, `${variancePct}% increase quoted`);
+  if (daysToExpiry <= th.dueSoonDays) add('Due Soon', w.dueSoon || 0, `${daysToExpiry} day(s) to expiry`);
   const score = Math.min(100, factors.reduce((s, f) => s + f.score, 0));
   const band = Object.entries(ctx.bands).sort((a, b) => b[1] - a[1]).find(([, min]) => score >= min)?.[0] || 'Low';
   return { score, band, factors };
@@ -225,7 +230,7 @@ export async function rate(r) {
   const claimsLoading = round2(base * loadingPct);
   const loyaltyDiscount = round2(base * loyaltyPct);
   const net = round2(base + claimsLoading - loyaltyDiscount);
-  const taxRates = { vat: Number(await getSetting('tax.vat_rate', 0)), dst: Number(await getSetting('tax.dst_rate', 0)), lgt: Number(await getSetting('tax.lgt_rate', 0)), fst: line === 'fire' ? Number(await getSetting('tax.fst_rate', 0)) : 0 };
+  const taxRates = { vat: Number(await getSetting('tax.vat_rate', 0.12)), dst: Number(await getSetting('tax.dst_rate', 0.125)), lgt: Number(await getSetting('tax.lgt_rate', 0.0075)), fst: line === 'fire' ? Number(await getSetting('tax.fst_rate', 0.02)) : 0 };
   const taxes = Object.fromEntries(Object.entries(taxRates).map(([k, v]) => [k, round2(net * v)]));
   const total = round2(net + Object.values(taxes).reduce((s, v) => s + v, 0));
   const variance = round2(total - previous);
@@ -267,7 +272,7 @@ async function noticeVars(r, noticeLabel) {
   return {
     noticeLabel, clientName: r.client_name || 'Valued Client', policyNumber: r.policy_number, insurerName: r.insurer_name || '', expiryDate: r.policy_expiry,
     currency: r.currency || await getSetting('currency.default', 'PHP'), premium: fmt(r.premium_new ?? r.premium_old ?? r.premium_total),
-    companyName: await getSetting('general.company_name', 'BrokerVerse'),
+    companyName: ((await getSetting('general.company_name')) ?? ''),
   };
 }
 
@@ -288,8 +293,8 @@ export async function sendNotice(id, user, { stage, method = 'Email', batchId = 
   let emailId = null;
   if (method === 'Email') {
     emailId = await queueEmail({
-      to: r.client_email, subject: renderTemplate(await getSetting('renewals.notice_subject', '{{noticeLabel}}: {{policyNumber}}'), vars, { html: false }),
-      html: renderTemplate(await getSetting('renewals.notice_template', '<p>{{policyNumber}}</p>'), vars), template: `renewal-notice-${target.code}`, entity: 'renewal', entityId: r.id,
+      to: r.client_email, subject: renderTemplate(await getSetting('renewals.notice_subject'), vars, { html: false }),
+      html: renderTemplate(await getSetting('renewals.notice_template'), vars), template: `renewal-notice-${target.code}`, entity: 'renewal', entityId: r.id,
     });
   }
   await withTransaction(async (db) => {
@@ -311,7 +316,7 @@ export async function sendReminder(id, user, { method = 'Email', note }) {
   if (method === 'Email') {
     if (!r.client_email) throw unprocessable('Client has no e-mail address');
     const vars = await noticeVars(r, 'Renewal Reminder');
-    await queueEmail({ to: r.client_email, subject: renderTemplate(await getSetting('renewals.notice_subject', '{{noticeLabel}}'), vars, { html: false }), html: renderTemplate(await getSetting('renewals.notice_template', ''), vars), template: 'renewal-reminder', entity: 'renewal', entityId: r.id });
+    await queueEmail({ to: r.client_email, subject: renderTemplate(await getSetting('renewals.notice_subject'), vars, { html: false }), html: renderTemplate(await getSetting('renewals.notice_template'), vars), template: 'renewal-reminder', entity: 'renewal', entityId: r.id });
   }
   await withTransaction(async (db) => {
     await db.query('UPDATE renewals SET contact_attempts = contact_attempts + 1, last_contact_at = now(), updated_at = now() WHERE id = $1', [r.id]);
@@ -339,7 +344,7 @@ export async function submitForApproval(id, user, note) {
   const roles = (await getSetting('renewals.approver_roles', ['underwriting'])) || [];
   const approvers = new Set();
   for (const role of roles) for (const u of await usersWithRole(role)) if (u.id !== user.id) approvers.add(u.id);
-  for (const a of approvers) await notify({ userId: a, type: 'approval', title: `Renewal approval: ${r.policy_number}`, message: `Renewal ${r.renewal_number} (${r.premium_new}) awaits approval`, link: '/renewal/negotiations', entity: 'renewal', entityId: r.id });
+  for (const a of approvers) await notify({ userId: a, type: 'approval', title: `Renewal approval: ${r.policy_number}`, message: `Renewal ${r.renewal_number} (${await formatMoney(r.premium_new)}) awaits approval`, link: '/renewal/negotiations', entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
 }
 

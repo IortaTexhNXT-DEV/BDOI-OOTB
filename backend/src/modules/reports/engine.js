@@ -1,6 +1,7 @@
 /** Report engine: normalises screen parameters, builds the parameterised SQL around a base query and runs it. */
 import { many, one, query as dbQuery } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
+import { businessTimeZone, isoInZone } from '../../lib/dates.js';
 import { badRequest } from '../../lib/errors.js';
 import { QUERIES } from './queries.js';
 
@@ -42,7 +43,6 @@ const pick = (raw, key) => {
   return null;
 };
 
-const isoInZone = (d, tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 async function toDate(v, label) {
   if (v === null) return null;
   const s = String(v);
@@ -50,7 +50,7 @@ async function toDate(v, label) {
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) throw badRequest(`${label} is not a valid date`);
   // Browsers send Date objects as UTC instants; read them in the business time zone
-  return isoInZone(d, await getSetting('general.timezone', 'Asia/Manila') || 'Asia/Manila');
+  return isoInZone(d, await businessTimeZone());
 }
 
 /** Relative periods for schedules: yesterday, today, last-7-days, last-30-days, month-to-date, previous-month, year-to-date. */
@@ -72,11 +72,11 @@ export function resolvePeriod(period, today) {
 }
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const CRITERIA_ALIASES = { principleinsurance: 'principalinsurer', principalinsurance: 'principalinsurer', principleinsurer: 'principalinsurer' };
 
 /** Turn screen/API parameters into { from, to, criteria, filters } for a query definition. */
 export async function normalizeParams(query, raw = {}) {
-  const tz = await getSetting('general.timezone', 'Asia/Manila') || 'Asia/Manila';
-  const today = isoInZone(new Date(), tz);
+  const today = isoInZone(new Date(), await businessTimeZone());
   let from = await toDate(pick(raw, 'from'), 'From date');
   let to = await toDate(pick(raw, 'to'), 'To date');
   const period = pick(raw, 'period');
@@ -91,7 +91,9 @@ export async function normalizeParams(query, raw = {}) {
   const wanted = pick(raw, 'criteria');
   // "Overall" / "All" is the screens' generic default: it means the report's first (overall) view
   const generic = wanted && ['overall', 'all'].includes(norm(wanted));
-  const criteria = wanted ? keys.find((k) => norm(k) === norm(wanted)) || (generic ? keys[0] : undefined) : keys[0];
+  // Older spellings stay accepted (saved schedules, API clients): "Principle Insurance" = "Principal Insurer"
+  const want = CRITERIA_ALIASES[norm(wanted)] || norm(wanted);
+  const criteria = wanted ? keys.find((k) => norm(k) === want) || (generic ? keys[0] : undefined) : keys[0];
   if (wanted && !criteria) throw badRequest(`Report criteria must be one of: ${keys.join(', ')}`);
   const filters = {};
   const ignored = [];
@@ -102,7 +104,7 @@ export async function normalizeParams(query, raw = {}) {
     filters[f] = String(v);
   }
   // The screens list the broker itself under "Company"; that means "all insurers", not a filter
-  if (filters.insurer && norm(filters.insurer) === norm(await getSetting('general.company_name', ''))) delete filters.insurer;
+  if (filters.insurer && norm(filters.insurer) === norm(((await getSetting('general.company_name')) ?? ''))) delete filters.insurer;
   return { from, to, criteria: criteria || null, filters, ignoredFilters: ignored };
 }
 

@@ -6,11 +6,8 @@ import { InputTextarea } from "primereact/inputtextarea";
 import InputTextField from "../../../component/inputText";
 import DropdownField from "../../../component/DropdwonField";
 import { useFormik } from "formik";
-import {
-  BodilyInjuryOptions,
-  LossandDamagecoverageRateOptions,
-  PropertyDamageOptions,
-} from "../mock";
+import { LossandDamagecoverageRateOptions } from "../mock";
+import { bodilyInjuryOptions as configuredBodilyInjuryOptions, propertyDamageOptions as configuredPropertyDamageOptions } from "../../../../utility/quoteOptions";
 
 const initialValue = {
   FromDate: "",
@@ -216,7 +213,7 @@ const PolicyExtend = ({
 
   const bodilyInjuryOptions = useMemo(
     () =>
-      addFallbackOption(formikInitialValues.BodilyInjury, BodilyInjuryOptions),
+      addFallbackOption(formikInitialValues.BodilyInjury, configuredBodilyInjuryOptions()),
     [addFallbackOption, formikInitialValues.BodilyInjury]
   );
 
@@ -224,7 +221,7 @@ const PolicyExtend = ({
     () =>
       addFallbackOption(
         formikInitialValues.PropertyDamage,
-        PropertyDamageOptions
+        configuredPropertyDamageOptions()
       ),
     [addFallbackOption, formikInitialValues.PropertyDamage]
   );

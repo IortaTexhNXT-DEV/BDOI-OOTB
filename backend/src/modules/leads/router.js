@@ -8,6 +8,7 @@ import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows, sendTable } from '../documents/tabular.js';
 import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
+import { today } from '../../lib/dates.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
 const legacy = moduleRouter('Leads', '/lead');
@@ -55,7 +56,7 @@ define({
     const category = req.query.category || 'All';
     const { header, rows } = await svc.leadReport(category, await scopeOf(req));
     await audit(req, { entity: 'lead', entityId: null, action: 'report', after: { category, rows: rows.length } });
-    sendTable(res, { header, rows, fileBase: `lead-report-${String(category).replace(/[^a-zA-Z0-9]/g, '')}-${new Date().toISOString().slice(0, 10)}`, format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Leads' });
+    sendTable(res, { header, rows, fileBase: `lead-report-${String(category).replace(/[^a-zA-Z0-9]/g, '')}-${await today()}`, format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Leads' });
   },
 });
 define({

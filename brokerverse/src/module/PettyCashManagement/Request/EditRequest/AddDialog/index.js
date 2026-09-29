@@ -22,7 +22,7 @@ const AddDialog = ({visible,setVisible}) => {
         const errors = {};
     
         if (!values.Narration) {
-          errors.Narration = "This field Code is required";
+          errors.Narration = "This field is required";
         }
         if (!values.Amount) {
           errors.Amount = "This field is required";

@@ -33,7 +33,8 @@ async function values(keys) {
 export async function getSystemSettings() {
   const keys = [...Object.values(FIELD_KEYS), 'branding.default_logo_url', 'branding.logo_presets', 'currency.allowed', 'general.languages',
     'general.company_name', 'general.system_name', 'general.timezone', 'general.date_format', 'currency.symbol', 'currency.decimals',
-    'general.phone_country_code', 'general.mobile_pattern', 'general.mobile_example', 'quote.vehicle_colours', 'quote.model_year_span'];
+    'general.phone_country_code', 'general.mobile_pattern', 'general.mobile_example', 'quote.vehicle_colours', 'quote.model_year_span',
+    'quote.bodily_injury_limits', 'quote.property_damage_limits'];
   const { map, updatedAt } = await values(keys);
   return {
     logoUrl: map['branding.logo_url'] || map['branding.default_logo_url'] || '',
@@ -57,6 +58,8 @@ export async function getSystemSettings() {
     mobileExample: map['general.mobile_example'],
     vehicleColours: Array.isArray(map['quote.vehicle_colours']) ? map['quote.vehicle_colours'] : [],
     modelYearSpan: map['quote.model_year_span'],
+    bodilyInjuryLimits: Array.isArray(map['quote.bodily_injury_limits']) ? map['quote.bodily_injury_limits'] : [],
+    propertyDamageLimits: Array.isArray(map['quote.property_damage_limits']) ? map['quote.property_damage_limits'] : [],
     updatedAt,
   };
 }

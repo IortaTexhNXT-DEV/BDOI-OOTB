@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
 import CommissionService from "../../../services/commissionService";
 import { formatBaht } from "../utils/formatBaht";
+import { currencySymbol } from "../../../utility/currencyConverter";
 
 const stepDate = (value) => value || "—";
 
@@ -181,7 +182,7 @@ const LineDetailDrawer = ({
               </p>
               <div className="rate-fields">
                 <label>
-                  Fixed (₱)
+                  Fixed ({currencySymbol()})
                   <InputNumber
                     value={rateFixed}
                     onValueChange={(e) => setRateFixed(e.value ?? 0)}

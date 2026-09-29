@@ -15,7 +15,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { dateBody, downloadCsv, isoDate, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
-import { confirmAction } from "../../../utility/dialogs";
+import { confirmAction, promptText } from "../../../utility/dialogs";
 
 const emptyRecon = { bankTransactions: [], systemTransactions: [], exceptions: [], summary: { total: 0, matched: 0, unmatched: 0, partial: 0, successRate: 0 } };
 
@@ -147,15 +147,15 @@ const ReconciliationProcess = () => {
     );
   };
 
-  const handleResolveException = (exception) => {
-    const resolution = window.prompt(`Resolution for ${exception.bankRef}`, "");
+  const handleResolveException = async (exception) => {
+    const resolution = await promptText(`Resolution for ${exception.bankRef}`, "");
     if (!resolution) return;
     run(() => remittanceService.resolveException(exception.id, resolution), 'Exception Resolved', `${exception.type} resolved`);
   };
 
-  const handleResolveAll = () => {
+  const handleResolveAll = async () => {
     if (!exceptions.length) return;
-    const resolution = window.prompt(`Resolution for ${exceptions.length} exception(s)`, "");
+    const resolution = await promptText(`Resolution for ${exceptions.length} exception(s)`, "");
     if (!resolution) return;
     run(() => Promise.all(exceptions.map((e) => remittanceService.resolveException(e.id, resolution))), 'Exceptions Resolved', `${exceptions.length} exception(s) resolved`);
   };

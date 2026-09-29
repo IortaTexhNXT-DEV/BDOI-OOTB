@@ -74,4 +74,17 @@ Confirmed by the business owner; seeded in `backend/src/db/seeds/settings.json` 
 | CTPL tariff (Product Configurator, motor templates) | Annual amounts inclusive of taxes and fees: motorcycles / tricycles / trailers 300.40, private cars 610.40, light / medium trucks 660.40, AC and tourist cars 790.40, taxi / PUJ / mini bus 1,150.40, heavy trucks and private buses 1,250.40, PUB and tourist buses 1,500.40. 3-year upfront for brand-new private cars 1,660.40 (other classes to be supplied). Added to the gross outside the taxed net premium; not discounted |
 | Auto Passenger PA | Limit per person x seats x 0.1%; limits 25,000 to 200,000 |
 
+Business settings moved from code to configuration (D133-D137, D146; seeded with the values the code used, **to be confirmed by the business owner**, editable in Master > Configuration):
+
+| Setting | Value |
+|---|---|
+| Executive Dashboard periods | Calendar month / quarter / year to date in Manila time (confirmed by the user); compared with the whole previous period |
+| `quote.bodily_injury_limits` / `quote.property_damage_limits` | 100,000 to 500,000 in steps of 100,000 (quote and endorsement screens) |
+| `dashboard.renewals_due_days` | 60 days (renewals due on the dashboards) |
+| `renewals.due_soon_days` / `renewals.risk_thresholds` | 30 days; retention risk: no contact within 30 days of expiry, premium increase above 10%, due within 15 days |
+| `product.expiry_warning_days` | 60 days (templates listed as expiring) |
+| `incentive.program_lookback_days` | 30 days (ended programs still shown to agents) |
+| `security.reset_code_minutes` / `security.restricted_token_minutes` | 15 / 15 minutes |
+| E-mail texts | `security.reset_email_*`, `remittance.statement_email_*`, `remittance.bill_email_*` |
+
 Where to maintain them: Product Configurator > template MOT-003-2025 (the template named in System Settings, `motor.pricing_template_code`) > tab "CTPL & Auto PA". Each vehicle class has its name, default seats, 1-year CTPL and 3-year CTPL (blank = the 3-year cover is not offered for that class); classes can be added or removed; the Auto Passenger PA rate and limits are on the same tab. The server checks the values on save (amounts of 0 or more, whole-number seats, unique class codes) and the quote screens use them at once. Re-tested on screen as bea.admin: a 3-year amount entered for motorcycles was saved and offered by the quotation tariff, then cleared again.

@@ -141,7 +141,7 @@ function AddState({ action }) {
     const errors = {};
 
     if (!values.StateCode) {
-      errors.StateCode = "This field Code is required";
+      errors.StateCode = "This field is required";
     }
     if (!values.StateName) {
       errors.StateName = "This field is required";

@@ -128,7 +128,7 @@ const DepartMentList = ({ action, branchCode }) => {
     const errors = {};
 
     if (!values.DepartmentCode) {
-      errors.DepartmentCode = "This field Code is required";
+      errors.DepartmentCode = "This field is required";
     }
     if (!values.DepartmentName) {
       errors.DepartmentName = "This field is required";

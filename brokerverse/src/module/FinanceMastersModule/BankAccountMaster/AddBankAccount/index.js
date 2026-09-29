@@ -10,6 +10,7 @@ import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
 import SuccessIcon from "../../../../assets/icons/SuccessIcon";
 import NavBar from "../../../../components/NavBar";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
 function AddBankAccount() {
   const { t } = useTranslation();
@@ -37,11 +38,8 @@ function AddBankAccount() {
     { name: "Profite Account", code: "RM" },
   ];
 
-  const code = [
-    { name: "PHP", code: "PHP" },
-    { name: "THB", code: "THB" },
-    { name: "USD", code: "USD" },
-  ];
+  // Currency codes from the Currency master (Master > Finance > Currency)
+  const code = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
 
   const home = { label: t("financeMasters.master") };
 
@@ -129,7 +127,7 @@ function AddBankAccount() {
               value={currencycode}
               onChange={(e) => setCurrencyCode(e.value)}
               options={code}
-              optionLabel="name"
+              optionLabel="label"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />

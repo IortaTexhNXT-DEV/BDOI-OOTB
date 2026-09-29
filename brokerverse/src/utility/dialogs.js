@@ -6,6 +6,8 @@
  * affected: PrimeReact only opens the dialog whose tagKey matches the confirmDialog() call.
  */
 import { confirmDialog } from "primereact/confirmdialog";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
 import i18n from "../i18n";
 
 export const APP_DIALOG_TAG = "app-dialog";
@@ -56,6 +58,50 @@ export const notifyError = (message) => notify("error", message);
 export const notifySuccess = (message) => notify("success", message);
 export const notifyWarn = (message) => notify("warn", message);
 export const notifyInfo = (message) => notify("info", message);
+
+/**
+ * In-app text prompt (in place of window.prompt): a dialog with a text box. Resolves the text entered (trimmed) when the
+ * user presses OK, null when they cancel or close the dialog, so `const reason = await promptText(msg); if (!reason)
+ * return;` keeps the native behaviour.
+ * @param {string} message label shown above the box
+ * @param {string} [defaultValue]
+ * @param {{ header?: string, acceptLabel?: string, rejectLabel?: string, multiline?: boolean }} [options]
+ * @returns {Promise<string|null>}
+ */
+export const promptText = (message, defaultValue = "", { header, acceptLabel, rejectLabel, multiline = true } = {}) =>
+  new Promise((resolve) => {
+    let settled = false;
+    let current = defaultValue === null || defaultValue === undefined ? "" : String(defaultValue);
+    const done = (value) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+    const onChange = (e) => {
+      current = e.target.value;
+    };
+    const box = multiline ? (
+      <InputTextarea id="app-prompt-text" defaultValue={current} rows={3} autoResize autoFocus onChange={onChange} />
+    ) : (
+      <InputText id="app-prompt-text" defaultValue={current} autoFocus onChange={onChange} />
+    );
+    confirmDialog({
+      tagKey: APP_DIALOG_TAG,
+      message: (
+        <div className="app-prompt" style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: "min(28rem, 80vw)" }}>
+          <label htmlFor="app-prompt-text">{text(message)}</label>
+          {box}
+        </div>
+      ),
+      header: header || tr("common.enterDetails", "Enter details"),
+      acceptLabel: acceptLabel || tr("common.ok", "OK"),
+      rejectLabel: rejectLabel || tr("common.cancel", "Cancel"),
+      accept: () => done(current.trim()),
+      reject: () => done(null),
+      onHide: () => done(null),
+    });
+  });
 
 /**
  * In-app confirmation (in place of window.confirm). Resolves true when the user accepts, false when they cancel or close

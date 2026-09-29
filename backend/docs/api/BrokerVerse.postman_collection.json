@@ -39565,7 +39565,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"production-register\",\n      \"name\": \"Production Register\",\n      \"category\": \"operational\",\n      \"screen\": \"Reports > Operational Reports > Production\",\n      \"criteria\": [\n        \"Overall\",\n        \"Agent\",\n        \"Principle Insurance\",\n        \"Branch\"\n      ],\n      \"formats\": [\n        \"csv\",\n        \"xlsx\",\n        \"pdf\"\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"production-register\",\n      \"name\": \"Production Register\",\n      \"category\": \"operational\",\n      \"screen\": \"Reports > Operational Reports > Production\",\n      \"criteria\": [\n        \"Overall\",\n        \"Agent\",\n        \"Principal Insurer\",\n        \"Branch\"\n      ],\n      \"formats\": [\n        \"csv\",\n        \"xlsx\",\n        \"pdf\"\n      ]\n    }\n  ]\n}"
             }
           ]
         },

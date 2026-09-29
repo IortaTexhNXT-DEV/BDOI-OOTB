@@ -17,12 +17,12 @@ import { ProgressBar } from 'primereact/progressbar';
 import { MultiSelect } from 'primereact/multiselect';
 import reinsuranceService from '../../../../services/reinsuranceService';
 import mastersService from '../../../../services/mastersService';
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate as isoDate } from "../../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 import FieldError from "../../../../components/FieldError";
 import './style.scss';
 
-const toIsoDate = (date) => (date instanceof Date ? date.toLocaleDateString('en-CA') : date);
+const toIsoDate = (date) => (date instanceof Date ? isoDate(date) : date);
 const toNumberOrUndefined = (value) => {
   const n = parseFloat(value);
   return Number.isFinite(n) ? n : undefined;

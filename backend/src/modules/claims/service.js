@@ -8,6 +8,7 @@ import path from 'node:path';
 import { config } from '../../config.js';
 import { many, one, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
+import { formatMoney } from '../../lib/money.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
@@ -226,7 +227,7 @@ async function docVars(r) {
     lossPlace: [r.loss_address, r.loss_city, r.loss_province].filter(Boolean).join(', '), lossType: r.loss_type || '',
     currency, estimate: fmt(r.estimate_amount), approvedAmount: fmt(r.approved_amount), settledAmount: fmt(r.settled_amount ?? r.settlement?.settlementAmount),
     settlementType: r.settlement?.settlementType || '', slaDays: await getSetting('claims.sla_days', 20),
-    companyName: await getSetting('general.company_name', 'BrokerVerse'),
+    companyName: ((await getSetting('general.company_name')) ?? ''),
   };
 }
 
@@ -238,8 +239,8 @@ async function sendPla(r, emailData = {}) {
   if (!to) return null;
   const subject = emailData.mailSubject && emailData.mailSubject !== 'New Claim Notification'
     ? `${emailData.mailSubject} - ${r.claim_number}`
-    : renderTemplate(await getSetting('claims.pla_subject', 'Preliminary Loss Advice - {{claimNumber}}'), vars, { html: false });
-  const html = renderTemplate(await getSetting('claims.pla_template', '<p>{{claimNumber}}</p>'), vars);
+    : renderTemplate(await getSetting('claims.pla_subject'), vars, { html: false });
+  const html = renderTemplate(await getSetting('claims.pla_template'), vars);
   return queueEmail({ to, cc: r.client_email || null, subject, html, template: 'claim-pla', entity: 'claim', entityId: r.id });
 }
 
@@ -434,7 +435,7 @@ export async function settleClaim(id, input, user, files) {
     await transition(row, 'pending-approval', user, { note: `Settlement of ${amount} submitted for approval`, action: 'Settlement Submitted', sets: { settlement: JSON.stringify(settlement), settlement_requested_by: user?.id ?? null } });
     const approvers = (await usersWithRole('claims')).map((u) => u.id).filter((u) => u !== user?.id);
     for (const a of approvers) {
-      await notify({ userId: a, type: 'approval', title: `Settlement approval: ${row.claim_number}`, message: `Settlement of ${amount} on claim ${row.claim_number} awaits approval`, link: `/agent/claimdetail/${row.id}`, entity: 'claim', entityId: row.id });
+      await notify({ userId: a, type: 'approval', title: `Settlement approval: ${row.claim_number}`, message: `Settlement of ${await formatMoney(amount)} on claim ${row.claim_number} awaits approval`, link: `/agent/claimdetail/${row.id}`, entity: 'claim', entityId: row.id });
     }
     return { from, claim: await getClaim(row.id), pendingApproval: true };
   }

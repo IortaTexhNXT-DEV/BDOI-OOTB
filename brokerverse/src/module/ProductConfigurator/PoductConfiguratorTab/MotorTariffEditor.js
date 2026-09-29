@@ -1,5 +1,6 @@
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { currencySymbol } from "../../../utility/currencyConverter";
 
 const slug = (s) =>
   String(s || "")
@@ -82,8 +83,8 @@ const MotorTariffEditor = ({ configuration = {}, fallbackClasses = [], onChange,
         <div className="col-12 md:col-4">Vehicle class</div>
         <div className="col-6 md:col-2">Code</div>
         <div className="col-6 md:col-1">Seats</div>
-        <div className="col-6 md:col-2">CTPL 1 year (₱)</div>
-        <div className="col-6 md:col-2">CTPL 3 years (₱)</div>
+        <div className="col-6 md:col-2">CTPL 1 year ({currencySymbol()})</div>
+        <div className="col-6 md:col-2">CTPL 3 years ({currencySymbol()})</div>
         <div className="col-12 md:col-1" />
       </div>
       {classes.map((c, i) => (
@@ -129,7 +130,7 @@ const MotorTariffEditor = ({ configuration = {}, fallbackClasses = [], onChange,
           />
         </div>
         <div className="field col-12 lg:col-6">
-          <label className={labelClass}>Limits per person offered (₱, separated by commas)</label>
+          <label className={labelClass}>Limits per person offered ({currencySymbol()}, separated by commas)</label>
           <InputText
             className={inputClass}
             value={(appa.limitsText ?? (appa.limits || []).join(", "))}

@@ -4,6 +4,7 @@ import { getSetting } from '../../lib/settings.js';
 import { round2 } from '../documents/common.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { scopeSql } from '../../lib/scope.js';
+import { businessTimeZone, calendarPeriod } from '../../lib/dates.js';
 
 /**
  * One user's own book, with the same ownership rules as the record scope of security.scoped_roles (lib/scope.js): the
@@ -16,22 +17,30 @@ const inBook = (book, entity, alias, params) => scopeSql(book, entity, alias, pa
 const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
 const change = (cur, prev) => (prev ? Math.round(((cur - prev) / prev) * 1000) / 10 : (cur ? 100 : 0));
 /** Product label of a policy: its product type, else the product master name, else the LOB. */
+/** Window of the "renewals due" counters and lists (dashboard.renewals_due_days). */
+const renewalsDueDays = async () => Number(await getSetting('dashboard.renewals_due_days', 60)) || 0;
 const PRODUCT = "COALESCE(p.product_type, pr.name, p.lob, 'Other')";
-const PERIODS = { month: '1 month', quarter: '3 months', year: '1 year' };
-const periodOf = (p) => PERIODS[p] || PERIODS.month;
+/** Start of a business date (Manila midnight by general.timezone) as a timestamptz, for comparing created_at. */
+const START = (date, tz) => `(${date}::date::timestamp AT TIME ZONE ${tz})`;
 
-/** Premium written in the current and previous period, policies in force, new business, claims ratio, retention. */
+/**
+ * Premium written in the current and previous period, policies in force, new business, claims ratio, retention.
+ * The period is the calendar month / quarter / year to date in the configured time zone (1 September to today for
+ * "This Month"), compared with the whole previous period (August).
+ */
 export async function executive(period = 'month') {
-  const iv = periodOf(period);
+  const range = await calendarPeriod(period);
+  const cur = `created_at >= ${START('$1', '$4')} AND created_at < ${START('$2', '$4')}`;
+  const prev = `created_at >= ${START('$3', '$4')} AND created_at < ${START('$1', '$4')}`;
   const k = await one(`SELECT
-      COALESCE(sum(premium_total) FILTER (WHERE created_at >= now() - $1::interval), 0) AS premium_cur,
-      COALESCE(sum(premium_total) FILTER (WHERE created_at >= now() - 2 * $1::interval AND created_at < now() - $1::interval), 0) AS premium_prev,
-      count(*) FILTER (WHERE status IN ('active','issued') AND expiry_date >= current_date)::int AS active,
-      count(*) FILTER (WHERE created_at >= now() - $1::interval)::int AS new_cur,
-      count(*) FILTER (WHERE created_at >= now() - 2 * $1::interval AND created_at < now() - $1::interval)::int AS new_prev,
-      COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND created_at >= now() - $1::interval), 0) AS new_business,
+      COALESCE(sum(premium_total) FILTER (WHERE ${cur}), 0) AS premium_cur,
+      COALESCE(sum(premium_total) FILTER (WHERE ${prev}), 0) AS premium_prev,
+      count(*) FILTER (WHERE status IN ('active','issued') AND expiry_date >= $5::date)::int AS active,
+      count(*) FILTER (WHERE ${cur})::int AS new_cur,
+      count(*) FILTER (WHERE ${prev})::int AS new_prev,
+      COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND ${cur}), 0) AS new_business,
       COALESCE(sum(premium_total), 0) AS premium_all
-    FROM policies`, [iv]);
+    FROM policies`, [range.from, range.next, range.prevFrom, range.timeZone, range.to]);
   const claims = await one(`SELECT count(*)::int AS total, count(*) FILTER (WHERE status NOT IN ('settled','closed','rejected'))::int AS open,
       COALESCE(sum(COALESCE(settled_amount, approved_amount, 0)), 0) AS incurred, COALESCE(sum(estimate_amount), 0) AS reserved FROM claims`);
   const ret = await one(`SELECT count(*) FILTER (WHERE status = 'renewed')::int AS renewed, count(*) FILTER (WHERE status IN ('renewed','lapsed'))::int AS closed FROM renewals`);
@@ -55,6 +64,7 @@ export async function executive(period = 'month') {
     claimsAnalytics: { totalClaims: claims.total, openClaims: claims.open, incurred: round2(claims.incurred), reserved: round2(claims.reserved), claimsRatio },
     receivables: await receivablesPosition(),
     currency: await getSetting('currency.default', 'PHP'),
+    period: { code: range.period, from: range.from, to: range.to, end: range.end, previousFrom: range.prevFrom, previousTo: range.prevTo },
   };
 }
 
@@ -87,12 +97,17 @@ export async function monthlyTrend(months = 12, book = null) {
   const pol = inBook(book, 'policy', 'p', params);
   const quo = inBook(book, 'quote', 'q', params);
   const lea = inBook(book, 'lead', 'l', params);
+  // Calendar months in the business time zone (general.timezone), so a policy written at 07:00 Manila on the 1st
+  // counts in the new month
+  params.push(await businessTimeZone());
+  const tz = `$${params.length}`;
+  const month = (col) => `date_trunc('month', ${col} AT TIME ZONE ${tz})`;
   const rows = await many(`SELECT to_char(m, 'YYYY-MM') AS month, to_char(m, 'Mon') AS label,
-      COALESCE((SELECT sum(premium_total) FROM policies p WHERE date_trunc('month', p.created_at) = m AND ${pol}), 0) AS premium,
-      (SELECT count(*)::int FROM policies p WHERE date_trunc('month', p.created_at) = m AND ${pol}) AS policies,
-      (SELECT count(*)::int FROM quotes q WHERE date_trunc('month', q.created_at) = m AND q.deleted_at IS NULL AND ${quo}) AS quotes,
-      (SELECT count(*)::int FROM leads l WHERE date_trunc('month', l.created_at) = m AND l.deleted_at IS NULL AND ${lea}) AS leads
-    FROM generate_series(date_trunc('month', now()) - make_interval(months => $1 - 1), date_trunc('month', now()), interval '1 month') AS m ORDER BY m`, params);
+      COALESCE((SELECT sum(premium_total) FROM policies p WHERE ${month('p.created_at')} = m AND ${pol}), 0) AS premium,
+      (SELECT count(*)::int FROM policies p WHERE ${month('p.created_at')} = m AND ${pol}) AS policies,
+      (SELECT count(*)::int FROM quotes q WHERE ${month('q.created_at')} = m AND q.deleted_at IS NULL AND ${quo}) AS quotes,
+      (SELECT count(*)::int FROM leads l WHERE ${month('l.created_at')} = m AND l.deleted_at IS NULL AND ${lea}) AS leads
+    FROM generate_series(${month('now()')} - make_interval(months => $1 - 1), ${month('now()')}, interval '1 month') AS m ORDER BY m`, params);
   return { labels: rows.map((r) => r.label), months: rows.map((r) => r.month), premium: rows.map((r) => round2(r.premium)),
     policies: rows.map((r) => r.policies), quotes: rows.map((r) => r.quotes), leads: rows.map((r) => r.leads) };
 }
@@ -133,12 +148,16 @@ export async function sales(book = null) {
   const lead = inBook(book, 'lead', 'l', p);
   const quote = inBook(book, 'quote', 'q', p);
   const policy = inBook(book, 'policy', 'po', p);
+  p.push(await renewalsDueDays());
+  const dueDays = `$${p.length}::int`;
+  p.push(await businessTimeZone());
+  const tz = `$${p.length}`;
   const f = await one(`SELECT (SELECT count(*)::int FROM leads l WHERE l.deleted_at IS NULL AND ${lead}) AS leads,
       (SELECT count(DISTINCT q.lead_id)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quoted_leads,
       (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quotes,
       (SELECT count(*)::int FROM policies po WHERE ${policy}) AS policies,
-      (SELECT COALESCE(sum(po.premium_total),0) FROM policies po WHERE ${policy} AND date_trunc('month', po.created_at) = date_trunc('month', now())) AS premium_month,
-      (SELECT count(*)::int FROM policies po WHERE ${policy} AND po.status IN ('active','issued') AND po.expiry_date BETWEEN current_date AND current_date + 60) AS renewals_due`, p);
+      (SELECT COALESCE(sum(po.premium_total),0) FROM policies po WHERE ${policy} AND date_trunc('month', po.created_at AT TIME ZONE ${tz}) = date_trunc('month', now() AT TIME ZONE ${tz})) AS premium_month,
+      (SELECT count(*)::int FROM policies po WHERE ${policy} AND po.status IN ('active','issued') AND po.expiry_date BETWEEN current_date AND current_date + ${dueDays}) AS renewals_due`, p);
   return {
     funnel: { leads: f.leads, quotedLeads: f.quoted_leads, quotations: f.quotes, policies: f.policies, leadToQuoteRate: pct(f.quoted_leads, f.leads), quoteToPolicyRate: pct(f.policies, f.quotes), leadToPolicyRate: pct(f.policies, f.leads) },
     leadsByStatus: leadsBy, quotationsByStatus: quotesBy.map((r) => ({ status: quoteStatusOut(r.status), count: r.count, premium: round2(r.premium) })),
@@ -184,8 +203,10 @@ export async function agentHome(book) {
   const recentQuotes = await many(`SELECT q.id AS "quotationId", q.quote_number AS "quotationNumber", q.status, q.premium_total AS "grossPremium", l.display_name AS "leadName", q.created_at AS "createdAt"
     FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id WHERE q.deleted_at IS NULL AND ${inBook(book, 'quote', 'q', qp)} ORDER BY q.created_at DESC LIMIT 5`, qp);
   const pp = [];
+  const scope = inBook(book, 'policy', 'p', pp);
+  pp.push(await renewalsDueDays());
   const expiring = await many(`SELECT p.id AS "policyId", p.policy_number AS "policyNumber", p.insured_name AS "insuredName", p.expiry_date AS "expiry", p.premium_total AS "grossPremium"
-    FROM policies p WHERE ${inBook(book, 'policy', 'p', pp)} AND p.status IN ('active','issued') AND p.expiry_date BETWEEN current_date AND current_date + 60 ORDER BY p.expiry_date LIMIT 10`, pp);
+    FROM policies p WHERE ${scope} AND p.status IN ('active','issued') AND p.expiry_date BETWEEN current_date AND current_date + $${pp.length}::int ORDER BY p.expiry_date LIMIT 10`, pp);
   const commission = await one(`SELECT COALESCE(sum(net_amount) FILTER (WHERE lower(status) <> 'paid'), 0) AS unpaid, COALESCE(sum(net_amount) FILTER (WHERE lower(status) = 'paid'), 0) AS paid
     FROM commissions WHERE agent_user_id = $1`, [book?.userId]);
   // Premium of the book's policies: collected = paid on the premium bills (receipts applied), receivable = still open.

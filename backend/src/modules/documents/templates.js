@@ -6,8 +6,8 @@ const money = (v) => num(v);
 const val = (v) => (v === null || v === undefined || v === '' ? '-' : String(v));
 
 export async function header(title, number) {
-  const company = await getSetting('general.company_name', '');
-  const system = await getSetting('general.system_name', '');
+  const company = ((await getSetting('general.company_name')) ?? '');
+  const system = ((await getSetting('general.system_name')) ?? '');
   return { title, subtitle: `${company}${number ? `  -  ${number}` : ''}`, footer: `${system || company} - generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC` };
 }
 
@@ -69,13 +69,13 @@ export async function placingSlipDoc(p) {
   const h = await header('Insurance Placing Slip', p.policyNumber);
   return { ...h, meta: [['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Class', p.productType], ['Period', `${val(p.inception)} to ${val(p.expiry)}`],
     ['Sum insured', num(p.sumInsured).toFixed(2)], ['Currency', p.currency]].map(([a, b]) => [a, val(b)]),
-  sections: [riskSection(x), coverageSection(x), premiumTable(x, p.currency), { heading: 'Security', text: `${val(p.insuranceCompanyName)} - 100% share. Placed by ${await getSetting('general.company_name', '')}.` }] };
+  sections: [riskSection(x), coverageSection(x), premiumTable(x, p.currency), { heading: 'Security', text: `${val(p.insuranceCompanyName)} - 100% share. Placed by ${((await getSetting('general.company_name')) ?? '')}.` }] };
 }
 
 export async function receiptDoc(r, lines) {
   const h = await header('Official Receipt', r.receipt_number);
   return { ...h, meta: [['Receipt no.', r.receipt_number], ['Date', String(r.received_date)], ['Received from', r.customer_name || r.client_name], ['Payment mode', r.payment_mode],
-    ['Reference', r.reference_no], ['Status', r.receipt_status || r.status], ['Amount', num(r.amount).toFixed(2)], ['Currency', r.currency_code || 'PHP']].map(([a, b]) => [a, val(b)]),
+    ['Reference', r.reference_no], ['Status', r.receipt_status || r.status], ['Amount', num(r.amount).toFixed(2)], ['Currency', r.currency_code || (await getSetting('currency.default', 'PHP'))]].map(([a, b]) => [a, val(b)]),
   sections: [{ heading: 'Applied to', table: { columns: ['Policy no.', 'Net premium', 'VAT', 'DST', 'LGT', 'Paid'], widths: [125, 80, 75, 75, 75, 85],
     rows: lines.length ? lines.map((l) => [l.policy_number, money(l.net_premium), money(l.vat), money(l.dst), money(l.lgt), money(l.paid)]) : [[r.policy_number || '-', 0, 0, 0, 0, money(r.amount)]] } },
   { heading: 'Remarks', text: r.remarks || 'Thank you for your payment.' }] };
@@ -101,7 +101,7 @@ export async function commissionDebitNoteDoc(dn, lines) {
         rows: lines.map((l) => [l.reference && l.reference !== l.policyNo ? `${l.policyNo} / ${l.reference}` : l.policyNo, val(l.insuredName), val(l.product), money(l.grossPremium),
           l.commissionRate === null || l.commissionRate === undefined ? '-' : `${num(l.commissionRate).toFixed(2)}%`, money(l.commission), money(l.vat), money(l.amount)]) } },
     { heading: `Amount due (${dn.currency})`, table: { columns: ['Item', 'Amount'], widths: [365, 150], rows: totals } },
-    { heading: 'Payment instructions', text: await getSetting('direct_bill.debit_note_remarks', '') },
+    { heading: 'Payment instructions', text: ((await getSetting('direct_bill.debit_note_remarks')) ?? '') },
     ...(dn.remarks ? [{ heading: 'Remarks', text: dn.remarks }] : []),
   ] };
 }

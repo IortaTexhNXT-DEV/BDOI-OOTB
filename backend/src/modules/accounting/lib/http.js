@@ -3,7 +3,8 @@ import { getSetting } from '../../../lib/settings.js';
 import { forbidden } from '../../../lib/errors.js';
 import { paging } from '../../../lib/respond.js';
 
-export const round2 = (n) => Math.round((Number(n || 0) + Number.EPSILON) * 100) / 100;
+export { round2 } from '../../../lib/money.js';
+export { today } from '../../../lib/dates.js';
 export const num = (v) => {
   if (v === null || v === undefined || v === '') return 0;
   const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[^0-9.-]/g, ''));
@@ -17,7 +18,6 @@ export const isoDate = (v) => {
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 };
-export const today = () => new Date().toISOString().slice(0, 10);
 
 export const pageParams = (q, perPage = 10) => paging(q, { page: 1, perPage });
 

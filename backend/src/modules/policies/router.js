@@ -1,4 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
+import { formatMoney } from '../../lib/money.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
@@ -81,7 +82,7 @@ define({
     await audit(req, { entity: 'policy', entityId: policy.id, action: r.option === 'pay-later' ? 'pay-later' : 'payment-capture', after: { ...(r.capture || {}), receiptNumber: r.receipt?.receiptNumber } });
     if (r.capture && !r.posted) {
       for (const u of await usersWithRoles(['finance'])) {
-        await notify({ userId: u.id, type: 'approval', title: 'Premium payment to verify', message: `${r.capture.paymentModeLabel} ${r.capture.amount.toFixed(2)} (ref ${r.capture.referenceNo || '-'}) on policy ${policy.policy_number}`,
+        await notify({ userId: u.id, type: 'approval', title: 'Premium payment to verify', message: `${r.capture.paymentModeLabel} ${await formatMoney(r.capture.amount)} (ref ${r.capture.referenceNo || '-'}) on policy ${policy.policy_number}`,
           link: `/agent/policy/paymentoptions/${policy.id}`, entity: 'policy', entityId: policy.id });
       }
     }

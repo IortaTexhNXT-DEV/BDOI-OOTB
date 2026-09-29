@@ -5,6 +5,8 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { renderTemplate } from '../documents/common.js';
+import { today } from '../../lib/dates.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { fileSize, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
@@ -103,7 +105,7 @@ async function settlementData(b, existing = {}) {
   }
   return {
     ins, totals, data: {
-      ...existing, settlementDate: isoDate(b.settlementDate ?? existing.settlementDate) || new Date().toISOString().slice(0, 10), settlementType: b.settlementType ?? existing.settlementType ?? 'Regular',
+      ...existing, settlementDate: isoDate(b.settlementDate ?? existing.settlementDate) || (await today()), settlementType: b.settlementType ?? existing.settlementType ?? 'Regular',
       insurerCode: ins.code, insurerName: ins.name, settlementPeriod: [isoDate(period[0]), isoDate(period[1])], ...adj,
       remarks: b.remarks ?? existing.remarks ?? '', paymentMethod: b.paymentMethod ?? existing.paymentMethod ?? null, bankAccount: b.bankAccount ?? existing.bankAccount ?? null,
       paymentReference: b.referenceNo ?? existing.paymentReference ?? '', paymentDate: isoDate(b.paymentDate ?? existing.paymentDate), parameterCode: param?.data?.code || null,
@@ -207,7 +209,7 @@ export async function createTransfer(b, user) {
   const ins = await findInsurer(b.insurerCode ?? rem?.insurerId, { required: false });
   const ref = await nextNumber('transfer');
   const data = { beneficiary: b.beneficiary, method: method.value, accountNumber: b.accountNumber || null, bankName: b.bankName || null, bankAccount: b.bankAccount || null,
-    purpose: b.purpose || b.description || '', scheduledDate: isoDate(b.scheduledDate) || new Date().toISOString().slice(0, 10), remittanceNo: rem?.remittanceNo || null };
+    purpose: b.purpose || b.description || '', scheduledDate: isoDate(b.scheduledDate) || (await today()), remittanceNo: rem?.remittanceNo || null };
   const id = await withTransaction(async (c) => {
     const itemId = await insertItem(c, { kind: 'transfer', referenceNo: ref, remittanceId: rem?.id, insurerId: ins?.id, amount, status: 'Pending', data, userId: user.id });
     await openApproval(c, { entity: 'item', entityId: itemId, referenceNo: ref, transactionType: 'Electronic Transfer', amount, description: `${method.label} to ${b.beneficiary}`, initiatorId: user.id });
@@ -263,7 +265,10 @@ export async function generateStatement(b, user) {
     fileName, fileSize: fileSize(saved.size), generatedAt: new Date().toISOString(), downloadUrl: saved.url, previewUrl: saved.url, rowCount: rows.length, totals };
   await insertItemNoTx({ kind: 'statement', referenceNo: ref, amount: totals.netAmount, status: 'Generated', data, userId: user.id });
   if (Array.isArray(b.emailTo) && b.emailTo.length) {
-    for (const to of b.emailTo) await queueEmail({ to, subject: `Remittance statement ${period}`, html: `<p>Your remittance statement for ${period} is available: <a href="${saved.url}">${fileName}</a></p>`, template: 'remittance-statement', entity: 'remittance_statement', entityId: ref });
+    const vars = { period, fileName, downloadUrl: saved.url, companyName: (await getSetting('general.company_name')) ?? '' };
+    const subject = renderTemplate(await getSetting('remittance.statement_email_subject'), vars);
+    const html = renderTemplate(await getSetting('remittance.statement_email_body'), vars);
+    for (const to of b.emailTo) await queueEmail({ to, subject, html, template: 'remittance-statement', entity: 'remittance_statement', entityId: ref });
   }
   return { success: true, ...data };
 }
@@ -282,7 +287,7 @@ export async function createException(b, user) {
   if (b.remittanceNo || b.remittanceId) rem = await getRemittance(b.remittanceNo || b.remittanceId);
   const ref = await nextNumber('remittance_exception');
   const data = { type: b.type, exceptionCode: t?.data?.code || null, severity, remittanceNo: rem?.remittanceNo || b.remittanceNo || null, description: b.description, assignedTo: b.assignedTo || '',
-    detectedOn: new Date().toISOString().slice(0, 10), bankRef: b.bankRef || null, sysRef: b.sysRef || null, difference: b.difference == null ? null : toNumber(b.difference), action: b.action || 'Review', sla: t?.data?.sla || null };
+    detectedOn: (await today()), bankRef: b.bankRef || null, sysRef: b.sysRef || null, difference: b.difference == null ? null : toNumber(b.difference), action: b.action || 'Review', sla: t?.data?.sla || null };
   const id = await insertItemNoTx({ kind: 'exception', referenceNo: ref, remittanceId: rem?.id, amount: toNumber(b.amount ?? b.difference, 0), status: 'Open', priority: severity, data, userId: user.id });
   return exceptionOut(await getItem('exception', id));
 }
@@ -358,7 +363,7 @@ export async function runSchedule(id, user) {
   const configCode = linked.find((x) => /^ARM-/.test(String(x))) || null;
   const result = await executeAutomated({ configCode }, user, `schedule:${s.code}`);
   await query('UPDATE remittance_items SET data = data || $2 WHERE reference_no = $1', [result.executionId, JSON.stringify({ scheduleId: String(s.id), scheduleCode: s.code })]);
-  await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text), updated_by = $3, updated_at = now() WHERE id = $1`, [s.id, new Date().toISOString().slice(0, 10), user.id]);
+  await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text), updated_by = $3, updated_at = now() WHERE id = $1`, [s.id, (await today()), user.id]);
   return { schedule: await masters.getRecord(t, id), execution: result };
 }
 
@@ -554,7 +559,7 @@ async function kpis(from, to) {
 }
 
 export async function analytics(qs) {
-  const to = isoDate(qs.to) || new Date().toISOString().slice(0, 10);
+  const to = isoDate(qs.to) || (await today());
   const from = isoDate(qs.from) || new Date(Date.parse(to) - 180 * 86400000).toISOString().slice(0, 10);
   const span = Date.parse(to) - Date.parse(from);
   const prevTo = new Date(Date.parse(from) - 86400000).toISOString().slice(0, 10);
@@ -591,7 +596,7 @@ export async function generateReport(b, user) {
   const tpl = await one('SELECT data FROM master_records WHERE type_code = \'remittance-report-template\' AND code = $1 AND status = \'active\'', [b.templateCode]);
   if (!tpl) throw badRequest('Validation failed', [{ path: 'templateCode', message: 'Unknown report template' }]);
   const from = isoDate(b.from) || `${new Date().toISOString().slice(0, 7)}-01`;
-  const to = isoDate(b.to) || new Date().toISOString().slice(0, 10);
+  const to = isoDate(b.to) || (await today());
   const rows = await statementRows({ from, to, insurers: b.insurers || [] });
   const ref = await nextNumber('remittance_report');
   const fileName = `${tpl.data.name.replace(/[^A-Za-z0-9]+/g, '_')}_${from}_${to}.csv`;

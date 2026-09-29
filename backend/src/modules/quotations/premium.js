@@ -61,7 +61,7 @@ async function commissionRate(v, insurerId) {
     const ic = await one('SELECT commission_rate FROM insurance_companies WHERE id = $1', [insurerId]);
     if (ic?.commission_rate != null) return Number(ic.commission_rate);
   }
-  return Number(await getSetting('commission.default_rate', 0));
+  return Number(await getSetting('commission.default_rate', 0.15));
 }
 
 /**

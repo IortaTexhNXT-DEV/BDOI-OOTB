@@ -77,7 +77,7 @@ export async function validateLines(db, rawLines, { manual = false } = {}) {
  */
 export async function createJournal(db, j, user) {
   const { lines, totalDebit, totalCredit, accounts } = await validateLines(db, j.lines, { manual: j.manual });
-  const date = j.date || today();
+  const date = j.date || (await today());
   const autoPost = await getSetting('accounting.auto_post_system_entries', true);
   const status = j.status || (autoPost ? 'posted' : 'pending');
   if (status === 'posted') await assertPeriodOpen(db, date);
@@ -159,7 +159,7 @@ export async function reverseJournal(db, id, user, { date, description, transact
   if (matched) throw conflict(`Journal ${jv.jv_number} has matched open entries; unmatch them first`);
   const lines = (await db.query('SELECT * FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [id])).rows;
   const rev = await createJournal(db, {
-    date: date || today(), description: description || `Reversal of ${jv.jv_number}${jv.description ? ` – ${jv.description}` : ''}`,
+    date: date || (await today()), description: description || `Reversal of ${jv.jv_number}${jv.description ? ` – ${jv.description}` : ''}`,
     source: 'reversal', kind, transactionCode: transactionCode || jv.transaction_code, entryType: jv.entry_type, entrySubType: 'REVERSAL',
     referenceType: jv.reference_type, referenceId: jv.reference_id, clientId: jv.client_id, policyId: jv.policy_id, policyNumber: jv.policy_number,
     currency: jv.currency, reversalOf: jv.id, status, requiresApproval,

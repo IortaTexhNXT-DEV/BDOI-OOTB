@@ -29,6 +29,9 @@ export const setPhoneConfig = ({ phoneCountryCode, mobilePattern, mobileExample 
   };
 };
 
+/** The configured dialling prefix (general.phone_country_code, e.g. "+63") shown in front of phone fields. */
+export const phoneCountryCode = () => config.countryCode;
+
 /** The hint shown under a mobile number field. */
 export const mobileHint = () => config.example;
 

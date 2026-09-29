@@ -16,7 +16,6 @@ import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../../components/LabelWrapper";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import { useFormik } from "formik";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
@@ -67,7 +66,7 @@ function EditAccountDetail({ action }) {
   //   const errors = {};
 
   //   if (!values.AccountNumber) {
-  //     errors.AccountNumber = "This field Code is required";
+  //     errors.AccountNumber = "This field is required";
   //   }
   //   if (!values.AccountName) {
   //     errors.AccountName = "This field is required";

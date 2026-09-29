@@ -60,7 +60,7 @@ define({
     const widths = [16, 14, 12, 28, 16, 14, 10];
     const lines = [padRow(['Voucher', 'Customer', 'Date', 'Payee', 'Policy', 'Amount', 'Status'], widths), '-'.repeat(116),
       ...rows.map((d) => padRow([d.voucher_number, d.customer_code, d.voucher_date, d.payee_name, d.policy_number, Number(d.amount).toFixed(2), d.status], widths))];
-    const title = `${await getSetting('general.company_name', 'BrokerVerse')} – Payment Vouchers`;
+    const title = `${((await getSetting('general.company_name')) ?? '')} – Payment Vouchers`;
     const file = await storeFile(pool, { category: 'print', fileName: 'disbursements.pdf', contentType: 'application/pdf', buffer: makePdf(title, lines), entity: 'disbursement', userId: req.user.id });
     ok(res, { url: file.url, filename: file.fileName, key: file.key, count: rows.length }, 'Disbursements exported');
   },

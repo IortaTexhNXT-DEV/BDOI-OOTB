@@ -27,6 +27,9 @@ describe('journal vouchers', () => {
     jv = c.body.data;
     expect(jv.status).toBe('for-approval');
     expect(c.body.message).toContain(jv.transactionNumber);
+    // The approval notification shows the amount formatted with the configured currency (not "(25000)")
+    const n = (await pool.query("SELECT message FROM notifications WHERE entity = 'journal_voucher' AND title LIKE '%awaiting approval' ORDER BY id DESC LIMIT 1")).rows[0];
+    expect(n.message).toContain('(₱25,000.00)');
     const d = await ctx.as('checker')('get', `/journal-vouchers?transactionNumber=${jv.transactionNumber}&page=1&pageSize=10`);
     expect(d.body.data).toHaveLength(2);
     expect(d.body.data[0]).toMatchObject({ mainAccount: '4401003', subAccount: '4401003001', entryType: 'Debit', localAmount: 25000, transactionNumber: jv.transactionNumber });

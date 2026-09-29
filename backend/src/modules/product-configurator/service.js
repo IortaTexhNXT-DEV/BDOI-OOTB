@@ -5,6 +5,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { today } from '../../lib/dates.js';
 import { isoDate, lastMonths, nextNumber, params, round2, toNumber } from '../masters/helpers.js';
 
 // ---------------- templates ----------------
@@ -162,7 +163,7 @@ export async function setTemplateLifecycle(id, action, reason, user) {
     await query('UPDATE product_templates SET status = \'Retired\', retired_at = now(), retired_reason = $2, updated_by = $3, updated_at = now() WHERE id = $1', [Number(id), reason || null, user.username]);
   } else {
     if (before.status === 'Active') throw badRequest('Template is already active');
-    if (before.expiryDate && before.expiryDate < new Date().toISOString().slice(0, 10)) throw badRequest('Template has expired; extend the expiry date before reactivating');
+    if (before.expiryDate && before.expiryDate < (await today())) throw badRequest('Template has expired; extend the expiry date before reactivating');
     await query('UPDATE product_templates SET status = \'Active\', retired_at = NULL, retired_reason = NULL, updated_by = $2, updated_at = now() WHERE id = $1', [Number(id), user.username]);
   }
   return { before, after: templateOut(await getTemplateRow({ id })) };
@@ -248,7 +249,7 @@ export async function calculatePremium(id, body) {
   }
   const taxLines = taxes.map((x) => ({ ...x, amount: round2(x.basis === 'Sum Insured' ? sumInsured * x.rate / 100 : adjusted * x.rate / 100) }));
   const totalTax = round2(taxLines.reduce((s, x) => s + x.amount, 0));
-  const commRate = toNumber(t.commissionRate ?? (toNumber(await getSetting('commission.default_rate', 0)) * 100));
+  const commRate = toNumber(t.commissionRate ?? (toNumber(await getSetting('commission.default_rate', 0.15)) * 100));
   const commission = round2(adjusted * commRate / 100);
   return {
     templateId: t.id, templateCode: t.templateCode, sumInsured, baseRate: rate, basePremium, factors: applied, ratedPremium: premium,
@@ -410,7 +411,7 @@ export async function dashboard() {
   const byCategory = await many('SELECT COALESCE(category, \'Other\') AS category, count(*)::int AS n FROM product_templates WHERE status <> \'Retired\' GROUP BY 1 ORDER BY 2 DESC');
   const comps = await many('SELECT kind, count(*)::int AS n FROM product_components WHERE status = \'Active\' GROUP BY kind');
   const recent = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t ORDER BY t.updated_at DESC LIMIT 5`);
-  const expiring = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t WHERE t.status = 'Active' AND t.expiry_date BETWEEN current_date AND current_date + 60 ORDER BY t.expiry_date`);
+  const expiring = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t WHERE t.status = 'Active' AND t.expiry_date BETWEEN current_date AND current_date + $1::int ORDER BY t.expiry_date`, [Number(await getSetting('product.expiry_warning_days', 60)) || 0]);
   const count = (s) => byStatus.find((x) => x.status === s)?.n || 0;
   const a = await analytics();
   return {

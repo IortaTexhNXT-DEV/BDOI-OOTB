@@ -28,6 +28,7 @@ import {
   postAddCompanyMiddleware,
 } from "../store/companyMiddleware";
 import useMasterOptions from "../../../common/useMasterOptions";
+import { phoneCountryCode } from "../../../../../utility/phoneFormat";
 
 
 function AddCompany({ action }) {
@@ -167,7 +168,7 @@ function AddCompany({ action }) {
     const errors = {};
 
     if (!values.CompanyCode) {
-      errors.CompanyCode = "This field Code is required";
+      errors.CompanyCode = "This field is required";
     }
     if (!values.CompanyName) {
       errors.CompanyName = "This field is required";
@@ -523,7 +524,7 @@ function AddCompany({ action }) {
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
               classNames="field__container"
-              label={t("generalMasters.pinCode")}
+              label={t("generalMasters.zipCode")}
               placeholder={t("generalMasters.enter")}
               value={
                 action == "add"
@@ -623,7 +624,7 @@ function AddCompany({ action }) {
             <label className="label_text">Phone Number</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText
@@ -652,7 +653,7 @@ function AddCompany({ action }) {
             <label className="label_text">Fax</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText

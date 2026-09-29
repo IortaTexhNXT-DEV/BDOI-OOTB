@@ -27,6 +27,7 @@ import {
   postAddBranchMiddleware,
 } from "../store/branchMiddleware";
 import useMasterOptions from "../../../common/useMasterOptions";
+import { phoneCountryCode } from "../../../../../utility/phoneFormat";
 
 const initialValues = {
   BranchCode: "",
@@ -105,7 +106,7 @@ function AddBranch({ action }) {
     const errors = {};
 
     if (!values.BranchCode) {
-      errors.BranchCode = "This field Code is required";
+      errors.BranchCode = "This field is required";
     }
     if (!values.BranchName) {
       errors.BranchName = "This field is required";
@@ -465,7 +466,7 @@ function AddBranch({ action }) {
             <label className="label_text">Phone Number</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText

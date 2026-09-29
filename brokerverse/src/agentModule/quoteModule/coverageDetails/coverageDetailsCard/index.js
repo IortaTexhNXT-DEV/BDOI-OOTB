@@ -11,7 +11,6 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import customHistory from "../../../../routes/customHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
-import { amountOptions, BodilyInjuryOptions, PropertyDamageOptions } from "./mock";
 import {
   postcoverageDetailsMiddleware,
 } from "../store/coverageDetailsMiddleware";
@@ -26,6 +25,7 @@ import useTaxRates from "../../utils/useTaxRates";
 import useMotorTariff, { appaFigures, findVehicleClass } from "../../utils/useMotorTariff";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { notifyError } from "../../../../utility/dialogs";
+import { amountOptions, bodilyInjuryOptions, propertyDamageOptions } from "../../../../utility/quoteOptions";
 
 const CoverageDetailsCard = ({
   action,
@@ -37,6 +37,9 @@ const CoverageDetailsCard = ({
   const { t } = useTranslation();
   // Motor tariff (Product Configurator): fixed CTPL premium per vehicle class, Auto Passenger PA limits and rate.
   const motorTariff = useMotorTariff();
+  // Limits offered come from Master > Configuration (quote.bodily_injury_limits / quote.property_damage_limits)
+  const BodilyInjuryOptions = useMemo(() => bodilyInjuryOptions(), []);
+  const PropertyDamageOptions = useMemo(() => propertyDamageOptions(), []);
   const AutopassengerpersonalAccidentOptions = useMemo(
     () => amountOptions(motorTariff.appa.limits),
     [motorTariff]

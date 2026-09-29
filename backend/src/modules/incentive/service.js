@@ -5,10 +5,10 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { today } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
 import { assertChecker, fileUrl, isoDate, lastMonths, nextNumber, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 
-const today = () => new Date().toISOString().slice(0, 10);
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
     .map((f) => ({ path: f, message: `${f} is required` }));
@@ -120,7 +120,7 @@ export async function deleteProgram(id, user) {
 // ---------------- achievement and payout ----------------
 
 export async function eligibleAgents(agentId) {
-  const roles = (await getSetting('incentive.eligible_roles', ['agent'])) || ['agent'];
+  const roles = (await getSetting('incentive.eligible_roles', [])) || [];
   return many(`SELECT u.id, u.display_name, COALESCE(u.employee_code, u.username) AS code, u.branch_code,
                  (SELECT name FROM branches b WHERE b.code = u.branch_code) AS branch_name
                FROM users u WHERE u.status = 'active' AND ($2::text IS NULL OR u.id = $2)
@@ -331,7 +331,7 @@ export async function decideCalculation(batchId, action, b, user) {
 export async function payCalculation(batchId, b) {
   const c = await calcRow(batchId);
   if (c.status !== 'Approved') throw conflict('Only approved batches can be paid');
-  const date = isoDate(b.paymentDate) || today();
+  const date = isoDate(b.paymentDate) || (await today());
   await withTransaction(async (tx) => {
     await tx.query('UPDATE incentive_calculations SET status = \'Paid\', payment_date = $2, payment_reference = $3, updated_at = now() WHERE batch_id = $1', [c.batch_id, date, b.paymentReference || null]);
     await tx.query('UPDATE incentive_results SET status = \'Paid\', paid_at = $2::date WHERE calculation_id = $1', [c.batch_id, date]);
@@ -341,7 +341,7 @@ export async function payCalculation(batchId, b) {
 
 export async function approvalsBoard() {
   const all = await listCalculations({});
-  const t = today();
+  const t = (await today());
   const pending = all.filter((a) => a.status === 'Pending Approval');
   return {
     approvals: all,
@@ -354,17 +354,19 @@ export async function approvalsBoard() {
 
 export async function agentPrograms(agentId) {
   const agents = await eligibleAgents(agentId);
-  const programs = await many('SELECT * FROM incentive_programs WHERE status = \'Active\' AND period_to >= current_date - 30 ORDER BY period_from');
+  const lookback = Number(await getSetting('incentive.program_lookback_days', 30)) || 0;
+  const t = await today();
+  const programs = await many('SELECT * FROM incentive_programs WHERE status = \'Active\' AND period_to >= $1::date - $2::int ORDER BY period_from', [t, lookback]);
   const out = [];
   for (const a of agents) {
     const assigned = [];
     for (const p of programs) {
-      const to = p.period_to < today() ? p.period_to : today();
+      const to = p.period_to < t ? p.period_to : t;
       const achieved = await achievement(p.metric, a.id, p.period_from, to);
       const pay = payout(p, achieved, Number(p.target));
       assigned.push({ programId: p.id, programCode: p.program_code, programName: p.name, targetMetric: p.target_metric, target: p.target, stretchTarget: p.stretch_target, achieved,
-        achievementPercent: pay.achievementPercent, potentialEarning: pay.amount, tier: pay.tier, daysRemaining: Math.max(0, Math.ceil((Date.parse(p.period_to) - Date.parse(today())) / 86400000)),
-        startDate: p.period_from, endDate: p.period_to, lastUpdated: today() });
+        achievementPercent: pay.achievementPercent, potentialEarning: pay.amount, tier: pay.tier, daysRemaining: Math.max(0, Math.ceil((Date.parse(p.period_to) - Date.parse(t)) / 86400000)),
+        startDate: p.period_from, endDate: p.period_to, lastUpdated: t });
     }
     const acts = await many(`SELECT p.inception_date, p.premium_total, p.renewed_from, pr.name AS product FROM policies p LEFT JOIN products pr ON pr.id = p.product_id
                              WHERE p.owner_user_id = $1 ORDER BY p.inception_date DESC LIMIT 10`, [a.id]);
@@ -375,16 +377,17 @@ export async function agentPrograms(agentId) {
 }
 
 /** Statement shape with no agent: the period label and zero totals. */
-export function emptyStatement(periodRef) {
-  const period = parsePeriod(periodRef || today().slice(0, 7));
-  return { agentId: null, agentName: '', agentCode: '', branch: '', period: period.label, statementDate: today(), totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0,
+export async function emptyStatement(periodRef) {
+  const t = await today();
+  const period = parsePeriod(periodRef || t.slice(0, 7));
+  return { agentId: null, agentName: '', agentCode: '', branch: '', period: period.label, statementDate: t, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0,
     lastPayment: 0, lastPaymentDate: null, programBreakdown: [], monthlyTrend: [] };
 }
 
 export async function statement(agentId, periodRef) {
   const [a] = await eligibleAgents(agentId);
   if (!a) throw notFound('Agent not found or not eligible for incentives');
-  const period = parsePeriod(periodRef || today().slice(0, 7));
+  const period = parsePeriod(periodRef || (await today()).slice(0, 7));
   const key = period.from.slice(0, 7);
   const lines = await many(`SELECT r.*, p.name, p.structure, p.metric FROM incentive_results r JOIN incentive_programs p ON p.id = r.program_id
                             WHERE r.agent_user_id = $1 AND r.period = $2 AND r.status <> 'Rejected'`, [a.id, key]);
@@ -395,7 +398,7 @@ export async function statement(agentId, periodRef) {
   const months = lastMonths(13, new Date(`${key}-01T00:00:00Z`));
   const trend = await many('SELECT period, COALESCE(sum(payout), 0) AS v FROM incentive_results WHERE agent_user_id = $1 AND status IN (\'Approved\', \'Paid\') AND period >= $2 GROUP BY period', [a.id, months[0].key]);
   return {
-    agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, period: period.label, statementDate: today(),
+    agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, period: period.label, statementDate: (await today()),
     totalEarnings: round2(lines.filter((l) => ['Approved', 'Paid'].includes(l.status)).reduce((s, l) => s + Number(l.payout), 0)), ytdEarnings: round2(ytd.v), pendingPayment: round2(pending.v),
     lastPayment: last ? round2(last.v) : 0, lastPaymentDate: last?.paid_at ? new Date(last.paid_at).toISOString().slice(0, 10) : null,
     programBreakdown: lines.map((l) => ({ program: l.name, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
@@ -434,7 +437,7 @@ export async function generateReport(b, user) {
     if (top > 0) rows = rows.slice(0, top);
     columns = ['period', 'agent', 'agent_code', 'program_code', 'program', 'target', 'achieved', 'achievement_percent', 'base_incentive', 'adjustments', 'payout', 'status'].map((k) => ({ key: k, label: k }));
   }
-  const saved = await saveFile({ category: 'incentive-reports', fileName: `${tpl.data.code}_${today()}.csv`, content: toCsv(rows, columns), contentType: 'text/csv', entity: 'incentive_report', entityId: tpl.data.code, userId: user.id });
+  const saved = await saveFile({ category: 'incentive-reports', fileName: `${tpl.data.code}_${(await today())}.csv`, content: toCsv(rows, columns), contentType: 'text/csv', entity: 'incentive_report', entityId: tpl.data.code, userId: user.id });
   const r = await one(`INSERT INTO generated_reports(code, name, params, format, storage_key, row_count, generated_by, status) VALUES ($1,$2,$3,'csv',$4,$5,$6,'done') RETURNING id, created_at`,
     [`incentive:${tpl.data.code}`, tpl.data.name, JSON.stringify({ parameters: p, format: b.format || b.parameters?.format || 'CSV' }), saved.key, rows.length, user.id]);
   return { reportId: r.id, reportType: tpl.data.name, templateCode: tpl.data.code, generatedDate: r.created_at, fileUrl: saved.url, rowCount: rows.length, format: 'CSV', requestedFormat: b.format || b.parameters?.format || null };

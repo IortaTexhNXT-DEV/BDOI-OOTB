@@ -14,6 +14,7 @@ import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { dateBody, downloadCsv, isoDate, loadInsurerOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
 
 const emptyTransfer = { method: null, amount: 0, beneficiary: null, accountNumber: "", bankName: "", purpose: "" };
 const total = (rows) => rows.reduce((s, r) => s + Number(r.amount || 0), 0);
@@ -80,9 +81,9 @@ const ElectronicTransfer = () => {
 
   const approvalFor = (row) => approvals.find((a) => a.entityId === row.id);
 
-  const handleApprove = (row) => {
+  const handleApprove = async (row) => {
     if (row.status === "Approved") {
-      const bankReference = window.prompt(t("remittance.reference"), "");
+      const bankReference = await promptText(t("remittance.reference"), "");
       if (bankReference === null) return;
       run(() => remittanceService.executeTransfer(row.id, { status: "Completed", bankReference }), `${row.reference} completed`);
       return;
@@ -92,8 +93,8 @@ const ElectronicTransfer = () => {
     run(() => remittanceService.approve(approval.id), `${row.reference} approved`);
   };
 
-  const handleReject = (row) => {
-    const reason = window.prompt(t("remittance.reason"), "");
+  const handleReject = async (row) => {
+    const reason = await promptText(t("remittance.reason"), "");
     if (!reason) return;
     if (row.status === "Approved") {
       run(() => remittanceService.executeTransfer(row.id, { status: "Failed", failureReason: reason }), `${row.reference} marked as failed`);

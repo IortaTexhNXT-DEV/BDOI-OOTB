@@ -185,7 +185,7 @@ export async function createReceivable(db, { policyId, amount, source = 'policy'
 
 /** Roles that earn commission on the policies they produce (commission.eligible_roles, falling back to incentive.eligible_roles). */
 export async function commissionEligibleRoles() {
-  const roles = (await getSetting('commission.eligible_roles', null)) || (await getSetting('incentive.eligible_roles', ['agent'])) || ['agent'];
+  const roles = (await getSetting('commission.eligible_roles', null)) || (await getSetting('incentive.eligible_roles', [])) || [];
   return (Array.isArray(roles) ? roles : [roles]).map((r) => String(r).toLowerCase());
 }
 
@@ -220,7 +220,7 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
   // administrators and back-office users who key in a policy do not.
   const agent = agentUserId ? await eligibleCommissionUser(db, agentUserId) : null;
   if (!agent) return null;
-  const wht = Number(await getSetting('tax.withholding_rate', 0));
+  const wht = Number(await getSetting('tax.withholding_rate', 0.05));
   const amount = round2(basis * rate);
   const withholding = round2(amount * wht);
   const status = await getSetting('commission.initial_status', 'Accrued');
@@ -300,7 +300,7 @@ export async function importPolicy(db, p, userId) {
     p.contactNumber || null, userId, p.companyName ? 'corporate' : 'individual', p.companyName ? 'Corporate' : 'Retail']);
   const icId = await insurerId(db, p.insuranceCompanyName);
   const rate = icId ? Number((await db.query('SELECT commission_rate FROM insurance_companies WHERE id = $1', [icId])).rows[0]?.commission_rate || 0)
-    : Number(await getSetting('commission.default_rate', 0));
+    : Number(await getSetting('commission.default_rate', 0.15));
   return issuePolicy(db, {
     clientId: cl.rows[0].id, insuranceCompanyId: icId, sumInsured: p.sumInsured, netPremium: p.netPremium, grossPremium: p.grossPremium,
     commissionAmount: round2(p.netPremium * rate), commissionRate: rate, currency: await getSetting('currency.default', 'PHP'),

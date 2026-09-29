@@ -1,20 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { ProductService } from "../mock";
+import React from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import ToggleButton from "../../../../components/ToggleButton";
 import SvgFilters from "../../../../assets/icons/SvgFilters";
 import "../index.scss";
+import { useMasterRecords } from "../../../GeneralMasters/common/useMasterOptions";
 
 const CompanyMasterTable = () => {
-  const [products, setProducts] = useState([]);
-  useEffect(() => {
-    ProductService.getProductsMini().then((data) => setProducts(data));
-  }, []);
+  // Records of the Company master (GET /masters/company)
+  const products = useMasterRecords("company");
 
   const template2 = {
     layout:
@@ -94,53 +91,47 @@ const CompanyMasterTable = () => {
             scrollHeight="40vh"
           >
             <Column
-              field="name"
+              field="CompanyCode"
               header="Company code"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="name"
+              field="CompanyName"
               header="Company name"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="category"
+              field="LicenseNumber"
               header="License Number"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="quantity"
+              field="Country"
               header="Country"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="name"
-              header="Currency Code"
+              field="PhoneNumber"
+              header="Phone Number"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="name"
+              field="EmailID"
               header="Email"
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="category"
+              field="status"
               header="Status"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(columnData) => <ToggleButton id={columnData.id} />}
-            ></Column>
-            <Column
-              field="code"
-              header="View"
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
+              body={(columnData) => columnData.status}
             ></Column>
           </DataTable>
         </div>

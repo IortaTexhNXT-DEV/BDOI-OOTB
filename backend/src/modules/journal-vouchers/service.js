@@ -82,7 +82,7 @@ const approvalStatus = async () => ((await getSetting('journal.require_approval'
 
 export async function createManual(db, b, user) {
   const status = await approvalStatus();
-  return createJournal(db, { date: isoDate(b.date || b.voucherDate) || today(), description: b.transactionDescription || b.description || null, source: 'manual', manual: true,
+  return createJournal(db, { date: isoDate(b.date || b.voucherDate) || (await today()), description: b.transactionDescription || b.description || null, source: 'manual', manual: true,
     transactionCode: b.transactionCode, entryType: 'JOURNAL_VOUCHER', referenceType: 'JournalVoucher', status, requiresApproval: status !== 'posted', lines: await toLines(db, b.entries) }, user);
 }
 
@@ -95,7 +95,7 @@ export async function createReversal(db, b, user) {
   const original = await getJv(db, b.transactionNumber || b.journalVoucherId || b.id, true);
   await assertNoPendingAdjustment(db, original);
   const status = await approvalStatus();
-  return reverseJournal(db, original.id, user, { date: isoDate(b.date) || today(), description: b.description || b.reversalDescription, transactionCode: b.reversalJVTransactionCode || b.transactionCode,
+  return reverseJournal(db, original.id, user, { date: isoDate(b.date) || (await today()), description: b.description || b.reversalDescription, transactionCode: b.reversalJVTransactionCode || b.transactionCode,
     status, requiresApproval: status !== 'posted' });
 }
 
@@ -107,7 +107,7 @@ export async function createCorrection(db, b, user) {
   const reversal = old.map((l) => ({ accountCode: l.account_code, debit: Number(l.credit), credit: Number(l.debit), memo: `Reverse ${original.jv_number}${l.memo ? ` – ${l.memo}` : ''}`,
     mainAccount: l.main_account, subAccount: l.sub_account, branchCode: l.branch_code, departmentCode: l.department_code, currencyCode: l.currency_code, clientId: l.client_id, policyId: l.policy_id }));
   const status = await approvalStatus();
-  const date = isoDate(b.date) || today();
+  const date = isoDate(b.date) || (await today());
   if (status === 'posted') await assertPeriodOpen(db, date);
   const jv = await createJournal(db, { date, description: b.description || `Correction of ${original.jv_number}`, source: 'correction', kind: 'correction', manual: true,
     transactionCode: b.correctionJVTransactionCode || b.transactionCode || original.transaction_code, entryType: original.entry_type || 'JOURNAL_VOUCHER', referenceType: 'JournalVoucher',

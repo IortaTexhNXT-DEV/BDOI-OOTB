@@ -140,7 +140,7 @@ const LapseManagement = () => {
   const addDays = (date, days) => {
     const d = new Date(date);
     d.setDate(d.getDate() + Number(days || 0));
-    return d.toLocaleDateString('en-CA');
+    return toIsoDate(d);
   };
 
   const loadInitialData = async () => {
@@ -276,7 +276,7 @@ const LapseManagement = () => {
         `${winBackOffer.discount}% discount`,
         ...winBackOffer.additionalBenefits,
         `${winBackOffer.paymentTerms} payment terms`,
-        `valid until ${winBackOffer.validUntil?.toLocaleDateString('en-CA')}`
+        `valid until ${formatAppDate(winBackOffer.validUntil)}`
       ].join(', ');
       const activeCampaign = winBackCampaigns.find(c => c.status === 'active');
       await renewalsWorkspaceService.winBack(selectedPolicy.id, {
