@@ -10,6 +10,7 @@ import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { JournalDialog, JournalLink, PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 
 const STEPS = ["accruals", "recurring", "deferral", "fx", "checks"];
 
@@ -20,6 +21,8 @@ const STEPS = ["accruals", "recurring", "deferral", "fx", "checks"];
  */
 const MonthEndCloseRun = () => {
   const { t } = useTranslation();
+  // Approving, rejecting, reopening and year-end close / reverse need approve:period-end (the server refuses them otherwise)
+  const canApprove = hasPermission("approve:period-end");
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useRef(null);
@@ -84,7 +87,7 @@ const MonthEndCloseRun = () => {
           <Button icon="pi pi-refresh" outlined label={t("periodEnd.recheck")} loading={busy === "recheck"} onClick={() => act("recheck", () => periodEndService.recheckRun(run.id))} />
         )}
         {canSubmit && <Button icon="pi pi-send" severity="success" label={t("periodEnd.submitClose")} onClick={() => { setTarget(run.status === "soft-closed" ? "closed" : "closed"); setDialog({ kind: "submit" }); }} />}
-        {run.status === "pending-approval" && (
+        {canApprove && run.status === "pending-approval" && (
           <>
             <Button icon="pi pi-check" severity="success" label={t("periodEnd.approveClose")} onClick={() => setDialog({ kind: "approve" })} />
             <Button icon="pi pi-times" severity="danger" outlined label={t("periodEnd.reject")} onClick={() => setDialog({ kind: "reject" })} />

@@ -10,6 +10,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { PageHeader, StatusTag, date, dateTime, showError, showSuccess } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 
 /**
  * Accounts > Period End > Period Management: fiscal years and their periods (1-12 and adjustment period 13) with
@@ -18,6 +19,8 @@ import { PageHeader, StatusTag, date, dateTime, showError, showSuccess } from ".
  */
 const PeriodManagement = () => {
   const { t } = useTranslation();
+  // Approving, rejecting, reopening and year-end close / reverse need approve:period-end (the server refuses them otherwise)
+  const canApprove = hasPermission("approve:period-end");
   const navigate = useNavigate();
   const toast = useRef(null);
   const [years, setYears] = useState([]);
@@ -102,7 +105,7 @@ const PeriodManagement = () => {
     if (row.status === "locked") return <span className="pe-muted">{t("periodEnd.lockedHint")}</span>;
     if (row.status === "open" && !row.isAdjustment) b.push(["soft_closed", "pi pi-lock-open", t("periodEnd.softClose")]);
     if (row.status !== "closed") b.push(["closed", "pi pi-lock", t("periodEnd.close")]);
-    if (row.status !== "open") b.push(["open", "pi pi-refresh", t("periodEnd.reopen")]);
+    if (canApprove && row.status !== "open") b.push(["open", "pi pi-refresh", t("periodEnd.reopen")]);
     return (
       <div className="flex gap-1 flex-wrap">
         {b.map(([status, icon, label]) => (

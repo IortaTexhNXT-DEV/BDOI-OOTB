@@ -11,6 +11,7 @@ import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { JournalDialog, JournalLink, PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
 import LinesEditor, { emptyLines } from "./LinesEditor";
+import { hasPermission } from "../../utils/canOpen";
 
 /**
  * Accounts > Period End > Year-End Close: pre-checks (twelve periods closed, adjustment period posted), closing entries
@@ -19,6 +20,8 @@ import LinesEditor, { emptyLines } from "./LinesEditor";
  */
 const YearEndClose = () => {
   const { t } = useTranslation();
+  // Approving, rejecting, reopening and year-end close / reverse need approve:period-end (the server refuses them otherwise)
+  const canApprove = hasPermission("approve:period-end");
   const toast = useRef(null);
   const [years, setYears] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -103,8 +106,8 @@ const YearEndClose = () => {
             <span>{t("periodEnd.preChecks")}</span>
             <span className="flex gap-2 flex-wrap">
               {["draft", "checked"].includes(status) && <Button icon="pi pi-check-square" outlined label={t("periodEnd.runChecks")} loading={busy === "check"} onClick={() => act("check", () => periodEndService.checkYearEnd(run.id))} />}
-              {["draft", "checked"].includes(status) && <Button icon="pi pi-lock" severity="danger" label={t("periodEnd.closeYear")} loading={busy === "close"} onClick={() => act("close", () => periodEndService.closeYearEnd(run.id), t("periodEnd.yearClosed"))} />}
-              {status === "closed" && <Button icon="pi pi-undo" severity="warning" outlined label={t("periodEnd.reverseClose")} onClick={() => setReverse({ reason: "" })} />}
+              {canApprove && ["draft", "checked"].includes(status) && <Button icon="pi pi-lock" severity="danger" label={t("periodEnd.closeYear")} loading={busy === "close"} onClick={() => act("close", () => periodEndService.closeYearEnd(run.id), t("periodEnd.yearClosed"))} />}
+              {canApprove && status === "closed" && <Button icon="pi pi-undo" severity="warning" outlined label={t("periodEnd.reverseClose")} onClick={() => setReverse({ reason: "" })} />}
               {["draft", "checked"].includes(status) && <Button icon="pi pi-ban" text severity="secondary" label={t("periodEnd.cancelRun")} onClick={() => act("cancel", () => periodEndService.cancelYearEnd(run.id))} />}
             </span>
           </div>

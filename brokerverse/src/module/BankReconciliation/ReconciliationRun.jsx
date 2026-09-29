@@ -10,6 +10,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import bankReconciliationService from "../../services/bankReconciliationService";
 import { BrTag, PageHeader, date, dateTime, money, periodLabel, showError, showSuccess } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 
 const Line = ({ label, value, sign, indent, strong, total }) => (
   <tr className={total ? "br-brs-total" : strong ? "pe-subtotal" : ""}>
@@ -45,6 +46,8 @@ const BankItems = ({ rows, t }) => (
  */
 const ReconciliationRun = () => {
   const { t } = useTranslation();
+  // Approve / reopen are the approver's (approve:bank-reconciliation); the server refuses them to anyone else
+  const canApprove = hasPermission("approve:bank-reconciliation");
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useRef(null);
@@ -108,8 +111,8 @@ const ReconciliationRun = () => {
         <Button icon="pi pi-th-large" outlined label={t("bankReconciliation.workspace")} onClick={() => navigate(`/accounts/bank-reconciliation?account=${encodeURIComponent(rec.bankAccount)}&period=${rec.period}`)} />
         {rec.status === "draft" && <Button icon="pi pi-refresh" outlined label={t("bankReconciliation.refresh")} loading={busy === "refresh"} onClick={() => act("refresh", load)} />}
         {rec.status === "draft" && <Button icon="pi pi-send" severity="success" label={t("bankReconciliation.prepare")} disabled={!agree} onClick={() => setDialog("prepare")} />}
-        {rec.status === "prepared" && <Button icon="pi pi-check" severity="success" label={t("bankReconciliation.approve")} onClick={() => setDialog("approve")} />}
-        {["prepared", "approved"].includes(rec.status) && <Button icon="pi pi-undo" severity="warning" outlined label={t("bankReconciliation.reopen")} onClick={() => setDialog("reopen")} />}
+        {canApprove && rec.status === "prepared" && <Button icon="pi pi-check" severity="success" label={t("bankReconciliation.approve")} onClick={() => setDialog("approve")} />}
+        {canApprove && ["prepared", "approved"].includes(rec.status) && <Button icon="pi pi-undo" severity="warning" outlined label={t("bankReconciliation.reopen")} onClick={() => setDialog("reopen")} />}
         <Button icon="pi pi-print" outlined label={t("bankReconciliation.printPdf")} loading={busy === "pdf"} onClick={print} />
         {rec.status === "draft" && <Button icon="pi pi-ban" text severity="secondary" label={t("bankReconciliation.cancelRun")} onClick={() => setDialog("cancel")} />}
       </PageHeader>
