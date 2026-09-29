@@ -22,6 +22,7 @@ import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
 
 import { numberLocale } from "../../../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 const TYPE = "remittance-history-config";
 
 const HistoryConfiguration = () => {
@@ -650,7 +651,7 @@ const HistoryConfiguration = () => {
                 <Column field="ruleName" header="Rule Name" style={{ width: '20%' }} />
                 <Column field="condition" header="Condition" style={{ width: '30%' }} />
                 <Column field="frequency" header="Frequency" style={{ width: '12%' }} />
-                <Column field="lastRun" header="Last Run" style={{ width: '12%' }} />
+                <Column body={(row) => formatAppDate(row.lastRun)} field="lastRun" header="Last Run" style={{ width: '12%' }} />
                 <Column
                   field="recordsAffected"
                   header="Records"

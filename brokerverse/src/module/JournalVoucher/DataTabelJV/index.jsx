@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const DataTabelJV = ({ 
   handleEdit, 
@@ -140,7 +141,7 @@ const DataTabelJV = ({
           headerStyle={headerStyle}
         ></Column>
 
-        <Column
+        <Column body={(row) => formatAppDate(row.date)}
           field="date"
           header={translate("common.date")}
           className="fieldvalue_container"

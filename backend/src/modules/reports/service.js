@@ -25,6 +25,16 @@ export const FORMATS = {
 const ADMIN_ROLES = ['it-admin', 'ba'];
 const isAdmin = (user) => (user?.roles || []).some((r) => ADMIN_ROLES.includes(r));
 
+/* ---------- filter options ---------- */
+
+/** Active users with the agent role, as drop-down options for the report Agent filter (value = user id). */
+export async function agentFilterOptions() {
+  const rows = await many(`SELECT u.id, u.display_name, u.username, u.employee_code FROM users u
+    WHERE u.status = 'active' AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.code = 'agent')
+    ORDER BY lower(COALESCE(u.display_name, u.username))`);
+  return rows.map((u) => ({ label: u.display_name || u.username, value: u.id, code: u.employee_code || u.username }));
+}
+
 /* ---------- catalogue ---------- */
 
 export function canAccess(user, def) {

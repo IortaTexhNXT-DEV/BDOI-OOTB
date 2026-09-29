@@ -15,6 +15,7 @@ import remittanceService from "../../../../services/remittanceService";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { isoDate, showError } from "../../../Remittance/shared";
 import { saveAndReturn } from "../masterRecord";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import "./index.scss";
 
 const AgencyBillMaster = () => {
@@ -238,8 +239,8 @@ const AgencyBillMaster = () => {
           >
             <Column field="billNo" header="Bill No" style={{ width: '15%' }} />
             <Column field="agency" header="Agency" style={{ width: '20%' }} />
-            <Column field="billDate" header="Bill Date" style={{ width: '12%' }} />
-            <Column field="dueDate" header="Due Date" style={{ width: '12%' }} />
+            <Column body={(row) => formatAppDate(row.billDate)} field="billDate" header="Bill Date" style={{ width: '12%' }} />
+            <Column body={(row) => formatAppDate(row.dueDate)} field="dueDate" header="Due Date" style={{ width: '12%' }} />
             <Column
               field="amount"
               header="Amount"

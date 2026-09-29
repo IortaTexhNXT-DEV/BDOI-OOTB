@@ -18,6 +18,7 @@ import {
   getReplenishSearchMiddleware,
   getViewReplenishMiddleware,
 } from "../store/pettyCashReplenishMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const PettyCashReplenishTable = () => {
   const dispatch = useDispatch();
@@ -244,7 +245,7 @@ const PettyCashReplenishTable = () => {
               body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
               sortable
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

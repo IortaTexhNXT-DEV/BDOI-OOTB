@@ -18,6 +18,7 @@ import {
   getViewReceiptMiddleware,
   getReceiptListMiddleware,
 } from "../store/pettyCashReceiptsMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const PettyCashReceiptsTable = () => {
   const navigate = useNavigate();
@@ -256,7 +257,7 @@ const PettyCashReceiptsTable = () => {
               // body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
               sortable
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

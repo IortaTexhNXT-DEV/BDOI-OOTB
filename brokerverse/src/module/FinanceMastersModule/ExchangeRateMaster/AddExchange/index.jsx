@@ -21,6 +21,7 @@ import CustomToast from "../../../../components/Toast";
 import { postExchangeStatus } from "../store/exchangeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValues = {
   EffectiveFrom: new Date(),
@@ -93,7 +94,7 @@ function AddExchange() {
     const errors = {};
 
     if (!values.CurrencyCode) {
-      errors.CurrencyCode = t("financeMasters.thisFieldCodeRequired");
+      errors.CurrencyCode = t("validation.fieldRequired");
     }
     if (!values.ToCurrencyCode) {
       errors.ToCurrencyCode = t("financeMasters.thisFieldIsRequired");
@@ -237,7 +238,7 @@ function AddExchange() {
               onChange={(e) => {
                 formik.setFieldValue("EffectiveFrom", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">
@@ -252,7 +253,7 @@ function AddExchange() {
               onChange={(e) => {
                 formik.setFieldValue("EffectiveTo", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">

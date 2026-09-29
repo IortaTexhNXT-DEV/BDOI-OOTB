@@ -14,6 +14,7 @@ import InputField from "../../../../../../components/InputField";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { postAddTransactionCodeSetup } from "../../../store/transactionCodeMasterMiddleware";
+import { calendarDateFormat } from "../../../../../../utility/dateFormat";
 
 const TransactionCodeSetupTable = () => {
   const { TransactioncodeListsearch, TransactionCodeSetup, loading } = useSelector(({ transactionCodeMasterReducer }) => {
@@ -223,7 +224,7 @@ const TransactionCodeSetupTable = () => {
               onChange={(e) => {
                 formik.setFieldValue("AccountingPeriodStart", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               error={formik.errors.AccountingPeriodStart}
             />
           </div>
@@ -240,7 +241,7 @@ const TransactionCodeSetupTable = () => {
               onChange={(e) => {
                 formik.setFieldValue("AccountingPeriodEnd", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               error={formik.errors.AccountingPeriodEnd}
             />
           </div>

@@ -17,6 +17,7 @@ import "../../PaymentTabel/index.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { getPaymentSearchDataMiddleWare } from "../../store/paymentMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const ReviewingListTabelData = () => {
   const { t } = useTranslation();
@@ -223,14 +224,14 @@ const ReviewingListTabelData = () => {
   const renderPolicyIssued = (rowData) => {
     return (
       <div className="category__text">
-        {rowData.policyIssued?.toUpperCase()}
+        {formatAppDate(rowData.policyIssued)}
       </div>
     );
   };
   const renderPolicyExpired = (rowData) => {
     return (
       <div className="category__text">
-        {rowData.policyExpird?.toUpperCase()}
+        {formatAppDate(rowData.policyExpird)}
       </div>
     );
   };

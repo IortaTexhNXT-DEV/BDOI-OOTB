@@ -19,6 +19,7 @@ import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 import CustomToast from "../../../../components/Toast";
 import { useSelector } from "react-redux";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValues = {
   EffectiveFrom: new Date(),
@@ -227,8 +228,7 @@ function ViewExchange() {
               showIcon
               value={new Date(effectiveFromDate)}
               //  disabled={true}
-              dateFormat="yy
-              -mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">
@@ -240,7 +240,7 @@ function ViewExchange() {
               showIcon
               value={new Date(effectiveToDate)}
               //  disabled={true}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">

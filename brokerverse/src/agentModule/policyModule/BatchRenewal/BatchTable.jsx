@@ -20,6 +20,7 @@ import { policyListDataMiddleWare } from "../store/policyMiddleWare";
 import BatchRenewalService from "../../../services/batchRenewalService";
 import { useNavigate } from "react-router-dom";
 import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 export default function BatchTable() {
   const { t } = useTranslation();
@@ -258,7 +259,7 @@ export default function BatchTable() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-PH");
+    return formatAppDate(dateString);
   };
 
   const pollQueueStatus = async (jobId, batchId) => {
@@ -698,7 +699,7 @@ export default function BatchTable() {
                   }
                   placeholder="Select Date"
                   style={{ width: "100%" }}
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                 />
               </div>
@@ -713,7 +714,7 @@ export default function BatchTable() {
                   }
                   placeholder="Select Date"
                   style={{ width: "100%" }}
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                 />
               </div>
@@ -956,7 +957,7 @@ export default function BatchTable() {
                     value={selectedBatch.criteriaOption?.expiryDateFrom}
                     placeholder="Select Date"
                     style={{ width: "100%" }}
-                    dateFormat="dd/mm/yy"
+                    dateFormat={calendarDateFormat()}
                     showIcon
                   />
                 </div>
@@ -970,7 +971,7 @@ export default function BatchTable() {
                     value={selectedBatch.criteriaOption?.expiryDateTo}
                     placeholder="Select Date"
                     style={{ width: "100%" }}
-                    dateFormat="dd/mm/yy"
+                    dateFormat={calendarDateFormat()}
                     showIcon
                   />
                 </div>

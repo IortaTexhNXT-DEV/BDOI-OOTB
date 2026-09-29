@@ -128,7 +128,7 @@ function AddCity({ action }) {
     const errors = {};
 
     if (!values.CityCode) {
-      errors.CityCode = t("validation.fieldCodeRequired");
+      errors.CityCode = t("validation.fieldRequired");
     }
     if (!values.CityName) {
       errors.CityName = t("validation.fieldRequired");

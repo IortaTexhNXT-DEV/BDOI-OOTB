@@ -5,7 +5,12 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import { useLocation } from "react-router-dom";
 import notificationService from "../services/notificationService";
+import authService from "../services/authService";
+
+/** Notifications are per user: nothing is fetched or polled on the sign-in page or after sign-out. */
+const signedIn = () => Boolean(authService.getAccessToken());
 
 const NotificationContext = createContext();
 
@@ -25,8 +30,11 @@ export const NotificationProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [lastFetch, setLastFetch] = useState(null);
 
+  const { pathname } = useLocation();
+
   // Fetch notifications
   const fetchNotifications = useCallback(async (params = {}) => {
+    if (!signedIn()) return;
     setLoading(true);
     try {
       const response = await notificationService.getNotifications(params);
@@ -128,6 +136,7 @@ export const NotificationProvider = ({ children }) => {
 
   // Get unread count
   const getUnreadCount = useCallback(async () => {
+    if (!signedIn()) return;
     try {
       const count = await notificationService.getUnreadCount();
       setUnreadCount(count);
@@ -147,10 +156,17 @@ export const NotificationProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [loading, getUnreadCount]);
 
-  // Initial fetch
+  // First fetch once signed in (the provider is mounted on the sign-in page too); cleared after sign-out
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (!signedIn()) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setLastFetch(null);
+      return;
+    }
+    if (!lastFetch) fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, fetchNotifications]);
 
   const value = {
     // State

@@ -21,7 +21,7 @@ import incentiveService from "../../../services/incentiveService";
 import { isoDate, loadSettings, showError, showSuccess } from "../../Remittance/shared";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 const PRIORITY_LABEL = { Urgent: "High", High: "High", Normal: "Medium", Low: "Low" };
 
 const Approvals = () => {
@@ -209,7 +209,7 @@ const Approvals = () => {
   };
 
   const dateBodyTemplate = (rowData) => {
-    return new Date(rowData.submittedDate).toLocaleDateString();
+    return formatAppDate(rowData.submittedDate);
   };
 
   const amountBodyTemplate = (rowData) => {
@@ -328,7 +328,7 @@ const Approvals = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <i className="pi pi-dollar card-icon red"></i>
+              <i className="pi pi-wallet card-icon red"></i>
               <div className="card-info">
                 <span className="card-value">
                   {formatCurrency(dashboardData.pendingAmount)}
@@ -516,7 +516,7 @@ const Approvals = () => {
                   </div>
                   <div className="detail-item">
                     <label>Submitted Date:</label>
-                    <span>{new Date(selectedApproval.submittedDate).toLocaleString(numberLocale())}</span>
+                    <span>{formatAppDate(selectedApproval.submittedDate, { withTime: true })}</span>
                   </div>
                   <div className="detail-item">
                     <label>Days Waiting:</label>
@@ -537,7 +537,7 @@ const Approvals = () => {
                         <i className="pi pi-check"></i>
                         <div className="history-content">
                           <div className="history-action">Approved by {selectedApproval.approvedBy}</div>
-                          <div className="history-date">{new Date(selectedApproval.approvalDate).toLocaleString(numberLocale())}</div>
+                          <div className="history-date">{formatAppDate(selectedApproval.approvalDate, { withTime: true })}</div>
                           {selectedApproval.approvalComment && (
                             <div className="history-comment">{selectedApproval.approvalComment}</div>
                           )}
@@ -549,7 +549,7 @@ const Approvals = () => {
                         <i className="pi pi-times"></i>
                         <div className="history-content">
                           <div className="history-action">Rejected by {selectedApproval.rejectedBy}</div>
-                          <div className="history-date">{new Date(selectedApproval.rejectionDate).toLocaleString(numberLocale())}</div>
+                          <div className="history-date">{formatAppDate(selectedApproval.rejectionDate, { withTime: true })}</div>
                           {selectedApproval.rejectionComment && (
                             <div className="history-comment">{selectedApproval.rejectionComment}</div>
                           )}

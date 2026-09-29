@@ -32,9 +32,9 @@ const ClientListingCard = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleCreatePolicy = () => {
+  const handleCreatePolicy = (lob) => {
     // Navigate to lead listing to select a lead for policy creation
-    navigate("/agent/leadlisting");
+    navigate("/agent/leadlisting", { state: { createPolicyLob: lob } });
   };
 
   const dropdownOptions = [
@@ -42,7 +42,6 @@ const ClientListingCard = () => {
       label: (
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreatePolicy()}
         >
           <div>
             <SvgMotor />
@@ -66,7 +65,6 @@ const ClientListingCard = () => {
       label: (
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreatePolicy()}
         >
           <div>
             <SvgFire />
@@ -132,6 +130,11 @@ const ClientListingCard = () => {
             <Dropdown
               value={selectedOption}
               options={dropdownOptions}
+              // a policy is issued from a lead's quotation: choosing a line (mouse or keyboard) opens the leads
+              onChange={(e) => {
+                setSelectedOption(null);
+                handleCreatePolicy(e.value);
+              }}
               placeholder={t("policies.createPolicy")}
               dropdownIcon={<SvgAdd />}
             />

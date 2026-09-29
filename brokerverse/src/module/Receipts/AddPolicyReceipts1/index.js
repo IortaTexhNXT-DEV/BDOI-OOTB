@@ -29,6 +29,7 @@ import mastersService from "../../../services/mastersService";
 import profileService from "../../../services/profileService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { getDisplayCurrencyConfig, numberLocale } from "../../../utility/currencyConverter";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 /** Receipt modes shown to the user, with the payment mode the receipts API records (cash / check / bank-transfer / online). */
 const RECEIPT_MODES = [
@@ -420,7 +421,7 @@ function BranchAdding() {
               showIcon
               value={values.receiptDate}
               onChange={(e) => setFieldValue("receiptDate", e.target.value)}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               disabled={true}
             />
             {errorText(touchedError("receiptDate"))}
@@ -595,7 +596,7 @@ function BranchAdding() {
                 showIcon
                 value={values.chequeDate}
                 onChange={(e) => setFieldValue("chequeDate", e.target.value)}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>
@@ -654,7 +655,7 @@ function BranchAdding() {
               <Column field="amount" header={t("accounts.addReceipts.billAmount")} body={money("amount")} />
               <Column field="paidAmount" header={t("accounts.addReceipts.billPaid")} body={money("paidAmount")} />
               <Column field="balance" header={t("accounts.addReceipts.billBalance")} body={money("balance")} />
-              <Column field="dueDate" header={t("accounts.addReceipts.billDueDate")} />
+              <Column body={(row) => formatAppDate(row.dueDate)} field="dueDate" header={t("accounts.addReceipts.billDueDate")} />
               <Column
                 field="status"
                 header={t("accounts.addReceipts.billStatus")}

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const TaxationDetails = () => {
   const { t } = useTranslation();
@@ -116,7 +117,7 @@ const TaxationDetails = () => {
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder="Enter"
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
             {/* <InputField
               
@@ -133,7 +134,7 @@ const TaxationDetails = () => {
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder="Enter"
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
         </div>

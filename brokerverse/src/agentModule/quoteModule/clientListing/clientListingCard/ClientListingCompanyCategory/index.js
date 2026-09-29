@@ -22,6 +22,7 @@ import {
 } from "../../store/clientsMiddleware";
 import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import { Avatar } from "primereact/avatar";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const ClientListingCompanyCategory = ({
   data,
@@ -165,7 +166,7 @@ const ClientListingCompanyCategory = ({
   };
 
   const renderDate = (rowData) => {
-    return <div className="date__text">{rowData.DateofBirth}</div>;
+    return <div className="date__text">{formatAppDate(rowData.createdAt)}</div>;
   };
 
   const renderQuotes = (rowData) => {
@@ -281,17 +282,17 @@ const ClientListingCompanyCategory = ({
           ></Column>
           <Column
             body={renderDate}
-            header={renderUncheckedHeader(t("clients.date"))}
+            header={renderUncheckedHeader(t("clients.clientSince"))}
             headerStyle={headerStyle}
           ></Column>
           <Column
             body={renderQuotes}
-            header={renderUncheckedHeader(t("clients.quotes"))}
+            header={renderUncheckedHeader(t("clients.policies"))}
             headerStyle={headerStyle}
           ></Column>
           <Column
             body={renderdes}
-            header={renderUncheckedHeader(t("clients.productDescription"))}
+            header={renderUncheckedHeader(t("clients.latestPolicyStatus"))}
             headerStyle={headerStyle}
           ></Column>
 

@@ -20,6 +20,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Knob } from 'primereact/knob';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import reinsuranceService from '../../services/reinsuranceService';
+import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
 
 const sum = (rows, field) => rows.reduce((total, row) => total + (Number(row[field]) || 0), 0);
 const orDash = (value) => (value === undefined || value === null || value === '' ? '-' : value);
@@ -312,7 +313,7 @@ export const CessionDashboard = () => {
           <Column field="cededPremium" header="Ceded Premium" sortable body={(rowData) => formatCurrency(rowData.cededPremium)} />
           <Column field="commission" header="Commission" sortable body={(rowData) => formatCurrency(rowData.commission)} />
           <Column header="Status" body={statusBodyTemplate} sortable sortField="status" />
-          <Column field="cessionDate" header="Cession Date" sortable />
+          <Column body={(row) => formatAppDate(row.cessionDate)} field="cessionDate" header="Cession Date" sortable />
           <Column header="Actions" body={actionBodyTemplate} />
         </DataTable>
       </Card>
@@ -633,7 +634,7 @@ export const RecoveryDashboard = () => {
               <Column field="claimNumber" header={t('reinsurance.claimNumber')} sortable />
               <Column field="policyNumber" header={t('reinsurance.policyNumber')} sortable />
               <Column field="insured" header={t('reinsurance.insured')} sortable />
-              <Column field="dateOfLoss" header={t('reinsurance.dateOfLoss')} sortable />
+              <Column body={(row) => formatAppDate(row.dateOfLoss)} field="dateOfLoss" header={t('reinsurance.dateOfLoss')} sortable />
               <Column field="causeOfLoss" header={t('reinsurance.cause')} sortable />
               <Column field="grossClaim" header={t('reinsurance.grossClaim')} sortable body={amount('grossClaim')} />
               <Column field="recoverableAmount" header={t('reinsurance.recoverable')} sortable body={amount('recoverableAmount')} />
@@ -646,7 +647,7 @@ export const RecoveryDashboard = () => {
               <Column field="claimNumber" header={t('reinsurance.claimNumber')} sortable />
               <Column field="insured" header={t('reinsurance.insured')} sortable />
               <Column field="recoverableAmount" header={t('reinsurance.recoveredAmount')} sortable body={amount('recoverableAmount')} />
-              <Column field="recoveryDate" header={t('reinsurance.recoveryDate')} sortable />
+              <Column body={(row) => formatAppDate(row.recoveryDate)} field="recoveryDate" header={t('reinsurance.recoveryDate')} sortable />
               <Column field="settlementAmount" header={t('reinsurance.settlement')} sortable body={amount('settlementAmount')} />
             </DataTable>
           </TabPanel>
@@ -681,7 +682,7 @@ export const RecoveryDashboard = () => {
           </div>
           <div className="field">
             <label>{t('reinsurance.recoveryDate')}</label>
-            <Calendar value={settlement.recoveryDate} dateFormat="yy-mm-dd" showIcon
+            <Calendar value={settlement.recoveryDate} dateFormat={calendarDateFormat()} showIcon
               onChange={(e) => setSettlement({ ...settlement, recoveryDate: e.value })} />
           </div>
           <Button label={t('common.submit')} icon="pi pi-check" disabled={!settlement.settlementAmount} onClick={settleRecovery} />
@@ -894,7 +895,7 @@ export const ReconciliationDashboard = () => {
           </TabPanel>
           <TabPanel header={t('reinsurance.exceptions')}>
             <DataTable value={exceptions} paginator rows={10}>
-              <Column field="date" header={t('remittance.date')} sortable />
+              <Column body={(row) => formatAppDate(row.date)} field="date" header={t('remittance.date')} sortable />
               <Column field="type" header={t('reinsurance.type')} sortable />
               <Column field="description" header={t('reinsurance.description')} sortable />
               <Column field="amount" header={t('reinsurance.amount')} sortable body={amount('amount')} />

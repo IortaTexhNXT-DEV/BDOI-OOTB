@@ -15,7 +15,7 @@ import { Calendar } from "primereact/calendar";
 import { MultiSelect } from "primereact/multiselect";
 import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
-import remittanceService, { apiRequest } from "../../../services/remittanceService";
+import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
 import { calendarDateFormat, dateBody, isoDate, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
@@ -81,8 +81,9 @@ const RemittanceApproval = () => {
   useEffect(() => {
     loadAll();
     loadSettings().then((s) => setPriorities(Object.keys(s["remittance.priority_sla_hours"] || {}))).catch((e) => showError(toast, e));
-    apiRequest("GET", "/users", { params: { perPage: 500, status: "active" } })
-      .then((res) => setUserOptions((res.data || []).filter((u) => u.userId !== currentUserId).map((u) => ({ label: u.displayName || u.username, value: u.username }))))
+    // users who may take over an approval (finance reads this without user-administration rights)
+    remittanceService.listApprovers()
+      .then((users) => setUserOptions((users || []).filter((u) => u.userId !== currentUserId).map((u) => ({ label: u.displayName || u.username, value: u.username }))))
       .catch(() => setUserOptions([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -408,7 +409,7 @@ const RemittanceApproval = () => {
             <div className="detail-section">
               <h4>{t("remittance.approvalAction")}</h4>
               <div className="approval-action">
-                <div className="p-field-radiobutton mb-2">
+                <div className="p-field-radiobutton field-radiobutton mb-2">
                   <RadioButton
                     inputId="approve"
                     value="approve"
@@ -417,7 +418,7 @@ const RemittanceApproval = () => {
                   />
                   <label htmlFor="approve" className="ml-2">{t("remittance.approve")}</label>
                 </div>
-                <div className="p-field-radiobutton mb-2">
+                <div className="p-field-radiobutton field-radiobutton mb-2">
                   <RadioButton
                     inputId="reject"
                     value="reject"
@@ -452,8 +453,8 @@ const RemittanceApproval = () => {
         onHide={() => setShowDelegationDialog(false)}
       >
         <div className="delegation-form">
-          <div className="p-fluid p-formgrid p-grid">
-            <div className="p-field p-col-12 p-md-6">
+          <div className="p-fluid formgrid grid">
+            <div className="p-field field col-12 md:col-6">
               <label>{t("remittance.delegateTo")} *</label>
               <Dropdown
                 value={delegationData.delegateTo}
@@ -463,7 +464,7 @@ const RemittanceApproval = () => {
                 placeholder={t("remittance.selectUser")}
               />
             </div>
-            <div className="p-field p-col-12 p-md-6">
+            <div className="p-field field col-12 md:col-6">
               <label>{t("remittance.delegationPeriod")} *</label>
               <div className="date-range">
                 <Calendar dateFormat={calendarDateFormat()}
@@ -479,7 +480,7 @@ const RemittanceApproval = () => {
                 />
               </div>
             </div>
-            <div className="p-field p-col-12 p-md-6">
+            <div className="p-field field col-12 md:col-6">
               <label>{t("remittance.transactionTypes")}</label>
               <MultiSelect
                 value={delegationData.transTypes}
@@ -488,7 +489,7 @@ const RemittanceApproval = () => {
                 display="chip"
               />
             </div>
-            <div className="p-field p-col-12 p-md-6">
+            <div className="p-field field col-12 md:col-6">
               <label>{t("remittance.amountLimit")}</label>
               <InputNumber
                 value={delegationData.amountLimit}
@@ -497,7 +498,7 @@ const RemittanceApproval = () => {
                 currency={currencyCode}
               />
             </div>
-            <div className="p-field p-col-12">
+            <div className="p-field field col-12">
               <label>{t("remittance.reason")} *</label>
               <InputTextarea
                 value={delegationData.reason}

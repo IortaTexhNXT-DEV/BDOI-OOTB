@@ -13,6 +13,7 @@ import { Divider } from 'primereact/divider';
 import { Chart } from 'primereact/chart';
 import { Dialog } from 'primereact/dialog';
 import reinsuranceService from '../../../services/reinsuranceService';
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import './style.scss';
 
 const TreatyDetail = () => {
@@ -170,7 +171,7 @@ const TreatyDetail = () => {
             </div>
             <div className="info-item">
               <label>Period:</label>
-              <span>{treaty.effectiveDate} to {treaty.expiryDate}</span>
+              <span>{formatAppDate(treaty.effectiveDate)} to {formatAppDate(treaty.expiryDate)}</span>
             </div>
             <div className="info-item">
               <label>Status:</label>
@@ -234,7 +235,7 @@ const TreatyDetail = () => {
           >
             <Column field="claimNumber" header="Claim No" sortable />
             <Column field="policyNumber" header="Policy" sortable />
-            <Column field="dateOfLoss" header="Loss Date" sortable />
+            <Column body={(row) => formatAppDate(row.dateOfLoss)} field="dateOfLoss" header="Loss Date" sortable />
             <Column field="grossClaim" header="Gross Claim" sortable
               body={(rowData) => formatCurrency(rowData.grossClaim)} />
             <Column field="recoverableAmount" header="Recoverable" sortable

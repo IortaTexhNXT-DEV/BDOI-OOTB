@@ -61,7 +61,7 @@ function AddAccountDetail() {
     const errors = {};
 
     if (!values.AccountNumber) {
-      errors.AccountNumber = t("validation.fieldCodeRequired");
+      errors.AccountNumber = t("validation.fieldRequired");
     }
     if (!values.AccountName) {
       errors.AccountName = t("validation.fieldRequired");

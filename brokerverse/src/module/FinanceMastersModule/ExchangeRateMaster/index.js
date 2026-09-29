@@ -31,6 +31,7 @@ import {
 import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -188,10 +189,10 @@ const Index = () => {
         <div className="filterbutton_container">
           {/* <SvgFilters/> */}
 
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />
             <p className="addtext">{t("financeMasters.add")}</p>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -225,13 +226,13 @@ const Index = () => {
             scrollHeight="40vh"
             emptyMessage={isEmpty ? emptyTableIcon : null}
           >
-            <Column
+            <Column body={(row) => formatAppDate(row.EffectiveFrom)}
               field="EffectiveFrom"
               header={t("financeMasters.effectiveFrom")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.EffectiveTo)}
               field="EffectiveTo"
               header="Effective To"
               headerStyle={headerStyle}

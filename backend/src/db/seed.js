@@ -26,7 +26,8 @@ const ROLE_PERMS = {
   underwriting: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'receipts:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'leads:read', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
-  finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
+  // Finance calculates, approves (maker-checker) and pays agent incentives (D102); program set-up stays with the business administrator.
+  finance: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'reports', 'notifications', 'masters:read', 'schedules:read'],
   // Agents work their own book (record scoping: security.scoped_roles): endorsements and first notice of loss on their own
   // policies. Claim decisions (review, reject, settle, approve settlement, close) additionally require the claims role.
   'user-access-admin': ['profile', 'users', 'roles', 'audit:read', 'notifications', 'settings:read'],

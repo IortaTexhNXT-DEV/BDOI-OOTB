@@ -19,6 +19,7 @@ import {
   getInitiateListSearchMiddleware,
 } from "../store/pettyCashInitiateMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const InitiateTable = () => {
   const { t } = useTranslation();
@@ -247,7 +248,7 @@ const InitiateTable = () => {
               className="fieldvalue_container"
               body={(rowData) => rowData.Departmentcode?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.TransactionDate)}
               field="TransactionDate"
               header="Date"
               headerStyle={headerStyle}

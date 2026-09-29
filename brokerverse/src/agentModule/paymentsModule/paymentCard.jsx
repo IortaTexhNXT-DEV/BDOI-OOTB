@@ -5,6 +5,7 @@ import SvgArrow from "../../assets/agentIcon/SvgArrow";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { formatDate as formatAppDate } from "../../utility/dateFormat";
 
 const PaymentCard = ({  dataSearch, status,setStatus }) => {
   const { formatCurrency } = useFormatCurrency();
@@ -69,7 +70,7 @@ const PaymentCard = ({  dataSearch, status,setStatus }) => {
           </div>
           <div>
             <div className="payment__paid__titlefieldcard">Date</div>
-            <div className="payment__paid__subtitlefieldcard">{data.date}</div>
+            <div className="payment__paid__subtitlefieldcard">{formatAppDate(data.date)}</div>
           </div>
           <div>
             <div >{data.status}</div>
@@ -110,7 +111,7 @@ const PaymentCard = ({  dataSearch, status,setStatus }) => {
           </div>
           <div>
             <div className="payment__paid__titlefieldcard">Date</div>
-            <div className="payment__paid__subtitlefieldcard">{data.date}</div>
+            <div className="payment__paid__subtitlefieldcard">{formatAppDate(data.date)}</div>
           </div>
           <div>
           {/* <div

@@ -1,4 +1,5 @@
-/** Code of a dropdown value that may be an option object ({ code }) or a plain string. */
+
+import { formatDate as formatAppDate } from "../../utility/dateFormat";/** Code of a dropdown value that may be an option object ({ code }) or a plain string. */
 export const optionCode = (value) => {
   if (value === undefined || value === null || value === "") return undefined;
   return typeof value === "object" ? value.code ?? value.value : value;
@@ -9,11 +10,7 @@ export const formatDisplayDate = (value) => {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-  });
+  return formatAppDate(date);
 };
 
 /** A Date (calendar value) as YYYY-MM-DD in local time. */

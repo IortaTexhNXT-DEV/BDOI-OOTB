@@ -155,7 +155,7 @@ export async function sendDueDateReminders(db, user) {
       await queueEmail({ to: x.client.email, subject: fill(subjectTpl, vars), html: fill(bodyTpl, vars), template: 'collection-reminder', entity: 'collection', entityId: x.id });
       emails += 1;
     } else skipped.push({ id: x.id, reason: 'client has no e-mail' });
-    await notify({ userId: r.owner_user_id || null, type: 'reminder', title: `Premium ${x.daysPastDue > 0 ? `overdue ${x.daysPastDue} day(s)` : `due ${x.dueDate}`} – ${x.policyNumber}`,
+    await notify({ userId: r.owner_user_id || null, audience: 'write:collections', type: 'reminder', title: `Premium ${x.daysPastDue > 0 ? `overdue ${x.daysPastDue} day(s)` : `due ${x.dueDate}`} – ${x.policyNumber}`,
       message: `${vars.clientName}: ${vars.amount} outstanding on ${x.billNumber}`, link: `/agent/collections/${x.id}`, entity: 'collection', entityId: x.id });
     notifications += 1;
     await db.query('UPDATE collection_items SET last_reminder_at = now() WHERE id = $1', [x.id]);

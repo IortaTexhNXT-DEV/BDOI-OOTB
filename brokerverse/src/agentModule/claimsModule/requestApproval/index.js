@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useClaimHeader from "../useClaimHeader";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useRef } from "react";
@@ -38,7 +39,9 @@ const RequestApproval = ({ flow }) => {
   }));
 
   // Try to get policy holder name from Redux first, then navigation state, then fullResponse or use fallback
+  const header = useClaimHeader(claimId);
   const policyHolderName =
+    header.policyHolderName ||
     reduxPolicyHolderName ||
     navigationState.policyHolderName ||
     fullResponse?.data?.policyHolderName ||
@@ -47,7 +50,7 @@ const RequestApproval = ({ flow }) => {
     t("claimRequestApproval.loading");
 
   // Use Redux claim number instead of navigation state
-  const claimNumber = reduxClaimNumber || t("claimRequestApproval.loading");
+  const claimNumber = header.claimNumber || reduxClaimNumber || "";
 
   // Console logs to debug the data
   console.log("=== REQUEST APPROVAL PAGE DATA ===");

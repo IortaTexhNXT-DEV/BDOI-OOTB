@@ -15,6 +15,7 @@ import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { useDispatch } from "react-redux";
 import { getCommission, getCommissionView, getPatchCommissionEditMiddleware } from "../store/commissionMiddleWare";
 import SvgEditicons from "../../../../assets/icons/SvgEditicons";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissionEdit }) => {
     const { t } = useTranslation();
@@ -192,14 +193,14 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                     body={(rowData) => rowData.selectCover?.toUpperCase()}
 
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.effectiveFrom)}
                     field="effectiveFrom"
                     header="Effective From"
                     className="fieldvalue_container"
 
                     headerStyle={headerStyle}
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.effectiveTo)}
                     field="effectiveTo"
                     header="Effective To"
                     className="fieldvalue_container"

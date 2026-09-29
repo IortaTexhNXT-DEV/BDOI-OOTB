@@ -11,7 +11,7 @@ import { Toast } from "primereact/toast";
 import adminService from "../../services/adminService";
 import "./index.scss";
 
-import { numberLocale } from "../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../utility/dateFormat";
 
 // Plain-language schedule for the common cron shapes; anything else is shown as written.
 const pad = (n) => String(n).padStart(2, "0");
@@ -42,7 +42,7 @@ export const describeOutput = (out) => {
     .map(([k, v]) => `${words(k)}: ${Array.isArray(v) ? v.length : typeof v === "object" && v ? JSON.stringify(v) : v}`)
     .join(", ") || "Done";
 };
-const fmt = (d) => (d ? new Date(d).toLocaleString(numberLocale()) : "-");
+const fmt = (d) => formatAppDate(d, { withTime: true });
 const statusTag = (s) => (s ? <Tag value={s} severity={s === "success" ? "success" : s === "failed" ? "danger" : "info"} /> : "-");
 
 /** Master > Schedules: the jobs the backend runs on a timetable (renewal notices, expiries, ageing, reports, e-mail). */

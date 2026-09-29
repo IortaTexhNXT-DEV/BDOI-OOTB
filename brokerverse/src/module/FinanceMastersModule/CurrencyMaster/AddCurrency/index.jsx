@@ -68,7 +68,7 @@ const AddCurrency = () => {
     const errors = {};
 
     if (!values.CurrencyCode) {
-      errors.CurrencyCode = t("financeMasters.thisFieldCodeRequired");
+      errors.CurrencyCode = t("validation.fieldRequired");
     }
     if (!values.ISOcode) {
       errors.ISOcode = t("financeMasters.thisFieldIsRequired");

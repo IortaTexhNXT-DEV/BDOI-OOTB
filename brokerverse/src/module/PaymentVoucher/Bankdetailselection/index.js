@@ -26,6 +26,7 @@ import { patchpaymentStatusByIdMiddleware } from "../store/paymentVocherMiddlewa
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import mastersService from "../../../services/mastersService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 function Bankdetailselection() {
   const { t } = useTranslation();
@@ -97,9 +98,7 @@ function Bankdetailselection() {
                 CustomerCode: checkbook.mainAccount || "-",
                 VoucheDate: checkbook.instrumentBookId || "-",
                 Amount: checkbook.instrumentNo,
-                InstrumentDate: new Date(
-                  checkbook.instrumentDate
-                ).toLocaleDateString("en-US"),
+                InstrumentDate: formatAppDate(checkbook.instrumentDate),
                 TotalAmount: formatCurrency(checkbook.totaleAmount || 0),
                 status: checkbook.status,
                 rawData: checkbook,
@@ -608,7 +607,7 @@ function Bankdetailselection() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.VoucheDate)}
             field="VoucheDate"
             header={t("paymentVoucher.instrumentBookId")}
             headerStyle={headerStyle}
@@ -620,7 +619,7 @@ function Bankdetailselection() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.InstrumentDate)}
             field="InstrumentDate"
             header={t("paymentVoucher.instrumentDate")}
             headerStyle={headerStyle}

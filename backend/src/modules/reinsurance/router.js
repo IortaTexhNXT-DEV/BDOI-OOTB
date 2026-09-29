@@ -11,6 +11,11 @@ const write = canWrite('reinsurance');
 // Claims officers register and follow up recoveries on their claims (Reinsurance > Claims Recovery).
 const recoveryRead = canRead('reinsurance', 'write:claims');
 const recoveryWrite = canWrite('reinsurance', 'write:claims');
+// Reconciling reinsurer statements (premium / claims accounts) is a finance task: remittance users reconcile and resolve
+// variances and exceptions, and read the reinsurer list the statement form offers (D103). Treaties and cessions stay
+// with reinsurance users.
+const reconRead = canRead('reinsurance', 'read:remittance', 'write:remittance');
+const reconWrite = canWrite('reinsurance', 'write:remittance');
 const S = (n) => `Reinsurance > ${n}`;
 const treaty = { id: 1, treatyNumber: 'QS-MOTOR-2026', name: 'Motor Quota Share Treaty 2026', type: 'Quota Share', lineOfBusiness: 'Motor', reinsurers: ['RE001', 'RE002'], effectiveDate: '2026-01-01', expiryDate: '2026-12-31', cession: { percentage: 40, maxLimit: 50000000 }, commission: { type: 'Flat', rate: 32.5 }, status: 'Active', utilization: 12.5, premiumCeded: 1250000, claimsRecovered: 450000 };
 const cession = { id: 1, cessionNumber: 'CES-2026-00001', policyNumber: 'POL-2026-90002', insured: 'Sample Corp.', treatyId: 1, treatyNumber: 'QS-MOTOR-2026', grossPremium: 142500, sumInsured: 7500000, cessionPercentage: 40, cededPremium: 57000, cededSumInsured: 3000000, commission: 18525, netPremium: 38475, status: 'Pending' };
@@ -30,7 +35,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/reinsurers', summary: 'Reinsurers with security rating and whether they meet the minimum', screen: 'Master > Reinsurance Treaty', middleware: read, query: { status: 'Active' },
+  method: 'GET', path: '/reinsurers', summary: 'Reinsurers with security rating and whether they meet the minimum', screen: 'Master > Reinsurance Treaty', middleware: reconRead, query: { status: 'Active' },
   response: { success: true, data: [{ id: 'RE001', name: 'National Reinsurance Corporation of the Philippines', type: 'Local', rating: 'A-', meetsMinimumRating: true, status: 'Active' }], minimumRating: 'A-' },
   handler: async (req, res) => {
     const { rows, minimumRating } = await svc.listReinsurers(req.query);
@@ -166,27 +171,27 @@ define({
   handler: async (_req, res) => ok(res, await svc.analytics()),
 });
 define({
-  method: 'GET', path: '/reconciliation', summary: 'Statement reconciliations (pending / matched) and exceptions', screen: S('Reconciliation'), middleware: read,
+  method: 'GET', path: '/reconciliation', summary: 'Statement reconciliations (pending / matched) and exceptions', screen: S('Reconciliation'), middleware: reconRead,
   response: { success: true, data: { pending: [{ id: 'rrc_1', type: 'Premium', reinsurer: 'RE001', period: '2026-08', ourAmount: 3200000, theirAmount: 3180000, variance: 20000, variancePercent: 0.6, status: 'Pending Review', items: 42 }], exceptions: [] } },
   handler: async (_req, res) => ok(res, await svc.reconciliation()),
 });
 define({
-  method: 'POST', path: '/reconciliation', summary: "Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration)", screen: S('Reconciliation'), middleware: write,
+  method: 'POST', path: '/reconciliation', summary: "Reconcile a reinsurer's statement amount against our cessions / recoveries (tolerance from configuration)", screen: S('Reconciliation'), middleware: reconWrite,
   request: { type: 'Premium', reinsurerId: 'RE001', period: '2026-09', theirAmount: 3180000 }, response: { success: true, data: { status: 'Pending Review', variance: 20000 } },
   handler: async (req, res) => created(res, await run(req, 'ri_reconciliation', 'create', () => svc.createReconciliation(req.body || {}, req.user)), 'Reconciliation recorded'),
 });
 define({
-  method: 'POST', path: '/reconciliation/:id/resolve', summary: 'Resolve a reconciliation variance', screen: S('Reconciliation'), middleware: write, request: { resolution: 'Timing difference; booked in October' },
+  method: 'POST', path: '/reconciliation/:id/resolve', summary: 'Resolve a reconciliation variance', screen: S('Reconciliation'), middleware: reconWrite, request: { resolution: 'Timing difference; booked in October' },
   response: { success: true, data: { status: 'Resolved' } },
   handler: async (req, res) => ok(res, await run(req, 'ri_reconciliation', 'resolve', () => svc.resolveReconciliation(req.params.id, req.body || {}, req.user)), 'Reconciliation resolved'),
 });
 define({
-  method: 'POST', path: '/exceptions', summary: 'Log a reconciliation exception', screen: S('Reconciliation'), middleware: write, request: { type: 'Missing Policy', description: 'Policy not in reinsurer statement', amount: 45000 },
+  method: 'POST', path: '/exceptions', summary: 'Log a reconciliation exception', screen: S('Reconciliation'), middleware: reconWrite, request: { type: 'Missing Policy', description: 'Policy not in reinsurer statement', amount: 45000 },
   response: { success: true, data: { status: 'Under Investigation' } },
   handler: async (req, res) => created(res, await run(req, 'ri_exception', 'create', () => svc.createException(req.body || {}, req.user)), 'Exception logged'),
 });
 define({
-  method: 'POST', path: '/exceptions/:id/resolve', summary: 'Resolve a reconciliation exception', screen: S('Reconciliation'), middleware: write, request: { resolution: 'Added to October bordereau' },
+  method: 'POST', path: '/exceptions/:id/resolve', summary: 'Resolve a reconciliation exception', screen: S('Reconciliation'), middleware: reconWrite, request: { resolution: 'Added to October bordereau' },
   response: { success: true, data: { status: 'Resolved' } },
   handler: async (req, res) => ok(res, await run(req, 'ri_exception', 'resolve', () => svc.resolveException(req.params.id, req.body || {})), 'Exception resolved'),
 });

@@ -103,7 +103,16 @@ const RemittanceExceptions = () => {
     if (assignee && selectedException) startException(selectedException, assignee);
   };
 
-  const exportRows = (rows, name) => downloadCsv(`${name}_${today}.csv`, rows, [
+  // the report is a CSV of the listed exceptions; say so when there is nothing to put in it (D105)
+  const exportRows = (rows, name) => {
+    if (!rows?.length) {
+      toast.current?.show({ severity: "info", summary: t("remittance.createReport"), detail: "There are no exceptions to include in the report.", life: 4000 });
+      return;
+    }
+    exportCsv(rows, name);
+    toast.current?.show({ severity: "success", summary: t("remittance.createReport"), detail: `${rows.length} exception(s) exported to ${name}_${today}.csv`, life: 3000 });
+  };
+  const exportCsv = (rows, name) => downloadCsv(`${name}_${today}.csv`, rows, [
     { field: "exceptionId", header: "ID" },
     { field: "severity", header: "Severity" },
     { field: "type", header: "Type" },
@@ -186,7 +195,7 @@ const RemittanceExceptions = () => {
           </div>
         </div>
         <div className="summary-item highlight">
-          <i className="pi pi-dollar" />
+          <i className="pi pi-wallet" />
           <div>
             <div className="value">{formatCurrency(summary.atRisk)}</div>
             <div className="label">{t("remittance.totalValueAtRisk")}</div>
@@ -277,7 +286,7 @@ const RemittanceExceptions = () => {
               <div className="detail-section">
                 <h4>{t("remittance.resolution")}</h4>
                 <div className="p-fluid">
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittance.resolutionType")} *</label>
                     <Dropdown
                       value={resolutionData.resolutionType}
@@ -292,7 +301,7 @@ const RemittanceExceptions = () => {
                       placeholder={t("remittance.selectResolutionType")}
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittance.resolutionAmount")} *</label>
                     <InputNumber
                       value={resolutionData.resolutionAmount}
@@ -301,7 +310,7 @@ const RemittanceExceptions = () => {
                       currency={currencyCode}
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittance.resolutionNotes")} *</label>
                     <InputTextarea
                       value={resolutionData.resolutionNotes}

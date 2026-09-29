@@ -36,6 +36,10 @@ FROM (VALUES
 JOIN policies p ON p.id = v.policy
 ON CONFLICT (id) DO NOTHING;
 
+-- D107: a claim is never reported before its loss (the API refuses it). The sample rows respect it (loss_ago >= rep_ago);
+-- this keeps any earlier seeded copy consistent. Idempotent.
+UPDATE claims SET reported_date = loss_date WHERE id LIKE 'clm_crs_%' AND reported_date < loss_date;
+
 -- Status history following the lifecycle up to each claim's current status
 WITH paths(status, path) AS (VALUES
   ('registered', ARRAY['registered']), ('in-review', ARRAY['registered','in-review']),

@@ -14,6 +14,7 @@ import { Divider } from "primereact/divider";
 import SvgDot from "../../../assets/icons/SvgDot";
 import incentiveService from "../../../services/incentiveService";
 import { downloadCsv, showError } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, programBreakdown: [], monthlyTrend: [] };
@@ -62,17 +63,16 @@ const Statement = () => {
   const loadStatement = async () => {
     setLoading(true);
     try {
-      let data;
-      try {
-        data = await incentiveService.statement({ agentId: agentId || undefined, period: selectedPeriod });
-      } catch (error) {
-        if (agentId) throw error;
-        const firstAgent = await loadAgentChoices();
-        if (!firstAgent) throw error;
-        setAgentId(firstAgent);
-        return;
+      const data = await incentiveService.statement({ agentId: agentId || undefined, period: selectedPeriod });
+      // A manager who is not an agent gets eligible: false; offer the agents and show the first one's statement.
+      if (!agentId && data?.eligible === false) {
+        const firstAgent = data.selectAgent ? await loadAgentChoices() : null;
+        if (firstAgent) {
+          setAgentId(firstAgent);
+          return;
+        }
       }
-      setStatementData(data);
+      setStatementData({ ...emptyStatement, ...data });
       initializeChart(data);
     } catch (error) {
       showError(toast, error, t('incentive.failedToLoadStatement'));
@@ -242,7 +242,7 @@ const Statement = () => {
             </div>
             <div className="period-info">
               <h3>{statementData.period}</h3>
-              <p className="statement-date">Statement Date: {statementData.statementDate ? new Date(statementData.statementDate).toLocaleDateString() : "-"}</p>
+              <p className="statement-date">Statement Date: {formatAppDate(statementData.statementDate)}</p>
             </div>
           </div>
         </Card>
@@ -302,7 +302,7 @@ const Statement = () => {
                   <span className="card-value">
                     {formatCurrency(statementData.lastPayment)}
                   </span>
-                  <span className="card-date">{statementData.lastPaymentDate ? new Date(statementData.lastPaymentDate).toLocaleDateString() : "-"}</span>
+                  <span className="card-date">{formatAppDate(statementData.lastPaymentDate)}</span>
                 </div>
               </div>
             </Card>
@@ -385,7 +385,7 @@ const Statement = () => {
             <div className="payment-history">
               <div className="payment-item">
                 <div className="payment-date">
-                  <span className="date">{statementData.lastPaymentDate ? new Date(statementData.lastPaymentDate).toLocaleDateString() : "-"}</span>
+                  <span className="date">{formatAppDate(statementData.lastPaymentDate)}</span>
                   <span className="status paid">Paid</span>
                 </div>
                 <div className="payment-details">

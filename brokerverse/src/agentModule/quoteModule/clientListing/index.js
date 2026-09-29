@@ -14,6 +14,7 @@ import SvgFire from "../../../assets/agentIcon/SvgFire";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getClientTableMiddleware } from "./store/clientsMiddleware";
+import { canOpen } from "../../../utils/canOpen";
 
 const ClientListing = () => {
   const { t } = useTranslation();
@@ -25,6 +26,8 @@ const ClientListing = () => {
     { label: t("clients.title") },
   ];
   const Initiate = { label: t("sidebar.Home") };
+  // only roles that may open Leads/Prospects are offered "Create Lead" (claims users view clients only)
+  const canCreateLead = canOpen("/agent/createlead");
 
   const dropdownOptions = [
     {
@@ -119,6 +122,7 @@ const ClientListing = () => {
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn_lable_save_container">
+            {canCreateLead && (
             <Dropdown
               value={selectedOption}
               options={dropdownOptions}
@@ -133,6 +137,7 @@ const ClientListing = () => {
               placeholder={t("clients.createLead")}
               dropdownIcon={<SvgAdd />}
             />
+            )}
           </div>
         </div>
       </div>

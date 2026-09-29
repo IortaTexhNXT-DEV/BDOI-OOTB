@@ -28,6 +28,16 @@ const PAYMENT_CLASS_MAP = {
   reviewing: "company__status__type__red",
 };
 
+const ENDORSEMENT_TYPE_LABELS = {
+  "personal-details": "Personal Details Change",
+  "motor-details": "Motor Details Change",
+  coverage: "Coverage Change",
+  "policy-extension": "Policy Extension",
+  cancellation: "Policy Cancellation",
+  "fire-details": "Fire Risk / Premium Change",
+  other: "Other",
+};
+
 const normalizeEndorsement = (record) => {
   if (!record) return null;
 
@@ -45,6 +55,12 @@ const normalizeEndorsement = (record) => {
 
   const endorsementNumber =
     record.endorsementNumber || record.endorsementId || record.id;
+  // endorsements.types values, one or more joined by commas
+  const typeLabel = String(record.endorsementType || "")
+    .split(",")
+    .filter(Boolean)
+    .map((k) => ENDORSEMENT_TYPE_LABELS[k] || k)
+    .join(", ");
 
   const createdAt = record.createdAt || record.endorsementDate || record.submittedOn;
   const expiry = record.completionDetails?.expiryDate || record.policyExpiry || record.expiryDate;
@@ -70,7 +86,8 @@ const normalizeEndorsement = (record) => {
     status,
     payment,
     productType,
-    type: productType,
+    // the endorsement type (Coverage Change, Personal Details Change, ...) from the server
+    type: typeLabel || productType,
   };
 };
 
@@ -321,7 +338,8 @@ const LeadListingAllTable = ({ clientId }) => {
       return <Skeleton width="6rem" />;
     }
 
-    const displayId = normalized?.endorsementId || normalized?.endorsementNumber || "N/A";
+    // the END- number, not the internal record id
+    const displayId = normalized?.endorsementNumber || normalized?.endorsementId || "N/A";
     return (
       <div className="category__text">
         {displayId.toString().toUpperCase()}
@@ -336,8 +354,7 @@ const LeadListingAllTable = ({ clientId }) => {
       return <Skeleton width="8rem" />;
     }
 
-    const description =
-      normalized?.productType || normalized?.type || "N/A";
+    const description = normalized?.productType || "N/A";
 
     return <div className="category__text">{description.toUpperCase()}</div>;
   };
@@ -486,7 +503,7 @@ const LeadListingAllTable = ({ clientId }) => {
               loading ? (
                 <Skeleton width="6rem" />
               ) : (
-                (rowData.type || rowData.Type || "N/A").toUpperCase()
+                normalizeEndorsement(rowData)?.type || rowData.Type || "N/A"
               )
             }
           ></Column>

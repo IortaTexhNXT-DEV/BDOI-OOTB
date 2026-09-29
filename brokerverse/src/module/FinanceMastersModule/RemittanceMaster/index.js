@@ -24,6 +24,7 @@ import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { showError, showSuccess } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const RemittanceMaster = () => {
   const { t } = useTranslation();
@@ -351,10 +352,10 @@ const RemittanceMaster = () => {
                 />
                 <Column
                   body={(rowData) => {
-                    if (rowData.type === "Automated") return rowData.lastRun;
-                    if (rowData.type === "Statement") return rowData.lastUsed;
-                    if (rowData.type === "Schedule") return rowData.nextRun;
-                    return rowData.lastUpdated || "-";
+                    if (rowData.type === "Automated") return formatAppDate(rowData.lastRun);
+                    if (rowData.type === "Statement") return formatAppDate(rowData.lastUsed);
+                    if (rowData.type === "Schedule") return formatAppDate(rowData.nextRun);
+                    return formatAppDate(rowData.lastUpdated);
                   }}
                   header={t("financeMasters.lastActivity")}
                   style={{ width: "12%" }}

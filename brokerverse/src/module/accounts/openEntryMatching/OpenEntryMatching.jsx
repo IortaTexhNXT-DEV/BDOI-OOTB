@@ -15,6 +15,7 @@ import "./OpenEntryMatching.scss";
 import accountingService from "../../../services/accountingService";
 import useOpenItemAccounts from "./useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const OpenEntryMatching = () => {
   const { t } = useTranslation();
@@ -150,12 +151,7 @@ const OpenEntryMatching = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    return formatAppDate(dateString, { empty: "" });
   };
 
   const calculateTotal = (entries, field) => {

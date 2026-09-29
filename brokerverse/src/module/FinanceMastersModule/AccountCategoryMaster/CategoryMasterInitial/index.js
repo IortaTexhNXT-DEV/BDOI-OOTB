@@ -99,10 +99,10 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd className="addicon" />
             <p className="addtext">Add</p>
-          </div>
+          </button>
         </div>
       </div>
 

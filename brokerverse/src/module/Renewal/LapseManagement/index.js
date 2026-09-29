@@ -22,6 +22,9 @@ import { Chip } from "primereact/chip";
 import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import FieldError from "../../../components/FieldError";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import "./index.scss";
 
 const LapseManagement = () => {
@@ -55,6 +58,7 @@ const LapseManagement = () => {
     validUntil: new Date(Date.now() + 30*24*60*60*1000),
     message: ''
   });
+  const [campaignErrors, setCampaignErrors] = useState({});
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     startDate: new Date(),
@@ -261,6 +265,7 @@ const LapseManagement = () => {
       benefits: [],
       budget: 100000
     });
+    setCampaignErrors({});
     setCampaignVisible(true);
   };
 
@@ -296,12 +301,23 @@ const LapseManagement = () => {
   };
 
   const handleCreateCampaignConfirm = async () => {
+    const errors = requiredErrors(newCampaign, [
+      ["name", "Campaign name"],
+      ["startDate", "Start date"],
+      ["endDate", "End date"],
+      ["endDate", "End date", (v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, "End date must be on or after the start date"],
+    ]);
+    setCampaignErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors), life: 4000 });
+      return;
+    }
     try {
       await renewalsWorkspaceService.createCampaign({
         campaignName: newCampaign.name,
         targetSegment: newCampaign.targetSegment,
-        startDate: newCampaign.startDate?.toLocaleDateString('en-CA'),
-        endDate: newCampaign.endDate?.toLocaleDateString('en-CA'),
+        startDate: toIsoDate(newCampaign.startDate),
+        endDate: toIsoDate(newCampaign.endDate),
         discount: newCampaign.discount,
         budget: newCampaign.budget,
         offers: newCampaign.benefits
@@ -598,7 +614,7 @@ const LapseManagement = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <i className="pi pi-dollar card-icon dark-red"></i>
+              <i className="pi pi-wallet card-icon dark-red"></i>
               <div className="card-info">
                 <span className="card-value">{formatCurrency(dashboardData.revenueAtRisk)}</span>
                 <span className="card-label">{t("renewal.revenueAtRisk")}</span>
@@ -741,8 +757,8 @@ const LapseManagement = () => {
                             <div className="detail-item">
                               <label>Period:</label>
                               <span>
-                                {new Date(campaign.startDate).toLocaleDateString()} -
-                                {new Date(campaign.endDate).toLocaleDateString()}
+                                {formatAppDate(campaign.startDate)} -
+                                {formatAppDate(campaign.endDate)}
                               </span>
                             </div>
                             <div className="detail-item">
@@ -820,7 +836,7 @@ const LapseManagement = () => {
                   {selectedPolicy.lapseDate && (
                     <div className="detail-item">
                       <label>Lapse Date:</label>
-                      <span>{new Date(selectedPolicy.lapseDate).toLocaleDateString()}</span>
+                      <span>{formatAppDate(selectedPolicy.lapseDate)}</span>
                     </div>
                   )}
                   {selectedPolicy.lapseReason && (
@@ -839,7 +855,7 @@ const LapseManagement = () => {
                       <div key={index} className="winback-item">
                         <div className="winback-header">
                           <strong>{attempt.method}</strong>
-                          <span>{new Date(attempt.date).toLocaleDateString()}</span>
+                          <span>{formatAppDate(attempt.date)}</span>
                         </div>
                         <div className="winback-details">
                           <p>Offer: {attempt.offer}</p>
@@ -938,7 +954,7 @@ const LapseManagement = () => {
                     <Calendar
                       value={winBackOffer.validUntil}
                       onChange={(e) => setWinBackOffer({...winBackOffer, validUntil: e.value})}
-                      dateFormat="mm/dd/yy"
+                      dateFormat={calendarDateFormat()}
                       minDate={new Date()}
                     />
                   </div>
@@ -998,12 +1014,13 @@ const LapseManagement = () => {
           <div className="campaign-form">
             <div className="form-grid">
               <div className="form-field">
-                <label>Campaign Name</label>
+                <label>Campaign Name *</label>
                 <InputText
                   value={newCampaign.name}
                   onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})}
                   placeholder="Enter campaign name"
                 />
+                <FieldError error={campaignErrors.name} />
               </div>
 
               <div className="form-field">
@@ -1016,23 +1033,25 @@ const LapseManagement = () => {
               </div>
 
               <div className="form-field">
-                <label>Start Date</label>
+                <label>Start Date *</label>
                 <Calendar
                   value={newCampaign.startDate}
                   onChange={(e) => setNewCampaign({...newCampaign, startDate: e.value})}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   minDate={new Date()}
                 />
+                <FieldError error={campaignErrors.startDate} />
               </div>
 
               <div className="form-field">
-                <label>End Date</label>
+                <label>End Date *</label>
                 <Calendar
                   value={newCampaign.endDate}
                   onChange={(e) => setNewCampaign({...newCampaign, endDate: e.value})}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   minDate={newCampaign.startDate}
                 />
+                <FieldError error={campaignErrors.endDate} />
               </div>
 
               <div className="form-field">

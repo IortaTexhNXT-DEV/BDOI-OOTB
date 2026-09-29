@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getDisbursementDetailsMiddleware } from "../store/paymentVocherMiddleware";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 function Detailview() {
   const { t } = useTranslation();
@@ -710,7 +711,7 @@ function Detailview() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.VoucheDate)}
             field="VoucheDate"
             header={t("paymentVoucher.instrumentBookId")}
             headerStyle={headerStyle}
@@ -722,7 +723,7 @@ function Detailview() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.InstrumentDate)}
             field="InstrumentDate"
             header={t("paymentVoucher.instrumentDate")}
             headerStyle={headerStyle}

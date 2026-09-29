@@ -10,6 +10,7 @@ import DatepickerField from "../../component/datePicker";
 import { FileUpload } from "primereact/fileupload";
 import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useClaimHeader from "../useClaimHeader";
 import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import customHistory from "../../../routes/customHistory";
 import { useDispatch, useSelector } from "react-redux";
@@ -128,17 +129,18 @@ const AdjusterSubmission = () => {
   }));
 
   // Try to get policy holder name from Redux first, then claim details, then fallback
+  const header = useClaimHeader(claimId);
   const policyHolderName =
+    header.policyHolderName ||
     reduxPolicyHolderName ||
-    claimDetails?.policyHolderName ||
-    claimDetails?.PolicyHolderName ||
-    "Loading...";
+    claimDetails?.data?.policyHolderName ||
+    t("agent.loading");
 
   const claimNumber =
+    header.claimNumber ||
     reduxClaimNumber ||
-    claimDetails?.claimNumber ||
-    claimDetails?.claim_number ||
-    "Loading...";
+    claimDetails?.data?.claimNumber ||
+    "";
 
   console.log("=== ADJUSTER SUBMISSION REDUX DATA ===");
   console.log("Claim Details:", claimDetails);

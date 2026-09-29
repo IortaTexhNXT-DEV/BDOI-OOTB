@@ -3,11 +3,15 @@ import { getSetting } from '../../lib/settings.js';
 import { notFound } from '../../lib/errors.js';
 import { isoDate, round2 } from '../accounting/lib/http.js';
 
-const STATUS_SQL = 'CASE WHEN r.status = \'paid\' OR r.balance <= 0 THEN \'PAID\' WHEN r.status = \'partial\' THEN \'REVIEWING\' ELSE \'PENDING\' END';
+// A premium bill cancelled because the policy moved to direct bill (the client pays the insurer) is DIRECT, not PAID;
+// any other cancelled bill is CANCELLED (D117).
+const STATUS_SQL = `CASE WHEN r.status = 'cancelled' AND p.billing_mode = 'direct' THEN 'DIRECT' WHEN r.status = 'cancelled' THEN 'CANCELLED'
+  WHEN r.status = 'paid' OR r.balance <= 0 THEN 'PAID' WHEN r.status = 'partial' THEN 'REVIEWING' ELSE 'PENDING' END`;
+const STATUS_LABEL = { DIRECT: 'DIRECT BILL' };
 /** Agents (no finance read permission) only see their own policies. */
 export const ownOnly = (user) => !(user.roles || []).some((r) => ['it-admin', 'ba', 'finance', 'sales', 'customer-services', 'underwriting'].includes(r));
 
-const PAY_SQL = `SELECT r.*, ${STATUS_SQL} AS pay_status, p.policy_number, p.owner_user_id, c.client_code, c.display_name, ic.name AS insurer_name, pr.name AS product_name,
+const PAY_SQL = `SELECT r.*, ${STATUS_SQL} AS pay_status, p.policy_number, p.owner_user_id, p.billing_mode, c.client_code, c.display_name, ic.name AS insurer_name, pr.name AS product_name,
   la.payment_mode AS last_mode, la.applied_at AS last_paid_at, COALESCE(rc.receipt_number, la.reference_no) AS last_reference
   FROM receivables r LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
   LEFT JOIN products pr ON pr.id = p.product_id
@@ -17,14 +21,17 @@ const PAY_SQL = `SELECT r.*, ${STATUS_SQL} AS pay_status, p.policy_number, p.own
 export const paymentRow = (x) => ({
   id: x.id, receivableId: x.id, billNumber: x.bill_number, grossPremium: Number(x.amount), paidAmount: round2(Number(x.amount) - Number(x.balance)), outstanding: Number(x.balance),
   clientId: x.client_code, clientRefId: x.client_id, clientName: x.display_name, date: isoDate(x.last_paid_at) || x.due_date, dueDate: x.due_date, policyId: x.policy_id,
-  policyNumber: x.policy_number, insurer: x.insurer_name, product: x.product_name, status: x.pay_status, paymentMethod: x.last_mode, referenceNumber: x.last_reference,
+  policyNumber: x.policy_number, insurer: x.insurer_name, product: x.product_name, status: STATUS_LABEL[x.pay_status] || x.pay_status, paymentMethod: x.last_mode, referenceNumber: x.last_reference,
+  billingMode: x.billing_mode || 'broker',
   commission: Number(x.commission_amount), source: x.source, currency: x.currency,
 });
 
 function where(q, user) {
   const w = ['r.status <> \'written-off\'']; const p = [];
   const add = (sql, v) => { p.push(v); w.push(sql.replaceAll('?', `$${p.length}`)); };
-  if (q.status) add(`${STATUS_SQL} = ?`, String(q.status).toUpperCase());
+  // the Paid tab also lists direct-bill policies (settled between the client and the insurer), labelled DIRECT BILL
+  if (q.status && String(q.status).toUpperCase() === 'PAID') add(`${STATUS_SQL} IN (?, 'DIRECT')`, 'PAID');
+  else if (q.status) add(`${STATUS_SQL} = ?`, String(q.status).toUpperCase());
   if (q.search) add('(COALESCE(p.policy_number,\'\') || \' \' || COALESCE(c.client_code,\'\') || \' \' || COALESCE(c.display_name,\'\') || \' \' || COALESCE(r.bill_number,\'\')) ILIKE \'%\' || ? || \'%\'', q.search);
   if (q.policyNumber) add('p.policy_number ILIKE \'%\' || ? || \'%\'', q.policyNumber);
   if (q.clientId) add('(c.client_code = ? OR c.id = ?)', q.clientId);

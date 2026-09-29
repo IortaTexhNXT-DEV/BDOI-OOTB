@@ -176,7 +176,7 @@ const RemittanceReports = () => {
               <div className="param-section">
                 <h4>{t("remittanceReports.reportParameters")}</h4>
                 <div className="p-fluid">
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittanceReports.reportPeriod")} *</label>
                     <Calendar dateFormat={calendarDateFormat()}
                       value={reportParams.reportPeriod}
@@ -185,7 +185,7 @@ const RemittanceReports = () => {
                       placeholder={t("remittanceReports.selectDateRange")}
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittanceReports.insurer")}</label>
                     <MultiSelect
                       value={reportParams.insurer}
@@ -196,7 +196,7 @@ const RemittanceReports = () => {
                       display="chip"
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittanceReports.branch")}</label>
                     <MultiSelect
                       value={reportParams.branch}
@@ -206,7 +206,7 @@ const RemittanceReports = () => {
                       display="chip"
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>Product Line</label>
                     <MultiSelect
                       value={reportParams.productLine}
@@ -221,17 +221,17 @@ const RemittanceReports = () => {
 
               <div className="output-section">
                 <h4>Output Options</h4>
-                <div className="p-fluid p-formgrid p-grid">
-                  <div className="p-field p-col-12 p-md-6">
+                <div className="p-fluid formgrid grid">
+                  <div className="p-field field col-12 md:col-6">
                     <label>Output Format</label>
                     <div className="format-options">
-                      <div className="p-field-radiobutton">
+                      <div className="p-field-radiobutton field-radiobutton">
                         <RadioButton inputId="csv" value="csv" onChange={(e) => setReportParams({ ...reportParams, outputFormat: e.value })} checked={reportParams.outputFormat === 'csv'} />
                         <label htmlFor="csv">CSV</label>
                       </div>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <label>Report Layout</label>
                     <Dropdown
                       value={reportParams.reportLayout}

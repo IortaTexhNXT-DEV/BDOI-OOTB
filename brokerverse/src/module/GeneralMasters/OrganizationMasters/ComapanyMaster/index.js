@@ -178,10 +178,10 @@ const Index = () => {
         <div className="filterbutton_container">
           {/* <SvgFilters/> */}
 
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />
             <p className="addtext">{t("generalMasters.add")}</p>
-          </div>
+          </button>
         </div>
       </div>
 

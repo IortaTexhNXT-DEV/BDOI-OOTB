@@ -29,6 +29,7 @@ import { Dialog } from "primereact/dialog";
 import { Checkbox } from "primereact/checkbox";
 import AddDialog from "./AddDialog";
 import { useLocation, useParams } from "react-router-dom";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 
 const initialValue = {
@@ -209,7 +210,7 @@ const EditRequestForm = ({ action }) => {
                             onChange={(e) => {
                                 formik.setFieldValue("Date", e.target.value);
                             }}
-                            dateFormat="yy-mm-dd"
+                            dateFormat={calendarDateFormat()}
                             disabled={action === "view" ? true : false}
                         />
                     </div>

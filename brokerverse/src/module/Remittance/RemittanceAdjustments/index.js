@@ -17,6 +17,8 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { calendarDateFormat, dateBody, downloadCsv, isoDate, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
+import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
+import FieldError from "../../../components/FieldError";
 import "./index.scss";
 
 const emptyAdjustment = {
@@ -40,6 +42,7 @@ const RemittanceAdjustments = () => {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedAdjustment, setSelectedAdjustment] = useState(null);
   const [newAdjustment, setNewAdjustment] = useState(emptyAdjustment);
+  const [adjustmentErrors, setAdjustmentErrors] = useState({});
   const [pendingAdjustments, setPendingAdjustments] = useState([]);
   const [adjustmentHistory, setAdjustmentHistory] = useState([]);
   const [approvals, setApprovals] = useState([]);
@@ -173,6 +176,18 @@ const RemittanceAdjustments = () => {
   };
 
   const handleCreateAdjustment = async () => {
+    const errors = requiredErrors(newAdjustment, [
+      ["adjustmentType", "Adjustment type"],
+      ["amount", "Adjustment amount"],
+      ["effectiveDate", "Effective date"],
+      ["description", "Description"],
+      ["reason", "Reason for adjustment"],
+    ]);
+    setAdjustmentErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: "Validation", detail: errorSummary(errors), life: 4000 });
+      return;
+    }
     try {
       const created = await remittanceService.createAdjustment({
         adjustmentType: newAdjustment.adjustmentType,
@@ -263,7 +278,7 @@ const RemittanceAdjustments = () => {
         <Card className="summary-card">
           <div className="card-content">
             <div className="card-icon blue">
-              <i className="pi pi-dollar" />
+              <i className="pi pi-wallet" />
             </div>
             <div className="card-details">
               <div className="card-value">{formatCurrency(summary.totalValue)}</div>
@@ -301,7 +316,10 @@ const RemittanceAdjustments = () => {
             label="New Adjustment"
             icon="pi pi-plus"
             className="p-button-primary"
-            onClick={() => setShowAdjustmentDialog(true)}
+            onClick={() => {
+              setAdjustmentErrors({});
+              setShowAdjustmentDialog(true);
+            }}
           />
           <div className="filter-section">
             <Dropdown
@@ -395,8 +413,8 @@ const RemittanceAdjustments = () => {
         onHide={() => setShowAdjustmentDialog(false)}
       >
         <div className="adjustment-form">
-          <div className="p-fluid p-formgrid p-grid">
-            <div className="p-field p-col-12 p-md-6">
+          <div className="p-fluid formgrid grid">
+            <div className="p-field field col-12 md:col-6">
               <label>Reference No *</label>
               <InputText
                 value={newAdjustment.referenceNo}
@@ -405,7 +423,7 @@ const RemittanceAdjustments = () => {
                 disabled
               />
             </div>
-            <div className="p-field p-col-12 p-md-6">
+            <div className="p-field field col-12 md:col-6">
               <label>Adjustment Type *</label>
               <Dropdown
                 value={newAdjustment.adjustmentType}
@@ -413,8 +431,9 @@ const RemittanceAdjustments = () => {
                 onChange={(e) => setNewAdjustment({ ...newAdjustment, adjustmentType: e.value })}
                 placeholder="Select Type"
               />
+              <FieldError error={adjustmentErrors.adjustmentType} />
             </div>
-            <div className="p-field p-col-12 p-md-6">
+            <div className="p-field field col-12 md:col-6">
               <label>Adjustment Amount *</label>
               <InputNumber
                 value={newAdjustment.amount}
@@ -423,24 +442,27 @@ const RemittanceAdjustments = () => {
                 currency={currencyCode}
                 placeholder="Enter amount"
               />
+              <FieldError error={adjustmentErrors.amount} />
             </div>
-            <div className="p-field p-col-12 p-md-6">
+            <div className="p-field field col-12 md:col-6">
               <label>Effective Date *</label>
               <Calendar dateFormat={calendarDateFormat()}
                 value={newAdjustment.effectiveDate}
                 onChange={(e) => setNewAdjustment({ ...newAdjustment, effectiveDate: e.value })}
                 placeholder="Select date"
               />
+              <FieldError error={adjustmentErrors.effectiveDate} />
             </div>
-            <div className="p-field p-col-12">
+            <div className="p-field field col-12">
               <label>Description *</label>
               <InputText
                 value={newAdjustment.description}
                 onChange={(e) => setNewAdjustment({ ...newAdjustment, description: e.target.value })}
                 placeholder="Brief description"
               />
+              <FieldError error={adjustmentErrors.description} />
             </div>
-            <div className="p-field p-col-12">
+            <div className="p-field field col-12">
               <label>Reason for Adjustment *</label>
               <InputTextarea
                 value={newAdjustment.reason}
@@ -448,6 +470,7 @@ const RemittanceAdjustments = () => {
                 rows={3}
                 placeholder="Detailed reason for this adjustment"
               />
+              <FieldError error={adjustmentErrors.reason} />
             </div>
           </div>
         </div>

@@ -19,6 +19,16 @@ import "./index.scss";
 import { numberLocale } from "../../utility/currencyConverter";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+import { calendarDateFormat } from "../../utility/dateFormat";
+
+const SETTINGS_PATH = "/master/configuration/system-settings";
+const PERIOD_MONTHS = { month: 1, quarter: 3, year: 12 };
+/** [from, today] of the rolling window the KPIs use for a period (month / quarter / year). */
+const rangeFor = (period) => {
+  const to = new Date();
+  const from = new Date(to.getFullYear(), to.getMonth() - (PERIOD_MONTHS[period] || 1), to.getDate());
+  return [from, to];
+};
 
 /** Quick actions of the dashboard; each is shown only when the user's roles may open its screen (same rules as the side menu). */
 const QUICK_ACTIONS = [
@@ -65,11 +75,11 @@ const ExecutiveDashboard = () => {
     return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles));
   });
   const toast = useRef(null);
+  // Settings opens System Settings (dashboard targets live there); only for roles that may open it
+  const [canOpenSettings] = useState(() => isPathAllowed(SETTINGS_PATH, menuList, getUserRoles()));
   const [selectedPeriod, setSelectedPeriod] = useState("month");
-  const [dateRange, setDateRange] = useState([
-    new Date(new Date().getFullYear(), 0, 1),
-    new Date(),
-  ]);
+  // export range: follows the chosen period (the KPIs cover the same rolling window) and can be changed
+  const [dateRange, setDateRange] = useState(() => rangeFor("month"));
   const [dashboard, setDashboard] = useState(null);
   const [claimsSummary, setClaimsSummary] = useState(null);
 
@@ -78,6 +88,7 @@ const ExecutiveDashboard = () => {
 
   useEffect(() => {
     dashboardService.getExecutive(selectedPeriod).then(setDashboard).catch(showError);
+    setDateRange(rangeFor(selectedPeriod));
   }, [selectedPeriod]);
 
   useEffect(() => {
@@ -226,6 +237,7 @@ const ExecutiveDashboard = () => {
           </div>
           <div className="header-right">
             <Calendar
+              dateFormat={calendarDateFormat()}
               value={dateRange}
               onChange={(e) => setDateRange(e.value)}
               selectionMode="range"
@@ -242,12 +254,20 @@ const ExecutiveDashboard = () => {
               severity="info"
               onClick={handleExport}
             />
-            <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" />
+            {canOpenSettings && (
+              <Button
+                label={t("executiveDashboard.settings")}
+                icon="pi pi-cog"
+                severity="secondary"
+                onClick={() => navigate(SETTINGS_PATH)}
+              />
+            )}
           </div>
         </div>
         {/* Mobile/Tablet Actions - moved below title */}
         <div className="mobile-header-actions">
           <Calendar
+            dateFormat={calendarDateFormat()}
             value={dateRange}
             onChange={(e) => setDateRange(e.value)}
             selectionMode="range"
@@ -259,7 +279,9 @@ const ExecutiveDashboard = () => {
             onChange={(e) => setSelectedPeriod(e.value)}
           />
           <Button label={t("executiveDashboard.exportReport")} icon="pi pi-download" severity="info" onClick={handleExport} />
-          <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" />
+          {canOpenSettings && (
+            <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" onClick={() => navigate(SETTINGS_PATH)} />
+          )}
         </div>
       </div>
 

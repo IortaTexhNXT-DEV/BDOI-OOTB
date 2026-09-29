@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { postAddTaxationMiddileware } from "../store/taxationMiddleWare";
 import useTaxRateOptions from "../useTaxRateOptions";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 const AddTaxation = () => {
   const { t } = useTranslation();
   const [errors, setErrors] = useState("");
@@ -202,13 +203,13 @@ const AddTaxation = () => {
                 // onChange={(e) => {
                 //   formik.setFieldValue("effectiveFrom", e.target.value);
                 // }}
-                // dateFormat="yy-mm-dd"
+                // dateFormat={calendarDateFormat()}
                 value={formik.values.effectiveFrom}
                 minDate={minDate}
                 onChange={(e) => {
                   formik.setFieldValue("effectiveFrom", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 error={
                   formik.touched.effectiveFrom && formik.errors.effectiveFrom
                 }
@@ -229,13 +230,13 @@ const AddTaxation = () => {
                 // onChange={(e) => {
                 //   formik.setFieldValue("effectiveTo", e.target.value);
                 // }}
-                // dateFormat="yy-mm-dd"
+                // dateFormat={calendarDateFormat()}
                 value={formik.values.effectiveTo}
                 minDate={minDate}
                 onChange={(e) => {
                   formik.setFieldValue("effectiveTo", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 error={formik.touched.effectiveTo && formik.errors.effectiveTo}
               />
             </div>

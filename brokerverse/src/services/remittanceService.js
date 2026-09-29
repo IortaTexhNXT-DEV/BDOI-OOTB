@@ -92,6 +92,7 @@ export const remittanceService = {
   reject: (approvalId, comments) => post(`${R}/approvals/${id(approvalId)}/reject`, { comments }),
   delegate: (approvalId, delegateTo, comments) => post(`${R}/approvals/${id(approvalId)}/delegate`, { delegateTo, comments }),
   listDelegations: () => get(`${R}/approvals/delegations`),
+  listApprovers: () => get(`${R}/approvals/approvers`),
   createDelegation: (payload) => post(`${R}/approvals/delegations`, payload),
 
   // settlements

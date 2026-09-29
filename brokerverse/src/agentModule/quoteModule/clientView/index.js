@@ -15,10 +15,12 @@ const LeadListing = ({ action }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
   const { id: clientId } = useParams();
+  // the header shows the client code (CL-...), never the internal record id of the address
+  const [clientCode, setClientCode] = useState(null);
 
   const items = [
     { label: "Clients", url: "/agent/clientlisting" },
-    { label: clientId ? `Client ID : ${clientId}` : "Client" }
+    { label: clientCode ? `Client: ${clientCode}` : "Client" }
   ];
   const Initiate = { label: "Home" };
 
@@ -39,7 +41,7 @@ const LeadListing = ({ action }) => {
           separatorIcon={<SvgDot color={"#000"} />}
         />
       </div>
-      <ClientViewCard action={action} clientId={clientId} />
+      <ClientViewCard action={action} clientId={clientId} onClient={(c) => setClientCode(c?.clientCode || c?.generatedClientId || null)} />
     </div>
   );
 };

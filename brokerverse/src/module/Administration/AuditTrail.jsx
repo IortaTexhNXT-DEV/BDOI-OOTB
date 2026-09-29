@@ -8,7 +8,7 @@ import { Toast } from "primereact/toast";
 import adminService from "../../services/adminService";
 import "./index.scss";
 
-import { numberLocale } from "../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../utility/dateFormat";
 const short = (v) => (v ? JSON.stringify(v).slice(0, 160) : "");
 
 /** Master > Audit Trail: who changed what, from the audit log the backend writes on every change. */
@@ -57,7 +57,7 @@ const AuditTrail = () => {
         <Button label="Search" icon="pi pi-search" onClick={load} />
       </div>
       <DataTable value={rows} loading={loading} paginator rows={20} size="small" stripedRows emptyMessage="No entries">
-        <Column header="When" body={(r) => new Date(r.at).toLocaleString(numberLocale())} />
+        <Column header="When" body={(r) => formatAppDate(r.at, { withTime: true })} />
         <Column field="username" header="User" />
         <Column field="entity" header="Record type" />
         <Column field="entityId" header="Record ID" />

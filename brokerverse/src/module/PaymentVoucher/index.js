@@ -32,6 +32,7 @@ import {
 } from "./store/paymentVocherMiddleware";
 import clientService from "../../services/clientService";
 import BulkUploadModal from "./BulkUploadModal";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -480,10 +481,10 @@ const Index = () => {
             </div>
           </div>
           <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
+            <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
               <SvgAdd />
               <p className="addtext">{t("paymentVoucher.create")}</p>
-            </div>
+            </button>
           </div>
         </div>
         <div className="mobile-header-actions">
@@ -509,10 +510,10 @@ const Index = () => {
             </div>
           </div>
           <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
+            <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
               <SvgAdd />
               <p className="addtext">{t("paymentVoucher.create")}</p>
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -627,7 +628,7 @@ const Index = () => {
                 className="fieldvalue_container"
                 body={(rowData) => rowData.CustomerCode?.toUpperCase()}
               ></Column>
-              <Column
+              <Column body={(row) => formatAppDate(row.VoucheDate)}
                 field="VoucheDate"
                 header={t("paymentVoucher.disbursementDate")}
                 sortable
@@ -807,7 +808,7 @@ const Index = () => {
                 onChange={(e) => {
                   setDateFrom(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -821,7 +822,7 @@ const Index = () => {
                 onChange={(e) => {
                   setDateTo(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>

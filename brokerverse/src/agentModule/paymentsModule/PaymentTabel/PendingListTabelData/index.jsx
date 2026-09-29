@@ -20,6 +20,7 @@ import {
   getPaymentSearchDataMiddleWare,
 } from "../../store/paymentMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const PendingListTabelData = () => {
   const { t } = useTranslation();
@@ -142,14 +143,14 @@ const PendingListTabelData = () => {
   const renderPolicyIssued = (rowData) => {
     return (
       <div className="category__text">
-        {rowData.policyIssued?.toUpperCase()}
+        {formatAppDate(rowData.policyIssued)}
       </div>
     );
   };
   const renderPolicyExpired = (rowData) => {
     return (
       <div className="category__text">
-        {rowData.policyExpird?.toUpperCase()}
+        {formatAppDate(rowData.policyExpird)}
       </div>
     );
   };

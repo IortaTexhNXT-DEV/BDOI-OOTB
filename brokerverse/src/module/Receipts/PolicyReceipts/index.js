@@ -32,6 +32,7 @@ import LabelWrapper from "../../../components/LabelWrapper";
 import { Toast } from "primereact/toast";
 import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const CONVERTED = "Converted";
 
@@ -749,7 +750,7 @@ const PolicyReceipts = () => {
                 headerStyle={headerStyle2}
                 className="fieldvalue_container"
               ></Column>
-              <Column
+              <Column body={(row) => formatAppDate(row.date)}
                 sortable
                 field="date"
                 header={t("common.date")}
@@ -1028,7 +1029,7 @@ const PolicyReceipts = () => {
                 onChange={(e) => {
                   setDateFrom(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -1042,7 +1043,7 @@ const PolicyReceipts = () => {
                 onChange={(e) => {
                   setDateTo(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>

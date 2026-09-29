@@ -24,7 +24,10 @@ import { FileUpload } from "primereact/fileupload";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
+import FieldError from "../../../components/FieldError";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import "./index.scss";
 
 const NegotiationWorkspace = () => {
@@ -41,6 +44,7 @@ const NegotiationWorkspace = () => {
   const [approvals, setApprovals] = useState([]);
   const [filteredNegotiations, setFilteredNegotiations] = useState([]);
   const [updateVisible, setUpdateVisible] = useState(false);
+  const [updateErrors, setUpdateErrors] = useState({});
   const [approvalVisible, setApprovalVisible] = useState(false);
   const [communicationVisible, setCommunicationVisible] = useState(false);
   const [dashboardData, setDashboardData] = useState({
@@ -257,6 +261,7 @@ const NegotiationWorkspace = () => {
   };
 
   const handleAddUpdate = () => {
+    setUpdateErrors({});
     setNewUpdate({
       type: 'Update',
       method: 'Phone',
@@ -289,6 +294,12 @@ const NegotiationWorkspace = () => {
   };
 
   const handleSaveUpdate = async () => {
+    const errors = requiredErrors(newUpdate, [["type", "Update type"], ["method", "Communication method"], ["description", "Description"]]);
+    setUpdateErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors), life: 4000 });
+      return;
+    }
     const saved = await recordActivity(
       {
         type: newUpdate.type,
@@ -296,7 +307,7 @@ const NegotiationWorkspace = () => {
         description: newUpdate.description,
         outcome: newUpdate.outcome || undefined,
         nextAction: newUpdate.nextAction || undefined,
-        followUpDate: newUpdate.followUpDate?.toLocaleDateString('en-CA')
+        followUpDate: toIsoDate(newUpdate.followUpDate) || undefined
       },
       t("renewal.updateAdded"),
       t("renewal.negotiationTimelineUpdated"),
@@ -336,7 +347,7 @@ const NegotiationWorkspace = () => {
         type: "Communication",
         method: newCommunication.method,
         description: `${newCommunication.subject}: ${newCommunication.message}`,
-        followUpDate: newCommunication.scheduledDate?.toLocaleDateString('en-CA')
+        followUpDate: toIsoDate(newCommunication.scheduledDate) || undefined
       },
       t("renewal.communicationSent"),
       t("renewal.communicationSentToClient", { method: newCommunication.method }),
@@ -384,7 +395,7 @@ const NegotiationWorkspace = () => {
 
     return (
       <div className="last-update-cell">
-        <span>{new Date(rowData.lastUpdated).toLocaleDateString()}</span>
+        <span>{formatAppDate(rowData.lastUpdated)}</span>
         <small>({daysSince} days ago)</small>
       </div>
     );
@@ -459,7 +470,7 @@ const NegotiationWorkspace = () => {
           </div>
           <div className="timeline-meta">
             <span className="timeline-method">{item.method}</span>
-            <span className="timeline-date">{new Date(item.date).toLocaleDateString()}</span>
+            <span className="timeline-date">{formatAppDate(item.date)}</span>
           </div>
         </div>
         <div className="timeline-description">
@@ -477,7 +488,7 @@ const NegotiationWorkspace = () => {
         )}
         {item.followUpDate && (
           <div className="timeline-follow-up">
-            <strong>Follow-up:</strong> {new Date(item.followUpDate).toLocaleDateString()}
+            <strong>Follow-up:</strong> {formatAppDate(item.followUpDate)}
           </div>
         )}
       </div>
@@ -743,11 +754,11 @@ const NegotiationWorkspace = () => {
                             </div>
                             <div className="detail-item">
                               <label>Created Date:</label>
-                              <span>{new Date(selectedNegotiation.createdDate).toLocaleDateString()}</span>
+                              <span>{formatAppDate(selectedNegotiation.createdDate)}</span>
                             </div>
                             <div className="detail-item">
                               <label>Last Updated:</label>
-                              <span>{new Date(selectedNegotiation.lastUpdated).toLocaleDateString()}</span>
+                              <span>{formatAppDate(selectedNegotiation.lastUpdated)}</span>
                             </div>
                           </div>
 
@@ -837,7 +848,7 @@ const NegotiationWorkspace = () => {
                                     <span>{comm.method}</span>
                                   </div>
                                   <span className="comm-date">
-                                    {new Date(comm.date).toLocaleDateString()}
+                                    {formatAppDate(comm.date)}
                                   </span>
                                 </div>
                                 <div className="comm-content">
@@ -877,32 +888,35 @@ const NegotiationWorkspace = () => {
           <div className="update-form">
             <div className="form-grid">
               <div className="form-field">
-                <label>Update Type</label>
+                <label>Update Type *</label>
                 <Dropdown
                   value={newUpdate.type}
                   onChange={(e) => setNewUpdate({...newUpdate, type: e.value})}
                   options={updateTypeOptions}
                 />
+                <FieldError error={updateErrors.type} />
               </div>
 
               <div className="form-field">
-                <label>Communication Method</label>
+                <label>Communication Method *</label>
                 <Dropdown
                   value={newUpdate.method}
                   onChange={(e) => setNewUpdate({...newUpdate, method: e.value})}
                   options={communicationMethodOptions}
                 />
+                <FieldError error={updateErrors.method} />
               </div>
             </div>
 
             <div className="form-field">
-              <label>Description</label>
+              <label>Description *</label>
               <InputTextarea
                 value={newUpdate.description}
                 onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
                 rows={3}
                 placeholder="Describe what happened during this interaction"
               />
+              <FieldError error={updateErrors.description} />
             </div>
 
             <div className="form-field">
@@ -928,7 +942,7 @@ const NegotiationWorkspace = () => {
               <Calendar
                 value={newUpdate.followUpDate}
                 onChange={(e) => setNewUpdate({...newUpdate, followUpDate: e.value})}
-                dateFormat="mm/dd/yy"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>
@@ -1079,7 +1093,7 @@ const NegotiationWorkspace = () => {
                   value={newCommunication.scheduledDate}
                   onChange={(e) => setNewCommunication({...newCommunication, scheduledDate: e.value})}
                   showTime
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                 />
               </div>
             </div>

@@ -15,6 +15,8 @@ import { Knob } from 'primereact/knob';
 import { Panel } from 'primereact/panel';
 import { Timeline } from 'primereact/timeline';
 import reinsuranceService from '../../../services/reinsuranceService';
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { canOpen } from "../../../utils/canOpen";
 import './style.scss';
 
 const RENEWAL_WINDOW_DAYS = 90;
@@ -196,10 +198,13 @@ const TreatyDashboard = () => {
       <Card className="timeline-card">
         <h5>{item.treaty}</h5>
         <p>{item.action}</p>
-        <small>{item.date}</small>
+        <small>{formatAppDate(item.date)}</small>
       </Card>
     );
   };
+
+  // treaties are set up in Master > Finance > Reinsurance Treaty; only roles that may open it get the button (D109)
+  const canAddTreaty = canOpen('/master/reinsurance/treaty');
 
   return (
     <div className="treaty-dashboard">
@@ -208,12 +213,14 @@ const TreatyDashboard = () => {
       <div className="dashboard-header">
         <h2>{t('reinsurance.reinsurance')} {t('reinsurance.treatyDashboard')}</h2>
         <div className="header-actions">
-          <Button
-            label="Add Treaty"
-            icon="pi pi-plus"
-            className="p-button-primary"
-            onClick={() => navigate('/master/reinsurance/treaty')}
-          />
+          {canAddTreaty && (
+            <Button
+              label="Add Treaty"
+              icon="pi pi-plus"
+              className="p-button-primary"
+              onClick={() => navigate('/master/reinsurance/treaty?new=1')}
+            />
+          )}
           <Button
             label="View Reports"
             icon="pi pi-chart-bar"

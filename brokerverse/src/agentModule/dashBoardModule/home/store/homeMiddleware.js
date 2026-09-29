@@ -29,12 +29,13 @@ const buildDashboardDetails = (home, policies) => ({
   userDetails: {
     name: localStorage.getItem("USER_NAME") || "",
     totalLeads: home.funnel?.leads ?? 0,
-    totalClients: new Set(policies.map((p) => p.clientId).filter(Boolean)).size,
+    // premium and client figures come from the server, over the same book as the lists (D118)
+    totalClients: home.clients ?? new Set(policies.map((p) => p.clientId).filter(Boolean)).size,
     policySold: home.funnel?.policies ?? 0,
     earnedCommission: (home.commission?.paid || 0) + (home.commission?.unpaid || 0),
-    collectedPremium: sum(policies.filter(isPaid), (p) => p.premiumTotal),
-    receivables: sum(policies.filter((p) => !isPaid(p)), (p) => p.premiumTotal),
-    grossPremium: sum(policies, (p) => p.premiumTotal),
+    collectedPremium: home.premium?.collected ?? sum(policies.filter(isPaid), (p) => p.premiumTotal),
+    receivables: home.premium?.receivable ?? sum(policies.filter((p) => !isPaid(p)), (p) => p.premiumTotal),
+    grossPremium: home.premium?.gross ?? sum(policies, (p) => p.premiumTotal),
   },
   commission: commissionByYear(policies),
   recentQuotations: home.recentQuotations || [],
@@ -50,7 +51,9 @@ export const getDashboardDataMiddleware = createAsyncThunk(
         policyService.getPolicies(1, POLICY_PAGE_SIZE),
       ]);
       if (!policiesResult.success) throw new Error(policiesResult.error);
-      const ownPolicies = (policiesResult.data?.data || []).filter(isOwnPolicy);
+      // agents' policy lists are already limited to their book on the server; others keep the policies they created
+      const all = policiesResult.data?.data || [];
+      const ownPolicies = home.scoped ? all : all.filter(isOwnPolicy);
       return buildDashboardDetails(home, ownPolicies);
     } catch (error) {
       return rejectWithValue(error.message);

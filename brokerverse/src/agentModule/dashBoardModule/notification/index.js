@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "../../../i18n";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
@@ -14,6 +13,7 @@ import {
 import NotificationFallback from "../../../components/NotificationFallback";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import SvgGreenDots from "../../../assets/agentIcon/SvgGreenDots";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const Notification = () => {
@@ -54,14 +54,7 @@ const Notification = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const locale = i18n.language && i18n.language.startsWith("th") ? "th-TH" : "en-US";
-    return date.toLocaleDateString(locale, {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return formatAppDate(date, { withTime: true });
   };
 
   const getPrioritySeverity = (priority) => {

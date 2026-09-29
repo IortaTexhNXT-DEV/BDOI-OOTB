@@ -114,12 +114,12 @@ const PettyCashMaster = ({ response }) => {
           </div>
           <div className="upload__text__petty">{t("financeMasters.upload")}</div>
         </div>
-        <div className="add__icon__view__petty" onClick={handlePolicy}>
+        <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
           <div className="add__icon__petty">
             <SvgAdd color={"#fff"} />
           </div>
           <div className="add__text__petty">{t("financeMasters.add")}</div>
-        </div>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__container__petty">

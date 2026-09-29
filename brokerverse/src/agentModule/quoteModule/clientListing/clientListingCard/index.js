@@ -37,8 +37,8 @@ const ClientListingCard = () => {
             <TabPanel header={t("clients.all")}>
               <ClientListingAllCategory data={"All"} clientListTable={clientListTable} paymentSearchList={paymentSearchList} />
             </TabPanel>
-            <TabPanel header={t("clients.individual")}>
-              <ClientListingIndividualCategory data={"Retail"} clientListTable={clientListTable} paymentSearchList={paymentSearchList} />
+            <TabPanel header={t("clients.individualTab")}>
+              <ClientListingIndividualCategory data={"Individual"} clientListTable={clientListTable} paymentSearchList={paymentSearchList} />
             </TabPanel>
             <TabPanel header={t("clients.company")}>
               <ClientListingCompanyCategory data={"Corporate"} clientListTable={clientListTable} paymentSearchList={paymentSearchList} />

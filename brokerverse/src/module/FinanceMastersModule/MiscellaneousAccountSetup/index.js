@@ -16,6 +16,7 @@ import DropDowns from "../../../components/DropDowns";
 import "./index.scss";
 import useAccountSetup, { useAccountSetupOptions } from "../common/useAccountSetup";
 import { confirmAction } from "../../../utility/dialogs";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 
 const MiscellaneousAccountSetup = () => {
   const { t } = useTranslation();
@@ -869,7 +870,7 @@ const MiscellaneousAccountSetup = () => {
                 onChange={(e) =>
                   handleInputChange("effectiveFromDate", e.value)
                 }
-                dateFormat="mm/dd/yy"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 icon="pi pi-calendar"
                 className="input__filed"
@@ -883,7 +884,7 @@ const MiscellaneousAccountSetup = () => {
               <Calendar
                 value={formData.effectiveToDate}
                 onChange={(e) => handleInputChange("effectiveToDate", e.value)}
-                dateFormat="mm/dd/yy"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 icon="pi pi-calendar"
                 className="input__filed"

@@ -19,6 +19,11 @@
 }
 
 .admin__header {
+  > .p-button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -86,4 +91,13 @@
   align-items: flex-end;
   gap: 12px;
   margin-bottom: 16px;
+}
+
+// many settings groups: the tab strip scrolls instead of running past the right edge
+.admin__tabs {
+  max-width: 100%;
+
+  .p-tabview-nav-content {
+    max-width: 100%;
+  }
 }

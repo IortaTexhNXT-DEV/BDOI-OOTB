@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getEmployeEditMiddleWare, getSearchEmployeeMiddleware, getEmployeeListMiddleware } from "../store/employeeMiddleware";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const EmployeeMaster = () => {
   const { t } = useTranslation();
@@ -163,12 +164,12 @@ const EmployeeMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <div className="add__icon__view__hierarchy" onClick={handleNavigate}>
+        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
           <div className="add__icon__hierarchy">
             <SvgAdd />
           </div>
           <div className="add__text__hierarchy">{t("generalMasters.add")}</div>
-        </div>
+        </button>
       </div>
       <div className="col-12 mt-3 ">
         <div className="sub__account__sub__container__hierarchy">
@@ -250,7 +251,7 @@ const EmployeeMaster = () => {
                   className="fieldvalue_container"
                   body={(rowData) => rowData.modifiedBy?.toUpperCase()}
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.modifiedOn)}
                   field="modifiedOn"
                   header="Modified On"
                   headerStyle={headerStyle}

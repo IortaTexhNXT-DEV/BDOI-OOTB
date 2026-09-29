@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (565 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (567 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -32154,6 +32154,57 @@
           ]
         },
         {
+          "name": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/approvals/approvers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "approvals",
+                "approvers"
+              ]
+            },
+            "description": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/approvals/approvers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "approvals",
+                    "approvers"
+                  ]
+                },
+                "description": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"usr_1\",\n      \"username\": \"fe.approver\",\n      \"displayName\": \"Fe Approver\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Approval delegations",
           "request": {
             "method": "GET",
@@ -39488,6 +39539,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"report\": {\n      \"code\": \"production-register\",\n      \"name\": \"Production Register\"\n    },\n    \"columns\": [\n      {\n        \"key\": \"policyNumber\",\n        \"label\": \"Policy No.\"\n      }\n    ],\n    \"rows\": [\n      {\n        \"policyNumber\": \"POL-2026-00001\",\n        \"premium\": 12500\n      }\n    ],\n    \"totals\": {\n      \"premium\": 12500\n    },\n    \"summary\": {\n      \"newBusiness\": 1\n    },\n    \"groups\": null,\n    \"params\": {\n      \"from\": \"2026-01-01\",\n      \"to\": \"2026-09-30\",\n      \"criteria\": \"Overall\",\n      \"filters\": {}\n    }\n  },\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Agents a report can be filtered by (active users with the agent role), as { label, value }",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/filters/agents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "filters",
+                "agents"
+              ]
+            },
+            "description": "Agents a report can be filtered by (active users with the agent role), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/filters/agents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "filters",
+                    "agents"
+                  ]
+                },
+                "description": "Agents a report can be filtered by (active users with the agent role), as { label, value }\n\nFront-end touchpoint: Reports > * (Agent filter)\n\nAccess: read:reports"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"label\": \"Ramon Agent\",\n      \"value\": \"usr_1\",\n      \"code\": \"AG001\"\n    }\n  ]\n}"
             }
           ]
         },

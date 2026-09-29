@@ -31,6 +31,7 @@ import {
 import disbursementService from "../../../services/disbursementService";
 import documentTemplateService from "../../../services/documentTemplateService";
 import { getUserData } from "../../../utility/tokenManager";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 function PolicyReceipts() {
   const { t } = useTranslation();
@@ -842,8 +843,8 @@ function PolicyReceipts() {
               body={(rowData) => {
                 const today = new Date();
                 return rowData?.docDate
-                  ? new Date(rowData.docDate).toLocaleDateString()
-                  : today.toLocaleDateString();
+                  ? formatAppDate(rowData.docDate)
+                  : formatAppDate(today);
               }}
             ></Column>
             <Column
@@ -855,8 +856,8 @@ function PolicyReceipts() {
               body={(rowData) => {
                 const today = new Date();
                 return rowData?.dueDate
-                  ? new Date(rowData.dueDate).toLocaleDateString()
-                  : today.toLocaleDateString();
+                  ? formatAppDate(rowData.dueDate)
+                  : formatAppDate(today);
               }}
             ></Column>
             <Column

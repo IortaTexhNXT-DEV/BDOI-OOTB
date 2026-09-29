@@ -12,6 +12,7 @@ import { Tag } from "primereact/tag";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import policyService from "../../services/policyService";
 import S3FileUpload from "../S3FileUpload";
+import { formatDate as formatAppDate } from "../../utility/dateFormat";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 const EMPTY_FORM = { referenceNo: "", amount: null, paymentDate: todayIso(), proofKey: "", proofFileName: "", remarks: "" };
@@ -309,7 +310,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
             <div key={c.id} className="flex flex-wrap align-items-center justify-content-between gap-2 py-3 border-bottom-1 surface-border">
               <div>
                 <div className="font-semibold">
-                  {c.paymentModeLabel} · {formatCurrency(c.amount)} · {c.paymentDate}
+                  {c.paymentModeLabel} · {formatCurrency(c.amount)} · {formatAppDate(c.paymentDate)}
                 </div>
                 <div className="text-sm text-600">
                   Ref {c.referenceNo || "—"}

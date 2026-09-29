@@ -23,7 +23,7 @@ const entryExample = [{ mainAccount: '4401003', subAccount: '4401003001', entryT
 
 async function notifyApprovers(jv, req) {
   if (jv.status !== 'for-approval') return;
-  await notify({ type: 'approval', title: `Journal voucher ${jv.jv_number} awaiting approval`, message: `${req.user.username} submitted ${jv.jv_number} (${jv.total_debit})`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id });
+  await notify({ audience: 'write:journal-vouchers', type: 'approval', title: `Journal voucher ${jv.jv_number} awaiting approval`, message: `${req.user.username} submitted ${jv.jv_number} (${jv.total_debit})`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id });
 }
 
 define({

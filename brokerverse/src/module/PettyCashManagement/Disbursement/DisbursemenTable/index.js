@@ -19,6 +19,7 @@ import {
   getDisbursmentViewMiddleware,
   getViewDisbursmentMiddleware,
 } from "../store/pettyCashDisbursementMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const DisbursementTable = () => {
   const navigate = useNavigate();
@@ -205,7 +206,7 @@ const DisbursementTable = () => {
               sortable
               body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

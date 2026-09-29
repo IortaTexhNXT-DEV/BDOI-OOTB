@@ -15,6 +15,7 @@ import { Tag } from "primereact/tag";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Paginator } from "primereact/paginator";
 import accountingService from "../../../services/accountingService";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const EntryTypeBadge = ({ entryType, t }) => {
@@ -446,7 +447,7 @@ const AllClientsAccountingView = () => {
                   setStartDate(e.value);
                   setPagination({ ...pagination, page: 1 });
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 className="w-full"
               />
@@ -459,7 +460,7 @@ const AllClientsAccountingView = () => {
                   setEndDate(e.value);
                   setPagination({ ...pagination, page: 1 });
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 className="w-full"
               />

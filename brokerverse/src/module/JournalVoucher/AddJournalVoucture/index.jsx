@@ -36,6 +36,7 @@ import {
 import { clearJournalVoucherTableData } from "../store/journalVoucherReducer";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
+import { calendarDateFormat } from "../../../utility/dateFormat";
 
 const toIsoDate = (value) => {
   if (!(value instanceof Date) || Number.isNaN(value.getTime())) return undefined;
@@ -411,7 +412,7 @@ const AddJournalVocture = () => {
                       e.value.toISOString().split("T")[0]
                     );
                   }}
-                  dateFormat="yy-mm-dd"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                   className="calender_field_claim__JV"
                 />

@@ -1454,6 +1454,15 @@ const PolicyDetailView = () => {
       ? "0%"
       : `${discountPercent}%`;
 
+  // Tax labels show the rate actually priced on this policy (tax / net premium), else the configured rate (tax.*
+  // settings); the labels used to be fixed text (e.g. LGT 2% while 0.75% was applied).
+  const pricedNet = parseAmount(premiumBreakdown?.netPremium || quotation.netPremium);
+  const taxRateLabel = (amount, configuredRate) => {
+    const value = parseAmount(amount);
+    const pct = pricedNet > 0 && value > 0 ? (value / pricedNet) * 100 : Number(configuredRate || 0) * 100;
+    return `${Number(pct.toFixed(2))}%`;
+  };
+
   const premiumLineItems = [
     {
       key: "netPremium",
@@ -1465,7 +1474,7 @@ const PolicyDetailView = () => {
     },
     {
       key: "dst",
-      label: t("policyDetail.documentaryStampTax125"),
+      label: t("policyDetail.documentaryStampTaxRate", { rate: taxRateLabel(premiumBreakdown?.documentaryStampTax || quotation.documentaryStampTax, taxRates.documentaryStampTax) }),
       amount: formatCurrency(
         premiumBreakdown?.documentaryStampTax || quotation.documentaryStampTax
       ),
@@ -1473,7 +1482,7 @@ const PolicyDetailView = () => {
     },
     {
       key: "vat",
-      label: t("policyDetail.valueAddedTax12"),
+      label: t("policyDetail.valueAddedTaxRate", { rate: taxRateLabel(premiumBreakdown?.valueAddedTax || quotation.valueAddedTax, taxRates.valueAddedTax) }),
       amount: formatCurrency(
         premiumBreakdown?.valueAddedTax || quotation.valueAddedTax
       ),
@@ -1481,7 +1490,7 @@ const PolicyDetailView = () => {
     },
     {
       key: "lgt",
-      label: t("policyDetail.localGovernmentTax2"),
+      label: t("policyDetail.localGovernmentTaxRate", { rate: taxRateLabel(premiumBreakdown?.localGovernmentTax || quotation.localGovernmentTax, taxRates.localGovernmentTax) }),
       amount: formatCurrency(
         premiumBreakdown?.localGovernmentTax || quotation.localGovernmentTax
       ),
@@ -1578,7 +1587,9 @@ const PolicyDetailView = () => {
     },
   ];
 
-  const paymentStatusIsPending = rawPolicyData?.paymentStatus === "Pending";
+  // Direct bill: the client pays the premium to the insurer; the broker only collects its commission from the insurer
+  const isDirectBill = rawPolicyData?.billingMode === "direct" || rawPolicyData?.isDirectBilled === true;
+  const paymentStatusIsPending = rawPolicyData?.paymentStatus === "Pending" && !isDirectBill;
 
   return (
     <div className="policy-detail-container">
@@ -2104,7 +2115,7 @@ const PolicyDetailView = () => {
                               onClick={() =>
                                 handleDownload(
                                   documentData?.originalUrl,
-                                  `Endorsement_${endorsementRef}.pdf`
+                                  `Endorsement_${endorsement.endorsementNumber || endorsementRef}.pdf`
                                 )
                               }
                               disabled={!documentData?.originalUrl}
@@ -2161,6 +2172,12 @@ const PolicyDetailView = () => {
                       }
                     />
                   </div>
+                </SidebarSection>
+              )}
+
+              {isDirectBill && (
+                <SidebarSection title={t("policyDetail.directBill")} icon="pi pi-building">
+                  <p className="payment-description">{t("policyDetail.directBillDescription")}</p>
                 </SidebarSection>
               )}
 

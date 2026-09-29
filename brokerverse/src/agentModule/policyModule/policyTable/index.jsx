@@ -31,6 +31,7 @@ import {
   getCategoriesForLob,
   MOTOR_CATEGORIES,
 } from "../../endorsementModule/constants/endorsementCategories";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 // Legacy export for backward compatibility (Motor categories)
 export const categories = MOTOR_CATEGORIES;
@@ -497,7 +498,7 @@ const LeadListingAllTable = ({
 
   const renderPolicyIssued = (rowData) => {
     return (
-      <div className="date__text">{rowData.PolicyIssued?.toUpperCase()}</div>
+      <div className="date__text">{formatAppDate(rowData.PolicyIssued)}</div>
     );
   };
   const renderPolicyExpiry = (rowData) => {
@@ -536,7 +537,7 @@ const LeadListingAllTable = ({
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <div className="date__text">{expiryDate?.toUpperCase()}</div>
+        <div className="date__text">{formatAppDate(expiryDate)}</div>
         {showBadge && (
           <div
             className={statusClass}
@@ -733,7 +734,7 @@ const LeadListingAllTable = ({
                   }
                   placeholder={t("policyTable.selectDate")}
                   style={{ width: "100%" }}
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                 />
               </div>
@@ -754,7 +755,7 @@ const LeadListingAllTable = ({
                   onChange={(e) => handleFilterChange("issuedDateTo", e.value)}
                   placeholder={t("policyTable.selectDate")}
                   style={{ width: "100%" }}
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                 />
               </div>
@@ -777,7 +778,7 @@ const LeadListingAllTable = ({
                   }
                   placeholder={t("policyTable.selectDate")}
                   style={{ width: "100%" }}
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                 />
               </div>
@@ -798,7 +799,7 @@ const LeadListingAllTable = ({
                   onChange={(e) => handleFilterChange("expiryDateTo", e.value)}
                   placeholder={t("policyTable.selectDate")}
                   style={{ width: "100%" }}
-                  dateFormat="dd/mm/yy"
+                  dateFormat={calendarDateFormat()}
                   showIcon
                 />
               </div>
@@ -928,7 +929,7 @@ const LeadListingAllTable = ({
 
           <Column
             body={renderGrossPremium}
-            header={t("policyTable.grossPremium")}
+            header={t("policyTable.grossPremiumHeader")}
             headerStyle={headerStyle}
           ></Column>
           <Column

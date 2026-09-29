@@ -14,6 +14,7 @@ import {
   GET_DRAFT_RECEIPTS,
   UPDATE_RECEIPT,
 } from "../../../redux/actionTypes";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const toReceiptRow = (receipt) => ({
   id: receipt.receiptId,
@@ -23,11 +24,7 @@ const toReceiptRow = (receipt) => ({
   policyNumber: receipt.policyNumber,
   name: receipt.name,
   customerCode: receipt.customerCode,
-  date: new Date(receipt.receiptDate).toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-  }),
+  date: formatAppDate(receipt.receiptDate, { empty: "" }),
   amount: receipt.receiptsList
     ?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0)
     .toFixed(2),

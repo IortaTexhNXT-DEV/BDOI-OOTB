@@ -17,6 +17,7 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { useMasterRecords } from "../../../GeneralMasters/common/useMasterOptions";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -108,10 +109,10 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd className="addicon" />
             <p className="addtext">{t("generalMasters.add")}</p>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -180,7 +181,7 @@ const Index = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.date)}
               field="date"
               header="Date"
               headerStyle={headerStyle}

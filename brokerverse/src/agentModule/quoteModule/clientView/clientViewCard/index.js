@@ -12,7 +12,7 @@ import SvgLeftArrow from "../../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate } from "react-router-dom";
 import clientService from "../../../../services/clientService";
 
-const ClientListingCard = ({ action, clientId }) => {
+const ClientListingCard = ({ action, clientId, onClient }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [clientName, setClientName] = useState(t("clientView.clientDetails"));
@@ -49,7 +49,7 @@ const ClientListingCard = ({ action, clientId }) => {
 
         if (response.success && response.data) {
           const payload = response.data?.data || response.data;
-          console.log("Client payload:", payload);
+          onClient?.(payload?.client || payload);
 
           const firstName =
             payload?.firstName || payload?.client?.firstName || null;

@@ -183,7 +183,7 @@ export async function createTreaty(b, user) {
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$17,$17) RETURNING id`,
   [b.name, rs.map((x) => x.name).join(', '), lowest, b.type, c.capacity, c.share, from, to, status, number, b.lineOfBusiness, JSON.stringify(b.reinsurers.map(String)), JSON.stringify(c.terms),
     b.currency || (await getSetting('currency.default', 'PHP')), c.retention, c.commission, user.id]);
-  if (approval) await notify({ type: 'approval', title: 'Treaty awaiting approval', message: `${number} ${b.name} needs approval`, link: '/master/reinsurance/treaty', entity: 'treaty', entityId: r.id });
+  if (approval) await notify({ audience: 'write:reinsurance', type: 'approval', title: 'Treaty awaiting approval', message: `${number} ${b.name} needs approval`, link: '/master/reinsurance/treaty', entity: 'treaty', entityId: r.id });
   return getTreaty(r.id);
 }
 

@@ -25,6 +25,7 @@ import {
 import SvgTable from "../../../assets/icons/SvgTable";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const TaxationMaster = () => {
   const { t } = useTranslation();
@@ -185,12 +186,12 @@ const TaxationMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__taxation mb-1">
-        <div className="add__icon__view__taxation" onClick={handleNavigate}>
+        <button type="button" className="add__icon__view__taxation bv-add-button" onClick={handleNavigate}>
           <div className="add__icon__taxation">
             <SvgAdd />
           </div>
           <div className="add__text__taxation">{t("financeMasters.add")}</div>
-        </div>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__taxation">
@@ -256,13 +257,13 @@ const TaxationMaster = () => {
                   body={(rowData) => (rowData.taxRate ?? "") === "" ? "" : `${rowData.taxRate}%`}
                   sortable
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.effectiveFrom)}
                   field="effectiveFrom"
                   header={t("financeMasters.effectiveFrom")}
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.effectiveTo)}
                   field="effectiveTo"
                   header={t("financeMasters.effectiveTo")}
                   headerStyle={headerStyle}

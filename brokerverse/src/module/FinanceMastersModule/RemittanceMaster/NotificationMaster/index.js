@@ -393,19 +393,19 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>SMTP Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>SMTP Server</label>
                       <InputText placeholder={t("remittance.placeholderSmtp")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Port</label>
                       <InputNumber placeholder={t("remittance.placeholderPort")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Username</label>
                       <InputText placeholder={t("remittance.placeholderEmail")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Authentication</label>
                       <Dropdown
                         options={[
@@ -423,19 +423,19 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>Default Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>From Email</label>
                       <InputText placeholder={t("remittance.placeholderRemittanceEmail")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>From Name</label>
                       <InputText placeholder={t("remittance.placeholderRemittanceSystem")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Reply To</label>
                       <InputText placeholder={t("remittance.placeholderSupportEmail")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>BCC Recipients</label>
                       <InputText placeholder={t("remittance.placeholderAuditEmail")} disabled={isViewMode} />
                     </div>
@@ -462,7 +462,7 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>SMS Provider Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>SMS Provider</label>
                       <Dropdown
                         options={[
@@ -474,15 +474,15 @@ const NotificationMaster = () => {
                         disabled={isViewMode}
                       />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>API Endpoint</label>
                       <InputText placeholder={t("remittance.placeholderApiUrl")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>API Key</label>
                       <InputText placeholder={t("remittance.placeholderApiKey")} type="password" disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Sender ID</label>
                       <InputText placeholder={t("remittance.placeholderRemit")} disabled={isViewMode} />
                     </div>
@@ -492,19 +492,19 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>SMS Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Max Message Length</label>
                       <InputNumber value={160} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Country Code</label>
                       <InputText placeholder={t("remittance.placeholderCountryCode")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Retry Attempts</label>
                       <InputNumber value={3} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <div className="field-checkbox">
                         <Checkbox
                           id="enableSMS"
@@ -549,12 +549,12 @@ const NotificationMaster = () => {
       >
         {selectedTemplate && (
           <div className="template-details">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12 p-md-6">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12 md:col-6">
                 <label>Template Name</label>
                 <InputText value={selectedTemplate.templateName} onChange={(e) => setTemplateField("templateName", e.target.value)} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Event Type</label>
                 <Dropdown
                   value={selectedTemplate.eventType}
@@ -564,7 +564,7 @@ const NotificationMaster = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Recipient Type</label>
                 <Dropdown
                   value={selectedTemplate.recipientType}
@@ -573,7 +573,7 @@ const NotificationMaster = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Channel</label>
                 <Dropdown
                   value={selectedTemplate.channel}
@@ -582,11 +582,11 @@ const NotificationMaster = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Subject</label>
                 <InputText value={selectedTemplate.subject} onChange={(e) => setTemplateField("subject", e.target.value)} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Message Template</label>
                 <InputTextarea
                   rows={5}
@@ -610,16 +610,16 @@ const NotificationMaster = () => {
       >
         {selectedRule && (
           <div className="rule-details">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12">
                 <label>Rule Name</label>
                 <InputText value={selectedRule.ruleName} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Condition</label>
                 <InputText value={selectedRule.condition} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Frequency</label>
                 <Dropdown
                   value={selectedRule.frequency}
@@ -627,11 +627,11 @@ const NotificationMaster = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Escalation Level</label>
                 <InputNumber value={selectedRule.escalationLevel} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Recipients</label>
                 <MultiSelect
                   value={selectedRule.recipients}

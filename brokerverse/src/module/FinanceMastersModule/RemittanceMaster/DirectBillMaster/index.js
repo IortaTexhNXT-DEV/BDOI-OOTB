@@ -15,6 +15,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import remittanceService, { masterService } from "../../../../services/remittanceService";
 import { showError, showSuccess } from "../../../Remittance/shared";
 import { MasterLookup, saveAndReturn } from "../masterRecord";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import "./index.scss";
 
 const DirectBillMaster = () => {
@@ -389,8 +390,8 @@ const DirectBillMaster = () => {
                 <Column field="dnNumber" header="Debit Note" style={{ width: "14%" }} />
                 <Column field="insurerName" header="Insurer" style={{ width: "20%" }} />
                 <Column field="policyCount" header="Policies" style={{ width: "8%" }} />
-                <Column field="dnDate" header="Date" style={{ width: "11%" }} />
-                <Column field="dueDate" header="Due Date" style={{ width: "11%" }} />
+                <Column body={(row) => formatAppDate(row.dnDate)} field="dnDate" header="Date" style={{ width: "11%" }} />
+                <Column body={(row) => formatAppDate(row.dueDate)} field="dueDate" header="Due Date" style={{ width: "11%" }} />
                 <Column
                   field="amount"
                   header="Amount Due"

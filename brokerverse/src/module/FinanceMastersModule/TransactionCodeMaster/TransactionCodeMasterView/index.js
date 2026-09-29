@@ -90,7 +90,7 @@ const TransactionCodeMasterView = () => {
     const errors = {};
 
     if (!values.TransactionCode) {
-      errors.TransactionCode = t("financeMasters.thisFieldCodeRequired");
+      errors.TransactionCode = t("validation.fieldRequired");
     }
     if (!values.TransactionName) {
       errors.TransactionName = t("financeMasters.thisFieldIsRequired");

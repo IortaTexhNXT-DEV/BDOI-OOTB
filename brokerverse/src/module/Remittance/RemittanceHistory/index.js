@@ -21,6 +21,7 @@ import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError, statusSe
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 const ACTION_STYLE = {
   create: { icon: "pi pi-plus", color: "#4CAF50" },
   approve: { icon: "pi pi-verified", color: "#4CAF50" },
@@ -224,7 +225,7 @@ const RemittanceHistory = () => {
         <div className="timeline-content">
           <div className="timeline-header">
             <span className="timeline-status">{item.status}</span>
-            <small className="timeline-date">{item.date}</small>
+            <small className="timeline-date">{formatAppDate(item.date)}</small>
           </div>
           <p className="timeline-description">{item.description}</p>
         </div>

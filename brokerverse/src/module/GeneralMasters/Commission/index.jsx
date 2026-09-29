@@ -97,12 +97,12 @@ const Commission = () => {
         />
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture mb-3">
-        <div className="add__icon__view__petty" onClick={handlePolicy}>
+        <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
           <div className="add__icon__petty">
             <SvgAdd color={"#fff"} />
           </div>
           <div className="add__text__petty">{t("generalMasters.add")}</div>
-        </div>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__container__Journal__Voture">

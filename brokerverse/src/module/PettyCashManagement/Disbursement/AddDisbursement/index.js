@@ -27,6 +27,7 @@ import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { optionCode } from "../../pettyCashFormat";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const CRITERIA = [
   { label: "Request", value: "Request" },
@@ -240,7 +241,7 @@ const AddDisbursement = () => {
                   formik.setFieldValue("Date", e.target.value);
                 }}
                 error={formik.touched.Date && formik.errors.Date}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               /> */}
               <LabelWrapper className="calenderlable__container">
                 Date
@@ -253,7 +254,7 @@ const AddDisbursement = () => {
                 onChange={(e) => {
                   formik.setFieldValue("Date", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">

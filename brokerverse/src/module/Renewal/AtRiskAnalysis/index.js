@@ -23,6 +23,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Knob } from "primereact/knob";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const AtRiskAnalysis = () => {
@@ -666,7 +667,7 @@ const AtRiskAnalysis = () => {
                         </div>
                         <div className="plan-item">
                           <label>Deadline:</label>
-                          <span>{new Date(selectedPolicy.actionPlan.deadline).toLocaleDateString()}</span>
+                          <span>{formatAppDate(selectedPolicy.actionPlan.deadline)}</span>
                         </div>
                         <div className="plan-item">
                           <label>Status:</label>
@@ -684,7 +685,7 @@ const AtRiskAnalysis = () => {
                     <div className="history-item" key={item.id}>
                       <div className="history-header">
                         <strong>{item.type}{item.method ? ` (${item.method})` : ''}</strong>
-                        <small>{new Date(item.date).toLocaleDateString()}</small>
+                        <small>{formatAppDate(item.date)}</small>
                       </div>
                       <p>{item.description}{item.outcome ? ` - ${item.outcome}` : ''}</p>
                     </div>
@@ -745,7 +746,7 @@ const AtRiskAnalysis = () => {
                     <Calendar
                       value={actionPlan.deadline}
                       onChange={(e) => setActionPlan({...actionPlan, deadline: e.value})}
-                      dateFormat="mm/dd/yy"
+                      dateFormat={calendarDateFormat()}
                       minDate={new Date()}
                     />
                   </div>

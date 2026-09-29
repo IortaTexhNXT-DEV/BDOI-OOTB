@@ -20,6 +20,7 @@ import { ProgressBar } from "primereact/progressbar";
 import { Avatar } from "primereact/avatar";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const RenewalQueue = () => {
@@ -491,7 +492,7 @@ const RenewalQueue = () => {
                   value={dateRange}
                   onChange={(e) => setDateRange(e.value)}
                   selectionMode="range"
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   placeholder={t("renewal.selectDateRange")}
                 />
               </div>
@@ -680,7 +681,7 @@ const RenewalQueue = () => {
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.expiryDate")}</label>
-                    <span>{new Date(selectedPolicy.expiryDate).toLocaleDateString()}</span>
+                    <span>{formatAppDate(selectedPolicy.expiryDate)}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.currentPremium")}</label>

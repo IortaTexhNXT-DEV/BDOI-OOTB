@@ -108,12 +108,9 @@ const AddEmployee = ({ action }) => {
       errors.employeeCode = "Employee Code is required";
     }
     if (!values.firstName) {
-      errors.firstName = "First name Code is required";
+      errors.firstName = "First name is required";
     }
-
-    if (!values.middleName) {
-      errors.middleName = "Middle name Name is required";
-    }
+    // middle name is optional (many employees have none)
 
     if (!values.employeeType) {
       errors.employeeType = "Employee type is required";
@@ -122,7 +119,7 @@ const AddEmployee = ({ action }) => {
       errors.designation = "Designation is required";
     }
     if (!values.reportingTo) {
-      errors.reportingTo = "Reporting is required";
+      errors.reportingTo = "Reporting to is required";
     }
     if (!values.branchCode) {
       errors.branchCode = "Branch code is required";
@@ -131,10 +128,10 @@ const AddEmployee = ({ action }) => {
       errors.departmentCode = "Department code is required";
     }
     if (!values.idProofType) {
-      errors.idProofType = "Id proof type is required";
+      errors.idProofType = "ID proof type is required";
     }
     if (!values.idNumber) {
-      errors.idNumber = "Id number is required";
+      errors.idNumber = "ID number is required";
     }
 
     if (!values.city) {

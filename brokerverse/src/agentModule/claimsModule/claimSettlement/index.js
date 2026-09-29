@@ -9,11 +9,13 @@ import DatepickerField from "../../component/datePicker";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import "./index.scss";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useClaimHeader from "../useClaimHeader";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionMiddleWare";
 import claimsService from "../../../services/claimsService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const ClaimSettlement = () => {
   const { t } = useTranslation();
@@ -58,13 +60,16 @@ const ClaimSettlement = () => {
   }));
 
   // Try to get policy holder name from Redux first, then claim details, then fallback
+  const header = useClaimHeader(claimId);
   const policyHolderName =
+    header.policyHolderName ||
     reduxPolicyHolderName ||
     claimDetails?.data?.policy?.policyHolderName ||
     claimDetails?.data?.policy?.PolicyHolderName ||
     t("agent.loading");
 
   const claimNumber =
+    header.claimNumber ||
     reduxClaimNumber ||
     claimDetails?.data?.claimNumber ||
     claimDetails?.data?.claim_number ||
@@ -338,11 +343,7 @@ const ClaimSettlement = () => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               value={
-                claimDetails?.data?.reportedDate
-                  ? new Date(
-                      claimDetails.data.reportedDate
-                    ).toLocaleDateString()
-                  : ""
+                formatAppDate(claimDetails?.data?.reportedDate, { empty: "" })
               }
               label={t("claimSettlementDetail.dateReported")}
               disabled={true}
@@ -351,11 +352,7 @@ const ClaimSettlement = () => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               value={
-                claimDetails?.data?.dateOfIncident
-                  ? new Date(
-                      claimDetails.data.dateOfIncident
-                    ).toLocaleDateString()
-                  : ""
+                formatAppDate(claimDetails?.data?.dateOfIncident, { empty: "" })
               }
               label={t("claimSettlementDetail.dateOfLoss")}
               disabled={true}

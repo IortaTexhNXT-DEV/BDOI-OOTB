@@ -26,6 +26,7 @@ import { getCommissionView } from "../store/commissionMiddleWare";
 // import AddCommissionPopup from './AddCommissionPopup';
 import { Card } from "primereact/card";
 import { useTranslation } from "react-i18next";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const ViewCommission = () => {
   const { t } = useTranslation();
@@ -70,7 +71,7 @@ const ViewCommission = () => {
     const errors = {};
 
     if (!values.prttycashcode) {
-      errors.prttycashcode = t("validation.fieldCodeRequired");
+      errors.prttycashcode = t("validation.fieldRequired");
     }
 
     if (!values.pettycashname) {
@@ -329,6 +330,7 @@ const ViewCommission = () => {
                 classNames="label__sub__add"
               >
                 <Calendar
+                  dateFormat={calendarDateFormat()}
                   value={commissionView.effectiveFrom ? new Date(commissionView.effectiveFrom) : null}
                   onChange={(e) => setDate(e.value)}
                   showIcon
@@ -352,6 +354,7 @@ const ViewCommission = () => {
                 classNames="label__sub__add"
               >
                 <Calendar
+                  dateFormat={calendarDateFormat()}
                   value={commissionView.effectiveTo ? new Date(commissionView.effectiveTo) : null}
                   onChange={(e) => setDate(e.value)}
                   showIcon
@@ -417,14 +420,14 @@ const ViewCommission = () => {
           </div>
           {/* <div className='col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture '>
 
-            <div className='add__icon__view__petty' onClick={handlePolicy}>
+            <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
               <div className='add__icon__petty' >
                 <SvgAdd color={'#fff'} />
               </div>
               <div className='add__text__petty'>
                 Add
               </div>
-            </div>
+            </button>
           </div> */}
         </div>
         <div className="col-12 card">

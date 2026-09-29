@@ -306,18 +306,43 @@ export async function sendNotification(b, user) {
 }
 
 export async function inbox(user) {
-  const rows = await many(`SELECT * FROM notifications WHERE (user_id = $1 OR user_id IS NULL) AND (entity LIKE 'remittance%' OR entity = 'item' OR link LIKE '/finance/remittance%') ORDER BY created_at DESC LIMIT 200`, [user.id]);
+  // same visibility as the bell: own notifications and those addressed to a permission the user holds (D119)
+  const rows = await many(`SELECT * FROM notifications WHERE (user_id = $1 OR (user_id IS NULL AND (audience IS NULL OR audience = ANY($2::text[]))))
+    AND (entity LIKE 'remittance%' OR entity = 'item' OR link LIKE '/finance/remittance%') ORDER BY created_at DESC LIMIT 200`, [user.id, user.permissions || []]);
   return rows.map((n) => ({ id: n.id, type: n.type === 'approval' ? 'Approval Request' : 'System Alert', subject: n.title, sender: 'Remittance System', recipientType: 'User', sentDate: ts(n.created_at),
     status: n.is_read ? 'Read' : 'Delivered', priority: n.type === 'approval' ? 'High' : 'Normal', channel: 'System', content: n.message, isRead: n.is_read, hasAttachment: false, link: n.link }));
 }
 
 // ---------------- schedules ----------------
 
+const STEP_DAYS = { daily: 1, weekly: 7 };
+/**
+ * Next run of a schedule as 'YYYY-MM-DD HH:mm': the stored next run (with its time, or the schedule's time, once) rolled
+ * forward by the frequency when it is already past, so "Upcoming events" never lists a run in the past.
+ */
+export function nextRunOf(r, now = new Date()) {
+  if (!r.nextRun) return null;
+  const text = String(r.nextRun).trim();
+  const date = text.slice(0, 10);
+  const time = (/\d{2}:\d{2}/.exec(text.slice(10)) || [])[0] || (/^\d{2}:\d{2}/.exec(String(r.time || '')) || [])[0] || '00:00';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return text;
+  const at = new Date(`${date}T${time}:00`);
+  const freq = String(r.frequency || '').toLowerCase();
+  for (let i = 0; at < now && i < 1000; i += 1) {
+    if (STEP_DAYS[freq]) at.setDate(at.getDate() + STEP_DAYS[freq]);
+    else if (freq === 'monthly') at.setMonth(at.getMonth() + 1);
+    else if (freq === 'quarterly') at.setMonth(at.getMonth() + 3);
+    else break;
+  }
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())} ${pad(at.getHours())}:${pad(at.getMinutes())}`;
+}
+
 export async function schedules() {
   const t = await masters.getType('remittance-schedule');
   const { rows } = await masters.listRecords(t, {}, { limit: 500, offset: 0 });
   const runs = await many('SELECT data->>\'scheduleId\' AS sid, max(created_at) AS last FROM remittance_items WHERE kind = \'execution\' AND data ? \'scheduleId\' GROUP BY 1');
-  const jobs = rows.map((r) => ({ ...r, id: r.id, name: r.name, frequency: r.frequency, nextRun: r.nextRun ? `${r.nextRun}${r.time ? ` ${r.time}` : ''}` : null,
+  const jobs = rows.map((r) => ({ ...r, id: r.id, name: r.name, frequency: r.frequency, nextRun: nextRunOf(r),
     lastRun: runs.find((x) => Number(x.sid) === r.id)?.last || r.lastRun || null, status: r.status === 'Active' ? 'Active' : 'Paused' }));
   const upcomingEvents = jobs.filter((j) => j.status === 'Active' && j.nextRun).sort((a, b) => String(a.nextRun).localeCompare(String(b.nextRun)))
     .slice(0, 10).map((j) => ({ status: j.nextRun, date: String(j.nextRun).slice(0, 10), content: j.name, scheduleId: j.id }));
