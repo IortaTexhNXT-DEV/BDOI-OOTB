@@ -7,7 +7,8 @@
  *                (accounting.account.retained_earnings)
  *            (2) opening balances of the next fiscal year: the balance-sheet balances at the year end are written to
  *                opening_balances (reports read them through pe_balance_before; no opening journal is posted, so the
- *                ledger is never double counted)
+ *                ledger is never double counted). Year-end balances include the year's own opening balances (carried
+ *                forward, or loaded at go-live by opening.js) plus the year's journals
  *            (3) the fiscal year is closed and all its periods locked; the next fiscal year and its periods are created
  *            (4) the fiscal-year rollover hook of document numbering is called when a numbering module provides one
  *   reverse  by a user with approve:period-end until the first period of the next fiscal year is closed: the closing
@@ -121,6 +122,24 @@ async function rolloverHook(fiscalYear, nextFiscalYear) {
   return { called: true };
 }
 
+/**
+ * Balances at the fiscal year end (debit-positive, rounded, non-zero): the year's opening balances (carried forward
+ * by the previous close or loaded at go-live) plus the year's posted journals; without opening balances, every posted
+ * journal up to the year end. Optionally only some account types or one account.
+ */
+async function yearEndBalances(db, fy, { types = null, account: code = null } = {}) {
+  const hasOpening = (await db.query('SELECT 1 FROM opening_balances WHERE fiscal_year = $1 LIMIT 1', [fy.code])).rows.length > 0;
+  return (await db.query(`SELECT x.account_code, round(sum(x.b), 2) AS bal FROM (
+      SELECT account_code, balance AS b FROM opening_balances WHERE fiscal_year = $1 AND $4
+      UNION ALL
+      SELECT l.account_code, l.debit - l.credit FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
+       WHERE j.status IN ('posted','reversed') AND j.jv_date <= $3 AND (NOT $4 OR j.jv_date >= $2)
+    ) x JOIN gl_accounts a ON a.code = x.account_code
+    WHERE ($5::text[] IS NULL OR a.account_type = ANY($5)) AND ($6::text IS NULL OR x.account_code = $6)
+    GROUP BY x.account_code HAVING round(sum(x.b), 2) <> 0 ORDER BY 1`,
+  [fy.code, iso(fy.start_date), iso(fy.end_date), hasOpening, types, code])).rows.map((x) => ({ account_code: x.account_code, bal: Number(x.bal) }));
+}
+
 export async function closeYearEnd(db, id, user) {
   const r = await lockRun(db, id);
   if (!['draft', 'checked'].includes(r.status)) throw conflict(`Run ${r.run_number} is ${r.status}`);
@@ -136,8 +155,7 @@ export async function closeYearEnd(db, id, user) {
   const base = { date: end, period, source: 'year-end-close', kind: 'closing', entryType: 'YEAR_END_CLOSE', referenceType: 'YearEndClose', referenceId: r.id, status: 'posted' };
 
   // (1) income and expense accounts to Current Year P/L
-  const pl = (await db.query(`SELECT l.account_code, sum(l.debit - l.credit) AS bal FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
-     WHERE a.account_type IN ('income','expense') AND j.status IN ('posted','reversed') AND j.jv_date <= $1 GROUP BY 1 HAVING round(sum(l.debit - l.credit), 2) <> 0 ORDER BY 1`, [end])).rows;
+  const pl = await yearEndBalances(db, fy, { types: ['income', 'expense'] });
   let closing = null;
   const net = round2(-pl.reduce((s, x) => s + Number(x.bal), 0)); // profit is positive
   if (pl.length) {
@@ -146,8 +164,7 @@ export async function closeYearEnd(db, id, user) {
     closing = await createJournal(db, { ...base, entrySubType: 'CLOSE_PL', description: `Year-end closing entries ${fy.code}: income and expense to current year P/L`, lines }, user);
   }
   // (2) Current Year P/L to Retained Earnings
-  const cyplBal = round2((await db.query(`SELECT COALESCE(sum(l.debit - l.credit),0) AS b FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
-     WHERE l.account_code = $1 AND j.status IN ('posted','reversed') AND j.jv_date <= $2`, [cypl, end])).rows[0].b);
+  const cyplBal = round2((await yearEndBalances(db, fy, { account: cypl }))[0]?.bal || 0);
   let transfer = null;
   if (cyplBal !== 0) {
     transfer = await createJournal(db, { ...base, entrySubType: 'TRANSFER_RE', description: `Year-end closing entries ${fy.code}: current year P/L to retained earnings`,
@@ -158,9 +175,11 @@ export async function closeYearEnd(db, id, user) {
   let next = (await db.query('SELECT * FROM fiscal_years WHERE start_date = $1', [addDays(end, 1)])).rows[0];
   if (!next) next = await createFiscalYear(db, addDays(end, 1), user);
   await db.query('DELETE FROM opening_balances WHERE fiscal_year = $1', [next.code]);
-  const ob = await db.query(`INSERT INTO opening_balances(fiscal_year, account_code, balance, source_run)
-     SELECT $1, l.account_code, round(sum(l.debit - l.credit), 2), $3 FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
-      WHERE j.status IN ('posted','reversed') AND j.jv_date <= $2 GROUP BY l.account_code HAVING round(sum(l.debit - l.credit), 2) <> 0`, [next.code, end, r.id]);
+  const closingBalances = await yearEndBalances(db, fy);
+  for (const b of closingBalances) {
+    await db.query('INSERT INTO opening_balances(fiscal_year, account_code, balance, source_run) VALUES ($1,$2,$3,$4)', [next.code, b.account_code, b.bal, r.id]);
+  }
+  const ob = { rowCount: closingBalances.length };
   // (4) lock the year
   for (const p of await periodsOf(db, fy.code)) await applyStatus(db, p, 'locked', { remarks: `Year-end close ${r.run_number}`, source: 'year-end', referenceId: r.id, user });
   await db.query('UPDATE fiscal_years SET status = \'closed\', closed_by = $2, closed_at = now(), updated_at = now() WHERE code = $1', [fy.code, user?.id ?? null]);

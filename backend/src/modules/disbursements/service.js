@@ -14,6 +14,26 @@ import { payLines, lineView } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const AGENT = 'Agent/Referrer';
+/** Payee types of a payment voucher. */
+export const PAYEE_TYPES = ['Customer', 'Client', 'Insurer', AGENT, 'Supplier'];
+
+/**
+ * Columns of the payment voucher bulk upload (Accounts > Payment Voucher > Bulk upload); header names are read
+ * camel-cased ("Voucher Date" -> voucherDate). The upload template is built from this list.
+ */
+export const DISBURSEMENT_UPLOAD_COLUMNS = [
+  { key: 'voucherDate', header: 'Voucher Date', format: 'Date YYYY-MM-DD; today when empty', example: '2026-10-06' },
+  { key: 'payeeType', header: 'Payee Type', format: 'Customer when empty', allowed: PAYEE_TYPES, example: 'Insurer' },
+  { key: 'customerCode', header: 'Customer Code', format: 'Client code (CL-...) for a customer refund', example: '' },
+  { key: 'insurerName', header: 'Insurer Name', format: 'Insurer name or code as in the Insurance Company master (payee type Insurer)', example: 'Malayan Insurance Co., Inc.' },
+  { key: 'policyNumber', header: 'Policy Number', format: 'Related policy, if any', example: 'PC-MLY-2026-000101' },
+  { key: 'referrerId', header: 'Referrer Id', format: 'Referrer code (payee type Agent/Referrer)', example: '' },
+  { key: 'amount', header: 'Amount', required: 'Yes, except for Agent/Referrer', format: 'Amount in PHP, greater than zero', example: '28120.50' },
+  { key: 'paymentMode', header: 'Payment Mode', format: 'Payment method, e.g. check or bank-transfer; check when empty', example: 'check' },
+  { key: 'transactionCode', header: 'Transaction Code', format: 'Transaction code master', example: '' },
+  { key: 'transactionDescription', header: 'Transaction Description', format: 'Text; printed on the voucher', example: 'Premium remittance September 2026' },
+  { key: 'remarks', header: 'Remarks', format: 'Text', example: 'Net of commission' },
+];
 
 export const checkbookRow = (c) => ({
   checkbookId: c.id, id: c.id, invoiceListRefId: c.invoice_list_id, disbursementId: c.disbursement_id, customerCode: c.customer_code, customerName: c.customer_name,

@@ -13,6 +13,24 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 const money = (v) => round2(v).toFixed(2);
 const SOURCE_BY_TXN = { ENDORSEMENT_PAYMENT: 'endorsement', ENDORSEMENT: 'endorsement', RENEWAL: 'renewal', RENEWAL_PAYMENT: 'renewal' };
 
+/** Payment modes of a receipt (also the receipt schema of the router). */
+export const PAYMENT_MODES = ['cash', 'check', 'bank-transfer', 'card', 'gcash', 'online'];
+
+/**
+ * Columns of the receipt bulk upload (Accounts > Receipts > Bulk upload); header names are read camel-cased
+ * ("Policy Number" -> policyNumber). The upload template is built from this list.
+ */
+export const RECEIPT_UPLOAD_COLUMNS = [
+  { key: 'policyNumber', header: 'Policy Number', aliases: ['policyNo', 'policy'], required: true, format: 'Policy number of an issued, broker-billed policy with an open bill', example: 'PC-MLY-2026-000101' },
+  { key: 'amount', header: 'Amount', required: true, format: 'Amount received in PHP, greater than zero', example: '35946.88' },
+  { key: 'receiptDate', header: 'Receipt Date', aliases: ['date'], format: 'Date YYYY-MM-DD; today when empty (must be in an open period)', example: '2026-10-05' },
+  { key: 'paymentMode', header: 'Payment Mode', format: 'The default payment mode when empty', allowed: PAYMENT_MODES, example: 'bank-transfer' },
+  { key: 'referenceNo', header: 'Reference No', aliases: ['reference'], format: 'Deposit slip, cheque or transfer reference', example: 'BDO-778812' },
+  { key: 'customerCode', header: 'Customer Code', format: 'Client code (CL-...); taken from the policy when empty', example: '' },
+  { key: 'transactionCode', header: 'Transaction Code', format: 'Transaction code master; the receipt default when empty', example: '' },
+  { key: 'remarks', header: 'Remarks', format: 'Text', example: 'Full payment, first installment' },
+];
+
 export const lineRow = (l) => ({
   receiptListId: l.id, id: l.id, lineNo: l.line_no, policies: l.policy_number, policyId: l.policy_id, netPremium: money(l.net_premium), paid: money(l.paid),
   unPaid: money(l.un_paid), discounts: money(l.discounts), dst: money(l.dst), lgt: money(l.lgt), vat: money(l.vat), ewt: money(l.ewt), other: money(l.other),

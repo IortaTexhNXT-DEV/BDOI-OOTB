@@ -6,7 +6,7 @@ import { policyStatusOut, policyStatusIn } from '../documents/statuses.js';
 import { toQuote } from '../quotations/shape.js';
 import { toClient } from '../clients/service.js';
 import { toLead } from '../leads/service.js';
-import { pick } from '../documents/tabular.js';
+import { mapColumns } from '../documents/tabular.js';
 import { publicUrl } from '../uploads/storage.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -286,37 +286,58 @@ export async function issuePolicy(db, src, body, userId) {
     await writeParticipants(db, 'policy', policyId, policyParts, { sumInsured: src.sumInsured, premium: src.netPremium, taxes, premiumTotal: src.grossPremium, commissionAmount: src.commissionAmount },
       { userId, commissionRate: src.commissionRate ?? null });
   }
+  const details = { commissionDetails: src.doc?.commissionDetails || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
+  // Go-live migration of an in-force policy: no bill, booking journal or commission accrual (the old system billed it;
+  // its open premium is loaded as an open item and the GL balances as opening balances).
+  if (src.migration) {
+    await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
+    return { policyId, receivable: null, commission: null };
+  }
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
   const renewal = src.receivableSource === 'renewal';
   const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId },
     breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount,
       ...(renewal ? { commissionAmount: src.commissionAmount } : {}) } });
   await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [policyId, receivable.bill_number]);
-  const details = { commissionDetails: src.doc?.commissionDetails || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
   await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
   const commission = await accrueCommission(db, { policyId, quoteId: src.quoteId, agentUserId: src.agentUserId, basis: src.netPremium, rate: src.commissionRate,
     period: inception.slice(0, 7), details: details.commissionDetails, user: { id: userId } });
   return { policyId, receivable, commission };
 }
 
+/** Columns of the policy bulk upload (Policies > Bulk Upload); the upload template is built from this list. */
+export const POLICY_UPLOAD_COLUMNS = [
+  { key: 'policyNumber', header: 'Policy Number', aliases: ['policy no'], format: 'Insurer policy number; a new BrokerVerse number is given when empty', example: 'PC-MLY-2026-000101' },
+  { key: 'insuredName', header: 'Insured Name', aliases: ['client name', 'name'], required: 'Insured Name, First Name or Company Name', format: 'Full name of the insured', example: 'Maria Santos' },
+  { key: 'firstName', header: 'First Name', format: 'Text', example: 'Maria' },
+  { key: 'lastName', header: 'Last Name', format: 'Text', example: 'Santos' },
+  { key: 'companyName', header: 'Company Name', aliases: ['company'], format: 'Text; for a corporate insured', example: '' },
+  { key: 'emailId', header: 'Email', aliases: ['email'], format: 'E-mail address', example: 'maria.santos@example.ph' },
+  { key: 'contactNumber', header: 'Contact Number', aliases: ['mobile', 'phone'], format: 'Mobile or landline number', example: '09171234567' },
+  { key: 'productType', header: 'Product Type', aliases: ['product', 'lob'], format: 'Product or line of business; Motor when empty', allowed: ['Motor', 'Fire', 'IAR'], example: 'Motor' },
+  { key: 'insuranceCompanyName', header: 'Insurance Company', aliases: ['insuranceCompanyName', 'insurer'], format: 'Insurer name or code as in the Insurance Company master', example: 'Malayan Insurance Co., Inc.' },
+  { key: 'inception', header: 'Inception Date', aliases: ['effective date', 'start date'], format: 'Date YYYY-MM-DD; today when empty', example: '2026-10-01' },
+  { key: 'expiry', header: 'Expiry Date', aliases: ['end date'], format: 'Date YYYY-MM-DD; inception plus the default term when empty', example: '2027-10-01' },
+  { key: 'issuedDate', header: 'Issue Date', aliases: ['issued date'], format: 'Date YYYY-MM-DD; today when empty', example: '2026-09-28' },
+  { key: 'sumInsured', header: 'Sum Insured', aliases: ['totalSumInsured'], format: 'Amount in PHP, no currency sign', example: '1250000' },
+  { key: 'netPremium', header: 'Net Premium', format: 'Amount in PHP; the gross premium when empty', example: '28750' },
+  { key: 'grossPremium', header: 'Gross Premium', aliases: ['premium', 'total premium'], required: true, format: 'Amount in PHP, greater than zero', example: '35946.88' },
+  { key: 'plateNumber', header: 'Plate Number', aliases: ['plate no'], format: 'Motor only', example: 'NCA 4521' },
+  { key: 'paymentStatus', header: 'Payment Status', format: 'Pending when empty', allowed: ['Pending', 'Reviewing', 'Partial', 'Completed', 'Refunded'], example: 'Pending' },
+];
+
 /** Map an uploaded policy row to the issuance inputs. */
 export function policyFromRow(row) {
-  const gross = num(pick(row, 'grossPremium', 'gross premium', 'premium', 'total premium'));
-  return {
-    policyNumber: pick(row, 'policyNumber', 'policy number', 'policy no'),
-    insuredName: pick(row, 'insuredName', 'insured name', 'client name', 'name'),
-    firstName: pick(row, 'firstName', 'first name'), lastName: pick(row, 'lastName', 'last name'), companyName: pick(row, 'companyName', 'company'),
-    emailId: pick(row, 'email', 'emailId'), contactNumber: pick(row, 'contactNumber', 'contact number', 'mobile', 'phone'),
-    productType: pick(row, 'productType', 'product type', 'product', 'lob') || 'Motor',
-    insuranceCompanyName: pick(row, 'insuranceCompanyName', 'insurance company', 'insurer'),
-    inception: pick(row, 'inception', 'inception date', 'effective date', 'start date'), expiry: pick(row, 'expiry', 'expiry date', 'end date'),
-    issuedDate: pick(row, 'issuedDate', 'issued date', 'issue date'), sumInsured: num(pick(row, 'sumInsured', 'sum insured', 'totalSumInsured')),
-    netPremium: num(pick(row, 'netPremium', 'net premium')) || gross, grossPremium: gross,
-    plateNumber: pick(row, 'plateNumber', 'plate number', 'plate no'), paymentStatus: pick(row, 'paymentStatus', 'payment status') || 'Pending',
-  };
+  const v = mapColumns(row, POLICY_UPLOAD_COLUMNS);
+  const gross = num(v.grossPremium);
+  return { ...v, productType: v.productType || 'Motor', sumInsured: num(v.sumInsured), netPremium: num(v.netPremium) || gross, grossPremium: gross, paymentStatus: v.paymentStatus || 'Pending' };
 }
 
-export async function importPolicy(db, p, userId) {
+/**
+ * Create the client and issue an uploaded policy. migration: an in-force policy of the old system loaded at go-live
+ * (no bill, booking journal or commission accrual; source go-live-migration).
+ */
+export async function importPolicy(db, p, userId, { migration = false } = {}) {
   if (!p.grossPremium) throw badRequest('grossPremium is required');
   if (!p.firstName && !p.companyName && !p.insuredName) throw badRequest('insuredName (or firstName / companyName) is required');
   const [first, ...rest] = (p.insuredName || '').split(' ');
@@ -334,7 +355,7 @@ export async function importPolicy(db, p, userId) {
     clientId: cl.rows[0].id, insuranceCompanyId: icId, sumInsured: p.sumInsured, netPremium: p.netPremium, grossPremium: p.grossPremium,
     commissionAmount: round2(p.netPremium * rate), commissionRate: rate, currency: await getSetting('currency.default', 'PHP'),
     insuredName: p.insuredName, productType: p.productType, lob: lobOf(p.productType), agentUserId: userId, ownerUserId: userId,
-    doc: { plateNumber: p.plateNumber, source: 'bulk-upload' },
+    doc: { plateNumber: p.plateNumber, source: migration ? 'go-live-migration' : 'bulk-upload' }, migration,
   }, { policyNumber: p.policyNumber, inception: p.inception, expiry: p.expiry, issuedDate: p.issuedDate, paymentStatus: p.paymentStatus, insuranceCompanyName: p.insuranceCompanyName }, userId);
 }
 

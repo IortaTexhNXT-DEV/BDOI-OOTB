@@ -250,6 +250,30 @@ export const FS_GROUPS = [
   ['Revenue', 'income'], ['Other Income', 'income'], ['Cost of Services', 'expense'], ['Operating Expenses', 'expense'], ['Other Expenses', 'expense'], ['Income Tax', 'expense'],
 ];
 const TYPE_ORDER = ['asset', 'liability', 'equity', 'income', 'expense'];
+
+/** Columns of the chart of accounts upload (add or update accounts); the upload template is built from this list. */
+export const ACCOUNT_UPLOAD_COLUMNS = [
+  { key: 'code', header: 'Account Code', required: true, format: '3 to 20 letters, digits or dashes; an existing code updates that account', example: '4401030' },
+  { key: 'name', header: 'Account Name', required: true, format: 'Text', example: 'Training and Seminars' },
+  { key: 'accountType', header: 'Account Type', required: 'Yes for a new account', allowed: TYPE_ORDER, example: 'expense' },
+  { key: 'parentCode', header: 'Main Account Code', aliases: ['parent code', 'parent', 'main account'], format: 'For a sub account: its main account (same type), listed earlier in the file or already in the chart', example: '' },
+  { key: 'fsGroup', header: 'Statement Group', aliases: ['fs group'], allowed: FS_GROUPS.map(([g]) => g), example: 'Operating Expenses' },
+  { key: 'category', header: 'Category', format: 'Text', example: 'Operating Expenses' },
+  { key: 'normalBalance', header: 'Normal Balance', allowed: ['debit', 'credit'], format: 'From the account type when empty', example: 'debit' },
+  { key: 'isOpenItem', header: 'Open Item', allowed: ['Yes', 'No'], format: 'Yes for accounts matched item by item (receivables, payables)', example: 'No' },
+  { key: 'allowManual', header: 'Allow Manual JV', aliases: ['manual jv'], allowed: ['Yes', 'No'], example: 'Yes' },
+  { key: 'status', header: 'Status', allowed: ['active', 'inactive'], format: 'active when empty', example: 'active' },
+  { key: 'description', header: 'Description', format: 'Up to 500 characters', example: 'Staff training, including Insurance Commission seminars' },
+];
+const yesNo = (v) => (v === undefined ? undefined : ['yes', 'y', 'true', '1'].includes(String(v).trim().toLowerCase()));
+const lower = (v) => (v === undefined ? undefined : String(v).trim().toLowerCase());
+
+/** Account body (POST / PUT /accounting/accounts) of an uploaded row mapped by ACCOUNT_UPLOAD_COLUMNS. */
+export const accountFromRow = (v) => Object.fromEntries(Object.entries({
+  code: v.code === undefined ? undefined : String(v.code).trim(), name: v.name, accountType: lower(v.accountType), parentCode: v.parentCode, fsGroup: v.fsGroup,
+  category: v.category, normalBalance: lower(v.normalBalance), isOpenItem: yesNo(v.isOpenItem), allowManual: yesNo(v.allowManual), status: lower(v.status),
+  description: v.description,
+}).filter(([, x]) => x !== undefined));
 const fsGroupOf = (type, group) => group || { asset: 'Current Assets', liability: 'Current Liabilities', equity: 'Equity', income: 'Revenue', expense: 'Operating Expenses' }[type];
 
 /** GL roles configured in accounting.account.*, accounting.payable_account_by_payee and accounting.cash_account_by_payment_mode, by account code. */

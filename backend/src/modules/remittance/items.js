@@ -9,6 +9,7 @@ import { renderTemplate } from '../documents/common.js';
 import { today } from '../../lib/dates.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { assertRowLimit } from '../../lib/uploadLimits.js';
+import { readXlsx } from '../documents/xlsx.js';
 import { fileSize, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
 import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
@@ -395,21 +396,37 @@ function parseCsv(text, delimiter = ',') {
   return rows.filter((r) => r.some((c) => String(c).trim() !== ''));
 }
 
-const DEFAULT_MAPPINGS = [{ sourceField: 'PolicyNo', targetField: 'policy_number', required: true }, { sourceField: 'Premium', targetField: 'premium_amount', required: true },
+export const DEFAULT_MAPPINGS = [{ sourceField: 'PolicyNo', targetField: 'policy_number', required: true }, { sourceField: 'Premium', targetField: 'premium_amount', required: true },
   { sourceField: 'Commission', targetField: 'commission_amount', required: false }, { sourceField: 'Tax', targetField: 'tax_amount', required: false }];
+
+/** Configuration used by an upload: the bulk-processing master record (configCode, else the first active one). */
+export async function bulkConfig(configCode = null) {
+  const cfgRow = await one('SELECT data FROM master_records WHERE type_code = \'remittance-bulk-processing\' AND status = \'active\' AND ($1::text IS NULL OR code = $1) ORDER BY id LIMIT 1', [configCode || null]);
+  if (configCode && !cfgRow) throw badRequest('Validation failed', [{ path: 'configCode', message: 'Unknown bulk processing configuration' }]);
+  const cfg = cfgRow?.data || {};
+  return { cfg, maps: Array.isArray(cfg.fieldMappings) && cfg.fieldMappings.length ? cfg.fieldMappings : DEFAULT_MAPPINGS };
+}
+
+/** Rows of an uploaded remittance file: XLSX (first sheet) or delimited text. */
+const bulkRows = (file, cfg) => {
+  const isZip = file.buffer[0] === 0x50 && file.buffer[1] === 0x4b;
+  if (!isZip) return parseCsv(file.buffer.toString('utf8'), cfg.delimiter || ',');
+  try {
+    return readXlsx(file.buffer).filter((r) => r.some((c) => String(c).trim() !== ''));
+  } catch (e) {
+    throw badRequest(`Could not read the file: ${e.message}`);
+  }
+};
 
 export async function uploadBulk(file, b, user) {
   if (!file) throw badRequest('file is required (multipart field "file")');
-  const cfgRow = await one('SELECT data FROM master_records WHERE type_code = \'remittance-bulk-processing\' AND status = \'active\' AND ($1::text IS NULL OR code = $1) ORDER BY id LIMIT 1', [b.configCode || null]);
-  if (b.configCode && !cfgRow) throw badRequest('Validation failed', [{ path: 'configCode', message: 'Unknown bulk processing configuration' }]);
-  const cfg = cfgRow?.data || {};
+  const { cfg, maps } = await bulkConfig(b.configCode);
   const maxBytes = Math.min(toNumber(cfg.maxFileSize, 0) * 1048576 || Infinity, Number(await getSetting('uploads.bulk_max_bytes', 10485760)));
   if (file.size > maxBytes) throw badRequest(`File exceeds the maximum size of ${fileSize(maxBytes)}`);
-  const rows = parseCsv(file.buffer.toString('utf8'), cfg.delimiter || ',');
+  const rows = bulkRows(file, cfg);
   if (!rows.length) throw badRequest('The file is empty');
   const header = cfg.hasHeader === false ? null : rows.shift().map((h) => String(h).trim());
   if (cfg.maxRecords && rows.length > cfg.maxRecords) throw badRequest(`The file has ${rows.length} records; the maximum is ${cfg.maxRecords}`);
-  const maps = Array.isArray(cfg.fieldMappings) && cfg.fieldMappings.length ? cfg.fieldMappings : DEFAULT_MAPPINGS;
   const idx = (m, i) => (header ? header.findIndex((h) => h.toLowerCase() === String(m.sourceField).toLowerCase()) : i);
   const missing = header ? maps.filter((m) => m.required && idx(m) < 0).map((m) => m.sourceField) : [];
   if (missing.length) throw badRequest(`Missing required columns: ${missing.join(', ')}`);

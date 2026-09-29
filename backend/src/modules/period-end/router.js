@@ -19,6 +19,9 @@ import * as ye from './yearend.js';
 import * as tax from './tax.js';
 import { AUTO_CHECKS, blockingFailures, checklistItems, runChecks } from './checks.js';
 import { generateDue, rjRow, saveRecurring } from './journals.js';
+import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS } from './opening.js';
+import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 
 const { router, define } = moduleRouter('Period End', '/period-end');
 const read = [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers')];
@@ -29,6 +32,29 @@ const writeTax = [requireAuth, requirePermission('write:period-end', 'write:mast
 const S = 'Accounts > Period End';
 const tx = (fn) => withTransaction(fn);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}/);
+
+// ---------- go-live opening balances ----------
+define({
+  method: 'GET', path: '/opening-balances', summary: 'Opening balances of a fiscal year (go-live load or carried forward by the year-end close) with totals',
+  screen: `${S} > Period Management > Opening balances`, middleware: read, query: { fiscalYear: 'FY2026' },
+  response: { success: true, data: { fiscalYear: 'FY2026', source: 'go-live', goLiveDate: '2026-10-01', totalDebit: 2102400, totalCredit: 2102400, lines: [{ accountCode: '1102001', accountName: 'Cash in Bank – Operating Account', debit: 1250000, credit: 0 }] } },
+  handler: async (req, res) => ok(res, await listOpeningBalances(pool, { fiscalYear: req.query.fiscalYear || null })),
+});
+define({
+  method: 'GET', path: '/opening-balances/template', summary: 'Opening balances upload template (XLSX)', screen: `${S} > Period Management > Import opening balances`,
+  middleware: read, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'opening-balances'),
+});
+define({
+  method: 'POST', path: '/opening-balances/import', summary: 'Go-live: load the old system\'s trial balance (multipart "file" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it',
+  screen: `${S} > Period Management > Import opening balances`, middleware: [...write, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
+  response: { success: true, data: { fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', accounts: 7, totalDebit: 2102400, totalCredit: 2102400, replaced: 0 } },
+  handler: async (req, res) => {
+    const rows = parseUploadedRows(req.file).map((r) => mapColumns(r, OPENING_BALANCE_COLUMNS));
+    const out = await tx((db) => importOpeningBalances(db, rows, { goLiveDate: String(req.body?.goLiveDate || '').slice(0, 10) }));
+    await audit(req, { entity: 'opening_balances', entityId: out.fiscalYear, action: 'go-live-import', after: out });
+    ok(res, out, `Opening balances of ${out.fiscalYear} loaded: ${out.accounts} accounts, debits = credits = ${out.totalDebit.toFixed(2)}`);
+  },
+});
 
 // ---------- fiscal calendar ----------
 define({

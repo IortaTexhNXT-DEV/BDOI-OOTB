@@ -7,9 +7,14 @@ import { Button } from "primereact/button";
 import TableData from "./TableData/index";
 import SvgUploade from "../../../../assets/icons/SvgUploade";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("insurance-company", "Insurance companies")];
 
 const Index = () => {
   const { t } = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const navigation = useNavigate();
 
   const items = [
@@ -44,7 +49,7 @@ const Index = () => {
           />
           </div>
           <div>
-          <Button
+          <Button onClick={() => setShowUpload(true)}
             icon={
               <div className="pr-2">
                 <SvgUploade />
@@ -54,6 +59,7 @@ const Index = () => {
           >
             {t("generalMasters.upload")}
           </Button>
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload insurance companies" targets={UPLOAD_TARGETS} />
           <Button
             icon={
               <div className="pr-2">

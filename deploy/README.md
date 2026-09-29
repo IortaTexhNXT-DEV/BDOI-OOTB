@@ -146,7 +146,9 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 - [ ] Insurers (Insurance Company master) with commission rates, contact e-mails for remittance and debit notes.
 - [ ] Referrers / sub-agents (referrer master) with WHT rates and bank accounts; commission rules (COMM codes).
 - [ ] Banks and the broker's bank accounts (operating, premium trust); signatories (Master > Signatories).
-- [ ] Chart of accounts review with Accounting (Master > Main Account / Sub Account); opening balances by journal voucher.
+- [ ] Chart of accounts review with Accounting (Master > Main Account / Sub Account). Opening balances, open premium
+  receivables and in-force policies are loaded with the go-live imports: see `docs/onboarding/GO_LIVE_DATA_SETUP.md`
+  (step 11) and the templates in `docs/templates`.
 - [ ] Product templates and the motor tariff (Product Configurator > MOT-003-2025 > "CTPL & Auto PA"): CTPL amounts per
   vehicle class (confirmed 29 Sep 2026: 300.40 to 1,500.40 annual, 1,660.40 3-year private car), Auto Passenger PA
   rate and limits; 3-year CTPL for other classes when known.

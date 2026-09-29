@@ -9,7 +9,7 @@ import { usersWithRoles } from '../documents/common.js';
 import { notify } from '../notifications/service.js';
 import * as payments from './payments.js';
 import { config } from '../../config.js';
-import { forbidden } from '../../lib/errors.js';
+import { badRequest, forbidden } from '../../lib/errors.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
@@ -36,16 +36,19 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums)', screen: `${SCREEN} > Bulk Upload`,
+  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission', screen: `${SCREEN} > Bulk Upload`,
   middleware: [...canWrite, uploadFile], request: 'multipart/form-data file', response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
     const rows = parseUploadedRows(req.file);
+    const mode = String(req.body?.mode || req.query.mode || '');
+    if (mode && mode !== 'go-live') throw badRequest('mode must be go-live or empty');
+    const migration = mode === 'go-live';
     const errors = [];
     let created = 0;
     for (const [i, row] of rows.entries()) {
       try {
-        const r = await withTransaction((db) => svc.importPolicy(db, svc.policyFromRow(row), actor(req)));
-        await audit(req, { entity: 'policy', entityId: r.policyId, action: 'bulk-create', after: { policyId: r.policyId, billNumber: r.receivable.bill_number } });
+        const r = await withTransaction((db) => svc.importPolicy(db, svc.policyFromRow(row), actor(req), { migration }));
+        await audit(req, { entity: 'policy', entityId: r.policyId, action: migration ? 'go-live-migration' : 'bulk-create', after: { policyId: r.policyId, billNumber: r.receivable?.bill_number ?? null } });
         created += 1;
       } catch (e) { errors.push({ row: i + 2, message: e.message }); }
     }

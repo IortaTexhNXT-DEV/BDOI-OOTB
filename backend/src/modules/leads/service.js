@@ -3,7 +3,7 @@ import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
 import { lobOf } from '../documents/common.js';
-import { pick } from '../documents/tabular.js';
+import { mapColumns } from '../documents/tabular.js';
 import { quoteStatusIn } from '../documents/statuses.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -167,20 +167,30 @@ export async function leadReport(category, scope = null) {
 }
 
 /** Map one uploaded spreadsheet row (any common header spelling) to the create-lead body. */
-export const leadFromRow = (row) => ({
-  firstName: pick(row, 'firstName', 'first name', 'fname', 'given name'),
-  lastName: pick(row, 'lastName', 'last name', 'surname', 'lname'),
-  preferredName: pick(row, 'preferredName', 'preferred name', 'nickname'),
-  companyName: pick(row, 'companyName', 'company name', 'company'),
-  DOB: pick(row, 'DOB', 'date of birth', 'dateofbirth', 'birthdate'),
-  gender: pick(row, 'gender', 'sex'),
-  emailId: pick(row, 'emailId', 'email', 'email id', 'emailaddress'),
-  contactNumber: pick(row, 'contactNumber', 'contact number', 'mobile', 'mobilenumber', 'phone'),
-  houseNo: pick(row, 'houseNo', 'house no', 'address', 'street'),
-  barangay: pick(row, 'barangay', 'district', 'subdivision'),
-  city: pick(row, 'city'), province: pick(row, 'province', 'state'), country: pick(row, 'country'),
-  zipCode: pick(row, 'zipCode', 'zip code', 'zip', 'postal code', 'postalcode'),
-  leadCategory: pick(row, 'leadCategory', 'category', 'lead category'),
-  taxInformationNumber: pick(row, 'taxInformationNumber', 'tin', 'tax number'),
-  lob: pick(row, 'lob', 'line of business', 'product'), source: pick(row, 'source') || 'bulk-upload',
-});
+/** Columns of the lead bulk upload (Leads > Bulk Upload); the upload template is built from this list. */
+export const LEAD_UPLOAD_COLUMNS = [
+  { key: 'firstName', header: 'First Name', aliases: ['fname', 'given name'], required: 'First Name or Company Name', format: 'Text (up to 100 characters)', example: 'Maria' },
+  { key: 'lastName', header: 'Last Name', aliases: ['surname', 'lname'], format: 'Text (up to 100 characters)', example: 'Santos' },
+  { key: 'preferredName', header: 'Preferred Name', aliases: ['nickname'], format: 'Text', example: 'Maria' },
+  { key: 'companyName', header: 'Company Name', aliases: ['company'], required: 'First Name or Company Name', format: 'Text (up to 200 characters); for a corporate lead', example: '' },
+  { key: 'DOB', header: 'Date of Birth', aliases: ['dateofbirth', 'birthdate'], format: 'Date YYYY-MM-DD', example: '1988-04-12' },
+  { key: 'gender', header: 'Gender', aliases: ['sex'], format: 'Text', allowed: ['Male', 'Female'], example: 'Female' },
+  { key: 'emailId', header: 'Email', aliases: ['email id', 'emailaddress'], format: 'E-mail address', example: 'maria.santos@example.ph' },
+  { key: 'contactNumber', header: 'Contact Number', aliases: ['mobile', 'mobilenumber', 'phone'], format: 'Mobile or landline number', example: '09171234567' },
+  { key: 'houseNo', header: 'House No', aliases: ['address', 'street'], format: 'House number and street', example: '12 Mabini St.' },
+  { key: 'barangay', header: 'Barangay', aliases: ['district', 'subdivision'], format: 'Text', example: 'San Antonio' },
+  { key: 'city', header: 'City', format: 'City or municipality', example: 'Pasig City' },
+  { key: 'province', header: 'Province', aliases: ['state'], format: 'Province or region', example: 'Metro Manila' },
+  { key: 'country', header: 'Country', format: 'Text', example: 'Philippines' },
+  { key: 'zipCode', header: 'Zip Code', aliases: ['zip', 'postal code', 'postalcode'], format: 'Four digits', example: '1600' },
+  { key: 'leadCategory', header: 'Lead Category', aliases: ['category'], format: 'Text', allowed: ['Retail', 'Corporate'], example: 'Retail' },
+  { key: 'taxInformationNumber', header: 'TIN', aliases: ['taxInformationNumber', 'tax number'], format: 'Tax identification number', example: '123-456-789-000' },
+  { key: 'lob', header: 'LOB', aliases: ['line of business', 'product'], format: 'Line of business', allowed: ['MOTOR', 'FIRE', 'IAR'], example: 'MOTOR' },
+  { key: 'source', header: 'Source', format: 'Text; bulk-upload when empty', example: 'Referral' },
+];
+
+/** Uploaded row -> lead body. */
+export const leadFromRow = (row) => {
+  const v = mapColumns(row, LEAD_UPLOAD_COLUMNS);
+  return { ...v, source: v.source || 'bulk-upload' };
+};

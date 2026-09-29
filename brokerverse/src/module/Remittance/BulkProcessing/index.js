@@ -117,7 +117,7 @@ const BulkProcessing = () => {
               customUpload
               uploadHandler={handleUpload}
               disabled={loading}
-              accept=".csv"
+              accept=".csv,.xlsx"
               maxFileSize={50000000}
               emptyTemplate={<p>Drag and drop files here to upload.</p>}
             />

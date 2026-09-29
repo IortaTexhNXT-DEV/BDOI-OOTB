@@ -14,7 +14,10 @@ import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import accountingService from "../../../services/accountingService";
+import ImportDialog from "../../../components/ImportDialog";
 import "./index.scss";
+
+const COA_UPLOAD = [{ label: "Chart of accounts", templatePath: "/accounting/accounts/template", uploadPath: "/accounting/accounts/upload" }];
 
 const TYPE_LABELS = { asset: "Assets", liability: "Liabilities", equity: "Equity", income: "Income", expense: "Expenses" };
 const typeLabel = (t) => TYPE_LABELS[t] || t;
@@ -27,6 +30,7 @@ const EMPTY = { code: "", name: "", accountType: "expense", fsGroup: null, paren
  * Accounts mapped to a system role (accounting.account.* settings) are flagged and cannot be deactivated.
  */
 const ChartOfAccounts = ({ level = "main" }) => {
+  const [showUpload, setShowUpload] = useState(false);
   const { t } = useTranslation();
   const toast = useRef(null);
   const [accounts, setAccounts] = useState([]);
@@ -124,9 +128,14 @@ const ChartOfAccounts = ({ level = "main" }) => {
             <BreadCrumb home={{ label: t("financeMasters.master", "Master") }} className="breadCrums__view__reversal"
               model={[{ label: title, url: level === "sub" ? "/master/finance/subaccount" : "/master/finance/mainaccount" }]} separatorIcon={<SvgDot color={"#000"} />} />
           </div>
-          <Button icon={<div className="pr-2"><SvgAdd /></div>} className="main__btn__action" onClick={openNew}>
-            {t("financeMasters.add", "Add")}
-          </Button>
+          <div className="flex gap-2">
+            <Button type="button" icon="pi pi-upload" label={t("financeMasters.upload", "Upload")} className="p-button-outlined" onClick={() => setShowUpload(true)} />
+            <Button icon={<div className="pr-2"><SvgAdd /></div>} className="main__btn__action" onClick={openNew}>
+              {t("financeMasters.add", "Add")}
+            </Button>
+          </div>
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload chart of accounts" targets={COA_UPLOAD} onDone={load}
+            note="Adds new accounts and updates existing ones (same Account Code). Put a main account before its sub accounts." />
         </div>
       </div>
 

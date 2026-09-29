@@ -11,6 +11,9 @@ import { cancelJournal, postJournal, resolveJournalId, reverseJournal } from './
 import * as svc from './service.js';
 import { isCoInsured, policyParticipants } from './lib/coinsurance.js';
 import { today } from '../../lib/dates.js';
+import { getSetting } from '../../lib/settings.js';
+import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 
 const { router, define } = moduleRouter('Accounting', '/accounting');
 const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:receipts', 'read:disbursements')];
@@ -221,6 +224,38 @@ define({
     const a = await withTransaction((db) => svc.upsertAccount(db, req.params.code, req.body));
     await audit(req, { entity: 'gl_account', entityId: a.code, action: 'update', before, after: a });
     ok(res, await withRoles(a));
+  },
+});
+define({
+  method: 'GET', path: '/accounts/template', summary: 'Chart of accounts upload template (XLSX)', screen: 'Master > Finance > Main Account > Upload > Download template',
+  middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:masters')], response: '(xlsx file)',
+  handler: async (_req, res) => sendTemplate(res, 'chart-of-accounts'),
+});
+define({
+  method: 'POST', path: '/accounts/upload', summary: 'Add or update GL accounts from CSV / XLSX (multipart "file"); rows in file order, each validated like Add / Edit account',
+  screen: 'Master > Finance > Main Account > Upload', middleware: [...write, uploadFile], request: 'multipart/form-data file',
+  response: { success: true, data: { message: 'Processed 2 rows: 1 created, 1 updated, 0 failed', total: 2, created: 1, updated: 1, failed: 0, errors: [] } },
+  handler: async (req, res) => {
+    const rows = parseUploadedRows(req.file);
+    const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
+    if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
+    const errors = [];
+    let added = 0;
+    let updated = 0;
+    for (const [i, row] of rows.entries()) {
+      try {
+        const body = svc.accountFromRow(mapColumns(row, svc.ACCOUNT_UPLOAD_COLUMNS));
+        const before = body.code ? (await pool.query('SELECT * FROM gl_accounts WHERE code = $1', [body.code])).rows[0] : null;
+        const parsed = (before ? accountSchema : accountSchema.required({ code: true, name: true, accountType: true })).parse(body);
+        const a = await withTransaction((db) => svc.upsertAccount(db, parsed.code, parsed));
+        await audit(req, { entity: 'gl_account', entityId: a.code, action: before ? 'bulk-update' : 'bulk-create', before: before || undefined, after: a });
+        if (before) updated += 1; else added += 1;
+      } catch (e) {
+        errors.push({ row: i + 2, message: e.issues ? e.issues.map((x) => `${x.path.join('.')}: ${x.message}`).join('; ') : e.message });
+      }
+    }
+    const data = { message: `Processed ${rows.length} rows: ${added} created, ${updated} updated, ${errors.length} failed`, total: rows.length, created: added, updated, failed: errors.length, errors };
+    res.json({ success: true, message: data.message, data });
   },
 });
 export default router;

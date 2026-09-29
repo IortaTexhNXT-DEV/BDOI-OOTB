@@ -9,7 +9,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
 import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
 import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
-import { pick } from '../documents/tabular.js';
+import { mapColumns } from '../documents/tabular.js';
 import { clientFromLead } from '../clients/service.js';
 import { issuePolicy, insurerId, getPolicyRow, updatePolicy } from '../policies/service.js';
 import { assertKyc } from '../policies/kyc.js';
@@ -409,24 +409,42 @@ export function compareInsights(a, b) {
   };
 }
 
+/** Columns of the quotation bulk upload (Quotations > Bulk Upload); the upload template is built from this list. */
+export const QUOTE_UPLOAD_COLUMNS = [
+  { key: 'leadRefId', header: 'Lead Id', aliases: ['leadRefId', 'lead number'], required: 'Lead Id, or First Name / Company Name for a new lead', format: 'Lead number (LD-...) of an existing lead; leave empty to create the lead from the name columns', example: '' },
+  { key: 'firstName', header: 'First Name', format: 'Text; used when Lead Id is empty', example: 'Jose' },
+  { key: 'lastName', header: 'Last Name', format: 'Text', example: 'Reyes' },
+  { key: 'companyName', header: 'Company Name', aliases: ['company'], format: 'Text; for a corporate lead', example: '' },
+  { key: 'emailId', header: 'Email', aliases: ['email'], format: 'E-mail address', example: 'jose.reyes@example.ph' },
+  { key: 'contactNumber', header: 'Contact Number', aliases: ['mobile'], format: 'Mobile or landline number', example: '09189876543' },
+  { key: 'productType', header: 'Product Type', aliases: ['product', 'lob'], format: 'Motor when empty', allowed: ['Motor', 'Fire', 'IAR'], example: 'Motor' },
+  { key: 'insurancePolicyType', header: 'Policy Type', aliases: ['insurancePolicyType'], format: 'Policy type code (e.g. PC private car, CV commercial vehicle)', example: 'PC' },
+  { key: 'insuranceCompanyName', header: 'Insurance Company', aliases: ['insuranceCompanyName', 'insurer'], format: 'Insurer name or code as in the Insurance Company master', example: 'Malayan Insurance Co., Inc.' },
+  { key: 'totalSumInsured', header: 'Sum Insured', aliases: ['totalSumInsured', 'sumInsured'], format: 'Amount in PHP', example: '980000' },
+  { key: 'lossAndDamageCoverage', header: 'Own Damage', aliases: ['lossAndDamageCoverage', 'fmv'], format: 'Motor own damage / fair market value in PHP', example: '980000' },
+  { key: 'lossAndDamageCoverageRate', header: 'OD Rate', aliases: ['lossAndDamageCoverageRate', 'rate'], format: 'Percent, e.g. 1.5 for 1.5%', example: '1.5' },
+  { key: 'netPremium', header: 'Net Premium', aliases: ['premium'], format: 'Amount in PHP; calculated from the rate when empty', example: '' },
+  { key: 'discount', header: 'Discount', format: 'Amount in PHP', example: '0' },
+  { key: 'remarks', header: 'Remarks', aliases: ['notes'], format: 'Text', example: 'Moving from another broker' },
+];
+
 /** Uploaded row -> quotation body (creates the lead when only the customer's details are given). */
 export async function quoteFromRow(db, row, userId) {
-  let leadRefId = pick(row, 'leadRefId', 'lead id', 'leadId', 'lead number');
+  const v = mapColumns(row, QUOTE_UPLOAD_COLUMNS);
+  let { leadRefId } = v;
   if (leadRefId) {
     const l = (await db.query('SELECT id FROM leads WHERE id = $1 OR lead_number = $1', [leadRefId])).rows[0];
     if (!l) throw badRequest(`Lead ${leadRefId} not found`);
     leadRefId = l.id;
   } else {
-    const lead = await createLead({ firstName: pick(row, 'firstName', 'first name'), lastName: pick(row, 'lastName', 'last name'), companyName: pick(row, 'companyName', 'company'),
-      emailId: pick(row, 'email', 'emailId'), contactNumber: pick(row, 'contactNumber', 'contact number', 'mobile'), lob: pick(row, 'productType', 'product', 'lob'), source: 'bulk-upload' }, userId, db);
+    const lead = await createLead({ firstName: v.firstName, lastName: v.lastName, companyName: v.companyName, emailId: v.emailId, contactNumber: v.contactNumber,
+      lob: v.productType, source: 'bulk-upload' }, userId, db);
     leadRefId = lead.id;
   }
   return {
-    leadRefId, productType: pick(row, 'productType', 'product type', 'product') || 'Motor', insurancePolicyType: pick(row, 'insurancePolicyType', 'policy type'),
-    insuranceCompanyName: pick(row, 'insuranceCompanyName', 'insurance company', 'insurer'),
-    totalSumInsured: pick(row, 'totalSumInsured', 'sum insured', 'sumInsured'), lossAndDamageCoverage: pick(row, 'lossAndDamageCoverage', 'own damage', 'fmv'),
-    lossAndDamageCoverageRate: pick(row, 'lossAndDamageCoverageRate', 'rate', 'od rate'), netPremium: pick(row, 'netPremium', 'net premium', 'premium'),
-    discount: pick(row, 'discount'), remarks: pick(row, 'remarks', 'notes'),
+    leadRefId, productType: v.productType || 'Motor', insurancePolicyType: v.insurancePolicyType, insuranceCompanyName: v.insuranceCompanyName,
+    totalSumInsured: v.totalSumInsured, lossAndDamageCoverage: v.lossAndDamageCoverage, lossAndDamageCoverageRate: v.lossAndDamageCoverageRate,
+    netPremium: v.netPremium, discount: v.discount, remarks: v.remarks,
   };
 }
 

@@ -7,9 +7,14 @@ import SvgAdd from "../../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import TransactionCodeMasterTable from "./TransactionCodeMasterTable";
+import { useState } from "react";
+import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("transaction-code", "Transaction codes")];
 
 const TransactionCodeMaster = () => {
   const { t } = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const navigate = useNavigate();
   const items = [
     {
@@ -42,7 +47,7 @@ const TransactionCodeMaster = () => {
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn__container">
-          <Button
+          <Button onClick={() => setShowUpload(true)}
               label={t("financeMasters.upload")}
               icon={<SvgUploade color={"#fff"} />}
               className="upload__btn"
@@ -50,6 +55,7 @@ const TransactionCodeMaster = () => {
                 handleClick();
               }}
             />
+            <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload transaction codes" targets={UPLOAD_TARGETS} />
             <Button
               label={t("financeMasters.add")}
               icon={<SvgAdd color={"#fff"} />}

@@ -23,9 +23,13 @@ import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { useTranslation } from "react-i18next";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("currency", "Currencies")];
 
 const CurrencyMaster = () => {
   const { t } = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const dispatch = useDispatch();
   const statusToast = useRef(null);
   const reloadList = () => dispatch(getCurrencyList());
@@ -160,7 +164,7 @@ const CurrencyMaster = () => {
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn mb-1">
         <div className="btn__container">
-          <Button
+          <Button onClick={() => setShowUpload(true)}
             label={t("financeMasters.upload")}
             icon={<SvgUploade color={"#fff"} />}
             className="upload__btn"
@@ -168,6 +172,7 @@ const CurrencyMaster = () => {
               handleClick();
             }}
           />
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload currencies" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             label={t("common.add")}
             icon={<SvgAdd color={"#fff"} />}

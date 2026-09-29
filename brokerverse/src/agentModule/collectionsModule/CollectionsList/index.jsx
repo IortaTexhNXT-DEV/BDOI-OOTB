@@ -13,6 +13,10 @@ import collectionService from "../../../services/collectionService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
+import ImportDialog from "../../../components/ImportDialog";
+import { hasPermission } from "../../../utils/canOpen";
+
+const OPEN_ITEMS_UPLOAD = [{ label: "Open items", templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
 
 const CollectionsList = () => {
   const { t } = useTranslation();
@@ -36,6 +40,7 @@ const CollectionsList = () => {
   const toast = useRef(null);
   const navigate = useNavigate();
   const [sendingReminders, setSendingReminders] = useState(false);
+  const [showOpenItems, setShowOpenItems] = useState(false);
 
   const statusOptions = [
     { label: t("collectionsList.allStatus"), value: "" },
@@ -260,7 +265,12 @@ const CollectionsList = () => {
           loading={sendingReminders}
           tooltipOptions={{ position: "top" }}
         />
+        {hasPermission("write:receipts") && (
+          <Button label="Import open items" icon="pi pi-upload" className="p-button-outlined p-button-rounded ml-2" onClick={() => setShowOpenItems(true)} />
+        )}
       </div>
+      <ImportDialog visible={showOpenItems} onHide={() => setShowOpenItems(false)} title="Import open items (go-live)" targets={OPEN_ITEMS_UPLOAD} goLiveDate onDone={() => loadCollections()}
+        note="Unpaid premium bills of the old system, loaded against policies already in BrokerVerse. No journal is posted: the GL opening balance carries them. Rows already loaded for the same go-live date are skipped." />
 
       <Card>
         <div className="filter-section">

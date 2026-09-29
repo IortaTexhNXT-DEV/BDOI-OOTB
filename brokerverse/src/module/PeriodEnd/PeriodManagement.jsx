@@ -11,6 +11,9 @@ import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { PageHeader, StatusTag, date, dateTime, showError, showSuccess } from "./common";
 import { hasPermission } from "../../utils/canOpen";
+import ImportDialog from "../../components/ImportDialog";
+
+const OPENING_UPLOAD = [{ label: "Opening balances", templatePath: "/period-end/opening-balances/template", uploadPath: "/period-end/opening-balances/import" }];
 
 /**
  * Accounts > Period End > Period Management: fiscal years and their periods (1-12 and adjustment period 13) with
@@ -32,6 +35,7 @@ const PeriodManagement = () => {
   const [busy, setBusy] = useState(false);
   const [history, setHistory] = useState(null);
   const [checks, setChecks] = useState(null);
+  const [showOpening, setShowOpening] = useState(false);
 
   const loadYears = useCallback(async () => {
     try {
@@ -126,7 +130,12 @@ const PeriodManagement = () => {
       <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]} subtitle={t("periodEnd.periodManagementHelp")}>
         <Dropdown value={selected} options={years.map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))} onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} />
         <Button icon="pi pi-plus" label={t("periodEnd.nextFiscalYear")} onClick={createNext} />
+        {hasPermission("write:period-end") && (
+          <Button icon="pi pi-upload" label="Import opening balances" className="p-button-outlined" onClick={() => setShowOpening(true)} />
+        )}
       </PageHeader>
+      <ImportDialog visible={showOpening} onHide={() => setShowOpening(false)} title="Import opening balances (go-live)" targets={OPENING_UPLOAD} goLiveDate onDone={loadYears}
+        note="Load the trial balance of the old system at the close of the day before the go-live date. Debits must equal credits; nothing is loaded if any row is wrong. Loading again with the same go-live date replaces the earlier load." />
 
       {fy && (
         <div className="pe-kpis">
