@@ -17,8 +17,8 @@ import * as billing from './billing.js';
 const { router, define } = moduleRouter('Receipts', '/receipts');
 const read = [requireAuth, requirePermission('read:receipts')];
 const write = [requireAuth, requirePermission('write:receipts')];
-// Receipts are also raised by the agent payment-confirmation / upload-policy flows (policy issuance).
-const writeFromFlows = [requireAuth, requirePermission('write:receipts', 'write:policies', 'write:endorsements')];
+// Official receipts (cash posting) are finance-only (segregation of duties). Agents, sales and underwriters record the
+// client's payment with POST /policies/:id/payments, which finance verifies (POST /policies/:id/payments/:paymentId/confirm).
 const SCREEN = 'Accounts > Receipts';
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const line = { receiptListId: 'rl_1', policies: 'POL-2026-00001', netPremium: '10000.00', paid: '11862.50', unPaid: '0.00', discounts: '0.00', dst: '1250.00', lgt: '75.00', vat: '1200.00', ewt: '0.00', other: '0.00', fcAmount: '0.00', lcAmount: '11862.50', status: 'Paid' };
@@ -109,8 +109,8 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/', summary: 'Create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable',
-  screen: `${SCREEN} > Add receipt; Agent > Payment confirmation / Upload policy / Endorsement payment`, middleware: [...writeFromFlows, validate(receiptSchema)],
+  method: 'POST', path: '/', summary: 'Finance (write:receipts): create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable',
+  screen: `${SCREEN} > Add receipt`, middleware: [...write, validate(receiptSchema)],
   request: { receiptType: 'Payment', receiptDate: '2026-09-28T00:00:00.000Z', customerCode: 'CL-2026-00001', currencyCode: 'PHP', transactionCode: 'PAYMENT', remarks: 'Payment receipt for policy POL-2026-00001', policyRefId: 'pol_1', receiptsList: [line] },
   response: { success: true, data: example },
   handler: async (req, res) => {

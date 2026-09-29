@@ -20,8 +20,9 @@ export const ROLES = [
   ['user-access-admin', 'User Access Administrator', 'Creates and maintains users, roles and access; reviews the audit trail and sign-in history. Cannot grant administrator roles or change its own access.', true],
 ];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit'];
+// write:receipts (official receipts, cash posting, payment verification) is finance-only: segregation of duties (D61).
 const ROLE_PERMS = {
-  sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'receipts', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
+  sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'receipts:read', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
   underwriting: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   'customer-services': ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'receipts:read', 'reports', 'notifications', 'masters:read', 'products:read'],
   claims: ['profile', 'leads:read', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],

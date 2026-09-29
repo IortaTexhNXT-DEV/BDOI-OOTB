@@ -73,7 +73,7 @@ const EndorsementDetailedView = ({ action }) => {
         clientNumber: state?.clientNumber,
         clientName: state?.clientName,
         endorsementData,
-        fromEndorsementDetail: true, // Flag for auto-payment flow
+        fromEndorsementDetail: true,
       },
     });
   };

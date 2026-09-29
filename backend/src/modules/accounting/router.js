@@ -140,8 +140,8 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/payment-entries', summary: 'Premium payment for a policy from the agent payment flows: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable',
-  screen: 'Agent > Quote / Endorsement payment confirmation; Upload policy', middleware: [requireAuth, requirePermission('write:receipts', 'write:policies', 'write:endorsements'),
+  method: 'POST', path: '/payment-entries', summary: 'Finance (write:receipts): record a premium payment for a policy directly: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable. Agents / sales / underwriters record payments with POST /policies/:id/payments for finance to verify',
+  screen: 'Accounts > Receipts', middleware: [requireAuth, requirePermission('write:receipts'),
     validate(z.object({ amount: z.coerce.number().positive(), clientId: z.string(), referenceType: z.string(), referenceId: z.string(), policyId: z.string().optional(), policyNumber: z.string().optional() }).passthrough())],
   request: { amount: 11862.5, grossPremium: 11862.5, netPremium: 10000, valueAddedTax: 1200, documentaryStampTax: 1250, localGovernmentTax: 75, accountPremiumOthers: 0, discount: 662.5, paymentDate: '2026-09-28T02:00:00Z', description: 'Quote payment for policy POL-2026-00001', referenceType: 'Policy', referenceId: 'pol_1', clientId: 'cl_1', policyId: 'pol_1', policyNumber: 'POL-2026-00001', isDirectBilled: false },
   response: { success: true, message: 'Payment accounting entries created', data: { journals: ['jv_1', 'jv_2'], applied: 11862.5, alreadyApplied: false } },

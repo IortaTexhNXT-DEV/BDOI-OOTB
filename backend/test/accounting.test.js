@@ -20,10 +20,12 @@ describe('accounting ledger', () => {
     m = await makePolicy({ net: 10000 });
     const body = { amount: m.gross, grossPremium: m.gross, netPremium: m.net, valueAddedTax: 1200, documentaryStampTax: 1250, localGovernmentTax: 75, paymentDate: new Date().toISOString(),
       description: `Quote payment for policy ${m.policy.policy_number}`, referenceType: 'Policy', referenceId: m.policy.id, clientId: m.client.id, policyId: m.policy.id, policyNumber: m.policy.policy_number, isDirectBilled: false };
-    const r1 = await ctx.as('agent')('post', '/accounting/payment-entries').send(body);
+    // recording a payment directly is finance-only (D70); agents record it for finance to verify
+    expect((await ctx.as('agent')('post', '/accounting/payment-entries').send(body)).status).toBe(403);
+    const r1 = await ctx.as('maker')('post', '/accounting/payment-entries').send(body);
     expect(r1.status).toBe(201);
     expect(r1.body.data.applied).toBe(m.gross);
-    const r2 = await ctx.as('agent')('post', '/accounting/payment-entries').send(body);
+    const r2 = await ctx.as('maker')('post', '/accounting/payment-entries').send(body);
     expect(r2.body.data.alreadyApplied).toBe(true);
     const e = await ctx.as('maker')('get', `/accounting/policies/${m.policy.id}/entries`);
     expect(e.status).toBe(200);
@@ -33,9 +35,9 @@ describe('accounting ledger', () => {
     const lv = await ctx.as('maker')('get', `/accounting/policies/${m.policy.id}/ledger-view`);
     expect(lv.body.data.at(-1).runningBalance).toBe(0);
     // the premium was collected by the broker, so the policy can no longer be switched to direct bill
-    const dir = await ctx.as('agent')('post', '/accounting/payment-entries').send({ ...body, isDirectBilled: true });
+    const dir = await ctx.as('maker')('post', '/accounting/payment-entries').send({ ...body, isDirectBilled: true });
     expect(dir.status).toBe(409);
-    expect((await ctx.as('agent')('post', '/accounting/payment-entries').send({ amount: -1, clientId: 'x', referenceType: 'Policy', referenceId: 'x' })).status).toBe(400);
+    expect((await ctx.as('maker')('post', '/accounting/payment-entries').send({ amount: -1, clientId: 'x', referenceType: 'Policy', referenceId: 'x' })).status).toBe(400);
   });
 
   it('entries search, client ledger, all-clients view and export', async () => {

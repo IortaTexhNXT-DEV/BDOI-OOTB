@@ -333,7 +333,7 @@
   ]
 }"
 13,Accounting,GET,/api/accounting/export,Export entries matching the search filters as CSV (attachment),Accounts > Accounting Query > Export,Bearer JWT,Any authenticated user,Query: ?startDate=2026-09-01&endDate=2026-09-30,(text/csv attachment)
-14,Accounting,POST,/api/accounting/payment-entries,"Premium payment for a policy from the agent payment flows: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable",Agent > Quote / Endorsement payment confirmation; Upload policy,Bearer JWT,Any authenticated user,"{
+14,Accounting,POST,/api/accounting/payment-entries,"Finance (write:receipts): record a premium payment for a policy directly: bills the policy if needed, applies the outstanding part (Dr Cash / Cr Premium Receivable); direct-billed books commission receivable. Agents / sales / underwriters record payments with POST /policies/:id/payments for finance to verify",Accounts > Receipts,Bearer JWT,Any authenticated user,"{
   ""amount"": 11862.5,
   ""grossPremium"": 11862.5,
   ""netPremium"": 10000,
@@ -4643,7 +4643,7 @@
   ""quoteRefId"": ""qt_1"",
   ""success"": true
 }"
-231,Policies,PUT,/api/policies/:id,"Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document)",Operations > Quotation > Upload policy,Bearer JWT,Any authenticated user,"{
+231,Policies,PUT,/api/policies/:id,"Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus",Operations > Quotation > Upload policy,Bearer JWT,Any authenticated user,"{
   ""policyNumber"": ""MAL-MC-2026-0099"",
   ""inception"": ""2026-10-01"",
   ""expiry"": ""2027-10-01"",
@@ -4681,7 +4681,7 @@
   }
 }"
 233,Policies,GET,/api/policies/:id/documents/insurance-placing-slip-fire,Insurance placing slip PDF,Operations > Policy > Policy detail > Insurance placing slip,Bearer JWT,Any authenticated user,,application/pdf
-234,Policies,PATCH,/api/policies/:id/payment-status,Set the payment status (policies.payment_statuses) and method,Operations > Quotation / Endorsement > Payment confirmation,Bearer JWT,Any authenticated user,"{
+234,Policies,PATCH,/api/policies/:id/payment-status,Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify,Accounts > Receipts,Bearer JWT,Any authenticated user,"{
   ""paymentStatus"": ""Completed"",
   ""paymentMethod"": ""Direct Debit""
 }","{
@@ -4740,7 +4740,7 @@
     ""canConfirm"": false
   }
 }"
-236,Policies,POST,/api/policies/:id/payments,"Record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof) for finance to verify; users with write:receipts post the official receipt at once",Operations > Policy > Payment,Bearer JWT,Any authenticated user,"{
+236,Policies,POST,/api/policies/:id/payments,"Payment capture (policy and endorsement bills): record how the client pays: pay later (bill stays open) or a payment (mode, reference, amount, date, proof; receivableId picks the bill, e.g. an endorsement bill) as pending for finance to verify; only users with write:receipts (finance) post the official receipt at once",Operations > Policy > Payment; Endorsement > Payment,Bearer JWT,Any authenticated user,"{
   ""option"": ""payment"",
   ""paymentMode"": ""bank-transfer"",
   ""referenceNo"": ""BDO-778812"",
@@ -6868,7 +6868,7 @@
     ""totalPages"": 1
   }
 }"
-368,Receipts,POST,/api/receipts,"Create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable",Accounts > Receipts > Add receipt; Agent > Payment confirmation / Upload policy / Endorsement payment,Bearer JWT,Any authenticated user,"{
+368,Receipts,POST,/api/receipts,"Finance (write:receipts): create an official receipt: receiptsList lines (Draft/pay-later or Paid) or a simple payment {receivableId|policyId, amount}. Paid amounts reduce the receivable and post Dr Cash / Cr Premium Receivable",Accounts > Receipts > Add receipt,Bearer JWT,Any authenticated user,"{
   ""receiptType"": ""Payment"",
   ""receiptDate"": ""2026-09-28T00:00:00.000Z"",
   ""customerCode"": ""CL-2026-00001"",

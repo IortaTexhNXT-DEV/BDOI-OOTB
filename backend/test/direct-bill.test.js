@@ -71,7 +71,7 @@ describe('direct-bill policy issue', () => {
     expect(cap.status).toBe(409);
     expect((await eligiblePolicies({ policyIds: [d.policyId] })).length).toBe(0);
     // receipts cannot bill premium on it either
-    const pe = await ctx.as('agent')('post', '/accounting/payment-entries').send({ amount: 125250, clientId: d.client.id, referenceType: 'Policy', referenceId: d.policyId, policyId: d.policyId });
+    const pe = await ctx.as('maker')('post', '/accounting/payment-entries').send({ amount: 125250, clientId: d.client.id, referenceType: 'Policy', referenceId: d.policyId, policyId: d.policyId });
     expect(pe.status).toBe(201);
     expect(pe.body.data).toMatchObject({ directBilled: true, applied: 0, alreadyApplied: true });
     expect((await query('SELECT count(*)::int AS n FROM direct_bill_items WHERE policy_id = $1', [d.policyId])).rows[0].n).toBe(1);
