@@ -22,6 +22,7 @@ import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const RenewalQueue = () => {
   const { t } = useTranslation();
@@ -358,7 +359,7 @@ const RenewalQueue = () => {
 
     return (
       <div className="attempts-cell">
-        <ProgressBar value={percentage} style={{ width: '60px', height: '8px' }} />
+        <ProgressBar value={progressValue(percentage)} showValue={false} style={{ width: '60px', height: '8px' }} />
         <span>{rowData.renewalAttempts}/{maxAttempts}</span>
       </div>
     );
@@ -745,7 +746,7 @@ const RenewalQueue = () => {
                     {selectedPolicy.claimsHistory.claimsRatio && (
                       <div className="detail-item">
                         <label>{t("renewal.claimsRatio")}</label>
-                        <span>{selectedPolicy.claimsHistory.claimsRatio}%</span>
+                        <span>{formatPercent(selectedPolicy.claimsHistory.claimsRatio)}</span>
                       </div>
                     )}
                   </div>

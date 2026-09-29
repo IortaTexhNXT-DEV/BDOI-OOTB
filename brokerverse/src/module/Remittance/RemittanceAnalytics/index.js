@@ -22,6 +22,7 @@ import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError } from ".
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
+import { formatPercent, progressValue, roundTo } from "../../../utility/numberFormat";
 const CHART_COLORS = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d'];
 const DAY_MS = 86400000;
 
@@ -227,13 +228,13 @@ const RemittanceAnalytics = () => {
     return <Tag value={rowData.severity.toUpperCase()} severity={rowData.severity} />;
   };
   const performanceBodyTemplate = (rowData) => {
-    return <ProgressBar value={rowData.performanceScore} className="performance-bar" />;
+    return <ProgressBar value={progressValue(rowData.performanceScore)} displayValueTemplate={(v) => `${v}%`} className="performance-bar" />;
   };
 
   const successRateBodyTemplate = (rowData) => {
     return (
       <div className="success-rate">
-        <span>{rowData.successRate}%</span>
+        <span>{formatPercent(rowData.successRate)}</span>
         <ProgressBar value={rowData.successRate} className="rate-bar" showValue={false} />
       </div>
     );
@@ -374,7 +375,7 @@ const RemittanceAnalytics = () => {
                 </div>
                 <div className="kpi-gauge">
                   <Knob
-                    value={kpi.value}
+                    value={roundTo(kpi.value, 1) ?? 0}
                     max={kpi.unit === '%' ? 100 : kpi.target * 1.5}
                     size={80}
                     valueColor={getKpiColor(kpi.status)}
@@ -467,7 +468,7 @@ const RemittanceAnalytics = () => {
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Success Rate</span>
-                    <span className="stat-value">{kpi("Payment Success Rate").value ?? 0}%</span>
+                    <span className="stat-value">{formatPercent(kpi("Payment Success Rate").value ?? 0)}</span>
                   </div>
                 </div>
               </Card>

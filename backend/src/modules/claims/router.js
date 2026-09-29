@@ -9,6 +9,7 @@ import { badRequest } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { sendSheet } from './docs.js';
 import * as svc from './service.js';
+import * as cash from './cash.js';
 
 /**
  * Claims (Operations > Claims wizard, Claims Dashboard, Operational Reports > Claims).
@@ -137,6 +138,40 @@ define({
     const { total, items } = await svc.listClaims(await withScope(req), pg);
     const meta = pageMeta(total, pg);
     res.json({ success: true, message: 'OK', data: { claims: items, pagination: { total, page: pg.page, pageSize: pg.perPage, limit: pg.perPage, totalPages: meta.totalPages } }, ...meta });
+  },
+});
+// ---------- cash of a settlement paid through the broker (posting rules claim.funds_received / claim.paid_to_claimant) ----------
+const cashExample = { claimNumber: 'CLM-2026-00001', settlementAmount: 75000, paidThroughBroker: true, canRecord: true, claimant: 'Maria Santos',
+  insurers: [{ insurerId: 1, insurer: 'Malayan Insurance Co., Inc.', share: 100, recoverable: 75000, received: 75000, outstanding: 0 }],
+  totalRecoverable: 75000, totalReceived: 75000, paidToClaimant: 0, payableToClaimant: 75000,
+  movements: [{ id: 1, kind: 'funds-received', insurer: 'Malayan Insurance Co., Inc.', amount: 75000, date: '2026-09-29', bankAccount: 'ACC-OPS-001', reference: 'RA-8812', journalNumber: 'JV-2026-00140' }],
+  bankAccounts: [{ code: 'ACC-OPS-001', name: 'Operating Account', glAccount: '1102001' }] };
+define({
+  method: 'GET', path: '/:id/settlement-cash', summary: 'Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts',
+  screen: 'Operations > Claims > Claim settlement', middleware: [...read, ownRecord('claim')], response: { success: true, data: cashExample },
+  handler: async (req, res) => ok(res, await cash.cashPosition(req.params.id)),
+});
+const cashSchema = z.object({ amount: z.coerce.number().positive(), bankAccount: z.string().min(1).max(100), date: z.string().max(40).optional().nullable(), reference: z.string().max(100).optional().nullable(),
+  remarks: z.string().max(1000).optional().nullable(), insurerId: z.union([z.string(), z.number()]).optional().nullable(), paymentMode: z.enum(['check', 'bank-transfer', 'cash']).optional(),
+  payee: z.string().max(200).optional().nullable() });
+define({
+  method: 'POST', path: '/:id/settlement-cash/funds-received', summary: 'Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer\'s outstanding share)',
+  screen: 'Operations > Claims > Claim settlement > Funds received', middleware: [requireAuth, requirePermission('write:receipts'), validate(cashSchema)],
+  request: { insurerId: 1, amount: 75000, bankAccount: 'ACC-OPS-001', date: '2026-09-29', reference: 'RA-8812' }, response: { success: true, data: { journalNumber: 'JV-2026-00140', position: cashExample } },
+  handler: async (req, res) => {
+    const r = await cash.recordMovement(req.params.id, 'funds-received', req.body, req.user);
+    await audit(req, { entity: 'claim', entityId: r.position.claimId, action: 'funds-received', after: { ...req.body, journalId: r.journalId } });
+    ok(res, r, 'Funds received recorded');
+  },
+});
+define({
+  method: 'POST', path: '/:id/settlement-cash/paid-to-claimant', summary: 'Record the payment of the settlement to the claimant by voucher / cheque or transfer (posting rule claim.paid_to_claimant; not more than the amount still payable)',
+  screen: 'Operations > Claims > Claim settlement > Pay claimant', middleware: [requireAuth, requirePermission('write:disbursements'), validate(cashSchema)],
+  request: { amount: 75000, bankAccount: 'ACC-OPS-001', paymentMode: 'check', reference: 'PV-2026-00031 / chq 000512', payee: 'Maria Santos' }, response: { success: true, data: { journalNumber: 'JV-2026-00141', position: cashExample } },
+  handler: async (req, res) => {
+    const r = await cash.recordMovement(req.params.id, 'paid-to-claimant', req.body, req.user);
+    await audit(req, { entity: 'claim', entityId: r.position.claimId, action: 'paid-to-claimant', after: { ...req.body, journalId: r.journalId } });
+    ok(res, r, 'Payment to claimant recorded');
   },
 });
 define({

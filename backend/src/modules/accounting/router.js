@@ -17,7 +17,7 @@ const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:rece
 const readPolicy = [requireAuth, requirePermission('read:journal-vouchers', 'read:receipts', 'read:policies')];
 const write = [requireAuth, requirePermission('write:journal-vouchers')];
 const Q = 'Accounts > Accounting Query';
-const entry = { id: '101', transactionId: 'jv_1', transactionCode: 'JV-2026-00001', entryType: 'PAYMENT_RECEIPT', debitCredit: 'DEBIT', amount: 11862.5, accountCode: '1102001', accountName: 'Cash in Bank – BDO Current', account: { accountCode: '1102001', accountName: 'Cash in Bank – BDO Current' }, glCode: '1102001', documentDate: '2026-09-28', status: 'Posted', motherPolicyId: 'pol_1', motherPolicyNumber: 'POL-2026-00001', clientId: 'cl_1', client: { clientId: 'CL-2026-00001', firstName: 'Maria', lastName: 'Santos' }, referenceType: 'Receipt', referenceId: 'or_1' };
+const entry = { id: '101', transactionId: 'jv_1', transactionCode: 'JV-2026-00001', entryType: 'PAYMENT_RECEIPT', debitCredit: 'DEBIT', amount: 11862.5, accountCode: '1102001', accountName: 'Cash in Bank – Operating Account', account: { accountCode: '1102001', accountName: 'Cash in Bank – Operating Account' }, glCode: '1102001', documentDate: '2026-09-28', status: 'Posted', motherPolicyId: 'pol_1', motherPolicyNumber: 'POL-2026-00001', clientId: 'cl_1', client: { clientId: 'CL-2026-00001', firstName: 'Maria', lastName: 'Santos' }, referenceType: 'Receipt', referenceId: 'or_1' };
 const pagination = { page: 1, pageSize: 10, total: 1, totalPages: 1 };
 
 define({
@@ -164,7 +164,7 @@ define({
 });
 define({
   method: 'GET', path: '/trial-balance', summary: 'Trial balance from posted journals (asOf date or period YYYY-MM; optional from)', screen: 'Reports > Financial Reports > Trial Balance', middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:reports')],
-  query: { asOf: '2026-09-30' }, response: { success: true, data: { asOf: '2026-09-30', rows: [{ accountCode: '1102001', accountName: 'Cash in Bank – BDO Current', debit: 11862.5, credit: 0 }], totals: { debit: 11862.5, credit: 11862.5, balanced: true } } },
+  query: { asOf: '2026-09-30' }, response: { success: true, data: { asOf: '2026-09-30', rows: [{ accountCode: '1102001', accountName: 'Cash in Bank – Operating Account', debit: 11862.5, credit: 0 }], totals: { debit: 11862.5, credit: 11862.5, balanced: true } } },
   handler: async (req, res) => ok(res, await svc.trialBalance(pool, req.query)),
 });
 define({

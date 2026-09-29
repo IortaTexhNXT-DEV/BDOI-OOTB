@@ -8,6 +8,7 @@ import { notFound } from '../../lib/errors.js';
 import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
 import * as pc from './pettycash.js';
+import { today } from '../../lib/dates.js';
 
 // ---------- Payments (agent) ----------
 const pay = moduleRouter('Payments', '/payments');
@@ -38,7 +39,7 @@ oi.define({
   method: 'GET', path: '/events', summary: 'Upcoming events of the signed-in user', screen: 'Agent > Open Items > Upcoming events', middleware: [requireAuth],
   query: { from: '2026-09-28' }, response: { success: true, data: [{ id: 'evt_1', date: '2026-10-01', description: 'Policy review with client', from: '10:00', to: '11:00' }] },
   handler: async (req, res) => {
-    const rows = (await pool.query('SELECT * FROM agent_events WHERE user_id = $1 AND status = \'active\' AND event_date >= COALESCE($2::date, current_date) ORDER BY event_date, start_time LIMIT 200', [req.user.id, req.query.from || null])).rows;
+    const rows = (await pool.query('SELECT * FROM agent_events WHERE user_id = $1 AND status = \'active\' AND event_date >= COALESCE($2::date, $3::date) ORDER BY event_date, start_time LIMIT 200', [req.user.id, req.query.from || null, await today()])).rows;
     ok(res, rows.map(svc.eventRow));
   },
 });

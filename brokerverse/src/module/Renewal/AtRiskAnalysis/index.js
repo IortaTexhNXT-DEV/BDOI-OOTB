@@ -25,6 +25,7 @@ import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { progressValue } from "../../../utility/numberFormat";
 
 const AtRiskAnalysis = () => {
   const { t } = useTranslation();
@@ -265,7 +266,7 @@ const AtRiskAnalysis = () => {
 
     return (
       <div className="risk-score-cell">
-        <ProgressBar value={score} className={`risk-progress ${getSeverity(score)}`} />
+        <ProgressBar value={progressValue(score)} showValue={false} className={`risk-progress ${getSeverity(score)}`} />
         <span className={`score-value ${getSeverity(score)}`}>{score}</span>
       </div>
     );
@@ -593,7 +594,7 @@ const AtRiskAnalysis = () => {
                   <div className="risk-overview">
                     <div className="risk-score-display">
                       <Knob
-                        value={selectedPolicy.riskScore}
+                        value={progressValue(selectedPolicy.riskScore)}
                         size={120}
                         readOnly
                         valueColor="#EF4444"
@@ -634,7 +635,7 @@ const AtRiskAnalysis = () => {
                           <Badge value={`${factor.score} pts`} severity="warning" />
                         </div>
                         <div className="factor-details">{factor.details}</div>
-                        <ProgressBar value={(factor.score / 30) * 100} className="factor-progress" />
+                        <ProgressBar value={progressValue((factor.score / 30) * 100)} showValue={false} className="factor-progress" />
                       </div>
                     ))}
                   </div>

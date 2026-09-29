@@ -411,12 +411,12 @@ export async function recoveryAction(id, action, b, user) {
   const before = await getRecovery(id);
   const allowed = { submit: ['Pending', 'Disputed'], settle: ['Processing'], dispute: ['Processing', 'Pending'], 'cash-call': ['Pending', 'Processing'] };
   if (!allowed[action].includes(before.status)) throw conflict(`Recovery is ${before.status}; cannot ${action}`);
-  if (action === 'submit') await query('UPDATE reinsurance_recoveries SET status = \'Processing\', submission_date = current_date, documents = COALESCE($2, documents), updated_by = $3, updated_at = now() WHERE id = $1', [before.id, b.documents ? JSON.stringify(b.documents) : null, user.id]);
+  if (action === 'submit') await query('UPDATE reinsurance_recoveries SET status = \'Processing\', submission_date = $4::date, documents = COALESCE($2, documents), updated_by = $3, updated_at = now() WHERE id = $1', [before.id, b.documents ? JSON.stringify(b.documents) : null, user.id, await today()]);
   if (action === 'settle') {
     const amt = toNumber(b.settlementAmount, NaN);
     if (!(amt > 0)) throw badRequest('Validation failed', [{ path: 'settlementAmount', message: 'settlementAmount must be greater than zero' }]);
     await withTransaction(async (db) => {
-      await db.query('UPDATE reinsurance_recoveries SET status = \'Recovered\', settlement_amount = $2, recovery_date = COALESCE($3::date, current_date), updated_by = $4, updated_at = now() WHERE id = $1', [before.id, amt, isoDate(b.recoveryDate), user.id]);
+      await db.query('UPDATE reinsurance_recoveries SET status = \'Recovered\', settlement_amount = $2, recovery_date = COALESCE($3::date, $5::date), updated_by = $4, updated_at = now() WHERE id = $1', [before.id, amt, isoDate(b.recoveryDate), user.id, await today()]);
       // recovery due from the reinsurer, payable to the cedant (posting rule ri.recovery)
       const jv = await postEvent('ri.recovery', { source: 'reinsurance', entryType: 'REINSURANCE', transactionCode: before.recoveryNumber, referenceType: 'ReinsuranceRecovery', referenceId: before.id,
         policyNumber: before.policyNumber, description: `Recovery ${before.recoveryNumber} – claim ${before.claimNumber || ''}`.trim(), amounts: { amount: round2(amt) },
@@ -498,7 +498,7 @@ export async function bordereauAction(id, action, user) {
   const before = await getBordereau(id);
   const next = { submit: ['Draft', 'Submitted', 'submission_date'], confirm: ['Submitted', 'Confirmed', 'confirmation_date'] }[action];
   if (before.status !== next[0]) throw conflict(`Bordereau is ${before.status}; cannot ${action}`);
-  await query(`UPDATE reinsurance_bordereaux SET status = $2, ${next[2]} = current_date, updated_by = $3, updated_at = now() WHERE id = $1`, [before.id, next[1], user.id]);
+  await query(`UPDATE reinsurance_bordereaux SET status = $2, ${next[2]} = $4::date, updated_by = $3, updated_at = now() WHERE id = $1`, [before.id, next[1], user.id, await today()]);
   return { before, after: await getBordereau(before.id) };
 }
 
@@ -554,8 +554,8 @@ export async function resolveReconciliation(id, b, user) {
 
 export async function createException(b, user) {
   need(b, ['type', 'description']);
-  const r = await one('INSERT INTO reinsurance_exceptions(date, type, description, amount, created_by) VALUES (COALESCE($1::date, current_date), $2, $3, $4, $5) RETURNING *',
-    [isoDate(b.date), b.type, b.description, toNumber(b.amount, 0), user.id]);
+  const r = await one('INSERT INTO reinsurance_exceptions(date, type, description, amount, created_by) VALUES (COALESCE($1::date, $6::date), $2, $3, $4, $5) RETURNING *',
+    [isoDate(b.date), b.type, b.description, toNumber(b.amount, 0), user.id, await today()]);
   return exceptionOut(r);
 }
 

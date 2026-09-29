@@ -303,6 +303,18 @@ define({
   },
 });
 
+// ---------------- refunds due from insurers ----------------
+define({
+  method: 'GET', path: '/insurer-credits', summary: 'Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer',
+  screen: `${S('Settlement')}; ${S('Tracking')}`, middleware: read, query: { insurer: 'MALAYAN', status: 'open' },
+  response: { success: true, data: { openBalance: 970, items: [{ id: 1, insurer: 'Malayan Insurance Co., Inc.', policyNumber: 'POL-2026-00001', reference: 'END-2026-00003', kind: 'return-premium', amount: 970, balance: 970, status: 'open' }] } },
+  handler: async (req, res) => {
+    const { pool } = await import('../../db/pool.js');
+    const { listInsurerCredits } = await import('./insurerCredits.js');
+    ok(res, await listInsurerCredits(pool, { insurer: req.query.insurer || req.query.insurerCode || req.query.insurerId || null, status: ['open', 'applied', 'all'].includes(req.query.status) ? req.query.status : 'open' }));
+  },
+});
+
 // ---------------- settlements ----------------
 define({
   method: 'GET', path: '/settlements/available-policies', summary: 'Policy lines of approved remittances available for settlement with an insurer', screen: S('Settlement'), middleware: read,

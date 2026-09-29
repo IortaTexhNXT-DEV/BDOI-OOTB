@@ -18,6 +18,7 @@ import mastersService from '../../../services/mastersService';
 import './style.scss';
 
 import { numberLocale } from "../../../utility/currencyConverter";
+import { formatPercent } from "../../../utility/numberFormat";
 const ProductDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -318,13 +319,13 @@ const ProductDashboard = () => {
                       color={rowData.lossRatio > 70 ? '#f44336' :
                              rowData.lossRatio > 60 ? '#ff9800' : '#4caf50'}
                     />
-                    <span>{rowData.lossRatio}%</span>
+                    <span>{formatPercent(rowData.lossRatio)}</span>
                   </div>
                 )} />
               <Column field="growth" header={t('productConfiguratorDashboard.growth')} sortable
                 body={(rowData) => (
                   <Tag
-                    value={`${rowData.growth > 0 ? '+' : ''}${rowData.growth}%`}
+                    value={`${rowData.growth > 0 ? '+' : ''}${formatPercent(rowData.growth)}`}
                     severity={rowData.growth > 0 ? 'success' : 'danger'}
                   />
                 )} />

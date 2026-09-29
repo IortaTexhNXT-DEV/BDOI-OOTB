@@ -22,6 +22,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
 import "./index.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
+import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
 
 const PerformanceTracking = () => {
   const { t } = useTranslation();
@@ -224,9 +225,7 @@ const PerformanceTracking = () => {
     });
   };
 
-  const formatPercentage = (value, decimals = 1) => {
-    return `${value?.toFixed(decimals) || 0}%`;
-  };
+  const formatPercentage = (value, decimals = 1) => formatPercent(value ?? 0, { decimals });
 
   const agentRankingTemplate = (rowData) => {
     const getRankIcon = (rank) => {
@@ -282,7 +281,7 @@ const PerformanceTracking = () => {
 
     return (
       <div className="rate-cell">
-        <ProgressBar value={rate} className={`rate-progress ${getColor(rate)}`} />
+        <ProgressBar value={progressValue(rate)} showValue={false} className={`rate-progress ${getColor(rate)}`} />
         <span className={`rate-value ${getColor(rate)}`}>{formatPercentage(rate)}</span>
       </div>
     );
@@ -305,7 +304,7 @@ const PerformanceTracking = () => {
       return 'danger';
     };
 
-    return <Tag value={`${days} days`} severity={getSeverity(days)} />;
+    return <Tag value={formatWithUnit(days, t("followUps.days", "days"))} severity={getSeverity(days)} />;
   };
 
   const productRateTemplate = (rowData, field) => {
@@ -349,6 +348,50 @@ const PerformanceTracking = () => {
     }
   ].filter(kpi => kpi.achieved !== undefined && kpi.achieved !== null);
 
+  const achievementOf = (kpi) => (kpi.inverse
+    ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
+    : (kpi.achieved / kpi.target) * 100);
+  // The KPI furthest from its target (none when every KPI is met)
+  const improvementArea = kpiData
+    .filter((kpi) => achievementOf(kpi) < 100)
+    .sort((a, b) => achievementOf(a) - achievementOf(b))[0]?.category;
+
+  // Insights computed from the performance data of the selected period (no fixed sentences)
+  const overall = performanceData.overall || {};
+  const topAgent = (performanceData.byAgent || [])[0];
+  const rankedProducts = productKeys
+    .map((key) => ({ key, rate: performanceData.byProduct?.[key]?.renewalRate }))
+    .filter((p) => p.rate !== undefined && p.rate !== null)
+    .sort((a, b) => a.rate - b.rate);
+  const weakestProduct = rankedProducts.length > 1 ? rankedProducts[0] : null;
+  const rateTarget = kpiData.find((k) => k.category === 'Renewal Rate')?.target;
+  const cycleTarget = kpiData.find((k) => k.category === 'Cycle Time')?.target;
+  const insights = [];
+  if (overall.renewalRate !== undefined && overall.renewalRate !== null) {
+    const met = overall.renewalRate >= rateTarget;
+    insights.push({
+      kind: met ? 'positive' : 'warning', icon: met ? 'pi-thumbs-up' : 'pi-exclamation-triangle',
+      title: t('followUps.insightRenewalRate', 'Renewal rate'),
+      text: t('followUps.insightRenewalRateText', 'Renewal rate is {{rate}} against a target of {{target}}.', { rate: formatPercent(overall.renewalRate), target: formatPercent(rateTarget) })
+        + (topAgent ? ` ${t('followUps.insightTopAgent', '{{agent}} leads with {{rate}}.', { agent: topAgent.agentName, rate: formatPercent(topAgent.renewalRate) })}` : ''),
+    });
+  }
+  if (overall.avgCycleTime) {
+    const met = overall.avgCycleTime <= cycleTarget;
+    insights.push({
+      kind: met ? 'success' : 'warning', icon: 'pi-clock',
+      title: t('followUps.insightCycleTime', 'Cycle time'),
+      text: t('followUps.insightCycleTimeText', 'Average cycle time is {{days}} against a target of {{target}}.', { days: formatWithUnit(overall.avgCycleTime, t('followUps.days', 'days')), target: formatWithUnit(cycleTarget, t('followUps.days', 'days')) }),
+    });
+  }
+  if (weakestProduct) {
+    insights.push({
+      kind: 'info', icon: 'pi-chart-line',
+      title: t('followUps.insightLowestProduct', 'Lowest renewal rate by product'),
+      text: t('followUps.insightLowestProductText', '{{product}} has the lowest renewal rate at {{rate}}.', { product: productLabel(weakestProduct.key), rate: formatPercent(weakestProduct.rate) }),
+    });
+  }
+
   const kpiAchievementTemplate = (rowData) => {
     const percentage = rowData.inverse
       ? Math.max(0, 100 - ((rowData.achieved - rowData.target) / rowData.target) * 100)
@@ -363,7 +406,7 @@ const PerformanceTracking = () => {
 
     return (
       <div className="kpi-achievement">
-        <ProgressBar value={Math.min(percentage, 100)} className={getSeverity(percentage)} />
+        <ProgressBar value={progressValue(percentage)} showValue={false} className={getSeverity(percentage)} />
         <span className="achievement-text">
           {percentage >= 100 ? '✓ Achieved' : `${Math.round(percentage)}% of target`}
         </span>
@@ -461,9 +504,9 @@ const PerformanceTracking = () => {
                 <div key={index} className="kpi-item">
                   <div className="kpi-visual">
                     <Knob
-                      value={kpi.inverse
+                      value={progressValue(kpi.inverse
                         ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
-                        : Math.min((kpi.achieved / kpi.target) * 100, 100)}
+                        : Math.min((kpi.achieved / kpi.target) * 100, 100))}
                       size={80}
                       readOnly
                       valueColor={
@@ -478,8 +521,8 @@ const PerformanceTracking = () => {
                   <div className="kpi-details">
                     <span className="kpi-category">{kpi.category}</span>
                     <div className="kpi-values">
-                      <span className="achieved">{kpi.achieved}{kpi.unit}</span>
-                      <span className="target">Target: {kpi.target}{kpi.unit}</span>
+                      <span className="achieved">{formatWithUnit(kpi.achieved, kpi.unit)}</span>
+                      <span className="target">Target: {formatWithUnit(kpi.target, kpi.unit)}</span>
                     </div>
                   </div>
                 </div>
@@ -621,13 +664,13 @@ const PerformanceTracking = () => {
                       field="target"
                       header={t("renewal.target")}
                       style={{ width: '15%' }}
-                      body={(data) => `${data.target}${data.unit}`}
+                      body={(data) => formatWithUnit(data.target, data.unit)}
                     />
                     <Column
                       field="achieved"
                       header={t("renewal.achieved")}
                       style={{ width: '15%' }}
-                      body={(data) => `${data.achieved}${data.unit}`}
+                      body={(data) => formatWithUnit(data.achieved, data.unit)}
                     />
                     <Column
                       body={kpiAchievementTemplate}
@@ -656,14 +699,7 @@ const PerformanceTracking = () => {
                       <div className="summary-item">
                         <span className="metric-label">Overall Score</span>
                         <span className="metric-value info">
-                          {Math.round(
-                            kpiData.reduce((total, kpi) => {
-                              const achievement = kpi.inverse
-                                ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
-                                : (kpi.achieved / kpi.target) * 100;
-                              return total + Math.min(achievement, 100);
-                            }, 0) / kpiData.length
-                          )}%
+                          {kpiData.length ? formatPercent(kpiData.reduce((total, kpi) => total + Math.min(achievementOf(kpi), 100), 0) / kpiData.length, { decimals: 0 }) : '-'}
                         </span>
                       </div>
                       <div className="summary-item">
@@ -674,7 +710,7 @@ const PerformanceTracking = () => {
                       </div>
                       <div className="summary-item">
                         <span className="metric-label">Improvement Area</span>
-                        <span className="metric-value warning">Cycle Time</span>
+                        <span className="metric-value warning">{improvementArea || '-'}</span>
                       </div>
                     </div>
                   </Card>
@@ -684,56 +720,29 @@ const PerformanceTracking = () => {
           </TabView>
         </div>
 
-        {/* Performance Insights */}
-        <div className="performance-insights">
-          <Card>
-            <div className="insights-header">
-              <h3>Performance Insights & Recommendations</h3>
-              <Badge value="AI Generated" severity="success" />
-            </div>
-            <div className="insights-grid">
-              <div className="insight-item positive">
-                <div className="insight-icon">
-                  <i className="pi pi-thumbs-up"></i>
-                </div>
-                <div className="insight-content">
-                  <h4>Strong Overall Performance</h4>
-                  <p>Renewal rate of 82.5% is above industry average. Ana Reyes leads with 88.2% success rate.</p>
-                </div>
+        {/* Performance Insights (computed from the data of the selected period) */}
+        {insights.length > 0 && (
+          <div className="performance-insights">
+            <Card>
+              <div className="insights-header">
+                <h3>{t('followUps.performanceInsights', 'Performance Insights')}</h3>
               </div>
-
-              <div className="insight-item warning">
-                <div className="insight-icon">
-                  <i className="pi pi-clock"></i>
-                </div>
-                <div className="insight-content">
-                  <h4>Cycle Time Optimization</h4>
-                  <p>Average cycle time of 18 days exceeds target. Consider process automation for faster renewals.</p>
-                </div>
+              <div className="insights-grid">
+                {insights.map((insight) => (
+                  <div key={insight.title} className={`insight-item ${insight.kind}`}>
+                    <div className="insight-icon">
+                      <i className={`pi ${insight.icon}`}></i>
+                    </div>
+                    <div className="insight-content">
+                      <h4>{insight.title}</h4>
+                      <p>{insight.text}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              <div className="insight-item info">
-                <div className="insight-icon">
-                  <i className="pi pi-chart-line"></i>
-                </div>
-                <div className="insight-content">
-                  <h4>Marine Insurance Opportunity</h4>
-                  <p>Marine insurance has lowest renewal rate at 75%. Focus on retention strategies for this segment.</p>
-                </div>
-              </div>
-
-              <div className="insight-item success">
-                <div className="insight-icon">
-                  <i className="pi pi-star"></i>
-                </div>
-                <div className="insight-content">
-                  <h4>Customer Satisfaction Growth</h4>
-                  <p>Satisfaction improved to 4.2/5. Continue focus on customer experience excellence.</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ import { downloadCsv, showError } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
-const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, programBreakdown: [], monthlyTrend: [] };
+const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], programBreakdown: [], monthlyTrend: [], contact: null };
 
 /** Last 12 calendar months as { label: "September 2026", value: "2026-09" }. */
 const recentMonths = () => {
@@ -382,32 +382,47 @@ const Statement = () => {
               <h3>Recent Payment History</h3>
             </div>
 
+            {/* From the statement data: the last payment and the approved results not paid yet (no sample dates) */}
             <div className="payment-history">
-              <div className="payment-item">
-                <div className="payment-date">
-                  <span className="date">{formatAppDate(statementData.lastPaymentDate)}</span>
-                  <span className="status paid">Paid</span>
-                </div>
-                <div className="payment-details">
-                  <div className="payment-description">December 2024 Incentive Payment</div>
-                  <div className="payment-amount">
-                    {formatCurrency(statementData.lastPayment)}
+              {!statementData.lastPaymentDate && !(statementData.pendingPayment > 0) && (
+                <div className="payment-item">
+                  <div className="payment-details">
+                    <div className="payment-description">{t("followUps.noIncentivePayments", "No incentive payments yet")}</div>
                   </div>
                 </div>
-              </div>
-
-              <div className="payment-item">
-                <div className="payment-date">
-                  <span className="date">Expected: February 15, 2025</span>
-                  <span className="status pending">Pending</span>
-                </div>
-                <div className="payment-details">
-                  <div className="payment-description">January 2025 Incentive Payment</div>
-                  <div className="payment-amount">
-                    {formatCurrency(statementData.pendingPayment)}
+              )}
+              {statementData.lastPaymentDate && (
+                <div className="payment-item">
+                  <div className="payment-date">
+                    <span className="date">{formatAppDate(statementData.lastPaymentDate)}</span>
+                    <span className="status paid">Paid</span>
+                  </div>
+                  <div className="payment-details">
+                    <div className="payment-description">
+                      {t("followUps.incentivePaymentFor", "Incentive payment: {{periods}}", { periods: (statementData.lastPaymentPeriods || []).join(", ") || "-" })}
+                    </div>
+                    <div className="payment-amount">
+                      {formatCurrency(statementData.lastPayment)}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+              {statementData.pendingPayment > 0 && (
+                <div className="payment-item">
+                  <div className="payment-date">
+                    <span className="date">{t("followUps.approvedNotPaid", "Approved, not yet paid")}</span>
+                    <span className="status pending">Pending</span>
+                  </div>
+                  <div className="payment-details">
+                    <div className="payment-description">
+                      {t("followUps.incentivePaymentFor", "Incentive payment: {{periods}}", { periods: (statementData.pendingPeriods || []).join(", ") || "-" })}
+                    </div>
+                    <div className="payment-amount">
+                      {formatCurrency(statementData.pendingPayment)}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -426,11 +441,12 @@ const Statement = () => {
             </div>
             <div className="footer-section">
               <h4>Contact Information:</h4>
+              {/* The letterhead company (Company master); lines without a value are left out */}
               <p>
-                <strong>Incentive Support:</strong><br />
-                Email: incentives@company.com<br />
-                Phone: (02) 123-4567<br />
-                Office Hours: Monday - Friday, 8:00 AM - 5:00 PM
+                {statementData.contact?.companyName && (<><strong>{statementData.contact.companyName}</strong><br /></>)}
+                {statementData.contact?.email && (<>Email: {statementData.contact.email}<br /></>)}
+                {statementData.contact?.phone && (<>Phone: {statementData.contact.phone}<br /></>)}
+                {!statementData.contact?.email && !statementData.contact?.phone && t("followUps.contactSupervisor", "Contact your supervisor or the finance team.")}
               </p>
             </div>
           </div>

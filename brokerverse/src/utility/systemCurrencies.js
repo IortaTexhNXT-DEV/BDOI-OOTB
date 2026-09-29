@@ -70,7 +70,6 @@ export const SYSTEM_CURRENCY_OPTIONS = SYSTEM_CURRENCIES.map((c) => ({
 
 export const LOGO_PRESETS = [
   { label: "EastWest Bank", value: "/temp-logo/eastwestbank.png" },
-  { label: "BDO", value: "/BDO_insure_logo.png.png" },
   { label: "China Bank", value: "/chinabank.png" },
   { label: "iorta", value: "/iorta.png" },
 ];

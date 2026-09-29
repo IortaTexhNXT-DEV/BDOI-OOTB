@@ -357,7 +357,7 @@ const DirectBillProcessing = () => {
               <Column field="insuredName" header="Insured Name" />
               <Column field="product" header="Product" />
               <Column field="lineOfBusiness" header="Line" />
-              <Column field="bookedOn" header="Issued" />
+              <Column field="bookedOn" body={dateBody("bookedOn")} header="Issued" />
               <Column field="grossPremium" header="Gross Premium" body={money("grossPremium")} className="text-right" />
               <Column field="commissionRate" header="Rate" body={(r) => (r.commissionRate == null ? "-" : `${Number(r.commissionRate).toFixed(2)}%`)} className="text-right" />
               <Column field="commission" header="Commission" body={money("commission")} className="text-right" />

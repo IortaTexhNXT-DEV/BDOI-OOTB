@@ -8,6 +8,7 @@ import {
 } from "../utils/commissionViewMode";
 import "./style.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
+import { formatPercent } from "../../../utility/numberFormat";
 
 const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
 
@@ -196,7 +197,7 @@ const CommissionDashboard = () => {
         </div>
         <div className="kpi-card accent-navy">
           <span className="label">Margin %</span>
-          <span className="value navy">{kpis.marginPct}%</span>
+          <span className="value navy">{formatPercent(kpis.marginPct)}</span>
         </div>
         <div className="kpi-card accent-purple">
           <span className="label">Outstanding payable</span>
@@ -305,7 +306,7 @@ const CommissionDashboard = () => {
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
-                    {formatBaht(item.amount)} ({item.pct}%)
+                    {formatBaht(item.amount)} ({formatPercent(item.pct)})
                   </span>
                 </li>
               ))}
@@ -354,7 +355,7 @@ const CommissionDashboard = () => {
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
-                    {formatBaht(item.amount)} ({item.pct}%)
+                    {formatBaht(item.amount)} ({formatPercent(item.pct)})
                   </span>
                 </li>
               ))}

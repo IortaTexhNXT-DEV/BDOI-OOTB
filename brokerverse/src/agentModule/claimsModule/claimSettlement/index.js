@@ -15,6 +15,7 @@ import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionMiddleWare";
 import claimsService from "../../../services/claimsService";
+import SettlementCash from "./SettlementCash";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const ClaimSettlement = () => {
@@ -521,6 +522,7 @@ const ClaimSettlement = () => {
           <Button onClick={handleList}>Go to listing</Button>
         </div> */}
       </Card>
+      <SettlementCash claimId={claimDetails?.data?.id || claimId} />
     </div>
   );
 };

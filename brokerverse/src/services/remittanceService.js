@@ -97,6 +97,8 @@ export const remittanceService = {
 
   // settlements
   settlementPolicies: (insurerCode) => get(`${R}/settlements/available-policies`, { insurerCode }),
+  // refunds due from the insurer (return premium already remitted), netted against its next remittance voucher
+  insurerCredits: (insurer, status = "open") => get(`${R}/insurer-credits`, { insurer, status }),
   calculateSettlement: (payload) => post(`${R}/settlements/calculate`, payload),
   listSettlements: (params) => get(`${R}/settlements`, params),
   getSettlement: (settlementId) => get(`${R}/settlements/${id(settlementId)}`),

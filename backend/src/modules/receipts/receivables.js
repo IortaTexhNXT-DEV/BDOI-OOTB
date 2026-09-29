@@ -101,7 +101,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   const split = await premiumSplit(db, policy, gross, breakdown, source);
   const { commission } = split;
-  const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays])).rows[0].d;
+  const due = dueDate || (await db.query('SELECT (GREATEST($1::date, $3::date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays, await today()])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
       net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by)
     VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
@@ -309,8 +309,11 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
     refundPayable = await createInvoiceList(db, { customerCode: policy.client_code, policyId: policy.id, payeeType: 'Customer', payables: refund, outstanding: refund, lcAmount: refund,
       balAmount: refund, totalAmount: refund, isInvoicePaid: true, source: kind }, user);
   }
+  // premium the client paid and the broker already remitted: the insurers owe their share back (netted against the next remittance)
+  const { raiseInsurerRefunds } = await import('../remittance/insurerCredits.js');
+  const insurerRefunds = await raiseInsurerRefunds(db, { policy, split, gross, refund, kind, reference, endorsementId, user });
   return { journalId: jv.id, journalNumber: jv.jv_number, amount: gross, credited, refund, commission: split.commission, refundPayableId: refundPayable?.id || null,
-    credits: credits.map((c) => ({ billNumber: c.receivable.bill_number, amount: c.amount })) };
+    credits: credits.map((c) => ({ billNumber: c.receivable.bill_number, amount: c.amount })), insurerRefunds };
 }
 
 /** Undo every application of a receipt: reversing journals and restoring receivable balances. */

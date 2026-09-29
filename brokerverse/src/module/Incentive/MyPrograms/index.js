@@ -21,6 +21,7 @@ import incentiveService from "../../../services/incentiveService";
 import { showError } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { formatPercent, progressValue, roundTo } from "../../../utility/numberFormat";
 
 const MyPrograms = () => {
   const { t } = useTranslation();
@@ -163,10 +164,11 @@ const MyPrograms = () => {
     return (
       <div className="achievement-progress">
         <ProgressBar
-          value={percentage}
+          value={progressValue(percentage)}
+          showValue={false}
           className={`progress-${getSeverity()}`}
         />
-        <span className="achievement-text">{percentage}%</span>
+        <span className="achievement-text">{formatPercent(percentage)}</span>
       </div>
     );
   };
@@ -265,7 +267,7 @@ const MyPrograms = () => {
             <div className="card-content">
               <div className="knob-container">
                 <Knob
-                  value={dashboardData.avgAchievement}
+                  value={roundTo(dashboardData.avgAchievement, 0) ?? 0}
                   size={60}
                   strokeWidth={8}
                   valueTemplate={"{value}%"}
@@ -433,7 +435,7 @@ const MyPrograms = () => {
                 <div className="progress-chart">
                   <div className="progress-circle">
                     <Knob
-                      value={selectedProgram.achievementPercent}
+                      value={roundTo(selectedProgram.achievementPercent, 0) ?? 0}
                       size={120}
                       strokeWidth={10}
                       valueTemplate={"{value}%"}

@@ -213,9 +213,9 @@ async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, bi
   const currency = await getSetting('currency.default', 'PHP');
   const r = await c.query(`INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, remarks, created_by,
       remittance_date, due_date, policy_count, currency, bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, updated_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10, COALESCE($11::date, current_date), $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $10) RETURNING id`,
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10, COALESCE($11::date, $22::date), $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $10) RETURNING id`,
   [number, insurerId || null, kind, period || null, gross, comm, tax, round2(gross - comm - tax), remarks || null, userId, date || null, dueDate || null, lines.length, currency,
-    billNumber || null, agency?.userId || null, agency?.code || null, agency?.name || null, previousBalance, configCode || null, JSON.stringify(deliveryMethod || [])]);
+    billNumber || null, agency?.userId || null, agency?.code || null, agency?.name || null, previousBalance, configCode || null, JSON.stringify(deliveryMethod || []), await businessToday()]);
   const id = r.rows[0].id;
   for (const l of lines) {
     await c.query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date, insurance_company_id, share_percent)

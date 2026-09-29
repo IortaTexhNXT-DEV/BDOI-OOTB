@@ -114,7 +114,7 @@ define({
 });
 define({
   method: 'GET', path: '/statement', summary: "Agent incentive statement for a period (own statement, or any agent's for incentive readers)", screen: S('Statement'), middleware: self,
-  query: { agentId: 'usr_1', period: '2026-08' }, response: { success: true, data: { agentName: 'Juan Dela Cruz', period: 'August 2026', totalEarnings: 13500, ytdEarnings: 38500, pendingPayment: 13500, programBreakdown: [], monthlyTrend: [] } },
+  query: { agentId: 'usr_1', period: '2026-08' }, response: { success: true, data: { agentName: 'Juan Dela Cruz', period: 'August 2026', totalEarnings: 13500, ytdEarnings: 38500, pendingPayment: 13500, pendingPeriods: ['August 2026'], lastPaymentPeriods: ['July 2026'], contact: { companyName: 'BrokerVerse Insurance Brokerage', email: 'info@brokerverse.ph', phone: '+63 2 8888 0000' }, programBreakdown: [], monthlyTrend: [] } },
   handler: async (req, res) => {
     const agentId = agentFor(req);
     // A manager (finance, administrator) who is not an agent opens the screen without choosing an agent: answer with an

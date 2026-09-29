@@ -50,7 +50,9 @@ const BASE = `SELECT c.*, p.policy_number, p.inception_date, p.expiry_date, p.su
   cl.email AS client_email, cl.phone AS client_phone, cl.address AS client_address, cl.house_no AS client_house_no,
   cl.barangay AS client_barangay, cl.city AS client_city, cl.state AS client_state,
   cl.country AS client_country, cl.postal_code AS client_postal, ic.name AS insurer_name, ic.contact_email AS insurer_email,
-  pr.name AS product_name, pr.line AS product_line, hu.display_name AS handler_name
+  pr.name AS product_name, pr.line AS product_line, hu.display_name AS handler_name, cl.client_code,
+  (SELECT l.lead_number FROM leads l WHERE l.id = COALESCE(c.lead_id, p.lead_id)) AS lead_number,
+  (SELECT q.quote_number FROM quotes q WHERE q.id = COALESCE(c.quote_id, p.quote_id)) AS quote_number
   FROM claims c JOIN policies p ON p.id = c.policy_id
   LEFT JOIN clients cl ON cl.id = COALESCE(c.client_id, p.client_id)
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
@@ -88,6 +90,8 @@ export function toApi(r, labels, todayStr, open) {
     claimType: r.claim_type, claimPriority: r.priority, priority: r.priority, lob, productType: r.product_name || lob,
     policyId: r.policy_id, policyRefId: r.policy_id, policyNumber: r.policy_number,
     clientId: r.client_id || r.policy_client_id, leadRefId: r.lead_id, quoteRefId: r.quote_id || r.policy_quote_id,
+    // business numbers for display (the *RefId fields are internal ids used for navigation)
+    clientCode: r.client_code || null, leadNumber: r.lead_number || null, quoteNumber: r.quote_number || null,
     policyHolderName: info.policyHolderName || r.client_name, customerName: r.client_name, clientName: r.client_name,
     insuranceCompanyName: info.insuranceCompanyName || r.insurer_name, insuranceCompanyClaimNumber: r.insurer_claim_number || '',
     reportedDate: r.reported_date, dateOfIncident: r.loss_date, timeOfIncident: r.loss_time || '',

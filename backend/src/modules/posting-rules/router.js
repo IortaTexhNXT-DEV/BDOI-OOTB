@@ -20,7 +20,7 @@ const lineExample = { lineNo: 1, side: 'Dr', accountType: 'role', account: 'prem
 const ruleExample = { id: 1, eventCode: 'policy.issue.broker_billed', event: 'Policy issued – broker billed', version: 1, name: 'Policy issued – broker billed', module: 'policies', entryType: 'NEW_BUSINESS',
   source: 'booking', narration: 'Premium billed – {{policyNumber}} ({{billNumber}})', branchSource: 'policy_owner', effectiveFrom: '2000-01-01', active: true, lines: [lineExample] };
 const simExample = { eventCode: 'receipt.apply', description: 'Premium collected – POL-SAMPLE (OR-SAMPLE)', balanced: true, totalDebit: 11200, totalCredit: 11200,
-  lines: [{ lineNo: 1, accountCode: '1102001', accountName: 'Cash in Bank – Operating Account (BDO Current)', debit: 11200, credit: 0, memo: 'Premium collection' },
+  lines: [{ lineNo: 1, accountCode: '1102001', accountName: 'Cash in Bank – Operating Account', debit: 11200, credit: 0, memo: 'Premium collection' },
     { lineNo: 2, accountCode: '1202001', accountName: 'Premiums Receivable – Direct Clients', debit: 0, credit: 11200, memo: 'Settles INV-SAMPLE' }] };
 
 define({

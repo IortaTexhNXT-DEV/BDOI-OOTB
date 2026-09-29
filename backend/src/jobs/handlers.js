@@ -3,17 +3,22 @@
 import { many, one, query } from '../db/pool.js';
 import { getSetting } from '../lib/settings.js';
 import { sendQueuedEmails } from '../lib/mailer.js';
+import { today } from '../lib/dates.js';
+
+// "Today" in every job is the business date in general.timezone (lib/dates.js), passed to SQL as a parameter: the
+// database's current_date is the server's (UTC) date, which is yesterday in Manila until 08:00.
 
 const tableExists = async (t) => !!(await one('SELECT 1 FROM information_schema.tables WHERE table_schema = \'public\' AND table_name = $1', [t]));
 
 export async function renewalNotices() {
   if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
   const days = (await getSetting('limits.renewal_notice_days', [60, 30, 15])) || [60, 30, 15];
+  const now = await today();
   let created = 0;
   for (const d of days) {
     const rows = await many(`SELECT p.id, p.policy_number, p.expiry_date, p.owner_user_id FROM policies p
-      WHERE p.status IN ('active','issued') AND p.expiry_date = current_date + $1::int
-      AND NOT EXISTS (SELECT 1 FROM notifications n WHERE n.entity = 'policy' AND n.entity_id = p.id AND n.type = 'reminder' AND n.title LIKE 'Renewal due in ' || $1::text || '%')`, [d]);
+      WHERE p.status IN ('active','issued') AND p.expiry_date = $2::date + $1::int
+      AND NOT EXISTS (SELECT 1 FROM notifications n WHERE n.entity = 'policy' AND n.entity_id = p.id AND n.type = 'reminder' AND n.title LIKE 'Renewal due in ' || $1::text || '%')`, [d, now]);
     for (const p of rows) {
       await query('INSERT INTO notifications(user_id, type, title, message, link, entity, entity_id) VALUES ($1,\'reminder\',$2,$3,$4,\'policy\',$5)',
         [p.owner_user_id || null, `Renewal due in ${d} days`, `Policy ${p.policy_number} expires on ${p.expiry_date}`, `/policy/view/${p.id}`, p.id]);
@@ -24,7 +29,7 @@ export async function renewalNotices() {
 }
 export async function policyExpiry() {
   if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
-  const r = await query('UPDATE policies SET status = \'expired\' WHERE status IN (\'active\',\'issued\') AND expiry_date < current_date');
+  const r = await query('UPDATE policies SET status = \'expired\' WHERE status IN (\'active\',\'issued\') AND expiry_date < $1::date', [await today()]);
   return { expired: r.rowCount };
 }
 export async function quoteExpiry() {
@@ -36,10 +41,10 @@ export async function quoteExpiry() {
 export async function receivableAgeing() {
   if (!(await tableExists('receivables'))) return { skipped: 'receivables table missing' };
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90, 120];
-  const rows = await many('SELECT id, due_date FROM receivables WHERE status IN (\'open\', \'partial\')');
+  const rows = await many('SELECT id, GREATEST($1::date - due_date, 0) AS age FROM receivables WHERE status IN (\'open\', \'partial\')', [await today()]);
   let updated = 0;
   for (const r of rows) {
-    const age = Math.max(0, Math.floor((Date.now() - new Date(r.due_date).getTime()) / 86400000));
+    const age = Number(r.age);
     const b = buckets.find((x) => age <= x);
     const label = age === 0 ? 'current' : b ? `1-${b}` : `>${buckets[buckets.length - 1]}`;
     await query('UPDATE receivables SET age_days = $2, ageing_bucket = $3 WHERE id = $1', [r.id, age, label]);
@@ -75,3 +80,6 @@ export { monthEndReminder, recurringJournals, accrualReversal, periodAutoSoftClo
 
 // Bank reconciliation: daily automatic matching (disabled by default)
 export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
+
+// Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
+export { housekeeping } from './housekeeping.js';

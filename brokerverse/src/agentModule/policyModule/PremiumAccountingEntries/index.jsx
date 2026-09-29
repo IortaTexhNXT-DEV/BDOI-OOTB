@@ -10,6 +10,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import accountingService from "../../../services/accountingService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 // Cell components for DataTable
@@ -41,18 +42,8 @@ const AmountCell = ({ amount, debitCredit }) => {
   );
 };
 
-const DateCell = ({ dateString }) => {
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  return formatDate(dateString);
-};
+// Dates in the configured display format (System Settings, general.date_format), not ISO
+const DateCell = ({ dateString }) => formatAppDate(dateString, { empty: "" });
 
 const EntryTypeBadge = ({ entryType, entrySubType, t }) => {
   const getEntryTypeConfig = (type, subType) => {

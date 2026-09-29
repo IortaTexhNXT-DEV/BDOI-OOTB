@@ -18,6 +18,7 @@ import remittanceService, { masterService } from "../../../../services/remittanc
 import { showError } from "../../../Remittance/shared";
 import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const TYPE = "remittance-exception";
 
@@ -415,7 +416,7 @@ const ExceptionMaster = () => {
                   style={{ width: '25%' }}
                 />
                 <Column
-                  field="detectedOn"
+                  field="detectedOn" body={(row) => formatAppDate(row.detectedOn)}
                   header="Detected On"
                   style={{ width: '15%' }}
                 />

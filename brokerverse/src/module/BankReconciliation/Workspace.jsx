@@ -16,6 +16,7 @@ import { Amount, BrTag, JournalDialog, PageHeader, date, money, previousPeriod, 
 import ImportStatementDialog from "./ImportStatementDialog";
 import AdjustmentDialog from "./AdjustmentDialog";
 import StaleChequesDialog from "./StaleChequesDialog";
+import { hasPermission } from "../../utils/canOpen";
 
 const text = (s) => String(s || "").toLowerCase();
 
@@ -141,7 +142,7 @@ const Workspace = () => {
         <Button icon="pi pi-file-edit" text rounded size="small" tooltip={t("bankReconciliation.createAdjustment")} tooltipOptions={{ position: "left" }}
           onClick={() => { setForm({ line: l }); setDialog("adjust"); }} aria-label={t("bankReconciliation.createAdjustment")} />
       )}
-      {l.adjustmentJournalStatus === "for-approval" && !l.matchId && (
+      {l.adjustmentJournalStatus === "for-approval" && !l.matchId && hasPermission("write:journal-vouchers") && (
         <Button icon="pi pi-check-circle" text rounded size="small" severity="success" tooltip={t("bankReconciliation.approveAdjustment")} tooltipOptions={{ position: "left" }}
           onClick={() => act("approveAdj", () => bankReconciliationService.approveAdjustment(l.id), t("bankReconciliation.adjustmentPosted"))} aria-label={t("bankReconciliation.approveAdjustment")} />
       )}

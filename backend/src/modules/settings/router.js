@@ -5,6 +5,8 @@ import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { many, query } from '../../db/pool.js';
 import { ok } from '../../lib/respond.js';
+import { badRequest } from '../../lib/errors.js';
+import { businessTimeZone } from '../../lib/dates.js';
 
 const { router, define } = moduleRouter('System Settings', '/settings');
 
@@ -37,14 +39,24 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/audit', summary: 'Audit trail (filter by entity / entityId / user)', screen: 'Master > Audit trail', roles: [ADMIN_ROLE],
-  middleware: [requireAuth, requirePermission('read:audit')], query: { entity: 'policy', entityId: 'pol_1', limit: 100 },
+  method: 'GET', path: '/audit', summary: 'Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)', screen: 'Master > Audit trail', roles: [ADMIN_ROLE],
+  middleware: [requireAuth, requirePermission('read:audit')], query: { entity: 'policy', entityId: 'pol_1', username: 'BrokerVerse', from: '2026-09-01', to: '2026-09-30', limit: 100 },
   response: { success: true, data: [{ at: '2026-01-01T00:00:00Z', username: 'BrokerVerse', entity: 'policy', action: 'create' }] },
   handler: async (req, res) => {
     const { entity, entityId, username } = req.query;
+    const iso = (v, field) => {
+      if (v === undefined || v === '') return null;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(v)) || Number.isNaN(Date.parse(`${v}T00:00:00Z`))) throw badRequest('Validation failed', [{ path: field, message: `${field} must be a date (YYYY-MM-DD)` }]);
+      return String(v);
+    };
+    const from = iso(req.query.from, 'from');
+    const to = iso(req.query.to, 'to');
     const limit = Math.min(1000, Number(req.query.limit) || 200);
+    // from / to are business dates: a day runs from 00:00 to 24:00 in general.timezone (Manila), not UTC
     ok(res, await many(`SELECT id, at, user_id AS "userId", username, entity, entity_id AS "entityId", action, before_data AS "before", after_data AS "after", ip FROM audit_log
-      WHERE ($1::text IS NULL OR entity = $1) AND ($2::text IS NULL OR entity_id = $2) AND ($3::text IS NULL OR username = $3) ORDER BY id DESC LIMIT $4`, [entity || null, entityId || null, username || null, limit]));
+      WHERE ($1::text IS NULL OR entity = $1) AND ($2::text IS NULL OR entity_id = $2) AND ($3::text IS NULL OR username = $3)
+        AND ($5::date IS NULL OR at >= ($5::date)::timestamp AT TIME ZONE $7) AND ($6::date IS NULL OR at < ($6::date + 1)::timestamp AT TIME ZONE $7)
+      ORDER BY id DESC LIMIT $4`, [entity || null, entityId || null, username || null, limit, from, to, await businessTimeZone()]));
   },
 });
 

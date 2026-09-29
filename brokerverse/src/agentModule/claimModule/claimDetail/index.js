@@ -392,18 +392,25 @@ const ClaimDetail = () => {
               <span className="label">{t("claims.insuredName")}</span>
               <span className="value">{policyData.insuredName || t("policyDetail.nA")}</span>
             </div>
-            <div className="detail-row">
-              <span className="label">{t("claims.leadRefId")}</span>
-              <span className="value">{claimData.leadRefId || t("policyDetail.nA")}</span>
-            </div>
-            <div className="detail-row">
-              <span className="label">{t("claims.quoteRefId")}</span>
-              <span className="value">{claimData.quoteRefId || t("policyDetail.nA")}</span>
-            </div>
-            <div className="detail-row">
-              <span className="label">{t("claims.policyRefId")}</span>
-              <span className="value">{claimData.policyRefId || t("policyDetail.nA")}</span>
-            </div>
+            {/* business numbers (lead no., quotation no.), never the internal lead / quote / policy ids */}
+            {claimData.clientCode && (
+              <div className="detail-row">
+                <span className="label">{t("followUps.clientCode", "Client code")}</span>
+                <span className="value">{claimData.clientCode}</span>
+              </div>
+            )}
+            {claimData.leadNumber && (
+              <div className="detail-row">
+                <span className="label">{t("followUps.leadNumber", "Lead number")}</span>
+                <span className="value">{claimData.leadNumber}</span>
+              </div>
+            )}
+            {claimData.quoteNumber && (
+              <div className="detail-row">
+                <span className="label">{t("followUps.quotationNumber", "Quotation number")}</span>
+                <span className="value">{claimData.quoteNumber}</span>
+              </div>
+            )}
             {(claimData.country ||
               claimData.houseNo ||
               claimData.roadThanon ||

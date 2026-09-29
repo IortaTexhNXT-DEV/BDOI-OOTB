@@ -153,8 +153,11 @@ const EndorsementDetailedView = ({ action }) => {
         >
           <SvgLeftArrow />
           <div className="detailed__endorsement__container__back__btn__title">
-            {state?.clientName || t("endorsement.client")} / {t("endorsement.clientIdColon")}{" "}
-            {state?.clientNumber || endorsementId}
+            {state?.clientName || endorsementData?.clientName || t("endorsement.client")}
+            {/* the client code (CL-...), never the internal endorsement id */}
+            {(state?.clientNumber || endorsementData?.clientCode) && (
+              <> / {t("endorsement.clientIdColon")} {state?.clientNumber || endorsementData?.clientCode}</>
+            )}
           </div>
         </div>
       </div>

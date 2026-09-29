@@ -4,7 +4,7 @@ import { getSetting } from '../../lib/settings.js';
 import { round2 } from '../documents/common.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { scopeSql } from '../../lib/scope.js';
-import { businessTimeZone, calendarPeriod } from '../../lib/dates.js';
+import { businessTimeZone, calendarPeriod, today } from '../../lib/dates.js';
 
 /**
  * One user's own book, with the same ownership rules as the record scope of security.scoped_roles (lib/scope.js): the
@@ -74,9 +74,9 @@ export async function executive(period = 'month') {
  */
 export async function receivablesPosition() {
   const r = await one(`SELECT COALESCE(sum(rv.balance), 0) AS premium, count(*)::int AS bills,
-      COALESCE(sum(rv.balance) FILTER (WHERE rv.due_date < current_date), 0) AS premium_overdue
+      COALESCE(sum(rv.balance) FILTER (WHERE rv.due_date < $1::date), 0) AS premium_overdue
     FROM receivables rv JOIN policies p ON p.id = rv.policy_id
-    WHERE rv.status IN ('open', 'partial') AND rv.balance > 0 AND p.billing_mode <> 'direct'`);
+    WHERE rv.status IN ('open', 'partial') AND rv.balance > 0 AND p.billing_mode <> 'direct'`, [await today()]);
   const { receivableSummary } = await import('../remittance/directbill.js');
   const c = await receivableSummary();
   return { premiumFromClients: round2(r.premium), premiumBills: r.bills, premiumOverdue: round2(r.premium_overdue),
@@ -152,12 +152,14 @@ export async function sales(book = null) {
   const dueDays = `$${p.length}::int`;
   p.push(await businessTimeZone());
   const tz = `$${p.length}`;
+  p.push(await today());
+  const day = `$${p.length}::date`;
   const f = await one(`SELECT (SELECT count(*)::int FROM leads l WHERE l.deleted_at IS NULL AND ${lead}) AS leads,
       (SELECT count(DISTINCT q.lead_id)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quoted_leads,
       (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quotes,
       (SELECT count(*)::int FROM policies po WHERE ${policy}) AS policies,
       (SELECT COALESCE(sum(po.premium_total),0) FROM policies po WHERE ${policy} AND date_trunc('month', po.created_at AT TIME ZONE ${tz}) = date_trunc('month', now() AT TIME ZONE ${tz})) AS premium_month,
-      (SELECT count(*)::int FROM policies po WHERE ${policy} AND po.status IN ('active','issued') AND po.expiry_date BETWEEN current_date AND current_date + ${dueDays}) AS renewals_due`, p);
+      (SELECT count(*)::int FROM policies po WHERE ${policy} AND po.status IN ('active','issued') AND po.expiry_date BETWEEN ${day} AND ${day} + ${dueDays}) AS renewals_due`, p);
   return {
     funnel: { leads: f.leads, quotedLeads: f.quoted_leads, quotations: f.quotes, policies: f.policies, leadToQuoteRate: pct(f.quoted_leads, f.leads), quoteToPolicyRate: pct(f.policies, f.quotes), leadToPolicyRate: pct(f.policies, f.leads) },
     leadsByStatus: leadsBy, quotationsByStatus: quotesBy.map((r) => ({ status: quoteStatusOut(r.status), count: r.count, premium: round2(r.premium) })),
@@ -205,8 +207,9 @@ export async function agentHome(book) {
   const pp = [];
   const scope = inBook(book, 'policy', 'p', pp);
   pp.push(await renewalsDueDays());
+  pp.push(await today());
   const expiring = await many(`SELECT p.id AS "policyId", p.policy_number AS "policyNumber", p.insured_name AS "insuredName", p.expiry_date AS "expiry", p.premium_total AS "grossPremium"
-    FROM policies p WHERE ${scope} AND p.status IN ('active','issued') AND p.expiry_date BETWEEN current_date AND current_date + $${pp.length}::int ORDER BY p.expiry_date LIMIT 10`, pp);
+    FROM policies p WHERE ${scope} AND p.status IN ('active','issued') AND p.expiry_date BETWEEN $${pp.length}::date AND $${pp.length}::date + $${pp.length - 1}::int ORDER BY p.expiry_date LIMIT 10`, pp);
   const commission = await one(`SELECT COALESCE(sum(net_amount) FILTER (WHERE lower(status) <> 'paid'), 0) AS unpaid, COALESCE(sum(net_amount) FILTER (WHERE lower(status) = 'paid'), 0) AS paid
     FROM commissions WHERE agent_user_id = $1`, [book?.userId]);
   // Premium of the book's policies: collected = paid on the premium bills (receipts applied), receivable = still open.

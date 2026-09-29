@@ -19,7 +19,7 @@ export function toEndorsement(r) {
   return {
     ...changes,
     id: r.id, endorsementId: r.id, endorsementNumber: r.endorsement_number, policyId: r.policy_id, policyNumber: r.policy_number,
-    clientId: r.client_id, clientName: r.client_name, insuredName: r.insured_name, status, endorsementStatus: status, endorsementType: r.endorsement_type,
+    clientId: r.client_id, clientCode: r.client_code || null, clientName: r.client_name, insuredName: r.insured_name, status, endorsementStatus: status, endorsementType: r.endorsement_type,
     endorsementTypeIds: r.endorsement_type_ids || [], isCancelPolicy: r.is_cancel, cancellationType: r.cancellation_type,
     premiumDelta: Number(r.premium_delta), effectiveDate: r.effective_date, remarks: r.remarks, documentKey: r.document_key,
     documentUrl: r.document_key ? (/^https?:/.test(r.document_key) ? r.document_key : publicUrl(r.document_key)) : null, completionDetails: r.completion || {},
@@ -30,7 +30,7 @@ export function toEndorsement(r) {
   };
 }
 
-const SELECT = `SELECT e.*, p.policy_number, p.expiry_date AS policy_expiry, p.lob, p.insured_name, c.display_name AS client_name,
+const SELECT = `SELECT e.*, p.policy_number, p.expiry_date AS policy_expiry, p.lob, p.insured_name, c.display_name AS client_name, c.client_code,
   (SELECT u.display_name FROM users u WHERE u.id = e.created_by) AS created_by_name
   FROM endorsements e JOIN policies p ON p.id = e.policy_id LEFT JOIN clients c ON c.id = e.client_id`;
 
@@ -277,6 +277,14 @@ export async function completeEndorsement(body, userId) {
       }
     }
     if (credit) completion.returnPremium = credit;
+    // The referrers' comsub follows the returned premium (broker or direct billed): unpaid lines are reduced or their
+    // accrual reversed, paid lines clawed back, in proportion to the return (commission/service.js adjustForReturnPremium)
+    const returnedGross = credit?.amount || (billingMode === 'direct' && delta < 0 ? -delta : 0);
+    if (returnedGross > 0) {
+      const { adjustForReturnPremium } = await import('../commission/service.js');
+      const comsub = await adjustForReturnPremium(db, { policyId: p.id, returnedGross, baseGross: Number(p.premium_total), endorsementId: e.id, reference: e.endorsement_number, user: { id: userId } });
+      if (comsub.adjustments.length || comsub.skipped.length) completion.comsubAdjustments = comsub;
+    }
     await db.query(`UPDATE endorsements SET status = $2, completion = $3, document_key = COALESCE($4, document_key), completed_at = now(), completed_by = $5,
       receivable_id = $6, billing_mode = $7, updated_by = $5, updated_at = now() WHERE id = $1`, [e.id, e.is_cancel ? 'cancelled' : 'completed', JSON.stringify(completion), body.documentKey || null, userId, receivableId, billingMode]);
     return p;

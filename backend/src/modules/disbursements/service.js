@@ -399,6 +399,13 @@ export async function createInsurerRemittance(db, b, user) {
     }
     total = round2(total + net);
   }
-  await db.query('UPDATE disbursements SET amount = $2, gross_amount = $2 WHERE id = $1', [d.id, total]);
-  return getDisbursement(db, d.id);
+  // refunds due from this insurer (return premium already remitted) are netted against the remittance
+  const { applyInsurerCredits } = await import('../remittance/insurerCredits.js');
+  const netted = await applyInsurerCredits(db, { insurerId: insurer.id, insurerName: insurer.name, available: total, disbursement: d, user });
+  const payable = round2(total - netted.applied);
+  await db.query('UPDATE disbursements SET amount = $2, gross_amount = $2 WHERE id = $1', [d.id, payable]);
+  if (netted.applied > 0) {
+    await db.query('UPDATE disbursements SET remarks = trim(concat_ws(\' \', remarks, $2::text)) WHERE id = $1', [d.id, `Refunds due from ${insurer.name} netted: ${netted.applied.toFixed(2)} (gross remittance ${total.toFixed(2)}).`]);
+  }
+  return { ...(await getDisbursement(db, d.id)), refundsNetted: netted.applied, grossRemittance: total };
 }

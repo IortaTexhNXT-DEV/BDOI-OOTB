@@ -1398,10 +1398,10 @@
                           "debitCredit": "DEBIT",
                           "amount": 11862.5,
                           "accountCode": "1102001",
-                          "accountName": "Cash in Bank – BDO Current",
+                          "accountName": "Cash in Bank – Operating Account",
                           "account": {
                             "accountCode": "1102001",
-                            "accountName": "Cash in Bank – BDO Current"
+                            "accountName": "Cash in Bank – Operating Account"
                           },
                           "glCode": "1102001",
                           "documentDate": "2026-09-28",
@@ -1595,10 +1595,10 @@
                       "debitCredit": "DEBIT",
                       "amount": 11862.5,
                       "accountCode": "1102001",
-                      "accountName": "Cash in Bank – BDO Current",
+                      "accountName": "Cash in Bank – Operating Account",
                       "account": {
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current"
+                        "accountName": "Cash in Bank – Operating Account"
                       },
                       "glCode": "1102001",
                       "documentDate": "2026-09-28",
@@ -2013,10 +2013,10 @@
                         "debitCredit": "DEBIT",
                         "amount": 11862.5,
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current",
+                        "accountName": "Cash in Bank – Operating Account",
                         "account": {
                           "accountCode": "1102001",
-                          "accountName": "Cash in Bank – BDO Current"
+                          "accountName": "Cash in Bank – Operating Account"
                         },
                         "glCode": "1102001",
                         "documentDate": "2026-09-28",
@@ -2040,10 +2040,10 @@
                         "debitCredit": "CREDIT",
                         "amount": 11862.5,
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current",
+                        "accountName": "Cash in Bank – Operating Account",
                         "account": {
                           "accountCode": "1102001",
-                          "accountName": "Cash in Bank – BDO Current"
+                          "accountName": "Cash in Bank – Operating Account"
                         },
                         "glCode": "1102001",
                         "documentDate": "2026-09-28",
@@ -2248,10 +2248,10 @@
                       "debitCredit": "DEBIT",
                       "amount": 11862.5,
                       "accountCode": "1102001",
-                      "accountName": "Cash in Bank – BDO Current",
+                      "accountName": "Cash in Bank – Operating Account",
                       "account": {
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current"
+                        "accountName": "Cash in Bank – Operating Account"
                       },
                       "glCode": "1102001",
                       "documentDate": "2026-09-28",
@@ -2560,10 +2560,10 @@
                       "debitCredit": "DEBIT",
                       "amount": 11862.5,
                       "accountCode": "1102001",
-                      "accountName": "Cash in Bank – BDO Current",
+                      "accountName": "Cash in Bank – Operating Account",
                       "account": {
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current"
+                        "accountName": "Cash in Bank – Operating Account"
                       },
                       "glCode": "1102001",
                       "documentDate": "2026-09-28",
@@ -3218,10 +3218,10 @@
                       "debitCredit": "DEBIT",
                       "amount": 11862.5,
                       "accountCode": "1102001",
-                      "accountName": "Cash in Bank – BDO Current",
+                      "accountName": "Cash in Bank – Operating Account",
                       "account": {
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current"
+                        "accountName": "Cash in Bank – Operating Account"
                       },
                       "glCode": "1102001",
                       "documentDate": "2026-09-28",
@@ -3438,10 +3438,10 @@
                       "debitCredit": "DEBIT",
                       "amount": 11862.5,
                       "accountCode": "1102001",
-                      "accountName": "Cash in Bank – BDO Current",
+                      "accountName": "Cash in Bank – Operating Account",
                       "account": {
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current"
+                        "accountName": "Cash in Bank – Operating Account"
                       },
                       "glCode": "1102001",
                       "documentDate": "2026-09-28",
@@ -3861,7 +3861,7 @@
                     "rows": [
                       {
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – BDO Current",
+                        "accountName": "Cash in Bank – Operating Account",
                         "debit": 11862.5,
                         "credit": 0
                       }
@@ -11790,6 +11790,696 @@
                 "adjusterStatus": "Assigned",
                 "thirdPartyDetails[thirdPartyName]": "Pedro Cruz",
                 "file": "(file)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/claims/{id}/settlement-cash": {
+      "get": {
+        "operationId": "getClaimsIdSettlementCash",
+        "summary": "Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim settlement\n\nAccess: read:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "claimNumber": {
+                          "type": "string"
+                        },
+                        "settlementAmount": {
+                          "type": "integer"
+                        },
+                        "paidThroughBroker": {
+                          "type": "boolean"
+                        },
+                        "canRecord": {
+                          "type": "boolean"
+                        },
+                        "claimant": {
+                          "type": "string"
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "insurerId": {
+                                "type": "integer"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "share": {
+                                "type": "integer"
+                              },
+                              "recoverable": {
+                                "type": "integer"
+                              },
+                              "received": {
+                                "type": "integer"
+                              },
+                              "outstanding": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "totalRecoverable": {
+                          "type": "integer"
+                        },
+                        "totalReceived": {
+                          "type": "integer"
+                        },
+                        "paidToClaimant": {
+                          "type": "integer"
+                        },
+                        "payableToClaimant": {
+                          "type": "integer"
+                        },
+                        "movements": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "bankAccount": {
+                                "type": "string"
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "journalNumber": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "bankAccounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "glAccount": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "claimNumber": "CLM-2026-00001",
+                    "settlementAmount": 75000,
+                    "paidThroughBroker": true,
+                    "canRecord": true,
+                    "claimant": "Maria Santos",
+                    "insurers": [
+                      {
+                        "insurerId": 1,
+                        "insurer": "Malayan Insurance Co., Inc.",
+                        "share": 100,
+                        "recoverable": 75000,
+                        "received": 75000,
+                        "outstanding": 0
+                      }
+                    ],
+                    "totalRecoverable": 75000,
+                    "totalReceived": 75000,
+                    "paidToClaimant": 0,
+                    "payableToClaimant": 75000,
+                    "movements": [
+                      {
+                        "id": 1,
+                        "kind": "funds-received",
+                        "insurer": "Malayan Insurance Co., Inc.",
+                        "amount": 75000,
+                        "date": "2026-09-29",
+                        "bankAccount": "ACC-OPS-001",
+                        "reference": "RA-8812",
+                        "journalNumber": "JV-2026-00140"
+                      }
+                    ],
+                    "bankAccounts": [
+                      {
+                        "code": "ACC-OPS-001",
+                        "name": "Operating Account",
+                        "glAccount": "1102001"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim settlement",
+        "x-permissions": [
+          "read:claims"
+        ]
+      }
+    },
+    "/claims/{id}/settlement-cash/funds-received": {
+      "post": {
+        "operationId": "postClaimsIdSettlementCashFundsReceived",
+        "summary": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "journalNumber": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "object",
+                          "properties": {
+                            "claimNumber": {
+                              "type": "string"
+                            },
+                            "settlementAmount": {
+                              "type": "integer"
+                            },
+                            "paidThroughBroker": {
+                              "type": "boolean"
+                            },
+                            "canRecord": {
+                              "type": "boolean"
+                            },
+                            "claimant": {
+                              "type": "string"
+                            },
+                            "insurers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "insurerId": {
+                                    "type": "integer"
+                                  },
+                                  "insurer": {
+                                    "type": "string"
+                                  },
+                                  "share": {
+                                    "type": "integer"
+                                  },
+                                  "recoverable": {
+                                    "type": "integer"
+                                  },
+                                  "received": {
+                                    "type": "integer"
+                                  },
+                                  "outstanding": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "totalRecoverable": {
+                              "type": "integer"
+                            },
+                            "totalReceived": {
+                              "type": "integer"
+                            },
+                            "paidToClaimant": {
+                              "type": "integer"
+                            },
+                            "payableToClaimant": {
+                              "type": "integer"
+                            },
+                            "movements": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "kind": {
+                                    "type": "string"
+                                  },
+                                  "insurer": {
+                                    "type": "string"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  },
+                                  "date": {
+                                    "type": "string"
+                                  },
+                                  "bankAccount": {
+                                    "type": "string"
+                                  },
+                                  "reference": {
+                                    "type": "string"
+                                  },
+                                  "journalNumber": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "bankAccounts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "glAccount": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "journalNumber": "JV-2026-00140",
+                    "position": {
+                      "claimNumber": "CLM-2026-00001",
+                      "settlementAmount": 75000,
+                      "paidThroughBroker": true,
+                      "canRecord": true,
+                      "claimant": "Maria Santos",
+                      "insurers": [
+                        {
+                          "insurerId": 1,
+                          "insurer": "Malayan Insurance Co., Inc.",
+                          "share": 100,
+                          "recoverable": 75000,
+                          "received": 75000,
+                          "outstanding": 0
+                        }
+                      ],
+                      "totalRecoverable": 75000,
+                      "totalReceived": 75000,
+                      "paidToClaimant": 0,
+                      "payableToClaimant": 75000,
+                      "movements": [
+                        {
+                          "id": 1,
+                          "kind": "funds-received",
+                          "insurer": "Malayan Insurance Co., Inc.",
+                          "amount": 75000,
+                          "date": "2026-09-29",
+                          "bankAccount": "ACC-OPS-001",
+                          "reference": "RA-8812",
+                          "journalNumber": "JV-2026-00140"
+                        }
+                      ],
+                      "bankAccounts": [
+                        {
+                          "code": "ACC-OPS-001",
+                          "name": "Operating Account",
+                          "glAccount": "1102001"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim settlement > Funds received",
+        "x-permissions": [
+          "write:receipts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "insurerId": {
+                    "type": "integer"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "date": {
+                    "type": "string"
+                  },
+                  "reference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "insurerId": 1,
+                "amount": 75000,
+                "bankAccount": "ACC-OPS-001",
+                "date": "2026-09-29",
+                "reference": "RA-8812"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/claims/{id}/settlement-cash/paid-to-claimant": {
+      "post": {
+        "operationId": "postClaimsIdSettlementCashPaidToClaimant",
+        "summary": "Record the payment of the settlement to the claimant by voucher / cheque or transfer (posting rule claim.paid_to_claimant; not more than the amount still payable)",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim settlement > Pay claimant\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "journalNumber": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "object",
+                          "properties": {
+                            "claimNumber": {
+                              "type": "string"
+                            },
+                            "settlementAmount": {
+                              "type": "integer"
+                            },
+                            "paidThroughBroker": {
+                              "type": "boolean"
+                            },
+                            "canRecord": {
+                              "type": "boolean"
+                            },
+                            "claimant": {
+                              "type": "string"
+                            },
+                            "insurers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "insurerId": {
+                                    "type": "integer"
+                                  },
+                                  "insurer": {
+                                    "type": "string"
+                                  },
+                                  "share": {
+                                    "type": "integer"
+                                  },
+                                  "recoverable": {
+                                    "type": "integer"
+                                  },
+                                  "received": {
+                                    "type": "integer"
+                                  },
+                                  "outstanding": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "totalRecoverable": {
+                              "type": "integer"
+                            },
+                            "totalReceived": {
+                              "type": "integer"
+                            },
+                            "paidToClaimant": {
+                              "type": "integer"
+                            },
+                            "payableToClaimant": {
+                              "type": "integer"
+                            },
+                            "movements": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "kind": {
+                                    "type": "string"
+                                  },
+                                  "insurer": {
+                                    "type": "string"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  },
+                                  "date": {
+                                    "type": "string"
+                                  },
+                                  "bankAccount": {
+                                    "type": "string"
+                                  },
+                                  "reference": {
+                                    "type": "string"
+                                  },
+                                  "journalNumber": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "bankAccounts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "glAccount": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "journalNumber": "JV-2026-00141",
+                    "position": {
+                      "claimNumber": "CLM-2026-00001",
+                      "settlementAmount": 75000,
+                      "paidThroughBroker": true,
+                      "canRecord": true,
+                      "claimant": "Maria Santos",
+                      "insurers": [
+                        {
+                          "insurerId": 1,
+                          "insurer": "Malayan Insurance Co., Inc.",
+                          "share": 100,
+                          "recoverable": 75000,
+                          "received": 75000,
+                          "outstanding": 0
+                        }
+                      ],
+                      "totalRecoverable": 75000,
+                      "totalReceived": 75000,
+                      "paidToClaimant": 0,
+                      "payableToClaimant": 75000,
+                      "movements": [
+                        {
+                          "id": 1,
+                          "kind": "funds-received",
+                          "insurer": "Malayan Insurance Co., Inc.",
+                          "amount": 75000,
+                          "date": "2026-09-29",
+                          "bankAccount": "ACC-OPS-001",
+                          "reference": "RA-8812",
+                          "journalNumber": "JV-2026-00140"
+                        }
+                      ],
+                      "bankAccounts": [
+                        {
+                          "code": "ACC-OPS-001",
+                          "name": "Operating Account",
+                          "glAccount": "1102001"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim settlement > Pay claimant",
+        "x-permissions": [
+          "write:disbursements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "bankAccount": {
+                    "type": "string"
+                  },
+                  "paymentMode": {
+                    "type": "string"
+                  },
+                  "reference": {
+                    "type": "string"
+                  },
+                  "payee": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "amount": 75000,
+                "bankAccount": "ACC-OPS-001",
+                "paymentMode": "check",
+                "reference": "PV-2026-00031 / chq 000512",
+                "payee": "Maria Santos"
               }
             }
           }
@@ -28351,6 +29041,32 @@
                         "pendingPayment": {
                           "type": "integer"
                         },
+                        "pendingPeriods": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "lastPaymentPeriods": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "contact": {
+                          "type": "object",
+                          "properties": {
+                            "companyName": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            },
+                            "phone": {
+                              "type": "string"
+                            }
+                          }
+                        },
                         "programBreakdown": {
                           "type": "array",
                           "items": {}
@@ -28371,6 +29087,17 @@
                     "totalEarnings": 13500,
                     "ytdEarnings": 38500,
                     "pendingPayment": 13500,
+                    "pendingPeriods": [
+                      "August 2026"
+                    ],
+                    "lastPaymentPeriods": [
+                      "July 2026"
+                    ],
+                    "contact": {
+                      "companyName": "BrokerVerse Insurance Brokerage",
+                      "email": "info@brokerverse.ph",
+                      "phone": "+63 2 8888 0000"
+                    },
                     "programBreakdown": [],
                     "monthlyTrend": []
                   }
@@ -47503,7 +48230,7 @@
                       {
                         "lineNo": 1,
                         "accountCode": "1102001",
-                        "accountName": "Cash in Bank – Operating Account (BDO Current)",
+                        "accountName": "Cash in Bank – Operating Account",
                         "debit": 11200,
                         "credit": 0,
                         "memo": "Premium collection"
@@ -69435,6 +70162,125 @@
         ]
       }
     },
+    "/remittance/insurer-credits": {
+      "get": {
+        "operationId": "getRemittanceInsurerCredits",
+        "summary": "Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Settlement; Accounts > Remittance > Tracking\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "insurer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "MALAYAN"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "open"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "openBalance": {
+                          "type": "integer"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              },
+                              "balance": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "openBalance": 970,
+                    "items": [
+                      {
+                        "id": 1,
+                        "insurer": "Malayan Insurance Co., Inc.",
+                        "policyNumber": "POL-2026-00001",
+                        "reference": "END-2026-00003",
+                        "kind": "return-premium",
+                        "amount": 970,
+                        "balance": 970,
+                        "status": "open"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Settlement; Accounts > Remittance > Tracking",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
     "/remittance/masters": {
       "get": {
         "operationId": "getRemittanceMasters",
@@ -77966,7 +78812,7 @@
     "/schedules": {
       "get": {
         "operationId": "getSchedules",
-        "summary": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox)",
+        "summary": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)",
         "tags": [
           "Schedules"
         ],
@@ -77982,6 +78828,9 @@
                   "properties": {
                     "success": {
                       "type": "boolean"
+                    },
+                    "timeZone": {
+                      "type": "string"
                     },
                     "data": {
                       "type": "array",
@@ -77999,6 +78848,12 @@
                           },
                           "lastStatus": {
                             "type": "string"
+                          },
+                          "timeZone": {
+                            "type": "string"
+                          },
+                          "nextRunAt": {
+                            "type": "string"
                           }
                         }
                       }
@@ -78007,12 +78862,15 @@
                 },
                 "example": {
                   "success": true,
+                  "timeZone": "Asia/Manila",
                   "data": [
                     {
                       "code": "renewal-notices",
                       "cron": "0 6 * * *",
                       "enabled": true,
-                      "lastStatus": "success"
+                      "lastStatus": "success",
+                      "timeZone": "Asia/Manila",
+                      "nextRunAt": "2026-01-02T22:00:00.000Z"
                     }
                   ]
                 }
@@ -78601,7 +79459,7 @@
     "/settings/audit": {
       "get": {
         "operationId": "getSettingsAudit",
-        "summary": "Audit trail (filter by entity / entityId / user)",
+        "summary": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)",
         "tags": [
           "System Settings"
         ],
@@ -78624,6 +79482,33 @@
               "type": "string"
             },
             "example": "pol_1"
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "BrokerVerse"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
           },
           {
             "name": "limit",
@@ -78840,12 +79725,12 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "logoUrl": "/BDO_insure_logo.png.png",
+                    "logoUrl": "/bdoi/iorta-technxt.png",
                     "logoPresets": [
                       {
-                        "id": "bdo",
-                        "label": "BDO",
-                        "url": "/BDO_insure_logo.png.png",
+                        "id": "iorta-technxt",
+                        "label": "iorta TechNXT (BrokerVerse)",
+                        "url": "/bdoi/iorta-technxt.png",
                         "builtIn": true
                       }
                     ],
@@ -78966,12 +79851,12 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "logoUrl": "/BDO_insure_logo.png.png",
+                    "logoUrl": "/bdoi/iorta-technxt.png",
                     "logoPresets": [
                       {
-                        "id": "bdo",
-                        "label": "BDO",
-                        "url": "/BDO_insure_logo.png.png",
+                        "id": "iorta-technxt",
+                        "label": "iorta TechNXT (BrokerVerse)",
+                        "url": "/bdoi/iorta-technxt.png",
                         "builtIn": true
                       }
                     ],
@@ -79362,12 +80247,12 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "logoUrl": "/BDO_insure_logo.png.png",
+                    "logoUrl": "/bdoi/iorta-technxt.png",
                     "logoPresets": [
                       {
-                        "id": "bdo",
-                        "label": "BDO",
-                        "url": "/BDO_insure_logo.png.png",
+                        "id": "iorta-technxt",
+                        "label": "iorta TechNXT (BrokerVerse)",
+                        "url": "/bdoi/iorta-technxt.png",
                         "builtIn": true
                       }
                     ],
@@ -79536,12 +80421,12 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "logoUrl": "/BDO_insure_logo.png.png",
+                    "logoUrl": "/bdoi/iorta-technxt.png",
                     "logoPresets": [
                       {
-                        "id": "bdo",
-                        "label": "BDO",
-                        "url": "/BDO_insure_logo.png.png",
+                        "id": "iorta-technxt",
+                        "label": "iorta TechNXT (BrokerVerse)",
+                        "url": "/bdoi/iorta-technxt.png",
                         "builtIn": true
                       }
                     ],
@@ -79684,12 +80569,12 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "logoUrl": "/BDO_insure_logo.png.png",
+                    "logoUrl": "/bdoi/iorta-technxt.png",
                     "logoPresets": [
                       {
-                        "id": "bdo",
-                        "label": "BDO",
-                        "url": "/BDO_insure_logo.png.png",
+                        "id": "iorta-technxt",
+                        "label": "iorta TechNXT (BrokerVerse)",
+                        "url": "/bdoi/iorta-technxt.png",
                         "builtIn": true
                       }
                     ],
