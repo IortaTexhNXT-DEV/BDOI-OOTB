@@ -9,6 +9,7 @@ import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import SvgDownloadIcon from "../../../assets/agentIcon/SvgDownloadIcon";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
+import { downloadBulkUploadTemplate } from "../../../agentModule/component/bulkUploadTemplate";
 import "./index.scss";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
@@ -27,10 +28,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     }
   };
 
-  const handleDownloadTemplate = () => {
-    const templateURL = "https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/template/disbursements-bulk-upload-template+2.xlsx";
-    window.open(templateURL, "_blank", "noopener,noreferrer");
-  };
+  const handleDownloadTemplate = () => downloadBulkUploadTemplate("disbursements");
 
   const handleUpload = async () => {
     if (!selectedFile) {
@@ -147,7 +145,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 ref={fileUploadRef}
                 mode="basic"
                 name="file"
-                accept=".xlsx"
+                accept=".xlsx,.csv"
                 maxFileSize={10485760}
                 customUpload
                 auto={false}

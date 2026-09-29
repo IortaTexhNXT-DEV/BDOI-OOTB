@@ -7,6 +7,7 @@ import { ProgressBar } from "primereact/progressbar";
 import { receiptsService } from "../../../services/receiptsService";
 import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import SvgDownloadIcon from "../../../assets/agentIcon/SvgDownloadIcon";
+import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../../agentModule/component/bulkUploadTemplate";
 import "./index.scss";
 import PropTypes from "prop-types";
 
@@ -20,17 +21,11 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const handleFileSelect = (e) => {
     const file = e.files[0];
     if (file) {
-      // Validate file type
-      const validTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel'
-      ];
-      
-      if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx')) {
+      if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
           summary: 'Invalid File',
-          detail: 'Please upload only Excel files (.xlsx)',
+          detail: 'Please upload an Excel (.xlsx) or CSV file',
           life: 3000
         });
         fileUploadRef.current.clear();
@@ -137,10 +132,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     onHide();
   };
 
-  const handleDownloadTemplate = () => {
-    const templateURL = "https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/template/receipts-bulk-upload-template+2.xlsx";
-    window.open(templateURL, "_blank", "noopener,noreferrer");
-  };
+  const handleDownloadTemplate = () => downloadBulkUploadTemplate("receipts");
 
   return (
     <Dialog
@@ -168,9 +160,9 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
               </div>
               <ul>
                 <li>Download the sample template file</li>
-                <li>Fill in the receipt details in the Excel file</li>
+                <li>Fill in the receipt details, one row per receipt</li>
                 <li>Upload the completed file (max 10MB)</li>
-                <li>Only .xlsx files are supported</li>
+                <li>Excel (.xlsx) and CSV files are supported</li>
               </ul>
             </div>
 
@@ -179,7 +171,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 ref={fileUploadRef}
                 mode="basic"
                 name="file"
-                accept=".xlsx"
+                accept=".xlsx,.csv"
                 maxFileSize={10485760}
                 customUpload
                 auto={false}
