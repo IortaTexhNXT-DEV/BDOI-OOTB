@@ -113,7 +113,7 @@ describe('bank account set-up and masters', () => {
     expect(types.map((t) => t.code)).toEqual(expect.arrayContaining(['BCHG', 'INT', 'FTAX', 'RCHQ', 'DCR-INS', 'DCR-CLI']));
     const formats = (await maker('get', '/bank-reconciliation/formats')).body.data.items;
     expect(formats.find((f) => f.code === 'GENERIC').isExample).toBe(false);
-    expect(formats.filter((f) => f.isExample).length).toBeGreaterThanOrEqual(3);
+    expect(formats.filter((f) => ['BDO-SAMPLE', 'BPI-SAMPLE', 'MBT-SAMPLE'].includes(f.code) && !f.isExample).length).toBe(3);
   });
 });
 

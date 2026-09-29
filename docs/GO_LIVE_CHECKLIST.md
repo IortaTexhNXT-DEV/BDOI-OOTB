@@ -154,8 +154,13 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   (columns name, username, password, role[, email]) with
   `CONFIRM_PROVISION=yes node scripts/provision-users.js /secure/users.csv` (without CONFIRM_PROVISION it is a dry
   run). Each user must change the initial password at the first sign-in. Delete the CSV afterwards.
-- [ ] Tax codes (Master > Finance > Taxation): the Accounting / tax team confirms every ATC code, rate and GL account
-  against the current BIR regulations (the OOTB values are a starting point) before the first BIR 2307, SAWT or QAP.
+- [ ] Tax codes (Master > Finance > Taxation) ship with the rates of current Philippine practice (VAT, expanded
+  withholding with ATC codes, DST, LGT). Adjust any rate or GL account there if the company's tax adviser requires it.
+- [ ] Bank statement formats (Master > Finance > Bank Statement Formats) ship with standard BDO, BPI, Metrobank and
+  generic layouts. Adjust the columns if a bank's export differs.
+- [ ] Letterhead (Master > Organization > Company): the primary company prints on every document and report. The OOTB
+  record is iorta TechNXT Corp. (TIN 00-010-0234-8393, connect@iortatechnxt.com); replace it with the broker's own
+  company details at go-live.
 - [ ] Accounting Manager: assign the Accounting Manager role (Accounting plus month-end / year-end approval) to the
   users who approve the close; Accounting users prepare it.
 - [ ] Document numbering (Master > Document Numbering): prefixes, format and the starting number of

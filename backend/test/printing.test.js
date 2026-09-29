@@ -240,7 +240,7 @@ describe('letterhead and the primary company', () => {
   it('reads the primary company of the Company master (iorta TechNXT Corp. out of the box) with its logo', async () => {
     clearLetterheadCache();
     const lh = await getLetterhead({ fresh: true });
-    expect(lh).toMatchObject({ code: 'ITX', name: 'iorta TechNXT Corp.', tin: '', licence: '', phone: '', email: '' });
+    expect(lh).toMatchObject({ code: 'ITX', name: 'iorta TechNXT Corp.', tin: '00-010-0234-8393', licence: '', phone: '', email: 'connect@iortatechnxt.com' });
     expect(lh.addressLines).toEqual(['UB, 111 Paseo De Roxas Building', 'Legazpi Village, San Lorenzo', 'Makati, Metro Manila, Philippines']);
     expect(lh.logo?.type).toBe('png');
     expect(companyAddressLines({ AddressLine1: 'A', City: 'Makati', State: 'Metro Manila', PinCode: '1226', Country: 'Philippines' })).toEqual(['A', 'Makati, Metro Manila 1226, Philippines']);
