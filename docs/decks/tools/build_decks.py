@@ -1,9 +1,9 @@
 """Build the BrokerVerse persona guides (one .pptx per persona) with python-pptx.
 
-Usage:  python3 docs/decks/tools/build_decks.py --shots <dir with <user>__<screen>.png> [--out docs/decks]
+Usage:  python3 docs/decks/tools/build_decks.py [--shots <dir with <user>__<screen>.png>] [--out docs/decks] [user ...]
 
-Screenshots come from docs/decks/tools/capture_screens.py (live screens, one sign-in per persona) and from the user
-manual's screens in docs/manual/images ('manual:<name>'). Content lives in personas.py next to this file.
+Screens come from the user manual's screenshots in docs/manual/images ('manual:<name>'), or from a --shots folder
+written by docs/decks/tools/capture_screens.py ('<user>__<screen>.png'). Content lives in personas.py next to this file.
 """
 import argparse, io, os, sys
 from pptx import Presentation
@@ -14,7 +14,7 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from personas import PERSONAS, FLOW_STEPS, REPORTS, JOBS  # noqa: E402
+from personas import PERSONAS, FLOW_STEPS, REPORTS, REPORT_GROUPS, JOBS, SUPPORT  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 LOGO = os.path.join(ROOT, 'brokerverse', 'public', 'bdoi', 'iorta-technxt.png')
@@ -25,6 +25,8 @@ def shot_path(img, shots):
     """'manual:<name>' -> docs/manual/images/<name>.jpg; anything else is a file in the --shots directory."""
     if img.startswith('manual:'):
         return os.path.join(MANUAL_IMAGES, img[len('manual:'):] + '.jpg')
+    if not shots:
+        raise SystemExit(f'{img} needs --shots <folder of captured screens>')
     return os.path.join(shots, img)
 
 DEEP = RGBColor(0x0B, 0x4F, 0x9C)
@@ -122,6 +124,22 @@ def picture(slide, path, x, y, w=None, h=None):
 _img_cache = {}
 
 
+def auto_bottom(im, max_ratio=0.75):
+    """Height that drops the empty page background under the content (right of the sidebar) and keeps tall screens
+    to at most max_ratio x width, so they stay readable on a slide."""
+    x0 = min(300, im.width // 4)
+    band = im.crop((x0, 0, im.width - 10, im.height)).convert('L')
+    w, h = band.size
+    px = band.load()
+    bottom = h
+    for y in range(h - 1, 0, -1):
+        row = [px[x, y] for x in range(0, w, 7)]
+        if max(row) - min(row) > 12:
+            bottom = min(h, y + 24)
+            break
+    return max(min(bottom, int(im.width * max_ratio)), min(h, int(im.width * 0.5)))
+
+
 def jpeg(path, max_w=1600, crop=None):
     """Screens re-encoded as JPEG so the decks stay small; returns a file-like object."""
     key = (path, crop)
@@ -129,6 +147,8 @@ def jpeg(path, max_w=1600, crop=None):
         im = Image.open(path).convert('RGB')
         if crop:
             im = im.crop(crop)
+        else:
+            im = im.crop((0, 0, im.width, auto_bottom(im)))
         if im.width > max_w:
             im = im.resize((max_w, round(im.height * max_w / im.width)), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, 'JPEG', quality=85, optimize=True)
@@ -190,23 +210,24 @@ def title_slide(d):
     s = d.slide(chrome=False)
     rect(s, 0, 0, SW, 0.08, fill=DEEP)
     picture(s, LOGO, 0.8, 0.9, h=1.05)
-    text(s, 0.8, 2.55, 7.9, 1.5, f"BrokerVerse — {p['label']} guide", size=38, bold=True, color=DEEP,
+    text(s, 0.8, 2.45, 7.9, 1.6, f"BrokerVerse guide for {p['label']}", size=38, bold=True, color=DEEP,
          anchor=MSO_ANCHOR.BOTTOM)
-    text(s, 0.8, 4.15, 7.9, 0.5, 'Out-of-the-box functions, flows, reports and schedules', size=20, color=TEXT)
+    text(s, 0.8, 4.15, 7.9, 0.5, 'Functions, flows, reports and schedules of your role', size=20, color=TEXT)
     text(s, 0.8, 4.75, 7.9, 0.4, 'BrokerVerse OOTB · insurance broking · Philippines · PHP', size=14, color=MUTED)
     x = 0.8
     for c in p['title_chips']:
         x += chip(s, x, 5.45, c) + 0.15
     # persona panel
     rect(s, 9.2, 0.9, 3.4, 5.6, fill=DEEP, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.05)
-    text(s, 9.5, 1.2, 2.8, 0.3, 'THIS GUIDE IS FOR', size=11, bold=True, color=RGBColor(0xBF, 0xD9, 0xF5))
-    text(s, 9.5, 1.55, 2.8, 1.0, p['label'], size=22, bold=True, color=WHITE)
-    rows = [('Sign-in', p['users']), ('Role code', p['role_code']), ('Lands on', p['landing'])]
-    y = 2.75
+    text(s, 9.5, 1.15, 2.8, 0.3, 'THIS GUIDE IS FOR', size=11, bold=True, color=RGBColor(0xBF, 0xD9, 0xF5))
+    text(s, 9.5, 1.45, 2.8, 0.5, p['label'], size=22, bold=True, color=WHITE)
+    rows = [('Role', p['full_label']), ('Sign-in', p['users']), ('Role code', p['role_code']), ('Lands on', p['landing'])]
+    y = 2.2
     for k, v in rows:
-        text(s, 9.5, y, 2.8, 0.28, k.upper(), size=10, bold=True, color=RGBColor(0x9F, 0xC8, 0xF2))
-        text(s, 9.5, y + 0.28, 2.8, 0.75, v, size=13, color=WHITE)
-        y += 1.1
+        lines = 1 + len(v) // 30
+        text(s, 9.5, y, 2.8, 0.26, k.upper(), size=10, bold=True, color=RGBColor(0x9F, 0xC8, 0xF2))
+        text(s, 9.5, y + 0.26, 2.8, 0.25 * lines, v, size=13, color=WHITE)
+        y += 0.26 + 0.25 * lines + 0.22
     text(s, 0.8, 6.85, 8, 0.3, 'Prepared by iorta TechNXT · September 2026', size=10, color=MUTED)
 
 
@@ -327,10 +348,11 @@ def flow_slide(d):
     s = d.slide(p.get('flow_title', 'End-to-end flow: your part of the cycle'), p.get('flow_kicker', 'Lead to renewal'))
     n = len(steps)
     first = (n + 1) // 2
-    bw, bh, ag = 1.62, 1.12, 0.46
+    ag = 0.46 if first <= 6 else 0.34
+    bw, bh = min(1.62, (12.33 - (first - 1) * ag) / first), 1.2
     row_w = first * bw + (first - 1) * ag
     x0 = 0.5 + (12.33 - row_w) / 2
-    ys = [1.55, 3.35]
+    ys = [1.45, 3.15]
     pos = []
     for i in range(n):
         if i < first:
@@ -343,9 +365,9 @@ def flow_slide(d):
         fill = GREEN if hl else LIGHT
         rect(s, x, y, bw, bh, fill=fill, line=None if hl else LINE, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.12)
         text(s, x + 0.08, y + 0.08, 0.5, 0.25, str(i + 1), size=10, bold=True, color=WHITE if hl else BRIGHT)
-        text(s, x + 0.08, y + 0.28, bw - 0.16, 0.45, name, size=13, bold=True, color=WHITE if hl else DEEP,
+        text(s, x + 0.08, y + 0.26, bw - 0.16, 0.45, name, size=12.5, bold=True, color=WHITE if hl else DEEP,
              align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
-        text(s, x + 0.08, y + 0.72, bw - 0.16, 0.34, owner, size=9.5, color=WHITE if hl else MUTED,
+        text(s, x + 0.06, y + 0.72, bw - 0.12, 0.45, owner, size=9.5, color=WHITE if hl else MUTED,
              align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.TOP)
         # arrows
         if i < n - 1:
@@ -358,7 +380,7 @@ def flow_slide(d):
                 rect(s, x + bw / 2 - 0.15, y + bh + 0.12, 0.3, ys[1] - y - bh - 0.24, fill=BRIGHT,
                      shape=MSO_SHAPE.DOWN_ARROW)
     # legend
-    ly = 4.72
+    ly = 4.6
     rect(s, 0.5, ly + 0.05, 0.28, 0.2, fill=GREEN, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.3)
     text(s, 0.85, ly, 3.2, 0.3, 'Your steps', size=11, color=TEXT, anchor=MSO_ANCHOR.MIDDLE)
     rect(s, 2.2, ly + 0.05, 0.28, 0.2, fill=LIGHT, line=LINE, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.3)
@@ -367,12 +389,12 @@ def flow_slide(d):
     if p.get('flow_loop'):
         text(s, 7.0, ly, 5.83, 0.3, p['flow_loop'], size=11, italic=True, color=MUTED, align=PP_ALIGN.RIGHT,
              anchor=MSO_ANCHOR.MIDDLE)
-    card(s, 0.5, 5.15, 12.33, 1.65, fill=PALE_GREEN, line=None)
+    card(s, 0.5, 5.0, 12.33, 1.8, fill=PALE_GREEN, line=None)
     notes = p['flow_notes']
     half = (len(notes) + 1) // 2
-    fs = min(fit(notes[:half], 5.85, 1.35, 5, (15, 14, 13, 12, 11)), fit(notes[half:], 5.85, 1.35, 5, (15, 14, 13, 12, 11)))
-    bullets(s, 0.75, 5.3, 5.85, 1.45, notes[:half], size=fs, spacing=5, marker=GREEN)
-    bullets(s, 6.75, 5.3, 5.9, 1.45, notes[half:], size=fs, spacing=5, marker=GREEN)
+    fs = min(fit(notes[:half], 5.85, 1.5, 5, (15, 14, 13, 12, 11)), fit(notes[half:], 5.85, 1.5, 5, (15, 14, 13, 12, 11)))
+    bullets(s, 0.75, 5.15, 5.85, 1.6, notes[:half], size=fs, spacing=5, marker=GREEN)
+    bullets(s, 6.75, 5.15, 5.9, 1.6, notes[half:], size=fs, spacing=5, marker=GREEN)
 
 
 def _table(s, x, y, w, rows, widths, size=11, header_fill=DEEP, row_h=0.3):
@@ -406,8 +428,7 @@ def _table(s, x, y, w, rows, widths, size=11, header_fill=DEEP, row_h=0.3):
 def reports_slide(d):
     p = d.p
     codes = p['reports']
-    s = d.slide(p.get('reports_title', 'Reports you use'), 'Reports > All Reports' if codes else 'Figures and evidence')
-    x = 0.5
+    s = d.slide(p.get('reports_title', f'Reports you use ({len(codes)})'), 'Reports > All Reports' if codes else 'Figures and evidence')
     if not codes:
         text(s, 0.5, 1.33, 12.33, 0.32, p.get('reports_note', ''), size=12, italic=True, color=MUTED,
              anchor=MSO_ANCHOR.MIDDLE)
@@ -416,31 +437,41 @@ def reports_slide(d):
         return
     text(s, 0.5, 1.33, 1.6, 0.32, 'Output formats', size=11, bold=True, color=MUTED, anchor=MSO_ANCHOR.MIDDLE)
     x = 2.05
-    for c, f in (('CSV', PALE_BLUE), ('XLSX', PALE_BLUE), ('PDF', PALE_BLUE), ('On screen', PALE_BLUE),
+    for c, f in (('CSV', PALE_BLUE), ('XLSX', PALE_BLUE), ('PDF', PALE_BLUE), ('Preview', PALE_BLUE),
                  ('Scheduled e-mail', PALE_GREEN)):
         x += chip(s, x, 1.33, c, fill=f, color=DEEP if f == PALE_BLUE else GREEN, size=10, h=0.3) + 0.1
     text(s, x + 0.2, 1.33, SW - 0.5 - x - 0.2, 0.32, p.get('reports_note', ''), size=11, italic=True, color=MUTED,
          anchor=MSO_ANCHOR.MIDDLE)
-    if not codes:
-        alt = p['reports_alt']
-        rows = [('Where', 'What it gives you')] + alt
-        _table(s, 0.5, 1.95, 12.33, rows, [3, 9], size=12, row_h=0.46)
+    if len(codes) <= 15:
+        rows = [('Report', 'What it shows')] + [(REPORTS[c][0], REPORTS[c][1]) for c in codes]
+        rh = min(0.46, 4.85 / len(rows))
+        _table(s, 0.5, 1.9, 12.33, rows, [3.2, 9.1], size=11.5 if len(rows) <= 10 else 10.5 if len(rows) <= 14 else 10, row_h=rh)
         return
-    items = [REPORTS[c] for c in codes]
-    if len(items) <= 10:
-        rows = [('Report', 'What it shows', 'Where')] + [(r[0], r[1], r[2]) for r in items]
-        rh = min(0.5, 4.5 / len(rows))
-        _table(s, 0.5, 1.95, 12.33, rows, [2.6, 6.6, 3.1], size=11.5 if len(rows) < 8 else 11, row_h=rh)
-    else:
-        ops = [r for c, r in zip(codes, items) if r[3] == 'operational']
-        fin = [r for c, r in zip(codes, items) if r[3] == 'financial']
-        for k, (hdr, group) in enumerate((('Operational', ops), ('Financial', fin))):
-            if not group:
-                continue
-            rows = [(f'{hdr} report', 'What it shows')] + [(r[0], r[1]) for r in group]
-            xx = 0.5 + k * 6.27
-            rh = 0.4
-            _table(s, xx, 1.95, 6.06, rows, [2.1, 3.96], size=9.5, row_h=rh)
+    # large catalogue: report names by group, in cards
+    groups = [(g, [c for c in cs if c in codes]) for g, cs in REPORT_GROUPS]
+    groups = [(g, cs) for g, cs in groups if cs]
+    per_row = (len(groups) + 1) // 2 if len(groups) > 4 else len(groups)
+    rows_ = [groups[i:i + per_row] for i in range(0, len(groups), per_row)]
+    gap = 0.18
+    cw = (12.33 - gap * (per_row - 1)) / per_row
+    top, total_h = 1.9, 4.9
+    longest = [max(len(cs) for _, cs in r) for r in rows_]
+    avail = total_h - gap * (len(rows_) - 1)
+    heights = [avail * n / sum(longest) for n in longest]
+    heights = [max(h, 1.3) for h in heights]
+    scale = avail / sum(heights)
+    heights = [h * scale for h in heights]
+    y = top
+    for r, hh in zip(rows_, heights):
+        for c, (g, cs) in enumerate(r):
+            x = 0.5 + c * (cw + gap)
+            card(s, x, y, cw, hh, fill=LIGHT)
+            rect(s, x, y, cw, 0.36, fill=DEEP, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.18)
+            text(s, x + 0.12, y, cw - 0.24, 0.36, g, size=11.5, bold=True, color=WHITE, anchor=MSO_ANCHOR.MIDDLE)
+            names = [REPORTS[k][0] for k in cs]
+            pt = fit(names, cw - 0.2, hh - 0.5, 2, (11.5, 11, 10.5, 10, 9.5, 9))
+            bullets(s, x + 0.1, y + 0.44, cw - 0.18, hh - 0.5, names, size=pt, spacing=2)
+        y += hh + gap
 
 
 def schedules_slide(d):
@@ -448,12 +479,12 @@ def schedules_slide(d):
     s = d.slide('Schedules and automations', 'Master > Configuration > Schedules')
     rows = [('Job', 'When it runs', 'What it means for you')]
     for code, effect in p['jobs']:
-        name, when, _ = JOBS[code]
-        rows.append((name, when, effect))
+        name, when, on = JOBS[code]
+        rows.append((name, when if on else when + ' (off when delivered)', effect))
     rh = min(0.55, 4.5 / len(rows))
     _table(s, 0.5, 1.45, 12.33, rows, [2.4, 2.2, 7.7], size=12 if len(rows) <= 7 else 11, row_h=rh)
-    text(s, 0.5, min(6.3, 1.45 + rh * len(rows) + 0.35), 12.33, 0.45, p.get('jobs_note', 'Times are server time (Philippine time in production). '
-         'The IT administrator can change a timetable, switch a job off or press Run now; every run is recorded.'),
+    text(s, 0.5, min(6.3, 1.45 + rh * len(rows) + 0.35), 12.33, 0.45, p.get('jobs_note', 'Times are Manila time (general.timezone). '
+         'The System Administrator changes a timetable, switches a job on or off, or runs it now; every run is recorded.'),
          size=11, italic=True, color=MUTED)
 
 
@@ -499,25 +530,28 @@ def closing_slide(d):
     bg = s.background.fill; bg.solid(); bg.fore_color.rgb = DEEP
     rect(s, 0.8, 0.9, 4.2, 1.5, fill=WHITE, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.08)
     picture(s, LOGO, 1.05, 1.15, h=1.0)
-    text(s, 0.8, 2.9, 11, 0.8, 'Thank you', size=40, bold=True, color=WHITE)
-    text(s, 0.8, 3.7, 11, 0.5, f"BrokerVerse — {p['label']} guide", size=18, color=RGBColor(0xBF, 0xD9, 0xF5))
-    rect(s, 0.8, 4.55, 11.7, 2.05, fill=RGBColor(0x0E, 0x5C, 0xB2), shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.06)
-    text(s, 1.1, 4.7, 5, 0.35, 'SUPPORT', size=11, bold=True, color=RGBColor(0x9F, 0xC8, 0xF2))
-    rows = [('Service desk', '<service desk to be confirmed>'), ('E-mail', '<support mailbox to be confirmed>'),
-            ('Hours', '<business hours, Manila time, to be confirmed>'),
-            ('Access requests', p.get('access_contact', 'Your User Access Administrator (Master > User Management)'))]
-    y = 5.05
+    text(s, 0.8, 2.75, 11, 0.8, 'Thank you', size=40, bold=True, color=WHITE)
+    text(s, 0.8, 3.55, 11, 0.5, f"BrokerVerse guide for {p['label']}", size=18, color=RGBColor(0xBF, 0xD9, 0xF5))
+    rect(s, 0.8, 4.3, 11.7, 2.4, fill=RGBColor(0x0E, 0x5C, 0xB2), shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.06)
+    text(s, 1.1, 4.42, 5, 0.35, 'SUPPORT', size=11, bold=True, color=RGBColor(0x9F, 0xC8, 0xF2))
+    rows = SUPPORT + [('Access requests', p.get('access_contact', 'Your System Administrator (Master > Generals > User Management)'))]
+    y = 4.75
     for k, v in rows:
-        text(s, 1.1, y, 2.4, 0.33, k, size=13, bold=True, color=WHITE)
-        text(s, 3.5, y, 8.8, 0.33, v, size=13, color=WHITE)
+        text(s, 1.1, y, 2.4, 0.33, k, size=12.5, bold=True, color=WHITE)
+        text(s, 3.5, y, 8.8, 0.33, v, size=12.5, color=WHITE)
         y += 0.36
-    text(s, 0.8, 6.9, 11.7, 0.3, 'iorta TechNXT · BrokerVerse insurance-broking platform', size=10,
+    text(s, 1.1, y + 0.02, 11.2, 0.33, 'When you report a problem, give the menu path, the record number, the time, your user ID, '
+         'the message and its request ID. Never send a password or a two-step code.', size=11, italic=True,
+         color=RGBColor(0xBF, 0xD9, 0xF5))
+    text(s, 0.8, 6.9, 11.7, 0.3, 'iorta TechNXT · BrokerVerse insurance broking platform', size=10,
          color=RGBColor(0xBF, 0xD9, 0xF5))
 
 
 def extra_slide(d, e, shots):
     kind = e['kind']
-    if kind == 'api':
+    if kind == 'table':
+        table_extra(d, e)
+    elif kind == 'api':
         s = d.slide(e['title'], e['kicker'])
         stats = e['stats']
         cw = (12.33 - 0.2 * (len(stats) - 1)) / len(stats)
@@ -553,6 +587,20 @@ def extra_slide(d, e, shots):
             bullets(s, 7.08, 2.05, 5.55, 4.6, e['right'], size=fit(e['right'], 5.55, 4.45, 8), spacing=8, marker=GREEN)
 
 
+def table_extra(d, e):
+    s = d.slide(e['title'], e['kicker'])
+    y = 1.4
+    if e.get('intro'):
+        text(s, 0.5, y, 12.33, 0.5, e['intro'], size=13, color=TEXT)
+        y += 0.6
+    rows = e['rows']
+    room = 6.75 - y - (0.55 if e.get('note') else 0)
+    rh = min(0.5, room / len(rows))
+    _table(s, 0.5, y, 12.33, rows, e['widths'], size=e.get('size', 12 if len(rows) <= 9 else 11), row_h=rh)
+    if e.get('note'):
+        text(s, 0.5, y + rh * len(rows) + 0.2, 12.33, 0.5, e['note'], size=11, italic=True, color=MUTED)
+
+
 def build(p, shots, out):
     d = Deck(p)
     title_slide(d)
@@ -576,7 +624,7 @@ def build(p, shots, out):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--shots', required=True)
+    ap.add_argument('--shots', default=None)
     ap.add_argument('--out', default=os.path.join(ROOT, 'docs', 'decks'))
     ap.add_argument('only', nargs='*')
     a = ap.parse_args()

@@ -1,63 +1,34 @@
 {
-"BrokerVerse":[
- {"name":"exec","path":"/executive/dashboard","wait":3500},
- {"name":"roles","path":"/master/generals/usermanagement/role"},
- {"name":"syssettings","path":"/master/configuration/system-settings","clip":[0,0,1600,640]},
- {"name":"config","path":"/master/configuration/settings"},
- {"name":"schedules","path":"/master/configuration/schedules"},
- {"name":"audit","path":"/master/configuration/audit-trail"}
-],
 "bea.admin":[
- {"name":"pcdash","path":"/product-configurator/dashboard"},
- {"name":"templates","path":"/product-configurator/templates"},
- {"name":"insurer","path":"/master/generals/insurancemanagement/insurancecompany"},
- {"name":"product","path":"/master/generals/insurancemanagement/productmaster"},
- {"name":"commission","path":"/master/generals/commission"},
- {"name":"treaty","path":"/master/reinsurance/treaty"},
- {"name":"incentive","path":"/master/incentive/programs/view"},
- {"name":"rating","path":"/product-configurator/rating"}
+ {"name":"docnum","path":"/master/configuration/document-numbering"},
+ {"name":"postingrules","path":"/master/finance/posting-rules"},
+ {"name":"schedules","path":"/master/configuration/schedules"}
 ],
 "maria.sales":[
- {"name":"exec","path":"/executive/dashboard","wait":3500},
+ {"name":"salesdash","path":"/agent/home","wait":3500},
  {"name":"leads","path":"/agent/leadlisting"},
- {"name":"quotes","path":"/agent/Quotation"},
- {"name":"policy","path":"/agent/policy"},
- {"name":"commission","path":"/commission/dashboard"},
  {"name":"renewalq","path":"/renewal/queue"}
 ],
-"ramon.agent":[
- {"name":"agentdash","path":"/agent/home","wait":3500},
- {"name":"leads","path":"/agent/leadlisting"},
- {"name":"renewals","path":"/agent/expired-policies"}
-],
 "jose.uw":[
- {"name":"uwdash","path":"/underwriting/dashboard","wait":3500},
- {"name":"uwrules","path":"/product-configurator/underwriting"},
- {"name":"rating","path":"/product-configurator/rating"},
- {"name":"coverages","path":"/product-configurator/coverages"},
- {"name":"quotes","path":"/agent/Quotation"},
- {"name":"renewalq","path":"/renewal/queue"},
- {"name":"cessions","path":"/reinsurance/cessions"}
+ {"name":"procdash","path":"/processing/dashboard","wait":3500},
+ {"name":"brokerslips","path":"/placement/broker-slips"},
+ {"name":"placementslips","path":"/placement/placement-slips"}
 ],
 "ana.cs":[
- {"name":"policy","path":"/agent/policy"},
  {"name":"openitems","path":"/agent/openitemslistdata"},
- {"name":"payments","path":"/agent/payments"},
- {"name":"renewals","path":"/agent/expired-policies"}
+ {"name":"clients","path":"/agent/clientlisting"}
 ],
 "carlo.claims":[
  {"name":"claimsdash","path":"/claims/dashboard","wait":3500},
- {"name":"claims","path":"/agent/claim"},
- {"name":"claimsreport","path":"/reports/operationalreports/claims"}
+ {"name":"claims","path":"/agent/claim"}
 ],
 "liza.finance":[
  {"name":"receipts","path":"/accounts/receipts"},
- {"name":"collections","path":"/agent/collections"},
- {"name":"jv","path":"/accounts/journalvoucher"},
- {"name":"remtracking","path":"/finance/remittance/tracking/status"}
+ {"name":"bankrec","path":"/accounts/bank-reconciliation"},
+ {"name":"monthend","path":"/accounts/period-end/close"}
 ],
-"carmela.morfe":[
- {"name":"roles","path":"/master/generals/usermanagement/role"},
- {"name":"audit","path":"/master/configuration/audit-trail"}
+"acct.manager":[
+ {"name":"periods","path":"/accounts/period-end/periods"},
+ {"name":"reconciliations","path":"/accounts/bank-reconciliation/reconciliations"}
 ]
 }

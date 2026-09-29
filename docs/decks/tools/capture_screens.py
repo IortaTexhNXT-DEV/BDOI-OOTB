@@ -8,9 +8,9 @@ front end on 127.0.0.1:5080 (WEB_BASE):
 
 Screens are written as <out_dir>/<user>__<name>.png (viewport 1600 x 1000; "clip": [x, y, w, h] keeps part of the
 screen) and fed to build_decks.py --shots. Screens that need clicks (dialogs, wizards, report preview) come from
-the user manual's screenshots instead ('manual:<name>' in personas.py). ADMIN_PASSWORD is the password of
-BrokerVerse and carmela.morfe, PERSONA_PASSWORD that of the other persona users; both are read from the
-environment only. Sign-in is rate limited per address, so a failed sign-in is retried after a pause.
+the user manual's screenshots instead ('manual:<name>' in personas.py). PERSONA_PASSWORD is the password of the
+role users, ADMIN_PASSWORD that of the delivered BrokerVerse user; both are read from the environment only.
+Sign-in is rate limited per address, so a failed sign-in is retried after a pause.
 """
 import json, os, re, sys
 from playwright.sync_api import sync_playwright
@@ -28,7 +28,7 @@ def settle(page, t=2500):
 
 
 def password_for(user):
-    return os.environ['ADMIN_PASSWORD'] if user in ('BrokerVerse', 'carmela.morfe') else os.environ['PERSONA_PASSWORD']
+    return os.environ['ADMIN_PASSWORD'] if user == 'BrokerVerse' else os.environ['PERSONA_PASSWORD']
 
 
 def login(page, user):

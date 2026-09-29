@@ -1,53 +1,68 @@
-# BrokerVerse persona guides
+# BrokerVerse role guides
 
-One PowerPoint deck (16:9, iorta TechNXT theme) per persona. Each deck explains BrokerVerse, the out-of-the-box
-insurance-broking platform from iorta TechNXT for the Philippine market, from that persona's point of view. It
-covers the role, the exact menu map, the key functions with screens, the persona's part of the end-to-end flow,
-reports, schedules, notifications, known limitations and tips.
+One PowerPoint deck (16:9, iorta TechNXT theme) for each of the seven roles of the broker role model. Each deck
+explains BrokerVerse, the out-of-the-box insurance broking platform from iorta TechNXT for the Philippine market,
+from that role's point of view. It covers the role, the exact menu map, the key functions with screens, the role's
+part of the end-to-end flow, reports, schedules, notifications, known limitations and tips.
 
-| Deck | Persona (users) | Role code | Slides |
+| Deck | Role (sample users) | Role code | Slides |
 |---|---|---|---|
-| [BrokerVerse_IT_Administrator_Guide.pptx](BrokerVerse_IT_Administrator_Guide.pptx) | IT Administrator (BrokerVerse) | it-admin | 19 |
-| [BrokerVerse_Business_Administrator_Guide.pptx](BrokerVerse_Business_Administrator_Guide.pptx) | Business Administrator (bea.admin) | ba | 17 |
-| [BrokerVerse_Sales_Relationship_Manager_Guide.pptx](BrokerVerse_Sales_Relationship_Manager_Guide.pptx) | Sales / Relationship Manager (maria.sales) | sales | 16 |
-| [BrokerVerse_Agent_Referrer_Guide.pptx](BrokerVerse_Agent_Referrer_Guide.pptx) | Agent / Referrer (ramon.agent) | agent | 15 |
-| [BrokerVerse_Underwriter_Guide.pptx](BrokerVerse_Underwriter_Guide.pptx) | Underwriter (jose.uw) | underwriting | 17 |
-| [BrokerVerse_Customer_Services_Guide.pptx](BrokerVerse_Customer_Services_Guide.pptx) | Customer Services (ana.cs) | customer-services | 16 |
-| [BrokerVerse_Claims_Officer_Guide.pptx](BrokerVerse_Claims_Officer_Guide.pptx) | Claims Officer (carlo.claims, lisa.claims2) | claims | 16 |
-| [BrokerVerse_Finance_Accounts_Guide.pptx](BrokerVerse_Finance_Accounts_Guide.pptx) | Finance / Accounts (liza.finance, fe.approver) | finance | 17 |
-| [BrokerVerse_User_Access_Administrator_Guide.pptx](BrokerVerse_User_Access_Administrator_Guide.pptx) | User Access Administrator (carmela.morfe) | user-access-admin | 15 |
+| [BrokerVerse_System_Administrator_Guide.pptx](BrokerVerse_System_Administrator_Guide.pptx) | System Administrator, Super Admin Access (bea.admin) | system-admin | 22 |
+| [BrokerVerse_Sales_and_Marketing_Guide.pptx](BrokerVerse_Sales_and_Marketing_Guide.pptx) | Sales & Marketing, Account Executive (maria.sales) | sales | 18 |
+| [BrokerVerse_Processing_Team_Guide.pptx](BrokerVerse_Processing_Team_Guide.pptx) | Processing Team, Placement & Policy Processing (jose.uw) | processing | 22 |
+| [BrokerVerse_Operations_Guide.pptx](BrokerVerse_Operations_Guide.pptx) | Operations, Client Servicing (ana.cs) | operations | 19 |
+| [BrokerVerse_Claims_Guide.pptx](BrokerVerse_Claims_Guide.pptx) | Claims (carlo.claims, lisa.claims2) | claims | 18 |
+| [BrokerVerse_Accounting_Guide.pptx](BrokerVerse_Accounting_Guide.pptx) | Accounting (liza.finance; fe.approver and fin.approver as second users) | accounting | 22 |
+| [BrokerVerse_Accounting_Manager_Guide.pptx](BrokerVerse_Accounting_Manager_Guide.pptx) | Accounting Manager (acct.manager), inherits Accounting | accounting-manager | 19 |
+
+The System Administrator replaces the IT, Business and User Access administrators. The Agent / Referrer login is
+withdrawn: referrers do not sign in, Sales & Marketing enters their business and they are paid from the referrer
+master. The decks of those retired roles have been removed.
+
+What the decks cover beyond the daily screens:
+
+- Placement: Broker Slips, offer comparison, Quotation Slips, Placement Slips, direct placement, Record Issued Policy,
+  the motor quotation that goes straight to policy, and the placement journey per line (Processing Team).
+- Co-insurance participants: shares, the lead insurer and the split of premium, commission, remittance and claims
+  (Processing Team, Accounting, Claims, Sales & Marketing).
+- Document numbering, posting rules and account determination (System Administrator), and what each operational event
+  posts to the ledger (Accounting).
+- Month-end and year-end close, period control and bank reconciliation, prepared by Accounting and approved by the
+  Accounting Manager.
 
 ## Sources
 
 - Menus: `brokerverse/src/utils/menuPermissions.js` and `brokerverse/src/components/SideBar/list.js`
-- Reports and the roles that can see them: `report_definitions` (`backend/src/db/seeds/60_reports.sql`)
-- Schedules: `backend/src/db/seeds/jobs.json`. Business rules: `app_settings` (Master > Configuration)
-- Flows and the money trail: `docs/e2e/E2E_REPORT.md`. Known limitations: user manual, Appendix G (every item of
-  `docs/e2e/DEFECTS.md` is fixed)
+- Roles, names and inheritance: migrations `0115_role_inheritance.sql` and `0140_broker_roles.sql`
+- Reports and the roles that can run them: `report_definitions` (39 reports)
+- Schedules: `backend/src/db/seeds/jobs.json` and Master > Schedules (15 jobs). Business rules: Master > Configuration
+- Screens opened per role: `docs/e2e/ROLE_WALK.md`
+- Flows, rules and known limitations: the user manual (`docs/manual/tools/manual_source.md`, Appendix G)
 - API: `backend/docs/api` (Postman collection, OpenAPI, touchpoints workbook)
 
 ## Screens
 
-All screens are live screens of the rebranded system (BrokerVerse name, iorta TechNXT logo) with the sample data,
-captured on 29 September 2026. Captions say where each screen comes from:
+Every screen in the decks is a user manual screenshot (`docs/manual/images`, referenced as `manual:<name>` in
+`tools/personas.py`), taken from the rebranded system with the sample data on 29 September 2026. Each caption names
+the screen and the role the screen was captured with, read from `docs/manual/tools/scenes.py`. Some screens of a
+deck were captured with another role that opens the same screen, and the caption says so. Screens of the Accounting
+Manager were captured with the manual's Accounting Manager user.
 
-- **"Live screen … signed in as <user>"**: captured signed in as that persona, either by
-  `tools/capture_screens.py` (screens opened by address) or taken from the user manual's screenshots
-  (`docs/manual/images`, referenced as `manual:<name>` in `tools/personas.py`) for screens that need clicks:
-  dialogs, the quotation wizard, report preview, account actions.
-- **"Live screen — sign-in, …"**: the sign-in security screens of the user manual (example values, nothing sent to
-  the server).
+`tools/capture_screens.py` and `tools/screens.json` can add live screens per role (read-only: the script only opens
+screens). Reference them in `personas.py` as `<user>__<name>.png` and pass `--shots`.
 
 ## Rebuilding
 
 ```bash
 # 1. retake the user manual screenshots first if the screens changed (docs/manual/README.md)
-# 2. capture the persona screens (passwords from the environment only; read-only)
-WEB_BASE=http://127.0.0.1:5080 PERSONA_PASSWORD=... ADMIN_PASSWORD=... \
-    python3 docs/decks/tools/capture_screens.py /tmp/deckshots docs/decks/tools/screens.json
-# 3. build the decks (python-pptx)
-python3 docs/decks/tools/build_decks.py --shots /tmp/deckshots
+# 2. build the decks (python-pptx, Pillow)
+python3 docs/decks/tools/build_decks.py
+# 3. check the wording (stock words, long dashes, emojis, names)
+python3 docs/manual/tools/style_scan.py docs/decks docs/decks/tools/personas.py
 ```
 
-The deck content lives in `tools/personas.py`, and the layout and theme are in `tools/build_decks.py`. The
-support contacts on the closing slide are placeholders until the service desk is confirmed.
+Optional live screens: `WEB_BASE=... PERSONA_PASSWORD=... python3 docs/decks/tools/capture_screens.py /tmp/deckshots
+docs/decks/tools/screens.json`, then `build_decks.py --shots /tmp/deckshots`. Passwords come from the environment only.
+
+The deck content lives in `tools/personas.py`, and the layout and theme are in `tools/build_decks.py`. The closing
+slide gives the support levels of the user manual (Appendix H).
