@@ -23,12 +23,13 @@ minimal, clearly-correct front-end fix.
   (`const { router, define } = moduleRouter('<Module name>', '<mount>')`). Fill `summary`, `screen` (the
   front-end menu path that uses it), and example `query` / `request` / `response`. The API list, Postman
   collection and Excel are generated from these declarations, so they must be accurate.
-- Auth: `requireAuth` on everything except login-type endpoints. Gate writes with `requirePermission('write:<module>')`
-  and reads with `requirePermission('read:<module>')` (admin roles `it-admin` and `ba` always pass). Permission
-  codes are `read:` / `write:` + one of: profile, leads, clients, quotations, policies, endorsements, claims,
-  renewals, receipts, collections, disbursements, commission, remittance, reinsurance, incentive, products,
-  masters, users, roles, settings, reports, schedules, notifications, journal-vouchers, audit.
-- Record scoping: users whose roles are all in `security.scoped_roles` (default `agent`) only see their own book. Use
+- Auth: `define()` puts `requireAuth` first on every route unless the route says `auth: false` (sign-in type
+  endpoints only). Gate writes with `requirePermission('write:<module>')` and reads with
+  `requirePermission('read:<module>')`; the System Administrator (`system-admin`, `ADMIN_ROLE` in `src/lib/auth.js`)
+  always passes. Permission codes are `read:` / `write:` + one of the modules in `MODULES` in `src/db/seed.js`, plus
+  `approve:period-end` and `approve:bank-reconciliation`. Which role holds which permission is `ROLE_PERMS` in the
+  same file.
+- Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use
   `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`
   to the WHERE clause; guard detail, update and workflow routes with `ownRecord('<entity>')` (answers 404, not 403).
 - Validation: zod via `validate(schema)` from `src/lib/validate.js`. Be permissive where the front end sends
@@ -37,16 +38,24 @@ minimal, clearly-correct front-end fix.
   `{ success, message, data }` and for lists add `total, page, perPage, totalPages` (see `src/lib/respond.js`).
   Many screens read `response.data.data` or `response.data.items`; check the caller.
 - IDs: text primary keys with a prefix (`ld_…`, `qt_…`) or serial for masters, as in the existing migrations.
-- Document numbers: `SELECT next_number('<seq>', <prefix>)`; the prefix comes from
-  `getSetting('numbering.<entity>.prefix')`. Never hard-code prefixes, tax rates, currencies, limits, e-mail text
-  or colours: read them from `app_settings` via `src/lib/settings.js`, and add new keys to
-  `src/db/seeds/settings.json` only through your own seed SQL (`INSERT ... ON CONFLICT DO NOTHING`).
+- Document numbers: `nextDocumentNumber('<series code>', { db })` from `src/lib/numbering.js`; the series (prefix,
+  pattern, reset rule) is a row of `document_numbering` (see `src/modules/document-numbering/README.md`). Never
+  hard-code prefixes, tax rates, currencies, limits, e-mail text or colours: read them from `app_settings` via
+  `src/lib/settings.js`. New keys go into a seed or migration (`INSERT ... ON CONFLICT DO NOTHING`) with a group and
+  a label; `npm run check:settings` lists keys read in code that nothing seeds.
 - Every mutation calls `audit(req, {...})` from `src/lib/audit.js`. Workflow events that someone must act on
-  create a notification with `notify()` from `src/modules/notifications/router.js`; customer-facing e-mails go
-  through `queueEmail()` in `src/lib/mailer.js`.
+  create a notification with `notify()` from `src/modules/notifications/service.js`; customer-facing e-mails go
+  through `queueEmail()` in `src/lib/mailer.js`, with the text from `renderTemplate()` (`src/lib/template.js`;
+  subjects with `{ html: false }`).
+- Errors: throw `badRequest`, `notFound`, `conflict`, `forbidden` from `src/lib/errors.js`; the error handler turns
+  them into the JSON error body with the request id.
+- Shared helpers: dates in `src/lib/dates.js` (`today`, `isoDate`, `addDays`, `businessDate`), amounts in
+  `src/lib/money.js` (`round2`, `toNumber`, `formatMoney`), CSV in `src/lib/csv.js`, XLSX in `src/lib/xlsx.js`,
+  maker-checker in `src/lib/makerChecker.js`. Do not write local copies.
 - Money is `numeric(14,2)`; the pool returns numbers. Dates are `date`, returned as `YYYY-MM-DD`.
 - Deletes are soft (status) unless the record is a draft.
-- No `console.log`; use `req.log`.
+- No `console.log` (eslint refuses it outside scripts); use `req.log` in handlers and `logger` from
+  `src/lib/logger.js` elsewhere.
 
 ## Running
 
