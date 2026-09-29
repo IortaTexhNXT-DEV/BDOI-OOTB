@@ -60,3 +60,14 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 ## Defects
 
 78 defects logged, 66 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the business decisions on D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts) were given on 29 Sep 2026 and all four are fixed and re-tested (steps 24-26).
+
+## Confirmed business settings (29 Sep 2026)
+
+Confirmed by the business owner; seeded in `backend/src/db/seeds/settings.json` and editable in System Settings.
+
+| Setting | Value |
+|---|---|
+| `direct_bill.default_billing_mode` | broker (new policies are broker-billed unless direct bill is chosen at issue) |
+| `direct_bill.commission_vat_rate` / `direct_bill.commission_vat_inclusive` | 12%, added on top of the commission |
+| `direct_bill.insurer_ewt_rate` | 10% of the commission, withheld by the insurer (creditable, BIR Form 2307) |
+| `direct_bill.debit_note_due_days` | 30 days after the debit note date |
