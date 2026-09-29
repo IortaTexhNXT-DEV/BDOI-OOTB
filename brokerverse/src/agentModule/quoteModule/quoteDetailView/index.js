@@ -1054,7 +1054,7 @@ const QuoteDetailView = ({ action }) => {
                     <label className="insurance_text">{t("coverageDetailsCard.ctplTariffPremium")}</label>
                     <label className="alpha_text">
                       {Number(quotationData?.ctplCoveragePremium)
-                        ? formatCurrency(quotationData.ctplCoveragePremium)
+                        ? `${formatCurrency(quotationData.ctplCoveragePremium)}${Number(quotationData.ctplTermYears) === 3 ? " (3 years)" : ""}`
                         : t("quoteDetailView.notIncluded", "Not included")}
                     </label>
                   </div>

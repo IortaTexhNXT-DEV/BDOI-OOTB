@@ -246,8 +246,16 @@ const CoverageDetailsCard = ({
   );
   const vehicleType =
     vehicleClassInfo?.value || currentQuoteCreation?.policyDetails?.vehicleType || "";
-  const ctplTariffPremium =
-    vehicleClassInfo?.ctplPremium != null ? vehicleClassInfo.ctplPremium.toFixed(2) : "";
+  // 1-year CTPL, or the 3-year upfront amount for a brand-new vehicle where the tariff has one (LTO 3-year registration)
+  const [ctplTermYears, setCtplTermYears] = useState(
+    () => Number(currentQuoteCreation?.coverageDetails?.ctplTermYears) === 3 ? 3 : 1
+  );
+  const ctplOffers3Year = vehicleClassInfo?.ctplPremium3Year != null;
+  const ctplAmount =
+    ctplTermYears === 3 && ctplOffers3Year ? vehicleClassInfo.ctplPremium3Year : vehicleClassInfo?.ctplPremium;
+  const ctplTariffPremium = ctplAmount != null ? ctplAmount.toFixed(2) : "";
+  // form initial values use the 1-year amount so that a term change does not re-initialise (and wipe) the form
+  const ctplOneYearPremium = vehicleClassInfo?.ctplPremium != null ? vehicleClassInfo.ctplPremium.toFixed(2) : "";
   const appaSeats =
     Number(currentQuoteCreation?.policyDetails?.seatingCapacity) ||
     vehicleClassInfo?.defaultSeats ||
@@ -286,7 +294,7 @@ const CoverageDetailsCard = ({
         PersonalAccidentCoverpremium:
           existingCoverageDetails.personalAccidentCoverPremium || "",
         CtplCoverageRate:
-          ctplTariffPremium,
+          ctplOneYearPremium,
         ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
         BodilyInjury: existingCoverageDetails.bodilyInjury || "",
         BodilyInjuryCoveragePremium:
@@ -314,7 +322,7 @@ const CoverageDetailsCard = ({
       PersonalAccidentCoverRate: "",
       PersonalAccidentCoverpremium: "",
       CtplCoverageRate:
-        ctplTariffPremium,
+        ctplOneYearPremium,
       BodilyInjury: "",
       BodilyInjuryCoveragePremium: "",
       PropertyDamage: "",
@@ -324,7 +332,7 @@ const CoverageDetailsCard = ({
       APPACoveragePremium: "",
       TotalSumInsured: "",
     };
-  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType, ctplTariffPremium]);
+  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType, ctplOneYearPremium]);
 
   // Configured tax rates (app settings) so the gross shown here matches the order summary.
   const settingsTaxRates = useTaxRates();
@@ -393,6 +401,7 @@ const CoverageDetailsCard = ({
         ? values.ActsofNaturepremium
         : "",
       includeCTPL,
+      ctplTermYears: includeCTPL && ctplOffers3Year ? ctplTermYears : 1,
       ctplCoverageRate: includeCTPL ? ctplTariffPremium : "",
       ctplCoveragePremium: includeCTPL ? ctplTariffPremium : "",
       appaSeats,
@@ -701,7 +710,7 @@ const CoverageDetailsCard = ({
           productConfigurator?.configuration?.premiumRates?.acts_of_nature ||
           "",
         CtplCoverageRate:
-          ctplTariffPremium,
+          ctplOneYearPremium,
         ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
         BodilyInjury: existingCoverageDetails.bodilyInjury || "",
         BodilyInjuryCoveragePremium:
@@ -724,7 +733,7 @@ const CoverageDetailsCard = ({
       LossandDamagecoveragepremium: "",
       ActsofNatureRate: "",
       CtplCoverageRate:
-        ctplTariffPremium,
+        ctplOneYearPremium,
       ActsofNaturepremium: "",
       RoadsideAssistanceRate: "",
       RoadsideAssistancepremium: "",
@@ -935,6 +944,23 @@ const CoverageDetailsCard = ({
                 {t("coverageDetailsCard.includeCtpl")}
               </label>
             </div>
+            {includeCTPL && ctplOffers3Year && (
+              <div className="flex align-items-center gap-2 mb-2">
+                <Checkbox
+                  inputId="ctpl-3-year"
+                  checked={ctplTermYears === 3}
+                  onChange={(e) => {
+                    const years = e.checked ? 3 : 1;
+                    setCtplTermYears(years);
+                    const amount = years === 3 ? vehicleClassInfo.ctplPremium3Year : vehicleClassInfo.ctplPremium;
+                    formik.setFieldValue("CtplCoverageRate", amount.toFixed(2));
+                  }}
+                />
+                <label htmlFor="ctpl-3-year" className="m-0">
+                  {t("coverageDetailsCard.ctplThreeYear")}
+                </label>
+              </div>
+            )}
             {includeCTPL && (
               <CalculaitionTextInputs
                 label={t("coverageDetailsCard.ctplTariffPremium")}

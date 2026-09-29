@@ -57,14 +57,14 @@ BEGIN
     WHERE p.insurance_company_id = rec.ins AND to_char(p.inception_date, 'YYYY') = rec.yr AND p.status IN ('active', 'expired', 'renewed', 'issued');
     IF st = 'for-approval' THEN
       INSERT INTO remittance_approvals(entity, entity_id, reference_no, transaction_type, amount, description, priority, sla_hours, required_levels, initiator_id, history, created_at)
-      SELECT 'remittance', r.id, r.remittance_number, 'Direct Bill', r.net_due, 'Remittance ' || r.remittance_number || ' (' || r.policy_count || ' policies)',
+      SELECT 'remittance', r.id, r.remittance_number, 'Insurer Remittance', r.net_due, 'Remittance ' || r.remittance_number || ' (' || r.policy_count || ' policies)',
              CASE WHEN r.net_due >= 250000 THEN 'High' WHEN r.net_due >= 20000 THEN 'Normal' ELSE 'Low' END, CASE WHEN r.net_due >= 250000 THEN 12 WHEN r.net_due >= 20000 THEN 24 ELSE 48 END,
              CASE WHEN r.net_due > 1000000 THEN 3 WHEN r.net_due > 100000 THEN 2 ELSE 1 END, admin_id,
              jsonb_build_array(jsonb_build_object('action', 'Submitted', 'by', admin_id, 'at', now() - interval '1 day')), now() - interval '1 day'
       FROM remittances r WHERE r.id = rid;
     ELSIF st IN ('approved', 'settled') THEN
       INSERT INTO remittance_approvals(entity, entity_id, reference_no, transaction_type, amount, description, priority, sla_hours, initiator_id, status, action_by, action_at, remarks, history, created_at)
-      SELECT 'remittance', r.id, r.remittance_number, 'Direct Bill', r.net_due, 'Remittance ' || r.remittance_number, 'Normal', 24, admin_id, 'Approved', checker_id, r.approved_at, 'Verified against insurer statement',
+      SELECT 'remittance', r.id, r.remittance_number, 'Insurer Remittance', r.net_due, 'Remittance ' || r.remittance_number, 'Normal', 24, admin_id, 'Approved', checker_id, r.approved_at, 'Verified against insurer statement',
              jsonb_build_array(jsonb_build_object('action', 'Submitted', 'by', admin_id, 'at', r.submitted_at), jsonb_build_object('action', 'Approved', 'by', checker_id, 'at', r.approved_at, 'remarks', 'Verified against insurer statement', 'level', 1)),
              r.submitted_at
       FROM remittances r WHERE r.id = rid;

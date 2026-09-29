@@ -587,7 +587,7 @@ define({
 });
 define({
   method: 'GET', path: '/history', summary: 'Transaction history across remittances, settlements, adjustments and transfers', screen: S('History'), middleware: read, query: { search: 'REM', type: 'Settlement', page: 1 },
-  response: { success: true, data: [{ id: 'rm_1', referenceNo: 'REM-2026-00001', type: 'Direct Bill', policyNo: 'POL-2026-00001', clientName: 'Malayan Insurance Co., Inc.', amount: 38250, status: 'Approved', createdBy: 'Finance Officer', version: 3, hasAuditTrail: true }] },
+  response: { success: true, data: [{ id: 'rm_1', referenceNo: 'REM-2026-00001', type: 'Insurer Remittance', policyNo: 'POL-2026-00001', clientName: 'Malayan Insurance Co., Inc.', amount: 38250, status: 'Approved', createdBy: 'Finance Officer', version: 3, hasAuditTrail: true }] },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
     const { rows, total } = await items.history(req.query, pg);

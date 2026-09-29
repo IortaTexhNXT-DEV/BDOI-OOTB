@@ -73,7 +73,7 @@ const ACCOUNT_TYPES = "'asset', 'liability', 'equity', 'income', 'expense'";
 
 // Direct bill: commission receivable from insurers per item (policy / endorsement), billed on a debit note or not yet;
 // the item's share of the note balance is outstanding. Aged from the note due date (unbilled: from the booking date).
-const directBill = `SELECT p.policy_number AS "policyNumber", COALESCE(e.endorsement_number, 'New business') AS reference, ${POLICY_DIMS}, it.booked_on AS "bookedOn",
+const directBill = `SELECT p.policy_number AS "policyNumber", CASE WHEN it.source = 'endorsement' THEN COALESCE(e.endorsement_number, it.reference) ELSE 'New business' END AS reference, ${POLICY_DIMS}, it.booked_on AS "bookedOn",
     it.booked_on >= $1::date AS "_inPeriod", d.dn_number AS "debitNoteNo", d.dn_date AS "debitNoteDate", d.due_date AS "dueDate",
     it.gross_premium AS "grossPremium", it.commission, it.vat, it.amount AS "totalDue",
     CASE WHEN d.id IS NULL OR d.status IN ('draft', 'for-approval') THEN it.amount WHEN d.amount = 0 THEN 0

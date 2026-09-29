@@ -16,18 +16,28 @@ describe('Motor tariff (CTPL fixed premium, Auto Passenger PA per seat)', () => 
     const r = await ctx.api('get', '/quotations/motor-tariff');
     expect(r.status).toBe(200);
     const byCode = Object.fromEntries(r.body.data.vehicleTypes.map((v) => [v.value, v]));
-    expect(byCode.private_cars).toMatchObject({ ctplPremium: 560, defaultSeats: 5, ownDamageRate: 2 });
-    expect(byCode.motorcycles_tricycles.ctplPremium).toBe(250);
-    expect(byCode.pub_and_tourist_bus.ctplPremium).toBe(1450);
+    expect(byCode.private_cars).toMatchObject({ ctplPremium: 610.4, ctplPremium3Year: 1660.4, defaultSeats: 5, ownDamageRate: 2 });
+    expect(byCode.motorcycles_tricycles).toMatchObject({ ctplPremium: 300.4, ctplPremium3Year: null });
+    expect(byCode.pub_and_tourist_bus.ctplPremium).toBe(1500.4);
     expect(r.body.data.appa).toEqual({ limits: [25000, 50000, 75000, 100000, 150000, 200000], ratePercent: 0.1 });
   });
 
   it('prices CTPL at the tariff of the vehicle class, whatever amount the browser sends', async () => {
     const r = await price(motor({ includeCTPL: true, ctplCoverageRate: '1.00', ...vehicle('private_cars') }));
     expect(r.status).toBe(200);
-    expect(r.body.data).toMatchObject({ vehicleType: 'private_cars', ctplCoveragePremium: 560, netPremium: 24560 });
+    // CTPL is inclusive of taxes and fees: added to the gross, outside the taxed net premium
+    expect(r.body.data).toMatchObject({ vehicleType: 'private_cars', ctplCoveragePremium: 610.4, ctplTermYears: 1, netPremium: 24000 });
+    expect(r.body.data.grossPremium).toBeCloseTo(24000 * 1.2525 + 610.4, 2);
     const truck = await price(motor({ includeCTPL: true, ...vehicle('Heavy trucks (own goods) and private buses over 3,930 kg', '3') }));
-    expect(truck.body.data).toMatchObject({ vehicleType: 'heavy_trucks', ctplCoveragePremium: 1200 });
+    expect(truck.body.data).toMatchObject({ vehicleType: 'heavy_trucks', ctplCoveragePremium: 1250.4 });
+  });
+
+  it('prices the 3-year CTPL for a brand-new private car and refuses it where the tariff has none', async () => {
+    const r = await price(motor({ includeCTPL: true, ctplTermYears: 3, ...vehicle('private_cars') }));
+    expect(r.body.data).toMatchObject({ ctplCoveragePremium: 1660.4, ctplTermYears: 3 });
+    const m = await price(motor({ includeCTPL: true, ctplTermYears: 3, ...vehicle('motorcycles_tricycles', '2') }));
+    expect(m.status).toBe(400);
+    expect(m.body.message).toMatch(/3-year/);
   });
 
   it('leaves CTPL out when it is not included and refuses CTPL without a vehicle class', async () => {
@@ -52,9 +62,9 @@ describe('Motor tariff (CTPL fixed premium, Auto Passenger PA per seat)', () => 
   });
 
   it('follows tariff changes made in the Product Configurator', async () => {
-    await pool.query(`UPDATE product_templates SET config = jsonb_set(config, '{ctplSetting,private_cars}', '"610.00"') WHERE template_code = 'MOT-003-2025'`);
+    await pool.query(`UPDATE product_templates SET config = jsonb_set(config, '{ctplSetting,private_cars}', '"620.40"') WHERE template_code = 'MOT-003-2025'`);
     clearSettingsCache();
-    expect((await price(motor({ includeCTPL: true, ...vehicle('private_cars') }))).body.data.ctplCoveragePremium).toBe(610);
+    expect((await price(motor({ includeCTPL: true, ...vehicle('private_cars') }))).body.data.ctplCoveragePremium).toBe(620.4);
   });
 });
 
@@ -73,8 +83,8 @@ describe('Saved quotation', () => {
       APPAtotalCoverage: '1000', APPAcoveragePremium: '5.00', participantDetails: [{ insuranceCompanyName: 'Malayan Insurance Co., Inc.' }], ...vehicle('private_cars', '5') }));
     expect(r.status).toBe(201);
     const [row] = (await pool.query('SELECT doc, premium_base FROM quotes WHERE quote_number = $1', [r.body.quotationNumber])).rows;
-    // 610: the private car tariff as changed in the Product Configurator test above
-    expect(row.doc).toMatchObject({ ctplCoveragePremium: 610, ctplCoverageRate: '610.00', APPAtotalCoverage: 250000, APPAcoveragePremium: 250, appaSeats: 5 });
-    expect(Number(row.premium_base)).toBe(24000 + 610 + 250);
+    // 620.40: the private car tariff as changed in the Product Configurator test above
+    expect(row.doc).toMatchObject({ ctplCoveragePremium: 620.4, ctplCoverageRate: '620.40', APPAtotalCoverage: 250000, APPAcoveragePremium: 250, appaSeats: 5 });
+    expect(Number(row.premium_base)).toBe(24000 + 250);
   });
 });

@@ -2,7 +2,10 @@
  * Philippine motor tariff read from the motor product template (Product Configurator), whose code is the setting
  * motor.pricing_template_code:
  *  - vehicleClasses: the Insurance Commission vehicle classes [{ code, label, seats }]
- *  - ctplSetting: CTPL basic premium per vehicle class. CTPL is a fixed tariff premium, never sum insured x rate.
+ *  - ctplSetting: CTPL annual amount per vehicle class, inclusive of taxes and the authentication fee (Insurance
+ *    Commission tariff). CTPL is a fixed tariff amount, never sum insured x rate.
+ *  - ctplSetting3Year: the 3-year upfront CTPL amount for brand-new vehicles (LTO 3-year registration), per class
+ *    where the tariff gives one.
  *  - premiumRates: own damage rate (%) per vehicle class
  *  - appaSetting: Auto Passenger Personal Accident { limits: [per-person limits], ratePercent }. APPA premium =
  *    limit per person x number of seats (driver and passengers) x rate / 100.
@@ -23,11 +26,13 @@ export async function motorTariff() {
   const ctpl = cfg.ctplSetting || {};
   const rates = cfg.premiumRates || {};
   const appa = cfg.appaSetting || {};
+  const ctpl3 = cfg.ctplSetting3Year || {};
   return {
     templateCode: row?.template_code || null,
     vehicleTypes: classes.map((c) => ({
       value: c.code, label: c.label, defaultSeats: num(c.seats) || null,
       ctplPremium: ctpl[c.code] !== undefined ? round2(num(ctpl[c.code])) : null,
+      ctplPremium3Year: num(ctpl3[c.code]) > 0 ? round2(num(ctpl3[c.code])) : null,
       ownDamageRate: rates[c.code] !== undefined ? num(rates[c.code]) : null,
     })),
     appa: { limits: (appa.limits || []).map(num).filter((x) => x > 0), ratePercent: num(appa.ratePercent) },
@@ -65,8 +70,12 @@ export async function motorFixedCovers(v, tariff = null) {
   const out = { vehicleType: cls?.value || vehicleType || null, ctplCoveragePremium: 0, ctplCoverageRate: '' };
   if (wantsCtpl(v)) {
     if (!cls || cls.ctplPremium === null) throw badRequest('CTPL needs the vehicle type (Insurance Commission vehicle class) of the vehicle');
-    out.ctplCoveragePremium = cls.ctplPremium;
-    out.ctplCoverageRate = cls.ctplPremium.toFixed(2);
+    const years = num(v.ctplTermYears) === 3 ? 3 : 1;
+    if (years === 3 && cls.ctplPremium3Year === null) throw badRequest(`No 3-year CTPL tariff is configured for ${cls.label}`);
+    const amount = years === 3 ? cls.ctplPremium3Year : cls.ctplPremium;
+    out.ctplTermYears = years;
+    out.ctplCoveragePremium = amount;
+    out.ctplCoverageRate = amount.toFixed(2);
   }
   const perPerson = num(v.autoPassengerPersonalAccident);
   if (perPerson > 0) {

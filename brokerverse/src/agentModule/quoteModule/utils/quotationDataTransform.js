@@ -42,6 +42,7 @@ export const transformToBackendFormat = (
     actsOfNaturePremium: coverageDetails?.actsOfNaturePremium || null,
     // CTPL: the server prices it at the vehicle class tariff when included
     includeCTPL: Boolean(coverageDetails?.includeCTPL),
+    ctplTermYears: coverageDetails?.ctplTermYears || 1,
     ctplCoverageRate: coverageDetails?.ctplCoverageRate || null,
     ctplCoveragePremium: coverageDetails?.ctplCoveragePremium || null,
     appaSeats: coverageDetails?.appaSeats || null,

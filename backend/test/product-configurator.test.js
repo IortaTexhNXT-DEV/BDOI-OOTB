@@ -26,7 +26,7 @@ describe('product templates', () => {
   it('configurator returns the template at the top level and under data', async () => {
     const r = await as(salesToken, 'get', '/product-configurator/products/configurator?templateCode=MOT-003-2025');
     expect(r.status).toBe(200);
-    expect(r.body.configuration.ctplSetting.private_cars).toBe('560.00');
+    expect(r.body.configuration.ctplSetting.private_cars).toBe('610.40');
     expect(r.body.data.coverages).toHaveLength(7);
     expect((await ctx.api('get', '/product-configurator/products/configurator')).status).toBe(400);
     expect((await ctx.api('get', '/product-configurator/products/configurator?templateCode=NOPE')).status).toBe(404);

@@ -34475,7 +34475,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rm_1\",\n      \"referenceNo\": \"REM-2026-00001\",\n      \"type\": \"Direct Bill\",\n      \"policyNo\": \"POL-2026-00001\",\n      \"clientName\": \"Malayan Insurance Co., Inc.\",\n      \"amount\": 38250,\n      \"status\": \"Approved\",\n      \"createdBy\": \"Finance Officer\",\n      \"version\": 3,\n      \"hasAuditTrail\": true\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rm_1\",\n      \"referenceNo\": \"REM-2026-00001\",\n      \"type\": \"Insurer Remittance\",\n      \"policyNo\": \"POL-2026-00001\",\n      \"clientName\": \"Malayan Insurance Co., Inc.\",\n      \"amount\": 38250,\n      \"status\": \"Approved\",\n      \"createdBy\": \"Finance Officer\",\n      \"version\": 3,\n      \"hasAuditTrail\": true\n    }\n  ]\n}"
             }
           ]
         },

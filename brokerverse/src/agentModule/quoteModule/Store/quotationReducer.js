@@ -133,6 +133,7 @@ const quotationSlice = createSlice({
         actsOfNaturePremium: quotation.actsOfNaturePremium || "",
         includeCTPL: Boolean(quotation.includeCTPL ?? Number(quotation.ctplCoverageRate)),
         ctplCoverageRate: quotation.ctplCoverageRate || "",
+        ctplTermYears: quotation.ctplTermYears || 1,
         ctplCoveragePremium: quotation.ctplCoveragePremium || "",
         roadsideAssistanceRate: quotation.roadsideAssistanceRate || "",
         roadsideAssistancePremium: quotation.roadsideAssistancePremium || "",

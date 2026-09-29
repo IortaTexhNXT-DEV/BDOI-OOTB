@@ -8576,7 +8576,7 @@
     {
       ""id"": ""rm_1"",
       ""referenceNo"": ""REM-2026-00001"",
-      ""type"": ""Direct Bill"",
+      ""type"": ""Insurer Remittance"",
       ""policyNo"": ""POL-2026-00001"",
       ""clientName"": ""Malayan Insurance Co., Inc."",
       ""amount"": 38250,

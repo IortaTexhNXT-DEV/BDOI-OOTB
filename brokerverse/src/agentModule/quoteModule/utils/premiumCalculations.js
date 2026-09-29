@@ -118,10 +118,10 @@ export const calculateOrderSummary = (
   const accessoriesTotal =
     airconValue + stereoValue + magWheelsValue + othersValue;
 
+  // CTPL is the tariff amount inclusive of taxes and fees: outside the taxed net premium, added to the gross.
   let netPremium =
     ldPremium +
     aonPremium +
-    ctplPremium +
     raPremium +
     pacPremium +
     biPremium +
@@ -143,7 +143,7 @@ export const calculateOrderSummary = (
 
   // Calculate gross before discount
   let grossBeforeDiscount =
-    netPremium + valueAddedTax + documentaryStampTax + localGovernmentTax;
+    netPremium + valueAddedTax + documentaryStampTax + localGovernmentTax + ctplPremium;
 
   // Apply discount
   const discountAmount = (grossBeforeDiscount * discountPercent) / 100;
@@ -159,7 +159,7 @@ export const calculateOrderSummary = (
     valueAddedTax,
     documentaryStampTax,
     localGovernmentTax,
-    others: 0, // calculateOrderSummary doesn't include others in calculation
+    others: ctplPremium, // CTPL (inclusive of taxes) is added to the gross like other charges
     discount: discountAmount,
     sumInsured,
     taxRates,
@@ -374,10 +374,10 @@ export const calculatePremiumBreakdown = (
   );
   const appaPremium = parseValue(coverageValues.APPAcoveragePremium);
 
+  // CTPL is the tariff amount inclusive of taxes and fees: outside the taxed net premium, added to the gross.
   const netPremium =
     lossAndDamagePremium +
     actsOfNaturePremium +
-    ctplPremium +
     roadsideAssistancePremium +
     personalAccidentCoverPremium +
     bodilyInjuryPremium +
@@ -403,6 +403,7 @@ export const calculatePremiumBreakdown = (
     documentaryStampTax +
     valueAddedTax +
     localGovernmentTax +
+    ctplPremium +
     others -
     discount;
 
@@ -416,7 +417,7 @@ export const calculatePremiumBreakdown = (
     valueAddedTax,
     documentaryStampTax,
     localGovernmentTax,
-    others,
+    others: others + ctplPremium, // CTPL (inclusive of taxes) is added to the gross like other charges
     discount,
     sumInsured,
     taxRates,

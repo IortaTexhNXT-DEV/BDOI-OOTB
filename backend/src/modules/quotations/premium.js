@@ -1,6 +1,7 @@
 /**
  * Server-side premium calculation mirroring the quote wizard (agentModule/quoteModule/utils/premiumCalculations.js):
- * cover premium = sum insured x rate / 100; for motor, CTPL is the fixed tariff premium of the vehicle class and Auto
+ * cover premium = sum insured x rate / 100; for motor, CTPL is the fixed tariff amount of the vehicle class (inclusive of
+ * taxes and fees, added to the gross outside the taxable net premium) and Auto
  * Passenger PA is limit per person x seats x rate (motorTariff.js); flat BI / PD premiums come from the coverages master
  * when an id is given; net premium = sum of cover premiums (Fire / IAR use the premium details they send);
  * taxes (VAT, DST, LGT, FST) use app_settings rates and the per-LOB tax set; gross = net + taxes + others - discount.
@@ -78,7 +79,10 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
     covers.APPAcoveragePremium = round2(num(motor.APPAcoveragePremium));
     amounts.APPAtotalCoverage = num(motor.APPAtotalCoverage);
   }
-  let net = Object.values(covers).reduce((s, x) => s + num(x), 0);
+  // CTPL is the Insurance Commission tariff amount, already inclusive of taxes and the authentication fee: it is added to
+  // the gross premium as it is, outside the net premium that VAT / DST / LGT and commission are computed on.
+  const ctpl = round2(num(covers.ctplCoveragePremium));
+  let net = Object.entries(covers).reduce((s, [k, x]) => (k === 'ctplCoveragePremium' ? s : s + num(x)), 0);
   if (lob !== 'MOTOR') {
     const fire = v.firePremiumDetails || v.iarPremiumDetails || {};
     net = num(fire.totalCoverPremium ?? fire.netPremium ?? fire.basicPremium) || net;
@@ -91,13 +95,13 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   const tax = Object.fromEntries(Object.entries(rates).map(([k, r]) => [k, round2(net * r)]));
   const others = round2(num(v.accountPremiumOthers));
   const discount = round2(num(v.discount));
-  const gross = Math.max(0, round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + others - discount));
+  const gross = Math.max(0, round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + ctpl + others - discount));
   const si = (k) => (k in amounts ? num(amounts[k]) : num(v[k]));
   const sumInsured = round2(num(v.totalSumInsured) || si('lossAndDamageCoverage') + si('bodilyInjury') + si('propertyDamage') + si('APPAtotalCoverage')
     || num((v.fireRiskDetails || {}).totalSumInsured));
   const cRate = await commissionRate(v, insurerId);
   return {
-    lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, appaSeats: motor.appaSeats ?? null,
+    lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, ctplTermYears: motor.ctplTermYears ?? null, appaSeats: motor.appaSeats ?? null,
       APPAtotalCoverage: amounts.APPAtotalCoverage, APPARate: motor.APPARate ?? null } : {}), netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,
     totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate),
     currency: await getSetting('currency.default', 'PHP'),

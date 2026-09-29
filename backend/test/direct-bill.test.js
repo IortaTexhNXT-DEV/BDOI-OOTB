@@ -122,7 +122,7 @@ describe('commission debit note', () => {
     const r = await ctx.as('maker')('get', '/remittance/direct-bill/policies?insurerCode=FPG');
     expect(r.status).toBe(200);
     const row = r.body.data.find((x) => x.policyId === d.policyId);
-    expect(row).toMatchObject({ policyNo: d.policy.policy_number, insuredName: d.client.display_name, product: 'Private Car Comprehensive', lineOfBusiness: 'MOTOR', insurerCode: 'FPG',
+    expect(row).toMatchObject({ policyNo: d.policy.policy_number, reference: 'New business', insuredName: d.client.display_name, product: 'Private Car Comprehensive', lineOfBusiness: 'MOTOR', insurerCode: 'FPG',
       grossPremium: 125250, commissionRate: 15, commission: 15000, vat: 1800, totalDue: 16800, expectedEwt: 1500, netReceivable: 15300 });
     expect(r.body.summary.ewtRate).toBe(0.1);
     expect((await ctx.as('agent')('get', '/remittance/direct-bill/policies')).status).toBe(403);

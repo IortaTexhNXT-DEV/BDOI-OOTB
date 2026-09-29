@@ -250,7 +250,7 @@ export async function processRemittances(ids, user) {
       total += Number(r.net_due);
       await c.query('UPDATE remittances SET status = \'for-approval\', submitted_by = $2, submitted_at = now(), batch_ref = $3, updated_by = $2, updated_at = now() WHERE id = $1', [r.id, user.id, batchId]);
       await c.query('DELETE FROM remittance_approvals WHERE entity = \'remittance\' AND entity_id = $1 AND status = \'Pending\'', [r.id]);
-      await openApproval(c, { entity: 'remittance', entityId: r.id, referenceNo: r.remittance_number, transactionType: r.kind === 'agency-bill' ? 'Agency Bill' : 'Direct Bill', amount: Number(r.net_due), description: `Remittance ${r.remittance_number} (${r.policy_count} policies)`, initiatorId: user.id });
+      await openApproval(c, { entity: 'remittance', entityId: r.id, referenceNo: r.remittance_number, transactionType: r.kind === 'agency-bill' ? 'Agency Bill' : 'Insurer Remittance', amount: Number(r.net_due), description: `Remittance ${r.remittance_number} (${r.policy_count} policies)`, initiatorId: user.id });
     }
     await c.query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('batch', $1, $2, 'Pending Approval', $3, $4, $4)`,
       [batchId, round2(total), JSON.stringify({ processedIds: ok.map((x) => x.id), itemCount: ok.length, durationMs: Date.now() - started }), user.id]);

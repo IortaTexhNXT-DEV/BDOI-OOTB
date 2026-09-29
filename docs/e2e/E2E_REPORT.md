@@ -59,7 +59,7 @@ Environment: Chromium 1600 x 1000, Asia/Manila business time, currency PHP with 
 
 ## Defects
 
-78 defects logged, 66 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the business decisions on D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts) were given on 29 Sep 2026 and all four are fixed and re-tested (steps 24-26).
+79 defects logged, 67 fixed (most re-tested on screen). The open ones are listed in [DEFECTS.md](DEFECTS.md); the business decisions on D12 (CTPL), D13 (APPA), D36 (direct bill) and D57 (chart of accounts) were given on 29 Sep 2026 and all four are fixed and re-tested (steps 24-26).
 
 ## Confirmed business settings (29 Sep 2026)
 
@@ -71,3 +71,5 @@ Confirmed by the business owner; seeded in `backend/src/db/seeds/settings.json` 
 | `direct_bill.commission_vat_rate` / `direct_bill.commission_vat_inclusive` | 12%, added on top of the commission |
 | `direct_bill.insurer_ewt_rate` | 10% of the commission, withheld by the insurer (creditable, BIR Form 2307) |
 | `direct_bill.debit_note_due_days` | 30 days after the debit note date |
+| CTPL tariff (Product Configurator, motor templates) | Annual amounts inclusive of taxes and fees: motorcycles / tricycles / trailers 300.40, private cars 610.40, light / medium trucks 660.40, AC and tourist cars 790.40, taxi / PUJ / mini bus 1,150.40, heavy trucks and private buses 1,250.40, PUB and tourist buses 1,500.40. 3-year upfront for brand-new private cars 1,660.40 (other classes to be supplied). Added to the gross outside the taxed net premium; not discounted |
+| Auto Passenger PA | Limit per person x seats x 0.1%; limits 25,000 to 200,000 |

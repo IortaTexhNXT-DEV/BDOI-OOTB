@@ -68,6 +68,7 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
       currentQuoteCreation.coverageDetails?.actsOfNaturePremium,
     // CTPL (fixed tariff), roadside assistance and personal accident cover as chosen on Coverage Details
     includeCTPL: currentQuoteCreation.coverageDetails?.includeCTPL,
+    ctplTermYears: currentQuoteCreation.coverageDetails?.ctplTermYears,
     ctplCoverageRate: currentQuoteCreation.coverageDetails?.ctplCoverageRate,
     ctplCoveragePremium: currentQuoteCreation.coverageDetails?.ctplCoveragePremium,
     roadsideAssistanceRate: currentQuoteCreation.coverageDetails?.roadsideAssistanceRate,
@@ -457,7 +458,7 @@ const OrderSummary = ({ action, flow }) => {
       const discountNum = parseFloat(orderSummaryData.discount) || 0;
       const commission = grossPremiumNum - netPremiumNum;
       const calculatedTotal =
-        netPremiumNum + vatNum + dstNum + lgtNum + othersNum - discountNum;
+        netPremiumNum + vatNum + dstNum + lgtNum + othersNum + ctplAmount - discountNum;
       const difference = Math.abs(grossPremiumNum - calculatedTotal);
 
       if (difference > 0.01 && grossPremiumNum > 0) {
@@ -524,6 +525,7 @@ const OrderSummary = ({ action, flow }) => {
             quotationData.actsOfNaturePremium,
           // CTPL is priced by the server from the vehicle class tariff
           includeCTPL: quotationData.includeCTPL,
+          ctplTermYears: quotationData.ctplTermYears,
           ctplCoverageRate: quotationData.ctplCoverageRate,
           ctplCoveragePremium: quotationData.ctplCoveragePremium,
           roadsideAssistanceRate: quotationData.roadsideAssistanceRate,
@@ -696,7 +698,7 @@ const OrderSummary = ({ action, flow }) => {
     const discountNum = parseFloat(values.discount) || 0;
 
     const calculatedTotal =
-      netPremiumNum + vatNum + dstNum + lgtNum + othersNum - discountNum;
+      netPremiumNum + vatNum + dstNum + lgtNum + othersNum + ctplAmount - discountNum;
     const difference = Math.abs(grossPremiumNum - calculatedTotal);
 
     if (difference > 0.01 && grossPremiumNum > 0) {
@@ -735,6 +737,9 @@ const OrderSummary = ({ action, flow }) => {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
+  // CTPL: Insurance Commission tariff amount inclusive of taxes and fees, added to the gross and never discounted
+  const ctplAmount = parseAmount(serverPremium?.ctplCoveragePremium ?? quotationData?.ctplCoveragePremium);
+
   // Pre-discount base: net + taxes + others (customer discount comes out of broker)
   const getPremiumBase = (values = formik.values) =>
     parseAmount(values.netPremium) +
@@ -746,7 +751,7 @@ const OrderSummary = ({ action, flow }) => {
   const applyDiscountPercent = (discountPercent) => {
     const base = getPremiumBase();
     const discountAmount = Number(((base * discountPercent) / 100).toFixed(2));
-    const grossPremium = Math.max(0, Number((base - discountAmount).toFixed(2)));
+    const grossPremium = Math.max(0, Number((base - discountAmount + ctplAmount).toFixed(2)));
     formik.setFieldValue("discount", discountAmount.toFixed(2));
     formik.setFieldValue("grossPremium", grossPremium.toFixed(2));
   };
@@ -862,6 +867,14 @@ const OrderSummary = ({ action, flow }) => {
                   }
                 />
               </div>
+              {ctplAmount > 0 && (
+                <div class="col-12 mt-2">
+                  <CalculaitionTextInputs
+                    label={t("coverageDetailsCard.ctplTariffPremium")}
+                    value={ctplAmount.toFixed(2)}
+                  />
+                </div>
+              )}
               <div class="col-12 mt-2">
                 <CalculaitionTextInputs
                   label={t("agent.discount")}

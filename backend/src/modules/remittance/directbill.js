@@ -208,7 +208,7 @@ const ITEM_SQL = `SELECT it.*, p.policy_number, p.inception_date, p.expiry_date,
 const pctOf = (rate) => (rate === null || rate === undefined ? null : round2(Number(rate) * 100));
 
 export const itemOut = (it, ewt = 0) => ({
-  id: it.id, policyId: it.policy_id, policyNo: it.policy_number, reference: it.endorsement_number || it.reference, source: it.source,
+  id: it.id, policyId: it.policy_id, policyNo: it.policy_number, reference: it.endorsement_number || (it.source === 'endorsement' ? it.reference : 'New business'), source: it.source,
   insuredName: it.insured_name, product: it.product_name, lineOfBusiness: it.line_of_business, insurerCode: it.insurer_code, insurerName: it.insurer_name,
   inceptionDate: isoDate(it.inception_date), bookedOn: isoDate(it.booked_on), currency: it.currency,
   grossPremium: Number(it.gross_premium), netPremium: Number(it.net_premium), commissionRate: pctOf(it.commission_rate),

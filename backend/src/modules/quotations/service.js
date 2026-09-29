@@ -28,7 +28,7 @@ const insurerRef = (doc) => doc.insuranceCompanyId || doc.insuranceCompanyName |
 
 /** The quote document with the motor covers the server priced (CTPL tariff, Auto Passenger PA per seat). */
 const withServerCovers = (doc, b) => (b.lob !== 'MOTOR' ? doc : {
-  ...doc, vehicleType: b.vehicleType, ctplCoverageRate: b.ctplCoverageRate, ctplCoveragePremium: b.ctplCoveragePremium,
+  ...doc, vehicleType: b.vehicleType, ctplCoverageRate: b.ctplCoverageRate, ctplCoveragePremium: b.ctplCoveragePremium, ctplTermYears: b.ctplTermYears,
   appaSeats: b.appaSeats, APPAtotalCoverage: b.APPAtotalCoverage, APPAcoveragePremium: b.APPAcoveragePremium,
 });
 

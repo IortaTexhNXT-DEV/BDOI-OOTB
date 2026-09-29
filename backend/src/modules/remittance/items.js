@@ -585,7 +585,7 @@ export async function history(qs, pg) {
   if (qs.type) cond += ` AND h.type = ${p.add(qs.type)}`;
   const labels = await statusLabels();
   const base = `
-    SELECT r.id, r.remittance_number AS reference_no, CASE r.kind WHEN 'agency-bill' THEN 'Agency Bill' ELSE 'Direct Bill' END AS type,
+    SELECT r.id, r.remittance_number AS reference_no, CASE r.kind WHEN 'agency-bill' THEN 'Agency Bill' ELSE 'Insurer Remittance' END AS type,
       (SELECT min(l.policy_number) FROM remittance_lines l WHERE l.remittance_id = r.id) AS policy_no, COALESCE(i.name, r.agency_name) AS client_name, r.net_due AS amount, r.status,
       r.created_by, r.created_at, r.updated_at, r.updated_by, 'remittance' AS entity
     FROM remittances r LEFT JOIN insurance_companies i ON i.id = r.insurance_company_id

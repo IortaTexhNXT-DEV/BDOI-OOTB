@@ -47,7 +47,7 @@ describe('remittances and approvals', () => {
     expect(p.body.data.batchId).toMatch(/^BLK-/);
     const q = await ctx.api('get', '/remittance/approvals');
     const a = q.body.data.find((x) => x.entityId === remId);
-    expect(a).toMatchObject({ transactionType: 'Direct Bill', amount: 17000, initiator: 'BrokerVerse Administrator', status: 'Pending' });
+    expect(a).toMatchObject({ transactionType: 'Insurer Remittance', amount: 17000, initiator: 'BrokerVerse Administrator', status: 'Pending' });
     const self = await ctx.api('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' });
     expect(self.status).toBe(403);
     const noReason = await as(fin, 'post', `/remittance/approvals/${a.id}/reject`).send({});
