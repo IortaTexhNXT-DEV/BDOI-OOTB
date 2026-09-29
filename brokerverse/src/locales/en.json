@@ -452,7 +452,9 @@
       "validationAmountExceedsBalance": "Amount exceeds the outstanding balance of {{balance}} on bill {{bill}}",
       "validationChequeNumberRequired": "Cheque number is required",
       "validationPolicyNumberRequired": "Policy number is required",
-      "validationReceiptModeRequired": "Receipt mode is required"
+      "validationReceiptModeRequired": "Receipt mode is required",
+      "draftCount": "{{count}} draft(s)",
+      "billsOpen": "{{count}} open bill(s)"
     },
     "addReceiptEdit": {
       "title": "Add Receipts",
@@ -533,7 +535,8 @@
       "mainAccountRequired": "Main Account is required",
       "success": "Success",
       "messageContent": "Message Content",
-      "rowCount": "Row count :"
+      "rowCount": "Row count :",
+      "rejectReason": "Reason"
     }
   },
   "renewalWaiting": {
@@ -924,7 +927,17 @@
     "kpiCategory": "KPI Category",
     "target": "Target",
     "achieved": "Achieved",
-    "achievement": "Achievement"
+    "achievement": "Achievement",
+    "confirmReinstate": "Reinstate {{policy}}?",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "approve": "Approve",
+    "reject": "Reject",
+    "renewalRate": "Renewal Rate",
+    "completeRenewal": "Complete Renewal",
+    "pipelineRefreshed": "Pipeline refreshed: {{created}} added, {{lapsed}} lapsed",
+    "confirmCompleteRenewal": "Renew policy {{policy}} for a new term?",
+    "allNoticesSent": "All notices sent"
   },
   "pettyCash": {
     "accounts": "Accounts",
@@ -1024,7 +1037,8 @@
     "currencyRequired": "Currency is required",
     "narrationRequired": "Narration is required",
     "amountRequired": "Amount is required",
-    "enter": "Enter"
+    "enter": "Enter",
+    "rejectReason": "Reason"
   },
   "employeeBenefit": {
     "lead": "Lead",
@@ -1608,7 +1622,29 @@
     "catExposure": "CAT Exposure",
     "description": "Description",
     "amount": "Amount",
-    "type": "Type"
+    "type": "Type",
+    "reason": "Reason",
+    "cessionConfirmed": "Cession confirmed",
+    "cessionProcessed": "Cession processed",
+    "cessionRejected": "Cession rejected",
+    "treaty": "Treaty",
+    "facultative": "Facultative",
+    "rejectCession": "Reject Cession",
+    "submitRecovery": "Submit to reinsurers",
+    "recoverySubmitted": "Recovery submitted",
+    "settle": "Record settlement",
+    "dispute": "Mark as disputed",
+    "recoveryRegistered": "Recovery registered",
+    "recoverySettled": "Settlement recorded",
+    "recoveryDisputed": "Recovery marked as disputed",
+    "registerRecovery": "Register Recovery",
+    "bordereaux": "Bordereaux",
+    "reference": "Reference",
+    "entries": "Entries",
+    "resolve": "Resolve",
+    "reconcileStatement": "Reconcile Statement",
+    "logException": "Log Exception",
+    "resolution": "Resolution"
   },
   "openEntryUnmatching": {
     "title": "Open Entry Un-Matching",
@@ -3056,7 +3092,8 @@
     "createdBy": "Created By:",
     "updatedBy": "Updated By:",
     "claimDueDate": "Claim Due Date:",
-    "claimRunDate": "Claim Run Date:"
+    "claimRunDate": "Claim Run Date:",
+    "reviewSettlement": "Review settlement"
   },
   "claimAuditTrail": {
     "title": "Claim Audit Trail",
@@ -3102,7 +3139,9 @@
     "kindlyBePatientSettlement": "Kindly be patient until the status of the claim settlement has been finalized",
     "reject": "Reject",
     "rejecting": "Rejecting...",
-    "proceed": "Proceed"
+    "proceed": "Proceed",
+    "returnSettlement": "Return",
+    "approveSettlement": "Approve Settlement"
   },
   "claimSettlementDetail": {
     "clients": "Clients",
@@ -3153,7 +3192,14 @@
     "coInsurer": "Co-Insurer",
     "total": "TOTAL",
     "settled": "Settled",
-    "settlementAmountNote": "* Settlement amounts may vary from claim amounts based on insurer approvals and adjustments."
+    "settlementAmountNote": "* Settlement amounts may vary from claim amounts based on insurer approvals and adjustments.",
+    "typeRequired": "Select the settlement type",
+    "amountRequired": "Enter a settlement amount greater than zero",
+    "issueDateRequired": "Issue date is required",
+    "settleDateRequired": "Settle date is required",
+    "settleBeforeIssue": "Settle date cannot be before the issue date",
+    "submittedForApproval": "Settlement submitted for approval",
+    "awaitingChecker": "A second claims user must approve it before the claim is settled"
   },
   "policies": {
     "title": "Policies",
@@ -3488,7 +3534,11 @@
     "coInsurancePolicy": "Co-Insurance Policy",
     "numberOfParticipatingInsurers": "Number of Participating Insurers",
     "yes": "Yes",
-    "coInsuranceInfoTooltip": "Shows co-insurance participants only. Share percentages and amounts are not displayed."
+    "coInsuranceInfoTooltip": "Shows co-insurance participants only. Share percentages and amounts are not displayed.",
+    "dateOfIncidentRequired": "Date of loss is required",
+    "dateOfIncidentFuture": "Date of loss cannot be in the future",
+    "typeOfIncidentRequired": "Select the cause of loss",
+    "estimateNegative": "Estimate cannot be negative"
   },
   "clients": {
     "title": "Clients",
@@ -3662,7 +3712,9 @@
     "employeeBenefits": "Employee Benefits",
     "active": "Active",
     "inactive": "Inactive",
-    "draft": "Draft"
+    "draft": "Draft",
+    "retire": "Retire",
+    "reactivate": "Reactivate"
   },
   "productRiskMapping": {
     "cardTitle": "Risk Mapping",
@@ -3735,7 +3787,8 @@
     "notIntegrated": "Not integrated into create-lead / quote flows yet.",
     "typedConfig": "Typed configuration (JSON)",
     "saveConfig": "Save configuration",
-    "invalidJson": "Configuration must be valid JSON"
+    "invalidJson": "Configuration must be valid JSON",
+    "sectionUpdated": "Section updated"
   },
   "coverageBuilder": {
     "cardTitle": "Coverage Configuration Builder",
@@ -3826,7 +3879,13 @@
     "status": "Status",
     "triggers": "Triggers",
     "error": "Error",
-    "failedToLoad": "Failed to load workflows"
+    "failedToLoad": "Failed to load workflows",
+    "sequential": "Sequential",
+    "parallel": "Parallel",
+    "failedToSave": "Failed to save workflow",
+    "name": "Name",
+    "role": "Role",
+    "addStage": "Add Stage"
   },
   "marketMapping": {
     "cardTitle": "Product Market Mapping",
@@ -3842,7 +3901,8 @@
     "ofTarget": "of target",
     "status": "Status",
     "error": "Error",
-    "failedToLoad": "Failed to load market mappings"
+    "failedToLoad": "Failed to load market mappings",
+    "failedToSave": "Failed to save mapping"
   },
   "documentManager": {
     "cardTitle": "Document Template Manager",
@@ -3859,7 +3919,10 @@
     "edit": "Edit",
     "preview": "Preview",
     "error": "Error",
-    "failedToLoad": "Failed to load documents"
+    "failedToLoad": "Failed to load documents",
+    "uploadFailed": "Upload failed",
+    "failedToSave": "Failed to save document",
+    "noFile": "No template file uploaded"
   },
   "productAnalytics": {
     "cardTitle": "Product Performance Analytics",
@@ -4278,7 +4341,12 @@
       "lgt": "LGT",
       "others": "Others",
       "invoiceListCreationFailed": "Accounting entries created but invoice list creation failed",
-      "refundProcessedSuccess": "Refund processed successfully!"
+      "refundProcessedSuccess": "Refund processed successfully!",
+      "refundRecorded": "Refund recorded",
+      "refundRecordedDetail": "Finance will release the refund to the client.",
+      "returnPremium": "Return premium",
+      "additionalPremium": "Additional premium",
+      "noPremiumChange": "This endorsement has no premium change: there is nothing to pay."
     },
     "paymentApprovalTitle": "Payment Approval (Endorsement)",
     "actsOfNaturePremium": "Acts of nature premium",
@@ -4332,7 +4400,18 @@
     "additionalPremiumDue": "Additional premium is due: proceed to payment.",
     "returnPremiumNote": "Return premium of {{amount}}: nothing to pay. Accounting refunds it to the client through a refund payment voucher.",
     "noPremiumChange": "No premium change: no payment is due.",
-    "done": "Done"
+    "done": "Done",
+    "additionalPremium": "Additional premium",
+    "returnPremium": "Return premium",
+    "ctplPremiumAsIssued": "CTPL premium (as issued)",
+    "appaCoveragePremium": "APPA coverage premium",
+    "totalSumInsured": "Total Sum Insured",
+    "valueAddedTax": "Value Added Tax",
+    "othersAccPremium": "Others(Acc. premium)",
+    "documentaryStampTax": "Documentary Stamp Tax",
+    "localGovtTax": "Local Gov’t Tax",
+    "invalidContact": "Enter a valid mobile number",
+    "invalidZip": "ZIP code is 4 digits"
   },
   "endorsementSummary": {
     "leads": "Leads",
@@ -4382,7 +4461,10 @@
     "others": "Others",
     "discount": "Discount",
     "grossPremium": "Gross premium",
-    "sendToInsuranceCompany": "Send to Insurance Company"
+    "sendToInsuranceCompany": "Send to Insurance Company",
+    "additionalPremium": "Additional premium",
+    "returnPremium": "Return premium",
+    "premiumChange": "Premium change"
   },
   "coverageDetailsReview": {
     "pageTitle": "Coverage Details Review",
@@ -4467,7 +4549,10 @@
     "aircon": "Aircon",
     "stereo": "Stereo",
     "magWheels": "Mag Wheels",
-    "viewDocument": "View Document"
+    "viewDocument": "View Document",
+    "billingMode": "Billing",
+    "brokerBilled": "Broker billed: the client pays the premium to the broker, who remits it to the insurer net of commission",
+    "directBilled": "Direct bill: the client pays the premium to the insurer; the broker raises a commission debit note to the insurer"
   },
   "coverageDetailsCard": {
     "renewalDetails": "Renewal Details",
@@ -6794,5 +6879,8 @@
     "settlementNotBooked": "Cash can be recorded once the settlement through the broker is booked.",
     "stillPayable": "Still payable",
     "voucherReference": "Voucher / cheque number"
+  },
+  "productConfigurator": {
+    "confirmDelete": "Delete {{name}}?"
   }
 }

@@ -48,7 +48,8 @@
     "eject": "react-scripts eject",
     "theme:bdoi": "node scripts/build-bdoi-theme.js",
     "theme:palette": "node scripts/apply-bdoi-palette.js",
-    "check:api": "node scripts/check-api-calls.js"
+    "check:api": "node scripts/check-api-calls.js",
+    "check:i18n": "node scripts/check-translations.js"
   },
   "eslintConfig": {
     "extends": [

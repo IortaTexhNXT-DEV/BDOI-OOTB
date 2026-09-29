@@ -440,7 +440,9 @@
       "validationAmountExceedsBalance": "จำนวนเงินเกินยอดค้างชำระ {{balance}} ของใบแจ้งหนี้ {{bill}}",
       "validationChequeNumberRequired": "กรุณาระบุหมายเลขเช็ค",
       "validationPolicyNumberRequired": "กรุณาระบุหมายเลขกรมธรรม์",
-      "validationReceiptModeRequired": "กรุณาเลือกวิธีรับชำระ"
+      "validationReceiptModeRequired": "กรุณาเลือกวิธีรับชำระ",
+      "draftCount": "ฉบับร่าง {{count}} รายการ",
+      "billsOpen": "บิลค้างชำระ {{count}} รายการ"
     },
     "addReceiptEdit": {
       "title": "เพิ่มใบเสร็จ",
