@@ -23,7 +23,7 @@ const participantOut = (r) => ({
 export async function policyParticipants(policyId, db) {
   const rows = (await db.query(`SELECT rp.*, ic.name AS insurer_name, ic.code AS insurer_code, ic.commission_rate AS insurer_commission_rate
     FROM risk_participants rp JOIN insurance_companies ic ON ic.id = rp.insurance_company_id
-    WHERE rp.entity_type = 'policy' AND rp.entity_id = $1 AND rp.status = 'active' ORDER BY rp.is_lead DESC, rp.id`, [String(policyId)])).rows;
+    WHERE rp.entity_type = 'policy' AND rp.entity_id = $1 AND rp.status = 'active' ORDER BY rp.is_lead DESC, rp.share_percent DESC, rp.id`, [String(policyId)])).rows;
   if (rows.length) return rows.map(participantOut);
   const p = (await db.query(`SELECT p.insurance_company_id, ic.name AS insurer_name, ic.code AS insurer_code, ic.commission_rate AS insurer_commission_rate,
       p.premium_total, p.net_premium AS premium, p.commission_amount

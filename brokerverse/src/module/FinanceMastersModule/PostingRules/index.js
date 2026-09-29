@@ -9,6 +9,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
+import { SelectButton } from "primereact/selectbutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -92,7 +93,6 @@ const PostingRules = () => {
   const glOptions = useMemo(() => gl.map((a) => ({ label: `${a.code} – ${a.name}`, value: a.code })), [gl]);
   const resolverOptions = useMemo(() => meta.resolvers.map((r) => ({ label: `${r.name} – ${r.label}`, value: r.name })), [meta]);
   const typeOptions = meta.accountTypes.map((x) => ({ label: t(`postingRules.accountType.${x}`), value: x }));
-  const sideOptions = meta.sides.map((x) => ({ label: x === "Dr" ? t("postingRules.debit") : t("postingRules.credit"), value: x }));
   const amountOptions = (selected?.amountKeys || []).map((k) => ({ label: k, value: k }));
   const branchOptions = meta.branchSources.map((x) => ({ label: t(`postingRules.branchSource.${x}`), value: x }));
 
@@ -195,9 +195,8 @@ const PostingRules = () => {
             </div>
             <DataTable value={shown} loading={loading} selectionMode="single" selection={selected} onSelectionChange={(e) => choose(e.value)} dataKey="eventCode"
               size="small" stripedRows scrollable scrollHeight="560px" emptyMessage={t("postingRules.noEvents")}>
-              <Column header={t("postingRules.event")} body={(e) => (<div><div className="font-semibold">{e.label}</div><code className="text-500">{e.eventCode}</code></div>)} />
-              <Column field="module" header={t("postingRules.module")} style={{ width: "7rem" }} />
-              <Column header={t("postingRules.version")} style={{ width: "6rem" }} body={(e) => (e.activeVersion ? <Tag value={`v${e.activeVersion}`} severity="success" /> : <Tag value={t("postingRules.none")} severity="danger" />)} />
+              <Column header={t("postingRules.event")} body={(e) => (<div><div className="font-semibold">{e.label}</div><code className="text-500">{e.eventCode}</code> <span className="text-500 text-sm">· {e.module}</span></div>)} />
+              <Column header={t("postingRules.version")} style={{ width: "5.5rem" }} body={(e) => (e.activeVersion ? <Tag value={`v${e.activeVersion}`} severity="success" /> : <Tag value={t("postingRules.none")} severity="danger" />)} />
             </DataTable>
           </div>
         </div>
@@ -270,29 +269,27 @@ const PostingRules = () => {
                     </div>
                   </div>
                   {edit.lines.map((l, i) => (
-                    <div key={i} className="posting-rules__line grid align-items-center">
-                      <div className="col-12 md:col-1 font-semibold">{i + 1}</div>
-                      <div className="col-6 md:col-2"><Dropdown value={l.side} options={sideOptions} onChange={(e) => setLine(i, { side: e.value })} className="w-full" /></div>
-                      <div className="col-6 md:col-2"><Dropdown value={l.accountType} options={typeOptions} onChange={(e) => setLine(i, { accountType: e.value, account: "" })} className="w-full" /></div>
-                      <div className="col-12 md:col-4">{accountEditor(l, i)}</div>
-                      <div className="col-6 md:col-2"><Dropdown value={l.amountKey} options={amountOptions} onChange={(e) => setLine(i, { amountKey: e.value })} className="w-full" /></div>
-                      <div className="col-6 md:col-1 flex gap-1">
-                        <Button icon="pi pi-arrow-up" className="p-button-text p-button-sm" onClick={() => moveLine(i, -1)} disabled={i === 0} />
-                        <Button icon="pi pi-trash" className="p-button-text p-button-sm p-button-danger" onClick={() => setEdit({ ...edit, lines: edit.lines.filter((_, j) => j !== i) })} />
+                    <div key={i} className="posting-rules__line">
+                      <div className="posting-rules__row">
+                        <span className="posting-rules__no">{i + 1}</span>
+                        <SelectButton value={l.side} options={meta.sides.map((x) => ({ label: x, value: x }))} onChange={(e) => e.value && setLine(i, { side: e.value })} className="posting-rules__side" />
+                        <Dropdown value={l.accountType} options={typeOptions} onChange={(e) => setLine(i, { accountType: e.value, account: "" })} className="posting-rules__type" />
+                        <div className="posting-rules__grow">{accountEditor(l, i)}</div>
+                        <Button icon="pi pi-arrow-up" className="p-button-text p-button-sm" onClick={() => moveLine(i, -1)} disabled={i === 0} tooltip={t("postingRules.moveUp")} />
+                        <Button icon="pi pi-trash" className="p-button-text p-button-sm p-button-danger" onClick={() => setEdit({ ...edit, lines: edit.lines.filter((_, j) => j !== i) })} tooltip={t("postingRules.removeLine")} />
                       </div>
-                      <div className="col-12 md:col-1" />
-                      <div className="col-12 md:col-4">
+                      <div className="posting-rules__row">
+                        <span className="posting-rules__no" />
+                        <Dropdown value={l.amountKey} options={amountOptions} onChange={(e) => setLine(i, { amountKey: e.value })} placeholder={t("postingRules.amount")} className="posting-rules__amount" />
                         {["context", "resolver"].includes(l.accountType) && (
-                          <Dropdown value={l.fallbackRole} options={roleOptions} filter showClear onChange={(e) => setLine(i, { fallbackRole: e.value || null })} placeholder={t("postingRules.fallbackRole")} className="w-full" />
+                          <Dropdown value={l.fallbackRole} options={roleOptions} filter showClear onChange={(e) => setLine(i, { fallbackRole: e.value || null })} placeholder={t("postingRules.fallbackRole")} className="posting-rules__type" />
                         )}
-                      </div>
-                      <div className="col-12 md:col-5"><InputText value={l.narration} onChange={(e) => setLine(i, { narration: e.target.value })} placeholder={t("postingRules.lineNarration")} className="w-full" /></div>
-                      <div className="col-12 md:col-2 flex align-items-center gap-2">
+                        <InputText value={l.narration} onChange={(e) => setLine(i, { narration: e.target.value })} placeholder={t("postingRules.lineNarration")} className="posting-rules__grow" />
                         {selected.perParticipant && (
-                          <>
+                          <span className="flex align-items-center gap-2">
                             <Checkbox inputId={`pp-${i}`} checked={l.perParticipant} onChange={(e) => setLine(i, { perParticipant: e.checked })} />
                             <label htmlFor={`pp-${i}`} className="m-0">{t("postingRules.perParticipant")}</label>
-                          </>
+                          </span>
                         )}
                       </div>
                     </div>

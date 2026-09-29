@@ -64,7 +64,43 @@
     border: 1px solid #eef1f6;
     border-radius: 8px;
     margin: 0.35rem 0;
+    padding: 0.5rem;
     background: #fafbfd;
+  }
+
+  .posting-rules__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+  }
+
+  .posting-rules__no {
+    width: 1.5rem;
+    font-weight: 600;
+  }
+
+  .posting-rules__side {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .posting-rules__type {
+    width: 10rem;
+  }
+
+  .posting-rules__amount {
+    width: 10rem;
+  }
+
+  .posting-rules__grow {
+    flex: 1 1 14rem;
+    min-width: 0;
+
+    .p-dropdown {
+      width: 100%;
+    }
   }
 
   .posting-rules__sim {

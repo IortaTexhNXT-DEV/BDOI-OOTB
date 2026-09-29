@@ -5682,6 +5682,8 @@
       "miscellaneous": "Miscellaneous",
       "ri-claims": "RI-Claims",
       "other": "Other"
-    }
+    },
+    "moveUp": "Move up",
+    "removeLine": "Remove line"
   }
 }
