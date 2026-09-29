@@ -176,6 +176,9 @@ async function documents() {
     await file(D, 'Placing slip - one co-insurer\'s share', `/policies/${coPol.id}/documents/insurance-placing-slip-fire?insurerId=${coPol.co}`, 'pdf');
   }
 
+  const rec = await q1('SELECT id FROM bank_reconciliations ORDER BY created_at DESC LIMIT 1').catch(() => ({}));
+  if (rec.id) await file(D, 'Bank reconciliation statement', `/bank-reconciliation/reconciliations/${rec.id}/pdf`, 'pdf');
+
   const E = 'Module export';
   await file(E, 'Claims dashboard report', `/claims/report?startDate=${yr}-01-01&endDate=${yr}-12-31&format=excel`, 'xlsx');
   await file(E, 'Lead report', '/leads/report', 'xlsx');

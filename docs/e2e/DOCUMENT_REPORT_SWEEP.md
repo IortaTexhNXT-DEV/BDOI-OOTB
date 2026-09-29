@@ -1,6 +1,6 @@
 # Document and report generation sweep
 
-Run 2026-09-29 10:55 UTC against http://localhost:8000/api: **264 of 264 passed**.
+Run 2026-09-29 11:30 UTC against http://localhost:8000/api: **291 of 291 passed**.
 
 Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) signature, a CSV header, and that the row count of each report file matches its on-screen preview.
 
@@ -267,6 +267,33 @@ Each file is fetched and checked: HTTP 200, the PDF (`%PDF-`) or XLSX (zip) sign
 | Report: financial | SLSP - Summary List of Purchases | CSV | Pass | 1 rows, 1 KB |
 | Report: financial | SLSP - Summary List of Purchases | XLSX | Pass | 1 rows, 5 KB |
 | Report: financial | SLSP - Summary List of Purchases | PDF | Pass | 1 rows, 58 KB |
+| Report: financial | Bank Reconciliation Statement (Overall) | Screen preview | Pass | 0 rows |
+| Report: financial | Bank Reconciliation Statement (Bank Account) | Screen preview | Pass | 0 rows |
+| Report: financial | Bank Reconciliation Statement | CSV | Pass | 0 rows, <1 KB |
+| Report: financial | Bank Reconciliation Statement | XLSX | Pass | 0 rows, 5 KB |
+| Report: financial | Bank Reconciliation Statement | PDF | Pass | 0 rows, 57 KB |
+| Report: financial | Outstanding Cheques (Overall) | Screen preview | Pass | 23 rows |
+| Report: financial | Outstanding Cheques (Bank Account) | Screen preview | Pass | 23 rows |
+| Report: financial | Outstanding Cheques (Status) | Screen preview | Pass | 23 rows |
+| Report: financial | Outstanding Cheques | CSV | Pass | 23 rows, 3 KB |
+| Report: financial | Outstanding Cheques | XLSX | Pass | 23 rows, 6 KB |
+| Report: financial | Outstanding Cheques | PDF | Pass | 23 rows, 75 KB |
+| Report: financial | Deposits in Transit (Overall) | Screen preview | Pass | 7 rows |
+| Report: financial | Deposits in Transit (Bank Account) | Screen preview | Pass | 7 rows |
+| Report: financial | Deposits in Transit | CSV | Pass | 7 rows, 1 KB |
+| Report: financial | Deposits in Transit | XLSX | Pass | 7 rows, 5 KB |
+| Report: financial | Deposits in Transit | PDF | Pass | 7 rows, 60 KB |
+| Report: financial | Unmatched Bank Lines (Overall) | Screen preview | Pass | 3 rows |
+| Report: financial | Unmatched Bank Lines (Bank Account) | Screen preview | Pass | 3 rows |
+| Report: financial | Unmatched Bank Lines (Suggested Type) | Screen preview | Pass | 3 rows |
+| Report: financial | Unmatched Bank Lines | CSV | Pass | 3 rows, <1 KB |
+| Report: financial | Unmatched Bank Lines | XLSX | Pass | 3 rows, 5 KB |
+| Report: financial | Unmatched Bank Lines | PDF | Pass | 3 rows, 57 KB |
+| Report: financial | Bank Book (Bank Account) | Screen preview | Pass | 32 rows |
+| Report: financial | Bank Book (Overall) | Screen preview | Pass | 32 rows |
+| Report: financial | Bank Book | CSV | Pass | 32 rows, 4 KB |
+| Report: financial | Bank Book | XLSX | Pass | 32 rows, 8 KB |
+| Report: financial | Bank Book | PDF | Pass | 32 rows, 89 KB |
 | Report schedule (run now) | Sweep pdf | PDF | Pass | 17 rows, e-mail queued to 1 |
 | Report schedule (run now) | Sweep csv | CSV | Pass | 17 rows, e-mail queued to 1 |
 | Report schedule (run now) | Sweep xlsx | XLSX | Pass | 17 rows, e-mail queued to 1 |
