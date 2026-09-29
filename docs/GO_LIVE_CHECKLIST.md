@@ -145,6 +145,10 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   rate and limits; 3-year CTPL for other classes when known.
 - [ ] Direct bill settings (confirmed): default broker-billed, VAT 12% on commission added on top, insurer EWT 10%,
   debit note due 30 days.
+- [ ] Named administrators: create the System Administrators (Super Admin) from a CSV kept outside the repository
+  (columns name, username, password, role[, email]) with
+  `CONFIRM_PROVISION=yes node scripts/provision-users.js /secure/users.csv` (without CONFIRM_PROVISION it is a dry
+  run). Each user must change the initial password at the first sign-in. Delete the CSV afterwards.
 - [ ] Tax codes (Master > Finance > Taxation): the finance / tax team confirms every ATC code, rate and GL account
   against the current BIR regulations (the OOTB values are a starting point) before the first BIR 2307, SAWT or QAP.
 - [ ] Finance Manager: assign the Finance Manager role (Finance plus month-end / year-end approval) to the users who
