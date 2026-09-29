@@ -25,9 +25,13 @@ import {
 import MenuData from "./MenuData";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("bank", "Banks"), masterTarget("bank-account", "Bank accounts")];
 
 const BankMaster = () => {
   const { t } = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const [visible, setVisible] = useState(false);
   const [visibleview, setVisibleview] = useState(false);
   const [, setDialog] = useState({});
@@ -234,7 +238,7 @@ const BankMaster = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <Button
+          <Button onClick={() => setShowUpload(true)}
             type="button"
             label={t("financeMasters.upload")}
             className="uploadbutton_container"
@@ -242,6 +246,7 @@ const BankMaster = () => {
             outlined
           />
 
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload banks and bank accounts" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             type="button"
             label={t("generalMasters.add")}

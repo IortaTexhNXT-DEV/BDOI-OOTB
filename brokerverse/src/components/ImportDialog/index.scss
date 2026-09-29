@@ -1,0 +1,42 @@
+.import-dialog {
+  &__note {
+    margin: 0 0 1rem;
+    color: #4d5761;
+    line-height: 1.4;
+  }
+  &__field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    label, span { flex: 1 1 16rem; }
+  }
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  &__error {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background: #fdecea;
+    color: #9c2a00;
+  }
+  &__result {
+    margin-top: 1rem;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.35rem 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    th:first-child, td:first-child { width: 4rem; }
+  }
+}

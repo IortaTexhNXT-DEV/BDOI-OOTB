@@ -821,14 +821,16 @@ class PolicyService {
   /**
    * Bulk upload policies from Excel file
    * @param {File} file - Excel file to upload
+   * @param {string} [mode] - "go-live" for in-force policies of the old system (no bill, journal or commission)
    * @returns {Promise<Object>} API response with upload results
    */
-  async bulkUploadPolicies(file) {
+  async bulkUploadPolicies(file, mode) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
 
       const formData = new FormData();
+      if (mode) formData.append("mode", mode);
       formData.append("file", file);
 
       const response = await fetch(`${this.baseURL}/policies/bulk-upload`, {

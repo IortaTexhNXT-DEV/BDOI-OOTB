@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
 import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
+import { Checkbox } from "primereact/checkbox";
 import policyService from "../../../services/policyService";
 import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import "./index.scss";
@@ -15,6 +16,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [goLive, setGoLive] = useState(false);
 
   const handleFileSelect = (e) => {
     const file = e.files[0];
@@ -62,7 +64,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     setUploadResult(null);
 
     try {
-      const result = await policyService.bulkUploadPolicies(selectedFile);
+      const result = await policyService.bulkUploadPolicies(selectedFile, goLive ? "go-live" : undefined);
 
       if (result.success) {
         const apiResponse = result.data;
@@ -158,6 +160,14 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 <li>Upload the completed file (max 10MB)</li>
                 <li>Only .xlsx or .csv files are supported</li>
               </ul>
+            </div>
+
+            <div className="flex align-items-start gap-2 mb-3">
+              <Checkbox inputId="policy-go-live" checked={goLive} onChange={(e) => setGoLive(e.checked)} disabled={loading} />
+              <label htmlFor="policy-go-live">
+                Existing policies (go-live): create in-force policies of the old system without a bill, journal or commission.
+                Load their unpaid premiums with Import open items (Accounts &gt; Collections).
+              </label>
             </div>
 
             <div className="upload-area">

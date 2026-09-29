@@ -27,9 +27,13 @@ import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("city", "Cities")];
 
 const City = () => {
   const { t } = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const dispatch = useDispatch();
   const statusToast = useRef(null);
   const reloadList = () => dispatch(getCityMiddleware());
@@ -159,7 +163,7 @@ const City = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <Button
+          <Button onClick={() => setShowUpload(true)}
             type="button"
             label={t("generalMasters.upload")}
             className="uploadbutton_container"
@@ -167,6 +171,7 @@ const City = () => {
             outlined
           />
 
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload cities" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             type="button"
             label={t("generalMasters.add")}

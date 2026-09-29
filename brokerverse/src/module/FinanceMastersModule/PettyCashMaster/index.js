@@ -12,9 +12,13 @@ import PettyDataTabel from "./PettyDataTabel";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { getPettyCashSearchList } from "./store/pettyCashMasterMiddleWare";
+import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("petty-cash", "Petty cash funds")];
 
 const PettyCashMaster = ({ response }) => {
   const translation = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const t = translation.t;
   const [visible, setVisible] = useState(false);
   const [newDataTable] = useState([]);
@@ -24,10 +28,6 @@ const PettyCashMaster = ({ response }) => {
     { id: 1, label: t("financeMasters.pettyCashBreadcrumb"), url: "/master/finance/pettycash" },
   ];
   const home = { label: t("financeMasters.master") };
-  const handleNavigate = () => {
-    navigate("/accounts/journalvoucher/addjournalvoucture");
-  };
-
   const handleEdit = () => {
     setVisible(true);
   };
@@ -100,12 +100,13 @@ const PettyCashMaster = ({ response }) => {
         />
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__petty mb-3">
-        <div className="upload__icon__view__petty" onClick={handleNavigate}>
+        <div className="upload__icon__view__petty" onClick={() => setShowUpload(true)}>
           <div className="upload__icon__petty">
             <SvgUpload color={"#fff"} />
           </div>
           <div className="upload__text__petty">{t("financeMasters.upload")}</div>
         </div>
+        <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload petty cash funds" targets={UPLOAD_TARGETS} />
         <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
           <div className="add__icon__petty">
             <SvgAdd color={"#fff"} />
