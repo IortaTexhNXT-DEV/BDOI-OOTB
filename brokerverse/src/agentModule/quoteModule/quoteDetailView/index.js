@@ -1291,7 +1291,6 @@ const QuoteDetailView = ({ action }) => {
                 label={
                   checkingPolicy ? t("quoteDetailView.checkingPolicy") : t("quoteDetailView.waitingForPolicy")
                 }
-                // className="policy_button p-button-outlined"
                 disabled={checkingPolicy || !relatedPolicy?.policyId}
                 onClick={() => {
                   if (!relatedPolicy?.policyId) {

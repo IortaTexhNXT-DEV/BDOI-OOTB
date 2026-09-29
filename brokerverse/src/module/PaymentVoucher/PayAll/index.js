@@ -81,7 +81,6 @@ function SpecificVoucher() {
       </div>
 
       <div className="next_container">
-        {/* <label className='label_subheader'>Payment Voucher History</label> */}
         <Button label="Edit" icon={<SvgEdit />} className="submit_button" />
       </div>
 

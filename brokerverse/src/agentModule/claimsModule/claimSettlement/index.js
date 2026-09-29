@@ -502,9 +502,6 @@ const ClaimSettlement = () => {
             </div>
           </div>
         </div>
-        {/* <div className="listing__button mt-3">
-          <Button onClick={handleList}>Go to listing</Button>
-        </div> */}
       </Card>
       <SettlementCash claimId={claimDetails?.data?.id || claimId} />
     </div>

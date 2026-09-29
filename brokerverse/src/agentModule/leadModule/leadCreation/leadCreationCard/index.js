@@ -58,7 +58,6 @@ const LeadCreationCard = ({ flow, action }) => {
       };
     }
   );
-  // const [ingredient, setIngredient] = useState("");
   const [show, setShow] = useState(false);
   const toastRef = useRef(null);
   const toastErrorRef = useRef(null);
@@ -235,17 +234,11 @@ const LeadCreationCard = ({ flow, action }) => {
     if (!values.LastName) {
       errors.LastName = "This field is required";
     }
-    // if (!values.EmailID) {
-    //   errors.EmailID = "This field is required";
-    // }
     if (!values.EmailID) {
       errors.EmailID = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
     }
-    // if (!values.ContactNumber) {
-    //   errors.ContactNumber = "This field is required";
-    // }
     if (!values.ContactNumber) {
       errors.ContactNumber = "Phone Number is required";
     } else if (!isValidMobile(values.ContactNumber)) {
@@ -603,7 +596,6 @@ const LeadCreationCard = ({ flow, action }) => {
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6">
-            {/* <InputTextField label="Date of Birth" />  */}
             <DatepickerField
               label={t("leadCreation.dateOfBirth")}
               value={formik.values.DateofBirth}
@@ -818,12 +810,6 @@ const LeadCreationCard = ({ flow, action }) => {
         )}
 
         <div className="save_continue_conatiner">
-          {/* <Button
-            label={t("leadCreation.saveLead")}
-            onClick={handleSaveLead}
-            text
-            className="btn_lable_container"
-          /> */}
           <div className="btn_lable_save_container flex justify-content-end mt-2">
             <Button
               onClick={() => {

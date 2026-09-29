@@ -46,7 +46,6 @@ const PettyCashMaster = ({ response }) => {
   ];
   const dispatch = useDispatch();
   const handleSubmit = (values) => {
-    // dispatch(getPettyCashSearchList({ textSearch: values.search }));
   };
 
   const formik = useFormik({
@@ -125,7 +124,6 @@ const PettyCashMaster = ({ response }) => {
           >
             <div className="col-12 md:col-12 lg:col-12">
               <div className="searchIcon__view__input__petty">
-                {/* <span className='pl-2'> <SvgSearchIcon /></span> */}
                 <i className="pi pi-search pl-3" />
                 <InputText
                   style={{ width: "100%" }}
@@ -152,7 +150,6 @@ const PettyCashMaster = ({ response }) => {
                 pettyCashList={search ? pettyCashSearchList : pettyCashList}
               />
 
-              {/* <PettyDataTabel handleEdit={handleEdit} newDataTable={newDataTable} visible={visible}   pettyCashList={search ? pettyCashSearchList : pettyCashList} /> */}
             </div>
           </div>
         </div>

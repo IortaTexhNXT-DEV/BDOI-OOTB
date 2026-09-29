@@ -111,7 +111,6 @@ const DisbursementTable = () => {
 
   const handleView = (rowData) => {
     dispatch(getDisbursmentViewMiddleware(rowData));
-    // dispatch(getDisbursmentSearchMiddleware(rowData));
     navigate("/accounts/pettycash/disbursementdetailview");
   };
   const headerStyle = {
@@ -177,7 +176,6 @@ const DisbursementTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}

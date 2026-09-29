@@ -96,10 +96,8 @@ const BankMaster = () => {
     };
   });
   // useEffect(() => {
-  //   console.log(currentDialog, "ads")
   //   if(Object.keys(currentDialog).length>0){
   //   }
-  //   // formik.setFieldValue()
 
   // }, [currentDialog])
 
@@ -143,7 +141,6 @@ const BankMaster = () => {
 
   const handleSubmit = () => {
     const formErrors = validate(formik.values);
-    // setErrors(formErrors);
   };
 
   const formik = useFormik({
@@ -151,7 +148,6 @@ const BankMaster = () => {
     validate,
     onSubmit: handleSubmit,
   });
-  // console.log(formik.values, "asdd")
 
   const handleUpdate = async () => {
     try {
@@ -161,9 +157,6 @@ const BankMaster = () => {
       statusToast.current?.show({ severity: "error", detail: error });
     }
   };
-  // useEffect(() => {
-  //   ProductService.getProductsMini().then(data => setProducts(data));
-  // }, []);
 
   const isEmpty = !bankList?.length;
 
@@ -293,7 +286,6 @@ const BankMaster = () => {
       </div>
 
       <Card
-      //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -322,7 +314,6 @@ const BankMaster = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -386,17 +377,13 @@ const BankMaster = () => {
                 //   <TieredMenu
                 //     model={menuitems.map((item) => ({
                 //       ...item,
-                //       command: () => item.command(rowData),
                 //       // data: rowData
                 //     }))}
 
                 //     popup
-                //     ref={menu}
                 //     breakpoint="767px"
                 //   />
                 //   <Button
-                //     icon={<SvgMenudots />}
-                //     onClick={(e) => menu.current.toggle(e)}
                 //     className="menubutton_popup"
                 //   />
                 // </div>

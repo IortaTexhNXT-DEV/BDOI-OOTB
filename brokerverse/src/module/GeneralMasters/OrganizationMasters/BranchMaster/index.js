@@ -126,7 +126,6 @@ const Index = () => {
     },
   ];
 
-
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -182,7 +181,6 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
           <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />

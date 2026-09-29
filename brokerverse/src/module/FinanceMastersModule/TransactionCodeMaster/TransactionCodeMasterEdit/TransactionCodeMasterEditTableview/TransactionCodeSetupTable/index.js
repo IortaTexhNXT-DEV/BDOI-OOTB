@@ -94,7 +94,6 @@ const TransactionCodeSetupTable = () => {
   }
 
   const handleView = (rowData) => {
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const headerStyle = {
     fontSize: 16,
@@ -125,7 +124,6 @@ const TransactionCodeSetupTable = () => {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
@@ -158,7 +156,6 @@ const TransactionCodeSetupTable = () => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -211,7 +208,6 @@ const TransactionCodeSetupTable = () => {
             </LabelWrapper>
             <Calendar
               showIcon
-              // placeholder="Select"
 
               className="calendar_container"
               value={formik.values.AccountingPeriodStart}
@@ -280,9 +276,6 @@ const TransactionCodeSetupTable = () => {
           <Button
             label="Save"
             className="add__btn"
-            // onClick={() => {
-            //   handleSave();
-            // }}
             onClick={() => { formik.handleSubmit(); }}
           />
         </div>

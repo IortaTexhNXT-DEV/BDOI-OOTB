@@ -49,7 +49,6 @@ const AddRequestTable = () => {
 
   const isEmpty = !AddRequestTable?.length;
 
-
   const handleapprove = async (actionName) => {
     const result = await dispatch(
       postAddRequestMiddleware({ submit: actionName === "approve" })
@@ -292,7 +291,6 @@ const AddRequestTable = () => {
         <div className="grid">
           <div className="col-12 md:col-8 lg:col-8">
             <InputField
-              // classNames="input__filed"
               classNames="fielduniqueone__container"
               label={t("pettyCash.narration")}
               placeholder={t("pettyCash.enter")}
@@ -301,7 +299,6 @@ const AddRequestTable = () => {
               textWeight={500}
               value={formik.values.Narration}
               onChange={formik.handleChange("Narration")}
-            // error={formik.touched.Narration && formik.errors.Narration}
             />
           </div>
           <div className="col-12 md:col-4 lg:col-4">
@@ -314,7 +311,6 @@ const AddRequestTable = () => {
               textWeight={500}
               value={formik.values.Amount}
               onChange={formik.handleChange("Amount")}
-            // error={formik.touched.Amount && formik.errors.Amount}
             />
           </div>
         </div>

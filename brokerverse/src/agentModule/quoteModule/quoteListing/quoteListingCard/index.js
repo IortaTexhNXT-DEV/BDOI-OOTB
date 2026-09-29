@@ -13,8 +13,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../assets/agentIcon/SvgDownArrow";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
 import SvgArrow from "../../../../assets/agentIcon/SvgArrow";
-// import { postinformationMiddleWare,patchinformationMiddleWare } from "./store/infoMiddleWare";
-// import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getQuoteSearchDataMiddleWare } from "../quoteListingCard/store/quoteMiddleware";
@@ -651,7 +649,6 @@ const QuoteListingCard = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickEmployeeBenefit();
           }}
         >
           <div>
@@ -677,7 +674,6 @@ const QuoteListingCard = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -703,7 +699,6 @@ const QuoteListingCard = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -747,11 +742,6 @@ const QuoteListingCard = () => {
           </div>
           <div class="col-12 md:col-6 lg:col-6">
             <div class="btn__container__quote__listing col-12 md:col-6 lg:col-6">
-              {/* <Button
-                icon={<SvgAdd />}
-                label="Add Quote"
-                onClick={() => handleclick()}
-              /> */}
               <Dropdown
                 value={null}
                 options={dropdownOptionsQuote}

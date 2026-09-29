@@ -42,7 +42,6 @@ const DesignationMaster = () => {
     navigate("/master/generals/employeemanagement/designation/add/1");
   };
   const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const handleView = (rowData) => {
     dispatch(getDesignationViewData(rowData));
@@ -130,7 +129,6 @@ const DesignationMaster = () => {
       </div>
     );
   };
-
 
   const template2 = {
     layout:

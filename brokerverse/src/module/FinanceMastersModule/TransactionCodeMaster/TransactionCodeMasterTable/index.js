@@ -197,32 +197,11 @@ const TransactionCodeMasterTable = () => {
             scrollHeight="40vh"
             paginator
             rows={5}
-            // selection={selectedRows}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
-            // selectionMode="checkbox"
           >
-            {/* <Column
-              header={<input type="checkbox" />}
-              body={(rowData) => (
-                <input
-                  type="checkbox"
-                  checked={selectedRows.some((row) => row.id === rowData.id)}
-                  onClick={() => handlecheck(rowData)}
-                />
-              )}
-              headerStyle={headerStyle}
-              style={{ textAlign: "center" }}
-            /> */}
-            {/* <Column
-              selectionMode="multiple"
-              selectedItem
-              headerStyle={{ width: "2rem" }}
-              style={{textAlign:'center'}}
-            ></Column> */}
 
             <Column
               field="TransactionCode"

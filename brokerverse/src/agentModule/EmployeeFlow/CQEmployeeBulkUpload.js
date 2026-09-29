@@ -341,13 +341,9 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                     <Button
                                         icon={<SvgEdit />}
-                                    // className="view__btn"
-                                    // onClick={() => handleView(rowData)}
                                     />
                                     <Button
                                         icon={<SvgDeleteIcon />}
-                                        // className="delete__btn"
-                                        // onClick={() => handleDelete(rowData)}
                                         severity="danger"
                                     />
                                 </div>
@@ -360,17 +356,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
 
                 <div >
 
-                    {/* <div className="bottom__button__wrapper">
-                        <div style={{color:'black'}} className="bottom__button__wrapper">
-                            Back
-                        </div>
-                        <Button
-                            onClick={() => {
-                             }}
-                            label="Next"
-                            className="next__button"
-                        />
-                    </div> */}
                     <div className="bottom__button__wrapper" style={{ display: 'flex', alignItems: 'center' }}>
                         <div onClick={handleBack} style={{ color: 'black', cursor: 'pointer', marginInline: '25px' }}>
                             Back
@@ -412,15 +397,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                         {formik.errors.Name && (
                             <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Name}</div>
                         )}
-
-                        {/* <DatepickerField
-                            label="Date of Birth*"
-                            value={formik.values.DateofBirth}
-                            onChange={(e) => formik.setFieldValue("DateofBirth", e.target.value)}
-                        />
-                        {formik.errors.DateofBirth && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.DateofBirth}</div>
-                        )} */}
 
                         <div className="field">
                             <label>Date of Birth*</label>

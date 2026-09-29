@@ -118,9 +118,6 @@ const TaxationDetails = () => {
               placeholder="Enter"
               dateFormat={calendarDateFormat()}
             />
-            {/* <InputField
-              
-            /> */}
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view__reversal">
             <LabelWrapper className="calenderlable__container">

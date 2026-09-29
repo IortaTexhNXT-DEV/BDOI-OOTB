@@ -239,11 +239,6 @@ export const menuList = [
                   "/master/generals/insurancemanagement/productmaster/view/",
                 ],
               },
-              // {
-              //   id: 4,
-              //   name: "Policy Type",
-              //   path: "/master/generals/insurancemanagement/policytype",
-              // },
               {
                 id: 5,
                 name: "Cover",
@@ -772,18 +767,14 @@ export const menuList = [
           {
             id: 18,
             name: "Renewal Policy",
-            // icon: <SvgPolicyIcon color="#9DA4AE" />,
             path: "/agent/expired-policies",
             includes: ["/agent/expired-policies"],
-            // permissions: ["read:renewals"],
           },
           {
             id: 19,
             name: "Renewal Batch",
-            // icon: <SvgPolicyIcon color="#9DA4AE" />,
             path: "/agent/renewal-batch",
             includes: ["/agent/renewal-batch"],
-            // permissions: ["read:renewals"],
           },
           {
             id: 1,

@@ -72,29 +72,8 @@ const Payments = () => {
   //     "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
   //   RowsPerPageDropdown: (options) => {
   //     const dropdownOptions = [
-  //       { label: 5, value: 5 },
-  //       { label: 10, value: 10 },
-  //       { label: 20, value: 20 },
-  //       { label: 120, value: 120 },
   //     ];
 
-  //     return (
-  //       <div className="table__selector">
-  //         <React.Fragment>
-  //           <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-  //             Row count :{" "}
-  //           </span>
-  //           <Dropdown
-  //             value={options.value}
-  //             className="pagedropdown_container"
-  //             options={dropdownOptions}
-  //             onChange={options.onChange}
-  //           />
-  //         </React.Fragment>
-  //       </div>
-  //     );
-  //   },
-  // };
   const handleMenuClick = (menuItem) => {
     if (menuItem == "view") {
       navigate("/agent/claimrequest/claimdetails");
@@ -123,13 +102,6 @@ const Payments = () => {
           aria-haspopup
         />
       </div>
-      // <div className="action__icon">
-      //   <Button
-      //     icon={<SvgEditIcon />}
-      //     onClick={() => handleEdit(rowData.id)}
-      //     className="action__button"
-      //   />
-      // </div>
     );
   };
   const dispatch = useDispatch();
@@ -139,27 +111,6 @@ const Payments = () => {
   useEffect(() => {
     dispatch(postpaymentdataMiddleWare());
   }, [dispatch]);
-  // const [globalFilter, setGlobalFilter] = useState("Name");
-  // const cities = [
-  //   { name: "Name", code: "Name" },
-  //   { name: "ClientID", code: "ClientID" },
-  //   { name: "Gross Premium", code: "Gross Premium" },
-  // ];
-  // const [status, setStatus] = useState("PAID");
-
-  // useEffect(() => {
-  //   if (globalFilter && search) {
-  //     dispatch(
-  //       getPaymentSearchDataMiddleWare({
-  //         field: globalFilter,
-  //         value: search,
-  //         // status1: status,
-  //       })
-  //     );
-  //   }
-  // }, [search]);
-
-  // console.log(status, "status");
 
   const template2 = {
     layout: "RowsPerPageDropdown CurrentPageReport PrevPageLink  NextPageLink ",

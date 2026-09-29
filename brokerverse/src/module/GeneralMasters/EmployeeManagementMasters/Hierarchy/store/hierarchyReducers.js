@@ -9,7 +9,6 @@ const initialState = {
   hierarchListDetails: {},
   getViewData: {},
   getPatchData: {}
-
 };
 const receiptsReducer = createSlice({
   name: "designation",
@@ -57,8 +56,6 @@ const receiptsReducer = createSlice({
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
-
-
     builder.addCase(postAddHirarchyMiddleware.pending, (state) => {
       state.loading = true;
     });
@@ -69,10 +66,8 @@ const receiptsReducer = createSlice({
     builder.addCase(postAddHirarchyMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
-
 
     builder.addCase(patchHirarchyEditMiddleware.pending, (state) => {
       state.loading = true;
@@ -102,7 +97,6 @@ const receiptsReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
 
     builder.addCase(getHierarchyViewMiddleWare.pending, (state) => {
       state.loading = true;
@@ -145,7 +139,6 @@ const receiptsReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
   },
 });
 

@@ -58,7 +58,6 @@ const HierarchyMaster = () => {
     }
   );
   const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const handleView = (rowData) => {
     dispatch(getHierarchyViewMiddleWare(rowData));
@@ -125,7 +124,6 @@ const HierarchyMaster = () => {
       </div>
     );
   };
-
 
   const template2 = {
     layout:

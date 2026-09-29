@@ -68,7 +68,6 @@ const AccountingTable = ({ type }) => {
         height: "56px",
     };
 
-
     const template2 = {
         layout:
             "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -108,7 +107,6 @@ const AccountingTable = ({ type }) => {
         navigate("/agent/leadedit");
     };
 
-
     const renderName = (rowData) => {
         return (
 
@@ -120,7 +118,6 @@ const AccountingTable = ({ type }) => {
             <div className="name__box__container">
 
                 <div className="name__text">{formatCurrency(rowData.amount)}</div>
-                {/* <div className="lead__id__text">Lead Id :{rowData.LeadID} </div> */}
             </div>
         );
     };
@@ -156,12 +153,9 @@ const AccountingTable = ({ type }) => {
                     padding: "0"
                 }}
                 selectionMode={selectionMode}
-                // selection={selectedProducts}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
-                // paginatorTemplate={template2}
                 className="corrections__table__main"
-                // onSelectionChange={(e) => setSelectedProducts(e.value)}
                 dataKey="id"
                 scrollable={true}
                 scrollHeight="80vh"
@@ -178,13 +172,11 @@ const AccountingTable = ({ type }) => {
                     headerStyle={headerStyle}
                 ></Column>
 
-
                 <Column
                     field="dueDt"
                     header={renderUncheckedHeader("Due Date")}
                     headerStyle={headerStyle}
                 ></Column>
-
 
                 <Column
                     field="mainAcc"
@@ -192,7 +184,6 @@ const AccountingTable = ({ type }) => {
                     headerStyle={headerStyle}
                 ></Column>
                 <Column
-                    // body={renderDate}
                     field="drCr"
                     header={renderUncheckedHeader("Dr/Cr")}
                     headerStyle={headerStyle}

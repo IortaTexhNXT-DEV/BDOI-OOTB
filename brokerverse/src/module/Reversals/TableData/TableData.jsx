@@ -40,7 +40,6 @@ const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
     <div className="reversal__table__container">
       <DataTable
         value={reversalJVGetDataList}
-        //   tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
         paginator
         rows={5}
         rowsPerPageOptions={[5, 10, 25, 50]}

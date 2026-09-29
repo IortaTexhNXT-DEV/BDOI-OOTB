@@ -36,7 +36,6 @@ const UserMaster = () => {
     navigate("/master/generals/usermanagement/user/add");
   };
   const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const { loading, userList, searchList } = useSelector(({ userReducers }) => {
     return {
@@ -281,8 +280,6 @@ const UserMaster = () => {
                   header="Action"
                   headerStyle={ViewheaderStyle}
                   style={{ minWidth: "11rem" }}
-                  // className="fieldvalue_container"
-                  //  className="fieldvalue_container_centered"
                 ></Column>
               </DataTable>
             </div>

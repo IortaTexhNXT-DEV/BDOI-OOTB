@@ -323,9 +323,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3">
           <DropDowns
-            // className="input__field__jv"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             className="dropdown__container"
             optionLabel="label"
             label="Sub Account"
@@ -348,8 +346,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
           <InputField
             classNames="field__container"
-            // classNames="input__field__jv"
-            // className="input__label__jv"
             label="Sub Account Description"
             value={formik.values.subAccountDescription || ""}
             disabled={true}
@@ -360,9 +356,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid m-0 ">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
           <DropDowns
-            // className="input__field__jv"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             className="dropdown__container"
             optionLabel="label"
             label="Branch Code"
@@ -382,8 +376,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         </div>
         <div className="col-12 md:col-6 lg:col-6 xl:col-6">
           <InputField
-            // classNames="input__field__jv"
-            // className="input__label__jv"
             classNames="field__container"
             label="Branch Code Description"
             value={formik.values.branchCodeDescription || ""}
@@ -403,10 +395,8 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid m-0 ">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3">
           <DropDowns
-            // className="input__field__jv"
             className="dropdown__container"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             optionLabel="label"
             label="Department Code"
             value={formik.values.departmentCode}
@@ -425,8 +415,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         </div>
         <div className="col-12 md:col-6 lg:col-6 xl:col-6">
           <InputField
-            // classNames="input__field__jv"
-            // className="input__label__jv"
             classNames="field__container"
             label="Department Description"
             value={formik.values.departmentDescription || ""}
@@ -446,9 +434,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid m-0">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3">
           <DropDowns
-            // className="input__field__jv"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             className="dropdown__container"
             optionLabel="label"
             label="Currency Code"
@@ -506,8 +492,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           </div>
           <InputField
             classNames="field__container"
-            // className="select__label__jv"
-            // label="Remarks (Options)"
             value={formik.values.remarks}
             onChange={(e) => formik.setFieldValue("remarks", e.target.value)}
             placeholder="Enter"

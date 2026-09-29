@@ -24,7 +24,6 @@ const AddTaxation = () => {
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
-  // const addTaxationList = useSelector((state) => state.addTaxationList);
   const { taxationList, loading, taxationSearchList } = useSelector(
     ({ taxationMainReducers }) => {
       return {
@@ -198,12 +197,6 @@ const AddTaxation = () => {
               <Calendar
                 classNames="calender__container"
                 showIcon
-                // value={formik.values.effectiveFrom}
-                // minDate={minDate}
-                // onChange={(e) => {
-                //   formik.setFieldValue("effectiveFrom", e.target.value);
-                // }}
-                // dateFormat={calendarDateFormat()}
                 value={formik.values.effectiveFrom}
                 minDate={minDate}
                 onChange={(e) => {
@@ -225,12 +218,6 @@ const AddTaxation = () => {
               <Calendar
                 classNames="calender__container"
                 showIcon
-                // value={formik.values.effectiveTo}
-                // minDate={minDate}
-                // onChange={(e) => {
-                //   formik.setFieldValue("effectiveTo", e.target.value);
-                // }}
-                // dateFormat={calendarDateFormat()}
                 value={formik.values.effectiveTo}
                 minDate={minDate}
                 onChange={(e) => {

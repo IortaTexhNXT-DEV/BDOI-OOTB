@@ -180,7 +180,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
         state: { ...propsState },
       });
       //implement a navigate to page for product recommendation
-      // navigate(`${basePath}/coveragedetails/coveragecreate/${idParam}`, state);
     }
   };
 

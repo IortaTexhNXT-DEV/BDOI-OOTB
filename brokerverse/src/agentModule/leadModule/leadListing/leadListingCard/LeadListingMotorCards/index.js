@@ -329,21 +329,6 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
       )}
 
       {/* Select All Checkbox */}
-      {/* {leadtabledata.length > 0 && (
-        <div className="select-all-container">
-          <Checkbox
-            inputId="selectAll"
-            checked={
-              selectedLeads.length === leadtabledata.length &&
-              leadtabledata.length > 0
-            }
-            onChange={handleSelectAll}
-          />
-          <label htmlFor="selectAll" className="ml-2">
-            Select All
-          </label>
-        </div>
-      )} */}
 
       {/* Cards Grid */}
       <div className="grid">
@@ -375,13 +360,6 @@ const LeadListingMotorCards = ({ lob = null, activeTab = 0, tabIndex = 0 }) => {
                 >
                   <div className="lead-card-header">
                     <div className="lead-card-checkbox">
-                      {/* <Checkbox
-                        checked={!!isSelected}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          handleSelectLead(lead);
-                        }}
-                      /> */}
                     </div>
                     <div>
                       <SvgMotorTable />

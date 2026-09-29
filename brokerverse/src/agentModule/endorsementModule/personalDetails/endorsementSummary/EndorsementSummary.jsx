@@ -336,34 +336,23 @@ const EndorsementSummary = ({ action }) => {
 
     // try {
     //   const response = await fetch(
-    //     `${BASE_URL}/quotations/${quotationData.quotationId}/send-for-approval`,
     //     {
     //       method: "POST",
     //       headers: {
     //         "Content-Type": "application/json",
-    //         ...authService.getAuthHeader(),
     //       },
-    //       body: JSON.stringify({ sentBy: "agent" }),
     //     }
     //   );
 
-    //   const result = await response.json();
-
     //   if (result.success) {
-    //     alert(`Quote sent to ${result.sentTo} successfully!`);
     //     // Refresh quotation data
     //     const refreshed = await dispatch(
-    //       getQuotationByIdMiddleware(quotationData.quotationId)
     //     );
     //     if (refreshed.type.endsWith("/fulfilled")) {
-    //       setQuotationData(refreshed.payload);
     //     }
     //   } else {
-    //     alert(`Failed: ${result.message}`);
     //   }
     // } catch (error) {
-    //   alert("Error sending quote for approval");
-    //   console.error(error);
     // }
   };
 

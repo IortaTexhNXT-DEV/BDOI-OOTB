@@ -112,7 +112,6 @@ const MotorDetailsChange = ({
     }
 
     formik.submitForm();
-    // formik.resetForm()
   }, [formik, shouldSubmit]);
 
   return (
@@ -128,7 +127,6 @@ const MotorDetailsChange = ({
               <DropdownField
                 label={t("endorsement.tnvs")}
                 disabled={disabled}
-                // disabled={true}
                 value={formik.values.TNVS}
                 options={tnvsOptions}
                 onChange={(e) => {
@@ -163,7 +161,6 @@ const MotorDetailsChange = ({
             disabled={disabled}
             label={t("endorsement.mortgage")}
             value={formik.values.Mortgage}
-            // options={MortgageOptions || mortgage}
             options={mortgageOptions}
             onChange={(e) => {
               formik.setFieldValue("Mortgage", e.value);

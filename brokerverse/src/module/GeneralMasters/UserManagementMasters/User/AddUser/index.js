@@ -174,7 +174,6 @@ const AddUser = ({ action }) => {
 
   // Set form values when user data is loaded (for edit/view)
   const setFormikValues = () => {
-
     // The record loaded for this route first, then the row picked in the list
     const userData =
       userDetailList?.userId === id
@@ -226,14 +225,6 @@ const AddUser = ({ action }) => {
     }
   }, [id, action, dispatch]);
 
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     dispatch(getUserListByIdMiddleware(id)).then(() => {
-  //       setFormikValues();
-  //     });
-  //     setFormikValues();
-  //   }
-  // }, [action, id]);
   return (
     <div className="grid add__user__container">
       <div

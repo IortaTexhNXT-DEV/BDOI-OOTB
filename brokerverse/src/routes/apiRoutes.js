@@ -61,10 +61,6 @@ export const APIROUTES = {
     POST_DOCUMENT_UPLOADE: "client/create-client",
     GET_DOCUMENT_UPLOAD_URL: "upload/get-url/document",
   },
-  // CLIENTMANAGEMENT:{
-  //  CLIENT_MANAGEMENT: "client/get-all-client",
-  //  GET_SEARCH_ALL_CLIENT:"client/search-all-client"
-  // },
   POLICYDETAILS: {
     GET_POLICY_DETAIL: "quote/get-quote-details?quoteId=",
     GET_BILL_NO: "billing/get-bill-no",

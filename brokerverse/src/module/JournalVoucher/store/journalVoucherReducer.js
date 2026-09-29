@@ -78,7 +78,6 @@ const journalVoucherReducer = createSlice({
     builder.addCase(postTCJournalVoucher.rejected, (state, action) => {
       state.loading = false;
 
-      // state.postTCdata = {};
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 

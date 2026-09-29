@@ -225,7 +225,6 @@ function AddBranch({ action }) {
               classNames="field__container"
               label={t("generalMasters.branchName")}
               placeholder={t("generalMasters.enter")}
-              //   value={formik.values.CurrencyDescription}
               value={
                 action == "add"
                   ? formik.values.BranchName
@@ -271,7 +270,6 @@ function AddBranch({ action }) {
               classNames="field__container"
               label={t("generalMasters.emailIdBranch")}
               placeholder={t("generalMasters.enter")}
-              //   value={formik.values.CurrencyDescription}
               value={
                 action == "add"
                   ? formik.values.EmailID
@@ -297,7 +295,6 @@ function AddBranch({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   action == "add"
                     ? formik.values.Description

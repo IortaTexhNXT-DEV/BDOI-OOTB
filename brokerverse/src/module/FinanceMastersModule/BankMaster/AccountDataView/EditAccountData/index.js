@@ -19,7 +19,6 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useFormik } from "formik";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
-// import SvgEditIcon from '../../../../../assets/icons/SvgEditIcon';
 import { useDispatch, useSelector } from "react-redux";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Dialog } from "primereact/dialog";
@@ -41,8 +40,6 @@ const initialValues = {
 };
 
 function EditAccountDetail({ action }) {
-  // const [visible, setVisible] = useState(false);
-
   const { AccountPatchDetailView, loading, chequeListData, getEditChequeData } =
     useSelector(({ bankMasterReducer }) => {
       return {
@@ -61,28 +58,6 @@ function EditAccountDetail({ action }) {
   const dispatch = useDispatch();
 
   // const customValidation = (values) => {
-  //   const errors = {};
-
-  //   if (!values.AccountNumber) {
-  //     errors.AccountNumber = "This field is required";
-  //   }
-  //   if (!values.AccountName) {
-  //     errors.AccountName = "This field is required";
-  //   }
-  //   if (!values.AccountType) {
-  //     errors.AccountType = "This field is required";
-  //   }
-  //   if (!values.MainAccount) {
-  //     errors.MainAccount = "This field is required";
-  //   }
-  //   if (!values.MainAccountDescription) {
-  //     errors.MainAccountDescription = "This field is required";
-  //   }
-  //   if (!values.TransactionLimit) {
-  //     errors.TransactionLimit = "This field is required";
-  //   }
-
-  //   return errors;
   // };
 
   const Navigate = useNavigate();
@@ -162,7 +137,6 @@ function EditAccountDetail({ action }) {
   ];
   const home = { label: "Master" };
   const handleSubmit = (value) => {
-    // setVisible(true);
     dispatch(postPatchAccountDetailEdit(value));
     navigate("/master/finance/bank/accountdataview");
   };
@@ -211,16 +185,12 @@ function EditAccountDetail({ action }) {
   };
 
   // const handleNavigation = () => {
-  //   Navigate("/SpecificVoucher")
   // }
   // const formik = useFormik({
   //   initialValues: initialValues,
   //   // validate: customValidation,
-  //   // onSubmit: (values) => {
   //   //   // Handle form submission
-  //   //    handleSubmit(values);
 
-  //   // },
   //   onSubmit: handleSubmit
   // });
 
@@ -370,9 +340,6 @@ function EditAccountDetail({ action }) {
             className="addbutton_container"
             icon={<SvgAdd />}
             onClick={() => setVisible(true)}
-            // onClick={() => {
-            //   formik.handleSubmit();
-            // }}
             disabled={!formik.isValid}
           />
         </div>
@@ -385,7 +352,6 @@ function EditAccountDetail({ action }) {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -435,19 +401,6 @@ function EditAccountDetail({ action }) {
               className="fieldvalue_container"
             ></Column>
 
-            {/* <Column field="Amount" header="Total Amount" style={{ width: '24rem' }} headerStyle={headerStyle} className='fieldvalue_container'></Column> */}
-            {/* <Column field="action" header="Action" headerStyle={headerStyle} className='fieldvalue_container'
-        onClick={() => setVisible(true)}
-        ></Column> */}
-
-            {/* <Column
-            body={(params) => (
-                <SvgEditIcon onClick={() => setVisible(true)}/>
-            )}
-            header="Action"
-            headerStyle={headerStyle}
-            className="fieldvalue_container"
-        ></Column> */}
           </DataTable>
         </div>
       </Card>
@@ -457,7 +410,6 @@ function EditAccountDetail({ action }) {
           className="submit_button p-0"
           label="Update"
           onClick={formik.handleSubmit}
-          //   disabled={!selectedProducts}
 
           disabled={!formik.isValid}
         />

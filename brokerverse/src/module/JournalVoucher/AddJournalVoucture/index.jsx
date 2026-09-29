@@ -20,7 +20,6 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import SvgDeleteIcon from "../../../assets/icons/SvgDeleteIcon";
 import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-// import { Toast } from 'primereact/toast';
 import { useFormik } from "formik";
 import AddData from "./AddData/AddData";
 import SvgTable from "../../../assets/icons/SvgTable";
@@ -123,10 +122,6 @@ const AddJournalVocture = () => {
   const handleSubmit = (values) => {
     dispatch(postTCJournalVoucher(formik.values));
   };
-
-  // useEffect(() => {
-  //     handleSubmit()
-  // }, [])
 
   const formik = useFormik({
     initialValues: {
@@ -296,11 +291,6 @@ const AddJournalVocture = () => {
     return total;
   }, 0);
 
-  // const totalLocalAmount = journalVoucherPostTabelData.reduce((total, item) => {
-  //     const localAmount = parseFloat(item.localAmount);
-  //     return !isNaN(localAmount) ? total + localAmount : total;
-  // }, 0);
-
   const handlePrint = () => {
     printRef.current.showToast();
     setVisibleSuccess(true);
@@ -310,24 +300,10 @@ const AddJournalVocture = () => {
 
   return (
     <div className="grid add__JV__container">
-      {/* {buttonshow === 0 ? (
-        <CustomToast
-          ref={toastRef}
-          message="Transaction Number 1234 is created"
-        />
-      ) : (
-        <CustomToast ref={toastRef} message="Successfully Printed" />
-      )} */}
       <CustomToast ref={toastRef} message={toastMessage} />
       <CustomToast ref={printRef} message="Successfully Printed" />
       <div className="col-12"></div>
       <div className="col-12 mb-2">
-        {/* <div className="add__sub__title__JV" onClick={handleGoback}>
-          <span className="mr-2">
-            <ArrowLeftIcon />
-          </span>{" "}
-          Add Journal Voucheraaaa
-        </div> */}
         <div>
           <span onClick={handleGoback}>
             <SvgBackicon />

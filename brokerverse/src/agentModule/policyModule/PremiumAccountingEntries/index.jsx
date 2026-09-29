@@ -388,27 +388,6 @@ const PremiumAccountingEntries = () => {
             )}
             style={{ minWidth: "120px", textAlign: "right" }}
           />
-          {/* <Column
-            field="motherPolicyNumber"
-            header="Mother Policy"
-            body={(rowData) => {
-              if (
-                rowData.motherPolicyNumber &&
-                rowData.motherPolicyNumber !== policyInfo.policyNumber
-              ) {
-                return (
-                  <button
-                    className="mother-policy-link"
-                    onClick={() => handleMotherPolicyClick(rowData.motherPolicyId)}
-                  >
-                    {rowData.motherPolicyNumber}
-                  </button>
-                );
-              }
-              return "-";
-            }}
-            style={{ minWidth: "150px" }}
-          /> */}
         </DataTable>
       </Card>
     </div>

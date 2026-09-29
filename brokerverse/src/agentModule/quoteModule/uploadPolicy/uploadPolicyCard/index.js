@@ -682,12 +682,10 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.production")}*`}
               value={formik.values.Production}
-              // minDate={minDate}
               onChange={(e) => {
                 formik.setFieldValue("Production", e.target.value);
               }}
               dateFormat="yy-mm-dd"
-              // error={formik.errors.Production}
             />
             {formik.touched.Production && formik.errors.Production && (
               <div style={{ fontSize: 12, color: "red" }} className="mt-3">
@@ -699,7 +697,6 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.inception")}*`}
               value={formik.values.Inception}
-              // minDate={minDate}
 
               onChange={(e) => {
                 handleIssuedDateChange();
@@ -733,9 +730,6 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.expiry")}*`}
               value={formik.values.Expiry}
-              // onChange={(e) => {
-              //   formik.setFieldValue("Expiry", e.target.value);
-              // }}
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Expiry && formik.errors.Expiry && (

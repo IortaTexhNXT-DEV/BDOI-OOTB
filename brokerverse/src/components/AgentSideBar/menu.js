@@ -1,9 +1,6 @@
 export const menuList = [
     {
         name: "Home", path: "/agent/home"
-
-        // submenu: [
-        // ],
     },
     {
         name: "Leads", path: "/agent/leadlisting"

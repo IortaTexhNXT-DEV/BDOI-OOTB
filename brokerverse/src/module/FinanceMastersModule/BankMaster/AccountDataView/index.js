@@ -38,11 +38,6 @@ const Index = () => {
         loading: bankMasterReducer?.loading,
         AccountDetailsList: bankMasterReducer?.AccountDetailsList,
         searchAccountDetails: bankMasterReducer?.searchAccountDetails,
-        // const [products, setProducts] = useState([]);
-
-        // const handleView=()=>{
-        //   navigate('/accounts/paymentvoucher/detailview')
-        // }
       };
     }
   );
@@ -168,7 +163,6 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
           <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />
@@ -179,7 +173,6 @@ const Index = () => {
 
       <Card
 
-      //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -209,7 +202,6 @@ const Index = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -260,9 +252,6 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
 
-            {/* <Column field="name" header={t("financeMasters.action")} headerStyle={headerStyle}  className='fieldvalue_container'></Column>
-                    <Column field="category" header="Instrument Status" headerStyle={headerStyle}  className='fieldvalue_container'></Column>
-                    <Column field="quantity" header="Amount" headerStyle={headerStyle} className='fieldvalue_container'></Column> */}
             <Column
               body={(columnData) => <ToggleButton id={columnData.id} />}
               header={t("financeMasters.status")}

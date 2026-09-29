@@ -6,7 +6,6 @@ import CorrectionJV from "../module/CorrectionJV";
 import PolicyReceipts from "../module/Receipts/PolicyReceipts";
 import PolicyReceiptsView from "../module/Receipts/PolicyReceiptsView";
 import AddPolicyReceipts1 from "../module/Receipts/AddPolicyReceipts1";
-// import AddPolicyReceipts1 from "../src/module/Receipts/AddReceipts/AddPolicyReceipts1";
 import AddPolicyEdit from "../module/Receipts/AddPolicyReceiptEdit";
 import Receipts from "../module/Receipts";
 import Reversalsjv from "../module/Reversals/index";
@@ -19,11 +18,9 @@ import Paymentvoucher from "../module/PaymentVoucher/index";
 import CreateVoucher from "../module/PaymentVoucher/CreateVoucher/index";
 import Detailview from "../module/PaymentVoucher/DetailView/index";
 import BulkDisburse from "../module/PaymentVoucher/BulkDisburse";
-// import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategoryMaster";
 import BankAccountMaster from "../module/FinanceMastersModule/BankAccountMaster";
 import BankChequeMaster from "../module/FinanceMastersModule/BankChequeMaster";
 import BranchMasterInitial from "../module/FinanceMastersModule/BranchMaster/BranchMasterInitial";
-// import BranchMaster from "../module/FinanceMastersModule/BranchMaster/BranchAdding";
 import BranchAdding from "../module/FinanceMastersModule/BranchMaster/BranchAdding";
 import BranchDetailsView from "../module/FinanceMastersModule/BranchMaster/BranchDetailsView";
 import CompanyMaster from "../module/FinanceMastersModule/CompanyMaster";
@@ -39,8 +36,6 @@ import DepartmentMasterInitial from "../module/FinanceMastersModule/DepartmentMa
 import DepartmentAdding from "../module/FinanceMastersModule/DepartmentMaster/DepartmentAdding";
 import DepartmentDetailsView from "../module/FinanceMastersModule/DepartmentMaster/DepartmentDetailsView";
 import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategoryMaster";
-// import SubAdd from "../module/FinanceMastersModule/SubAccountMaster/SubAdd";
-// import SaveAndEdit from "../module/FinanceMastersModule/SubAccountMaster/SaveAndEdit";
 import CategoryMasterInitial from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryMasterInitial";
 import CategoryAdding from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryAdding";
 import CategoryDetailsView from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryDetailsView";
@@ -51,8 +46,6 @@ import TaxationDetails from "../module/FinanceMastersModule/TaxationMaster/Taxat
 import TaxationEdit from "../module/FinanceMastersModule/TaxationMaster/TaxationEdit";
 import AddExchange from "../module/FinanceMastersModule/ExchangeRateMaster/AddExchange";
 import SaveAndEditExchange from "../module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange";
-
-// import AddCompany from "../module/FinanceMastersModule/CompanyMaster/AddCompany";
 
 import AddBankAccount from "../module/FinanceMastersModule/BankAccountMaster/AddBankAccount";
 import BankAccountdetails from "../module/FinanceMastersModule/BankAccountMaster/BankAccountdetails";
@@ -239,7 +232,6 @@ import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRu
 import BankStatementFormats from "../module/BankReconciliation/StatementFormats";
 import BankTransactionTypes from "../module/BankReconciliation/TransactionTypes";
 import BankRecReportPage from "../module/BankReconciliation/ReportPage";
-// import OperationalReports from "../module/Reports/OperationalReports";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -378,7 +370,6 @@ import ProductRecommendation from "../agentModule/quoteModule/productRecommandat
 const Maincomponent = () => {
   return (
     <div className="parent__main__container">
-      {/* <AuthRoute /> */}
       <Routes>
         {/* sign-in: agentModule/authModule/Login (App.js route /login) */}
         <Route element={<ProtectedLayout />}>
@@ -389,8 +380,6 @@ const Maincomponent = () => {
 
           {/* Receipts */}
 
-          {/* <Route path="/accounts/receipts" element={<Receipts />} /> */}
-
           <Route
             path="/accounts/receipts/addpolicyreceipts"
             element={<Navigate to="/accounts/receipts/addreceipts" replace />}
@@ -400,8 +389,6 @@ const Maincomponent = () => {
             path="/accounts/receipts/policyreceiptsview"
             element={<PolicyReceiptsView />}
           />
-
-          {/* <Route path="/accounts/receipts/addreceipt" element={<AddPolicyReceipts1 />} /> */}
 
           <Route path="/accounts/receipts" element={<PolicyReceipts />} />
           <Route
@@ -446,7 +433,6 @@ const Maincomponent = () => {
             element={<Bankdetailselection />}
           />
 
-          {/* <Route path="/payallvoucher" element={<Payallvoucher />} /> */}
           <Route
             path="accounts/paymentvoucher/SpecificVoucher"
             element={<SpecificVoucher />}
@@ -510,14 +496,6 @@ const Maincomponent = () => {
             path="accounts/pettycash/addrequest/add/:id"
             element={<RequestForm action="add" />}
           />
-          {/* <Route
-              path="/accounts/pettycash/addrequest/view/:id"
-              element={<RequestForm action="view" />}
-            /> */}
-          {/* <Route
-              path="/accounts/pettycash/addrequest/edit/:id"
-              element={<RequestForm action="edit" />}
-            /> */}
           <Route
             path="accounts/pettycash/addrequesttable"
             element={<AddRequestTable />}
@@ -571,15 +549,7 @@ const Maincomponent = () => {
             path="accounts/pettycash/replenishtdetailview"
             element={<ReplenishtDetailView />}
           />
-          {/* <Route
-              path="/pettycashmanagement"
-              element={<Pettycashmanagement />}
-            /> */}
           {/* Finacel Master Route*/}
-          {/* <Route
-              path="master/finance/accountcate"
-              element={<AccountCategoryMaster />}
-            /> */}
 
           {/* General Master */}
 
@@ -736,7 +706,6 @@ const Maincomponent = () => {
 
           {/* Location */}
 
-          {/* {Country} */}
           <Route
             path="master/generals/location/country"
             element={<Country />}
@@ -754,7 +723,6 @@ const Maincomponent = () => {
             element={<AddCountry action="add" />}
           />
 
-          {/* {State} */}
           <Route path="master/generals/location/state" element={<State />} />
 
           <Route
@@ -770,7 +738,6 @@ const Maincomponent = () => {
             element={<AddState action="add" />}
           />
 
-          {/* {City} */}
           <Route path="master/generals/location/city" element={<City />} />
 
           <Route
@@ -894,10 +861,6 @@ const Maincomponent = () => {
             path="master/generals/usermanagement/role/view/:id"
             element={<AddRole action="view" />}
           />
-          {/* <Route
-              path="master/generals/usermanagement/addrole"
-              element={<AddRole />}
-            /> */}
 
           {/* Branch Master Module */}
           <Route
@@ -1443,8 +1406,6 @@ const Maincomponent = () => {
             element={<ViewCommission />}
           />
 
-          {/* <Route path="/login" element={<Login />} />
-            <Route path="/forgotpassword" element={<ForgotPassword />} /> */}
           {/* // Dashboard Routes */}
           <Route path="/" element={<ExecutiveDashboard />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
@@ -1475,10 +1436,6 @@ const Maincomponent = () => {
             path="/agent/clientedit"
             element={<LeadCreation flow="client" action="edit" />}
           />
-          {/* <Route
-            path="/agent/leadcreate"
-            element={<LeadEdit flow="create" action="create"/>}
-          /> */}
           {/* // Quote Creation, Policy conversion & Client listing */}
           <Route
             path="/agent/createquote/policydetails/createquote/:id"
@@ -1570,10 +1527,6 @@ const Maincomponent = () => {
             element={<EndorsementSummary action="view" />}
           />
 
-          {/* <Route
-            path="/agent/createquote/ordersummaryquote"
-            element={<OrderSummaryQuote />}
-          /> */}
           <Route
             path="/agent/quotedetailview/:id"
             element={<QuoteDetailView action="view" />}
@@ -1903,10 +1856,6 @@ const Maincomponent = () => {
             element={<RenewalRequest />}
           />
           {/* //Reports */}
-          {/* <Route
-              path="/reports/operationalreports"
-              element={<OperationalReports />}
-            /> */}
 
           {/* // Payments */}
           <Route path="/agent/payments" element={<Payments />} />

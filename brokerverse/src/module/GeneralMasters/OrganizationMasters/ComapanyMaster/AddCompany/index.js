@@ -31,7 +31,6 @@ import { Checkbox } from "primereact/checkbox";
 import { BASE_URL } from "../../../../../utility/constant";
 import authService from "../../../../../services/authService";
 
-
 function AddCompany({ action }) {
   const { t } = useTranslation();
   const { companyView, getcompanyEdit, loading } = useSelector(
@@ -60,9 +59,7 @@ function AddCompany({ action }) {
 
   const State = useMasterOptions("state");
 
-
   const Country = useMasterOptions("country");
-
 
   const home = { label: t("generalMasters.master") };
   const items = [
@@ -75,59 +72,8 @@ function AddCompany({ action }) {
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     if (id != null) {
-  //       const filteredcompanyList = companyView?.filter(
-  //         (data) => parseInt(data.id) === parseInt(id)
-  //       );
-  //       setFormikValues(filteredcompanyList);
-  //       console.log(filteredcompanyList, "find filteredcompanyList");
-  //     }
-  //   }
-  // }, [action]);
-
   // const setFormikValues = (data) => {
-  //   console.log(data, "data");
-  //   const id = getcompanyEdit?.id;
-  //   const CompanyCode = getcompanyEdit?.CompanyCode;
-  //   const CompanyName = getcompanyEdit?.CompanyName;
-  //   const Description = getcompanyEdit?.Description;
-  //   const AddressLine1 = getcompanyEdit?.AddressLine1;
-  //   const AddressLine2 = getcompanyEdit?.AddressLine2;
-  //   const AddressLine3 = getcompanyEdit?.AddressLine3;
-  //   const Websitelink = getcompanyEdit?.Websitelink;
-  //   const PinCode = getcompanyEdit?.PinCode;
-  //   const City = { label: "Option 1", value: getcompanyEdit?.City };
-  //   const State = { label: "Option 1", value: getcompanyEdit?.State };
-  //   const Country = { label: "Option 1", value: getcompanyEdit?.Country };
-  //   const EmailID = getcompanyEdit?.EmailID;
-  //   const PhoneNumber = getcompanyEdit?.PhoneNumber;
-  //   const LicenseNumber = getcompanyEdit?.LicenseNumber;
-  //   const Fax = getcompanyEdit?.Fax;
-
-  //   const updatedValues = {
-  //     CompanyCode: `${CompanyCode}`,
-  //     CompanyName: `${CompanyName}`,
-  //     Description: `${Description}`,
-  //     AddressLine1: `${AddressLine1}`,
-  //     AddressLine2: `${AddressLine2}`,
-  //     AddressLine3: `${AddressLine3}`,
-  //     City: `${City.value}`,
-  //     State: `${State.value}`,
-  //     Country: `${Country.value}`,
-  //     EmailID: `${EmailID}`,
-  //     PhoneNumber: `${PhoneNumber}`,
-  //     LicenseNumber,
-  //     PinCode,
-  //     Fax,
-  //     Websitelink,
-  //     id,
-  //   };
-
-  //   formik.setValues({ ...formik.values, ...updatedValues });
   // };
-
 
   const initialValues = {
     id: "",
@@ -279,7 +225,6 @@ function AddCompany({ action }) {
               ? "Edit Company"
               : "Company details"}
         </label>
-
 
         <BreadCrumb
           model={items}
@@ -572,7 +517,6 @@ function AddCompany({ action }) {
                     : companyView.City
               }
               onChange={(e) => formik.setFieldValue("City", e.value)}
-              // options={City}
               options={City}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
@@ -597,7 +541,6 @@ function AddCompany({ action }) {
                     : companyView.State
               }
               onChange={(e) => formik.setFieldValue("State", e.value)}
-              // options={State}
               options={State}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
@@ -710,7 +653,6 @@ function AddCompany({ action }) {
             label={t("generalMasters.update")}
             disabled={!formik.isValid}
             onClick={formik.handleSubmit}
-          // onClick={()=>{formik.handleSubmit();}}
           />
         )}
       </div>

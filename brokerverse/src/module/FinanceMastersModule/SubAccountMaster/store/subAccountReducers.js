@@ -9,8 +9,6 @@ const initialState = {
     subAccountEdit: {},
     subAccountList: [],
     getSubDetailEdit: {}
-
-
 };
 const subAccaountReducers = createSlice({
     name: "subAccount",
@@ -23,7 +21,6 @@ const subAccaountReducers = createSlice({
         builder.addCase(getSubAccount.fulfilled, (state, action) => {
             state.loading = false;
             state.subAccountList = action.payload;
-
         });
         builder.addCase(getSubAccount.rejected, (state, action) => {
             state.loading = false;
@@ -31,7 +28,6 @@ const subAccaountReducers = createSlice({
             state.subAccountList = [];
             state.error = typeof action.payload === "string" ? action.payload : "";
         });
-
 
         //addCommission
         builder.addCase(postSubAccount.pending, (state) => {
@@ -68,8 +64,6 @@ const subAccaountReducers = createSlice({
             }
         );
 
-
-
         builder.addCase(patchSubAccountEdit.pending, (state) => {
             state.loading = true;
         });
@@ -77,20 +71,7 @@ const subAccaountReducers = createSlice({
             patchSubAccountEdit.fulfilled,
             (state, action) => {
                 state.loading = false;
-                // const updatedCurrencyList = [...state.subAccountList];
-                // updatedCurrencyList[updatedIndex] = action.payload;
                 state.subAccountList = action.payload;
-                // const updatedIndex = state.subAccountList.findIndex(
-                //     (item) => item.id === action.payload.id
-                // );
-                // if (updatedIndex !== -1) {
-                //     const updatedCurrencyList = [...state.subAccountList];
-                //     updatedCurrencyList[updatedIndex] = action.payload;
-                //     state.subAccountList = updatedCurrencyList;
-                //     console.log(state.subAccountList, "state.subAccountList")
-                // } else {
-                //     state.subAccountList = [...state.subAccountList, action.payload];
-                // }
             }
         );
 
@@ -142,7 +123,6 @@ const subAccaountReducers = createSlice({
                 state.error = typeof action.payload === "string" ? action.payload : "";
             }
         );
-
     },
 });
 

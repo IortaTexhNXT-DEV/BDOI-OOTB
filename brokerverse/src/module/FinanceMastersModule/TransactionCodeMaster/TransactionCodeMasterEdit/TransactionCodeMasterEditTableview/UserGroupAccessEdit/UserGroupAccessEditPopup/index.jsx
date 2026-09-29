@@ -35,7 +35,6 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
     const handleSubmit = (value) => {
         dispatch(patchUserRoleAccess(value))
         setShowEditData(false)
-        // setShow(false)
     }
 
     const customValidation = (values) => {
@@ -84,7 +83,6 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
     }, [getUserAccessData]);
 
     const handleView = (rowData) => {
-        // navigate("/accounts/pettycash/PettyCashCodeDetails")
     };
     const headerStyle = {
         fontSize: 16,
@@ -126,15 +124,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                             dropdownIcon={<SvgDropdown color={"#000"} />}
                         // label="User Role"
                         // placeholder="Select"
-                        // textColor={"#111927"}
-                        // textSize={"16"}
-                        // textWeight={500}
-                        // dropdownIcon={<SvgDropdown color={"#000"} />}
-                        // value={formik.values.Description}
-                        // options={BankAccountCode}
                         // onChange={(e) => {
-                        //   console.log(e.value);
-                        //   formik.setFieldValue("Description", e.value);
                         //   handleAccountcode(e.value.);
                         // }}
                         // optionLabel="Description"

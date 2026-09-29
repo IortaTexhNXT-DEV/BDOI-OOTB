@@ -10,7 +10,6 @@ import commissionMianReducers from "../module/GeneralMasters/Commission/store/co
 import taxationMainReducers from "../module/FinanceMastersModule/TaxationMaster/store/taxationReducers";
 import subAccountMainReducers from "../module/FinanceMastersModule/SubAccountMaster/store/subAccountReducers";
 import receiptsTableReducers from "../module/Receipts/store/receiptsReducers";
-// import pettyCashMainReducers from "../module/FinanceMastersModule/PettyCashMaster/store/pettyCashMasterReducers"
 import pettyCashInitiateReducer from "../module/PettyCashManagement/Initiate/store/pettyCashInitiateReducer";
 import pettyCashDisbursementReducers from "../module/PettyCashManagement/Disbursement/store/pettyCashDisbursementReducers";
 import pettyCashReceiptsReducer from "../module/PettyCashManagement/Receipts/store/pettyCashReceiptsReducer";
@@ -18,8 +17,6 @@ import pettyCashReplenishReducer from "../module/PettyCashManagement/Replenish/s
 import pettyCashRequestReducer from "../module/PettyCashManagement/Request/store/pettyCashRequestReducer";
 
 import pettyCashMainReducers from "../module/FinanceMastersModule/PettyCashMaster/store/pettyCashMasterReducers";
-// import receiptsTableReducers from "../module/Receipts/store/receiptsReducers";
-// import reversalMainReducers from "../module/Reversals/store/reversalReducers"
 import receivableTableReducers from "../module/Receipts/store/receiptsReducers";
 import editReducers from "../module/Receipts/store/receiptsReducers";
 import reversalMainReducers from "../module/Reversals/store/reversalReducers";
@@ -42,11 +39,6 @@ import insuranceSignatoriesReducers from "../module/GeneralMasters/InsuranceMana
 import insuranceVehicleReducers from "../module/GeneralMasters/InsuranceManagementMasters/Vehicle/store/insuranceVehicleReducers";
 import stateReducers from "../module/GeneralMasters/LocationMasters/StateMaster/store/stateReducers";
 import agentPaymentMainReducers from "../agentModule/paymentsModule/store/paymentReducer";
-// import endrosementViewMainReducers from "../agentModule/endorsementModule/endorsementDetailedView/store/endrosementViewReducers";
-// import claimSettlementReducer from "../agentModule/claimsModule/settlementDetails/Store/claimSettlementReducer";
-// import endrosementViewMainReducers from "../agentModule/endorsementModule/endorsementDetailedView/store/endrosementViewReducers"
-// import claimDetailsMainReducers from "../agentModule/claimsModule/claimDetails/store/claimDetailsReducers";
-// import claimTabelMainReducers from "../agentModule/quoteModule/clientView/clientViewCard/ClientListingViewClaimTable/store/getClaimTabelDataReducers"
 import claimSettleMainReducers from "../agentModule/claimsModule/claimSettlement/store/claimSettleReducers";
 import claimDocumentUploadMainReducers from "../agentModule/claimsModule/claimDocumentUpload/store/claimDocumentUploadReducers";
 import endrosementViewMainReducers from "../agentModule/endorsementModule/uploadEndorsement/store/uploadEndrosmentReducers";

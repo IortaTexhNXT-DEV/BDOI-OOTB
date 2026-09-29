@@ -223,7 +223,6 @@ const AddCommission = () => {
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showViewPopup, setShowViewPopup] = useState(false);
   const handleNavigateView = (rowData) => {
-    // navigate("/master/generals/commission/viewcommission")
     setShowViewPopup(true);
     dispatch(getCommissionPopupView(rowData));
   };
@@ -231,7 +230,6 @@ const AddCommission = () => {
   const handleEditNavigate = (rowData) => {
     dispatch(getEditCommissionPopup(rowData));
     setShowEditPopup(true);
-    // navigate("/master/generals/commission/editcommission/editcommissionpopup")
   };
   const renderEditButton = (rowData) => {
     return (
@@ -260,12 +258,6 @@ const AddCommission = () => {
           </span>
           <label className="label_header">{t("commission.addCommissions")}</label>
         </div>
-        {/* <div className="add__sub__title">
-          <div onClick={handleGoBack} className="mr-2 mt-1">
-            <ArrowLeftIcon />
-          </div>
-          Add Commissions
-        </div> */}
         <div className="mt-3 mb-3">
           <BreadCrumb
             home={home}
@@ -304,7 +296,6 @@ const AddCommission = () => {
                   </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -358,7 +349,6 @@ const AddCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -449,8 +439,6 @@ const AddCommission = () => {
                 classNames="input__field__reversal"
               >
                 <Calendar
-                  // value={date}
-                  // onChange={(e) => setDate(e.value)}
                   value={
                     formik.values.effectiveFrom
                       ? new Date(formik.values.effectiveFrom)
@@ -515,7 +503,6 @@ const AddCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -596,7 +583,6 @@ const AddCommission = () => {
               field="commissionCode"
               header="Commission Code"
               headerStyle={headerStyle}
-              // style={{ display: 'grid', alignItems: 'center', justifyContent: 'center' }}
             ></Column>
             <Column
               field="sharingRate"

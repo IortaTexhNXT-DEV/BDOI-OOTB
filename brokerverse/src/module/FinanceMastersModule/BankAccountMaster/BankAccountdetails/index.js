@@ -18,9 +18,6 @@ function BankAccountdetails() {
   const [visiblePopup, setVisiblePopup] = useState(false);
   const showPopup = () => {
     setVisiblePopup(true);
-    // setTimeout(() => {
-    //   setVisiblePopup(false);
-    // }, 1000);
   };
   
   const items = [{ label: t("financeMasters.bankAccount") }, { label: t("financeMasters.bankAccountDetails") }];
@@ -103,8 +100,6 @@ function BankAccountdetails() {
           </div>
         </div>
 
-        
-
         <div class="grid">
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
@@ -146,7 +141,6 @@ function BankAccountdetails() {
           </div>
         </div>
         <div class="grid">
-          
 
           <div class="sm-col-12  md:col-3 lg-col-4">
             <InputField

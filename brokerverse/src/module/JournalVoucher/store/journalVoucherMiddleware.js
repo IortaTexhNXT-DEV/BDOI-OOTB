@@ -22,7 +22,6 @@ export const journalVoucherMiddleware = createAsyncThunk(
     const { journalVoucherList } = journalVoucherMainReducers;
     const filteredData = journalVoucherList.filter((item) => item.id === 1);
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return filteredData[0];
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -78,18 +77,6 @@ export const postTCJournalVoucher = createAsyncThunk(
   }
 );
 
-// export const patchJVMiddleware = createAsyncThunk(
-//     PATCH_JOURNAL_VOUCHER_EDIT,
-//     async (payload, { rejectWithValue, getState }) => {
-//         try {
-//             console.log(payload, "find payload in patch");
-//             // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-//             return payload;
-//         } catch (error) {
-//             return rejectWithValue(error?.response.data.error.message);
-//         }
-//     }
-// );
 export const patchJVMiddleware = createAsyncThunk(
   PATCH_JOURNAL_VOUCHER_EDIT,
   async (payload, { rejectWithValue, getState }) => {
@@ -128,13 +115,7 @@ export const patchJVMiddleware = createAsyncThunk(
 export const getJournalVoucherViewData = createAsyncThunk(
   GET_JOURNAL_VOUCHER_VIEW,
   async (payload, { rejectWithValue, getState }) => {
-    // const { journalVoucherMainReducers } = getState();
-    // console.log(journalVoucherMainReducers, "dta");
-    // const { journalVoucherList } = journalVoucherMainReducers
-    // const filteredData = journalVoucherList.filter(item => item.id === 1);
-    // console.log(filteredData, "filteredData")
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);

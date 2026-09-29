@@ -10,7 +10,6 @@ const request = axios.create({
 });
 
 // Alter defaults after instance has been created
-// instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
 
 // set token on request headers
 request.interceptors.request.use((config) => {

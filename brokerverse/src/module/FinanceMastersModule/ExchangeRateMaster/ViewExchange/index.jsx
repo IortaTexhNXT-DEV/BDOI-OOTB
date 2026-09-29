@@ -57,8 +57,6 @@ function ViewExchange() {
       label: ExchangeDetailView.CurrencyCode,
       value: ExchangeDetailView.CurrencyCode,
     },
-    // { name: "THB", code: "THB" },
-    // { name: "USD", code: "RM" },
   ];
   const ToCurrencyCode = [
     {
@@ -93,10 +91,6 @@ function ViewExchange() {
       errors.ExchangeRate = "This field is required";
     }
 
-    // if (!values.TransactionDescription) {
-    //   errors.TransactionDescription = "This field is required";
-    // }
-
     return errors;
   };
   const effectiveFromDate = ExchangeDetailView.EffectiveFrom;
@@ -107,7 +101,6 @@ function ViewExchange() {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit,
@@ -115,10 +108,6 @@ function ViewExchange() {
 
   return (
     <div className="overall__viewexchange__container">
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon />
@@ -139,8 +128,6 @@ function ViewExchange() {
               <DropDowns
                 className="dropdown__container"
                 label="Currency Code"
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={ExchangeDetailView.CurrencyCode}
                 onChange={(e) => formik.setFieldValue("CurrencyCode", e.value)}
                 options={currencyCode}
@@ -161,7 +148,6 @@ function ViewExchange() {
                 classNames="field__container"
                 label="Currency  Description"
                 placeholder={"Enter"}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   ExchangeDetailView.CurrencyCode
                     ? `CurrencyCode ${ExchangeDetailView.CurrencyDescription}`
@@ -179,8 +165,6 @@ function ViewExchange() {
               <DropDowns
                 className="dropdown__container"
                 label="To Currency Code"
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={ExchangeDetailView.ToCurrencyCode}
                 onChange={(e) =>
                   formik.setFieldValue("ToCurrencyCode", e.value)
@@ -204,7 +188,6 @@ function ViewExchange() {
                 classNames="field__container"
                 label="To Currency  Description"
                 placeholder={"Enter"}
-                //   value={formik.values.ToCurrencyDescription}
                 value={
                   ExchangeDetailView.ToCurrencyCode
                     ? `ToCurrencyCode ${ExchangeDetailView.ToCurrencyDescription}`
@@ -225,7 +208,6 @@ function ViewExchange() {
               classNames="calender__container"
               showIcon
               value={new Date(effectiveFromDate)}
-              //  disabled={true}
               dateFormat={calendarDateFormat()}
             />
           </div>
@@ -237,7 +219,6 @@ function ViewExchange() {
               classNames="calender__container"
               showIcon
               value={new Date(effectiveToDate)}
-              //  disabled={true}
               dateFormat={calendarDateFormat()}
             />
           </div>

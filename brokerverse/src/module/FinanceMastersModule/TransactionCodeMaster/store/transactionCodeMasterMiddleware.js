@@ -18,30 +18,22 @@ const withUserGroupAccess = (values, getState) => ({
   ),
 });
 
-
 export const getTransactioncodeListMiddleware = masterThunk(GET_TRANSACTION_CODE_LIST, (params) => mastersService.list(TYPE, params));
-
-
 
 export const getTransactioncodeListsearch = masterThunk(GET_TRANSACTION_CODE_LIST_SEARCH, (query) =>
   mastersService.list(TYPE, { search: searchText(query) })
 );
 
-
 export const postStatus = masterThunk(POST_STATUS, ({ id, active }) => mastersService.setStatus(TYPE, id, active));
-
 
 export const postAddTransaction = masterThunk(POST_ADD_TRANSACTION, (values, { getState }) =>
   mastersService.create(TYPE, withUserGroupAccess(values, getState))
 );
 
-
-
 export const getTransactionCodeSetup = createAsyncThunk(
     GET_TRANSACTION_CODE_SETUP,
     async (payload, { rejectWithValue }) => {
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -49,15 +41,11 @@ export const getTransactionCodeSetup = createAsyncThunk(
     },
 );
 
-
 export const getUserGroupAccess = masterThunk(GET_USER_GROUP_ACCESS, (rows) => (Array.isArray(rows) ? rows : []).map(withRowId));
-
-
 
 export const postAddTransactionCodeSetup = createAsyncThunk(
     POST_ADD_TRANSACTION_CODE_SETUP,
     async (payload, { rejectWithValue, getState }) => {
-
         let bodyTableData = {
             AccountingPeriodStart: payload?.AccountingPeriodStart.toLocaleDateString("en-US", {
                 month: "numeric",
@@ -72,17 +60,14 @@ export const postAddTransactionCodeSetup = createAsyncThunk(
             TransactionNumberFrom: payload?.TransactionNumberFrom,
             TransactionNumberTo: payload?.TransactionNumberTo,
             lastUsed: "0"
-
         };
         try {
-
             return bodyTableData;
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error?.message);
         }
     }
 );
-
 
 export const postAddUserGroupAccess = masterThunk(POST_ADD_USER_GROUP_ACCESS, (row) =>
   withRowId({
@@ -92,9 +77,7 @@ export const postAddUserGroupAccess = masterThunk(POST_ADD_USER_GROUP_ACCESS, (r
   })
 );
 
-
 export const getTrascationcodeDetailsView = masterThunk(GET_TRANSACTION_CODE_DETAILS_VIEW, (row) => mastersService.get(TYPE, row?.id ?? row));
-
 
 export const getpatchTrascationcodeDetailsEdit = masterThunk(GET_PATCH_TRANSACTION_EDIT, (row) => mastersService.get(TYPE, row?.id ?? row));
 
@@ -106,7 +89,6 @@ export const getUserEditData = createAsyncThunk(
     GET_PATCH_USER_ACCESS,
     async (payload, { rejectWithValue }) => {
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -124,7 +106,6 @@ export const patchUserRoleAccess = createAsyncThunk(
             MaximumTransaction: payload?.MaximumTransaction,
         }
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return data;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);

@@ -367,12 +367,6 @@ const CollectionsList = () => {
               body={statusBodyTemplate}
               style={{ minWidth: "120px" }}
             />
-            {/* <Column
-            field="overdueLevel"
-            header={t("tables.level")}
-            body={overdueLevelBodyTemplate}
-            style={{ minWidth: "90px" }}
-          /> */}
             <Column
               field="daysPastDue"
               header={t("tables.daysOverdue")}

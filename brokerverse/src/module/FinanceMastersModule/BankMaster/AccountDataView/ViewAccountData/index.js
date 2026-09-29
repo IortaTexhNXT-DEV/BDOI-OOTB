@@ -21,7 +21,6 @@ import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import { useFormik } from "formik";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
-// import SvgEditIcon from '../../../../../assets/icons/SvgEditIcon';
 import { useDispatch, useSelector } from "react-redux";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Dialog } from "primereact/dialog";
@@ -43,15 +42,9 @@ function ViewAccountDetail() {
       return {
         loading: bankMasterReducer?.loading,
         accountDetailsView: bankMasterReducer?.accountDetailsView,
-        // const [products, setProducts] = useState([]);
-
-        // const handleView=()=>{
-        //   navigate('/accounts/paymentvoucher/detailview')
-        // }
       };
     }
   );
-  // const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
   const [date, setDate] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState(false);
@@ -174,15 +167,11 @@ function ViewAccountDetail() {
     navigate("/master/finance/bank/accountdataview");
   };
 
-  // const handleNavigation = () => {
-  //   Navigate("/SpecificVoucher")
-  // }
   const formik = useFormik({
     initialValues: initialValues,
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit,
@@ -244,9 +233,6 @@ function ViewAccountDetail() {
                 className="dropdown__container"
                 label={t("financeMasters.accountType")}
                 value={accountDetailsView?.AccountType}
-                // onChange={(e) =>
-                //   formik.setFieldValue("AccountType", e.value)
-                // }
                 options={Type}
                 optionLabel="label"
                 placeholder={"Select"}
@@ -328,7 +314,6 @@ function ViewAccountDetail() {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -363,38 +348,10 @@ function ViewAccountDetail() {
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
-            {/* <Column
-              body={(columnData) => <SvgEdit />}
-              header="Action"
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column> */}
 
-            {/* <Column field="Amount" header="Total Amount" style={{ width: '24rem' }} headerStyle={headerStyle} className='fieldvalue_container'></Column> */}
-            {/* <Column field="action" header="Action" headerStyle={headerStyle} className='fieldvalue_container'
-        onClick={() => setVisible(true)}
-        ></Column> */}
-
-            {/* <Column
-            body={(params) => (
-                <SvgEditIcon onClick={() => setVisible(true)}/>
-            )}
-            header="Action"
-            headerStyle={headerStyle}
-            className="fieldvalue_container"
-        ></Column> */}
           </DataTable>
         </div>
       </Card>
-
-      {/* <div className="next_container">
-
-        <Button className="submit_button p-0" label={t("generalMasters.save")}
-          onClick={handleNavigation}
-        //   disabled={!selectedProducts}
-        disabled={!formik.isValid}
-        />
-      </div> */}
 
       <Dialog
         header="Add Cheque book"

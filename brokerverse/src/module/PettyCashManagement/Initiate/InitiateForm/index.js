@@ -78,17 +78,6 @@ const InitiateForm = () => {
       errors.MainAccountCode = t("pettyCash.currencyRequired");
     }
 
-    // if (!values.TransactionCode) {
-    //   errors.TransactionCode = "Transaction Code is required";
-    // }
-
-    // if (!values.BranchCode) {
-    //   errors.BranchCode = "Branch Code is required";
-    // }
-
-    // if (!values.DepartmentCode) {
-    //   errors.DepartmentCode = "Department Code is required";
-    // }
     return errors;
   };
 
@@ -178,26 +167,17 @@ const InitiateForm = () => {
         </div>
       </div>
 
-
       <Card className="mt-4">
 
-
         <div class="grid" style={{ flexDirection: "row-reverse" }}>
-          {/* <div class="col-12 md:col-6 lg:col-3">
-        <div class="text-center p-3 border-round-sm bg-primary font-bold">col-12 md:col-6 lg:col-3</div>
-    </div> */}
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
               disabled={true}
               classNames="field__container"
               label={t("pettyCash.transactionNumber")}
-              // placeholder={"Enter"}
-              // value={formik.values.TransactionDescription}
               value={
                 formik.values.TransactionNumber
-
               }
-              // value={formik.values.Transactioncode}
 
               onChange={formik.handleChange("TransactionNumber")}
             />
@@ -206,17 +186,10 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.transactionCode")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-            // value={formik.values.PettyCashdescription}
-            // onChange={formik.handleChange("PettyCashdescription")}
-            // error={
-            //   formik.touched.PettyCashdescription &&
-            //   formik.errors.PettyCashdescription
-            // }
             />
 
           </div>
@@ -240,7 +213,6 @@ const InitiateForm = () => {
           </div>
         </div>
 
-
         <div className="grid mt-1">
           <div className="col-12 md:col-3 lg-col-3 input__view">
             <DropDowns
@@ -263,36 +235,24 @@ const InitiateForm = () => {
                 formik.touched.PettyCashCodes && formik.errors.PettyCashCodes
               }
             />
-            {/* {formik.touched.PettyCashCode &&
-              formik.errors.PettyCashCode && (
-                <div style={{ fontSize: 8, color: "red",marginTop:4 }}>
-                  {formik.errors.PettyCashCode}
-                </div>
-              )} */}
 
           </div>
           <div className="col-12 md:col-6 lg-col-6 input__view">
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.PettyCashdescription}
               onChange={formik.handleChange("PettyCashdescription")}
-            // error={
-            //   formik.touched.PettyCashdescription &&
-            //   formik.errors.PettyCashdescription
-            // }
             />
           </div>
           <div className="col-12 md:col-3 lg-col-3 input__view">
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashSize")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -418,7 +378,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.currencyDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -458,7 +417,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.branchDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -500,7 +458,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.departmentDescription")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -519,7 +476,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.availableCash")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -535,7 +491,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.maxLimit")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -552,7 +507,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.minimumCashbox")}
-              // placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}

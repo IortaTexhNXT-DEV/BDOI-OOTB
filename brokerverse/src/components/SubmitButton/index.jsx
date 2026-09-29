@@ -11,18 +11,7 @@ const SubmitButton = ({
   navigation,
   visiblechange,
 }) => {
-  
   const navigate = useNavigate();
-
-  
-  // useEffect(() => {
-  //   if (visible) {
-  //     setTimeout(() => {
-  //       setVisible(false);
-  //       navigate(`/${navigation}`);
-  //     }, 2000);
-  //   }
-  // }, [visible]);
 
   useEffect(() => {
     if (visiblechange) {
@@ -38,11 +27,9 @@ const SubmitButton = ({
         rounded
         handleSubmit={handleSubmit}
       />
-      
 
       </div>
-      
-    
+
   );
 };
 

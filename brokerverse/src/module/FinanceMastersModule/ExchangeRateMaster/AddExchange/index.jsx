@@ -40,7 +40,6 @@ function AddExchange() {
       return {
         loading: exchangeMasterReducer?.loading,
         ExchangeList: exchangeMasterReducer?.ExchangeList,
-
       };
     }
   );
@@ -72,11 +71,8 @@ function AddExchange() {
   minDate.setDate(minDate.getDate() + 1);
 
   // const handleSubmit=(value)=>{
-
-  //     Navigate("/master/finance/exchangerate")
   // }
 
-  // const toastRef = useRef(null);
   const dispatch = useDispatch();
   const handleSubmit = async (values) => {
     try {
@@ -103,10 +99,6 @@ function AddExchange() {
       errors.ExchangeRate = t("financeMasters.thisFieldIsRequired");
     }
 
-    // if (!values.TransactionDescription) {
-    //   errors.TransactionDescription = "This field is required";
-    // }
-
     return errors;
   };
 
@@ -115,7 +107,6 @@ function AddExchange() {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit,
@@ -123,10 +114,6 @@ function AddExchange() {
 
   return (
     <div className="overall__addexchange__container">
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <CustomToast ref={toastRef} message={t("financeMasters.exchangeRateAdded", { code: "ER1234" })} />
       <div>
         <span onClick={() => Navigate(-1)}>
@@ -148,8 +135,6 @@ function AddExchange() {
               <DropDowns
                 className="dropdown__container"
                 label={t("financeMasters.currencyCodeLabel")}
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.CurrencyCode}
                 onChange={(e) => formik.setFieldValue("CurrencyCode", e.value)}
                 options={currencyCode}
@@ -170,7 +155,6 @@ function AddExchange() {
                 classNames="field__container"
                 label={t("financeMasters.currencyDescription")}
                 placeholder={t("financeMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.CurrencyCode
                     ? `CurrencyCode ${formik.values.CurrencyDescription}`
@@ -188,8 +172,6 @@ function AddExchange() {
               <DropDowns
                 className="dropdown__container"
                 label={t("financeMasters.toCurrencyCode")}
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.ToCurrencyCode}
                 onChange={(e) =>
                   formik.setFieldValue("ToCurrencyCode", e.value)
@@ -213,7 +195,6 @@ function AddExchange() {
                 classNames="field__container"
                 label={t("financeMasters.toCurrencyDescription")}
                 placeholder={t("financeMasters.enter")}
-                //   value={formik.values.ToCurrencyDescription}
                 value={
                   formik.values.ToCurrencyCode
                     ? `ToCurrencyCode ${formik.values.ToCurrencyDescription}`

@@ -39,55 +39,11 @@ const AgentProfileCard = () => {
     zipCode: "",
   };
   // const validate = (values) => {
-  //   const errors = {};
-  //   console.log(values, errors, "values");
   //   if (!values.employeeCode) {
-  //     errors.employeeCode = "Employee Code is required";
   //   }
   //   if (!values.firstName) {
-  //     errors.firstName = "First name Code is required";
   //   }
 
-  //   if (!values.middleName) {
-  //     errors.middleName = "Middle name Name is required";
-  //   }
-
-  //   if (!values.employeeType) {
-  //     errors.employeeType = "Employee type is required";
-  //   }
-  //   if (!values.designation) {
-  //     errors.designation = "Designation is required";
-  //   }
-  //   if (!values.reportingto) {
-  //     errors.reportingto = "Reporting is required";
-  //   }
-  //   if (!values.branchCode) {
-  //     errors.branchCode = "Branch code is required";
-  //   }
-  //   if (!values.departmentCode) {
-  //     errors.departmentCode = "Department code is required";
-  //   }
-  //   if (!values.idProofType) {
-  //     errors.idProofType = "Id proof type is required";
-  //   }
-  //   if (!values.idNumber) {
-  //     errors.idNumber = "Id number is required";
-  //   }
-
-  //   if (!values.city) {
-  //     errors.city = "City is required";
-  //   }
-  //   if (!values.country) {
-  //     errors.country = "Country is required";
-  //   }
-  //   if (!values.state) {
-  //     errors.state = "State is required";
-  //   }
-  //   if (!values.lastName) {
-  //     errors.lastName = "Last name is required";
-  //   }
-
-  //   return errors;
   // };
 
   const setFormikValues = () => {

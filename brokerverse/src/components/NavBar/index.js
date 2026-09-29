@@ -61,29 +61,12 @@ const NavBar = ({ Logout }) => {
   );
   return (
     <div className="nav__block">
-      {/* {token === undefined ? (
-        <Menubar
-          model={Navdata}
-          start={start}
-          end={Logout === "true" ? end : ""}
-        />
-      ) : (
-        <Menubar
-          model={Navdata}
-          start={start}
-          end={Logout === "true" ? end : ""}
-        />
-      )} */}
-
-
 
             <i className="pi pi-bell p-overlay-badge" style={{ height:32,width:32,display:"contents" }}>
-                {/* <Badge value="2"></Badge> */}
             </i>
 
             <Avatar image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png" className="profile_container" size="xlarge" shape="circle" />
-            
-        
+
     </div>
   );
 };

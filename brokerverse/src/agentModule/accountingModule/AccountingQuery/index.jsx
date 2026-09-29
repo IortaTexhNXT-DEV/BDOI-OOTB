@@ -788,13 +788,6 @@ const AccountingQuery = () => {
               )}
               style={{ minWidth: "100px" }}
             />
-            {/* <Column
-              header={t("tables.actions")}
-              body={(rowData) => <ActionButtons rowData={rowData} />}
-              style={{ minWidth: "120px" }}
-              alignHeader="center"
-              align="center"
-            /> */}
           </DataTable>
         </Card>
       )}

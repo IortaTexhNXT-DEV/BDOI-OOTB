@@ -4,7 +4,6 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
-// import CustomToast from "../../../../components/Toast";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
 import ReplenishtDetailViewTable from "./ReplenishDetailviewTable";
@@ -29,7 +28,6 @@ const ReplenishtDetailView = () => {
 
   const { funds, banks, subAccounts } = usePettyCashOptions();
 
-  //   const toastRef = useRef(null);
   const items = [
     {
       label: "Petty Cash",
@@ -48,7 +46,6 @@ const ReplenishtDetailView = () => {
 
   return (
     <div className="add__replenish__view__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
           <div
@@ -76,7 +73,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Date"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -88,7 +84,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Transaction Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -100,7 +95,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Transaction Number"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -114,7 +108,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Petty cash Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -126,7 +119,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Petty cash Description"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -140,7 +132,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Bank Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -152,7 +143,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Bank Account Name"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -166,7 +156,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Sub Account Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -178,7 +167,6 @@ const ReplenishtDetailView = () => {
             <InputField
               classNames="input__filed"
               label="Sub Account Description"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}

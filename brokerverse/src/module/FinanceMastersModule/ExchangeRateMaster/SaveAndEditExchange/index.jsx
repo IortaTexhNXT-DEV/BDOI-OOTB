@@ -152,8 +152,6 @@ function EditExchange() {
               <DropDowns
                 className="dropdown__container"
                 label="Currency Code"
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.CurrencyCode}
                 onChange={(e) => formik.setFieldValue("CurrencyCode", e.value)}
                 options={currencyCode}
@@ -169,7 +167,6 @@ function EditExchange() {
                 classNames="field__container"
                 label="Currency  Description"
                 placeholder={"Enter"}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.CurrencyCode
                     ? `CurrencyCode ${formik.values.CurrencyDescription}`
@@ -187,8 +184,6 @@ function EditExchange() {
               <DropDowns
                 className="dropdown__container"
                 label="To Currency Code"
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.ToCurrencyCode}
                 onChange={(e) =>
                   formik.setFieldValue("ToCurrencyCode", e.value)
@@ -206,7 +201,6 @@ function EditExchange() {
                 classNames="field__container"
                 label="To Currency  Description"
                 placeholder={"Enter"}
-                //   value={formik.values.ToCurrencyDescription}
                 value={
                   formik.values.ToCurrencyCode
                     ? `ToCurrencyCode ${formik.values.ToCurrencyDescription}`
@@ -265,8 +259,6 @@ function EditExchange() {
         <Button
           className="submit_button p-0"
           label="Update"
-          // disabled={!formik.isValid}
-          // onClick={()=>{formik.handleSubmit();}}
           onClick={formik.handleSubmit}
         />
       </div>

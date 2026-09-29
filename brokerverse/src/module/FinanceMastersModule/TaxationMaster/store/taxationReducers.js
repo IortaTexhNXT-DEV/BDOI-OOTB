@@ -18,7 +18,6 @@ const initialState = {
   getTaxationEdit: {},
   taxationList: [],
 };
-// let nextId = 3
 const taxationReducers = createSlice({
   name: "commission",
   initialState,
@@ -41,12 +40,6 @@ const taxationReducers = createSlice({
     builder.addCase(postAddTaxationMiddileware.pending, (state) => {
       state.loading = true;
     });
-    // builder.addCase(postAddTaxationMiddileware.fulfilled, (state, action) => {
-    //     state.loading = false;
-    //     const newItem2 = action.payload;
-    //     state.taxationList = [...state.taxationList, newItem2];
-    //     console.log(state.taxationList, "taxationListtaxationList")
-    // });
     builder.addCase(postAddTaxationMiddileware.fulfilled, (state, action) => {
       state.loading = false;
       state.taxationList = [...state.taxationList, action.payload];

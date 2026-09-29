@@ -440,12 +440,6 @@ const CollectionDetail = () => {
             className="p-button-outlined p-button-primary"
             onClick={() => handleFollowUpAction("Email")}
           />
-          {/* <Button
-            label="Log Call"
-            icon="pi pi-phone"
-            className="p-button-outlined p-button-success"
-            onClick={() => handleFollowUpAction("Call")}
-          /> */}
           <Button
             label={t("collectionDetail.addNote")}
             icon="pi pi-file-edit"

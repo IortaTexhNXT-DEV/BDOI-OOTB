@@ -62,33 +62,10 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
         }
     };
     // const customValidation = (values) => {
-    //   const errors = {}
     //   if (!values.PaymentType) {
-    //     errors.PaymentType = "This field is required";
     //   }
     //   if (!values.InstallmentType) {
-    //     errors.InstallmentType = "This field is required";
     //   }
-
-    //   // if (!values.VehicleBrand) {
-    //   //   errors.VehicleBrand = "This field is required";
-    //   // }
-    //   // if (!values.ModelYear) {
-    //   //   errors.ModelYear = "This field is required";
-    //   // }
-    //   // if (!values.VehicleModel) {
-    //   //   errors.VehicleModel = "This field is required";
-    //   // }
-    //   // if (!values.ModelVariant) {
-    //   //   errors.ModelVariant = "This field is required";
-    //   // }
-    //   // if (!values.VehicleColor) {
-    //   //   errors.VehicleColor = "This field is required";
-    //   // }
-
-    //   // if (!values.SeatingCapacity) {
-    //   //   errors.SeatingCapacity = "This field is required";
-    //   // }
 
     //   return errors
     // }
@@ -508,31 +485,6 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                     </div>
 
                 </div>
-                {/* <div style={{ backgroundColor: 'black' }}>
-                    <div className="">
-                        <Button
-                             onClick={() => {
-                                formik.handleSubmit();
-                            }}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                backgroundColor: '#0072d8',
-                                gap: '8px',
-                                padding: '10px',
-                                color: '#fff',
-                                border: '1px solid #0072d8',
-                                borderRadius: '6px',
-                                fontFamily: "Nunito, Arial, sans-serif",
-                                fontSize: '16px',
-                                fontWeight: 400,
-                                lineHeight: '24px', 
-                            }}
-                        >
-                            Next
-                        </Button>
-                    </div>
-                </div> */}
                 <div >
                     <div
                         style={{

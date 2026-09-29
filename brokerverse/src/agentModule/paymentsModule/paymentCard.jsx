@@ -109,17 +109,6 @@ const PaymentCard = ({  dataSearch, status,setStatus }) => {
             <div className="payment__paid__subtitlefieldcard">{formatAppDate(data.date)}</div>
           </div>
           <div>
-          {/* <div
-        className={
-          rowData.Payment === "Pending"
-            ? "company__status__type__green"
-            : rowData.Payment === "Completed"
-              ? "company__status__type__blue"
-              : "company__status__type__red"
-        }
-      >
-        {rowData.Payment}
-      </div> */}
       <div className={data.status === "PAID"
       ? "payment__paidfieldcard"
       : data.status === "PENDING"
@@ -129,7 +118,6 @@ const PaymentCard = ({  dataSearch, status,setStatus }) => {
     }>
 {data.status}
       </div>
-            {/* <div className="payment__paidfieldcard">{data.status}</div> */}
           </div>
           <div>
             <Button

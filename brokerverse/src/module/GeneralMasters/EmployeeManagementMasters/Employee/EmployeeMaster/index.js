@@ -27,7 +27,6 @@ const EmployeeMaster = () => {
     navigate(`/master/generals/employeemanagement/employee/add/${123}`);
   };
   const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
 
   const { employeeTableList, loading, total, employeeSeachDetailList } = useSelector(
@@ -51,7 +50,6 @@ const EmployeeMaster = () => {
   }, [dispatch]);
 
   const handleView = (rowData) => {
-    // dispatch(getEmployeViewMiddleWare(rowData))
     dispatch(getEmployeEditMiddleWare(rowData))
     navigate(`/master/generals/employeemanagement/employee/view/${123}`);
   };
@@ -117,7 +115,6 @@ const EmployeeMaster = () => {
       </div>
     );
   };
-
 
   const template2 = {
     layout:

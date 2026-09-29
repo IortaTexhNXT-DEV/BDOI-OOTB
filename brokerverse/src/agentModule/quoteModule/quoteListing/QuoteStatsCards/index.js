@@ -154,43 +154,6 @@ const QuoteStatsCards = ({ leadRefId }) => {
           : null,
       warningSeverity: "danger",
     },
-    // recentQuotations: {
-    //   title: "Last 7 Days",
-    //   value: quotationStats.recentQuotations,
-    //   change: null,
-    //   trend: null,
-    //   icon: "pi pi-clock",
-    //   color: "#4bc0c0",
-    //   warning:
-    //     quotationStats.recentQuotations === 0 ? "No recent activity" : null,
-    // },
-    // last30DaysQuotations: {
-    //   title: "Last 30 Days",
-    //   value: quotationStats.last30DaysQuotations,
-    //   change:
-    //     quotationStats.growthRate !== 0 &&
-    //     quotationStats.last30DaysQuotations >= 0
-    //       ? `${quotationStats.growthRate > 0 ? "+" : ""}${
-    //           quotationStats.growthRate
-    //         }%`
-    //       : null,
-    //   trend:
-    //     quotationStats.growthRate > 0
-    //       ? "up"
-    //       : quotationStats.growthRate < 0
-    //       ? "down"
-    //       : null,
-    //   icon: "pi pi-calendar",
-    //   color: "#9966ff",
-    //   warning:
-    //     quotationStats.last30DaysQuotations === 0 &&
-    //     quotationStats.totalQuotations > 0
-    //       ? "No new quotations"
-    //       : quotationStats.growthRate <= -50 &&
-    //         quotationStats.last30DaysQuotations >= 0
-    //       ? "Critical decline"
-    //       : null,
-    // },
     averagePremium: {
       title: t("quoteStats.averagePremium"),
       value: quotationStats.averagePremium,
@@ -222,24 +185,6 @@ const QuoteStatsCards = ({ leadRefId }) => {
           ? "danger"
           : "warning",
     },
-    // convertedToPolicyCount: {
-    //   title: "Converted to Policy",
-    //   value: quotationStats.convertedToPolicyCount,
-    //   change: null,
-    //   trend: null,
-    //   icon: "pi pi-shield",
-    //   color: "#ff9f40",
-    //   subtitle: `${quotationStats.conversionRate}% conversion rate`,
-    //   warning:
-    //     quotationStats.conversionRate === 0 &&
-    //     quotationStats.totalQuotations > 0
-    //       ? "No conversions"
-    //       : quotationStats.conversionRate < 10 &&
-    //         quotationStats.conversionRate > 0 &&
-    //         quotationStats.totalQuotations >= 10
-    //       ? "Low conversion"
-    //       : null,
-    // },
     activeQuotations: {
       title: t("quoteStats.activeQuotations"),
       value: activeQuotationsCount,

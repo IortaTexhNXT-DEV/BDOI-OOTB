@@ -94,13 +94,6 @@ const PendingListTabelData = () => {
   const renderViewEditButton = (rowData) => {
     return (
       <div className="btn__container__view__edit">
-        {/* <div>
-          <Button
-            icon={<SvgEdit />}
-            className="view__btn"
-            onClick={() => handleEdit(rowData)}
-          />
-        </div> */}
         <div>
           <Button
             icon={<SvgArrow />}
@@ -215,7 +208,6 @@ const PendingListTabelData = () => {
         <div class="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("common.search")}
               value={search}
@@ -229,7 +221,6 @@ const PendingListTabelData = () => {
           </span>
         </div>
         <div class="col-12 md:col-3 lg:col-3">
-          {/* <TableDropdownField label="Search By" /> */}
           <Dropdown
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.value)}

@@ -40,26 +40,13 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
     };
     const dispatch=useDispatch()
     const handleSubmit = (value) => {
-        // dispatch(addLevelPatchEditPopup(value))
         setShowViewPopup(false);
     }
     const [levetOptionData, setLevelOptionData]=useState([])
 
     // const setFormikValues = () => {
     //     const levelData=popupEditData?.level
-       
-    //     const updatedValues = {
-    //         id: popupEditData?.id,
-    //         level:levelData,
-    //         sharingRate: popupEditData?.sharingRate,
-    //         commissionCode: popupEditData?.commissionCode,
-    //     };
-    //     if(levelData){
-    //         formik.setValues({ ...formik.values, ...updatedValues });
-    //         setLevelOptionData([{ label: levelData, value: levelData }]);
-    //     }
-      
-    //     formik.setValues({ ...formik.values, ...updatedValues });
+
     // };
     const formik = useFormik({
         initialValues: {
@@ -68,17 +55,7 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
         },
         validate: customValidation,
         onSubmit:handleSubmit
-        // onSubmit: (values) => {
-        //     // console.log("Submitting form with values:", values);
-        //     handleSubmit(values);
-        //     // // formik.resetForm();
-        //     // handleUpdate(values);
-        //     setShowEditPopup(false);
-        // },
     });
-    // useEffect(() => {
-    //     setFormikValues();
-    // }, [popupEditData]);
 
     return (
         <Dialog
@@ -143,12 +120,6 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
                         alignItems: "flex-end",
                     }}
                 >
-                    {/* <Button
-                        label={t("generalMasters.save")}
-                        className="jv__btn__reversal"
-                        disabled={!formik.isValid}
-                        onClick={formik.handleSubmit}
-                    /> */}
                 </div>
 
             </div>

@@ -165,7 +165,6 @@ const PolicyExtend = ({
       onSectionSubmitted(index, payload);
     }
 
-    // formik.resetForm()
   }, [formik, index, shouldSubmit, onSectionSubmitted]);
 
   const handleDateChange = useCallback(

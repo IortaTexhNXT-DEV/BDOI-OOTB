@@ -224,18 +224,8 @@ const TableData = ({ navigate }) => {
           body={(columnData) => <MasterStatusToggle type="insurance-company" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
-          // style={{
-          //   padding: "20px 1rem 17px 0px",
-          // }}
-          // field="id"
           body={renderActionButton}
           header={t("common.actions")}
-          // className="fieldvalue_container"
-          // headerStyle={{
-          //   display: "flex",
-          //   justifyContent: "center",
-          //   alignItems: "center",
-          // }}
           className="fieldvalueaction_container"
           headerStyle={headeraction}
         ></Column>

@@ -126,13 +126,6 @@ const JournalVoucher = () => {
     initialValues: { search: "" },
     onSubmit: handleSubmit,
   });
-  // useEffect(() => {
-  //   if (formik.values.search !== "") {
-  //     dispatch(
-  //       getJournalVoucherSearchList({ textSearch: formik.values.search })
-  //     );
-  //   }
-  // }, [formik.values.search]);
 
   const onPageChange = (event) => {
     const newPage = event.page + 1; // PrimeReact uses 0-based indexing
@@ -162,10 +155,6 @@ const JournalVoucher = () => {
     { label: t("accounts.voucherNumber") },
   ];
 
-  // const dispatch=useDispatch();
-  //   useEffect(()=>{
-  //   },[])
-
   return (
     <div className="grid  container__Journal__Voture">
       <div className="col-12"></div>
@@ -185,7 +174,6 @@ const JournalVoucher = () => {
         </div>
       </div>
       <div className="menu-container">
-        {/* <TieredMenu className='mt-2' model={menuitems} popup ref={menu} breakpoint="767px" /> */}
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture mb-3">
         <div
@@ -214,13 +202,6 @@ const JournalVoucher = () => {
                   <i className="pi pi-search" />
                   {/* <span className='p-1'> <SvgSearchIcon /></span> */}
             {/* <InputText
-                    style={{ width: "100%" }}
-                    classNames="input__sub__account__Journal__Voture"
-                    placeholder="Search by Transaction Code"
-                    value={formik.values.search}
-                    onChange={formik.handleChange("search")}
-                  /> */}
-            {/* <InputText
                 placeholder="Search customers"
                 className="searchinput_left"
               />
@@ -245,12 +226,6 @@ const JournalVoucher = () => {
             </div>
 
             <div className="col-12 md:col-2 lg:col-2">
-              {/* <div className='sort__filter__view__Journal__Voture' onClick={(e) => menu.current.toggle(e)}>
-                <div className='sort__by__text__Journal__Voture'>Search By</div>
-                <div>
-                  <SvgFilters />
-                </div>
-              </div> */}
               <Dropdown
                 value={globalFilter}
                 onChange={(e) => setGlobalFilter(e.value)}

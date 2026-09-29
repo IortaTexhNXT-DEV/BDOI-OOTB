@@ -36,7 +36,6 @@ const TableData = ({ navigate }) => {
       };
     }
   );
-  // const navigate = useNavigation();
 
   const emptyTableIcon = (
     <div>
@@ -186,7 +185,6 @@ const TableData = ({ navigate }) => {
           header="Action"
           headerStyle={{ textAlign: "center" }}
           className="fieldvalueaction_container"
-          // style={{textAlign:'center'}}
         ></Column>
       </DataTable>
     </div>

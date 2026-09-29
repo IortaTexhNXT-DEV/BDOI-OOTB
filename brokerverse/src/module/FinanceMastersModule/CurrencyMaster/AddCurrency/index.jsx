@@ -25,7 +25,6 @@ const initialValues = {
   Description: "",
   CurrencyFormat: "",
   NumberofDecimals: ""
-
 }
 
 const AddCurrency = () => {
@@ -33,7 +32,6 @@ const AddCurrency = () => {
   const toastRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const toastRef = useRef(null);
 
   const { CurrencyList, loading } = useSelector(({ currencyMasterReducer }) => {
     return {
@@ -48,7 +46,6 @@ const AddCurrency = () => {
   ];
 
   const ISOcode = useCurrencyCodeOptions();
-
 
   const home = { label: t("financeMasters.master") };
 
@@ -93,17 +90,14 @@ const AddCurrency = () => {
       errors.NumberofDecimals = t("financeMasters.thisFieldIsRequired");
     }
 
-
     return errors;
   };
-
 
   const formik = useFormik({
     initialValues: initialValues,
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
@@ -155,7 +149,6 @@ const AddCurrency = () => {
               value={formik.values.ISOcode}
               onChange={(e) =>
                 formik.setFieldValue("ISOcode", e.value)
-
               }
               options={ISOcode}
               optionLabel="name"
@@ -295,6 +288,5 @@ const AddCurrency = () => {
       </div>
     </div>
   )
-
 }
 export default AddCurrency

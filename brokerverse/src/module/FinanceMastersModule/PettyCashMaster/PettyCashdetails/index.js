@@ -70,12 +70,8 @@ const PettyCashDetail = () => {
 
     return errors;
   };
-  // const [view, setView]=useState({})
   const handleSubmit = (values) => {
   };
-  // const viewData=pettyCashList.map((val)=>{
-  //   return val
-  // })
 
   const formik = useFormik({
     initialValues: {
@@ -125,9 +121,6 @@ const PettyCashDetail = () => {
             placeholder="Enter"
             value={pettyCashView.pettycashcode}
             disabled={true}
-            // onChange={(e) =>
-            //   formik.setFieldValue("pettycashcode", e.target.value)
-            // }
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -142,9 +135,6 @@ const PettyCashDetail = () => {
             placeholder="Enter"
             value={pettyCashView.pettycashname}
             disabled={true}
-            // onChange={(e) =>
-            //   formik.setFieldValue("pettycashname", e.target.value)
-            // }
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -159,9 +149,6 @@ const PettyCashDetail = () => {
             placeholder="Enter"
             value={pettyCashView.pettycashsize}
             disabled={true}
-            // onChange={(e) =>
-            //   formik.setFieldValue("pettycashsize", e.target.value)
-            // }
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -176,9 +163,6 @@ const PettyCashDetail = () => {
             placeholder="Enter"
             value={pettyCashView.avilabelcash}
             disabled={true}
-            // onChange={(e) =>
-            //   formik.setFieldValue("avilabelcash", e.target.value)
-            // }
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -193,9 +177,6 @@ const PettyCashDetail = () => {
             placeholder="Enter"
             value={pettyCashView.minicashbox}
             disabled={true}
-            // onChange={(e) =>
-            //   formik.setFieldValue("minicashbox", e.target.value)
-            // }
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -210,20 +191,9 @@ const PettyCashDetail = () => {
             placeholder="Enter"
             value={pettyCashView.transactionlimit}
             disabled={true}
-            // onChange={(e) =>
-            //   formik.setFieldValue("transactionlimit", e.target.value)
-            // }
           />
         </div>
       </div>
-      {/* <div className='col-12 btn__view__Add mt-2'>
-        <Button
-          label='Save'
-          className='save__add__btn'
-          // onClick={() => setVisiblePopup(true)}
-          onClick={formik.handleSubmit}
-        />
-      </div> */}
     </div>
   );
 };

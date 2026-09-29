@@ -175,14 +175,6 @@ const PettyCashReceiptsTable = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" />
-            <Button
-              label="Search by"
-              outlined
-              icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
           <div className="sub__title">Receipts history</div>
         </div>
@@ -198,7 +190,6 @@ const PettyCashReceiptsTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -253,7 +244,6 @@ const PettyCashReceiptsTable = () => {
               header="Transaction Number"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              // body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
               sortable
             ></Column>
             <Column body={(row) => formatAppDate(row.Date)}

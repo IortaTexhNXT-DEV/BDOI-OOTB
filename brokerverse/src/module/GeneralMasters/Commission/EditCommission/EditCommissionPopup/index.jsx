@@ -68,13 +68,6 @@ const EditCommissionPopup = ({ showEditPopup, setShowEditPopup, handleUpdate }) 
         },
         validate: customValidation,
         onSubmit:handleSubmit
-        // onSubmit: (values) => {
-        //     // console.log("Submitting form with values:", values);
-        //     handleSubmit(values);
-        //     // // formik.resetForm();
-        //     // handleUpdate(values);
-        //     setShowEditPopup(false);
-        // },
     });
     useEffect(() => {
         setFormikValues();

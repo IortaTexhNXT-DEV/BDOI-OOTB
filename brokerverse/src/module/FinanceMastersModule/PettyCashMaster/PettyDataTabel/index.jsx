@@ -94,7 +94,6 @@ const PettyDataTabel = ({ newDataTable, pettyCashList }) => {
   };
   const handleEdit = (columnData) => {
     dispatch(getPatchPettyCashEdit(columnData));
-    // alert(columnData.id, "hiii")
     navigate(`/master/finance/pettycash/editpettycash/${columnData.id}`);
   };
 

@@ -628,17 +628,6 @@ return `${policyHolderName} / ${
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
             <DatepickerField
               label={`${t("agent.dateOfReported")}*`}
-              // value={
-              //   formik.values.dateOfReported
-              //     ?
-              //      new Date(formik.values.dateOfReported)
-              //     : null
-              // }
-              // onChange={(e) => {
-              //   formik.handleChange("dateOfReported")(
-              //     e.value.toISOString().split("T")[0]
-              //   );
-              // }}
               value={new Date(formik?.values?.dateOfReported)}
               onChange={(e) =>
                 formik.setFieldValue(
@@ -657,16 +646,6 @@ return `${policyHolderName} / ${
           <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
             <DatepickerField
               label={`${t("agent.dateOfLoss")}*`}
-              // value={
-              //   formik.values.dateOfLoss
-              //     ? new Date(formik.values.dateOfLoss)
-              //     : null
-              // }
-              // onChange={(e) => {
-              //   formik.handleChange("dateOfLoss")(
-              //     e.value.toISOString().split("T")[0]
-              //   );
-              // }}
               value={new Date(formik?.values?.dateOfLoss)}
               onChange={(e) =>
                 formik.setFieldValue(
@@ -924,9 +903,6 @@ return `${policyHolderName} / ${
                 name="demo"
                 accept=".png,.jpg,.jpeg,.pdf"
                 maxFileSize={2000000}
-                // uploadHandler={(e) => {
-                //   handleUppendImg(e.options.props.name, e.files[0]);
-                // }}
                 uploadHandler={(e) => {
                   formik.setFieldValue("file", e.files[0]);
                   handleUppendImg(e.options.props.name, e.files[0]);

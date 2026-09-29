@@ -197,7 +197,6 @@ const Country = () => {
 
       <Card
         style={{ marginTop: "20px", borderRadius: "20px" }}
-        //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -229,7 +228,6 @@ const Country = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -273,7 +271,6 @@ const Country = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
             ></Column>
-            {/* <Column field="name" header="Phone" headerStyle={headerStyle}  className='fieldvalue_container'></Column> */}
             <Column
               body={(rowData) => <MasterStatusToggle type="country" record={rowData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
@@ -307,8 +304,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.bankCode")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-6">
@@ -316,8 +311,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.bankName")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-3 lg:col-3">
@@ -325,8 +318,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.bankBranch")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -337,8 +328,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.ifscCode")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -346,8 +335,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.addressLine1")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -355,8 +342,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.addressLine2")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -364,8 +349,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.addressLine3")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -376,8 +359,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.city")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -385,8 +366,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.state")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -394,8 +373,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.country")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -403,8 +380,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.phoneNumber")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -415,8 +390,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.fax")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -424,8 +397,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.emailId")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -450,8 +421,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.bankCode")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-6">
@@ -459,8 +428,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.bankName")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-3 lg:col-3">
@@ -468,8 +435,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.bankBranch")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -480,8 +445,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.ifscCode")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -489,8 +452,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.addressLine1")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -498,8 +459,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.addressLine2")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -507,8 +466,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.addressLine3")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -519,8 +476,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.city")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -528,8 +483,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.state")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -537,8 +490,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.country")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -546,8 +497,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.phoneNumber")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>
@@ -558,8 +507,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.fax")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
           <div class="col-12 md:col-6 lg:col-3">
@@ -567,8 +514,6 @@ const Country = () => {
               classNames="field__container"
               label={t("generalMasters.emailId")}
               placeholder={t("generalMasters.enter")}
-              // value={formik.values.EmailID}
-              // onChange={formik.handleChange("EmailID")}
             />
           </div>
         </div>

@@ -65,10 +65,8 @@ const cityReducer = createSlice({
     builder.addCase(postAddCityMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
-
 
     builder.addCase(patchCityEditMiddleware.pending, (state) => {
       state.loading = true;
@@ -98,9 +96,6 @@ const cityReducer = createSlice({
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
-
-
-
   },
 });
 

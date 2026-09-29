@@ -371,16 +371,6 @@ function SpecificVoucher() {
     );
   }
 
-  // if (!disbursementData) {
-  //   return (
-  //     <div className="overall__specific__container">
-  //       <div className="error-message">
-  //         Failed to load disbursement details.
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="overall__specific__container">
       <CustomToast
@@ -576,7 +566,6 @@ function SpecificVoucher() {
             label={t("paymentVoucher.update")}
             className="update_btnlabel"
             onClick={formik.handleSubmit}
-            // onClick={() => setVisible(false)}
           />
         </div>
       </Dialog>

@@ -152,9 +152,6 @@ const ClientListingCard = () => {
         </div>
 
         {/* Policy Statistics Cards */}
-        {/* <div className="col-12">
-          <PolicyStatsCards />
-        </div> */}
 
         <div className="card__container__outer">
           <Card style={{ borderRadius: "20px" }}>

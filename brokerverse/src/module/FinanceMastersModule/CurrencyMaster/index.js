@@ -19,7 +19,6 @@ import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgEditicon from "../../../assets/icons/SvgEdit";
-// import { useNavigation } from '';
 import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -114,7 +113,6 @@ const CurrencyMaster = () => {
       </div>
     );
   };
-
 
   const handleView = (rowData) => {
     dispatch(getCurrencyDetailView(rowData));
@@ -212,11 +210,6 @@ const CurrencyMaster = () => {
               </div>
             </div>
             <div className="col-12 md:col-2 lg:col-2">
-              {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" />
-            <Button label="Search by" outlined icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
             </div>
           </div>
           <div className="col-12 ">
@@ -238,7 +231,6 @@ const CurrencyMaster = () => {
                 paginator
                 rows={5}
                 rowsPerPageOptions={[5, 10, 25, 50]}
-                // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 paginatorTemplate={template2}
                 emptyMessage={isEmpty ? emptyTableIcon : null}

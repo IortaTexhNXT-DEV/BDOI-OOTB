@@ -61,7 +61,6 @@ const Index = () => {
     navigate(`/master/generals/organization/companymaster/add/${123}`);
   };
 
-
   const isEmpty = companyTableList.length === 0;
 
   const emptyTableIcon = (
@@ -113,7 +112,6 @@ const Index = () => {
       label: t("generalMasters.voucherNumber"),
     },
   ];
-
 
   const headerStyle = {
     width: "26%",
@@ -176,7 +174,6 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
           <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />
@@ -187,7 +184,6 @@ const Index = () => {
 
       <Card
 
-      //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 

@@ -24,11 +24,6 @@ const UserGroupAccessDetail = () => {
     };
   });
   const [products, setProducts] = useState([]);
-  // const handleEdit = (columnData) => {
-  //   // setShowEdit(true)
-  //   dispatch(getUserEditData(columnData))
-  //   console.log(columnData, "columnData");
-  // }
   const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
@@ -122,19 +117,6 @@ const UserGroupAccessDetail = () => {
             className="fieldvalue_container"
             //   sortable
           ></Column>
-          {/* <Column
-            field="Edit"
-            body={(columnData) => (
-              <div onClick={() => handleEdit(columnData)}  style={{ display: 'flex', justifyContent: 'space-between', cursor: "pointer" }}>
-
-
-                <SvgEditIcon  />
-              </div>
-            )}
-            header="Edit"
-            headerStyle={headerStyle}
-            className="fieldvalue_container"
-          ></Column> */}
         </DataTable>
       </div>
       {/* </Card> */}

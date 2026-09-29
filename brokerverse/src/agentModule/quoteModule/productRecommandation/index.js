@@ -464,63 +464,11 @@ const ProductRecommendation = () => {
           </section>
 
           {/* Alternatives Section */}
-          {/* <div className="product__recommendation__alternatives__header">
-            <h3 className="product__recommendation__alternatives__title">
-              Competitive Alternatives
-            </h3>
-            <div className="product__recommendation__alternatives__divider"></div>
-          </div> */}
-          {/* 
-          {!showAlternatives ? (
-            <div className="product__recommendation__alternatives__trigger">
-              <button
-                onClick={() => setShowAlternatives(true)}
-                className="product__recommendation__alternatives__button"
-              >
-                <span>Compare with other Insurers</span>
-                <div className="product__recommendation__alternatives__icon">
-                  <svg
-                    className="product__recommendation__alternatives__arrow"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M19 9l-7 7-7-7"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-              </button>
-            </div>
-          ) : (
-            <section className="product__recommendation__alternatives__grid">
-              {alternativePlans.map((plan) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  isActive={activePlanId === plan.id}
-                  onClick={() => setActivePlanId(plan.id)}
-                  onSelect={() => handlePlanSelect(plan)}
-                  isPrimary={false}
-                />
-              ))}
-
-            </section>
-          )} */}
 
           {/* Back Button */}
 
           <div className="justify-content-between back__next__btn__container ">
             <div className="back__btn__container">
-              {/* <Button
-                className="back__btn"
-                onClick={() => handleBackNavigation()}
-              >
-                Back
-              </Button> */}
             </div>
             <div className="next__btn__container">
               <Button

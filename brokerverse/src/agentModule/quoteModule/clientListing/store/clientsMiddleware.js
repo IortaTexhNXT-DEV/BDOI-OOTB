@@ -110,7 +110,6 @@ export const patchClientEditMiddleWare = createAsyncThunk(
         }
 
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return data;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);

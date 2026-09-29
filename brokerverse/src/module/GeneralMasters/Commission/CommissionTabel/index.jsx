@@ -24,7 +24,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
     const [first, setFirst] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const handleNavigateView = (columnData) => {
-        // navigate(`/master/generals/commission/viewcommission`)
         dispatch(getCommissionView(columnData))
 
         navigate(`/master/generals/commission/viewcommission/${columnData.id}`)
@@ -33,27 +32,7 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
         dispatch(getPatchCommissionEditMiddleware(columnData))
         navigate(`/master/generals/commission/editcommission`)
     }
-    // console.log(newDataTable, "find newDataTable");
-    // let newProduct;
-    // let updatedProductData;
 
-    // if (newDataTable.length > 0) {
-    //     updatedProductData = [
-    //         ...data,
-    //         (newProduct = {
-    //             id: 11,
-    //             mainAC: newDataTable[0].mainAccount,
-    //             subAC: newDataTable[0].subAccount,
-    //             Currency: newDataTable[0].currencyCode,
-    //             foreignAmount: newDataTable[0].foreignAmount,
-    //             localAmount: "500.00",
-    //             Remarks: "New credit voucher",
-    //             Entry: newDataTable[0].entryType,
-    //         }),
-    //     ];
-    // } else {
-    //     updatedProductData = data;
-    // }
     const onPageChange = (event) => {
         setFirst(event.first);
         setRowsPerPage(event.rows);
@@ -64,7 +43,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
             <SvgTable />
         </div>
     );
-
 
     const headerStyle = {
         // width: '10rem',
@@ -107,7 +85,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                 </React.Fragment>
             );
         },
-
     };
 
     const renderEditButton = (rowData) => {
@@ -134,7 +111,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
         />
     );
 
-
     return (
         <div className="petty__cash__table__container">
             <Toast ref={statusToast} />
@@ -151,10 +127,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 paginatorTemplate={template2}
-                // onPage={onPageChange}
-                // onPageChange={onPageChange}
-                // emptyMessage={isEmpty ? emptyTableIcon : null}
-
 
             >
                 <Column
@@ -217,7 +189,6 @@ const CommissionTabel = ({ handleEdit, newDataTable, commissionList, getCommissi
                     className="fieldvalue_container"
                 ></Column>
                 <Column
-                    // body={renderEditButton}
                     body={(columnData) => (
                         <div style={{ display: 'flex', justifyContent: 'space-between', cursor: "pointer" }}>
                             <SvgIconeye onClick={() => handleNavigateView(columnData)} />

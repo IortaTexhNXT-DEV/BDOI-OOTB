@@ -159,7 +159,6 @@ const AddReplenishTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             selectionMode="checkbox"
@@ -167,7 +166,6 @@ const AddReplenishTable = () => {
             selection={selectedRows}
             onSelectionChange={(e) => setSelectedRows(e.value)}
 
-            // rowClassName={(rowData) => getStatusClassName(rowData.status)}
           >
             <Column
               selectionMode="multiple"
@@ -217,7 +215,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Disbursed Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -229,7 +226,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Reimbursement Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -241,7 +237,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Current balance"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}

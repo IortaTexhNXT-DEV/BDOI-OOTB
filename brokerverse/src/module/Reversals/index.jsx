@@ -120,17 +120,8 @@ const Reversals = () => {
 
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
-        {/* <div className="col-12 p-0">
-          <div className="correction__title__reversal">
-            <span onClick={() => setStep(step - 1)}>
-              {step !== 0 && <ArrowLeftIcon />}
-            </span>{" "}
-            Reversal JV Details
-          </div>
-        </div> */}
         <div className="correction__title__reversal">
           <span onClick={() => setStep(step - 1)}>
-            {/* <SvgBackicon /> */}
             {step !== 0 && <SvgBackicon />}
           </span>
           <label className={step !== 0 ? "label_header" : ""}>

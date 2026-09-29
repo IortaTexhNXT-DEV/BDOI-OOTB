@@ -107,12 +107,6 @@ const OpenItems = () => {
       upcommingList: openitemsReducers?.upcommingEventsList || [],
     };
   });
-  // const handlesubmit = () => {
-  //   toastRef.current.showToast();
-  //   setTimeout(() => {
-  //     setVisible(false);
-  //   }, 2000);
-  // };
 
   const handleSeeMore = () => {
     navigate("/agent/openitems/upcomingevents");
@@ -135,50 +129,6 @@ const OpenItems = () => {
       <CustomToast ref={toastRef} message={t("openItems.eventAddedSuccess")} />
       <div className="open__item__title">{t("openItems.activityTracker")}</div>
 
-      {/* <div className="grid mt-3">
-        <div className="col-12 md:col-6 lg:col-6">
-          <Card>
-            <div className="grid" onClick={handlePolicyExpiry}>
-              <div
-                className="col-1 md:col-1 lg:col-1"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <SvgpolicyExpire />
-              </div>
-              <div
-                className="col-5 md:col-5 lg:col-5"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <div className="sub__title">Policies Expiring soon</div>
-              </div>
-              <div className="col-6 md:col-6 lg:col-6">
-                <div className="sub__number">15</div>
-              </div>
-            </div>
-          </Card>
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <Card>
-            <div className="grid" onClick={handlePendingPayments}>
-              <div
-                className="col-1 md:col-1 lg:col-1"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <SvgpendingPayment />
-              </div>
-              <div
-                className="col-5 md:col-5 lg:col-5"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <div className="sub__title">Pending Payments</div>
-              </div>
-              <div className="col-6 md:col-6 lg:col-6">
-                <div className="sub__number">09</div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div> */}
       <div className="grid mt-3">
         <div className="col-12 md:col-6 lg:col-6">
           <div
@@ -207,7 +157,6 @@ const OpenItems = () => {
                 initialView="dayGridMonth"
                 editable={true}
                 selectable={true}
-                // select={handleDateSelect}
               />
             </div>
           </Card>

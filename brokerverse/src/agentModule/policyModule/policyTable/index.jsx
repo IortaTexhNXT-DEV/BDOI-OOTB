@@ -55,8 +55,6 @@ const LeadListingAllTable = ({
     });
   const menu = useRef(null);
 
-  //   const dispatch = useDispatch();
-
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [selectionMode, setSelectionMode] = useState("multiple");

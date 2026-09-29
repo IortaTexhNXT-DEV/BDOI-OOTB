@@ -38,9 +38,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
     if (action === "coveragedetail") {
       setFormikValuesPatch();
     }
-    // if (action === "coveragedetail") {
-    //   formik.setFieldValue("BodilyInjury", BodilyInjuryOptions[0].value);
-    // }
     if (action === "coveragedetail") {
       formik.setFieldValue("PropertyDamage", PropertyDamageOptions[0].value);
     }
@@ -136,7 +133,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
     // validate:customValidation,
     onSubmit: (values) => {
       handleclick(values);
-      // hadlecalculation();
     },
   });
 
@@ -172,7 +168,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
           <div className="col-12 md:col-6 lg:col-6">
             <DropdownField
               label={t("employeeBenefit.selectCovers")}
-              // value={formik.values.BodilyInjury}
                value={covers[0].value}
               options={covers}
               onChange={(e) => {
@@ -203,18 +198,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             )}
           </div>
         </div>
-{/* 
-         <div class="col-12 mt-2">
-          <InputTextField
-            label={t("employeeBenefit.medicalCoverage")}
-            value={formik.values.LossandDamagecoverage}
-            onChange={formik.handleChange("LossandDamagecoverage")}
-            error={
-              formik.touched.LossandDamagecoverage &&
-              formik.errors.LossandDamagecoverage
-            }
-          />
-        </div> */}
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
@@ -260,9 +243,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("employeeBenefit.employersLiabilityCoverage")}
-              // value={formik.values.ActsofNatureRate}
               value={  formik.values.ActsofNatureRate }
-              // value={formik.values.ActsofNatureRate}
               onChange={formik.handleChange("ActsofNatureRate")}
             />
             {formik.touched.ActsofNatureRate &&
@@ -276,7 +257,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             {isOverRide ?
               <InputTextField
                 label={t("employeeBenefit.employersLiabilityCoveragePremium")}
-                // value={formik.values.LossandDamagecoverageRate}
                 value={
                   action == "coveragecreate"
                     ? formik.values.ActsofNaturepremium
@@ -286,12 +266,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               />
               : <CalculaitionTextInputs
                 label={t("employeeBenefit.employersLiabilityCoveragePremium")}
-                // value={formik.values.ActsofNaturepremium}
-                // value={
-                //   action == "coveragecreate"
-                //     ? formik.values.ActsofNaturepremium
-                //     : "0.00"
-                // }
                 value={formik.values.ActsofNaturepremium}
                 onChange={formik.handleChange("ActsofNaturepremium")}
               />
@@ -324,13 +298,11 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
           <div className="col-12 md:col-6 lg:col-6">
             {isOverRide ? <InputTextField
               label={t("employeeBenefit.anyOneOccurrenceLimitCoveragePremium")}
-              // value={formik.values.LossandDamagecoverageRate}
               value={ formik.values.BodilyInjuryCoveragePremium
               }
               onChange={formik.handleChange("BodilyInjuryCoveragePremium")}
             /> : <CalculaitionTextInputs
               label={t("employeeBenefit.anyOneOccurrenceLimitCoveragePremium")}
-              // value={formik.values.BodilyInjuryCoveragePremium}
               value={ formik.values.BodilyInjuryCoveragePremium
               }
               onChange={formik.handleChange("BodilyInjuryCoveragePremium")}
@@ -363,7 +335,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
           <div className="col-12 md:col-6 lg:col-6">
             {isOverRide ? <InputTextField
               label={t("employeeBenefit.paCoveragePremium")}
-              // value={formik.values.LossandDamagecoverageRate}
               value={
                 action == "coveragecreate"
                   ? formik.values.PropertyDamageCoveragePremium
@@ -372,12 +343,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               onChange={formik.handleChange("PropertyDamageCoveragePremium")}
             /> : <CalculaitionTextInputs
               label={t("employeeBenefit.paCoveragePremium")}
-              // value={formik.values.PropertyDamageCoveragePremium}
-              // value={
-              //   action == "coveragecreate"
-              //     ? formik.values.PropertyDamageCoveragePremium
-              //     : "0.0%"
-              // }
               value={formik.values.PropertyDamageCoveragePremium}
               onChange={formik.handleChange("PropertyDamageCoveragePremium")}
             />}
@@ -389,32 +354,11 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               )}
           </div>
         </div>
-        {/* <div className="grid m-0 mt-2">
-          <div className="col-12 md:col-12 lg:col-12">
-            <DropdownField
-              label="Critical Illness Coverage"
-              value={formik.values.AutopassengerpersonalAccident}
-              options={AutopassengerpersonalAccidentOptions}
-              onChange={(e) => {
-                console.log(e.value);
-                formik.setFieldValue("AutopassengerpersonalAccident", e.value);
-              }}
-              optionLabel="label"
-            />
-            {formik.touched.AutopassengerpersonalAccident &&
-              formik.errors.AutopassengerpersonalAccident && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.AutopassengerpersonalAccident}
-                </div>
-              )}
-          </div>
-        </div> */}
 
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("employeeBenefit.dependentsCoverage")}
-              // value={formik.values.APPATotalCoverage}
               onChange={formik.handleChange("APPATotalCoverage")} 
               value={formik.values.APPATotalCoverage}
             />
@@ -428,22 +372,10 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
           <div className="col-12 md:col-6 lg:col-6">
             {isOverRide ? <InputTextField
               label={t("employeeBenefit.dependentsCoveragePremium")}
-              // value={formik.values.APPATotalCoverage}
               onChange={formik.handleChange("APPACoveragePremium")}
-              // value={
-              //   action == "coveragecreate"
-              //     ? formik.values.APPATotalCoverage
-              //     : "0.0%"
-              // }
               value={formik.values.APPACoveragePremium}
             /> : <CalculaitionTextInputs
               label={t("employeeBenefit.dependentsCoveragePremium")}
-              // value={formik.values.APPACoveragePremium}
-              // value={
-              //   action == "coveragecreate"
-              //     ? formik.values.APPACoveragePremium
-              //     : "0.0%"
-              // }
               value={formik.values.APPACoveragePremium}
               onChange={formik.handleChange("APPACoveragePremium")}
             />}
@@ -460,23 +392,12 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             {isOverRide ?
               <InputTextField
                 label="Total Employee Benefits Sum Insured"
-                // value={formik.values.APPATotalCoverage}
                 onChange={formik.handleChange("TotalSumInsured")}
-                // value={
-                //   action == "coveragecreate"
-                //     ? formik.values.APPATotalCoverage
-                //     : "0.0%"
-                // }
                 value={formik.values.TotalSumInsured}
               />
               : <CalculaitionTextInputs
                 label="Total Employee Benefits Sum Insured"
                 value={formik.values.TotalSumInsured}
-                // value={
-                //   action == "coveragecreate"
-                //     ? formik.values.TotalSumInsured
-                //     : "0.00"
-                // }
                 onChange={formik.handleChange("TotalSumInsured")}
               />}
             {formik.touched.TotalSumInsured &&
@@ -519,7 +440,6 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               <Button
                 className="next__btn"
                 onClick={formik.handleSubmit}
-                // onClick={navigate('/agent/employee-benefit/create-quote-order-summary')}
                 disabled={show === true ? true : false}
               >
                 {t("employeeBenefit.next")}

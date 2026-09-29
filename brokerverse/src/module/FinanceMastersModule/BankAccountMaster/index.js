@@ -104,7 +104,6 @@ const BankAccountMaster = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
           <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd className="addicon" />
@@ -114,7 +113,6 @@ const BankAccountMaster = () => {
       </div>
 
       <Card
-      //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -155,7 +153,6 @@ const BankAccountMaster = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             className="datatable_container"

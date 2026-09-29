@@ -142,7 +142,6 @@ const UserGroupAccess = () => {
   });
 
   const handleView = (rowData) => {
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const headerStyle = {
     fontSize: 16,
@@ -181,7 +180,6 @@ const UserGroupAccess = () => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -207,12 +205,6 @@ const UserGroupAccess = () => {
             className="fieldvalue_container"
             //   sortable
           ></Column>
-          {/* <Column
-            field="Edit"
-            header="Edit"
-            headerStyle={headerStyle}
-            className="fieldvalue_container"
-          ></Column> */}
           <Column
             field="Edit"
             body={(columnData) => (
@@ -230,12 +222,6 @@ const UserGroupAccess = () => {
             header="Edit"
             headerStyle={headerStyle}
             className="fieldvalue_container"
-            // header="View"
-            // className="fieldvalue_container"
-            // headerStyle={
-            //   { display: 'flex', justifyContent: 'center', alignItems: 'center' }
-            // }
-            // style={{ textAlign: 'center' }}
           ></Column>
         </DataTable>
       </div>
@@ -261,15 +247,7 @@ const UserGroupAccess = () => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
               // label="User Role"
               // placeholder="Select"
-              // textColor={"#111927"}
-              // textSize={"16"}
-              // textWeight={500}
-              // dropdownIcon={<SvgDropdown color={"#000"} />}
-              // value={formik.values.Description}
-              // options={BankAccountCode}
               // onChange={(e) => {
-              //   console.log(e.value);
-              //   formik.setFieldValue("Description", e.value);
               //   handleAccountcode(e.value.);
               // }}
               // optionLabel="Description"
@@ -336,102 +314,6 @@ const UserGroupAccess = () => {
           setShowEdit={setShowEdit}
         />
       </div>
-      {/* <Dialog
-        header="Add User Group Access"
-        visible={showEdit}
-        style={{ width: "50vw" }}
-        onHide={() => setShowEdit(false)}
-      >
-        <div className="grid mt-1">
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <DropDowns
-              className="inputdialog__fieled"
-              label="User Role"
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.UserRole}
-              onChange={(e) =>
-                formik.setFieldValue("UserRole", e.target.value)
-              }
-
-              options={BankAccountCode}
-
-              optionLabel='label'
-
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-            // label="User Role"
-            // placeholder="Select"
-            // textColor={"#111927"}
-            // textSize={"16"}
-            // textWeight={500}
-            // dropdownIcon={<SvgDropdown color={"#000"} />}
-            // value={formik.values.Description}
-            // options={BankAccountCode}
-            // onChange={(e) => {
-            //   console.log(e.value);
-            //   formik.setFieldValue("Description", e.value);
-            //   handleAccountcode(e.value.);
-            // }}
-            // optionLabel="Description"
-            // error={
-            //   formik.touched.BankAccountNumber &&
-            //   formik.errors.BankAccountNumber
-            // }
-            />
-            {formik.touched.UserRole && formik.errors.UserRole && (
-              <div
-                style={{ fontSize: 12, color: "red" }}
-                className="formik__errror__JV"
-              >
-                {formik.errors.UserRole}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="grid mt-1">
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <InputField
-              classNames="input__filed"
-              label="Minimum Transaction"
-              placeholder="Enter"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.MinimumTransaction}
-              onChange={formik.handleChange("MinimumTransaction")}
-              error={
-                formik.touched.MinimumTransaction &&
-                formik.errors.MinimumTransaction
-              }
-            />
-          </div>
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <InputField
-              classNames="input__filed"
-              label="Maximum Transaction"
-              placeholder="Enter"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.MaximumTransaction}
-              onChange={formik.handleChange("MaximumTransaction")}
-              error={
-                formik.touched.MaximumTransaction &&
-                formik.errors.MaximumTransaction
-              }
-            />
-          </div>
-        </div>
-        <div className="btn__container">
-          <Button
-            label="Save"
-            className="add__btn"
-            onClick={formik.handleSubmit}
-          />
-        </div>
-      </Dialog> */}
       {/* </Card> */}
     </div>
   );

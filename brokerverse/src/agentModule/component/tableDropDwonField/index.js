@@ -26,7 +26,6 @@ const TableDropdownField = ({ value, onChange, options, label }) => {
         onBlur={handleBlur}
         dropdownIcon={<SvgDownArrow/>}
         inputId={fieldId}
-        // placeholder={focused ? '' : label}
       />
       <label
         htmlFor={fieldId}

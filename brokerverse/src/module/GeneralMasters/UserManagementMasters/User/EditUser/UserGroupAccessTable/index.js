@@ -71,29 +71,8 @@ const UserGroupAccess = () => {
   //     "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
   //   RowsPerPageDropdown: (options) => {
   //     const dropdownOptions = [
-  //       { label: "5", value: "5" },
-  //       { label: 10, value: 10 },
-  //       { label: 20, value: 20 },
-  //       { label: 120, value: 120 },
   //     ];
 
-  //     return (
-  //       <div className="table__selector">
-  //         <React.Fragment>
-  //           <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-  //             Row count :{" "}
-  //           </span>
-  //           <Dropdown
-  //             value={options.value}
-  //             className="pagedropdown_container"
-  //             options={dropdownOptions}
-  //             onChange={options.onChange}
-  //           />
-  //         </React.Fragment>
-  //       </div>
-  //     );
-  //   },
-  // };
   const headerStyle = {
     // width: '10rem',
     // backgroundColor: 'red',
@@ -166,11 +145,6 @@ const UserGroupAccess = () => {
           className="eye__btn"
           onClick={() => handleView(rowData)}
         />
-        {/* <Button
-          icon={<SvgEditIcon />}
-          className="eye__btn"
-          onClick={() => handlEdit(rowData)}
-        /> */}
       </div>
     );
   };
@@ -178,16 +152,7 @@ const UserGroupAccess = () => {
   const handleView = (rowData) => {
     dispatch(getAdditionalRoleViewMiddleWare(rowData));
     setShowView(true);
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
-  // const headerStyle = {
-  //   fontSize: 16,
-  //   fontFamily: "Nunito, Arial, sans-serif",
-  //   fontWeight: 500,
-  //   padding: 6,
-  //   color: "#000",
-  //   border: "none",
-  // };
 
   const handleSubmit = () => {
     setShow(false);
@@ -222,7 +187,6 @@ const UserGroupAccess = () => {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit,

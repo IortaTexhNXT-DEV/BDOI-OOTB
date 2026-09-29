@@ -157,11 +157,6 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
           body={(rowData) => rowData.coverName?.toUpperCase()}
         ></Column>
-        {/* <Column
-          field="policyType"
-          header="Policy Type"
-          className="fieldvalue_container"
-        ></Column> */}
         <Column
           field="modifiedby"
           header="Modified by"

@@ -56,89 +56,6 @@ const ReviewingListTabelData = () => {
     }
   }, [search]);
 
-  // const paymentRewiwingtabledata=[
-  //   {
-  //     id: 1,
-  //     type:"Policy",
-  //     name:"CarsonDarrin",
-  //     clintid:"123",
-  //     policyNo:"999",
-  //     grosspremium: "355",
-  //     policyIssued:"13/12/12",
-  //     policyExpird:"13/12/12",
-  //     status:"PAID"
-  //   },
-  //   {
-  //     id: 2,
-  //     type:"Renewal Policy",
-  //     name:"Carson Darrin",
-  //     clintid:"456",
-  //     policyNo:"98456",
-  //     grosspremium: "655",
-  //     policyIssued:"13/12/12",
-  //     policyExpird:"13/12/12",
-  //     status:"PAID"
-  //   },
-  //   {
-  //     id: 3,
-  //     type:"Renewal Policy",
-  //     name:"Carson Darrin",
-  //     clintid:"566",
-  //     policyNo:"123456",
-  //     grosspremium: "655",
-  //     policyIssued:"13/12/12",
-  //     policyExpird:"13/12/12",
-  //     status:"PAID"
-  //   },
-  //   {
-  //     id: 4,
-  //     type:"Renewal Policy",
-  //     name:"Carson Darrin",
-  //     clintid:"786",
-  //     policyNo:"67856",
-  //     grosspremium: "655",
-  //     policyIssued:"13/12/12",
-  //     policyExpird:"13/12/12",
-  //     status:"PAID"
-  //   },
-  //     // {
-  //     //   id: 1,
-  //     //   grosspremium: "677",
-  //     //   clintid:"789",
-  //     //   date:"13/12/12",
-  //     //   name:"youraj",
-  //     //   subtitle:"policy no : 12345",
-  //     //   status:"PENDING"
-  //     // },
-  //     // {
-  //     //   id: 2,
-  //     //   grosspremium: "788",
-  //     //   clintid:"912",
-  //     //   date:"13/12/12",
-  //     //   name:"pandiyan",
-  //     //   subtitle:"policy no : 12345",
-  //     //   status:"PENDING"
-  //     // },
-  //     // {
-  //     //   id: 1,
-  //     //   grosspremium: "888",
-  //     //   clintid:"812",
-  //     //   date:"13/12/12",
-  //     //   name:"manoj",
-  //     //   subtitle:"policy no : 888",
-  //     //   status:"REVIEWING"
-  //     // },
-  //     // {
-  //     //   id: 2,
-  //     //   grosspremium: "988",
-  //     //   clintid:"765",
-  //     //   date:"13/12/12",
-  //     //   name:"sudarshan",
-  //     //   subtitle:"policy no : 988",
-  //     //   status:"REVIEWING"
-  //     // },
-  //   ]
-
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -175,13 +92,6 @@ const ReviewingListTabelData = () => {
   const renderViewEditButton = (rowData) => {
     return (
       <div className="btn__container__view__edit">
-        {/* <div>
-          <Button
-            icon={<SvgEdit />}
-            className="view__btn"
-            onClick={() => handleEdit(rowData)}
-          />
-        </div> */}
         <div>
           <Button
             icon={<SvgArrow />}

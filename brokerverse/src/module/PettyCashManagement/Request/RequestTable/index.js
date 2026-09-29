@@ -56,12 +56,10 @@ const RequestTable = () => {
   const isEmpty = !RequestList?.length;
 
   const handleViewer = (columnData) => {
-    // dispatch(getAccountDetailsView(columnData));
     dispatch(geteditrequestMiddleware(columnData));
     navigate(`/accounts/pettycash/editrequestform/view/${columnData?.id}`);
   };
   const handleEdit = (rowData) => {
-    // dispatch(getPatchAccountDetailsView(columnData));
     dispatch(geteditrequestMiddleware(rowData));
     navigate(`/accounts/pettycash/editrequestform/edit/${rowData?.id}`);
   };
@@ -102,18 +100,6 @@ const RequestTable = () => {
       );
     },
   };
-
-  // const renderViewButton = (rowData) => {
-  //   return (
-  //     <div className="center-content">
-  //       <Button
-  //         icon={<SvgEyeIcon />}
-  //         className="eye__btn"
-  //         onClick={() => handleView(rowData)}
-  //       />
-  //     </div>
-  //   );
-  // };
 
   const menu = useRef(null);
 
@@ -196,18 +182,10 @@ const RequestTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
           >
-            {/* <Column
-              field="PettycashCode"
-              header="Petty cash Code"
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-              
-            ></Column> */}
 
             <Column
               field="RequesterName"

@@ -41,7 +41,6 @@ const ExpiringPolicyCard = () => {
     }
   );
 
-  // const [globalFilter, setGlobalFilter] = useState("policy Number");
   const policy = [
     { name: t("openItems.name"), code: "Name" },
     { name: t("openItems.policyNumber"), code: "policy Number" },
@@ -80,14 +79,6 @@ const ExpiringPolicyCard = () => {
           <SvgDots />
         </div>
       </div>
-      // <div className="btn__container__view__edit">
-      //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-      //   <Button
-      //     icon={<SvgDot />}
-      //     className="view__btn"
-      //     onClick={(event) => handleMenuToggle(event, menu, rowData)}
-      //   />
-      // </div>
     );
   };
 
@@ -303,21 +294,6 @@ const ExpiringPolicyCard = () => {
     );
   };
 
-  // const renderAction = () => {
-  //   return (
-  //     <div className="action__container">
-  //       <div
-  //         className="action__Svg"
-  //         onClick={() => {
-  //           handlesubmit();
-  //         }}
-  //       >
-  //         <SvgDots/>
-  //       </div>
-  //     </div>
-  //   );
-  // };
-
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -352,7 +328,6 @@ const ExpiringPolicyCard = () => {
   };
 
   const handlesubmit = () => {
-    // navigate("/agent/policydetailedviewonly");
   };
 
   return (
@@ -389,7 +364,6 @@ const ExpiringPolicyCard = () => {
         </div>
         <div className="table__container">
           <DataTable
-            // value={TableData}
             value={search ? expiringSearchList : expiringtabledata}
             tableStyle={{ minWidth: "50rem" }}
             paginator
@@ -410,16 +384,6 @@ const ExpiringPolicyCard = () => {
               header={t("openItems.policyNumber")}
               headerStyle={headerStyle}
             ></Column>
-            {/* <Column
-              body={renderGross}
-              header="Gross premium"
-              headerStyle={headerStyle}
-            ></Column> */}
-            {/* <Column
-              body={renderIssuedDate}
-              header={t("openItems.policyIssued")}
-              headerStyle={headerStyle}
-            ></Column> */}
             <Column
               body={renderExpiryDate}
               header={t("openItems.expiryDate")}

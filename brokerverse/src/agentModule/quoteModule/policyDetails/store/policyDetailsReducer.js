@@ -6,13 +6,6 @@ const initialState = {
   error: "",
   PolicyDetails: {},
   TableList: [
-    //   {
-    //   id: 1,
-    //   ParticipantName: "Alpha insurance",
-    //   SumInsuredcurrency: "Peso",
-    //   Premiumcurrencys: "Peso",
-    //   Sharepercentage: "50%",
-    // },
   ]
 };
 const PolicyDetailsReducer = createSlice({
@@ -63,7 +56,6 @@ const PolicyDetailsReducer = createSlice({
     });
     builder.addCase(postModleDetailsMiddleware.rejected, (state, action) => {
       state.loading = false;
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
   },

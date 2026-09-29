@@ -3,11 +3,8 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-// import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
-// import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-// import ShareOption from "./Modal/ShareOption";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 import SvgRightarrow from "../../assets/agentIcon/SvgRightArrow";
 import ShareOption from "../quoteModule/quoteDetailView/Modal/ShareOption";
@@ -45,12 +42,6 @@ const CQquoteDetails = ({ action }) => {
 
   const handleclick = () => {
     navigate('/agent/employee-benefit/policy-waiting-for-policy')
-    // if (action == "view") {
-    //   navigate(`/agent/convertpolicy/customerinfo/view/${12}`, { state: state });
-    // }
-    // if (action == "edit") {
-    //   navigate(`/agent/convertpolicy/customerinfo/edit/${12}`, { state: state });
-    // }
   };
   const handleLeadNavigation = () => {
     navigate("/agent/leadlisting");
@@ -76,21 +67,18 @@ const CQquoteDetails = ({ action }) => {
           <div className="quote_details">
             <label className="insurance_text">Insurance Company</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.InsuranceCompanyName} */}
               SecureGuard Insurance
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("employeeBenefit.insurancePolicyType")}</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.InsurancePolicyType} */}
               CV
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("employeeBenefit.accountCode")}</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.AccountCode} */}
               Acc012345
             </label>
           </div>
@@ -100,14 +88,12 @@ const CQquoteDetails = ({ action }) => {
           <div className="quote_details">
             <label className="insurance_text">Name</label>
             <label className="alpha_text">
-              {/* {createleaddata.FirstName} */}
               Carson
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">Email ID</label>
             <label className="alpha_text">
-              {/* {createleaddata.EmailID} */}
               contact@broker.com
             </label>
           </div>
@@ -115,7 +101,6 @@ const CQquoteDetails = ({ action }) => {
             <label className="insurance_text">Contact Number</label>
             <label className="alpha_text">
               9874563210
-              {/* {createleaddata.ContactNumber} */}
             </label>
           </div>
         </div>
@@ -124,28 +109,24 @@ const CQquoteDetails = ({ action }) => {
           <div className="quote_details">
             <label className="insurance_text">Category of Employees</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.VehicleBrand} */}
            Management
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">Occupation</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.ModelYear} */}
               Office
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">No. of Staff</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.VehicleModel} */}
              150
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">Estimated Annual Earning</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.ModelVariant} */}
              15,000,000
             </label>
           </div>
@@ -153,7 +134,6 @@ const CQquoteDetails = ({ action }) => {
           <div className="quote_details">
             <label className="insurance_text">Limit per Person</label>
             <label className="alpha_text">
-              {/* {PolicyDetails.VehicleColor} */}
               500,000
             </label>
           </div>
@@ -180,48 +160,41 @@ const CQquoteDetails = ({ action }) => {
             <label className="insurance_text">NET Premium</label>
             <label className="alpha_text">
               100,000.00
-              {/* {OrderSummary.NETpremium} */}
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">DST</label>
             <label className="alpha_text">
-              {/* {OrderSummary.DocumentaryStampTax} */}
               400.00
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">VAT</label>
             <label className="alpha_text">
-              {/* {OrderSummary.ValueAddedTax} */}
               500.00
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">LGT</label>
             <label className="alpha_text">
-              {/* {OrderSummary.LocalGovtTax} */}
               550.00
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">Others</label>
             <label className="alpha_text">
-              {/* {OrderSummary.Others} */}
               550
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">Discount</label>
             <label className="alpha_text">
-              {/* {OrderSummary.Discount} */}
               -500.00
             </label>
           </div>
           <div className="quote_details">
             <label className="gross_text">Gross premium</label>
             <label className="gross_count">
-              {/* {OrderSummary.GrossPremium} */}
               104,900.00
             </label>
           </div>

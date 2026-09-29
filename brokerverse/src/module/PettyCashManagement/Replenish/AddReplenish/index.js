@@ -84,8 +84,6 @@ const AddReplenish = () => {
       errors.BankCode = "Bank Code is required";
     }
 
-   
-
     return errors;
   };
 
@@ -108,8 +106,6 @@ const AddReplenish = () => {
     formik.setFieldValue("SubAccountDescription", describe(subAccounts, option?.code));
   const handlePettyCashDescribtion = (fund) =>
     formik.setFieldValue("PettycashDescription", fund?.description || "");
-
-
 
   return (
     <div className="add__replenish__container">
@@ -142,7 +138,6 @@ const AddReplenish = () => {
               <InputField
                 classNames="input__filed"
                 label="Date"
-                //   placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -154,7 +149,6 @@ const AddReplenish = () => {
             <InputField
                 classNames="input__filed"
                 label="Transaction Code"
-                //   placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -166,7 +160,6 @@ const AddReplenish = () => {
               <InputField
                 classNames="input__filed"
                 label="Transaction Number"
-                //   placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -202,17 +195,12 @@ const AddReplenish = () => {
               <InputField
                 classNames="input__filed"
                 label="Petty cash Description"
-                //   placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.PettycashDescription}
                 onChange={formik.handleChange("PettycashDescription")}
-                // error={
-                //   formik.touched.PettycashDescription &&
-                //   formik.errors.PettycashDescription
-                // }
               />
             </div>
           </div>
@@ -241,7 +229,6 @@ const AddReplenish = () => {
               <InputField
                 classNames="input__filed"
                 label="Bank Account Name"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -282,7 +269,6 @@ const AddReplenish = () => {
               <InputField
                 classNames="input__filed"
                 label="Sub Account Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}

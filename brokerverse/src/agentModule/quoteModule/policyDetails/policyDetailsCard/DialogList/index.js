@@ -45,11 +45,6 @@ const DialogList = ({ setVisible, visible }) => {
       id: TableList?.length + 1,
     };
     dispatch(postModleDetailsMiddleware(valueWithId));
-    // {
-    //   action === "quotedetails"
-    //     ? navigate(`/agent/createquote/coveragedetails/coveragedetail/${123}`)
-    //     : navigate(`/agent/createquote/coveragedetails/coveragecreate/${123}`);
-    // }
   };
 
   const formik = useFormik({
@@ -108,7 +103,6 @@ const DialogList = ({ setVisible, visible }) => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("tables.sharePercent")}
-              // value={formik.values.SeatingCapacity}
               value={formik.values.Sharepercentage}
               onChange={formik.handleChange("Sharepercentage")}
             />

@@ -338,58 +338,35 @@ const CustomerInfo = ({ action }) => {
   const TruckTypes = [
     { label: "Heavy duty", value: "AL" },
     { label: "Heavy Xl", value: "AZ" },
-    //  { label: "duty", value: "AR" },
   ];
 
   // const customValidation = (values) => {
-  //   const errors = {};
-
   //   if (!values.MotorNumber) {
-  //     errors.MotorNumber = "This field is required";
   //   }
   //   if (!values.ChassisNumber) {
-  //     errors.ChassisNumber = "This field is required";
   //   }
   //   if (!values.TruckType) {
-  //     errors.TruckType = "This field is required";
   //   }
   //   if (!values.Mortgage) {
-  //     errors.Mortgage = "This field is required";
   //   }
   //   if (!values.CertNumber) {
-  //     errors.CertNumber = "This field is required";
   //   }
   //   if (!values.PlateNumber) {
-  //     errors.PlateNumber = "This field is required";
   //   }
   //   if (!values.MVFileNumber) {
-  //     errors.MVFileNumber = "This field is required";
   //   }
   //   if (!values.AuthenCode) {
-  //     errors.AuthenCode = "This field is required";
   //   }
   //   if (!values.Aluminium) {
-  //     errors.Aluminium = "This field is required";
   //   }
   //   if (!values.AirBag) {
-  //     errors.AirBag = "This field is required";
   //   }
   //   if (!values.TNVS) {
-  //     errors.TNVS = "This field is required";
   //   }
   //   if (!values.file) {
-  //     errors.file = "This field is required";
   //   }
-  //   return errors;
   // };
 
-  //   useEffect(() => {
-  //     console.log(action,'find sction call')
-  //     if (action === "edit") {
-  // console.log(postcustomerinfodata,'find postcustomerinfodata')
-  //     setFormikValues(postcustomerinfodata);
-  //     }
-  //   },[action]);
   useEffect(() => {
     if (action === "edit" && postcustomerinfodata) {
       setFormikValues(postcustomerinfodata);
@@ -397,7 +374,6 @@ const CustomerInfo = ({ action }) => {
   }, [action, postcustomerinfodata]);
 
   const setFormikValues = (data) => {
-    // const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
       MotorNumber: data?.MotorNumber,
       ChassisNumber: data?.ChassisNumber,
@@ -448,8 +424,6 @@ const CustomerInfo = ({ action }) => {
   }, [formik.values.IdCardImage]);
 
   useEffect(() => {
-    // if (action === "edit") {
-    // }
     if (action === "edit") {
       if (!formik.values.Aluminium) {
         formik.setFieldValue("Aluminium", Aluminium[0].value);

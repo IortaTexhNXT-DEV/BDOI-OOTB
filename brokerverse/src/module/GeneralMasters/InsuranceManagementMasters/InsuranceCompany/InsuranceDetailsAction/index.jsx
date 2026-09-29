@@ -47,18 +47,6 @@ const InsuranceDetailsAction = ({ action }) => {
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     if (id != null) {
-  //       const filteredInsuranceCompanyList = InsuranceCompanyList.filter(
-  //         (data) => data.id === parseInt(id)
-  //       );
-  //       setFormikValues(filteredInsuranceCompanyList);
-  //       setdropdown(filteredInsuranceCompanyList)
-  //     }
-  //   }
-  // }, [action]);
-
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -250,7 +238,6 @@ const InsuranceDetailsAction = ({ action }) => {
               className="input__label__corrections"
               placeholder="Enter"
               label={t("generalMasters.insuranceCompanyCode")}
-              // value={formik.values.insuranceCompanyCode}
               value={
                 action == "add"
                   ? formik.values.insuranceCompanyCode
@@ -258,7 +245,6 @@ const InsuranceDetailsAction = ({ action }) => {
                     ? formik.values.insuranceCompanyCode
                     : getInsuranceView?.insuranceCompanyCode
               }
-              // value={formik.values.insuranceCompanyCode}
               onChange={(e) =>
                 formik.setFieldValue("insuranceCompanyCode", e.target.value)
               }
@@ -448,7 +434,6 @@ const InsuranceDetailsAction = ({ action }) => {
               }
              
               onChange={(e) => formik.setFieldValue("state", e.value)}
-              // options={State}
               options={State}
             />
             {formik.touched.state && formik.errors.state && (
@@ -478,7 +463,6 @@ const InsuranceDetailsAction = ({ action }) => {
               }
               
               onChange={(e) => formik.setFieldValue("country", e.value)}
-              // options={Country}
               options={Country}
             />
             {formik.touched.country && formik.errors.country && (

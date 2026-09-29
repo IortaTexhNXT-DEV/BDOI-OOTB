@@ -23,7 +23,6 @@ import ArrowLeftIcon from "../../../../assets/icons/ArrowLeftIcon";
 import { SelectButton } from "primereact/selectbutton";
 import { useDispatch, useSelector } from "react-redux";
 import { getCommissionView } from "../store/commissionMiddleWare";
-// import AddCommissionPopup from './AddCommissionPopup';
 import { Card } from "primereact/card";
 import { useTranslation } from "react-i18next";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
@@ -124,7 +123,6 @@ const ViewCommission = () => {
     navigate("/master/generals/commission");
   };
   const handlePolicy = () => {
-    // navigate('/master/generals/commission/addcommission')
     setVisible(true);
   };
   const [products, setProducts] = useState([]);
@@ -219,9 +217,6 @@ const ViewCommission = () => {
               label={t("generalMasters.commissionCode")}
               placeholder={t("generalMasters.enter")}
               value={commissionView.commissionCode}
-              // onChange={(e) =>
-              //   formik.setFieldValue("prttycashcode", e.target.value)
-              // }
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6 xl:col-6 input__view__reversal">
@@ -242,7 +237,6 @@ const ViewCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               disabled={true}
               className={
                 step === 0
@@ -274,7 +268,6 @@ const ViewCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               disabled={true}
               className={
                 step === 0
@@ -336,7 +329,6 @@ const ViewCommission = () => {
                   showIcon
                   className="calender_field_claim"
                   disabled={true}
-                  // placeholder={translate("claimstatus")["Choose Date"]}
                 />
                 <div className="calender_icon_claim">
                   <SvgDatePicker />
@@ -360,7 +352,6 @@ const ViewCommission = () => {
                   showIcon
                   className="calender_field_claim"
                   disabled={true}
-                  // placeholder={translate("claimstatus")["Choose Date"]}
                 />
                 <div className="calender_icon_claim">
                   <SvgDatePicker />
@@ -370,7 +361,6 @@ const ViewCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               disabled={true}
               className={
                 step === 0
@@ -418,17 +408,6 @@ const ViewCommission = () => {
           <div className="col-12 md:col-6 lg:col-6 add__level__text">
             Add Level Wise Commission Sharing
           </div>
-          {/* <div className='col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture '>
-
-            <button type="button" className="add__icon__view__petty bv-add-button" onClick={handlePolicy}>
-              <div className='add__icon__petty' >
-                <SvgAdd color={'#fff'} />
-              </div>
-              <div className='add__text__petty'>
-                Add
-              </div>
-            </button>
-          </div> */}
         </div>
         <div className="col-12 card">
           <DataTable

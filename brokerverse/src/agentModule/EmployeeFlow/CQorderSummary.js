@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import useSignatoryOptions from "../quoteModule/utils/useSignatoryOptions";
 import { useDispatch } from "react-redux";
-// import CardComponent from "../../../components/Cardcomponent";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { postOrderSummaryMiddleware } from "../quoteModule/orderSummary/store/orderSummaryMiddleware";
 import customHistory from "../../routes/customHistory";
@@ -44,7 +43,6 @@ const CQOrderSummary = ({ action, flow }) => {
     toastRef.current.showToast();
     setTimeout(() => {
       if (action === "post") {
-        // navigate("/agent/quotedetailedit");
         navigate("/agent/quotedetailview", { state: state });
       }
       if (action === "view") {
@@ -371,7 +369,6 @@ const CQOrderSummary = ({ action, flow }) => {
                 <Button
                   className="next__btn"
                   onClick={() => {
-                    // formik.handleSubmit();
                     navigate('/agent/employee-benefit/create-quote-quote-details')
                   }}
                 >

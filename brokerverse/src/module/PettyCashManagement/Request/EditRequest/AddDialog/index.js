@@ -28,10 +28,6 @@ const AddDialog = ({visible,setVisible}) => {
       };
 
       const handleSubmit = (value) => {
-        // const valueWithId = {
-        //     ...value,
-        //     id: editrequestDetails?.length + 1,
-        // };
         dispatch(postEditRequestMiddleware(value));
         setVisible(false)
         formik.setFieldValue("Narration",);
@@ -64,7 +60,6 @@ const AddDialog = ({visible,setVisible}) => {
                     <div className="grid">
                         <div className="col-12 md:col-8 lg:col-8">
                             <InputField
-                                // classNames="input__filed"
                                 classNames="fielduniqueone__container"
                                 label="Narration"
                                 placeholder="Enter"
@@ -86,7 +81,6 @@ const AddDialog = ({visible,setVisible}) => {
                                 textWeight={500}
                                 value={formik.values.Amount}
                                 onChange={formik.handleChange("Amount")}
-                                // error={formik.touched.Amount && formik.errors.Amount}
                             />
                         </div>
                     </div>

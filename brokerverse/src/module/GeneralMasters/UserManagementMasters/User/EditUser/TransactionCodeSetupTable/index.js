@@ -131,29 +131,17 @@ const TransactionCodeSetupTable = ({ action }) => {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
   });
 
-  // const handleView = (rowData) => {
-  //   console.log("View clicked:", rowData);
-  //   // navigate("/accounts/pettycash/PettyCashCodeDetails")
-  // };
   const dispatch = useDispatch()
   const handleView = (rowData) => {
     dispatch(getViewMainBranchUser(rowData))
     setShowView(true)
-    // dispatch(getUserViewDataMiddleWare(rowData))
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
 
-  // const handlEdit = (rowData) => {
-  //   console.log(rowData, "gg");
-  //   dispatch(getUserEditDataMiddleWare(rowData))
-  //   navigate(`/master/generals/usermanagement/user/edit/${rowData?.id}`);
-  // };
   const items = [
     { label: t("generalMasters.userManagement") },
     {
@@ -181,11 +169,6 @@ const TransactionCodeSetupTable = ({ action }) => {
           className="eye__btn"
           onClick={() => handleView(rowData)}
         />
-        {/* <Button
-          icon={<SvgEditIcon />}
-          className="eye__btn"
-          onClick={() => handlEdit(rowData)}
-        /> */}
       </div>
     );
   };
@@ -217,7 +200,6 @@ const TransactionCodeSetupTable = ({ action }) => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -315,9 +297,6 @@ const TransactionCodeSetupTable = ({ action }) => {
           <Button
             label={t("generalMasters.save")}
             className="add__btn"
-            // onClick={() => {
-            //   handleSave();
-            // }}
             onClick={() => { formik.handleSubmit(); }}
           />
         </div>
@@ -339,7 +318,6 @@ const TransactionCodeSetupTable = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={mainUserViewData.branchCode}
               onChange={formik.handleChange("branchCode")}
-              // error={formik.errors.branchCode}
               className="dropdown__add__sub"
               label={t("generalMasters.branch")}
               classNames="label__sub__add"
@@ -356,7 +334,6 @@ const TransactionCodeSetupTable = ({ action }) => {
               disabled={action === "view" ? true : false}
               value={mainUserViewData.departmentCode}
               onChange={formik.handleChange("departmentCode")}
-              // error={formik.errors.departmentCode}
               className="dropdown__add__sub"
               label={t("generalMasters.departmentCode")}
               classNames="label__sub__add"

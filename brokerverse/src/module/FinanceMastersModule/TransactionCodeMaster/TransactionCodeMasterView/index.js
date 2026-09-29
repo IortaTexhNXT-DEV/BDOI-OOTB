@@ -43,7 +43,6 @@ const TransactionCodeMasterView = () => {
       TransactioncodeList: transactionCodeMasterReducer?.TransactioncodeList,
 
       // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
-
     };
   });
   const toastRef = useRef(null);
@@ -67,7 +66,6 @@ const TransactionCodeMasterView = () => {
   const Initiate = { label: "Master" };
 
   const handleClick = () => {
-    // navigate("/master/finance/transactioncode");
     navigate(-1);
   };
 
@@ -105,21 +103,12 @@ const TransactionCodeMasterView = () => {
       errors.MainAccountCode = t("financeMasters.thisFieldIsRequired");
     }
 
-    // if (!values.MainAccountDescription) {
-    //   errors.MainAccountDescription = "This field is required";
-    // }
     if (!values.SubAccountCode) {
       errors.SubAccountCode = t("financeMasters.thisFieldIsRequired");
     }
-    // if (!values.SubAccountDescription) {
-    //   errors.SubAccountDescription = "This field is required";
-    // }
     if (!values.DepartmentCode) {
       errors.DepartmentCode = t("financeMasters.thisFieldIsRequired");
     }
-    // if (!values. DepartmentDescription) {
-    //   errors. DepartmentDescription= "This field is required";
-    // }
     if (!values.BranchCode) {
       errors.BranchCode = t("financeMasters.thisFieldIsRequired");
     }
@@ -137,7 +126,6 @@ const TransactionCodeMasterView = () => {
 
   return (
     <div className="transactioncode__master__view">
-      {/* <CustomToast ref={toastRef} message="Petty Cash Initiated Successfully"/> */}
       <CustomToast ref={toastRef} message={t("financeMasters.saveSuccessfully")} />
       <div className="grid  m-0">
         <div className="col-12 md:col-12 lg:col-12">
@@ -147,22 +135,8 @@ const TransactionCodeMasterView = () => {
           </span>
           <label className="label_header">
           Add Transaction Code
-            {/* {action === "add"
-            ? "Add Country"
-            : action === "edit"
-              ? "Edit Country"
-              : "Country Details"} */}
           </label>
         </div>
-          {/* <div
-            className="Transaction__Code__Master__title"
-            onClick={() => {
-              handleClick();
-            }}
-          >
-            <SvgBackArrow />
-            Add Transaction Code
-          </div> */}
           <div className="mt-3">
             <BreadCrumb
               model={items}
@@ -239,7 +213,6 @@ const TransactionCodeMasterView = () => {
                 options={BankAccountCode}
                 onChange={(e) => {
                   formik.setFieldValue("TransactionBasis", e.value);
-                  // handleAccountcode(e.value);
                 }}
                 optionLabel="label"
                 error={
@@ -285,12 +258,7 @@ const TransactionCodeMasterView = () => {
                     ? `MainAccountCode ${formik.values.MainAccountDescription}`
                     : ""
                 }
-                //value={formik.values.MainAccountDescription}
                 onChange={formik.handleChange("MainAccountDescription")}
-              // error={
-              //   formik.touched.MainAccountDescription &&
-              //   formik.errors.MainAccountDescription
-              // }
               />
             </div>
           </div>
@@ -324,17 +292,12 @@ const TransactionCodeMasterView = () => {
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formik.values.SubAccountDescription}
                 value={
                   formik.values.SubAccountCode
                     ? `MainAccountCode ${formik.values.SubAccountDescription}`
                     : ""
                 }
                 onChange={formik.handleChange("SubAccountDescription")}
-              // error={
-              //   formik.touched.SubAccountDescription &&
-              //   formik.errors.SubAccountDescription
-              // }
               />
             </div>
           </div>
@@ -366,17 +329,12 @@ const TransactionCodeMasterView = () => {
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formik.values.BranchDescription}
                 value={
                   formik.values.BranchCode
                     ? `BranchCode ${formik.values.BranchDescription}`
                     : ""
                 }
                 onChange={formik.handleChange("BranchDescription")}
-              // error={
-              //   formik.touched.BranchDescription &&
-              //   formik.errors.BranchDescription
-              // }
               />
             </div>
           </div>
@@ -408,17 +366,12 @@ const TransactionCodeMasterView = () => {
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formik.values.DepartmentDescription}
                 value={
                   formik.values.DepartmentCode
                     ? `DepartmentCode ${formik.values.DepartmentDescription}`
                     : ""
                 }
                 onChange={formik.handleChange("DepartmentDescription")}
-              // error={
-              //   formik.touched.DepartmentDescription &&
-              //   formik.errors.DepartmentDescription
-              // }
               />
             </div>
           </div>

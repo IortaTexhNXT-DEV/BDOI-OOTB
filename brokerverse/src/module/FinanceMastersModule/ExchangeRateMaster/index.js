@@ -20,7 +20,6 @@ import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import SvgEditicon from "../../../assets/icons/SvgEdit";
 import SvgEdit from "../../../assets/icons/SvgEdits";
-// import SvgEditicons from "../../../assets/icons/SvgEdit";
 import SvgTable from "../../../assets/icons/SvgTable";
 import {
   getExchangeDetailEdit,
@@ -187,7 +186,6 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
           <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />

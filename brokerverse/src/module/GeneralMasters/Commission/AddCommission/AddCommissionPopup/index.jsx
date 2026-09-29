@@ -32,18 +32,10 @@ const AddCommissionPopup = ({ visible, setVisible, handleUpdate }) => {
 
         return errors;
     };
-    // const handleSubmit = (values) => {
-    //     console.log(values, "find values");
-    //     setVisible(false);
-    // };
     const dispatch=useDispatch()
     const handleSubmit = (values) => {
         dispatch(postAddLevelShareRatingCommission(formik.values))
           .then(() => {
-            // toastRef.current.showToast();
-            // setTimeout(() => {
-            //     setVisible(false);
-            // }, 2000);
             setVisible(false);
           })
           .catch((error) => {

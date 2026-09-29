@@ -83,7 +83,6 @@ const UserGroupAccess = () => {
   };
 
   const handleView = (rowData) => {
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
   };
   const [showEdit, setShowEditData] = useState(false)
   const handleEdit = (columnData) => {
@@ -168,7 +167,6 @@ const UserGroupAccess = () => {
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -232,7 +230,6 @@ const UserGroupAccess = () => {
               options={BankAccountCode}
               onChange={(e) => {
                 formik.setFieldValue("UserRole", e.value);
-                // handleAccountcode(e.value);
               }}
               optionLabel="label"
               error={
@@ -240,48 +237,7 @@ const UserGroupAccess = () => {
                 formik.errors.UserRole
               }
             />
-            {/* <DropDowns
-              classNames="inputdialog__fieled"
-              label="Minimum Transaction"
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.UserRole}
-              onChange={(e) =>
-                formik.setFieldValue("UserRole", e.target.value)
-              }
-style={{width:"100%"}}
-              options={BankAccountCode}
 
-              optionLabel='label'
-
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-            /> */}
-
-            {/* {formik.touched.UserRole && formik.errors.UserRole && (
-              <div
-                style={{ fontSize: 12, color: "red" }}
-                className="formik__errror__JV"
-              >
-                {formik.errors.UserRole}
-              </div>
-            )} */}
-            {/* <InputField
-              classNames="input__filed"
-              label="Minimum Transaction"
-              placeholder="Enter"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-
-              value={formik.values.UserRole}
-              onChange={formik.handleChange("UserRole")}
-              error={
-                formik.touched.UserRole &&
-                formik.errors.UserRole
-              }
-            /> */}
           </div>
         </div>
         <div className="grid mt-1">

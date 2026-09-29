@@ -83,8 +83,6 @@ function AddExchange({ action }) {
   minDate.setDate(minDate.getDate() + 1);
 
   // const handleSubmit=(value)=>{
-
-  //     Navigate("/master/finance/exchangerate")
   // }
 
   const saveAndReturn = async (thunk, values, message) => {
@@ -126,10 +124,6 @@ function AddExchange({ action }) {
     if (!values.Description) {
       errors.Description = t("validation.fieldRequired");
     }
-    // if (!values.PhoneCode) {
-    //     errors.PhoneCode = "This field is required";
-    // }
-
 
     return errors;
   };
@@ -146,10 +140,6 @@ function AddExchange({ action }) {
 
   return (
     <div className="overall__addcountry__container">
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <CustomToast ref={toastRef} message={t("generalMasters.countryAdded")} />
       <div>
         <span onClick={() => Navigate(-1)}>
@@ -178,7 +168,6 @@ function AddExchange({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.countryName")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.CountryName}
                 onChange={formik.handleChange("CountryName")}
                 disabled={
@@ -198,7 +187,6 @@ function AddExchange({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.isoCode")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.ISOCode}
                 onChange={formik.handleChange("ISOCode")}
                 disabled={
@@ -218,7 +206,6 @@ function AddExchange({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.Description}
                 onChange={formik.handleChange("Description")}
                 disabled={
@@ -251,14 +238,6 @@ function AddExchange({ action }) {
                 }
               />
             </div>
-            {/* {formik.touched.PhoneCode && formik.errors.PhoneCode && (
-              <div
-                style={{ fontSize: 12, color: "red" }}
-                
-              >
-                {formik.errors.PhoneCode}
-              </div>
-            )} */}
           </div>
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
@@ -266,7 +245,6 @@ function AddExchange({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedBy")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.Modifiedby}
                 onChange={formik.handleChange("Modifiedby")}
                 disabled={
@@ -286,7 +264,6 @@ function AddExchange({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedOn")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={formik.values.ModifiedOn}
                 onChange={formik.handleChange("ModifiedOn")}
                 disabled={

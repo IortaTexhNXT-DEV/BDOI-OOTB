@@ -37,8 +37,6 @@ const AddDesignation = ({ action }) => {
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState("");
 
-
-
   const items = [
     { label: t("generalMasters.employeeManagement") },
     {
@@ -181,7 +179,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationCode : formik.values.designationCode}
                 onChange={formik.handleChange("designationCode")}
-                // error={formik.errors.designationCode}
                 label={t("generalMasters.designationCode")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -199,7 +196,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationName : formik.values.designationName}
                 onChange={formik.handleChange("designationName")}
-                // error={formik.errors.designationName}
                 label={t("generalMasters.designationName")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -235,7 +231,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.departmentCode : formik.values.departmentCode}
                 onChange={formik.handleChange("departmentCode")}
-                // error={formik.errors.departmentCode}
                 className="dropdown__add__sub"
                 label={t("generalMasters.departmentCode")}
                 classNames="label__sub__add"
@@ -258,12 +253,10 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.level : formik.values.level}
                 onChange={formik.handleChange("level")}
-                // error={formik.errors.level}
                 className="dropdown__add__sub"
                 label={t("generalMasters.level")}
                 classNames="label__sub__add"
                 placeholder={"Select"}
-                // options={item1}
                 options={item1}
 
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -282,7 +275,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.reportingtoLevel : formik.values.reportingtoLevel}
                 onChange={formik.handleChange("reportingtoLevel")}
-                // error={formik.errors.reportingtoLevel}
                 className="dropdown__add__sub"
                 label={t("generalMasters.reportingToLevel")}
                 classNames="label__sub__add"

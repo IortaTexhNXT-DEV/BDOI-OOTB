@@ -16,7 +16,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "primereact/avatar";
-// import PaymentCard from "./paymentCard";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getClientEditMiddleWare,
@@ -54,109 +53,6 @@ const ClientListingAllCategory = ({
       );
     }
   }, [search]);
-
-  // console.log(status, "status");
-  // const clientListTable = [
-  //   {
-  //     id: "1",
-  //     Name: "Sophie Clark",
-  //     Category: "Retail",
-  //     Date: "2024-01-26",
-  //     Quotes: "01",
-  //     LeadID: "123456",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "2",
-  //     Name: "John Smith",
-  //     Category: "Retail",
-  //     Date: "2024-02-10",
-  //     Quotes: "02",
-  //     LeadID: "126",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "3",
-  //     Name: "Emma Davis",
-  //     Category: "Retail",
-  //     Date: "2024-03-15",
-  //     Quotes: "02",
-  //     LeadID: "1456",
-  //     Svg: <SvgHomeTable />,
-  //   },
-  //   {
-  //     id: "4",
-  //     Name: "Michael Johnson",
-  //     Category: "Retail",
-  //     Date: "2024-04-20",
-  //     Quotes: "03",
-  //     LeadID: "1236",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "5",
-  //     Name: "Olivia Turner",
-  //     Category: "Retail",
-  //     Date: "2024-05-25",
-  //     Quotes: "04",
-  //     LeadID: "1456",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "6",
-  //     Name: "David Rodriguez",
-  //     Category: "Corporate",
-  //     Date: "2024-06-30",
-  //     Quotes: "05",
-  //     LeadID: "123116",
-  //     Svg: <SvgHomeTable />,
-  //   },
-  //   {
-  //     id: "7",
-  //     Name: "Ava Williams",
-  //     Category: "Corporate",
-  //     Date: "2024-07-05",
-  //     Quotes: "06",
-  //     LeadID: "123411",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "8",
-  //     Name: "Daniel Brown",
-  //     Category: "Corporate",
-  //     Date: "2024-08-10",
-  //     Quotes: "01",
-  //     LeadID: "1234000",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "9",
-  //     Name: "Sophia Carter",
-  //     Category: "Retail",
-  //     Date: "2024-09-15",
-  //     Quotes: "02",
-  //     LeadID: "1234555",
-  //     Svg: <SvgHomeTable />,
-  //   },
-  //   {
-  //     id: "10",
-  //     Name: "Ryan Walker",
-  //     Category: "Corporate",
-  //     Date: "2024-10-20",
-  //     Quotes: "03",
-  //     LeadID: "1234226",
-  //     Svg: <SvgTravlesTable />,
-  //   },
-  //   {
-  //     id: "11",
-  //     Name: "Ella Adams",
-  //     Category: "Corporate",
-  //     Date: "2024-11-25",
-  //     Quotes: "04",
-  //     LeadID: "1234000",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  // ];
 
   const template2 = {
     layout:
@@ -346,7 +242,6 @@ const ClientListingAllCategory = ({
         <div className="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("clients.search")}
               value={search}
@@ -369,10 +264,7 @@ const ClientListingAllCategory = ({
             placeholder={t("clients.searchBy")}
             className="sorbyfilter__style"
             dropdownIcon={<SvgDropdownicon />}
-            // dropdownIcon={<SvgDownArrow/>}
           />
-          {/* // <Dropdown   optionLabel="name" className="feat_searchby_container" */}
-          {/* //         placeholder="Search by"  dropdownIcon={<SvgDownArrow/>}/> */}
         </div>
       </div>
       <div className="lead__table__container">

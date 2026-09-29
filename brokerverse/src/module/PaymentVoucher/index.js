@@ -517,7 +517,6 @@ const Index = () => {
       <Card
         className="mt-3"
 
-        //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -536,7 +535,6 @@ const Index = () => {
           </div>
           {/* </div> */}
           <div className="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
 
             <Dropdown
               value={globalFilter}
@@ -549,13 +547,6 @@ const Index = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <Button
-              label="Search by"
-              outlined
-              icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
         </div>
         <div className="headlist_lable">{t("paymentVoucher.disbursementHistory")}</div>

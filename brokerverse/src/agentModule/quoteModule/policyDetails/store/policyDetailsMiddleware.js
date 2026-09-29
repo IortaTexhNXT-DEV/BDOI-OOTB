@@ -7,7 +7,6 @@ export const postPolicyDetailsMiddleware = createAsyncThunk(
   POST_POLICY_DETAILS,
   async (payload, { rejectWithValue, getState }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);
@@ -28,7 +27,6 @@ export const postModleDetailsMiddleware = createAsyncThunk(
       sumInsured: payload?.sumInsured
     }
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return dataTable;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -40,7 +38,6 @@ export const getModleDetailsMiddleware = createAsyncThunk(
   GET_MODLE_DETAILS,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);

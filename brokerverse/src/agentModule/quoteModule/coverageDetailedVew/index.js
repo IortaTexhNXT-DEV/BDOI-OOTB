@@ -427,44 +427,6 @@ const CoverageDetailedView = () => {
               </label>
             </div>
             {/* Hidden fields: Policy Number, Production Date, Inception Date, Issued Date, Expiry Date */}
-            {/* <div className="quote__details">
-              <label className="insurance__text">Policy Number</label>
-              <label className="alpha__text">
-                {additionalPolicyData?.policyNumber || "N/A"}
-              </label>
-            </div>
-            <div className="quote__details">
-              <label className="insurance__text">Production Date</label>
-              <label className="alpha__text">
-                {additionalPolicyData?.production
-                  ? formatConfiguredDate(additionalPolicyData.production)
-                  : "N/A"}
-              </label>
-            </div>
-            <div className="quote__details">
-              <label className="insurance__text">Inception Date</label>
-              <label className="alpha__text">
-                {additionalPolicyData?.inception
-                  ? formatConfiguredDate(additionalPolicyData.inception)
-                  : "N/A"}
-              </label>
-            </div>
-            <div className="quote__details">
-              <label className="insurance__text">Issued Date</label>
-              <label className="alpha__text">
-                {additionalPolicyData?.issuedDate
-                  ? formatConfiguredDate(additionalPolicyData.issuedDate)
-                  : "N/A"}
-              </label>
-            </div>
-            <div className="quote__details">
-              <label className="insurance__text">Expiry Date</label>
-              <label className="alpha__text">
-                {additionalPolicyData?.expiry
-                  ? formatConfiguredDate(additionalPolicyData.expiry)
-                  : "N/A"}
-              </label>
-            </div> */}
           </div>
 
           {/* Assured Details */}
@@ -1102,13 +1064,6 @@ const CoverageDetailedView = () => {
           onClick={handleBackNavigation}
           disabled={isProcessing}
         />
-        {/* <Button
-          label={t("coverageDetailsReview.proceedToPayment")}
-          className="policy_button"
-          onClick={handleProceedToPayment}
-          disabled={loading || !quotData || isProcessing}
-          loading={isProcessing}
-        /> */}
         <Button
           label={t("coverageDetailsReview.sendToInsuranceCompany")}
           className="policy_button p-button-success"

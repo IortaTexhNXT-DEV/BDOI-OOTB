@@ -351,11 +351,6 @@ const AgentNavBar = () => {
   return (
     <div className="Agentnavbar__container">
       <div className="bdo-logo-section">
-        {/* <img
-          src="/iorta.png"
-          alt="iortaTechNxt Logo"
-          className="bdo-logo-nav"
-        /> */}
       </div>
       <div className="nav-spacer"></div>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -406,7 +401,6 @@ const AgentNavBar = () => {
         ref={menuProfile}
         id="popup_menu_right"
         popupAlignment="right"
-        //   style={menuStyle}
       />
       <Button
         className="p-0"

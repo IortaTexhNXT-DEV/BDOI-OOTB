@@ -174,7 +174,6 @@ const PettyCashReplenishTable = () => {
             </span>
           </div>
           <div class="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
 
             <Dropdown
               value={search}
@@ -201,7 +200,6 @@ const PettyCashReplenishTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}

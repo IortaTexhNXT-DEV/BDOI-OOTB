@@ -33,7 +33,6 @@ const TableData = ({ newDataTable, editID }) => {
       };
     }
   );
-  // const editId = editID;
 
   const template2 = {
     layout:
@@ -64,9 +63,6 @@ const TableData = ({ newDataTable, editID }) => {
     },
   };
   const [visible, setVisible] = useState(false);
-  // const handleEdit = () => {
-  //   setVisible(true)
-  // }
   const renderEditButton = (rowData) => {
     return (
       <div className="action__icon">
@@ -140,10 +136,6 @@ const TableData = ({ newDataTable, editID }) => {
     setVisible(true);
   };
   const handleSubmit = (value) => {
-    // const valueWithId = {
-    //   ...values,
-    //   id: EditID,
-    // };
     dispatch(patchCorrectionJVEdit(value));
     setVisible(false);
   };
@@ -167,7 +159,6 @@ const TableData = ({ newDataTable, editID }) => {
     onSubmit: (values) => {
       handleSubmit(values);
       formik.resetForm();
-      // handleUpdate(values);
       setVisible(false);
     },
   });

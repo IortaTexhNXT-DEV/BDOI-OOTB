@@ -39,7 +39,6 @@ const RenewalRequestCard = () => {
       };
     });
 
-  // const [globalFilter, setGlobalFilter] = useState("policy Number");
   const policy = [
     { name: t("openItems.name"), code: "Name" },
     { name: t("openItems.policyNumber"), code: "policy Number" },
@@ -57,7 +56,6 @@ const RenewalRequestCard = () => {
   const renderActions = () => {
     return (
       <div className="action__container">
-        {/* <Menu model={menuItems} popup ref={menu} breakpoint="767px" /> */}
         <div
           className="action__Svg"
           onClick={(event) => handleMenuToggle(event, menu)}
@@ -65,16 +63,7 @@ const RenewalRequestCard = () => {
           <SvgArrow />
         </div>
       </div>
-      // <div className="btn__container__view__edit">
-      //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-      //   <Button
-      //     icon={<SvgDot />}
-      //     className="view__btn"
-      //     onClick={(event) => handleMenuToggle(event, menu, rowData)}
-      //   />
-      // </div>
     );
-    // navigate("/agent/createquote/coveragedetails");
   };
 
   const renderViewEditButton = (rowData) => {
@@ -88,25 +77,6 @@ const RenewalRequestCard = () => {
         command: () => handleMenuClick("renewal"),
       },
     ];
-    //  return (
-    //   <div className="action__container">
-    //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-    //     <div
-    //       className="action__Svg"
-    //       onClick={(event) => handleMenuToggle(event, menu, rowData)}
-    //     >
-    //       <SvgArrow/>
-    //     </div>
-    //   </div>
-    //   // <div className="btn__container__view__edit">
-    //   //   <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
-    //   //   <Button
-    //   //     icon={<SvgDot />}
-    //   //     className="view__btn"
-    //   //     onClick={(event) => handleMenuToggle(event, menu, rowData)}
-    //   //   />
-    //   // </div>
-    // );
   };
 
   useEffect(() => {
@@ -299,20 +269,6 @@ const RenewalRequestCard = () => {
       </div>
     );
   };
-  // const renderAction = () => {
-  //   return (
-  //     <div className="action__container">
-  //       <div
-  //         className="action__Svg"
-  //         onClick={() => {
-  //           handlesubmit();
-  //         }}
-  //       >
-  //         <SvgDots/>
-  //       </div>
-  //     </div>
-  //   );
-  // };
 
   const template2 = {
     layout:
@@ -348,7 +304,6 @@ const RenewalRequestCard = () => {
   };
 
   const handlesubmit = () => {
-    // navigate("/agent/policydetailedviewonly");
   };
 
   return (
@@ -385,7 +340,6 @@ const RenewalRequestCard = () => {
         </div>
         <div className="table__container">
           <DataTable
-            // value={TableData}
             value={search ? renewalrequestSearchList : renewalrequesttabledata}
             tableStyle={{ minWidth: "50rem" }}
             paginator

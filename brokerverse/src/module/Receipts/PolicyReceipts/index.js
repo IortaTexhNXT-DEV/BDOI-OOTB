@@ -92,8 +92,6 @@ const PolicyReceipts = () => {
     receiptDate: new Date(),
   };
   // Remove minDate restriction to allow selecting today and past dates
-  // const minDate = new Date();
-  // minDate.setDate(minDate.getDate() + 1);
   const search = [
     { name: t("accounts.receipts.searchName"), value: "name" },
     { name: t("accounts.receipts.searchCustomerCode"), value: "customerCode" },

@@ -82,7 +82,6 @@ const bankMasterReducer = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-
     //BankList
 
     builder.addCase(getBankList.pending, (state) => {
@@ -149,20 +148,11 @@ const bankMasterReducer = createSlice({
       }
     );
 
-
     //BankStatus
 
     builder.addCase(postAddBankMiddleware.pending, (state) => {
       state.loading = true;
     });
-    // builder.addCase(
-    //   postAddBankMiddleware.fulfilled, (state, action) => {
-    //     state.loading = false;
-    //     const newItem2 = action.payload;
-    //     state.BankList = [...state.BankList, newItem2];
-    //     console.log(state.BankList, "BankList")
-    //   }
-    // );
     builder.addCase(postAddBankMiddleware.fulfilled, (state, action) => {
       state.loading = false;
       state.BankList = [...state.BankList, action.payload];
@@ -177,7 +167,6 @@ const bankMasterReducer = createSlice({
       }
     );
 
-
     builder.addCase(postAddAccountDetails.pending, (state) => {
       state.loading = true;
     });
@@ -191,7 +180,6 @@ const bankMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        // state.BankStatus = {};
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -225,7 +213,6 @@ const bankMasterReducer = createSlice({
       getAddBank.fulfilled,
       (state, action) => {
         state.loading = false;
-        // state.AddBank = action.payload;
         state.BankList = [...state.BankList, action.payload];
       }
     );
@@ -294,27 +281,9 @@ const bankMasterReducer = createSlice({
       }
     );
 
-
     builder.addCase(postPatchAccountDetailEdit.pending, (state) => {
       state.loading = true;
     });
-    // builder.addCase(
-    //   postPatchAccountDetailEdit.fulfilled,
-    //   (state, action) => {
-    //     state.loading = false;
-    //     console.log(state.AccountDetailsList, "state.BankList");
-    //     const updatedIndex = state.AccountDetailsList.findIndex(
-    //       (item) => item.id === action.payload.id // The comparison here might need adjustment
-    //     );
-    //     if (updatedIndex !== -1) {
-    //       const updatedBankList = [...state.AccountDetailsList];
-    //       updatedBankList[updatedIndex] = action.payload;
-    //       state.AccountDetailsList = updatedBankList;
-    //     } else {
-    //       state.AccountDetailsList = [...state.AccountDetailsList, action.payload];
-    //     }
-    //   }
-    // );
     builder.addCase(
       postPatchAccountDetailEdit.fulfilled,
       (state, action) => {
@@ -417,7 +386,6 @@ const bankMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
         state.postCheque = {}
-        // state.BankStatus = {};
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );

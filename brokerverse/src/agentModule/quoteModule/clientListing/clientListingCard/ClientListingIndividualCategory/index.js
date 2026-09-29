@@ -60,118 +60,6 @@ const ClientListingIndividualCategory = ({
       );
     }
   }, [search]);
-  // const TableData = [
-  //   {
-  //     id: "1",
-  //     Name: "Sophie Clark",
-  //     Category: "Retail",
-  //     Date: "2024-01-26",
-  //     Quotes: "01",
-  //     LeadID: "123456",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "2",
-  //     Name: "John Smith",
-  //     Category: "Retail",
-  //     Date: "2024-02-10",
-  //     Quotes: "02",
-  //     LeadID: "126",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "3",
-  //     Name: "Emma Davis",
-  //     Category: "Retail",
-  //     Date: "2024-03-15",
-  //     Quotes: "02",
-  //     LeadID: "1456",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "4",
-  //     Name: "Michael Johnson",
-  //     Category: "Retail",
-  //     Date: "2024-04-20",
-  //     Quotes: "03",
-  //     LeadID: "1236",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "5",
-  //     Name: "Olivia Turner",
-  //     Category: "Retail",
-  //     Date: "2024-05-25",
-  //     Quotes: "04",
-  //     LeadID: "1456",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "6",
-  //     Name: "David Rodriguez",
-  //     Category: "Retail",
-  //     Date: "2024-06-30",
-  //     Quotes: "05",
-  //     LeadID: "123116",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "7",
-  //     Name: "Ava Williams",
-  //     Category: "Retail",
-  //     Date: "2024-07-05",
-  //     Quotes: "06",
-  //     LeadID: "123411",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "8",
-  //     Name: "Daniel Brown",
-  //     Category: "Retail",
-  //     Date: "2024-08-10",
-  //     Quotes: "01",
-  //     LeadID: "1234000",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "9",
-  //     Name: "Sophia Carter",
-  //     Category: "Retail",
-  //     Date: "2024-09-15",
-  //     Quotes: "02",
-  //     LeadID: "1234555",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "10",
-  //     Name: "Ryan Walker",
-  //     Category: "Retail",
-  //     Date: "2024-10-20",
-  //     Quotes: "03",
-  //     LeadID: "1234226",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  //   {
-  //     id: "11",
-  //     Name: "Ella Adams",
-  //     Category: "Retail",
-  //     Date: "2024-11-25",
-  //     Quotes: "04",
-  //     LeadID: "1234000",
-  //     ProductDescription: "Motor Comprensive",
-  //     Svg: <SvgMotorTable />,
-  //   },
-  // ];
 
   const template2 = {
     layout:
@@ -339,7 +227,6 @@ const ClientListingIndividualCategory = ({
         <div className="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("clients.search")}
               value={search}

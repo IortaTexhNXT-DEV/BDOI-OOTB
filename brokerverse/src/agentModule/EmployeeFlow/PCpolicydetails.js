@@ -1,12 +1,8 @@
 import { Card } from "primereact/card";
 import React from "react";
 import { useTranslation } from "react-i18next";
-// import InputTextField from "../../../component/inputText";
-// import DatepickerField from "../../../component/datePicker";
-// import SvgBlueArrow from "../../../../assets/agentIcon/SvgBlueArrow";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
-// import SvgDot from "../../../../assets/agentIcon/SvgDot";
 import { useSelector } from "react-redux";
 import { useFormik } from "formik";
 import InputTextField from "../component/inputText";
@@ -24,7 +20,6 @@ const initialValues = {
 };
 
 const handleSubmit = () => {
-  // navigate("/agent/convertpolicy/uploadvehiclephotos");
 };
 
 const PCpolicyDetails = ({ action, state: stateProp }) => {
@@ -131,7 +126,6 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
       <Card style={{ marginTop: "20px" }}>
         <div className="policy__details__card__view__container__title">
           {t("employeeBenefit.policyDetailsTitle")}
-          {/* <SvgDot /> */}
         </div>
         <div className="grid mt-2">
           <div className="col-12">
@@ -157,31 +151,13 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
             <InputTextField
               label={t("employeeBenefit.production")}
               value={formik.values.Production}
-              // onChange={formik.handleChange("Production")}
             />
-            {/* <DatepickerField
-              label={t("employeeBenefit.production")}
-              value={formik.values.Production}
-              onChange={(e) => {
-                formik.setFieldValue("Production", e.target.value);
-              }}
-              dateFormat="yy-mm-dd"
-            /> */}
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label="Inception"
               value={formik.values.Inception}
-              // onChange={formik.handleChange("Inception")}
             />
-            {/* <DatepickerField
-              label="Inception"
-              value={formik.values.Inception}
-              onChange={(e) => {
-                formik.setFieldValue("Inception", e.target.value);
-              }}
-              dateFormat="yy-mm-dd"
-            /> */}
           </div>
         </div>
 
@@ -190,32 +166,14 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
             <InputTextField
               label="Issue Date"
               value={formik.values.IssueDate}
-              // onChange={formik.handleChange("IssueDate")}
             />
-            {/* <DatepickerField
-              label="Issue Date"
-              value={formik.values.IssueDate}
-              onChange={(e) => {
-                formik.setFieldValue("IssueDate", e.target.value);
-              }}
-              dateFormat="yy-mm-dd"
-            /> */}
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("employeeBenefit.expiry")}
               value={formik.values.Expiry}
-              // onChange={formik.handleChange("Expiry")}
             />
 
-            {/* <DatepickerField
-              label={t("employeeBenefit.expiry")}
-              value={formik.values.Expiry}
-              onChange={(e) => {
-                formik.setFieldValue("Expiry", e.target.value);
-              }}
-              dateFormat="yy-mm-dd"
-            /> */}
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField label={t("employeeBenefit.totalCoverage")} value="3,25,000.00" />
@@ -292,25 +250,6 @@ const PCpolicyDetails = ({ action, state: stateProp }) => {
             </div>
           </div>
         </div>
-        {/* { (
-          <div className="policy__detail__view__btn__container mt-4">
-            <div className="paylater__btn__container">
-              <Button className="back__btn" onClick={handlePayLater}>
-                Pay Later
-              </Button>
-            </div>
-            <div className="proceed__btn__container">
-              <Button
-                className="next__btn"
-                onClick={() => {
-                  handleclick();
-                }}
-              >
-                Proceed to payment
-              </Button>
-            </div>
-          </div>
-        )} */}
 
         <div
           style={{

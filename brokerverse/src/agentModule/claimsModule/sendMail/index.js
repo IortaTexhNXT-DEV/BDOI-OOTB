@@ -50,13 +50,6 @@ const SendMail = () => {
   const dispatch = useDispatch();
   const handleUppendImg = (name, src) => {
     setuploadImage(src?.objectURL);
-    // const file = src.files[0];
-    // console.log(file,"file");
-
-    // if (file.size <= 200000) {
-    // } else {
-    //   console.log("File size exceeds 2 MB. Please select a smaller file.");
-    // }
   };
   const handleCancelUplaoded = () => {
     setuploadImage(null);
@@ -88,19 +81,8 @@ const SendMail = () => {
     file: null,
   };
   // const customValidation = (values) => {
-  //   const errors = {};
-
-  //   if (!values.mailSubject) {
-  //     errors.mailSubject = "This field is required";
-  //   }
-  //   if (!values.write) {
-  //     errors.write = "This field is required";
-  //   }
-
   //   if (!values.file) {
-  //     errors.file = "Please select a file";
   //   }
-  //   return errors;
   // };
   const handleSubmit = async (values) => {
     try {
@@ -170,9 +152,6 @@ const SendMail = () => {
     // validate: customValidation,
     onSubmit: handleSubmit,
   });
-  // const handleSubmit = () => {
-  //   navigate("/agent/claimrequest/requestapproval/122344");
-  // };
   const handleBackNavigation = () => {
     customHistory.back();
   };
@@ -211,10 +190,6 @@ const SendMail = () => {
           )}
         </div>
         <div className="mt-4">
-          {/* <InputTextField 
-          style={{height:"200px"}}
-            label="Write"
-          /> */}
           <InputTextarea
             label={t("agent.write")}
             rows={5}
@@ -245,12 +220,10 @@ const SendMail = () => {
                 mode="basic"
                 name="demo"
                 accept=".png,.jpg,.jpeg"
-                // maxFileSize={2000000}
                 uploadHandler={(e) => {
                   formik.setFieldValue("file", e.files[0]);
                   handleUppendImg(e.options.props.name, e.files[0], "the data");
                 }}
-                // disabled={pending === "Pending"}
               />
               <div className="icon_click_option">
                 <SvgImageUpload />
@@ -275,10 +248,6 @@ const SendMail = () => {
             </div>
           )}
           {/* ) : ( */}
-          {/* <div className="upload__image__area mt-2">
-                <img src={imageURL} alt="Image" className="image__view" />
-              </div>
-            ) */}
           {/* } */}
         </div>
 
@@ -307,7 +276,6 @@ const SendMail = () => {
           </Button>
         </div>
       </Card>
-      {/* <ClaimDetailsCard /> */}
     </div>
   );
 };

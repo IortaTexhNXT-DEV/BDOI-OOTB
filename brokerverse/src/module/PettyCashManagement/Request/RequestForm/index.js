@@ -49,10 +49,6 @@ const RequestForm = ({ action }) => {
   const validate = (values) => {
     let errors = {};
 
-    // if (!values.TransactionCode) {
-    //   errors.TransactionCode = "Petty Cash Code is required";
-    // }
-
     if (!values.RequesterName) {
       errors.RequesterName = t("pettyCash.transactionNumberRequired");
     }
@@ -60,13 +56,6 @@ const RequestForm = ({ action }) => {
       errors.PettyCashCode = t("pettyCash.pettyCashCodeRequiredMsg");
     }
 
-    // if (!values.BranchCode) {
-    //   errors.BranchCode = "Branch Code is required";
-    // }
-
-    // if (!values.DepartmentCode) {
-    //   errors.DepartmentCode = "Department Code is required";
-    // }
     return errors;
   };
   const headerStyle = {
@@ -108,7 +97,6 @@ const RequestForm = ({ action }) => {
     },
   });
 
-
   return (
     <div className="request__form">
       <div className="grid  m-0">
@@ -144,11 +132,9 @@ const RequestForm = ({ action }) => {
               <label className="labelfield_container">{t("pettyCash.date")}</label>
               <Calendar
                 showIcon
-                // placeholder="Select"
 
                 className="calendar_container"
                 value={formik.values.Date}
-                // minDate={minDate}
                 onChange={(e) => {
                   formik.setFieldValue("Date", e.target.value);
                 }}
@@ -159,24 +145,16 @@ const RequestForm = ({ action }) => {
               <InputField
                 classNames="input__filed"
                 label={t("pettyCash.transactionCode")}
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-              // value={formik.values.TransactionNumber}
-              // onChange={formik.handleChange("TransactionNumber")}
-              // error={
-              //   formik.touched.TransactionNumber &&
-              //   formik.errors.TransactionNumber
-              // }
               />
             </div>
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <InputField
                 classNames="input__filed"
                 label={t("pettyCash.transactionNumber")}
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -195,11 +173,9 @@ const RequestForm = ({ action }) => {
               <label className="labelfield_container">{t("pettyCash.requestDate")}</label>
               <Calendar
                 showIcon
-                // placeholder="Select"
 
                 className="calendar_container"
                 value={formik.values.RequestDate}
-                // minDate={minDate}
                 onChange={(e) => {
                   formik.setFieldValue("RequestDate", e.target.value);
                 }}
@@ -284,9 +260,7 @@ const RequestForm = ({ action }) => {
             </div>
             <div className="table__container">
               <DataTable
-                // value={AddRequestTable}
                 tableStyle={{ minWidth: "50rem" }}
-                // emptyMessage={isEmpty ? emptyTableIcon : null}
                 scrollable={true}
                 scrollHeight="40vh"
               >
@@ -317,7 +291,6 @@ const RequestForm = ({ action }) => {
                       <Button
                         icon={<SvgDeleteIcon />}
                         className="delete__btn"
-                      // onClick={() => handleDelete(rowData.id)}
                       />
                     </div>
                   )}
@@ -330,16 +303,9 @@ const RequestForm = ({ action }) => {
               <InputField
                 classNames="input__filed"
                 label={t("pettyCash.totalAmount")}
-                // placeholder="Enter"
-                // disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-              // value={formik.values.TransactionNumber}
-              // onChange={formik.handleChange("TransactionNumber")}
-              // error={
-              //   formik.touched.TransactionNumber && formik.errors.TransactionNumber
-              // }
               />
             </div>
           </div>
@@ -379,7 +345,6 @@ const RequestForm = ({ action }) => {
           <div className="grid">
             <div className="col-12 md:col-8 lg:col-8">
               <InputField
-                // classNames="input__filed"
                 classNames="fielduniqueone__container"
                 label={t("pettyCash.narration")}
                 placeholder={t("pettyCash.enter")}
@@ -411,9 +376,6 @@ const RequestForm = ({ action }) => {
             <Button
               label={t("pettyCash.save")}
               className="add__btn"
-            // onClick={() => {
-            //   formik.handleSubmit();
-            // }}
             />
           </div>
         </div>

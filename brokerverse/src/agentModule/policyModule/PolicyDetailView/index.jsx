@@ -1632,7 +1632,6 @@ const PolicyDetailView = () => {
                 className="p-button-success p-button-rounded"
               />
             )}
-            {/* {policyDetails.Payment} */}
 
             <Button
               label={t("policyDetail.claim")}
@@ -2130,16 +2129,6 @@ const PolicyDetailView = () => {
                     {t("policyDetail.paymentRequiredDescription")}
                   </p>
                   <div className="payment-actions">
-                    {/* <Button
-                      label={t("policyDetail.payLater")}
-                      icon="pi pi-clock"
-                      className="p-button-outlined p-button-secondary"
-                      onClick={() =>
-                        navigate(
-                          `/agent/clientview/${rawPolicyData?.clientId || ""}`
-                        )
-                      }
-                    /> */}
                     <Button
                       label={t("policyDetail.proceedToPayment")}
                       icon="pi pi-credit-card"

@@ -145,7 +145,6 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -171,7 +170,6 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -317,7 +315,6 @@ const LeadListing = () => {
             <Dropdown
               value={selectedOption}
               options={dropdownOptions}
-              // onChange={(e) => setSelectedOption(e.value)}
               placeholder={t("leads.createLead")}
               dropdownIcon={<SvgAdd />}
             />

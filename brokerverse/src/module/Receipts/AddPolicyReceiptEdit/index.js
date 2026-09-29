@@ -650,10 +650,6 @@ function PolicyReceipts() {
 
   return (
     <div className="overall__add_policy_edit__container">
-      {/* <span onClick={() => navigate(-1)}>
-        <SvgBack />
-      </span>
-      <label className="label_header">Add Receipts</label> */}
       <div>
         <span onClick={() => navigate(-1)}>
           <SvgBackicon />
@@ -749,9 +745,7 @@ function PolicyReceipts() {
 
               setSelectedRows(filteredSelection);
             }}
-            // selection={selectedProducts}
 
-            // onSelectionChange={(e) => setSelectedProducts(e.value)}
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}

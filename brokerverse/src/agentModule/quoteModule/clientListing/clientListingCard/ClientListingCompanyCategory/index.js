@@ -226,7 +226,6 @@ const ClientListingCompanyCategory = ({
         <div className="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left">
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("clients.search")}
               value={search}

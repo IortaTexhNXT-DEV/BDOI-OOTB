@@ -33,11 +33,9 @@ const AccountCategoryMaster = () => {
   ];
   const home = { label: t("financeMasters.master") };
   const handleSave = (values) => {
-    // setVisible(false);
     setEmptyTable(true);
   };
   const handleEdit = (values) => {
-    // setVisible(false);
   };
   const handleViewAction = (data) => {
     dispatch(getAccountCategoryDetailViewMiddleWare(data));

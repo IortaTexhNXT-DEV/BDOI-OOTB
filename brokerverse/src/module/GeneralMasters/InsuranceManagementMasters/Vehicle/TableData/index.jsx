@@ -35,7 +35,6 @@ const TableData = ({ navigate }) => {
       };
     }
   );
-  // const navigate = useNavigation();
   const [products, setProducts] = useState([]);
 
   const emptyTableIcon = (

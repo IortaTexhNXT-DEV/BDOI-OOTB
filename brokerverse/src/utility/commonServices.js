@@ -1,6 +1,4 @@
-// import axios from "axios";
 import request from "./interceptor";
-// import { BASE_URL } from "./constant";
 
 export const getRequest = async (url, params) => {
   const res = await request.get(url, { params });

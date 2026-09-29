@@ -281,7 +281,6 @@ const EditPettyCash = () => {
         <Button
           label={t("financeMasters.save")}
           className="save__add__btn"
-          // onClick={() => setVisiblePopup(true)}
           onClick={formik.handleSubmit}
         />
       </div>

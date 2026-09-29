@@ -53,7 +53,6 @@ const DataTabelJV = ({
   const dispatch = useDispatch();
   const handleView = (rowData) => {
     dispatch(getJournalVoucherViewData(rowData));
-    // const serializedData = JSON.stringify(rowData);
     navigate(`/accounts/journalvoucher/detailsjournalvocture/${rowData.id}`);
   };
 
@@ -98,11 +97,6 @@ const DataTabelJV = ({
     justifyContent: "flex-end",
     paddingRight: 20,
   };
-  // const body__style = {
-  //     display: 'flex',
-  //     justifyContent: 'flex-end',
-  //     paddingRight: 30
-  // };
 
   return (
     <div className="journal__table__container">
@@ -164,7 +158,6 @@ const DataTabelJV = ({
         ></Column>
 
         <Column
-          // body={renderEditButton}
 
           body={(columnData) => (
             <SvgIconeye onClick={() => handleView(columnData)} />
@@ -173,8 +166,6 @@ const DataTabelJV = ({
           headerStyle={headaction}
           header={translate("common.view")}
           className="fieldvalue_container"
-          // headerStyle={header__style}
-          // bodyStyle={body__style}
         ></Column>
       </DataTable>
     </div>

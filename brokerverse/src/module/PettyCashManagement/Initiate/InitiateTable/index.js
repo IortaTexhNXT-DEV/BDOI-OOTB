@@ -170,7 +170,6 @@ const InitiateTable = () => {
             </span>
           </div>
           <div class="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
             <Dropdown
               value={search}
               onChange={(e) => setGlobalFilter(e.value)}
@@ -182,10 +181,6 @@ const InitiateTable = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <Button label="Search by" outlined icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
           <div className="sub__title">Petty Cash Code history</div>
         </div>
@@ -200,7 +195,6 @@ const InitiateTable = () => {
             paginator
             rows={5}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}

@@ -522,10 +522,6 @@ const QuoteDetailView = () => {
         </div>
         </div>
       </Card>
-      {/* <div className="button_component">
-        <Button label="Download" className="policy_button">
-        </Button>
-      </div> */}
     </div>
   );
 };

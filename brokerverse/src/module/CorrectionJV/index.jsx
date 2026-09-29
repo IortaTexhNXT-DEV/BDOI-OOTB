@@ -152,12 +152,6 @@ const CorrectionJV = () => {
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
-          {/* <div className="correction__title__reversal">
-            <span onClick={() => setStep(step - 1)}>
-              {step !== 0 && <ArrowLeftIcon />}
-            </span>{" "}
-            Corrections JV Details
-          </div> */}
           <div className="correction__title__reversal">
             <span onClick={() => setStep(step - 1)}>
 

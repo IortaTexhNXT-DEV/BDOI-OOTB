@@ -24,7 +24,6 @@ const PettyCashInitiateReducer = createSlice({
     builder.addCase(getInitiateListMiddleware.fulfilled, (state, action) => {
       state.loading = false;
       state.InitiateList = action.payload;
-      //   state.InitiateList = [...state.InitiateList, action.payload];
     });
     builder.addCase(getInitiateListMiddleware.rejected, (state, action) => {
       state.loading = false;
@@ -61,7 +60,6 @@ const PettyCashInitiateReducer = createSlice({
     });
     builder.addCase(postInitiateMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      //   state.Initiate = action.payload;
       state.InitiateList = [action.payload, ...state.InitiateList];
     });
     builder.addCase(postInitiateMiddleware.rejected, (state, action) => {

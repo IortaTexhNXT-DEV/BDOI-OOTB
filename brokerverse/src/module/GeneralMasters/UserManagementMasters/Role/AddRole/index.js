@@ -37,7 +37,6 @@ const AddRole = ({ action }) => {
   const toastRef = useRef(null);
   const [visiblePopup, setVisiblePopup] = useState("");
 
-
   const items = [
     { label: "User Management" },
     {
@@ -221,7 +220,6 @@ const AddRole = ({ action }) => {
                 
                 value={action === "view" ? roleViewData.roleDescription : formik.values.roleDescription}
                 onChange={formik.handleChange("roleDescription")}
-                // error={formik.errors.roleDescription}
                 label={t("generalMasters.roleDescription")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -248,7 +246,6 @@ const AddRole = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? roleViewData.subMenuAccess : formik.values.subMenuAccess}
                 onChange={formik.handleChange("subMenuAccess")}
-                // error={formik.errors.subMenuAccess}
                 className="dropdown__add__sub"
                 label={t("generalMasters.subMenuAccess")}
                 classNames="label__sub__add"
@@ -313,16 +310,6 @@ label={t("generalMasters.modifiedOn")}
           loading={formik.isSubmitting}
         />}
         
-        {/* )}
-        {action === "edit" && (
-          <Button
-            className="save__add__btn"
-            disabled={!formik.isValid}
-            onClick={formik.handleSubmit}
-          >
-            Update
-          </Button>
-        )} */}
       </div>
       <CustomToast ref={toastRef} message={t("generalMasters.roleAdded")} />
     </div>

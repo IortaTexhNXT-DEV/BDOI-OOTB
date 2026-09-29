@@ -53,7 +53,6 @@ const RoleMaster = () => {
     navigate("/master/generals/usermanagement/role/add/1");
   };
   const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const handleView = (rowData) => {
     dispatch(getViewRoleEditMiddleware(rowData));
@@ -128,7 +127,6 @@ const RoleMaster = () => {
       </div>
     );
   };
-
 
   const template2 = {
     layout:

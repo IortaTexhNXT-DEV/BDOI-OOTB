@@ -9,27 +9,22 @@ import masterThunk from "../../../GeneralMasters/common/masterThunk";
 
 const BANK = "bank";
 
-
 export const getBankList = masterThunk(GET_BANK_LIST, (params) => mastersService.list(BANK, params));
-
 
 export const getBankSearchList = masterThunk(GET_BANK_SEARCH_LIST, (query) => mastersService.list(BANK, { search: searchText(query) }));
 
 export const postAddBankMiddleware = masterThunk(POST_BANK_STATUS, (values) => mastersService.create(BANK, values));
 
-
 export const getAddBank = createAsyncThunk(
     GET_ADD_BANK,
     async (payload, { rejectWithValue }) => {
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
         }
     },
 );
-
 
 export const postAddAccountDetails = createAsyncThunk(
     POST_ADD_ACCOUNT_DETAILS,
@@ -45,7 +40,6 @@ export const postAddAccountDetails = createAsyncThunk(
             MaxTransactionLimit:"0"
         }
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return data;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -53,24 +47,20 @@ export const postAddAccountDetails = createAsyncThunk(
     },
 );
 
-
 export const postAddBank = createAsyncThunk(
     POST_ADD_BANK,
     async (payload, { rejectWithValue }) => {
         const tabledata = {
             id: payload.id,
             bankCode: payload.BankCode,
-            // code: <SvgArrow />,
             bankName: payload?.BankName,
             bankBranch: payload?.BankBranch,
             ifscCode: payload?.IFSCCode,
             email: payload?.EmailID,
             status: true,
             mobile: payload?.PhoneNumber
-
         }
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return tabledata;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -82,7 +72,6 @@ export const getAccountDetailsView = createAsyncThunk(
     GET_ADD_VIEW,
     async (payload, { rejectWithValue }) => {
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -93,14 +82,12 @@ export const getPatchAccountDetailsView = createAsyncThunk(
     GET_Account_PATCH_VIEW,
     async (payload, { rejectWithValue }) => {
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
         }
     },
 );
-
 
 export const patchBankDetailEdit = masterThunk(PATCH_BANK_DETAIL_EDIT, (values) =>
   mastersService.update(BANK, values.id, {
@@ -120,7 +107,6 @@ export const patchBankDetailEdit = masterThunk(PATCH_BANK_DETAIL_EDIT, (values) 
   })
 );
 
-
 export const getBankDetailView = masterThunk(GET_BANK_DETAIL_VIEW, (row) => mastersService.get(BANK, row?.id ?? row));
 
 export const postPatchAccountDetailEdit = createAsyncThunk(
@@ -137,14 +123,12 @@ export const postPatchAccountDetailEdit = createAsyncThunk(
             MaxTransactionLimit:"0"
         }
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return data;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
         }
     },
 );
-
 
 export const getSeachAddAccountDetails = createAsyncThunk(
     GET_ACCOUNT_DETAILS_SEARCH_LIST,
@@ -167,7 +151,6 @@ export const getChequeListData = createAsyncThunk(
     GET_CHEQUE_LIST,
     async (payload, { rejectWithValue }) => {
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -185,7 +168,6 @@ export const postChequeDataMiddleWare = createAsyncThunk(
             chequeLeafEnd: payload?.chequeLeafEnd,
         }
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return data;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -196,9 +178,7 @@ export const postChequeDataMiddleWare = createAsyncThunk(
 export const getChequeEditDataMiddleWare = createAsyncThunk(
     GET_CHEQUE_EDIT_DATA,
     async (payload, { rejectWithValue }) => {
-       
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return payload;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);
@@ -215,7 +195,6 @@ export const postChequeEditDataMiddleWare = createAsyncThunk(
             chequeLeafEnd: payload?.chequeLeafEnd,
         }
         try {
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return data;
         } catch (error) {
             return rejectWithValue(error?.response.data.error.message);

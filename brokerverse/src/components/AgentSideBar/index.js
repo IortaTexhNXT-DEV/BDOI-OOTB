@@ -73,27 +73,6 @@ const AgenSideBar = () => {
                                 }}
                                 color="#fff"
                                 label={data.name}
-                                // icon={
-                                //     data.name === "Accounts" ? (
-                                //         <SvgAccountIcon
-                                //             color={data.name === openSubMenu ? "#0072d8" : "#Fff"}
-                                //         />
-                                //     ) :
-                                //         data.name === "Petty Cash" ? (
-                                //             <SvgAccountIcon
-                                //                 color={data.name === openSubMenu ? "#0072d8" : "#Fff"}
-                                //             />
-                                //         ) :
-                                //             data.name === "Master" ? (
-                                //                 <SvgMassterIcon
-                                //                     color={data.name === openSubMenu ? "#0072d8" : "#Fff"}
-                                //                 />
-                                //             ) : data.name === "Reports" ? (
-                                //                 <SvgReportsIcon
-                                //                     color={data.name === openSubMenu ? "#0072d8" : "#Fff"}
-                                //                 />
-                                //             ) : undefined
-                                // }
                                 onClick={() => handleClick(data.path)}
                             >
                                 {data.submenu && data.submenu.map((subItem, subIndex) => (

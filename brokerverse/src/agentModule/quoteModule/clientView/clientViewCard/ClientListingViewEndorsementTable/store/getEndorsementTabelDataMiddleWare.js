@@ -10,7 +10,6 @@ export const getEndorsementTabelData = createAsyncThunk(
 
         try {
             // Simulate an API call if needed
-            // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
             return filteredData[0];
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error?.message);

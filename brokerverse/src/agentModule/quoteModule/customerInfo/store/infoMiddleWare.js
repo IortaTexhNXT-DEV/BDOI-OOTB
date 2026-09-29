@@ -24,7 +24,6 @@ export const postinformationMiddleWare = createAsyncThunk(
       };
   
       try {
-        // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
         return bodyTableData;
       } catch (error) {
         return rejectWithValue(error?.response.data.error.message);
@@ -36,7 +35,6 @@ export const postinformationMiddleWare = createAsyncThunk(
     PATCH_INFORMATION_DATA,
     async (payload, { rejectWithValue, getState }) => {
       try {
-        // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
         return payload;
       
       } catch (error) {

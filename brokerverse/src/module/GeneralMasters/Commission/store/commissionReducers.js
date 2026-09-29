@@ -51,7 +51,6 @@ const commissionReducers = createSlice({
     });
     builder.addCase(postAddCommission.fulfilled, (state, action) => {
       state.loading = false;
-      // const newItem = action.payload;
       state.commissionList = [...state.commissionList, action.payload];
     });
     builder.addCase(postAddCommission.rejected, (state, action) => {
@@ -213,7 +212,6 @@ const commissionReducers = createSlice({
     builder.addCase(addLevelPatchEditPopup.rejected, (state, action) => {
       state.loading = false;
 
-      // state.popupEditData = {};
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 

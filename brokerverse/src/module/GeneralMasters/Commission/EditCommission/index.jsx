@@ -174,12 +174,6 @@ const EditCommission = () => {
   useEffect(() => {
     setFormikValues();
   }, [getCommissionEdit]);
-  // const handleSubmit = (values) => {
-  //     toastRef.current.showToast();
-  //     setTimeout(() => {
-  //         navigate("/master/generals/commission");
-  //     }, 2000);
-  // };
   const handleGoBack = () => {
     navigate("/master/generals/commission");
   };
@@ -199,8 +193,6 @@ const EditCommission = () => {
   //     validate: customValidation,
 
   //     onSubmit: (values) => {
-  //         handleSubmit(values);
-  //         setStep(1);
   //     },
   // });
   const handlePolicy = () => {
@@ -317,7 +309,6 @@ const EditCommission = () => {
                    </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -370,7 +361,6 @@ const EditCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -461,8 +451,6 @@ const EditCommission = () => {
                 classNames="label__sub__add"
               >
                 <Calendar
-                  // value={date}
-                  // onChange={(e) => setDate(e.value)}
                   value={
                     formik.values.effectiveFrom
                       ? new Date(formik.values.effectiveFrom)
@@ -525,7 +513,6 @@ const EditCommission = () => {
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
             <DropDowns
-              // disabled={step === 0 ? false : true}
               className={
                 step === 0
                   ? "input__field__reversal"
@@ -606,7 +593,6 @@ const EditCommission = () => {
               field="commissionCode"
               header="Commission Code"
               className="fieldvalue_container"
-              // style={{ display: 'grid', alignItems: 'center', justifyContent: 'center' }}
             ></Column>
             <Column
               field="sharingRate"
@@ -632,8 +618,6 @@ const EditCommission = () => {
       </div>
       <div className="col-12">
         <EditCommissionPopup
-          // visiblePopup={visiblePopup}
-          // setVisiblePopup={setVisiblePopup}
           showEditPopup={showEditPopup}
           setShowEditPopup={setShowEditPopup}
         />

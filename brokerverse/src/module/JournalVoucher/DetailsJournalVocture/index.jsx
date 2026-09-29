@@ -40,10 +40,6 @@ const DetailsJournalVocture = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(getpaymentVocherByIdMiddleware(id));
-  // }, [id]);
-
   const {
     journalVoucherView,
     loading,
@@ -246,8 +242,6 @@ const DetailsJournalVocture = () => {
   const handleSubmit = (values) => {
     dispatch(getJournalVoucherViewData());
     // Handle form submission
-    // setVisible(false);
-    // setVisiblePopup(true);
   };
   const mainAccountOptions = [
     {
@@ -448,7 +442,6 @@ const DetailsJournalVocture = () => {
                 label={t("accounts.journalVoucherDetails.transactionNumber")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
-                // placeholder="Enter"
                 value={journalVoucherView?.transactionNumber || ""}
                 onChange={(e) =>
                   formik.setFieldValue("transactionNumber", e.target.value)
@@ -465,14 +458,6 @@ const DetailsJournalVocture = () => {
                   textWeight={"300"}
                   classNames="label__sub__add"
                 >
-                  {/* <Calendar
-                                        dateFormat={calendarDateFormat()}
-                                        value={formik.values.date}
-                                        onChange={(e) => setDate(e.value)}
-                                        showIcon
-                                        className="calender_field_claim"
-                                        disabled={true}
-                                    /> */}
                   <Calendar
                     dateFormat={calendarDateFormat()}
                     value={

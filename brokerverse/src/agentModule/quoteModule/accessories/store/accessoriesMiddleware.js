@@ -7,7 +7,6 @@ export const postaccessoriesMiddleware = createAsyncThunk(
   POST_ACCESSORIES,
   async (payload, { rejectWithValue, getState }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);

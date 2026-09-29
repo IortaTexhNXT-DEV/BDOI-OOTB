@@ -497,8 +497,6 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             </div>
             <InputField
               classNames="input__field__jv"
-              // className="select__label__jv"
-              // label="Remarks (Options)"
               value={formik.values.remarks}
               onChange={(e) => formik.setFieldValue("remarks", e.target.value)}
               placeholder="Enter"
