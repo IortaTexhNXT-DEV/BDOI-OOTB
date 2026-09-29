@@ -1,11 +1,9 @@
 /**
  * Helpers shared by the configuration, masters, product configurator, remittance, reinsurance and incentive modules.
  */
-import { one } from '../../db/pool.js';
 import { publicUrl, reserveKey, writeObject } from '../uploads/storage.js';
 
 export { publicUrl as fileUrl };
-import { getSetting } from '../../lib/settings.js';
 import { forbidden } from '../../lib/errors.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { ok, pageMeta } from '../../lib/respond.js';
@@ -44,12 +42,6 @@ export function parseStatus(v) {
   return undefined;
 }
 export const statusLabel = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-
-/** Next document number; the prefix is read from app_settings numbering.<entity>.prefix. */
-export async function nextNumber(entity) {
-  const prefix = await getSetting(`numbering.${entity}.prefix`, entity.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4));
-  return (await one('SELECT next_number($1, $2) AS n', [entity, prefix])).n;
-}
 
 /** Maker-checker: the person approving must not be the person who created / submitted the record. */
 export function assertChecker(req, makerId, what = 'record') {

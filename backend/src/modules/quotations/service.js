@@ -7,7 +7,7 @@ import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/router.js';
-import { nextNumber, lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
+import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
 import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
 import { pick } from '../documents/tabular.js';
 import { clientFromLead } from '../clients/service.js';
@@ -18,6 +18,7 @@ import { premiumBreakdown } from './premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { toQuote, stripReserved, QUOTE_SELECT } from './shape.js';
 import { addDays, today } from '../../lib/dates.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export async function getQuoteRow(id, db = null) {
   const r = await (db || { query }).query(`${QUOTE_SELECT} WHERE (q.id = $1 OR q.quote_number = $1) AND q.deleted_at IS NULL`, [id]);
@@ -49,7 +50,7 @@ export async function createQuote(body, userId, db = null) {
     if (!leadId && !body.clientId) throw badRequest('leadRefId (or clientId) is required');
     const icId = await insurerId(c, insurerRef(doc));
     const b = await premiumBreakdown(doc, { insurerId: icId });
-    const number = await nextNumber(c, 'quote', 'quote');
+    const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     const validity = Number(await getSetting('limits.quote_validity_days', 30));
     const status = 'draft';
     const data = { quote_number: number, lead_id: leadId, client_id: body.clientId || null, insurance_company_id: icId, status,

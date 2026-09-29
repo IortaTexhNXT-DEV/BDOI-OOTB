@@ -14,7 +14,8 @@ import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
 import { buildPdf, renderTemplate } from './docs.js';
-import { daysBetween, nextNumber, parseJsonField, round2, storeUpload, toBool, toDate, toNum, today, unprocessable, usersWithRole } from './util.js';
+import { daysBetween, parseJsonField, round2, storeUpload, toBool, toDate, toNum, today, unprocessable, usersWithRole } from './util.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const STATUSES = ['registered', 'in-review', 'pending-approval', 'approved', 'settled', 'closed', 'rejected'];
 export const PLACEHOLDER_REFS = new Set(['POLICY-001', 'LEAD-001', 'QUOTE-001', '']);
@@ -268,7 +269,7 @@ export async function createClaim(input, user, files) {
   if (input.driverName) driver.driverName = input.driverName;
   const lob = String(input.lob || policy.product_line || 'MOTOR').toUpperCase();
   const handler = await pickHandler(input.handlerUserId);
-  const number = await nextNumber('claim', 'numbering.claim.prefix', 'CLM', { table: 'claims', column: 'claim_number' });
+  const number = await nextDocumentNumber('claim', { unique: { table: 'claims', column: 'claim_number' } });
   const leadId = PLACEHOLDER_REFS.has(String(input.leadRefId ?? '')) ? null : input.leadRefId;
   const quoteId = PLACEHOLDER_REFS.has(String(input.quoteRefId ?? '')) ? policy.quote_id : input.quoteRefId;
 

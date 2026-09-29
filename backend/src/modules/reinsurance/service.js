@@ -8,7 +8,8 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
 import { notify } from '../notifications/router.js';
-import { assertChecker, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
+import { assertChecker, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
@@ -77,7 +78,7 @@ export async function createReinsurer(b, user) {
   need(b, ['name', 'type', 'rating']);
   await validRating(b.rating);
   if (await one('SELECT 1 FROM reinsurers WHERE lower(name) = lower($1)', [b.name])) throw conflict(`Reinsurer ${b.name} already exists`);
-  const id = b.id && /^[A-Za-z0-9-]{2,20}$/.test(b.id) ? b.id : await nextNumber('reinsurer');
+  const id = b.id && /^[A-Za-z0-9-]{2,20}$/.test(b.id) ? b.id : await nextDocumentNumber('reinsurer');
   await query(`INSERT INTO reinsurers(id, name, short_name, type, country, rating, rating_agency, capacity, contact, status, created_by, updated_by)
                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)`,
   [id, b.name, b.shortName || null, b.type, b.country || null, String(b.rating).toUpperCase(), b.ratingAgency || null, b.capacity || null, JSON.stringify(b.contact || {}), b.status || 'Active', user.username]);
@@ -171,7 +172,7 @@ export async function createTreaty(b, user) {
   const to = isoDate(b.expiryDate);
   validateTreatyDates(from, to);
   const rs = await assertSecurity(b.reinsurers);
-  const number = b.treatyNumber ? String(b.treatyNumber).trim() : await nextNumber('treaty');
+  const number = b.treatyNumber ? String(b.treatyNumber).trim() : await nextDocumentNumber('treaty');
   if (await one('SELECT 1 FROM reinsurance_treaties WHERE lower(treaty_number) = lower($1)', [number])) throw conflict(`Treaty ${number} already exists`);
   const c = treatyColumns(b);
   const pol = await securityPolicy();
@@ -316,7 +317,7 @@ export async function createCession(b, user) {
   }
   const cededPremium = round2(gross * pct / 100);
   const commission = round2(cededPremium * commRate / 100);
-  const number = await nextNumber('cession');
+  const number = await nextDocumentNumber('cession');
   const r = await one(`INSERT INTO cessions(treaty_id, policy_id, ceded_sum, ceded_premium, cession_number, policy_number, insured, line_of_business, cession_type, facultative_reinsurer_id,
       gross_premium, sum_insured, cession_percentage, commission, net_premium, cession_date, status, notes, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'Pending',$17,$18) RETURNING id`,
@@ -385,7 +386,7 @@ export async function createRecovery(b, user) {
   const t = b.treatyId || ces?.treaty_id ? await treatyRow(b.treatyId ?? ces.treaty_id) : null;
   if (!t && !ces) throw badRequest('Validation failed', [{ path: 'treatyId', message: 'No confirmed cession or treaty covers this claim' }]);
   const pct = toNumber(b.cessionPercentage ?? ces?.cession_percentage ?? (t?.share == null ? null : t.share * 100), 0);
-  const number = await nextNumber('ri_recovery');
+  const number = await nextDocumentNumber('ri_recovery');
   const r = await one(`INSERT INTO reinsurance_recoveries(recovery_number, claim_id, claim_number, policy_number, insured, treaty_id, cession_id, date_of_loss, cause_of_loss, gross_claim,
       cession_percentage, recoverable_amount, status, expected_settlement, documents, notes, created_by, updated_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'Pending',$13,$14,$15,$16,$16) RETURNING id`,
@@ -460,7 +461,7 @@ export async function generateBordereau(b, user) {
       { key: 'gross_claim', label: 'Gross Claim' }, { key: 'recoverable_amount', label: 'Recoverable' }, { key: 'settlement_amount', label: 'Recovered' }, { key: 'status', label: 'Status' }];
   }
   if (!rows.length) throw badRequest(`No ${b.type.toLowerCase()} entries for ${period}${t ? ` under ${t.treaty_number}` : ''}`);
-  const ref = await nextNumber('bordereau');
+  const ref = await nextDocumentNumber('bordereau');
   const saved = await saveFile({ category: 'bordereaux', fileName: `${ref}_${b.type}_${period}.csv`, content: toCsv(rows, columns), contentType: 'text/csv', entity: 'bordereau', entityId: ref, userId: user.id });
   const dueDays = Number(await getSetting('reinsurance.bordereau_due_days', 30));
   const end = new Date(Date.UTC(Number(period.slice(0, 4)), Number(period.slice(5, 7)), 0));
@@ -510,7 +511,7 @@ export async function createReconciliation(b, user) {
   const tol = Number(await getSetting('reinsurance.reconciliation_tolerance_percent', 1));
   const variancePct = Number(ours.amt) ? (Math.abs(Number(ours.amt) - their) / Number(ours.amt)) * 100 : (their ? 100 : 0);
   const status = variancePct <= tol ? 'Matched' : 'Pending Review';
-  const ref = await nextNumber('ri_reconciliation');
+  const ref = await nextDocumentNumber('ri_reconciliation');
   const id = await withTransaction(async (c) => {
     const r = await c.query(`INSERT INTO reinsurance_reconciliations(reference, type, reinsurer_id, period, our_amount, their_amount, items, status, created_by, updated_by)
                              VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING id`, [ref, b.type, ri.id, period, round2(ours.amt), their, ours.n, status, user.id]);

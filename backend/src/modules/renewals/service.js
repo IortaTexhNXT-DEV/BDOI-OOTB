@@ -11,7 +11,8 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/router.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { renderTemplate } from '../claims/docs.js';
-import { daysBetween, nextNumber, round2, toDate, today, unprocessable, usersWithRole } from '../claims/util.js';
+import { daysBetween, round2, toDate, today, unprocessable, usersWithRole } from '../claims/util.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const OPEN = ['pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'];
 const NOTICE_STATUS = ['notice-1', 'notice-2', 'final-notice'];
@@ -173,7 +174,7 @@ export async function ensureRenewal(policyRef, user) {
   if (existing) return { id: existing.id, created: false, policy };
   if (policy.status === 'renewed' || policy.renewed_to) throw conflict(`Policy ${policy.policy_number} has already been renewed`);
   if (policy.status === 'cancelled') throw conflict(`Policy ${policy.policy_number} is cancelled`);
-  const number = await nextNumber('renewal', 'numbering.renewal.prefix', 'RN', { table: 'renewals', column: 'renewal_number' });
+  const number = await nextDocumentNumber('renewal', { unique: { table: 'renewals', column: 'renewal_number' } });
   try {
     const r = await one(`INSERT INTO renewals(renewal_number, policy_id, client_id, owner_user_id, status, due_date, premium_old, created_by)
       VALUES ($1,$2,$3,$4,'pipeline',$5,$6,$7) RETURNING id`, [number, policy.id, policy.client_id, policy.owner_user_id, policy.expiry_date, policy.premium_total, user?.username ?? null]);
@@ -244,7 +245,7 @@ export async function generateQuote(id, user) {
   const r = await loadRow(id);
   if (!['pipeline', ...NOTICE_STATUS, 'quoted', 'approved'].includes(r.status)) throw conflict(`Renewal is ${r.status}; a quote cannot be generated`);
   const q = await rate(r);
-  const number = await nextNumber('renewal_quote', 'numbering.renewal_quote.prefix', 'RQ', { table: 'renewal_quotes', column: 'quote_number' });
+  const number = await nextDocumentNumber('renewal_quote', { unique: { table: 'renewal_quotes', column: 'quote_number' } });
   const validUntil = addDays(await today(), Number(await getSetting('renewals.quote_validity_days', 30)));
   const row = await withTransaction(async (db) => {
     await db.query('UPDATE renewal_quotes SET status = \'superseded\' WHERE renewal_id = $1 AND status = \'generated\'', [r.id]);
@@ -372,7 +373,7 @@ export async function completeRenewal(id, user, input = {}) {
   const inception = (await toDate(input.inceptionDate)) || r.effective_date || addDays(r.policy_expiry, 1);
   const expiry = (await toDate(input.expiryDate)) || r.expiry_date || addDays(addYears(inception, 1), -1);
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
-  const policyNumber = input.policyNumber || await nextNumber('policy', 'numbering.policy.prefix', 'POL', { table: 'policies', column: 'policy_number' });
+  const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { unique: { table: 'policies', column: 'policy_number' } });
   const commission = r.premium_total > 0 ? round2((r.commission_amount / r.premium_total) * premium) : 0;
   const result = await withTransaction(async (db) => {
     const lock = await db.query('SELECT status FROM renewals WHERE id = $1 FOR UPDATE', [r.id]);

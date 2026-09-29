@@ -1,7 +1,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { nextNumber, toDate, num, round2, lobOf } from '../documents/common.js';
+import { toDate, num, round2, lobOf } from '../documents/common.js';
 import { policyStatusOut, policyStatusIn } from '../documents/statuses.js';
 import { toQuote } from '../quotations/shape.js';
 import { toClient } from '../clients/service.js';
@@ -9,6 +9,7 @@ import { toLead } from '../leads/service.js';
 import { pick } from '../documents/tabular.js';
 import { publicUrl } from '../uploads/storage.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
@@ -166,7 +167,7 @@ const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMont
 /**
  * Receivable (bill) for a premium amount. Delegates to the finance module so every bill is booked in the
  * ledger at issuance (Dr premium receivable / Cr due to insurer / Cr commission income) and opens a
- * collection item; the bill number comes from numbering.invoice.prefix.
+ * collection item; the bill number comes from the invoice series (Master > Document Numbering).
  * A direct-bill policy (the client pays the insurer) has no premium bill: the commission due from the insurer is booked
  * instead (Dr commission receivable / Cr commission income / Cr output VAT) and { id: null, bill_number: null, directBill }
  * is returned.
@@ -245,7 +246,7 @@ export async function issuePolicy(db, src, body, userId) {
   const inception = cols.inception_date || toDate(new Date());
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
-  const number = cols.policy_number || await nextNumber(db, 'policy', 'policy');
+  const number = cols.policy_number || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
   if (cols.policy_number) await assertUniqueNumber(db, number, null);
   const paymentStatus = cols.payment_status || 'Pending';
   const r = await db.query(`INSERT INTO policies(policy_number, quote_id, client_id, lead_id, product_id, policy_type_id, insurance_company_id, owner_user_id,
@@ -293,7 +294,7 @@ export async function importPolicy(db, p, userId) {
   const [first, ...rest] = (p.insuredName || '').split(' ');
   const firstName = p.firstName || (p.companyName ? null : first);
   const lastName = p.lastName || (p.companyName ? null : rest.join(' ') || null);
-  const code = await nextNumber(db, 'client', 'client');
+  const code = await nextDocumentNumber('client', { db, unique: { table: 'clients', column: 'client_code' } });
   const cl = await db.query(`INSERT INTO clients(client_code, first_name, last_name, company_name, display_name, email, phone, source, created_by, owner_user_id,
       client_type, lead_category) VALUES ($1,$2,$3,$4,$5,$6,$7,'bulk-upload',$8,$8,$9,$10) RETURNING id`,
   [code, firstName, lastName, p.companyName || null, p.insuredName || [firstName, lastName].filter(Boolean).join(' ') || p.companyName, p.emailId || null,

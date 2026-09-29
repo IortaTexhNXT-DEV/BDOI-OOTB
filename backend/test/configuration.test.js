@@ -49,13 +49,7 @@ function settingReads() {
     }
     // reports/queries.js reads settings inside SQL: setting('key', fallback, type)
     for (const s of src.matchAll(/\bsetting\(\s*'([a-z_]+\.[a-z0-9_.]+)'/g)) reads.push({ key: s[1], where: `${file}:${src.slice(0, s.index).split('\n').length}` });
-    // Keys built from a name: numbering.<entity>.prefix and email.template.<name>
-    if (/nextNumber[^;]*from '\.\.\/masters\/helpers\.js'/.test(src)) {
-      for (const s of src.matchAll(/\bnextNumber\('([a-z_]+)'\)/g)) reads.push({ key: `numbering.${s[1]}.prefix`, where: file });
-    }
-    if (/nextNumber[^;]*from '\.\.\/documents\/common\.js'/.test(src)) {
-      for (const s of src.matchAll(/\bnextNumber\(\s*\w+,\s*'[a-z_]+',\s*'([a-z_]+)'\)/g)) reads.push({ key: `numbering.${s[1]}.prefix`, where: file });
-    }
+    // Keys built from a name: email.template.<name> (document number prefixes live in document_numbering, see numbering.test.js)
     for (const s of src.matchAll(/\bemailTemplate\(\s*'([a-z_]+)'\s*\)/g)) reads.push({ key: `email.template.${s[1]}`, where: file });
     for (const s of src.matchAll(/emailTemplate\(\s*\w+\s*\?\s*'([a-z_]+)'\s*:\s*'([a-z_]+)'\s*\)/g)) {
       reads.push({ key: `email.template.${s[1]}`, where: file }, { key: `email.template.${s[2]}`, where: file });
@@ -74,7 +68,7 @@ describe('settings the code reads', () => {
   it('finds the reads (sanity check of the scanner)', () => {
     const reads = settingReads();
     expect(reads.length).toBeGreaterThan(200);
-    expect(reads.some((r) => r.key === 'numbering.cession.prefix')).toBe(true);
+    expect(reads.some((r) => r.key === 'commission.default_rate')).toBe(true);
     expect(reads.some((r) => r.key === 'email.template.quote_approval')).toBe(true);
   });
 

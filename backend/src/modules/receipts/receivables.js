@@ -8,6 +8,7 @@ import { badRequest, notFound } from '../../lib/errors.js';
 import { account, cashAccountFor, createJournal, reverseJournal } from '../accounting/lib/ledger.js';
 import { round2, today } from '../accounting/lib/http.js';
 import { onPolicyPremiumCollected } from '../commission/service.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
   ic.name AS insurer_name, ic.short_name AS insurer_short, ic.commission_rate AS insurer_commission_rate, pr.name AS product_name, pr.line AS product_line
@@ -48,8 +49,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const gross = round2(amount);
   if (!(gross > 0)) throw badRequest('Receivable amount must be greater than zero');
   const creditDays = Number(await getSetting('collections.default_credit_days', 30));
-  const prefix = await getSetting('numbering.invoice.prefix', 'INV');
-  const billNumber = (await db.query('SELECT next_number($1, $2) AS n', ['invoice', prefix])).rows[0].n;
+  const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   const commission = await commissionFor(policy, gross, breakdown, source);
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, current_date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,

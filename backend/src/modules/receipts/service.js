@@ -8,8 +8,8 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { applyToPolicy, ensureBilled, findClient, findPolicy, requirePolicy, reverseReceiptApplications } from './receivables.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
-const nextNo = async (db, seq, key, fallback) => (await db.query('SELECT next_number($1,$2) AS n', [seq, await getSetting(key, fallback)])).rows[0].n;
 const money = (v) => round2(v).toFixed(2);
 const SOURCE_BY_TXN = { ENDORSEMENT_PAYMENT: 'endorsement', ENDORSEMENT: 'endorsement', RENEWAL: 'renewal', RENEWAL_PAYMENT: 'renewal' };
 
@@ -146,8 +146,8 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
   if (!policy && lines[0]?.receivableId) policy = await findPolicy(db, lines[0].policyId);
   const client = await findClient(db, b.customerCode) || (policy?.client_id ? await findClient(db, policy.client_id) : null);
   if (!client && !policy) throw badRequest('customerCode or policy is required');
-  const number = await nextNo(db, 'receipt', 'numbering.receipt.prefix', 'OR');
-  const txn = b.transactionNumber || await nextNo(db, 'receipt-txn', 'numbering.receipt_txn.prefix', 'RT');
+  const number = await nextDocumentNumber('receipt', { db, unique: { table: 'receipts', column: 'receipt_number' } });
+  const txn = b.transactionNumber || await nextDocumentNumber('receipt_txn', { db });
   const header = (await db.query(`INSERT INTO receipts(receipt_number, policy_id, client_id, amount, payment_mode, reference_no, bank_id, received_date, status, remarks, created_by,
       receipt_type, receipt_status, transaction_code, transaction_number, customer_code, customer_name, branch_code, department_code, currency_code, policy_number, external_ref, source)
     VALUES ($1,$2,$3,0,$4,$5,$6,$7,'posted',$8,$9,$10,'Draft',$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING *`,

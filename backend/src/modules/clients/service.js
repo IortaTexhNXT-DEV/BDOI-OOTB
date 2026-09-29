@@ -1,8 +1,9 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
-import { nextNumber, toDate } from '../documents/common.js';
+import { toDate } from '../documents/common.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
@@ -64,7 +65,7 @@ function columnsFrom(body) {
 const nameOf = (c) => [c.first_name, c.last_name].filter(Boolean).join(' ').trim() || c.company_name || c.preferred_name || 'Unnamed client';
 
 async function insertClient(db, cols, extra, userId) {
-  const code = await nextNumber(db, 'client', 'client');
+  const code = await nextDocumentNumber('client', { db, unique: { table: 'clients', column: 'client_code' } });
   const data = { ...cols, client_code: code, display_name: nameOf(cols), extra: JSON.stringify(extra), created_by: userId, owner_user_id: userId,
     client_type: cols.client_type || (cols.lead_category === 'Corporate' ? 'corporate' : 'individual') };
   const keys = Object.keys(data);

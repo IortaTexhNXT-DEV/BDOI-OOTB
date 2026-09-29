@@ -6,7 +6,8 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
-import { isoDate, lastMonths, nextNumber, params, round2, toNumber } from '../masters/helpers.js';
+import { isoDate, lastMonths, params, round2, toNumber } from '../masters/helpers.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 // ---------------- templates ----------------
 
@@ -132,7 +133,7 @@ async function templateValues(body, partial) {
 
 export async function createTemplate(body, user) {
   const b = { ...body };
-  if (!b.templateCode) b.templateCode = await nextNumber('product_template');
+  if (!b.templateCode) b.templateCode = await nextDocumentNumber('product_template');
   const vals = await templateValues(b, false);
   if (await one('SELECT 1 FROM product_templates WHERE lower(template_code) = lower($1)', [vals.template_code])) throw conflict(`Template code ${vals.template_code} already exists`);
   const cols = Object.keys(vals);

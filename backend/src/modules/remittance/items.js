@@ -9,9 +9,10 @@ import { renderTemplate } from '../documents/common.js';
 import { today } from '../../lib/dates.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { assertRowLimit } from '../../lib/uploadLimits.js';
-import { fileSize, isoDate, lastMonths, nextNumber, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
+import { fileSize, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
 import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, statusLabels } from './service.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const ts = (d) => (d ? new Date(d).toISOString().replace('T', ' ').slice(0, 16) : null);
 const ITEM_SELECT = `SELECT x.*, (SELECT display_name FROM users u WHERE u.id = x.created_by) AS created_by_name,
@@ -117,7 +118,7 @@ async function settlementData(b, existing = {}) {
 
 export async function createSettlement(b, user) {
   const { ins, totals, data } = await settlementData(b);
-  const ref = await nextNumber('settlement');
+  const ref = await nextDocumentNumber('settlement');
   const id = await insertItemNoTx({ kind: 'settlement', referenceNo: ref, insurerId: ins.id, amount: totals.netAmount, status: 'Draft', data: { ...data, settlementNo: ref }, userId: user.id });
   const x = await getItem('settlement', id);
   if (b.submit) return submitSettlement(x.id, {}, user);
@@ -158,7 +159,7 @@ export async function createAdjustment(b, user) {
   if (!type) throw badRequest('Validation failed', [{ path: 'adjustmentType', message: `${b.adjustmentType} is not an active adjustment type` }]);
   let rem = null;
   if (b.remittanceId || b.remittanceNo) rem = await getRemittance(b.remittanceId || b.remittanceNo);
-  const ref = b.referenceNo ? String(b.referenceNo) : await nextNumber('adjustment');
+  const ref = b.referenceNo ? String(b.referenceNo) : await nextDocumentNumber('adjustment');
   if (await one('SELECT 1 FROM remittance_items WHERE reference_no = $1', [ref])) throw conflict(`Reference ${ref} already exists`);
   const original = toNumber(b.originalAmount ?? rem?.netAmount, 0);
   const needsApproval = type.data.requiresApproval !== false || (type.data.approvalLimit && Math.abs(amount) > toNumber(type.data.approvalLimit));
@@ -207,7 +208,7 @@ export async function createTransfer(b, user) {
     if (!['approved', 'settled'].includes(rem.statusCode)) throw conflict('Only approved remittances can be paid by transfer');
   }
   const ins = await findInsurer(b.insurerCode ?? rem?.insurerId, { required: false });
-  const ref = await nextNumber('transfer');
+  const ref = await nextDocumentNumber('transfer');
   const data = { beneficiary: b.beneficiary, method: method.value, accountNumber: b.accountNumber || null, bankName: b.bankName || null, bankAccount: b.bankAccount || null,
     purpose: b.purpose || b.description || '', scheduledDate: isoDate(b.scheduledDate) || (await today()), remittanceNo: rem?.remittanceNo || null };
   const id = await withTransaction(async (c) => {
@@ -257,7 +258,7 @@ export async function generateStatement(b, user) {
   const tpl = tplCode ? await one('SELECT data FROM master_records WHERE type_code = \'remittance-statement-template\' AND code = $1 AND status = \'active\'', [tplCode]) : null;
   if (tplCode && !tpl) throw badRequest('Validation failed', [{ path: 'templateCode', message: 'Unknown statement template' }]);
   const rows = await statementRows({ period, insurers });
-  const ref = await nextNumber('statement');
+  const ref = await nextDocumentNumber('statement');
   const fileName = `Statement_${period.replace('-', '_')}_${ref}.csv`;
   const saved = await saveFile({ category: 'remittance-statements', fileName, content: toCsv(rows, STATEMENT_COLUMNS), contentType: 'text/csv', entity: 'remittance_statement', entityId: ref, userId: user.id });
   const totals = { premium: round2(rows.reduce((s, r) => s + r.premium, 0)), commission: round2(rows.reduce((s, r) => s + r.commission, 0)), netAmount: round2(rows.reduce((s, r) => s + r.netAmount, 0)) };
@@ -285,7 +286,7 @@ export async function createException(b, user) {
   if (!severities.includes(severity)) throw badRequest('Validation failed', [{ path: 'severity', message: `severity must be one of ${severities.join(', ')}` }]);
   let rem = null;
   if (b.remittanceNo || b.remittanceId) rem = await getRemittance(b.remittanceNo || b.remittanceId);
-  const ref = await nextNumber('remittance_exception');
+  const ref = await nextDocumentNumber('remittance_exception');
   const data = { type: b.type, exceptionCode: t?.data?.code || null, severity, remittanceNo: rem?.remittanceNo || b.remittanceNo || null, description: b.description, assignedTo: b.assignedTo || '',
     detectedOn: (await today()), bankRef: b.bankRef || null, sysRef: b.sysRef || null, difference: b.difference == null ? null : toNumber(b.difference), action: b.action || 'Review', sla: t?.data?.sla || null };
   const id = await insertItemNoTx({ kind: 'exception', referenceNo: ref, remittanceId: rem?.id, amount: toNumber(b.amount ?? b.difference, 0), status: 'Open', priority: severity, data, userId: user.id });
@@ -305,7 +306,7 @@ export async function sendNotification(b, user) {
   const channel = b.channel || 'Email';
   const emails = recipients.filter((r) => /@/.test(r));
   if (/email/i.test(channel)) for (const to of emails) await queueEmail({ to, subject: b.subject, html: `<p>${String(content).replace(/</g, '&lt;')}</p>`, template: b.templateCode || 'remittance-notification', entity: 'remittance_notification' });
-  const ref = await nextNumber('remittance_notice');
+  const ref = await nextDocumentNumber('remittance_notice');
   const data = { type: b.type || 'General', subject: b.subject, content, recipients, recipientType: b.recipientType || 'Client', channel, templateCode: b.templateCode || null, queuedEmails: emails.length, deliveryRate: null, openRate: null };
   const id = await insertItemNoTx({ kind: 'notification', referenceNo: ref, status: 'Sent', priority: b.priority || 'Normal', data, userId: user.id });
   return sentOut(await getItem('notification', id));
@@ -427,7 +428,7 @@ export async function uploadBulk(file, b, user) {
   const rules = Array.isArray(cfg.validationRules) && cfg.validationRules.length ? cfg.validationRules : [{ field: 'policy_number', rule: 'Not Empty' }, { field: 'premium_amount', rule: 'Positive Number' }];
   const validationResults = rules.map((ru) => { const bad = errors.filter((e) => e.field === ru.field).length; return { field: ru.field, rule: ru.rule, valid: rows.length - bad, invalid: bad, total: rows.length }; });
   const saved = await saveFile({ category: 'remittance-bulk', fileName: file.originalname, content: file.buffer, contentType: file.mimetype, entity: 'remittance_bulk', userId: user.id });
-  const ref = await nextNumber('remittance_batch');
+  const ref = await nextDocumentNumber('remittance_batch');
   const data = { fileName: file.originalname, fileSize: fileSize(file.size), fileUrl: saved.url, configCode: cfg.code || null, uploadedAt: new Date().toISOString(), uploadedBy: user.username,
     totalRecords: rows.length, successCount: valid.length, errorCount: rows.length - valid.length, errors: errors.slice(0, 500), validationResults, validRows: valid };
   const id = await insertItemNoTx({ kind: 'upload', referenceNo: ref, amount: round2(valid.reduce((s, v) => s + v.premium - v.commission - v.tax, 0)), status: valid.length ? 'Validated' : 'Failed', data, userId: user.id });
@@ -485,7 +486,7 @@ export async function importBankTransactions(list, user) {
     const d = isoDate(t.transDate);
     if (!Number.isFinite(amount) || !d || !t.reference) throw badRequest('Validation failed', [{ path: 'transactions', message: 'Each transaction needs transDate, reference and amount' }]);
     if (await one('SELECT 1 FROM remittance_items WHERE kind = \'bank-txn\' AND data->>\'bankReference\' = $1', [String(t.reference)])) continue;
-    const ref = await nextNumber('bank_txn');
+    const ref = await nextDocumentNumber('bank_txn');
     const id = await insertItemNoTx({ kind: 'bank-txn', referenceNo: ref, amount, status: 'unmatched', data: { transDate: d, bankReference: String(t.reference), description: t.description || '' }, userId: user.id });
     out.push(bankOut(await getItem('bank-txn', id)));
   }
@@ -598,7 +599,7 @@ export async function generateReport(b, user) {
   const from = isoDate(b.from) || `${new Date().toISOString().slice(0, 7)}-01`;
   const to = isoDate(b.to) || (await today());
   const rows = await statementRows({ from, to, insurers: b.insurers || [] });
-  const ref = await nextNumber('remittance_report');
+  const ref = await nextDocumentNumber('remittance_report');
   const fileName = `${tpl.data.name.replace(/[^A-Za-z0-9]+/g, '_')}_${from}_${to}.csv`;
   const saved = await saveFile({ category: 'remittance-reports', fileName, content: toCsv(rows, STATEMENT_COLUMNS), contentType: 'text/csv', entity: 'remittance_report', entityId: ref, userId: user.id });
   await query(`INSERT INTO generated_reports(code, name, params, format, storage_key, row_count, generated_by, status) VALUES ($1,$2,$3,'csv',$4,$5,$6,'done')`,

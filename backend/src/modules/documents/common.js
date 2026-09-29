@@ -10,13 +10,6 @@ import { badRequest } from '../../lib/errors.js';
 export const sendEntity = (res, entity, { status = 200, message = 'OK', extra = {} } = {}) => res.status(status)
   .json({ ...entity, ...extra, success: true, message, data: entity });
 
-/** Next document number from the numbering sequence, prefix from app_settings (numbering.<entity>.prefix). */
-export async function nextNumber(db, seq, entity) {
-  const prefix = await getSetting(`numbering.${entity}.prefix`, entity.toUpperCase().slice(0, 3));
-  const r = await (db || { query }).query('SELECT next_number($1, $2) AS n', [seq, prefix]);
-  return r.rows[0].n;
-}
-
 /** Replace {{placeholders}} in an e-mail / document template with values (HTML-escaped). */
 export function renderTemplate(tpl, vars) {
   const escape = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

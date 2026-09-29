@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { config } from '../../config.js';
-import { getSetting } from '../../lib/settings.js';
 import { businessDate } from '../../lib/dates.js';
 import { HttpError } from '../../lib/errors.js';
 import { many, query } from '../../db/pool.js';
@@ -28,18 +27,6 @@ export async function toDate(v) {
   return v ? businessDate(v) : null;
 }
 export const daysBetween = (a, b) => Math.round((new Date(`${b}T00:00:00Z`) - new Date(`${a}T00:00:00Z`)) / 86400000);
-
-/** Next document number, e.g. CLM-2026-00001; retries if the number already exists in the target table. */
-export async function nextNumber(seq, prefixKey, fallbackPrefix, { table, column } = {}) {
-  const prefix = await getSetting(prefixKey, fallbackPrefix);
-  for (let i = 0; i < 20; i += 1) {
-    const n = (await query('SELECT next_number($1, $2) AS n', [seq, prefix])).rows[0].n;
-    if (!table) return n;
-    const exists = (await query(`SELECT 1 FROM ${table} WHERE ${column} = $1`, [n])).rowCount;
-    if (!exists) return n;
-  }
-  throw new HttpError(500, `Could not allocate a ${seq} number`);
-}
 
 /** Store an uploaded (multer memory) file on disk and register it in documents. */
 export async function storeUpload(file, { category, entity, entityId, userId }) {

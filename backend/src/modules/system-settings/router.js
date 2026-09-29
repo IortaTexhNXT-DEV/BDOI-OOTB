@@ -81,7 +81,7 @@ define({
 });
 define({
   method: 'PUT', path: '/configuration', summary: 'Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked', screen: 'Master > Configuration',
-  middleware: canWrite('settings'), request: { settings: { 'tax.vat_rate': 0.12, 'numbering.policy.prefix': 'POL', 'notification.email_enabled': true } },
+  middleware: canWrite('settings'), request: { settings: { 'tax.vat_rate': 0.12, 'general.app_title': 'BrokerVerse', 'notification.email_enabled': true } },
   response: { success: true, data: { groups: [], items: [], total: 0 } },
   handler: async (req, res) => {
     const b = req.body || {};

@@ -1,8 +1,9 @@
 /** Read models for the Operations > Renewals workspace screens (queue, at-risk, negotiations, lapse, performance, approvals). */
 import { many, one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
-import { round2, today, daysBetween, nextNumber, toDate } from '../claims/util.js';
+import { round2, today, daysBetween, toDate } from '../claims/util.js';
 import { BASE, OPEN, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 /** Renewal queue with the dashboard counters (total, due within renewals.due_soon_days, at risk, in grace period). */
 export async function renewalQueue(q, pg) {
@@ -140,7 +141,7 @@ export async function listCampaigns() {
   return out;
 }
 export async function createCampaign(input, user) {
-  const number = await nextNumber('campaign', 'numbering.campaign.prefix', 'WB', { table: 'winback_campaigns', column: 'campaign_number' });
+  const number = await nextDocumentNumber('campaign', { unique: { table: 'winback_campaigns', column: 'campaign_number' } });
   const c = await one(`INSERT INTO winback_campaigns(campaign_number, name, target_segment, start_date, end_date, discount_pct, budget, offers, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`, [number, input.campaignName, input.targetSegment || null, await toDate(input.startDate), await toDate(input.endDate),
     input.discount ?? 0, input.budget ?? 0, JSON.stringify(input.offers || []), user?.username ?? null]);
