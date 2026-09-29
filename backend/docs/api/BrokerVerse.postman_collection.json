@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (568 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (610 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -15907,6 +15907,3305 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rcv_1\",\n    \"billNumber\": \"INV-2026-00001\",\n    \"grossPremium\": 11862.5,\n    \"paidAmount\": 11862.5,\n    \"outstanding\": 0,\n    \"clientId\": \"CL-2026-00001\",\n    \"clientName\": \"Maria Santos\",\n    \"date\": \"2026-09-28\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"insurer\": \"Malayan Insurance Co., Inc.\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"status\": \"PAID\",\n    \"paymentMethod\": \"gcash\",\n    \"referenceNumber\": \"OR-2026-00001\",\n    \"commission\": 1500,\n    \"payments\": [\n      {\n        \"amount\": 11862.5,\n        \"paymentMethod\": \"gcash\",\n        \"receiptNumber\": \"OR-2026-00001\",\n        \"date\": \"2026-09-28T02:00:00Z\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Period End",
+      "item": [
+        {
+          "name": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/adjustments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "adjustments"
+              ]
+            },
+            "description": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fiscalYear\": \"FY2025\",\n  \"description\": \"Audit adjustment – accrued audit fee\",\n  \"lines\": [\n    {\n      \"accountCode\": \"4401003\",\n      \"debit\": 150000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"2208001\",\n      \"debit\": 0,\n      \"credit\": 150000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/adjustments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "adjustments"
+                  ]
+                },
+                "description": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fiscalYear\": \"FY2025\",\n  \"description\": \"Audit adjustment – accrued audit fee\",\n  \"lines\": [\n    {\n      \"accountCode\": \"4401003\",\n      \"debit\": 150000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"2208001\",\n      \"debit\": 0,\n      \"credit\": 150000\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"jvNumber\": \"JV-2026-00200\",\n    \"period\": \"2025-13\",\n    \"status\": \"pending\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/bir/2307?year=2026&quarter=3&direction=issued",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "bir",
+                "2307"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                },
+                {
+                  "key": "direction",
+                  "value": "issued"
+                }
+              ]
+            },
+            "description": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/bir/2307?year=2026&quarter=3&direction=issued",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "bir",
+                    "2307"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    },
+                    {
+                      "key": "quarter",
+                      "value": "3"
+                    },
+                    {
+                      "key": "direction",
+                      "value": "issued"
+                    }
+                  ]
+                },
+                "description": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"payees\": [\n      {\n        \"payeeKey\": \"Agent/Referrer:ref-jdelacruz\",\n        \"payeeName\": \"Juan Dela Cruz\",\n        \"totalIncome\": 5298.72,\n        \"totalTax\": 264.93,\n        \"certificateNumber\": null\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "BIR Form 2307 data of one payee and quarter (per ATC: income per month of the quarter, total, tax withheld)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/bir/2307/certificate?year=2026&quarter=3&payeeKey=Agent/Referrer:ref-jdelacruz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "bir",
+                "2307",
+                "certificate"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                },
+                {
+                  "key": "payeeKey",
+                  "value": "Agent/Referrer:ref-jdelacruz"
+                }
+              ]
+            },
+            "description": "BIR Form 2307 data of one payee and quarter (per ATC: income per month of the quarter, total, tax withheld)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307 > Print\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/bir/2307/certificate?year=2026&quarter=3&payeeKey=Agent/Referrer:ref-jdelacruz",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "bir",
+                    "2307",
+                    "certificate"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    },
+                    {
+                      "key": "quarter",
+                      "value": "3"
+                    },
+                    {
+                      "key": "payeeKey",
+                      "value": "Agent/Referrer:ref-jdelacruz"
+                    }
+                  ]
+                },
+                "description": "BIR Form 2307 data of one payee and quarter (per ATC: income per month of the quarter, total, tax withheld)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307 > Print\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lines\": [\n      {\n        \"atc\": \"WI515\",\n        \"month1\": 0,\n        \"month2\": 0,\n        \"month3\": 5298.72,\n        \"total\": 5298.72,\n        \"tax\": 264.93\n      }\n    ],\n    \"totalTax\": 264.93\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register of issued BIR Form 2307 certificates (filter year, quarter, direction)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/bir/2307/certificates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "bir",
+                "2307",
+                "certificates"
+              ]
+            },
+            "description": "Register of issued BIR Form 2307 certificates (filter year, quarter, direction)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/bir/2307/certificates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "bir",
+                    "2307",
+                    "certificates"
+                  ]
+                },
+                "description": "Register of issued BIR Form 2307 certificates (filter year, quarter, direction)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"certificateNumber\": \"CWT-2026-00001\",\n      \"payeeName\": \"Juan Dela Cruz\",\n      \"totalTax\": 264.93,\n      \"status\": \"issued\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel an issued certificate (a new one can then be issued)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/bir/2307/certificates/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "bir",
+                "2307",
+                "certificates",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel an issued certificate (a new one can then be issued)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong ATC\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/bir/2307/certificates/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "bir",
+                    "2307",
+                    "certificates",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel an issued certificate (a new one can then be issued)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong ATC\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cwt_1\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Issue (number with the CWT series and record) the BIR Form 2307 of a payee and quarter; an issued one is returned unchanged",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/bir/2307/issue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "bir",
+                "2307",
+                "issue"
+              ]
+            },
+            "description": "Issue (number with the CWT series and record) the BIR Form 2307 of a payee and quarter; an issued one is returned unchanged\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"payeeKey\": \"Agent/Referrer:ref-jdelacruz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/bir/2307/issue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "bir",
+                    "2307",
+                    "issue"
+                  ]
+                },
+                "description": "Issue (number with the CWT series and record) the BIR Form 2307 of a payee and quarter; an issued one is returned unchanged\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"payeeKey\": \"Agent/Referrer:ref-jdelacruz\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"certificateNumber\": \"CWT-2026-00001\",\n    \"totalTax\": 264.93\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Month-end close checklist items (auto checks and manual sign-offs)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/checklist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "checklist"
+              ]
+            },
+            "description": "Month-end close checklist items (auto checks and manual sign-offs)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/checklist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "checklist"
+                  ]
+                },
+                "description": "Month-end close checklist items (auto checks and manual sign-offs)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"unposted_journals\",\n      \"label\": \"No unposted or pending journals in the period\",\n      \"itemType\": \"auto\",\n      \"severity\": \"blocking\",\n      \"active\": true,\n      \"sortOrder\": 10\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a checklist item (manual sign-off, or an auto item bound to a built-in check)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/checklist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "checklist"
+              ]
+            },
+            "description": "Add a checklist item (manual sign-off, or an auto item bound to a built-in check)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"insurer_statements\",\n  \"label\": \"Insurer statements of account reconciled\",\n  \"itemType\": \"manual\",\n  \"severity\": \"warning\",\n  \"sortOrder\": 130\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/checklist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "checklist"
+                  ]
+                },
+                "description": "Add a checklist item (manual sign-off, or an auto item bound to a built-in check)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"insurer_statements\",\n  \"label\": \"Insurer statements of account reconciled\",\n  \"itemType\": \"manual\",\n  \"severity\": \"warning\",\n  \"sortOrder\": 130\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"insurer_statements\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a checklist item (label, severity, active, order)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/checklist/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "checklist",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a checklist item (label, severity, active, order)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"severity\": \"blocking\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/checklist/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "checklist",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a checklist item (label, severity, active, order)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"severity\": \"blocking\",\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"unapplied_receipts\",\n    \"severity\": \"blocking\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a checklist item added by users (built-in checks can only be deactivated)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/checklist/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "checklist",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a checklist item added by users (built-in checks can only be deactivated)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/checklist/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "checklist",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a checklist item added by users (built-in checks can only be deactivated)\n\nFront-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"insurer_statements\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Month-end close runs (filter period, status, fiscalYear)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs?fiscalYear=FY2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs"
+              ],
+              "query": [
+                {
+                  "key": "fiscalYear",
+                  "value": "FY2026"
+                }
+              ]
+            },
+            "description": "Month-end close runs (filter period, status, fiscalYear)\n\nFront-end touchpoint: Accounts > Period End > Month-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs?fiscalYear=FY2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs"
+                  ],
+                  "query": [
+                    {
+                      "key": "fiscalYear",
+                      "value": "FY2026"
+                    }
+                  ]
+                },
+                "description": "Month-end close runs (filter period, status, fiscalYear)\n\nFront-end touchpoint: Accounts > Period End > Month-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pcr_1\",\n      \"runNumber\": \"MEC-2026-00001\",\n      \"period\": \"2026-08\",\n      \"status\": \"ready\",\n      \"steps\": {\n        \"accruals\": {\n          \"status\": \"done\",\n          \"journals\": [\n            \"jv_1\"\n          ]\n        }\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start the month-end close of a period (one open run per period; checklist copied to the run)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs"
+              ]
+            },
+            "description": "Start the month-end close of a period (one open run per period; checklist copied to the run)\n\nFront-end touchpoint: Accounts > Period End > Month-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period\": \"2026-08\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs"
+                  ]
+                },
+                "description": "Start the month-end close of a period (one open run per period; checklist copied to the run)\n\nFront-end touchpoint: Accounts > Period End > Month-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"period\": \"2026-08\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A month-end close run: steps, checklist results, generated journals, approvals and period history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A month-end close run: steps, checklist results, generated journals, approvals and period history\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A month-end close run: steps, checklist results, generated journals, approvals and period history\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve the close (a different user than the preparer; approve:period-end) and close the period",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve the close (a different user than the preparer; approve:period-end) and close the period\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve the close (a different user than the preparer; approve:period-end) and close the period\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel an unfinished run (its accrual, deferral and FX journals are reversed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel an unfinished run (its accrual, deferral and FX journals are reversed)\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel an unfinished run (its accrual, deferral and FX journals are reversed)\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the automatic checklist items again",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/checks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "checks"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Run the automatic checklist items again\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/checks",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "checks"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Run the automatic checklist items again\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sign off (or withdraw the sign-off of) a manual checklist item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/checks/:code/sign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "checks",
+                ":code",
+                "sign"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Sign off (or withdraw the sign-off of) a manual checklist item\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/checks/:code/sign",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "checks",
+                    ":code",
+                    "sign"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Sign off (or withdraw the sign-off of) a manual checklist item\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Execute the steps (accruals, recurring, deferral, fx, checks); a rerun first reverses the run's own previous accrual, deferral and FX journals",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/execute",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "execute"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Execute the steps (accruals, recurring, deferral, fx, checks); a rerun first reverses the run's own previous accrual, deferral and FX journals\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/execute",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "execute"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Execute the steps (accruals, recurring, deferral, fx, checks); a rerun first reverses the run's own previous accrual, deferral and FX journals\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Return a submitted close to the preparer with a reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Return a submitted close to the preparer with a reason\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Return a submitted close to the preparer with a reason\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit the close (target soft_closed or closed); closes directly when accounting.period_close_requires_approval is false",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/close-runs/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "close-runs",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit the close (target soft_closed or closed); closes directly when accounting.period_close_requires_approval is false\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/close-runs/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "close-runs",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit the close (target soft_closed or closed); closes directly when accounting.period_close_requires_approval is false\n\nFront-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"runNumber\": \"MEC-2026-00001\",\n    \"period\": \"2026-08\",\n    \"status\": \"ready\",\n    \"steps\": {\n      \"accruals\": {\n        \"status\": \"done\",\n        \"journals\": [\n          \"jv_1\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Fiscal years (generated from the first journal up to today) with period status counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/fiscal-years",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "fiscal-years"
+              ]
+            },
+            "description": "Fiscal years (generated from the first journal up to today) with period status counts\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/fiscal-years",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "fiscal-years"
+                  ]
+                },
+                "description": "Fiscal years (generated from the first journal up to today) with period status counts\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"FY2026\",\n      \"startDate\": \"2026-01-01\",\n      \"endDate\": \"2026-12-31\",\n      \"status\": \"open\",\n      \"periods\": {\n        \"open\": 13\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create the next fiscal year (or one starting on startDate) with its 12 periods and adjustment period 13",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/fiscal-years",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "fiscal-years"
+              ]
+            },
+            "description": "Create the next fiscal year (or one starting on startDate) with its 12 periods and adjustment period 13\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2027-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/fiscal-years",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "fiscal-years"
+                  ]
+                },
+                "description": "Create the next fiscal year (or one starting on startDate) with its 12 periods and adjustment period 13\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"startDate\": \"2027-01-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2027\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A fiscal year with its periods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/fiscal-years/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "fiscal-years",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "A fiscal year with its periods\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/fiscal-years/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "fiscal-years",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A fiscal year with its periods\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2026\",\n    \"periods\": [\n      {\n        \"period\": \"2026-01\",\n        \"periodNo\": 1,\n        \"status\": \"closed\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the month-end checklist for a period without a close run (preview)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/periods/:period/checks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "periods",
+                ":period",
+                "checks"
+              ],
+              "variable": [
+                {
+                  "key": "period",
+                  "value": "",
+                  "description": "period (path parameter)"
+                }
+              ]
+            },
+            "description": "Run the month-end checklist for a period without a close run (preview)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/periods/:period/checks",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "periods",
+                    ":period",
+                    "checks"
+                  ],
+                  "variable": [
+                    {
+                      "key": "period",
+                      "value": "",
+                      "description": "period (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Run the month-end checklist for a period without a close run (preview)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"unposted_journals\",\n      \"status\": \"failed\",\n      \"count\": 2,\n      \"message\": \"2 journal(s) in 2026-08 not posted\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/periods/:period/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "periods",
+                ":period",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "period",
+                  "value": "",
+                  "description": "period (path parameter)"
+                }
+              ]
+            },
+            "description": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/periods/:period/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "periods",
+                    ":period",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "period",
+                      "value": "",
+                      "description": "period (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"from\": \"open\",\n      \"to\": \"closed\",\n      \"remarks\": \"August closed\",\n      \"changedBy\": \"Finance Manager\",\n      \"changedAt\": \"2026-09-05T02:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/periods/:period/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "periods",
+                ":period",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "period",
+                  "value": "",
+                  "description": "period (path parameter)"
+                }
+              ]
+            },
+            "description": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"soft_closed\",\n  \"remarks\": \"Pending insurer statements\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/periods/:period/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "periods",
+                    ":period",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "period",
+                      "value": "",
+                      "description": "period (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"soft_closed\",\n  \"remarks\": \"Pending insurer statements\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": \"2026-08\",\n    \"status\": \"soft_closed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Recurring and accrual journal templates (filter kind, status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/recurring-journals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "recurring-journals"
+              ]
+            },
+            "description": "Recurring and accrual journal templates (filter kind, status)\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/recurring-journals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "recurring-journals"
+                  ]
+                },
+                "description": "Recurring and accrual journal templates (filter kind, status)\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rj_1\",\n      \"code\": \"RJV-2026-00001\",\n      \"name\": \"Office rent\",\n      \"kind\": \"recurring\",\n      \"frequency\": \"monthly\",\n      \"startDate\": \"2026-01-31\",\n      \"nextRunDate\": \"2026-09-30\",\n      \"autoPost\": true,\n      \"lines\": [\n        {\n          \"accountCode\": \"4402001\",\n          \"debit\": 85000,\n          \"credit\": 0\n        },\n        {\n          \"accountCode\": \"1102001\",\n          \"debit\": 0,\n          \"credit\": 85000\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a recurring or accrual journal template (RJV number)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/recurring-journals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "recurring-journals"
+              ]
+            },
+            "description": "Create a recurring or accrual journal template (RJV number)\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"rj_1\",\n  \"code\": \"RJV-2026-00001\",\n  \"name\": \"Office rent\",\n  \"kind\": \"recurring\",\n  \"frequency\": \"monthly\",\n  \"startDate\": \"2026-01-31\",\n  \"nextRunDate\": \"2026-09-30\",\n  \"autoPost\": true,\n  \"lines\": [\n    {\n      \"accountCode\": \"4402001\",\n      \"debit\": 85000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"1102001\",\n      \"debit\": 0,\n      \"credit\": 85000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/recurring-journals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "recurring-journals"
+                  ]
+                },
+                "description": "Create a recurring or accrual journal template (RJV number)\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"rj_1\",\n  \"code\": \"RJV-2026-00001\",\n  \"name\": \"Office rent\",\n  \"kind\": \"recurring\",\n  \"frequency\": \"monthly\",\n  \"startDate\": \"2026-01-31\",\n  \"nextRunDate\": \"2026-09-30\",\n  \"autoPost\": true,\n  \"lines\": [\n    {\n      \"accountCode\": \"4402001\",\n      \"debit\": 85000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"1102001\",\n      \"debit\": 0,\n      \"credit\": 85000\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rj_1\",\n    \"code\": \"RJV-2026-00001\",\n    \"name\": \"Office rent\",\n    \"kind\": \"recurring\",\n    \"frequency\": \"monthly\",\n    \"startDate\": \"2026-01-31\",\n    \"nextRunDate\": \"2026-09-30\",\n    \"autoPost\": true,\n    \"lines\": [\n      {\n        \"accountCode\": \"4402001\",\n        \"debit\": 85000,\n        \"credit\": 0\n      },\n      {\n        \"accountCode\": \"1102001\",\n        \"debit\": 0,\n        \"credit\": 85000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A recurring journal template with its generated journals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/recurring-journals/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "recurring-journals",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A recurring journal template with its generated journals\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/recurring-journals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "recurring-journals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A recurring journal template with its generated journals\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rj_1\",\n    \"code\": \"RJV-2026-00001\",\n    \"name\": \"Office rent\",\n    \"kind\": \"recurring\",\n    \"frequency\": \"monthly\",\n    \"startDate\": \"2026-01-31\",\n    \"nextRunDate\": \"2026-09-30\",\n    \"autoPost\": true,\n    \"lines\": [\n      {\n        \"accountCode\": \"4402001\",\n        \"debit\": 85000,\n        \"credit\": 0\n      },\n      {\n        \"accountCode\": \"1102001\",\n        \"debit\": 0,\n        \"credit\": 85000\n      }\n    ],\n    \"runs\": [\n      {\n        \"occurrenceDate\": \"2026-08-31\",\n        \"journalNumber\": \"JV-2026-00100\",\n        \"status\": \"posted\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a recurring journal template (lines, frequency, next run date, end date, auto-post, status)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/recurring-journals/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "recurring-journals",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a recurring journal template (lines, frequency, next run date, end date, auto-post, status)\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endDate\": \"2026-12-31\",\n  \"autoPost\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/recurring-journals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "recurring-journals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a recurring journal template (lines, frequency, next run date, end date, auto-post, status)\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"endDate\": \"2026-12-31\",\n  \"autoPost\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rj_1\",\n    \"code\": \"RJV-2026-00001\",\n    \"name\": \"Office rent\",\n    \"kind\": \"recurring\",\n    \"frequency\": \"monthly\",\n    \"startDate\": \"2026-01-31\",\n    \"nextRunDate\": \"2026-09-30\",\n    \"autoPost\": true,\n    \"lines\": [\n      {\n        \"accountCode\": \"4402001\",\n        \"debit\": 85000,\n        \"credit\": 0\n      },\n      {\n        \"accountCode\": \"1102001\",\n        \"debit\": 0,\n        \"credit\": 85000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Post the recurring journals due up to asOf (default today); what the recurring-journals job does",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/recurring-journals/run-due",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "recurring-journals",
+                "run-due"
+              ]
+            },
+            "description": "Post the recurring journals due up to asOf (default today); what the recurring-journals job does\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asOf\": \"2026-09-30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/recurring-journals/run-due",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "recurring-journals",
+                    "run-due"
+                  ]
+                },
+                "description": "Post the recurring journals due up to asOf (default today); what the recurring-journals job does\n\nFront-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"asOf\": \"2026-09-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"created\": [\n      {\n        \"code\": \"RJV-2026-00001\",\n        \"occurrence\": \"2026-09-30\",\n        \"jvNumber\": \"JV-2026-00120\"\n      }\n    ],\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/statements/:type?FromDate=2026-01-01&ToDate=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "statements",
+                ":type"
+              ],
+              "query": [
+                {
+                  "key": "FromDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "ToDate",
+                  "value": "2026-09-30"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/statements/:type?FromDate=2026-01-01&ToDate=2026-09-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "statements",
+                    ":type"
+                  ],
+                  "query": [
+                    {
+                      "key": "FromDate",
+                      "value": "2026-01-01"
+                    },
+                    {
+                      "key": "ToDate",
+                      "value": "2026-09-30"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": [\n      {\n        \"accountType\": \"income\",\n        \"fsGroup\": \"Revenue\",\n        \"accountCode\": \"3201001\",\n        \"currentPeriod\": 183803.75\n      }\n    ],\n    \"summary\": {\n      \"netIncome\": 120000\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT, premium tax); filter taxType, active, search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/tax-codes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "tax-codes"
+              ]
+            },
+            "description": "Tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT, premium tax); filter taxType, active, search\n\nFront-end touchpoint: Master > Finance > Taxation\n\nAccess: read:period-end, read:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/tax-codes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "tax-codes"
+                  ]
+                },
+                "description": "Tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT, premium tax); filter taxType, active, search\n\nFront-end touchpoint: Master > Finance > Taxation\n\nAccess: read:period-end, read:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"WC158\",\n      \"description\": \"EWT 1% – purchases of goods by top withholding agents from corporate suppliers\",\n      \"taxType\": \"EWT\",\n      \"rate\": 1,\n      \"atc\": \"WC158\",\n      \"glAccount\": \"2204001\",\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a tax code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/tax-codes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "tax-codes"
+              ]
+            },
+            "description": "Add a tax code\n\nFront-end touchpoint: Master > Finance > Taxation\n\nAccess: write:period-end, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"WC158\",\n  \"description\": \"EWT 1% – purchases of goods by top withholding agents from corporate suppliers\",\n  \"taxType\": \"EWT\",\n  \"rate\": 1,\n  \"atc\": \"WC158\",\n  \"glAccount\": \"2204001\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/tax-codes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "tax-codes"
+                  ]
+                },
+                "description": "Add a tax code\n\nFront-end touchpoint: Master > Finance > Taxation\n\nAccess: write:period-end, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"WC158\",\n  \"description\": \"EWT 1% – purchases of goods by top withholding agents from corporate suppliers\",\n  \"taxType\": \"EWT\",\n  \"rate\": 1,\n  \"atc\": \"WC158\",\n  \"glAccount\": \"2204001\",\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"WC158\",\n    \"description\": \"EWT 1% – purchases of goods by top withholding agents from corporate suppliers\",\n    \"taxType\": \"EWT\",\n    \"rate\": 1,\n    \"atc\": \"WC158\",\n    \"glAccount\": \"2204001\",\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a tax code (rate, ATC, GL account, active)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/tax-codes/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "tax-codes",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a tax code (rate, ATC, GL account, active)\n\nFront-end touchpoint: Master > Finance > Taxation\n\nAccess: write:period-end, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/tax-codes/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "tax-codes",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a tax code (rate, ATC, GL account, active)\n\nFront-end touchpoint: Master > Finance > Taxation\n\nAccess: write:period-end, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"WC158\",\n    \"description\": \"EWT 1% – purchases of goods by top withholding agents from corporate suppliers\",\n    \"taxType\": \"EWT\",\n    \"rate\": 1,\n    \"atc\": \"WC158\",\n    \"glAccount\": \"2204001\",\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Fiscal years with their year-end close runs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end"
+              ]
+            },
+            "description": "Fiscal years with their year-end close runs\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end"
+                  ]
+                },
+                "description": "Fiscal years with their year-end close runs\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"FY2025\",\n      \"status\": \"closed\",\n      \"runs\": [\n        {\n          \"id\": \"yec_1\",\n          \"runNumber\": \"YEC-2026-00001\",\n          \"fiscalYear\": \"FY2025\",\n          \"status\": \"closed\",\n          \"netIncome\": 1250000,\n          \"nextFiscalYear\": \"FY2026\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start the year-end close of a fiscal year (the year becomes \"closing\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end"
+              ]
+            },
+            "description": "Start the year-end close of a fiscal year (the year becomes \"closing\")\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fiscalYear\": \"FY2025\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end"
+                  ]
+                },
+                "description": "Start the year-end close of a fiscal year (the year becomes \"closing\")\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fiscalYear\": \"FY2025\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A year-end close run with its checks, closing journals and opening balances",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A year-end close run with its checks, closing journals and opening balances\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A year-end close run with its checks, closing journals and opening balances\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a year-end close run that has not closed the year",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a year-end close run that has not closed the year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a year-end close run that has not closed the year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the year-end pre-checks",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "check"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Run the year-end pre-checks\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "check"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Run the year-end pre-checks\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
             }
           ]
         }

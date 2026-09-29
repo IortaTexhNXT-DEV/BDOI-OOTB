@@ -81,6 +81,9 @@
       "name": "Payments"
     },
     {
+      "name": "Period End"
+    },
+    {
       "name": "Petty Cash"
     },
     {
@@ -25711,6 +25714,4315 @@
           "read:receipts",
           "read:policies"
         ]
+      }
+    },
+    "/period-end/adjustments": {
+      "post": {
+        "operationId": "postPeriodEndAdjustments",
+        "summary": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "jvNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "jv_1",
+                    "jvNumber": "JV-2026-00200",
+                    "period": "2025-13",
+                    "status": "pending"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fiscalYear": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "accountCode": {
+                          "type": "string"
+                        },
+                        "debit": {
+                          "type": "integer"
+                        },
+                        "credit": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "fiscalYear": "FY2025",
+                "description": "Audit adjustment – accrued audit fee",
+                "lines": [
+                  {
+                    "accountCode": "4401003",
+                    "debit": 150000,
+                    "credit": 0
+                  },
+                  {
+                    "accountCode": "2208001",
+                    "debit": 0,
+                    "credit": 150000
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/bir/2307": {
+      "get": {
+        "operationId": "getPeriodEndBir2307",
+        "summary": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "payees": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "payeeKey": {
+                                "type": "string"
+                              },
+                              "payeeName": {
+                                "type": "string"
+                              },
+                              "totalIncome": {
+                                "type": "number"
+                              },
+                              "totalTax": {
+                                "type": "number"
+                              },
+                              "certificateNumber": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "payees": [
+                      {
+                        "payeeKey": "Agent/Referrer:ref-jdelacruz",
+                        "payeeName": "Juan Dela Cruz",
+                        "totalIncome": 5298.72,
+                        "totalTax": 264.93,
+                        "certificateNumber": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR Form 2307",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/bir/2307/certificate": {
+      "get": {
+        "operationId": "getPeriodEndBir2307Certificate",
+        "summary": "BIR Form 2307 data of one payee and quarter (per ATC: income per month of the quarter, total, tax withheld)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307 > Print\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "payeeKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Agent/Referrer:ref-jdelacruz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "atc": {
+                                "type": "string"
+                              },
+                              "month1": {
+                                "type": "integer"
+                              },
+                              "month2": {
+                                "type": "integer"
+                              },
+                              "month3": {
+                                "type": "number"
+                              },
+                              "total": {
+                                "type": "number"
+                              },
+                              "tax": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "totalTax": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "lines": [
+                      {
+                        "atc": "WI515",
+                        "month1": 0,
+                        "month2": 0,
+                        "month3": 5298.72,
+                        "total": 5298.72,
+                        "tax": 264.93
+                      }
+                    ],
+                    "totalTax": 264.93
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR Form 2307 > Print",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/bir/2307/certificates": {
+      "get": {
+        "operationId": "getPeriodEndBir2307Certificates",
+        "summary": "Register of issued BIR Form 2307 certificates (filter year, quarter, direction)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "certificateNumber": {
+                            "type": "string"
+                          },
+                          "payeeName": {
+                            "type": "string"
+                          },
+                          "totalTax": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "certificateNumber": "CWT-2026-00001",
+                      "payeeName": "Juan Dela Cruz",
+                      "totalTax": 264.93,
+                      "status": "issued"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR Form 2307",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/bir/2307/certificates/{id}/cancel": {
+      "post": {
+        "operationId": "postPeriodEndBir2307CertificatesIdCancel",
+        "summary": "Cancel an issued certificate (a new one can then be issued)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cwt_1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR Form 2307",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Wrong ATC"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/bir/2307/issue": {
+      "post": {
+        "operationId": "postPeriodEndBir2307Issue",
+        "summary": "Issue (number with the CWT series and record) the BIR Form 2307 of a payee and quarter; an issued one is returned unchanged",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "certificateNumber": {
+                          "type": "string"
+                        },
+                        "totalTax": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "certificateNumber": "CWT-2026-00001",
+                    "totalTax": 264.93
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR Form 2307",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "integer"
+                  },
+                  "quarter": {
+                    "type": "integer"
+                  },
+                  "payeeKey": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "year": 2026,
+                "quarter": 3,
+                "payeeKey": "Agent/Referrer:ref-jdelacruz"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/checklist": {
+      "get": {
+        "operationId": "getPeriodEndChecklist",
+        "summary": "Month-end close checklist items (auto checks and manual sign-offs)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Close Checklist\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "itemType": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "sortOrder": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "unposted_journals",
+                      "label": "No unposted or pending journals in the period",
+                      "itemType": "auto",
+                      "severity": "blocking",
+                      "active": true,
+                      "sortOrder": 10
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Close Checklist",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "post": {
+        "operationId": "postPeriodEndChecklist",
+        "summary": "Add a checklist item (manual sign-off, or an auto item bound to a built-in check)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "insurer_statements"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Close Checklist",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "itemType": {
+                    "type": "string"
+                  },
+                  "severity": {
+                    "type": "string"
+                  },
+                  "sortOrder": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "code": "insurer_statements",
+                "label": "Insurer statements of account reconciled",
+                "itemType": "manual",
+                "severity": "warning",
+                "sortOrder": 130
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/checklist/{code}": {
+      "put": {
+        "operationId": "putPeriodEndChecklistCode",
+        "summary": "Change a checklist item (label, severity, active, order)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "severity": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "unapplied_receipts",
+                    "severity": "blocking"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Close Checklist",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "severity": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "severity": "blocking",
+                "active": true
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePeriodEndChecklistCode",
+        "summary": "Delete a checklist item added by users (built-in checks can only be deactivated)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Close Checklist\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "insurer_statements"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Close Checklist",
+        "x-permissions": [
+          "write:period-end"
+        ]
+      }
+    },
+    "/period-end/close-runs": {
+      "get": {
+        "operationId": "getPeriodEndCloseRuns",
+        "summary": "Month-end close runs (filter period, status, fiscalYear)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "fiscalYear",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "FY2026"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "runNumber": {
+                            "type": "string"
+                          },
+                          "period": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "steps": {
+                            "type": "object",
+                            "properties": {
+                              "accruals": {
+                                "type": "object",
+                                "properties": {
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "journals": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "pcr_1",
+                      "runNumber": "MEC-2026-00001",
+                      "period": "2026-08",
+                      "status": "ready",
+                      "steps": {
+                        "accruals": {
+                          "status": "done",
+                          "journals": [
+                            "jv_1"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "post": {
+        "operationId": "postPeriodEndCloseRuns",
+        "summary": "Start the month-end close of a period (one open run per period; checklist copied to the run)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "period": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "period": "2026-08"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}": {
+      "get": {
+        "operationId": "getPeriodEndCloseRunsId",
+        "summary": "A month-end close run: steps, checklist results, generated journals, approvals and period history",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/close-runs/{id}/approve": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdApprove",
+        "summary": "Approve the close (a different user than the preparer; approve:period-end) and close the period",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}/cancel": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdCancel",
+        "summary": "Cancel an unfinished run (its accrual, deferral and FX journals are reversed)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}/checks": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdChecks",
+        "summary": "Run the automatic checklist items again",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}/checks/{code}/sign": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdChecksCodeSign",
+        "summary": "Sign off (or withdraw the sign-off of) a manual checklist item",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}/execute": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdExecute",
+        "summary": "Execute the steps (accruals, recurring, deferral, fx, checks); a rerun first reverses the run's own previous accrual, deferral and FX journals",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}/reject": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdReject",
+        "summary": "Return a submitted close to the preparer with a reason",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/close-runs/{id}/submit": {
+      "post": {
+        "operationId": "postPeriodEndCloseRunsIdSubmit",
+        "summary": "Submit the close (target soft_closed or closed); closes directly when accounting.period_close_requires_approval is false",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Month-End Close > Run\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "steps": {
+                          "type": "object",
+                          "properties": {
+                            "accruals": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string"
+                                },
+                                "journals": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pcr_1",
+                    "runNumber": "MEC-2026-00001",
+                    "period": "2026-08",
+                    "status": "ready",
+                    "steps": {
+                      "accruals": {
+                        "status": "done",
+                        "journals": [
+                          "jv_1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Month-End Close > Run",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/fiscal-years": {
+      "get": {
+        "operationId": "getPeriodEndFiscalYears",
+        "summary": "Fiscal years (generated from the first journal up to today) with period status counts",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "startDate": {
+                            "type": "string"
+                          },
+                          "endDate": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "periods": {
+                            "type": "object",
+                            "properties": {
+                              "open": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "FY2026",
+                      "startDate": "2026-01-01",
+                      "endDate": "2026-12-31",
+                      "status": "open",
+                      "periods": {
+                        "open": 13
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "post": {
+        "operationId": "postPeriodEndFiscalYears",
+        "summary": "Create the next fiscal year (or one starting on startDate) with its 12 periods and adjustment period 13",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "FY2027"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "startDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "startDate": "2027-01-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/fiscal-years/{code}": {
+      "get": {
+        "operationId": "getPeriodEndFiscalYearsCode",
+        "summary": "A fiscal year with its periods",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "periods": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "period": {
+                                "type": "string"
+                              },
+                              "periodNo": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "FY2026",
+                    "periods": [
+                      {
+                        "period": "2026-01",
+                        "periodNo": 1,
+                        "status": "closed"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/periods/{period}/checks": {
+      "get": {
+        "operationId": "getPeriodEndPeriodsPeriodChecks",
+        "summary": "Run the month-end checklist for a period without a close run (preview)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "unposted_journals",
+                      "status": "failed",
+                      "count": 2,
+                      "message": "2 journal(s) in 2026-08 not posted"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/periods/{period}/history": {
+      "get": {
+        "operationId": "getPeriodEndPeriodsPeriodHistory",
+        "summary": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "string"
+                          },
+                          "to": {
+                            "type": "string"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "changedBy": {
+                            "type": "string"
+                          },
+                          "changedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "from": "open",
+                      "to": "closed",
+                      "remarks": "August closed",
+                      "changedBy": "Finance Manager",
+                      "changedAt": "2026-09-05T02:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/periods/{period}/status": {
+      "post": {
+        "operationId": "postPeriodEndPeriodsPeriodStatus",
+        "summary": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "period": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "period": "2026-08",
+                    "status": "soft_closed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "soft_closed",
+                "remarks": "Pending insurer statements"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/recurring-journals": {
+      "get": {
+        "operationId": "getPeriodEndRecurringJournals",
+        "summary": "Recurring and accrual journal templates (filter kind, status)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "frequency": {
+                            "type": "string"
+                          },
+                          "startDate": {
+                            "type": "string"
+                          },
+                          "nextRunDate": {
+                            "type": "string"
+                          },
+                          "autoPost": {
+                            "type": "boolean"
+                          },
+                          "lines": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "accountCode": {
+                                  "type": "string"
+                                },
+                                "debit": {
+                                  "type": "integer"
+                                },
+                                "credit": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "rj_1",
+                      "code": "RJV-2026-00001",
+                      "name": "Office rent",
+                      "kind": "recurring",
+                      "frequency": "monthly",
+                      "startDate": "2026-01-31",
+                      "nextRunDate": "2026-09-30",
+                      "autoPost": true,
+                      "lines": [
+                        {
+                          "accountCode": "4402001",
+                          "debit": 85000,
+                          "credit": 0
+                        },
+                        {
+                          "accountCode": "1102001",
+                          "debit": 0,
+                          "credit": 85000
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Recurring Journals",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "post": {
+        "operationId": "postPeriodEndRecurringJournals",
+        "summary": "Create a recurring or accrual journal template (RJV number)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "frequency": {
+                          "type": "string"
+                        },
+                        "startDate": {
+                          "type": "string"
+                        },
+                        "nextRunDate": {
+                          "type": "string"
+                        },
+                        "autoPost": {
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountCode": {
+                                "type": "string"
+                              },
+                              "debit": {
+                                "type": "integer"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "rj_1",
+                    "code": "RJV-2026-00001",
+                    "name": "Office rent",
+                    "kind": "recurring",
+                    "frequency": "monthly",
+                    "startDate": "2026-01-31",
+                    "nextRunDate": "2026-09-30",
+                    "autoPost": true,
+                    "lines": [
+                      {
+                        "accountCode": "4402001",
+                        "debit": 85000,
+                        "credit": 0
+                      },
+                      {
+                        "accountCode": "1102001",
+                        "debit": 0,
+                        "credit": 85000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Recurring Journals",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "frequency": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string"
+                  },
+                  "nextRunDate": {
+                    "type": "string"
+                  },
+                  "autoPost": {
+                    "type": "boolean"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "accountCode": {
+                          "type": "string"
+                        },
+                        "debit": {
+                          "type": "integer"
+                        },
+                        "credit": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "id": "rj_1",
+                "code": "RJV-2026-00001",
+                "name": "Office rent",
+                "kind": "recurring",
+                "frequency": "monthly",
+                "startDate": "2026-01-31",
+                "nextRunDate": "2026-09-30",
+                "autoPost": true,
+                "lines": [
+                  {
+                    "accountCode": "4402001",
+                    "debit": 85000,
+                    "credit": 0
+                  },
+                  {
+                    "accountCode": "1102001",
+                    "debit": 0,
+                    "credit": 85000
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/recurring-journals/{id}": {
+      "get": {
+        "operationId": "getPeriodEndRecurringJournalsId",
+        "summary": "A recurring journal template with its generated journals",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "frequency": {
+                          "type": "string"
+                        },
+                        "startDate": {
+                          "type": "string"
+                        },
+                        "nextRunDate": {
+                          "type": "string"
+                        },
+                        "autoPost": {
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountCode": {
+                                "type": "string"
+                              },
+                              "debit": {
+                                "type": "integer"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "runs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "occurrenceDate": {
+                                "type": "string"
+                              },
+                              "journalNumber": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "rj_1",
+                    "code": "RJV-2026-00001",
+                    "name": "Office rent",
+                    "kind": "recurring",
+                    "frequency": "monthly",
+                    "startDate": "2026-01-31",
+                    "nextRunDate": "2026-09-30",
+                    "autoPost": true,
+                    "lines": [
+                      {
+                        "accountCode": "4402001",
+                        "debit": 85000,
+                        "credit": 0
+                      },
+                      {
+                        "accountCode": "1102001",
+                        "debit": 0,
+                        "credit": 85000
+                      }
+                    ],
+                    "runs": [
+                      {
+                        "occurrenceDate": "2026-08-31",
+                        "journalNumber": "JV-2026-00100",
+                        "status": "posted"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Recurring Journals",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "put": {
+        "operationId": "putPeriodEndRecurringJournalsId",
+        "summary": "Change a recurring journal template (lines, frequency, next run date, end date, auto-post, status)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "frequency": {
+                          "type": "string"
+                        },
+                        "startDate": {
+                          "type": "string"
+                        },
+                        "nextRunDate": {
+                          "type": "string"
+                        },
+                        "autoPost": {
+                          "type": "boolean"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountCode": {
+                                "type": "string"
+                              },
+                              "debit": {
+                                "type": "integer"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "rj_1",
+                    "code": "RJV-2026-00001",
+                    "name": "Office rent",
+                    "kind": "recurring",
+                    "frequency": "monthly",
+                    "startDate": "2026-01-31",
+                    "nextRunDate": "2026-09-30",
+                    "autoPost": true,
+                    "lines": [
+                      {
+                        "accountCode": "4402001",
+                        "debit": 85000,
+                        "credit": 0
+                      },
+                      {
+                        "accountCode": "1102001",
+                        "debit": 0,
+                        "credit": 85000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Recurring Journals",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "endDate": {
+                    "type": "string"
+                  },
+                  "autoPost": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "endDate": "2026-12-31",
+                "autoPost": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/recurring-journals/run-due": {
+      "post": {
+        "operationId": "postPeriodEndRecurringJournalsRunDue",
+        "summary": "Post the recurring journals due up to asOf (default today); what the recurring-journals job does",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Recurring Journals\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "created": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "occurrence": {
+                                "type": "string"
+                              },
+                              "jvNumber": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "created": [
+                      {
+                        "code": "RJV-2026-00001",
+                        "occurrence": "2026-09-30",
+                        "jvNumber": "JV-2026-00120"
+                      }
+                    ],
+                    "errors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Recurring Journals",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "asOf": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "asOf": "2026-09-30"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/statements/{type}": {
+      "get": {
+        "operationId": "getPeriodEndStatementsType",
+        "summary": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "ToDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountType": {
+                                "type": "string"
+                              },
+                              "fsGroup": {
+                                "type": "string"
+                              },
+                              "accountCode": {
+                                "type": "string"
+                              },
+                              "currentPeriod": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "netIncome": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "rows": [
+                      {
+                        "accountType": "income",
+                        "fsGroup": "Revenue",
+                        "accountCode": "3201001",
+                        "currentPeriod": 183803.75
+                      }
+                    ],
+                    "summary": {
+                      "netIncome": 120000
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Financial Statements",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers",
+          "read:reports"
+        ]
+      }
+    },
+    "/period-end/tax-codes": {
+      "get": {
+        "operationId": "getPeriodEndTaxCodes",
+        "summary": "Tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT, premium tax); filter taxType, active, search",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Taxation\n\nAccess: read:period-end, read:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "taxType": {
+                            "type": "string"
+                          },
+                          "rate": {
+                            "type": "integer"
+                          },
+                          "atc": {
+                            "type": "string"
+                          },
+                          "glAccount": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "WC158",
+                      "description": "EWT 1% – purchases of goods by top withholding agents from corporate suppliers",
+                      "taxType": "EWT",
+                      "rate": 1,
+                      "atc": "WC158",
+                      "glAccount": "2204001",
+                      "active": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Taxation",
+        "x-permissions": [
+          "read:period-end",
+          "read:masters"
+        ]
+      },
+      "post": {
+        "operationId": "postPeriodEndTaxCodes",
+        "summary": "Add a tax code",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Taxation\n\nAccess: write:period-end, write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "taxType": {
+                          "type": "string"
+                        },
+                        "rate": {
+                          "type": "integer"
+                        },
+                        "atc": {
+                          "type": "string"
+                        },
+                        "glAccount": {
+                          "type": "string"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "WC158",
+                    "description": "EWT 1% – purchases of goods by top withholding agents from corporate suppliers",
+                    "taxType": "EWT",
+                    "rate": 1,
+                    "atc": "WC158",
+                    "glAccount": "2204001",
+                    "active": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Taxation",
+        "x-permissions": [
+          "write:period-end",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "taxType": {
+                    "type": "string"
+                  },
+                  "rate": {
+                    "type": "integer"
+                  },
+                  "atc": {
+                    "type": "string"
+                  },
+                  "glAccount": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "code": "WC158",
+                "description": "EWT 1% – purchases of goods by top withholding agents from corporate suppliers",
+                "taxType": "EWT",
+                "rate": 1,
+                "atc": "WC158",
+                "glAccount": "2204001",
+                "active": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/tax-codes/{code}": {
+      "put": {
+        "operationId": "putPeriodEndTaxCodesCode",
+        "summary": "Change a tax code (rate, ATC, GL account, active)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Taxation\n\nAccess: write:period-end, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "taxType": {
+                          "type": "string"
+                        },
+                        "rate": {
+                          "type": "integer"
+                        },
+                        "atc": {
+                          "type": "string"
+                        },
+                        "glAccount": {
+                          "type": "string"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "WC158",
+                    "description": "EWT 1% – purchases of goods by top withholding agents from corporate suppliers",
+                    "taxType": "EWT",
+                    "rate": 1,
+                    "atc": "WC158",
+                    "glAccount": "2204001",
+                    "active": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Taxation",
+        "x-permissions": [
+          "write:period-end",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rate": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "rate": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end": {
+      "get": {
+        "operationId": "getPeriodEndYearEnd",
+        "summary": "Fiscal years with their year-end close runs",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "runs": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "runNumber": {
+                                  "type": "string"
+                                },
+                                "fiscalYear": {
+                                  "type": "string"
+                                },
+                                "status": {
+                                  "type": "string"
+                                },
+                                "netIncome": {
+                                  "type": "integer"
+                                },
+                                "nextFiscalYear": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "FY2025",
+                      "status": "closed",
+                      "runs": [
+                        {
+                          "id": "yec_1",
+                          "runNumber": "YEC-2026-00001",
+                          "fiscalYear": "FY2025",
+                          "status": "closed",
+                          "netIncome": 1250000,
+                          "nextFiscalYear": "FY2026"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "post": {
+        "operationId": "postPeriodEndYearEnd",
+        "summary": "Start the year-end close of a fiscal year (the year becomes \"closing\")",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fiscalYear": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "fiscalYear": "FY2025"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}": {
+      "get": {
+        "operationId": "getPeriodEndYearEndId",
+        "summary": "A year-end close run with its checks, closing journals and opening balances",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/period-end/year-end/{id}/cancel": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdCancel",
+        "summary": "Cancel a year-end close run that has not closed the year",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/check": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdCheck",
+        "summary": "Run the year-end pre-checks",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/close": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdClose",
+        "summary": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverse",
+        "summary": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
       }
     },
     "/payments/petty-cash/disbursements": {
