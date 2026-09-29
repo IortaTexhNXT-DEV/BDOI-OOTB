@@ -32,7 +32,7 @@ const TableData = ({ navigate }) => {
       return {
         loading: insuranceProductReducers?.loading,
         InsuranceProductList: insuranceProductReducers?.InsuranceProductList,
-        SearchTableList: insuranceProductReducers?.SearchTableList,
+        SearchTableList: insuranceProductReducers?.searchInsuranceProductList,
       };
     }
   );

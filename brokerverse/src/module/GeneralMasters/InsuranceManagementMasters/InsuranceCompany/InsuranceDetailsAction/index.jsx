@@ -19,6 +19,8 @@ import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import {
   patchInsuranceCompanyMiddleWare,
   postInsuranceCompanyMiddleWare,
+  getInsuranceViewMiddleWare,
+  getInsurancePatchData as loadInsurancePatchData,
 } from "../store/insuranceCompanyMiddleware";
 import { useSelector, useDispatch } from "react-redux";
 import { act } from "react-dom/test-utils";
@@ -37,8 +39,8 @@ const InsuranceDetailsAction = ({ action }) => {
     return {
       loading: insuranceCompanyReducers?.loading,
       InsuranceCompanyList: insuranceCompanyReducers?.InsuranceCompanyList,
-      getInsuranceView: insuranceCompanyReducers?.getInsuranceView,
-      getInsurancePatchData: insuranceCompanyReducers?.getInsurancePatchData,
+      getInsuranceView: insuranceCompanyReducers?.InsuranceMasterView || {},
+      getInsurancePatchData: insuranceCompanyReducers?.InsuranceMasterPatchData,
     };
   });
   const { id } = useParams();
@@ -171,6 +173,12 @@ const InsuranceDetailsAction = ({ action }) => {
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
+  // load the record by the id in the address, so a refreshed or shared link works too
+  useEffect(() => {
+    if (id && action === "view") dispatch(getInsuranceViewMiddleWare(id));
+    if (id && action === "edit") dispatch(loadInsurancePatchData(id));
+  }, [id, action]);
+
   useEffect(() => {
     if (action === "view" || action === "edit") {
       setFormikValues();
@@ -248,7 +256,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.insuranceCompanyCode
                   : action == "edit"
                     ? formik.values.insuranceCompanyCode
-                    : getInsuranceView.insuranceCompanyCode
+                    : getInsuranceView?.insuranceCompanyCode
               }
               // value={formik.values.insuranceCompanyCode}
               onChange={(e) =>
@@ -274,7 +282,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.insuranceCompanyName
                   : action == "edit"
                   ? formik.values.insuranceCompanyName
-                  : getInsuranceView.insuranceCompanyName
+                  : getInsuranceView?.insuranceCompanyName
               }
               
               onChange={(e) =>
@@ -300,7 +308,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.insuranceCompanyDescription
                   : action == "edit"
                   ? formik.values.insuranceCompanyDescription
-                  : getInsuranceView.insuranceCompanyDescription
+                  : getInsuranceView?.insuranceCompanyDescription
               }
              
               onChange={(e) =>
@@ -329,7 +337,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.addressLine1
                   : action == "edit"
                   ? formik.values.addressLine1
-                  : getInsuranceView.addressLine1
+                  : getInsuranceView?.addressLine1
               }
               
               onChange={(e) =>
@@ -354,7 +362,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.addressLine2
                   : action == "edit"
                   ? formik.values.addressLine2
-                  : getInsuranceView.addressLine2
+                  : getInsuranceView?.addressLine2
               }
              
               onChange={(e) =>
@@ -379,7 +387,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.addressLine3
                   : action == "edit"
                   ? formik.values.addressLine3
-                  : getInsuranceView.addressLine3
+                  : getInsuranceView?.addressLine3
               }
               
               onChange={(e) =>
@@ -406,7 +414,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.city
                   : action == "edit"
                   ? formik.values.city
-                  : getInsuranceView.city
+                  : getInsuranceView?.city
               }
              
               onChange={(e) => formik.setFieldValue("city", e.value)}
@@ -436,7 +444,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.state
                   : action == "edit"
                   ? formik.values.state
-                  : getInsuranceView.state
+                  : getInsuranceView?.state
               }
              
               onChange={(e) => formik.setFieldValue("state", e.value)}
@@ -466,7 +474,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.country
                   : action == "edit"
                   ? formik.values.country
-                  : getInsuranceView.country
+                  : getInsuranceView?.country
               }
               
               onChange={(e) => formik.setFieldValue("country", e.value)}
@@ -494,7 +502,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.phoneNumber
                   : action == "edit"
                   ? formik.values.phoneNumber
-                  : getInsuranceView.phoneNumber
+                  : getInsuranceView?.phoneNumber
               }
               
               onChange={(e) =>
@@ -519,7 +527,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.email
                   : action == "edit"
                   ? formik.values.email
-                  : getInsuranceView.email
+                  : getInsuranceView?.email
               }
              
               onChange={(e) => formik.setFieldValue("email", e.target.value)}
@@ -582,7 +590,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.modifiedBy
                   : action == "edit"
                   ? formik.values.modifiedBy
-                  : getInsuranceView.modifiedBy
+                  : getInsuranceView?.modifiedBy
               }
              
               onChange={(e) =>
@@ -601,7 +609,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.modifiedOn
                   : action == "edit"
                   ? formik.values.modifiedOn
-                  : getInsuranceView.modifiedOn
+                  : getInsuranceView?.modifiedOn
               }
             
               onChange={(e) =>

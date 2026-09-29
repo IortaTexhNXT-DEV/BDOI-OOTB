@@ -37,7 +37,7 @@ const TableData = ({ navigate }) => {
       return {
         loading: insuranceCompanyReducers?.loading,
         InsuranceCompanyList: insuranceCompanyReducers?.InsuranceCompanyList,
-        SearchTableList: insuranceCompanyReducers?.SearchTableList,
+        SearchTableList: insuranceCompanyReducers?.searchInsuranceList,
       };
     }
   );

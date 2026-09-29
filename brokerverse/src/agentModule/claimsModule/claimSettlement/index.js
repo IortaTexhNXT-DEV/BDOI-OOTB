@@ -50,13 +50,10 @@ const ClaimSettlement = () => {
     policyHolderName: reduxPolicyHolderName,
     policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
-    clientDetails: reduxClientDetails,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
     policyNumber: claimDetailsMainReducers?.policyNumber || "",
     claimNumber: claimDetailsMainReducers?.claimNumber || "",
-    clientId: claimDetailsMainReducers?.clientId || "",
-    clientDetails: claimDetailsMainReducers?.claimDetails || "",
   }));
 
   // Try to get policy holder name from Redux first, then claim details, then fallback
