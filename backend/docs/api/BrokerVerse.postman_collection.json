@@ -3485,7 +3485,7 @@
           ]
         },
         {
-          "name": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)",
+          "name": "Link a bank account to its GL cash account, default statement format and reconciliation start date (book entries before it are covered by the first statement's opening balance; default: the first statement's start)",
           "request": {
             "method": "PUT",
             "header": [
@@ -3512,10 +3512,10 @@
                 }
               ]
             },
-            "description": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
+            "description": "Link a bank account to its GL cash account, default statement format and reconciliation start date (book entries before it are covered by the first statement's opening balance; default: the first statement's start)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"glAccountCode\": \"1102001\",\n  \"statementFormat\": \"BDO-SAMPLE\"\n}",
+              "raw": "{\n  \"glAccountCode\": \"1102001\",\n  \"statementFormat\": \"BDO-SAMPLE\",\n  \"reconcileFrom\": \"2026-08-01\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3552,10 +3552,10 @@
                     }
                   ]
                 },
-                "description": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
+                "description": "Link a bank account to its GL cash account, default statement format and reconciliation start date (book entries before it are covered by the first statement's opening balance; default: the first statement's start)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Bank account setup\n\nAccess: write:bank-reconciliation",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"glAccountCode\": \"1102001\",\n  \"statementFormat\": \"BDO-SAMPLE\"\n}",
+                  "raw": "{\n  \"glAccountCode\": \"1102001\",\n  \"statementFormat\": \"BDO-SAMPLE\",\n  \"reconcileFrom\": \"2026-08-01\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3573,7 +3573,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"ACC-BDO-001\",\n    \"glAccountCode\": \"1102001\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"ACC-BDO-001\",\n    \"glAccountCode\": \"1102001\",\n    \"reconcileFrom\": \"2026-08-01\"\n  }\n}"
             }
           ]
         },

@@ -210,39 +210,42 @@ export async function cancelRec(db, id, user, { remarks = null } = {}) {
 
 // ---------- printable statement ----------
 const money = (v) => Number(v || 0);
+const txt = (v) => String(v ?? '').replace(/[\u2013\u2014]/g, '-');
 const itemTable = (list, kind) => ({
   columns: kind === 'book' ? ['Date', 'Journal', 'Document', 'Cheque / Ref.', 'Payee / Payer', 'Amount'] : ['Date', 'Statement', 'Description', 'Reference', 'Amount'],
-  widths: kind === 'book' ? [60, 75, 90, 70, 145, 75] : [60, 80, 185, 115, 75],
+  widths: kind === 'book' ? [55, 72, 140, 68, 110, 70] : [55, 80, 200, 110, 70],
   rows: list.map((x) => (kind === 'book'
-    ? [x.date, x.journalNumber, `${x.documentType || ''} ${x.documentNumber || ''}`.trim(), x.chequeNumber || x.reference || '', x.party || x.description || '', Math.abs(money(x.amount))]
-    : [x.date || x.clearedDate, x.statementNumber || x.matchId || '', x.description || x.remarks || '', x.reference || '', Math.abs(money(x.amount ?? x.difference))])),
+    ? [x.date, x.journalNumber, txt(`${x.documentType || ''} ${x.documentNumber || ''}`.trim()), txt(x.chequeNumber || x.reference || ''), txt(x.party || x.description || ''), Math.abs(money(x.amount))]
+    : [x.date || x.clearedDate, x.statementNumber || x.matchId || '', txt(x.description || x.remarks || ''), txt(x.reference || ''), Math.abs(money(x.amount ?? x.difference))])),
 });
 
 /** Document spec (documents/pdf.js buildPdf) of the Bank Reconciliation Statement. */
 export async function statementPdfSpec(rec, company) {
   const s = rec.statement;
-  const line = (label, v, sign = '') => [label, `${sign}${Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`];
+  const fig = (label, v, sign = 1) => [label, sign * money(v)];
+  const block = (rows) => ({ columns: ['', 'PHP'], widths: [415, 100], rows });
   const sections = [
-    { heading: 'Balance per bank statement', rows: [
-      line('Balance per bank statement', s.bankBalance), line('Add: Deposits in transit', s.depositsInTransit, '+ '), line('Less: Outstanding cheques', s.outstandingCheques, '- '),
-      line('Add / (less): Bank errors', s.bankErrors), line('Adjusted bank balance', s.adjustedBankBalance)] },
-    { heading: 'Balance per books', rows: [
-      line('Balance per books', s.bookBalance), line('Add: Bank credits not yet booked', s.unbookedCredits, '+ '), line('Less: Bank charges not yet booked', s.unbookedDebits, '- '),
-      line('Add / (less): Book errors', s.bookErrors), line('Adjusted book balance', s.adjustedBookBalance)] },
-    { heading: 'Result', rows: [line('Difference (must be zero)', s.difference), ['Status', rec.status.toUpperCase()]] },
+    { heading: 'Balance per bank statement', table: block([
+      fig('Balance per bank statement', s.bankBalance), fig('Add: deposits in transit', s.depositsInTransit), fig('Less: outstanding cheques', s.outstandingCheques, -1),
+      fig('Add / (less): bank errors', s.bankErrors), fig('ADJUSTED BANK BALANCE', s.adjustedBankBalance)]) },
+    { heading: 'Balance per books', table: block([
+      fig('Balance per books', s.bookBalance), fig('Add: bank credits not yet booked', s.unbookedCredits), fig('Less: bank charges not yet booked', s.unbookedDebits, -1),
+      fig('Add / (less): book errors', s.bookErrors), fig('ADJUSTED BOOK BALANCE', s.adjustedBookBalance)]) },
+    { heading: 'Result', rows: [['Difference (must be zero)', money(s.difference).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })], ['Status', rec.status.toUpperCase()]] },
   ];
   const detail = [['Deposits in transit', s.items?.depositsInTransit, 'book'], ['Outstanding cheques', s.items?.outstandingCheques, 'book'], ['Bank credits not yet booked', s.items?.unbookedCredits, 'bank'],
     ['Bank charges not yet booked', s.items?.unbookedDebits, 'bank'], ['Bank errors', s.items?.bankErrors, 'bank'], ['Book errors', s.items?.bookErrors, 'bank']];
   for (const [heading, list, kind] of detail) if (list?.length) sections.push({ heading: `${heading} (${list.length})`, table: itemTable(list, kind) });
-  sections.push({ heading: 'Sign-off', rows: [['Prepared by', rec.preparedByName || '-'], ['Prepared at', rec.preparedAt ? new Date(rec.preparedAt).toISOString().slice(0, 16).replace('T', ' ') : '-'],
-    ['Approved by', rec.approvedByName || '-'], ['Approved at', rec.approvedAt ? new Date(rec.approvedAt).toISOString().slice(0, 16).replace('T', ' ') : '-']] });
+  const at = (v) => (v ? new Date(v).toISOString().slice(0, 16).replace('T', ' ') : '-');
+  sections.push({ heading: 'Sign-off', rows: [['Prepared by', txt(rec.preparedByName || '-')], ['Prepared at', at(rec.preparedAt)], ['Approved by', txt(rec.approvedByName || '-')], ['Approved at', at(rec.approvedAt)]] });
   return {
     title: 'Bank Reconciliation Statement',
-    subtitle: `${company.name || ''}${company.name ? '  -  ' : ''}${rec.recNumber}`,
-    meta: [['Bank account', `${s.bankAccount} ${s.bankAccountName || ''}`.trim()], ['Bank', s.bankName || '-'], ['Account number', s.accountNumber || '-'], ['GL account', `${s.glAccountCode} ${s.glAccountName || ''}`.trim()],
-      ['Period', rec.period], ['As of', s.asOf], ['Bank statement', s.statement ? `${s.statement.statementNumber}${s.statement.statementRef ? ` (${s.statement.statementRef})` : ''}` : '-'], ['Status', rec.status]],
+    subtitle: txt(`${company.name || ''}${company.name ? '  -  ' : ''}${rec.recNumber}`),
+    meta: [['Bank account', s.bankAccount], ['Account name', txt(s.bankAccountName || '-')], ['Bank', txt(s.bankName || '-')], ['Account number', s.accountNumber || '-'],
+      ['GL account', txt(`${s.glAccountCode} ${s.glAccountName || ''}`.trim())], ['Period', rec.period], ['As of', s.asOf],
+      ['Bank statement', txt(s.statement ? `${s.statement.statementNumber}${s.statement.statementRef ? ` (${s.statement.statementRef})` : ''}` : '-')]],
     sections,
-    footer: `${company.system || company.name || ''} - generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC`,
+    footer: txt(`${company.system || company.name || ''} - generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC`),
   };
 }
 

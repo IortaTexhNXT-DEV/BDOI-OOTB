@@ -52,9 +52,10 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/bank-accounts/:code', summary: 'Link a bank account to its GL cash account and default statement format (stored on the bank account master record)',
-  screen: `${S} > Bank account setup`, middleware: [...write, validate(z.object({ glAccountCode: z.string().max(20).nullable().optional(), statementFormat: z.string().max(30).nullable().optional() }))],
-  request: { glAccountCode: '1102001', statementFormat: 'BDO-SAMPLE' }, response: { success: true, data: { code: 'ACC-BDO-001', glAccountCode: '1102001' } },
+  method: 'PUT', path: '/bank-accounts/:code', summary: 'Link a bank account to its GL cash account, default statement format and reconciliation start date (book entries before it are covered by the first statement\'s opening balance; default: the first statement\'s start)',
+  screen: `${S} > Bank account setup`, middleware: [...write, validate(z.object({ glAccountCode: z.string().max(20).nullable().optional(), statementFormat: z.string().max(30).nullable().optional(),
+    reconcileFrom: date.nullable().optional() }))],
+  request: { glAccountCode: '1102001', statementFormat: 'BDO-SAMPLE', reconcileFrom: '2026-08-01' }, response: { success: true, data: { code: 'ACC-BDO-001', glAccountCode: '1102001', reconcileFrom: '2026-08-01' } },
   handler: async (req, res) => {
     const out = await tx(async (db) => {
       const a = await getBankAccount(db, req.params.code);
@@ -72,7 +73,12 @@ define({
         if (used) throw conflict(`Bank account ${a.bank_account_code} has ${used} active match(es); its GL account cannot change`);
       }
       if (b.statementFormat) await st.getFormat(db, b.statementFormat);
-      const patch = { glAccountCode: gl || '', ...(b.statementFormat !== undefined ? { statementFormat: b.statementFormat || '' } : {}) };
+      if (b.reconcileFrom !== undefined && (b.reconcileFrom || null) !== (a.reconcile_from ? iso(a.reconcile_from) : null)) {
+        const rec = (await db.query('SELECT rec_number FROM bank_reconciliations WHERE bank_account_id = $1 AND status = \'approved\' LIMIT 1', [a.bank_account_id])).rows[0];
+        if (rec) throw conflict(`Bank account ${a.bank_account_code} has approved reconciliations (${rec.rec_number}); its reconciliation start cannot change`);
+      }
+      const patch = { glAccountCode: gl || '', ...(b.statementFormat !== undefined ? { statementFormat: b.statementFormat || '' } : {}),
+        ...(b.reconcileFrom !== undefined ? { reconcileFrom: b.reconcileFrom || '' } : {}) };
       await db.query('UPDATE master_records SET data = data || $2::jsonb, updated_by = $3, updated_at = now() WHERE id = $1', [a.bank_account_id, JSON.stringify(patch), req.user.id]);
       return { before: accountRow(a), after: accountRow(await getBankAccount(db, a.bank_account_id)) };
     });

@@ -4970,7 +4970,7 @@
     "/bank-reconciliation/bank-accounts/{code}": {
       "put": {
         "operationId": "putBankReconciliationBankAccountsCode",
-        "summary": "Link a bank account to its GL cash account and default statement format (stored on the bank account master record)",
+        "summary": "Link a bank account to its GL cash account, default statement format and reconciliation start date (book entries before it are covered by the first statement's opening balance; default: the first statement's start)",
         "tags": [
           "Bank Reconciliation"
         ],
@@ -5004,6 +5004,9 @@
                         },
                         "glAccountCode": {
                           "type": "string"
+                        },
+                        "reconcileFrom": {
+                          "type": "string"
                         }
                       }
                     }
@@ -5013,7 +5016,8 @@
                   "success": true,
                   "data": {
                     "code": "ACC-BDO-001",
-                    "glAccountCode": "1102001"
+                    "glAccountCode": "1102001",
+                    "reconcileFrom": "2026-08-01"
                   }
                 }
               }
@@ -5045,12 +5049,16 @@
                   },
                   "statementFormat": {
                     "type": "string"
+                  },
+                  "reconcileFrom": {
+                    "type": "string"
                   }
                 }
               },
               "example": {
                 "glAccountCode": "1102001",
-                "statementFormat": "BDO-SAMPLE"
+                "statementFormat": "BDO-SAMPLE",
+                "reconcileFrom": "2026-08-01"
               }
             }
           }

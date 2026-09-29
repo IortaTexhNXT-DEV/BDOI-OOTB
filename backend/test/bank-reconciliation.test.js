@@ -102,9 +102,10 @@ describe('bank account set-up and masters', () => {
   it('links the bank account to its GL cash account; finance reads, agents may not', async () => {
     expect((await admin('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: '3201001' })).status).toBe(400);
     expect((await admin('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: '1102001' })).status).toBe(409); // linked to ACC-BDO-001 by the sample data
-    const r = await maker('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: GL, statementFormat: 'GENERIC' });
+    // reconcile from January: the stale January cheque is an opening outstanding item (default: the first statement's start)
+    const r = await maker('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: GL, statementFormat: 'GENERIC', reconcileFrom: '2026-01-01' });
     expect(r.status, JSON.stringify(r.body)).toBe(200);
-    expect(r.body.data).toMatchObject({ code: ACCT, glAccountCode: GL, statementFormat: 'GENERIC' });
+    expect(r.body.data).toMatchObject({ code: ACCT, glAccountCode: GL, statementFormat: 'GENERIC', reconcileFrom: '2026-01-01' });
     const list = await maker('get', '/bank-reconciliation/bank-accounts');
     expect(list.body.data.find((a) => a.code === ACCT).glAccountCode).toBe(GL);
     expect((await ctx.as('agent')('get', '/bank-reconciliation/bank-accounts')).status).toBe(403);

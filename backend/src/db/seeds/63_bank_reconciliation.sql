@@ -13,7 +13,8 @@ ON CONFLICT (code) DO NOTHING;
 UPDATE master_types t SET fields = t.fields || (
   SELECT COALESCE(jsonb_agg(f), '[]'::jsonb) FROM jsonb_array_elements($j$[
     {"name":"glAccountCode","label":"GL Cash Account (bank reconciliation)","type":"string","required":false},
-    {"name":"statementFormat","label":"Bank Statement Format","type":"string","required":false}
+    {"name":"statementFormat","label":"Bank Statement Format","type":"string","required":false},
+    {"name":"reconcileFrom","label":"Reconcile From (date)","type":"date","required":false}
   ]$j$::jsonb) f
   WHERE NOT EXISTS (SELECT 1 FROM jsonb_array_elements(t.fields) e WHERE e->>'name' = f->>'name'))
 WHERE t.code = 'bank-account';

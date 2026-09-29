@@ -6067,6 +6067,8 @@
     "notLinkedHelp": "Bank account {{account}} is not linked to a GL cash account yet.",
     "glAccount": "GL cash account",
     "statementFormat": "Statement format",
+    "reconcileFrom": "Reconcile from",
+    "reconcileFromHelp": "Book entries before this date are covered by the first statement's opening balance (empty: the first statement's start date).",
     "period": "Period",
     "importStatement": "Import statement",
     "autoMatch": "Auto-match",

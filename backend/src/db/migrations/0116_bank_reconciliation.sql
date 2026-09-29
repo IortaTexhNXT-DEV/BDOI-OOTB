@@ -246,11 +246,14 @@ CREATE INDEX IF NOT EXISTS bank_reconciliation_history_rec_idx ON bank_reconcili
 CREATE OR REPLACE VIEW bank_account_links AS
 SELECT m.id AS bank_account_id, m.code AS bank_account_code, m.name AS bank_account_name, m.data->>'bankCode' AS bank_code,
   m.data->>'bankName' AS bank_name, m.data->>'accountNumber' AS account_number, COALESCE(m.data->>'currency', 'PHP') AS currency,
-  NULLIF(btrim(m.data->>'glAccountCode'), '') AS gl_account_code, NULLIF(btrim(m.data->>'statementFormat'), '') AS statement_format, m.status
+  NULLIF(btrim(m.data->>'glAccountCode'), '') AS gl_account_code, NULLIF(btrim(m.data->>'statementFormat'), '') AS statement_format, m.status,
+  CASE WHEN m.data->>'reconcileFrom' ~ '^\d{4}-\d{2}-\d{2}$' THEN (m.data->>'reconcileFrom')::date END AS reconcile_from
 FROM master_records m WHERE m.type_code = 'bank-account' AND m.status <> 'deleted';
 
 -- Book side: posted (and reversed) GL lines on the cash account of a linked bank account, with the source document
--- (official receipt, payment voucher / cheque, journal voucher) and the active match of the line.
+-- (official receipt, payment voucher / cheque, journal voucher) and the active match of the line. Entries dated before
+-- the account's reconciliation start (data.reconcileFrom, else the first statement's start date) are covered by the
+-- first statement's opening balance and left out.
 CREATE OR REPLACE VIEW bank_book_lines AS
 SELECT l.id AS line_id, b.bank_account_id, b.bank_account_code, l.account_code, j.id AS jv_id, j.jv_number, j.jv_date AS txn_date, j.status AS jv_status,
   j.source, j.reference_type, j.reference_id, j.transaction_code, j.reversal_of, j.reversed_by_jv,
@@ -270,7 +273,9 @@ LEFT JOIN receipts r ON j.reference_type = 'Receipt' AND r.id = j.reference_id
 LEFT JOIN disbursements d ON j.reference_type = 'Disbursement' AND d.id = j.reference_id
 LEFT JOIN LATERAL (SELECT c.* FROM checkbooks c WHERE c.journal_id = COALESCE(j.reversal_of, j.id) ORDER BY c.created_at LIMIT 1) ck ON true
 LEFT JOIN bank_rec_match_items mi ON mi.journal_line_id = l.id AND mi.active
-LEFT JOIN bank_rec_matches mm ON mm.id = mi.match_id;
+LEFT JOIN bank_rec_matches mm ON mm.id = mi.match_id
+WHERE j.jv_date >= COALESCE(b.reconcile_from,
+  (SELECT min(s.period_from) FROM bank_statements s WHERE s.bank_account_id = b.bank_account_id AND s.status = 'active'), j.jv_date);
 
 -- ---------- scheduled job (disabled until finance switches it on under Master > Configuration > Schedules) ----------
 INSERT INTO scheduled_jobs(code, name, description, cron, handler, params, enabled) VALUES

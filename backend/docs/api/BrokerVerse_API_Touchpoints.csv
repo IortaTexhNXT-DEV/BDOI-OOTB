@@ -776,14 +776,16 @@
     }
   ]
 }"
-47,Bank Reconciliation,PUT,/api/bank-reconciliation/bank-accounts/:code,Link a bank account to its GL cash account and default statement format (stored on the bank account master record),Accounts > Bank Reconciliation > Bank account setup,Bearer JWT,write:bank-reconciliation,"{
+47,Bank Reconciliation,PUT,/api/bank-reconciliation/bank-accounts/:code,"Link a bank account to its GL cash account, default statement format and reconciliation start date (book entries before it are covered by the first statement's opening balance; default: the first statement's start)",Accounts > Bank Reconciliation > Bank account setup,Bearer JWT,write:bank-reconciliation,"{
   ""glAccountCode"": ""1102001"",
-  ""statementFormat"": ""BDO-SAMPLE""
+  ""statementFormat"": ""BDO-SAMPLE"",
+  ""reconcileFrom"": ""2026-08-01""
 }","{
   ""success"": true,
   ""data"": {
     ""code"": ""ACC-BDO-001"",
-    ""glAccountCode"": ""1102001""
+    ""glAccountCode"": ""1102001"",
+    ""reconcileFrom"": ""2026-08-01""
   }
 }"
 48,Bank Reconciliation,POST,/api/bank-reconciliation/bank-lines/:id/adjustment,"Create the adjustment for an unrecorded bank item from a bank line (postBankAdjustment: bank charges, interest, final tax, direct credits, returned cheque)",Accounts > Bank Reconciliation > Create adjustment,Bearer JWT,write:bank-reconciliation,"{

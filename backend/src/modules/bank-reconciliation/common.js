@@ -18,6 +18,7 @@ export const num = (v) => (v === null || v === undefined || v === '' ? null : Nu
 export const accountRow = (a) => a && ({
   id: a.bank_account_id, code: a.bank_account_code, name: a.bank_account_name, bankCode: a.bank_code, bankName: a.bank_name, accountNumber: a.account_number,
   currency: a.currency, glAccountCode: a.gl_account_code, glAccountName: a.gl_account_name || null, statementFormat: a.statement_format, status: a.status,
+  reconcileFrom: a.reconcile_from ? iso(a.reconcile_from) : null,
 });
 
 /** A bank account of the master by code or id (any status but deleted). */

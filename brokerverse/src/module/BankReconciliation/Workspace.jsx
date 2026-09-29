@@ -167,7 +167,7 @@ const Workspace = () => {
       <PageHeader title={t("bankReconciliation.title")} trail={[t("bankReconciliation.workspace")]} subtitle={t("bankReconciliation.workspaceHelp")}>
         <Button icon="pi pi-list" outlined label={t("bankReconciliation.reconciliations")} onClick={() => navigate("/accounts/bank-reconciliation/reconciliations")} />
         <Button icon="pi pi-cog" outlined label={t("bankReconciliation.accountSetup")} disabled={!current}
-          onClick={() => { setForm({ glAccountCode: current?.glAccountCode || null, statementFormat: current?.statementFormat || null }); setDialog("setup"); }} />
+          onClick={() => { setForm({ glAccountCode: current?.glAccountCode || null, statementFormat: current?.statementFormat || null, reconcileFrom: current?.reconcileFrom || "" }); setDialog("setup"); }} />
       </PageHeader>
 
       <div className="pe-card">
@@ -193,7 +193,7 @@ const Workspace = () => {
         {current && !linked && (
           <div className="br-notice mt-3">
             {t("bankReconciliation.notLinkedHelp", { account: current.code })}{" "}
-            <Button link size="small" label={t("bankReconciliation.accountSetup")} onClick={() => { setForm({ glAccountCode: null, statementFormat: current.statementFormat || null }); setDialog("setup"); }} />
+            <Button link size="small" label={t("bankReconciliation.accountSetup")} onClick={() => { setForm({ glAccountCode: null, statementFormat: current.statementFormat || null, reconcileFrom: current.reconcileFrom || "" }); setDialog("setup"); }} />
           </div>
         )}
       </div>
@@ -231,16 +231,15 @@ const Workspace = () => {
             <DataTable value={bankRows} dataKey="id" size="small" loading={loading} selectionMode="checkbox" selection={bankSel} onSelectionChange={(e) => setBankSel(e.value.filter((x) => !x.matchId))}
               scrollable scrollHeight="560px" emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
               <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />
-              <Column header={t("bankReconciliation.date")} body={(l) => date(l.date)} style={{ width: "7rem" }} />
+              <Column header={t("bankReconciliation.date")} body={(l) => date(l.date)} style={{ width: "6.5rem" }} />
               <Column header={t("bankReconciliation.description")} body={(l) => (
                 <div className="br-desc" title={l.description}>
                   <div>{l.description}</div>
                   <div className="br-sub">{[l.reference, l.statementNumber].filter(Boolean).join(" · ")}{l.typeCode && !l.matchId ? ` · ${typeName(l.typeCode)}` : ""}</div>
                 </div>
               )} />
-              <Column header={t("bankReconciliation.amount")} body={(l) => <Amount value={l.amount} />} className="bv-num" headerClassName="bv-num" style={{ width: "8rem" }} />
-              <Column header={t("bankReconciliation.status.label")} body={statusBody} style={{ width: "8.5rem" }} />
-              <Column body={bankActions} style={{ width: "6.5rem" }} />
+              <Column header={t("bankReconciliation.amount")} body={(l) => <div><Amount value={l.amount} /><div className="mt-1">{statusBody(l)}</div></div>} className="bv-num" headerClassName="bv-num" style={{ width: "9.5rem" }} />
+              <Column body={bankActions} style={{ width: "6rem" }} />
             </DataTable>
           </div>
           <div className="pe-card">
@@ -254,7 +253,7 @@ const Workspace = () => {
             <DataTable value={bookRows} dataKey="id" size="small" loading={loading} selectionMode="checkbox" selection={bookSel} onSelectionChange={(e) => setBookSel(e.value.filter((x) => !x.matchId))}
               scrollable scrollHeight="560px" emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
               <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />
-              <Column header={t("bankReconciliation.date")} body={(v) => date(v.date)} style={{ width: "7rem" }} />
+              <Column header={t("bankReconciliation.date")} body={(v) => date(v.date)} style={{ width: "6.5rem" }} />
               <Column header={t("bankReconciliation.document")} body={(v) => (
                 <div className="br-desc" title={v.description}>
                   <div>{v.documentType} {v.documentNumber}{v.chequeNumber ? ` · ${t("bankReconciliation.cheque")} ${v.chequeNumber}` : ""}</div>
@@ -262,8 +261,7 @@ const Workspace = () => {
                     {v.party ? ` · ${v.party}` : ""}{v.reference && v.reference !== v.chequeNumber ? ` · ${v.reference}` : ""}</div>
                 </div>
               )} />
-              <Column header={t("bankReconciliation.amount")} body={(v) => <Amount value={v.amount} />} className="bv-num" headerClassName="bv-num" style={{ width: "8rem" }} />
-              <Column header={t("bankReconciliation.status.label")} body={statusBody} style={{ width: "8.5rem" }} />
+              <Column header={t("bankReconciliation.amount")} body={(v) => <div><Amount value={v.amount} /><div className="mt-1">{statusBody(v)}</div></div>} className="bv-num" headerClassName="bv-num" style={{ width: "9.5rem" }} />
               <Column body={bookActions} style={{ width: "3rem" }} />
             </DataTable>
           </div>
@@ -298,7 +296,8 @@ const Workspace = () => {
           <div>
             <Button label={t("bankReconciliation.cancel")} text onClick={() => setDialog(null)} />
             {dialog === "setup" && <Button label={t("bankReconciliation.save")} icon="pi pi-save" loading={busy === "setup"} disabled={!form.glAccountCode}
-              onClick={() => act("setup", () => bankReconciliationService.linkBankAccount(account, { glAccountCode: form.glAccountCode, statementFormat: form.statementFormat || null }), t("bankReconciliation.accountLinked")).then(loadAccounts)} />}
+              onClick={() => act("setup", () => bankReconciliationService.linkBankAccount(account, { glAccountCode: form.glAccountCode, statementFormat: form.statementFormat || null,
+                ...((form.reconcileFrom || null) !== (current?.reconcileFrom || null) ? { reconcileFrom: form.reconcileFrom || null } : {}) }), t("bankReconciliation.accountLinked")).then(loadAccounts)} />}
             {dialog === "flag" && <Button label={t("bankReconciliation.flagBankError")} icon="pi pi-flag" severity="danger" loading={busy === "flag"} disabled={!String(form.remarks || "").trim()}
               onClick={() => act("flag", () => bankReconciliationService.flagLine(form.line.id, "bank-error", form.remarks), t("bankReconciliation.flagged"))} />}
             {dialog === "unmatch" && <Button label={t("bankReconciliation.unmatch")} icon="pi pi-link" severity="warning" loading={busy === "unmatch"}
@@ -320,6 +319,11 @@ const Workspace = () => {
               <Dropdown inputId="br-format" value={form.statementFormat} onChange={(e) => setForm({ ...form, statementFormat: e.value })} className="w-full" showClear
                 options={formats.map((f) => ({ label: `${f.code} – ${f.name}`, value: f.code }))} />
             </div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="br-from">{t("bankReconciliation.reconcileFrom")}</label>
+              <InputText id="br-from" type="date" value={form.reconcileFrom || ""} onChange={(e) => setForm({ ...form, reconcileFrom: e.target.value })} className="w-full" />
+            </div>
+            <div className="col-12 md:col-6 flex align-items-end"><span className="pe-muted">{t("bankReconciliation.reconcileFromHelp")}</span></div>
           </div>
         )}
         {dialog === "flag" && form.line && (
