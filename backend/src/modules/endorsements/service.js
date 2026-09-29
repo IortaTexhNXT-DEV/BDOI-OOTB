@@ -236,17 +236,28 @@ export async function completeEndorsement(body, userId) {
     const p = await applyToPolicy(db, e, completion, userId);
     let receivableId = null;
     const delta = Number(e.premium_delta);
-    if (delta > 0) {
+    // Billing mode of the premium change: the one chosen on completion (billingMode), else the endorsement's, else the policy's.
+    const { bookDirectBill, normaliseBillingMode } = await import('../remittance/directbill.js');
+    const billingMode = normaliseBillingMode(body.billingMode) || e.billing_mode || p.billing_mode || 'broker';
+    const dp = e.changes?.premiumChange?.delta;
+    const breakdown = dp && num(dp.netPremium) ? { netPremium: Math.abs(num(dp.netPremium)), vat: dp.valueAddedTax, dst: dp.documentaryStampTax, lgt: dp.localGovernmentTax } : {};
+    if (billingMode === 'direct' && delta !== 0) {
+      // direct bill: the client pays the insurer; the commission on the premium change is due from (or returned to) the insurer
+      await bookDirectBill(db, { policy: p, amount: delta, breakdown, source: 'endorsement', reference: e.endorsement_number, endorsementId: e.id, user: { id: userId } });
+    } else if (delta > 0) {
       // additional premium is billed like any premium: receivable, booking journal and collection item (finance routine)
-      const dp = e.changes?.premiumChange?.delta;
-      const breakdown = dp && dp.netPremium > 0 ? { netPremium: dp.netPremium, vat: dp.valueAddedTax, dst: dp.documentaryStampTax, lgt: dp.localGovernmentTax } : {};
-      receivableId = (await createReceivable(db, { policyId: p.id, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
+      if (p.billing_mode === 'direct') {
+        const { createReceivable: financeReceivable, findPolicy } = await import('../receipts/receivables.js');
+        receivableId = (await financeReceivable(db, { policy: { ...(await findPolicy(db, p.id)), billing_mode: 'broker' }, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
+      } else {
+        receivableId = (await createReceivable(db, { policyId: p.id, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
+      }
     }
-    // A negative delta (return premium) is recorded on the endorsement and lowers the policy premium, but nothing is billed.
-    // TODO: returning it is a business decision (refund vs. credit against a later bill); there is no automatic refund, so
-    // finance raises a client refund payment voucher (disbursements) once the return is approved.
+    // A negative delta (return premium) on a broker-billed policy is recorded on the endorsement and lowers the policy
+    // premium, but nothing is billed. TODO: returning it is a business decision (refund vs. credit against a later bill);
+    // there is no automatic refund, so finance raises a client refund payment voucher (disbursements) once the return is approved.
     await db.query(`UPDATE endorsements SET status = $2, completion = $3, document_key = COALESCE($4, document_key), completed_at = now(), completed_by = $5,
-      receivable_id = $6, updated_by = $5, updated_at = now() WHERE id = $1`, [e.id, e.is_cancel ? 'cancelled' : 'completed', JSON.stringify(completion), body.documentKey || null, userId, receivableId]);
+      receivable_id = $6, billing_mode = $7, updated_by = $5, updated_at = now() WHERE id = $1`, [e.id, e.is_cancel ? 'cancelled' : 'completed', JSON.stringify(completion), body.documentKey || null, userId, receivableId, billingMode]);
     return p;
   });
   const after = await getEndorsementRow(e0.id);

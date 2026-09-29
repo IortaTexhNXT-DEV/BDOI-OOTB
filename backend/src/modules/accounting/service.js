@@ -1,9 +1,9 @@
 /** Ledger queries (entries, client / policy ledgers, trial balance), open-entry matching, periods, chart of accounts, payment entries. */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { getSetting } from '../../lib/settings.js';
-import { account, createJournal, periodOf } from './lib/ledger.js';
+import { periodOf } from './lib/ledger.js';
 import { isoDate, num, round2, today } from './lib/http.js';
 import { applyToPolicy, ensureBilled, requirePolicy, findClient } from '../receipts/receivables.js';
+import { bookDirectBill, changeBillingModeIn } from '../remittance/directbill.js';
 
 const STATUS_LABEL = { posted: 'Posted', pending: 'Pending', draft: 'Pending', 'for-approval': 'Pending', approved: 'Pending', reversed: 'Reversed', cancelled: 'Cancelled', rejected: 'Cancelled' };
 const STATUS_FILTER = { Posted: ['posted'], Pending: ['pending', 'draft', 'for-approval', 'approved'], Reversed: ['reversed'], Cancelled: ['cancelled', 'rejected'] };
@@ -143,16 +143,27 @@ export async function unmatch(db, ids, user) {
 export async function trialBalance(db, q) {
   const asOf = isoDate(q.asOf) || (q.period ? (await db.query('SELECT (to_date($1, \'YYYY-MM\') + interval \'1 month - 1 day\')::date AS d', [q.period])).rows[0].d : today());
   const from = isoDate(q.from) || null;
-  const rows = (await db.query(`SELECT a.code, a.name, a.account_type, COALESCE(sum(l.debit),0) AS d, COALESCE(sum(l.credit),0) AS c
+  const rows = (await db.query(`SELECT a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance, COALESCE(sum(l.debit),0) AS d, COALESCE(sum(l.credit),0) AS c
     FROM gl_accounts a LEFT JOIN journal_lines l ON l.account_code = a.code AND EXISTS (SELECT 1 FROM journal_vouchers j WHERE j.id = l.jv_id
       AND j.status IN ('posted','reversed') AND j.jv_date <= $1 AND ($2::date IS NULL OR j.jv_date >= $2))
-    GROUP BY a.code, a.name, a.account_type HAVING COALESCE(sum(l.debit),0) <> 0 OR COALESCE(sum(l.credit),0) <> 0 ORDER BY a.code`, [asOf, from])).rows;
+    GROUP BY a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance HAVING COALESCE(sum(l.debit),0) <> 0 OR COALESCE(sum(l.credit),0) <> 0`, [asOf, from])).rows;
+  const groupRank = new Map(FS_GROUPS.map(([g], i) => [g, i]));
   const data = rows.map((r) => {
     const net = round2(Number(r.d) - Number(r.c));
-    return { accountCode: r.code, accountName: r.name, accountType: r.account_type, totalDebit: round2(r.d), totalCredit: round2(r.c), debit: net > 0 ? net : 0, credit: net < 0 ? -net : 0, balance: net };
-  });
+    return { accountCode: r.code, accountName: r.name, accountType: r.account_type, fsGroup: fsGroupOf(r.account_type, r.fs_group), category: r.category, normalBalance: r.normal_balance,
+      totalDebit: round2(r.d), totalCredit: round2(r.c), debit: net > 0 ? net : 0, credit: net < 0 ? -net : 0, balance: net };
+  }).sort((x, y) => TYPE_ORDER.indexOf(x.accountType) - TYPE_ORDER.indexOf(y.accountType) || (groupRank.get(x.fsGroup) ?? 99) - (groupRank.get(y.fsGroup) ?? 99) || x.accountCode.localeCompare(y.accountCode));
   const debit = round2(data.reduce((s, r) => s + r.debit, 0)); const credit = round2(data.reduce((s, r) => s + r.credit, 0));
-  return { asOf, from, rows: data, totals: { debit, credit, difference: round2(debit - credit), balanced: debit === credit } };
+  // subtotals per account type and statement group (debit-positive balance), in statement order
+  const byType = TYPE_ORDER.map((t) => ({ accountType: t, debit: round2(data.filter((r) => r.accountType === t).reduce((s, r) => s + r.debit, 0)),
+    credit: round2(data.filter((r) => r.accountType === t).reduce((s, r) => s + r.credit, 0)) })).map((x) => ({ ...x, balance: round2(x.debit - x.credit) }));
+  const byGroup = [...new Set(data.map((r) => r.fsGroup))].map((g) => {
+    const rs = data.filter((r) => r.fsGroup === g);
+    return { fsGroup: g, accountType: rs[0].accountType, debit: round2(rs.reduce((s, r) => s + r.debit, 0)), credit: round2(rs.reduce((s, r) => s + r.credit, 0)), balance: round2(rs.reduce((s, r) => s + r.balance, 0)) };
+  });
+  const income = -byType.find((x) => x.accountType === 'income').balance;
+  const expense = byType.find((x) => x.accountType === 'expense').balance;
+  return { asOf, from, rows: data, byType, byGroup, totals: { debit, credit, difference: round2(debit - credit), balanced: debit === credit, netIncome: round2(income - expense) } };
 }
 
 export async function listPeriods(db) {
@@ -180,53 +191,128 @@ export async function setPeriodStatus(db, period, status, remarks, user) {
   return (await listPeriods(db)).find((p) => p.period === period);
 }
 
-export const accountRow = (a) => ({ code: a.code, accountCode: a.code, name: a.name, accountName: a.name, accountType: a.account_type, parentCode: a.parent_code, category: a.category,
-  isOpenItem: a.is_open_item, allowManual: a.allow_manual, status: a.status });
+/** Statement line groups of the chart (gl_accounts.fs_group), in statement order, with the account type they belong to. */
+export const FS_GROUPS = [
+  ['Current Assets', 'asset'], ['Non-current Assets', 'asset'], ['Current Liabilities', 'liability'], ['Non-current Liabilities', 'liability'], ['Equity', 'equity'],
+  ['Revenue', 'income'], ['Other Income', 'income'], ['Cost of Services', 'expense'], ['Operating Expenses', 'expense'], ['Other Expenses', 'expense'], ['Income Tax', 'expense'],
+];
+const TYPE_ORDER = ['asset', 'liability', 'equity', 'income', 'expense'];
+const fsGroupOf = (type, group) => group || { asset: 'Current Assets', liability: 'Current Liabilities', equity: 'Equity', income: 'Revenue', expense: 'Operating Expenses' }[type];
+
+/** GL roles configured in accounting.account.*, accounting.payable_account_by_payee and accounting.cash_account_by_payment_mode, by account code. */
+export async function accountRoles(db) {
+  const rows = (await db.query(`SELECT key, value FROM app_settings WHERE key LIKE 'accounting.account.%' OR key IN ('accounting.payable_account_by_payee', 'accounting.cash_account_by_payment_mode')`)).rows;
+  const roles = new Map();
+  const add = (code, role) => { if (code) roles.set(String(code), [...(roles.get(String(code)) || []), role]); };
+  for (const r of rows) {
+    if (r.key.startsWith('accounting.account.')) add(r.value, r.key.slice('accounting.account.'.length));
+    else if (r.value && typeof r.value === 'object') for (const [k, code] of Object.entries(r.value)) add(code, `${r.key === 'accounting.payable_account_by_payee' ? 'payable' : 'cash'}:${k}`);
+  }
+  return roles;
+}
+
+export const accountRow = (a, roles = new Map()) => ({ code: a.code, accountCode: a.code, name: a.name, accountName: a.name, accountType: a.account_type, parentCode: a.parent_code, category: a.category,
+  fsGroup: fsGroupOf(a.account_type, a.fs_group), normalBalance: a.normal_balance, description: a.description, isOpenItem: a.is_open_item, allowManual: a.allow_manual, status: a.status,
+  systemRoles: roles.get(a.code) || [], isSystem: roles.has(a.code) });
+
+/** Chart of accounts in statement order (type, statement group, code) with the configured system roles. */
+export async function listAccounts(db, q = {}) {
+  const rows = (await db.query(`SELECT * FROM gl_accounts WHERE ($1::text IS NULL OR account_type = $1) AND ($2::text IS NULL OR status = $2)
+    AND ($3::text IS NULL OR code ILIKE $3 || '%' OR name ILIKE '%' || $3 || '%' OR category ILIKE '%' || $3 || '%') AND ($4::text IS NULL OR fs_group = $4)
+    AND ($5::text IS NULL OR ($5 = 'main' AND parent_code IS NULL) OR ($5 = 'sub' AND parent_code IS NOT NULL))
+    ORDER BY code`, [q.type || q.accountType || null, q.status || null, q.search || null, q.fsGroup || null, q.level || null])).rows;
+  const roles = await accountRoles(db);
+  const groupRank = new Map(FS_GROUPS.map(([g], i) => [g, i]));
+  return rows.map((a) => accountRow(a, roles)).sort((x, y) => TYPE_ORDER.indexOf(x.accountType) - TYPE_ORDER.indexOf(y.accountType)
+    || (groupRank.get(x.fsGroup) ?? 99) - (groupRank.get(y.fsGroup) ?? 99) || x.code.localeCompare(y.code));
+}
+
+/** Keep the Main Account / Sub Account masters (lookups on remittance, transaction-code and account-setup screens) in step with the chart. */
+async function syncAccountMaster(db, a) {
+  const type = a.parent_code ? 'sub-account' : 'main-account';
+  const other = a.parent_code ? 'main-account' : 'sub-account';
+  const data = a.parent_code
+    ? { subAccountCode: a.code, subAccountName: a.name, description: a.description || a.name, mainAccount: a.parent_code }
+    : { mainAccountCode: a.code, mainAccountName: a.name, description: a.description || a.name, accountType: a.account_type.charAt(0).toUpperCase() + a.account_type.slice(1),
+      accountCategoryCode: { asset: 'AC-ASSET', liability: 'AC-LIAB', equity: 'AC-EQTY', income: 'AC-INC', expense: 'AC-EXP' }[a.account_type],
+      openEntry: a.is_open_item ? 'Yes' : 'No', openEntryType: a.category || '', fsGroup: a.fs_group };
+  await db.query('UPDATE master_records SET status = \'deleted\', updated_at = now() WHERE type_code = $1 AND lower(code) = lower($2) AND status <> \'deleted\'', [other, a.code]);
+  const hit = (await db.query('SELECT id FROM master_records WHERE type_code = $1 AND lower(code) = lower($2) AND status <> \'deleted\'', [type, a.code])).rows[0];
+  if (hit) {
+    await db.query('UPDATE master_records SET name = $2, data = data || $3::jsonb, status = $4, updated_at = now() WHERE id = $1', [hit.id, a.name, JSON.stringify(data), a.status]);
+  } else {
+    await db.query('INSERT INTO master_records(type_code, code, name, data, status, created_by) VALUES ($1,$2,$3,$4,$5,\'gl-sync\')', [type, a.code, a.name, JSON.stringify(data), a.status]);
+  }
+}
 
 export async function upsertAccount(db, code, b) {
   const exists = (await db.query('SELECT * FROM gl_accounts WHERE code = $1', [code])).rows[0];
   if (b.parentCode) {
-    const parent = (await db.query('SELECT 1 FROM gl_accounts WHERE code = $1', [b.parentCode])).rows[0];
+    const parent = (await db.query('SELECT account_type FROM gl_accounts WHERE code = $1', [b.parentCode])).rows[0];
     if (!parent) throw badRequest(`Parent account ${b.parentCode} not found`);
+    if (b.parentCode === code) throw badRequest('An account cannot be its own parent');
+    const type = b.accountType || exists?.account_type;
+    if (type && parent.account_type !== type) throw badRequest(`Parent account ${b.parentCode} is ${parent.account_type}; a sub account must have the same type`);
   }
+  if (b.fsGroup) {
+    const g = FS_GROUPS.find(([name]) => name === b.fsGroup);
+    const type = b.accountType || exists?.account_type;
+    if (!g) throw badRequest(`fsGroup must be one of ${FS_GROUPS.map(([name]) => name).join(', ')}`);
+    if (type && g[1] !== type) throw badRequest(`Statement group ${b.fsGroup} is for ${g[1]} accounts`);
+  }
+  let row;
   if (exists) {
-    if (b.status === 'inactive') {
+    if (b.status === 'inactive' && exists.status !== 'inactive') {
+      const roles = (await accountRoles(db)).get(code);
+      if (roles) throw conflict(`Account ${code} is used by the system (${roles.join(', ')}); change the accounting settings first`);
       const bal = (await db.query('SELECT COALESCE(sum(debit - credit),0) AS b FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE l.account_code = $1 AND j.status IN (\'posted\',\'reversed\')', [code])).rows[0].b;
       if (round2(bal) !== 0) throw conflict(`Account ${code} has a balance of ${bal}; it cannot be deactivated`);
     }
-    return (await db.query(`UPDATE gl_accounts SET name = COALESCE($2,name), account_type = COALESCE($3,account_type), parent_code = COALESCE($4,parent_code), category = COALESCE($5,category),
-      is_open_item = COALESCE($6,is_open_item), allow_manual = COALESCE($7,allow_manual), status = COALESCE($8,status), updated_at = now() WHERE code = $1 RETURNING *`,
-    [code, b.name, b.accountType, b.parentCode, b.category, b.isOpenItem, b.allowManual, b.status])).rows[0];
+    if (b.accountType && b.accountType !== exists.account_type) {
+      const used = (await db.query('SELECT count(*)::int AS n FROM journal_lines WHERE account_code = $1', [code])).rows[0].n;
+      if (used) throw conflict(`Account ${code} has journal lines; its type cannot change`);
+    }
+    row = (await db.query(`UPDATE gl_accounts SET name = COALESCE($2,name), account_type = COALESCE($3,account_type), parent_code = COALESCE($4,parent_code), category = COALESCE($5,category),
+      is_open_item = COALESCE($6,is_open_item), allow_manual = COALESCE($7,allow_manual), status = COALESCE($8,status), fs_group = COALESCE($9,fs_group), normal_balance = COALESCE($10,normal_balance),
+      description = COALESCE($11,description), updated_at = now() WHERE code = $1 RETURNING *`,
+    [code, b.name, b.accountType, b.parentCode, b.category, b.isOpenItem, b.allowManual, b.status, b.fsGroup, b.normalBalance, b.description])).rows[0];
+  } else {
+    if (!b.name || !b.accountType) throw badRequest('name and accountType are required for a new account');
+    row = (await db.query(`INSERT INTO gl_accounts(code, name, account_type, parent_code, category, is_open_item, allow_manual, status, fs_group, normal_balance, description)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+    [code, b.name, b.accountType, b.parentCode || null, b.category || null, !!b.isOpenItem, b.allowManual !== false, b.status || 'active', fsGroupOf(b.accountType, b.fsGroup),
+      b.normalBalance || null, b.description || null])).rows[0];
   }
-  if (!b.name || !b.accountType) throw badRequest('name and accountType are required for a new account');
-  return (await db.query(`INSERT INTO gl_accounts(code, name, account_type, parent_code, category, is_open_item, allow_manual, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-    [code, b.name, b.accountType, b.parentCode || null, b.category || null, !!b.isOpenItem, b.allowManual !== false, b.status || 'active'])).rows[0];
+  await syncAccountMaster(db, row);
+  return row;
 }
 
 // ---------- payment entries (agent payment confirmation flows) ----------
 /**
  * Record a premium payment for a policy. Bills the policy if needed (booking journal) and applies the part of `amount`
- * that is still outstanding (a receipt created in the same flow may already have applied it). Direct-billed policies
- * (client paid the insurer) book Dr Commission Receivable / Cr Commission Income once.
+ * that is still outstanding (a receipt created in the same flow may already have applied it). A direct-bill policy (the
+ * client paid the insurer) has no premium to collect: its commission due from the insurer is booked once (Dr Commission
+ * Receivable / Cr Commission Income / Cr Output VAT). isDirectBilled=true on a broker-billed policy switches it to direct
+ * bill, which is refused once premium was collected.
  */
 export async function paymentEntries(db, b, user) {
-  const policy = await requirePolicy(db, b.policyId || b.policyNumber || b.referenceId);
+  let policy = await requirePolicy(db, b.policyId || b.policyNumber || b.referenceId);
   if (b.clientId && !(await findClient(db, b.clientId))) throw notFound('Client not found');
   const amount = round2(num(b.amount));
   const breakdown = { netPremium: num(b.netPremium), vat: num(b.valueAddedTax), dst: num(b.documentaryStampTax), lgt: num(b.localGovernmentTax), other: num(b.accountPremiumOthers), discount: num(b.discount) };
-  const journals = [];
-  if (b.isDirectBilled) {
-    const done = (await db.query('SELECT id FROM journal_vouchers WHERE entry_type = \'DIRECT_BILLED\' AND policy_id = $1 AND status IN (\'posted\',\'pending\')', [policy.id])).rows[0];
-    if (!done) {
-      const rate = Number(policy.insurer_commission_rate) || Number(await getSetting('commission.default_rate', 0.15));
-      const commission = round2(Number(policy.commission_amount) > 0 ? Number(policy.commission_amount) : (breakdown.netPremium || amount) * rate);
-      const jv = await createJournal(db, { source: 'booking', entryType: 'DIRECT_BILLED', referenceType: b.referenceType || 'Policy', referenceId: policy.id, clientId: policy.client_id,
-        policyId: policy.id, policyNumber: policy.policy_number, description: b.description || `Direct-billed commission – ${policy.policy_number}`, date: isoDate(b.paymentDate) || today(),
-        lines: [{ accountCode: await account('commission_receivable'), debit: commission, memo: `Commission due from ${policy.insurer_name || 'insurer'}` },
-          { accountCode: await account('commission_income'), credit: commission, memo: 'Brokerage commission (direct billed)' }] }, user);
-      journals.push(jv.id);
+  if (b.isDirectBilled === true && policy.billing_mode !== 'direct') {
+    await changeBillingModeIn(db, policy.id, 'direct', user, { reason: b.description || 'Client paid the insurer directly' });
+    policy = await requirePolicy(db, policy.id);
+  }
+  if (policy.billing_mode === 'direct') {
+    const items = (await db.query('SELECT booking_jv_id FROM direct_bill_items WHERE policy_id = $1 AND status <> \'cancelled\' ORDER BY created_at', [policy.id])).rows;
+    const had = items.length > 0;
+    if (!had) {
+      const it = await bookDirectBill(db, { policy, amount: round2(num(b.grossPremium) || Number(policy.premium_total) || amount), breakdown: { netPremium: breakdown.netPremium },
+        source: 'policy', reference: policy.policy_number, date: isoDate(b.paymentDate) || today(), user });
+      if (it) items.push(it);
     }
-    return { journals, applied: 0, alreadyApplied: !!done, directBilled: true };
+    return { journals: items.map((i) => i.booking_jv_id).filter(Boolean), applied: 0, alreadyApplied: had, directBilled: true };
   }
   const open = await ensureBilled(db, { policy, amount: round2(num(b.grossPremium) || amount), breakdown, source: 'policy', user });
   const outstanding = round2(open.reduce((s, r) => s + Number(r.balance), 0));

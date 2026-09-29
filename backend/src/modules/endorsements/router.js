@@ -25,6 +25,7 @@ const createBody = z.object({
 const completeBody = z.object({
   endorsementId: z.string().min(1), policyNumber: z.string().optional(), endorsementNumber: z.string().optional(), productionDate: z.string().optional(),
   inceptionDate: z.string().optional(), issuedDate: z.string().optional(), expiryDate: z.string().optional(), documentKey: z.string().optional().nullable(), notes: z.string().optional(),
+  billingMode: z.enum(['broker', 'direct']).optional(),
 }).passthrough();
 
 define({

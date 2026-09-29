@@ -104,27 +104,27 @@ describe('settlement to money out', () => {
     const again = await ctx.api('post', '/disbursements/insurer-remittance').send({ insurerName: 'FPG Insurance Co., Inc.' });
     expect(again.status === 409 || !again.body.data.invoiceList.some((i) => i.policyNumber === pol.policy_number)).toBe(true);
   });
-  it('a policy paid in full shows nothing outstanding on direct billing', async () => {
+  it('broker-billed policies are not offered for direct-bill commission debit notes', async () => {
     const { rows: [paid] } = await pool.query(`SELECT p.id, i.code FROM policies p JOIN insurance_companies i ON i.id = p.insurance_company_id
-      WHERE EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id) AND NOT EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id AND r.status <> 'paid') LIMIT 1`);
-    if (!paid) return;
-    const row = (await ctx.api('get', `/remittance/direct-bill/policies?insurerCode=${paid.code}`)).body.data.find((p) => p.id === paid.id);
-    if (row) expect(row.outstandingAmount).toBe(0);
+      WHERE p.billing_mode = 'broker' AND EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id) LIMIT 1`);
+    const r = await ctx.api('get', `/remittance/direct-bill/policies?insurerCode=${paid.code}`);
+    expect(r.status).toBe(200);
+    expect(r.body.data.some((x) => x.policyId === paid.id)).toBe(false);
   });
 });
 
 describe('bills', () => {
-  it('direct bill from eligible policies, then send', async () => {
-    const pols = await ctx.api('get', '/remittance/direct-bill/policies?insurerCode=SECUREGUARD');
-    expect(pols.status).toBe(200);
-    const ids = pols.body.data.map((p) => p.id);
-    if (!ids.length) return;
-    const b = await ctx.api('post', '/remittance/direct-bill').send({ insurerCode: 'SECUREGUARD', billingPeriod: '2026-09', policyIds: ids, deliveryMethod: ['email'] });
-    expect(b.status).toBe(201);
-    expect(b.body.data.billNo).toMatch(/^BIL-/);
-    expect((await ctx.api('post', '/remittance/direct-bill').send({ insurerCode: 'SECUREGUARD', policyIds: ids })).status).toBe(400);
-    const s = await ctx.api('post', `/remittance/bills/${b.body.data.id}/send`).send({ email: 'billing@secureguard.example' });
-    expect(s.body.data).toMatchObject({ billStatus: 'Sent', emailedTo: 'billing@secureguard.example' });
+  it('direct-bill policies are never remitted to the insurer (the client paid the insurer)', async () => {
+    const { eligiblePolicies } = await import('../src/modules/remittance/service.js');
+    const pols = await policyFor('SECUREGUARD');
+    if (!pols.length) return;
+    const ids = pols.map((p) => p.id);
+    const before = await eligiblePolicies({ policyIds: ids });
+    await pool.query('UPDATE policies SET billing_mode = \'direct\' WHERE id = $1', [pols[0].id]);
+    const after = await eligiblePolicies({ policyIds: ids });
+    expect(after.some((p) => p.id === pols[0].id)).toBe(false);
+    expect(after.length).toBe(before.filter((p) => p.id !== pols[0].id).length);
+    await pool.query('UPDATE policies SET billing_mode = \'broker\' WHERE id = $1', [pols[0].id]);
   });
   it('agency bills per agent with previous balance', async () => {
     const ag = await ctx.api('get', '/remittance/agency-bill/agencies?billPeriod=2026-09');
@@ -138,6 +138,8 @@ describe('bills', () => {
     expect((await ctx.api('post', '/remittance/agency-bill/generate').send({ billPeriod: '2026-09', agencyCodes: ['AG004'] })).status).toBe(400);
     const list = await ctx.api('get', '/remittance/agency-bill');
     expect(list.body.data.some((b) => b.agencyCode === 'AG002' && b.previousBalance === 5000)).toBe(true);
+    const sent = await ctx.api('post', `/remittance/bills/${g.body.data.agencyBills[0].id}/send`).send({ email: 'agency@example.ph' });
+    expect(sent.body.data).toMatchObject({ billStatus: 'Sent', emailedTo: 'agency@example.ph' });
   });
 });
 

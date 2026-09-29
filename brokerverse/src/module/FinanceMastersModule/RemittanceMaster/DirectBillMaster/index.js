@@ -51,14 +51,9 @@ const DirectBillMaster = () => {
   const [lateChargeAccount, setLateChargeAccount] = useState(glMapping.lateFee || "");
   const [badDebtAccount, setBadDebtAccount] = useState(glMapping.refund || "");
 
-  const loadBills = () => remittanceService.listDirectBills({ perPage: 200 })
-    .then((rows) => setActiveBills((rows || []).filter((b) => b.billNo && !["settled", "rejected", "cancelled"].includes(b.statusCode)).map((b) => ({
-      ...b,
-      policyNo: `${b.policyCount} policies`,
-      insured: b.insurerName,
-      premium: b.billAmount,
-      installment: b.period
-    }))))
+  // open commission debit notes to insurers (direct bill: the client pays the insurer)
+  const loadBills = () => remittanceService.listDirectBills({ perPage: 200, status: "open,partial" })
+    .then((rows) => setActiveBills(rows || []))
     .catch((error) => showError(toast, error));
 
   useEffect(() => {
@@ -131,8 +126,8 @@ const DirectBillMaster = () => {
 
   const sendBills = async (bills) => {
     try {
-      await Promise.all(bills.map((b) => remittanceService.sendBill(b.id, { deliveryMethod: ["email"] })));
-      showSuccess(toast, `${bills.length} bill(s) sent`);
+      await Promise.all(bills.map((b) => remittanceService.sendDebitNote(b.id)));
+      showSuccess(toast, `${bills.length} debit note(s) sent`);
       loadBills();
     } catch (error) {
       showError(toast, error);
@@ -391,18 +386,23 @@ const DirectBillMaster = () => {
               </div>
 
               <DataTable value={activeBills} stripedRows>
-                <Column field="billNo" header="Bill No" style={{ width: "15%" }} />
-                <Column field="policyNo" header="Policy No" style={{ width: "15%" }} />
-                <Column field="insured" header="Insured" style={{ width: "20%" }} />
-                <Column field="billDate" header="Bill Date" style={{ width: "12%" }} />
-                <Column field="dueDate" header="Due Date" style={{ width: "12%" }} />
+                <Column field="dnNumber" header="Debit Note" style={{ width: "14%" }} />
+                <Column field="insurerName" header="Insurer" style={{ width: "20%" }} />
+                <Column field="policyCount" header="Policies" style={{ width: "8%" }} />
+                <Column field="dnDate" header="Date" style={{ width: "11%" }} />
+                <Column field="dueDate" header="Due Date" style={{ width: "11%" }} />
                 <Column
-                  field="premium"
-                  header="Premium"
+                  field="amount"
+                  header="Amount Due"
                   style={{ width: "12%" }}
-                  body={(rowData) => formatCurrency(rowData.premium)}
+                  body={(rowData) => formatCurrency(rowData.amount)}
                 />
-                <Column field="installment" header="Installment" style={{ width: "10%" }} />
+                <Column
+                  field="balance"
+                  header="Balance"
+                  style={{ width: "10%" }}
+                  body={(rowData) => formatCurrency(rowData.balance)}
+                />
                 <Column
                   field="status"
                   header="Status"

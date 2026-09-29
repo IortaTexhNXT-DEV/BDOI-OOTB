@@ -218,7 +218,7 @@ export async function convertToPolicy(id, body, user) {
     const renewalOf = doc.renewal?.policyId ? doc.renewal : null;
     let expiring = null;
     if (renewalOf) {
-      expiring = (await db.query('SELECT id, policy_number, status, renewed_to, expiry_date FROM policies WHERE id = $1 FOR UPDATE', [renewalOf.policyId])).rows[0];
+      expiring = (await db.query('SELECT id, policy_number, status, renewed_to, expiry_date, billing_mode FROM policies WHERE id = $1 FOR UPDATE', [renewalOf.policyId])).rows[0];
       if (!expiring) throw badRequest(`Policy ${renewalOf.policyNumber || renewalOf.policyId} being renewed was not found`);
       if (expiring.renewed_to || expiring.status === 'renewed') throw conflict(`Policy ${expiring.policy_number} has already been renewed`);
       if (expiring.status === 'cancelled') throw conflict(`Policy ${expiring.policy_number} is cancelled`);
@@ -234,6 +234,7 @@ export async function convertToPolicy(id, body, user) {
       grossPremium: q.premium_total, commissionAmount: q.commission_amount, commissionRate: Number(q.commission_rate || 0), currency: q.currency,
       insuredName: extra.insuredName, productType: q.product_type, lob: q.lob, doc: stripReserved(doc),
       receivableSource: renewalOf ? 'renewal' : 'policy', receivableReference: renewalOf?.renewalNumber || null,
+      billingMode: expiring?.billing_mode || null,
     }, extra, user.id);
     if (renewalOf) {
       const link = { businessType: 'Renewal', renewal: { renewalId: renewalOf.renewalId, renewalNumber: renewalOf.renewalNumber, previousPolicyId: expiring.id, previousPolicyNumber: expiring.policy_number, quoteId: q.id } };
@@ -252,7 +253,7 @@ export async function convertToPolicy(id, body, user) {
   });
   const policy = await getPolicyRow(result.policyId);
   const owner = existing.created_by || user.id;
-  await notify({ userId: owner, type: 'info', title: 'Policy issued', message: `Policy ${policy.policy_number} was issued from quotation ${existing.quote_number} (bill ${policy.bill_number})`,
+  await notify({ userId: owner, type: 'info', title: 'Policy issued', message: `Policy ${policy.policy_number} was issued from quotation ${existing.quote_number} (${policy.billing_mode === 'direct' ? 'direct bill: the client pays the insurer' : `bill ${policy.bill_number}`})`,
     link: `/agent/policydetail/${policy.id}`, entity: 'policy', entityId: policy.id });
   return { ...result, created: true };
 }

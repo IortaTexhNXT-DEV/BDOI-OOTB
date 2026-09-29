@@ -44,8 +44,24 @@ export async function executive(period = 'month') {
     topProducts: await topProducts(),
     agentPerformance: await agents(),
     claimsAnalytics: { totalClaims: claims.total, openClaims: claims.open, incurred: round2(claims.incurred), reserved: round2(claims.reserved), claimsRatio },
+    receivables: await receivablesPosition(),
     currency: await getSetting('currency.default', 'PHP'),
   };
+}
+
+/**
+ * What the broker is owed: premium from clients on broker-billed policies (open bills) and commission from insurers on
+ * direct-bill policies (the client paid the insurer, so no premium is receivable from the client).
+ */
+export async function receivablesPosition() {
+  const r = await one(`SELECT COALESCE(sum(rv.balance), 0) AS premium, count(*)::int AS bills,
+      COALESCE(sum(rv.balance) FILTER (WHERE rv.due_date < current_date), 0) AS premium_overdue
+    FROM receivables rv JOIN policies p ON p.id = rv.policy_id
+    WHERE rv.status IN ('open', 'partial') AND rv.balance > 0 AND p.billing_mode <> 'direct'`);
+  const { receivableSummary } = await import('../remittance/directbill.js');
+  const c = await receivableSummary();
+  return { premiumFromClients: round2(r.premium), premiumBills: r.bills, premiumOverdue: round2(r.premium_overdue),
+    commissionFromInsurers: c.total, commissionUnbilled: c.unbilled, commissionBilled: c.billedOutstanding, commissionOverdue: c.overdue };
 }
 
 /** Premium by product; ownerId limits it to one owner's policies. */

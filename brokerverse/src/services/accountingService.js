@@ -678,6 +678,40 @@ class AccountingService {
     }
   }
 
+  /** Chart of accounts requests that throw the server message on failure (used by the chart of accounts master). */
+  async chartRequest(method, path, body) {
+    const response = await fetch(`${this.baseURL}/accounting${path}`, {
+      method,
+      headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.success === false) {
+      const details = (data.errors || []).map((e) => e.message).filter(Boolean).join(", ");
+      throw new Error(`${data.message || `Request failed (${response.status})`}${details ? `: ${details}` : ""}`);
+    }
+    return data.data;
+  }
+
+  /** Account types and financial-statement groups of the chart. */
+  getAccountGroups() {
+    return this.chartRequest("GET", "/account-groups");
+  }
+
+  /** Chart of accounts in statement order, with system roles (throws on error). */
+  listChartOfAccounts(filters = {}) {
+    const query = toQueryString(filters);
+    return this.chartRequest("GET", `/accounts${query ? `?${query}` : ""}`);
+  }
+
+  createAccount(account) {
+    return this.chartRequest("POST", "/accounts", account);
+  }
+
+  updateAccount(code, changes) {
+    return this.chartRequest("PUT", `/accounts/${encodeURIComponent(code)}`, changes);
+  }
+
   async getUnmatchedEntries(filters = {}) {
     try {
       const query = toQueryString({ ...filters, page: 1, pageSize: 100 });

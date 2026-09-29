@@ -171,37 +171,45 @@ for (const [action, status] of [['close', 'closed'], ['reopen', 'open']]) {
     },
   });
 }
+const accountExample = { code: '1203001', name: 'Commission Receivable – Insurers (Direct Bill)', accountType: 'asset', fsGroup: 'Current Assets', category: 'Receivables',
+  normalBalance: 'debit', isOpenItem: true, allowManual: true, status: 'active', systemRoles: ['commission_receivable'], isSystem: true };
 define({
-  method: 'GET', path: '/accounts', summary: 'Chart of accounts (filter type, status, search)', screen: 'Master > Finance > Main / Sub Account; Journal Voucher account pickers', middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:masters')],
-  query: { type: 'asset', search: 'receivable' }, response: { success: true, data: [{ code: '1202001', name: 'Premiums Receivable - Direct Clients', accountType: 'asset', isOpenItem: true }] },
-  handler: async (req, res) => {
-    const rows = (await pool.query(`SELECT * FROM gl_accounts WHERE ($1::text IS NULL OR account_type = $1) AND ($2::text IS NULL OR status = $2)
-      AND ($3::text IS NULL OR code ILIKE $3 || '%' OR name ILIKE '%' || $3 || '%') ORDER BY code`, [req.query.type || null, req.query.status || null, req.query.search || null])).rows;
-    ok(res, rows.map(svc.accountRow));
-  },
+  method: 'GET', path: '/accounts', summary: 'Chart of accounts in statement order (filter type, status, fsGroup, level=main|sub, search) with the system roles mapped to each account',
+  screen: 'Master > Finance > Chart of Accounts (Main / Sub Account); Journal Voucher account pickers', middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:masters')],
+  query: { type: 'asset', search: 'receivable' }, response: { success: true, data: [accountExample] },
+  handler: async (req, res) => ok(res, await svc.listAccounts(pool, req.query)),
+});
+define({
+  method: 'GET', path: '/account-groups', summary: 'Account types and financial-statement groups of the chart (for the chart of accounts form and reports)', screen: 'Master > Finance > Chart of Accounts',
+  middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:masters')],
+  response: { success: true, data: { types: ['asset', 'liability', 'equity', 'income', 'expense'], groups: [{ group: 'Current Assets', accountType: 'asset' }] } },
+  handler: async (_req, res) => ok(res, { types: ['asset', 'liability', 'equity', 'income', 'expense'], groups: svc.FS_GROUPS.map(([group, accountType]) => ({ group, accountType })) }),
 });
 const accountSchema = z.object({ code: z.string().regex(/^[0-9A-Za-z-]{3,20}$/).optional(), name: z.string().min(2).optional(), accountType: z.enum(['asset', 'liability', 'equity', 'income', 'expense']).optional(),
-  parentCode: z.string().optional(), category: z.string().optional(), isOpenItem: z.boolean().optional(), allowManual: z.boolean().optional(), status: z.enum(['active', 'inactive']).optional() });
+  parentCode: z.string().optional(), category: z.string().optional(), isOpenItem: z.boolean().optional(), allowManual: z.boolean().optional(), status: z.enum(['active', 'inactive']).optional(),
+  fsGroup: z.string().optional(), normalBalance: z.enum(['debit', 'credit']).optional(), description: z.string().max(500).optional() });
+const withRoles = async (a) => svc.accountRow(a, await svc.accountRoles(pool));
 define({
-  method: 'POST', path: '/accounts', summary: 'Add a GL account', screen: 'Master > Finance > Main / Sub Account', middleware: [...write, validate(accountSchema.required({ code: true, name: true, accountType: true }))],
-  request: { code: '4401011', name: 'Office Supplies', accountType: 'expense' }, response: { success: true, data: { code: '4401011', name: 'Office Supplies', accountType: 'expense' } },
+  method: 'POST', path: '/accounts', summary: 'Add a GL account (also listed in the Main / Sub Account masters)', screen: 'Master > Finance > Chart of Accounts', middleware: [...write, validate(accountSchema.required({ code: true, name: true, accountType: true }))],
+  request: { code: '4409002', name: 'Donations and Contributions', accountType: 'expense', fsGroup: 'Operating Expenses', category: 'Operating Expenses' },
+  response: { success: true, data: { code: '4409002', name: 'Donations and Contributions', accountType: 'expense', fsGroup: 'Operating Expenses' } },
   handler: async (req, res) => {
     const exists = (await pool.query('SELECT 1 FROM gl_accounts WHERE code = $1', [req.body.code])).rows[0];
     if (exists) throw badRequest(`Account ${req.body.code} already exists`);
     const a = await withTransaction((db) => svc.upsertAccount(db, req.body.code, req.body));
     await audit(req, { entity: 'gl_account', entityId: a.code, action: 'create', after: a });
-    created(res, svc.accountRow(a));
+    created(res, await withRoles(a));
   },
 });
 define({
-  method: 'PUT', path: '/accounts/:code', summary: 'Update a GL account (deactivation only with zero balance)', screen: 'Master > Finance > Main / Sub Account', middleware: [...write, validate(accountSchema)],
-  request: { name: 'Office Supplies Expense' }, response: { success: true, data: { code: '4401011', name: 'Office Supplies Expense' } },
+  method: 'PUT', path: '/accounts/:code', summary: 'Update a GL account (deactivation only with zero balance and no system role; type fixed once used)', screen: 'Master > Finance > Chart of Accounts', middleware: [...write, validate(accountSchema)],
+  request: { name: 'Office Supplies Expense' }, response: { success: true, data: { code: '4401008', name: 'Office Supplies Expense' } },
   handler: async (req, res) => {
     const before = (await pool.query('SELECT * FROM gl_accounts WHERE code = $1', [req.params.code])).rows[0];
     if (!before) { res.status(404).json({ success: false, message: 'Account not found' }); return; }
     const a = await withTransaction((db) => svc.upsertAccount(db, req.params.code, req.body));
     await audit(req, { entity: 'gl_account', entityId: a.code, action: 'update', before, after: a });
-    ok(res, svc.accountRow(a));
+    ok(res, await withRoles(a));
   },
 });
 export default router;

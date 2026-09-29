@@ -109,7 +109,7 @@ describe('report catalogue', () => {
   });
   it('returns a definition with the screen filter schema', async () => {
     const r = await as('admin', 'get', '/reports/production-register');
-    expect(r.body.data.parameters.properties.ReportCriteria.enum).toEqual(['Overall', 'Agent', 'Principle Insurance', 'Branch']);
+    expect(r.body.data.parameters.properties.ReportCriteria.enum).toEqual(['Overall', 'Agent', 'Principle Insurance', 'Branch', 'Billing Mode']);
     expect(r.body.data.parameters.properties.Agent['x-enabledWhen']).toEqual({ ReportCriteria: ['Agent'] });
     expect(r.body.data.columns.find((c) => c.key === 'premium').type).toBe('money');
     expect((await as('admin', 'get', '/reports/nope')).status).toBe(404);

@@ -140,10 +140,19 @@ export async function buildAccount(db, id) {
   };
 }
 
-/** Premium fully collected for a policy: it has receivables and none has an outstanding balance. */
+/**
+ * Premium fully collected for a policy: it has receivables and none has an outstanding balance. For a direct-bill policy
+ * (the client pays the insurer) it is the commission that must be collected: every commission debit note of the policy
+ * is fully collected from the insurer.
+ */
 export async function isPremiumCollected(db, policyId) {
+  const mode = (await db.query('SELECT billing_mode FROM policies WHERE id = $1', [policyId])).rows[0]?.billing_mode;
+  if (mode === 'direct') {
+    const { isDirectBillCollected } = await import('../remittance/directbill.js');
+    return isDirectBillCollected(db, policyId);
+  }
   const r = (await db.query(`SELECT count(*)::int AS total, count(*) FILTER (WHERE balance > 0 AND status IN ('open','partial'))::int AS open
-    FROM receivables WHERE policy_id = $1`, [policyId])).rows[0];
+    FROM receivables WHERE policy_id = $1 AND status <> 'cancelled'`, [policyId])).rows[0];
   return r.total > 0 && r.open === 0;
 }
 

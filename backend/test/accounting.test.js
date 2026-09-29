@@ -32,8 +32,9 @@ describe('accounting ledger', () => {
     expect(e.body.totals.totalDebits).toBe(e.body.totals.totalCredits);
     const lv = await ctx.as('maker')('get', `/accounting/policies/${m.policy.id}/ledger-view`);
     expect(lv.body.data.at(-1).runningBalance).toBe(0);
+    // the premium was collected by the broker, so the policy can no longer be switched to direct bill
     const dir = await ctx.as('agent')('post', '/accounting/payment-entries').send({ ...body, isDirectBilled: true });
-    expect(dir.body.data.directBilled).toBe(true);
+    expect(dir.status).toBe(409);
     expect((await ctx.as('agent')('post', '/accounting/payment-entries').send({ amount: -1, clientId: 'x', referenceType: 'Policy', referenceId: 'x' })).status).toBe(400);
   });
 
@@ -123,8 +124,9 @@ describe('accounting ledger', () => {
     const u = await ctx.as('maker')('put', '/accounting/accounts/4401011').send({ name: 'Seminars & Training' });
     expect(u.body.data.name).toBe('Seminars & Training');
     expect((await ctx.as('maker')('put', '/accounting/accounts/1202001').send({ status: 'inactive' })).status).toBe(409);
-    const l = await ctx.as('maker')('get', '/accounting/accounts?type=expense&search=Seminar');
+    const l = await ctx.as('maker')('get', '/accounting/accounts?type=expense&search=4401011');
     expect(l.body.data).toHaveLength(1);
+    expect(l.body.data[0]).toMatchObject({ name: 'Seminars & Training', fsGroup: 'Operating Expenses', normalBalance: 'debit' });
   });
 
   it('permissions', async () => {

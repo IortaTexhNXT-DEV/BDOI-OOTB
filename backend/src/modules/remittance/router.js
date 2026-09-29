@@ -7,6 +7,9 @@ import { canRead, canWrite, sendList } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
 import * as svc from './service.js';
 import * as items from './items.js';
+import * as directBill from './directbill.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { commissionDebitNoteDoc } from '../documents/templates.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -113,30 +116,117 @@ define({
   handler: async (_req, res) => ok(res, await svc.executionHistory()),
 });
 
-// ---------------- direct bill / agency bill ----------------
+// ---------------- direct bill: commission debit notes to insurers (the client pays the insurer) ----------------
+const dnExample = { id: 'dn_1', dnNumber: 'DN-2026-00001', dnDate: '2026-09-30', dueDate: '2026-10-30', periodFrom: '2026-09-01', periodTo: '2026-09-30', insurerCode: 'MALAYAN',
+  insurerName: 'Malayan Insurance Co., Inc.', policyCount: 2, grossPremium: 45000, commission: 6750, vat: 810, amount: 7560, ewtRate: 0.1, expectedEwt: 675, netPayable: 6885,
+  collectedCash: 0, collectedEwt: 0, balance: 7560, status: 'Pending Approval', statusCode: 'for-approval', currency: 'PHP' };
+const itemExample = { id: 'dbi_1', policyId: 'pol_1', policyNo: 'POL-2026-00001', reference: 'POL-2026-00001', source: 'policy', insuredName: 'Juan Dela Cruz', product: 'Private Car Comprehensive',
+  lineOfBusiness: 'MOTOR', bookedOn: '2026-09-15', grossPremium: 30000, netPremium: 25000, commissionRate: 18, commission: 4500, vat: 540, totalDue: 5040, expectedEwt: 450, netReceivable: 4590, bookingJournal: 'JV-2026-00012' };
 define({
-  method: 'GET', path: '/direct-bill/policies', summary: 'Policies that can be direct-billed (insurerCode, productLine, policyStatus)', screen: S('Direct Bill Processing'), middleware: read,
-  query: { insurerCode: 'MALAYAN', productLine: 'Motor' }, response: { success: true, data: [{ id: 'pol_1', policyNo: 'POL-2026-00001', insuredName: 'Juan Dela Cruz', product: 'Motor', effectiveDate: '2026-09-01', premium: 15000, outstandingAmount: 15000, billAmount: 15000 }] },
-  handler: async (req, res) => ok(res, await svc.directBillPolicies(req.query)),
+  method: 'GET', path: '/direct-bill/summary', summary: 'Commission receivable from insurers on direct-bill policies: unbilled, billed outstanding, overdue, notes pending approval', screen: S('Direct Bill Processing'), middleware: read,
+  response: { success: true, data: { unbilled: 5040, billedOutstanding: 7560, overdue: 0, total: 12600, pendingApproval: 1 } },
+  handler: async (_req, res) => ok(res, await directBill.receivableSummary()),
 });
 define({
-  method: 'GET', path: '/direct-bill', summary: 'Direct bills', screen: S('Direct Bill Processing'), middleware: read, response: { success: true, data: [{ ...rem, billNo: 'BIL-2026-00001', billStatus: 'Generated' }] },
+  method: 'GET', path: '/direct-bill/policies', summary: 'Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT',
+  screen: S('Direct Bill Processing'), middleware: read, query: { insurerCode: 'MALAYAN', from: '2026-09-01', to: '2026-09-30', productLine: 'MOTOR' },
+  response: { success: true, data: [itemExample], summary: { count: 1, grossPremium: 30000, commission: 4500, vat: 540, totalDue: 5040, expectedEwt: 450, netReceivable: 4590, ewtRate: 0.1 } },
+  handler: async (req, res) => {
+    const r = await directBill.unbilledItems(req.query);
+    ok(res, r.data, 'OK', { summary: r.summary });
+  },
+});
+define({
+  method: 'GET', path: '/direct-bill', summary: 'Commission debit notes (insurerCode, status code or label, from / to, search, paging)', screen: S('Direct Bill Processing > Debit Notes'), middleware: read,
+  query: { status: 'Open,Partially Collected', insurerCode: 'MALAYAN', page: 1, perPage: 20 }, response: { success: true, data: [dnExample] },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
-    const { rows, total } = await svc.listRemittances({ ...req.query, kind: 'direct-bill' }, pg);
-    sendList(res, rows, total, pg);
+    const { rows, total, summary } = await directBill.listDebitNotes(req.query, pg);
+    sendList(res, rows, total, pg, { summary });
   },
 });
 define({
-  method: 'POST', path: '/direct-bill', summary: 'Generate a direct bill for selected policies', screen: S('Direct Bill Processing > Generate'), middleware: write,
-  request: { insurerCode: 'MALAYAN', billingPeriod: '2026-09', billDate: '2026-09-28', dueDate: '2026-10-28', policyIds: ['pol_1'], deliveryMethod: ['email'] },
-  response: { success: true, data: { ...rem, billNo: 'BIL-2026-00001', billStatus: 'Generated' } },
+  method: 'POST', path: '/direct-bill', summary: 'Raise a commission debit note to an insurer for unbilled direct-bill commission (itemIds / policyIds, else all of the period); submit=true sends it for approval',
+  screen: S('Direct Bill Processing > Raise Debit Note'), middleware: write,
+  request: { insurerCode: 'MALAYAN', periodFrom: '2026-09-01', periodTo: '2026-09-30', dnDate: '2026-09-30', itemIds: ['dbi_1'], remarks: 'September 2026 placements', submit: true },
+  response: { success: true, data: { ...dnExample, lines: [] } },
   handler: async (req, res) => {
-    const r = await svc.createDirectBill(req.body || {}, req.user);
-    await audit(req, { entity: 'remittance', entityId: r.id, action: 'create-direct-bill', after: r });
-    created(res, r, 'Direct bill generated');
+    const r = await directBill.raiseDebitNote(req.body || {}, req.user);
+    await audit(req, { entity: 'commission_debit_note', entityId: r.id, action: 'create', after: r });
+    created(res, r, `Debit note ${r.dnNumber} ${r.statusCode === 'for-approval' ? 'raised and submitted for approval' : 'saved as draft'}`);
   },
 });
+define({
+  method: 'POST', path: '/direct-bill/billing-mode', summary: 'Change the billing mode of an issued policy (broker billed or direct bill): refused once premium is collected or remitted, or the commission is on a debit note',
+  screen: S('Direct Bill Processing > Billing Mode'), middleware: write, request: { policyNumber: 'POL-2026-00001', billingMode: 'direct', reason: 'Client pays Malayan directly' },
+  response: { success: true, data: { policyNumber: 'POL-2026-00001', before: 'Broker billed', billingMode: 'direct', billingModeLabel: 'Direct bill', directBill: { items: 1, commissionDue: 5040, unbilled: 5040, collected: 0 } } },
+  handler: async (req, res) => {
+    const b = req.body || {};
+    if (!b.policyId && !b.policyNumber) throw badRequest('Validation failed', [{ path: 'policyNumber', message: 'policyNumber is required' }]);
+    const r = await directBill.changeBillingMode(b.policyId || b.policyNumber, b.billingMode, req.user, { reason: b.reason });
+    await audit(req, { entity: 'policy', entityId: r.policyId, action: 'change-billing-mode', before: { billingMode: r.before }, after: r });
+    ok(res, r, `${r.policyNumber} is now ${r.billingModeLabel.toLowerCase()}`);
+  },
+});
+define({
+  method: 'GET', path: '/direct-bill/:id', summary: 'One commission debit note with its policy lines and collections', screen: S('Direct Bill Processing > Debit Notes > View'), middleware: read,
+  response: { success: true, data: { ...dnExample, lines: [], collections: [] } }, handler: async (req, res) => ok(res, await directBill.getDebitNote(req.params.id)),
+});
+define({
+  method: 'GET', path: '/direct-bill/:id/pdf', summary: 'Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)', screen: S('Direct Bill Processing > Debit Notes > Print'), middleware: read,
+  query: { download: 1 }, response: 'application/pdf',
+  handler: async (req, res) => {
+    const dn = await directBill.getDebitNote(req.params.id);
+    sendPdf(res, buildPdf(await commissionDebitNoteDoc(dn, dn.lines)), `debit-note-${dn.dnNumber}.pdf`, req.query.download ? 'attachment' : 'inline');
+  },
+});
+define({
+  method: 'POST', path: '/direct-bill/:id/submit', summary: 'Submit a draft debit note for approval', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
+  response: { success: true, data: { ...dnExample } },
+  handler: async (req, res) => ok(res, (await logged('commission_debit_note', 'submit', (r) => directBill.submitDebitNote(r.params.id, r.user))(req, res)).after, 'Debit note submitted for approval'),
+});
+for (const action of ['approve', 'reject']) {
+  define({
+    method: 'POST', path: `/direct-bill/:id/${action}`,
+    summary: `${action === 'approve' ? 'Approve (opens it for sending and collection)' : 'Reject (reason required; its commission becomes unbilled again)'} a debit note; maker-checker: not the maker`,
+    screen: S('Direct Bill Processing > Debit Notes'), middleware: write, request: action === 'approve' ? { remarks: 'Checked against the placements' } : { reason: 'Wrong period' },
+    response: { success: true, data: { ...dnExample, status: action === 'approve' ? 'Open' : 'Rejected' } },
+    handler: async (req, res) => ok(res, (await logged('commission_debit_note', action, (r) => directBill.decideDebitNote(r.params.id, action, r.body || {}, r.user))(req, res)).after,
+      `Debit note ${action === 'approve' ? 'approved' : 'rejected'}`),
+  });
+}
+define({
+  method: 'POST', path: '/direct-bill/:id/cancel', summary: 'Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
+  request: { reason: 'Raised to the wrong insurer' }, response: { success: true, data: { ...dnExample, status: 'Cancelled' } },
+  handler: async (req, res) => ok(res, (await logged('commission_debit_note', 'cancel', (r) => directBill.cancelDebitNote(r.params.id, r.body || {}, r.user))(req, res)).after, 'Debit note cancelled'),
+});
+define({
+  method: 'POST', path: '/direct-bill/:id/send', summary: 'E-mail an approved debit note to the insurer (direct_bill.email_subject / email_body)', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
+  request: { email: 'billing@malayan.example' }, response: { success: true, data: { ...dnExample, sentTo: 'billing@malayan.example' } },
+  handler: async (req, res) => ok(res, await logged('commission_debit_note', 'send', (r) => directBill.sendDebitNote(r.params.id, r.body || {}, r.user))(req, res), 'Debit note sent'),
+});
+define({
+  method: 'POST', path: '/direct-bill/:id/collections', summary: 'Record a payment from the insurer (partial allowed): Dr Cash in Bank + Dr Creditable Withholding Tax / Cr Commission Receivable',
+  screen: S('Direct Bill Processing > Debit Notes > Collect'), middleware: write,
+  request: { receivedDate: '2026-10-15', cashAmount: 6885, ewtAmount: 675, paymentMode: 'bank-transfer', referenceNo: 'MAL-OR-55812', form2307No: '2307-2026-0091' },
+  response: { success: true, data: { ...dnExample, status: 'Collected', statusCode: 'collected', collectedCash: 6885, collectedEwt: 675, balance: 0, collection: { collectionNumber: 'DNC-2026-00001' } } },
+  handler: async (req, res) => {
+    const r = await directBill.collectDebitNote(req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'commission_debit_note', entityId: r.id, action: 'collect', after: { collection: r.collection, balance: r.balance, status: r.status } });
+    created(res, r, `Collection ${r.collection.collectionNumber} posted; ${r.dnNumber} is ${r.status.toLowerCase()}`);
+  },
+});
+define({
+  method: 'POST', path: '/direct-bill/:id/collections/:collectionId/reverse', summary: 'Reverse a collection entered in error (reversing journal; balance restored)', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
+  request: { reason: 'Keyed against the wrong debit note' }, response: { success: true, data: { ...dnExample } },
+  handler: async (req, res) => {
+    const r = await directBill.reverseCollection(req.params.id, req.params.collectionId, req.body || {}, req.user);
+    await audit(req, { entity: 'commission_debit_note', entityId: r.id, action: 'reverse-collection', after: { collectionId: req.params.collectionId, reason: req.body?.reason || null } });
+    ok(res, r, 'Collection reversed');
+  },
+});
+
+// ---------------- agency bill ----------------
 define({
   method: 'GET', path: '/agency-bill/agencies', summary: 'Agencies / agents with production, previous balance and total due for a bill period', screen: S('Agency Bill Processing'), middleware: read,
   query: { billPeriod: '2026-09' }, response: { success: true, data: [{ agencyCode: 'AG001', agencyName: 'Juan Dela Cruz', agencyType: 'Agent', policyCount: 5, grossPremium: 75000, commission: 11250, previousBalance: 0, totalDue: 63750 }] },
@@ -162,7 +252,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/bills/:id/send', summary: 'Send a direct / agency bill (queues an e-mail to the agent or insurer)', screen: `${S('Direct Bill Processing')}; ${S('Agency Bill Processing')}`, middleware: write,
+  method: 'POST', path: '/bills/:id/send', summary: 'Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer)', screen: S('Agency Bill Processing'), middleware: write,
   request: { deliveryMethod: ['email'], email: 'billing@example.com' }, response: { success: true, data: { billStatus: 'Sent' } },
   handler: async (req, res) => ok(res, await logged('remittance', 'send-bill', (r) => svc.sendBill(r.params.id, r.body || {}, r.user))(req, res), 'Bill sent'),
 });

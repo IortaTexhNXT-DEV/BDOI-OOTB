@@ -30,10 +30,10 @@ import BranchDetailsView from "../module/FinanceMastersModule/BranchMaster/Branc
 import CompanyMaster from "../module/FinanceMastersModule/CompanyMaster";
 import CurrencyMaster from "../module/FinanceMastersModule/CurrencyMaster";
 import ExchangeRateMaster from "../module/FinanceMastersModule/ExchangeRateMaster";
-import MainAccountMaster from "../module/FinanceMastersModule/MainAccountMaster";
+// Main / Sub Account masters are the GL chart of accounts (D57)
+import ChartOfAccounts from "../module/FinanceMastersModule/ChartOfAccounts";
 import PettyCashMaster from "../module/FinanceMastersModule/PettyCashMaster";
 import PaymentDetails from "../module/Receipts/PaymentDetails";
-import SubAccountMaster from "../module/FinanceMastersModule/SubAccountMaster";
 import TaxationMaster from "../module/FinanceMastersModule/TaxationMaster";
 import TransactionCodeMaster from "../module/FinanceMastersModule/TransactionCodeMaster";
 import DepartmentMasterInitial from "../module/FinanceMastersModule/DepartmentMaster/DepartmentMasterInitial";
@@ -45,8 +45,6 @@ import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategor
 import CategoryMasterInitial from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryMasterInitial";
 import CategoryAdding from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryAdding";
 import CategoryDetailsView from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryDetailsView";
-import SubAccountDetails from "../module/FinanceMastersModule/SubAccountMaster/SubAccountDetails";
-import SaveAndEdit from "../module/FinanceMastersModule/SubAccountMaster/SubAccountEdit";
 import AddCurrency from "../module/FinanceMastersModule/CurrencyMaster/AddCurrency";
 import SaveAndEditCurrency from "../module/FinanceMastersModule/CurrencyMaster/ViewCurrency";
 import AddTaxation from "../module/FinanceMastersModule/TaxationMaster/AddTaxation";
@@ -69,7 +67,6 @@ import DetailsJournalVocture from "../module/JournalVoucher/DetailsJournalVoctur
 import Bankdetailselection from "../module/PaymentVoucher/Bankdetailselection";
 import Initiate from "../module/PettyCashManagement/Initiate";
 import Disbursement from "../module/PettyCashManagement/Disbursement";
-import SubAccountEdit from "../module/FinanceMastersModule/SubAccountMaster/SubAccountEdit";
 import Request from "../module/PettyCashManagement/Request";
 import PettyCashReceipts from "../module/PettyCashManagement/Receipts";
 import PettyCashReplenish from "../module/PettyCashManagement/Replenish";
@@ -91,9 +88,6 @@ import TransactionCodeMasterView from "../module/FinanceMastersModule/Transactio
 import TransactionCodeDetails from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeDetails";
 import ViewCurrency from "../module/FinanceMastersModule/CurrencyMaster/ViewCurrency";
 import EditCurrency from "../module/FinanceMastersModule/CurrencyMaster/EditCurrency";
-import AddMainAccount from "../module/FinanceMastersModule/MainAccountMaster/AddMainAccount";
-import EditMainAccount from "../module/FinanceMastersModule/MainAccountMaster/EditMainAccount";
-import ViewMainAccount from "../module/FinanceMastersModule/MainAccountMaster/ViewMainAccount";
 import Commission from "../module/GeneralMasters/Commission";
 import AddCommission from "../module/GeneralMasters/Commission/AddCommission";
 import EditCommission from "../module/GeneralMasters/Commission/EditCommission";
@@ -1030,24 +1024,24 @@ const Maincomponent = () => {
 
           <Route
             path="master/finance/mainaccount"
-            element={<MainAccountMaster />}
+            element={<ChartOfAccounts />}
           />
           <Route
             path="master/finance/mainaccount/addmainaccount"
-            element={<AddMainAccount />}
+            element={<ChartOfAccounts />}
           />
           <Route
             path="master/finance/mainaccount/editmainaccount"
-            element={<EditMainAccount />}
+            element={<ChartOfAccounts />}
           />
           <Route
             path="master/finance/mainaccount/viewmainaccount"
-            element={<ViewMainAccount />}
+            element={<ChartOfAccounts />}
           />
 
           <Route
             path="master/finance/subaccount"
-            element={<SubAccountMaster />}
+            element={<ChartOfAccounts level="sub" />}
           />
           <Route path="master/finance/taxation" element={<TaxationMaster />} />
           <Route
@@ -1370,11 +1364,11 @@ const Maincomponent = () => {
 
           <Route
             path="master/finance/subaccount/subaccountdetails"
-            element={<SubAccountDetails />}
+            element={<ChartOfAccounts level="sub" />}
           />
           <Route
             path="master/finance/subaccount/subaccountedit"
-            element={<SubAccountEdit />}
+            element={<ChartOfAccounts level="sub" />}
           />
           <Route
             path="master/finance/currency/addcurrency"

@@ -207,4 +207,24 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(await receivableCount('pol_sls_03')).toBe(rcvBefore);
     expect(Number((await q("SELECT premium_total FROM policies WHERE id = 'pol_sls_03'"))[0].premium_total)).toBeCloseTo(before + delta, 2);
   });
+
+  it('a premium change marked direct bill books the commission due from the insurer instead of a client bill (D36)', async () => {
+    const rcvBefore = await receivableCount('pol_sls_03');
+    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_03', endorsementTypeIds: [3],
+      coverageChanges: { LossandDamagecoverage: '1600000', LossandDamagecoverageRate: '1.50' } });
+    expect(e.status).toBe(201);
+    const delta = e.body.premiumDelta;
+    expect(delta).toBeGreaterThan(0);
+    const c = await cs('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId, endorsementNumber: 'INS-COV-DB', issuedDate: '2026-09-28', billingMode: 'direct' });
+    expect(c.status).toBe(200);
+    expect(c.body.receivableId).toBeNull();
+    expect(await receivableCount('pol_sls_03')).toBe(rcvBefore);
+    const [item] = await q('SELECT * FROM direct_bill_items WHERE endorsement_id = $1', [e.body.endorsementId]);
+    expect(item).toMatchObject({ source: 'endorsement', status: 'unbilled' });
+    expect(Number(item.gross_premium)).toBeCloseTo(delta, 2);
+    expect(Number(item.amount)).toBeCloseTo(Number(item.commission) + Number(item.vat), 2);
+    const lines = await q('SELECT account_code FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [item.booking_jv_id]);
+    expect(lines.map((l) => l.account_code)).toEqual(['1203001', '3201001', '2204003']);
+    expect((await q('SELECT billing_mode FROM endorsements WHERE id = $1', [e.body.endorsementId]))[0].billing_mode).toBe('direct');
+  });
 });

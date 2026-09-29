@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (552 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (564 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -130,7 +130,56 @@
       "name": "Accounting",
       "item": [
         {
-          "name": "Chart of accounts (filter type, status, search)",
+          "name": "Account types and financial-statement groups of the chart (for the chart of accounts form and reports)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/account-groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "account-groups"
+              ]
+            },
+            "description": "Account types and financial-statement groups of the chart (for the chart of accounts form and reports)\n\nFront-end touchpoint: Master > Finance > Chart of Accounts\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/account-groups",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "account-groups"
+                  ]
+                },
+                "description": "Account types and financial-statement groups of the chart (for the chart of accounts form and reports)\n\nFront-end touchpoint: Master > Finance > Chart of Accounts\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"types\": [\n      \"asset\",\n      \"liability\",\n      \"equity\",\n      \"income\",\n      \"expense\"\n    ],\n    \"groups\": [\n      {\n        \"group\": \"Current Assets\",\n        \"accountType\": \"asset\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Chart of accounts in statement order (filter type, status, fsGroup, level=main|sub, search) with the system roles mapped to each account",
           "request": {
             "method": "GET",
             "header": [],
@@ -154,7 +203,7 @@
                 }
               ]
             },
-            "description": "Chart of accounts (filter type, status, search)\n\nFront-end touchpoint: Master > Finance > Main / Sub Account; Journal Voucher account pickers\n\nAccess: Any authenticated user"
+            "description": "Chart of accounts in statement order (filter type, status, fsGroup, level=main|sub, search) with the system roles mapped to each account\n\nFront-end touchpoint: Master > Finance > Chart of Accounts (Main / Sub Account); Journal Voucher account pickers\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -182,7 +231,7 @@
                     }
                   ]
                 },
-                "description": "Chart of accounts (filter type, status, search)\n\nFront-end touchpoint: Master > Finance > Main / Sub Account; Journal Voucher account pickers\n\nAccess: Any authenticated user"
+                "description": "Chart of accounts in statement order (filter type, status, fsGroup, level=main|sub, search) with the system roles mapped to each account\n\nFront-end touchpoint: Master > Finance > Chart of Accounts (Main / Sub Account); Journal Voucher account pickers\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -194,12 +243,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"1202001\",\n      \"name\": \"Premiums Receivable - Direct Clients\",\n      \"accountType\": \"asset\",\n      \"isOpenItem\": true\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"1203001\",\n      \"name\": \"Commission Receivable – Insurers (Direct Bill)\",\n      \"accountType\": \"asset\",\n      \"fsGroup\": \"Current Assets\",\n      \"category\": \"Receivables\",\n      \"normalBalance\": \"debit\",\n      \"isOpenItem\": true,\n      \"allowManual\": true,\n      \"status\": \"active\",\n      \"systemRoles\": [\n        \"commission_receivable\"\n      ],\n      \"isSystem\": true\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Add a GL account",
+          "name": "Add a GL account (also listed in the Main / Sub Account masters)",
           "request": {
             "method": "POST",
             "header": [
@@ -218,10 +267,10 @@
                 "accounts"
               ]
             },
-            "description": "Add a GL account\n\nFront-end touchpoint: Master > Finance > Main / Sub Account\n\nAccess: Any authenticated user",
+            "description": "Add a GL account (also listed in the Main / Sub Account masters)\n\nFront-end touchpoint: Master > Finance > Chart of Accounts\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"4401011\",\n  \"name\": \"Office Supplies\",\n  \"accountType\": \"expense\"\n}",
+              "raw": "{\n  \"code\": \"4409002\",\n  \"name\": \"Donations and Contributions\",\n  \"accountType\": \"expense\",\n  \"fsGroup\": \"Operating Expenses\",\n  \"category\": \"Operating Expenses\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -250,10 +299,10 @@
                     "accounts"
                   ]
                 },
-                "description": "Add a GL account\n\nFront-end touchpoint: Master > Finance > Main / Sub Account\n\nAccess: Any authenticated user",
+                "description": "Add a GL account (also listed in the Main / Sub Account masters)\n\nFront-end touchpoint: Master > Finance > Chart of Accounts\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"4401011\",\n  \"name\": \"Office Supplies\",\n  \"accountType\": \"expense\"\n}",
+                  "raw": "{\n  \"code\": \"4409002\",\n  \"name\": \"Donations and Contributions\",\n  \"accountType\": \"expense\",\n  \"fsGroup\": \"Operating Expenses\",\n  \"category\": \"Operating Expenses\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -271,12 +320,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"4401011\",\n    \"name\": \"Office Supplies\",\n    \"accountType\": \"expense\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"4409002\",\n    \"name\": \"Donations and Contributions\",\n    \"accountType\": \"expense\",\n    \"fsGroup\": \"Operating Expenses\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Update a GL account (deactivation only with zero balance)",
+          "name": "Update a GL account (deactivation only with zero balance and no system role; type fixed once used)",
           "request": {
             "method": "PUT",
             "header": [
@@ -303,7 +352,7 @@
                 }
               ]
             },
-            "description": "Update a GL account (deactivation only with zero balance)\n\nFront-end touchpoint: Master > Finance > Main / Sub Account\n\nAccess: Any authenticated user",
+            "description": "Update a GL account (deactivation only with zero balance and no system role; type fixed once used)\n\nFront-end touchpoint: Master > Finance > Chart of Accounts\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Office Supplies Expense\"\n}",
@@ -343,7 +392,7 @@
                     }
                   ]
                 },
-                "description": "Update a GL account (deactivation only with zero balance)\n\nFront-end touchpoint: Master > Finance > Main / Sub Account\n\nAccess: Any authenticated user",
+                "description": "Update a GL account (deactivation only with zero balance and no system role; type fixed once used)\n\nFront-end touchpoint: Master > Finance > Chart of Accounts\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Office Supplies Expense\"\n}",
@@ -364,7 +413,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"4401011\",\n    \"name\": \"Office Supplies Expense\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"4401008\",\n    \"name\": \"Office Supplies Expense\"\n  }\n}"
             }
           ]
         },
@@ -14631,12 +14680,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications?page=1&pageSize=20&type=reminder&isRead=false",
+              "raw": "{{baseUrl}}/accounting/notifications?page=1&pageSize=20&type=reminder&isRead=false",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications"
               ],
               "query": [
@@ -14667,12 +14716,12 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications?page=1&pageSize=20&type=reminder&isRead=false",
+                  "raw": "{{baseUrl}}/accounting/notifications?page=1&pageSize=20&type=reminder&isRead=false",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications"
                   ],
                   "query": [
@@ -14721,12 +14770,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications",
+              "raw": "{{baseUrl}}/accounting/notifications",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications"
               ]
             },
@@ -14753,12 +14802,12 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications",
+                  "raw": "{{baseUrl}}/accounting/notifications",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications"
                   ]
                 },
@@ -14793,12 +14842,12 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications/:id",
+              "raw": "{{baseUrl}}/accounting/notifications/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications",
                 ":id"
               ],
@@ -14819,12 +14868,12 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications/:id",
+                  "raw": "{{baseUrl}}/accounting/notifications/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications",
                     ":id"
                   ],
@@ -14858,12 +14907,12 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications/:id/read",
+              "raw": "{{baseUrl}}/accounting/notifications/:id/read",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications",
                 ":id",
                 "read"
@@ -14885,12 +14934,12 @@
                 "method": "PUT",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications/:id/read",
+                  "raw": "{{baseUrl}}/accounting/notifications/:id/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications",
                     ":id",
                     "read"
@@ -14930,12 +14979,12 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications/read",
+              "raw": "{{baseUrl}}/accounting/notifications/read",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications",
                 "read"
               ]
@@ -14963,12 +15012,12 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications/read",
+                  "raw": "{{baseUrl}}/accounting/notifications/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications",
                     "read"
                   ]
@@ -15004,12 +15053,12 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications/read-all",
+              "raw": "{{baseUrl}}/accounting/notifications/read-all",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications",
                 "read-all"
               ]
@@ -15023,12 +15072,12 @@
                 "method": "PUT",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications/read-all",
+                  "raw": "{{baseUrl}}/accounting/notifications/read-all",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications",
                     "read-all"
                   ]
@@ -15055,12 +15104,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications/stats",
+              "raw": "{{baseUrl}}/accounting/notifications/stats",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications",
                 "stats"
               ]
@@ -15074,12 +15123,12 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications/stats",
+                  "raw": "{{baseUrl}}/accounting/notifications/stats",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications",
                     "stats"
                   ]
@@ -15106,12 +15155,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/notifications/unread-count",
+              "raw": "{{baseUrl}}/accounting/notifications/unread-count",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "claims",
+                "accounting",
                 "notifications",
                 "unread-count"
               ]
@@ -15125,12 +15174,12 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/notifications/unread-count",
+                  "raw": "{{baseUrl}}/accounting/notifications/unread-count",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "claims",
+                    "accounting",
                     "notifications",
                     "unread-count"
                   ]
@@ -32430,7 +32479,7 @@
           ]
         },
         {
-          "name": "Send a direct / agency bill (queues an e-mail to the agent or insurer)",
+          "name": "Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer)",
           "request": {
             "method": "POST",
             "header": [
@@ -32458,7 +32507,7 @@
                 }
               ]
             },
-            "description": "Send a direct / agency bill (queues an e-mail to the agent or insurer)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing; Accounts > Remittance > Agency Bill Processing\n\nAccess: Any authenticated user",
+            "description": "Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer)\n\nFront-end touchpoint: Accounts > Remittance > Agency Bill Processing\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"deliveryMethod\": [\n    \"email\"\n  ],\n  \"email\": \"billing@example.com\"\n}",
@@ -32499,7 +32548,7 @@
                     }
                   ]
                 },
-                "description": "Send a direct / agency bill (queues an e-mail to the agent or insurer)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing; Accounts > Remittance > Agency Bill Processing\n\nAccess: Any authenticated user",
+                "description": "Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer)\n\nFront-end touchpoint: Accounts > Remittance > Agency Bill Processing\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"deliveryMethod\": [\n    \"email\"\n  ],\n  \"email\": \"billing@example.com\"\n}",
@@ -32720,21 +32769,39 @@
           ]
         },
         {
-          "name": "Direct bills",
+          "name": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/remittance/direct-bill",
+              "raw": "{{baseUrl}}/remittance/direct-bill?status=Open,Partially Collected&insurerCode=MALAYAN&page=1&perPage=20",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "remittance",
                 "direct-bill"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Open,Partially Collected"
+                },
+                {
+                  "key": "insurerCode",
+                  "value": "MALAYAN"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "20"
+                }
               ]
             },
-            "description": "Direct bills\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
+            "description": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -32743,16 +32810,34 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/remittance/direct-bill",
+                  "raw": "{{baseUrl}}/remittance/direct-bill?status=Open,Partially Collected&insurerCode=MALAYAN&page=1&perPage=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "remittance",
                     "direct-bill"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "Open,Partially Collected"
+                    },
+                    {
+                      "key": "insurerCode",
+                      "value": "MALAYAN"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "20"
+                    }
                   ]
                 },
-                "description": "Direct bills\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
+                "description": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -32764,12 +32849,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rm_1\",\n      \"remittanceNo\": \"REM-2026-00001\",\n      \"remittanceDate\": \"2026-09-15\",\n      \"insurerCode\": \"MALAYAN\",\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"policyCount\": 3,\n      \"grossAmount\": 45000,\n      \"commission\": 6750,\n      \"tax\": 0,\n      \"netAmount\": 38250,\n      \"status\": \"Pending Approval\",\n      \"statusCode\": \"for-approval\",\n      \"billNo\": \"BIL-2026-00001\",\n      \"billStatus\": \"Generated\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"dn_1\",\n      \"dnNumber\": \"DN-2026-00001\",\n      \"dnDate\": \"2026-09-30\",\n      \"dueDate\": \"2026-10-30\",\n      \"periodFrom\": \"2026-09-01\",\n      \"periodTo\": \"2026-09-30\",\n      \"insurerCode\": \"MALAYAN\",\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"policyCount\": 2,\n      \"grossPremium\": 45000,\n      \"commission\": 6750,\n      \"vat\": 810,\n      \"amount\": 7560,\n      \"ewtRate\": 0.1,\n      \"expectedEwt\": 675,\n      \"netPayable\": 6885,\n      \"collectedCash\": 0,\n      \"collectedEwt\": 0,\n      \"balance\": 7560,\n      \"status\": \"Pending Approval\",\n      \"statusCode\": \"for-approval\",\n      \"currency\": \"PHP\"\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Generate a direct bill for selected policies",
+          "name": "Raise a commission debit note to an insurer for unbilled direct-bill commission (itemIds / policyIds, else all of the period); submit=true sends it for approval",
           "request": {
             "method": "POST",
             "header": [
@@ -32788,10 +32873,10 @@
                 "direct-bill"
               ]
             },
-            "description": "Generate a direct bill for selected policies\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Generate\n\nAccess: Any authenticated user",
+            "description": "Raise a commission debit note to an insurer for unbilled direct-bill commission (itemIds / policyIds, else all of the period); submit=true sends it for approval\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Raise Debit Note\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insurerCode\": \"MALAYAN\",\n  \"billingPeriod\": \"2026-09\",\n  \"billDate\": \"2026-09-28\",\n  \"dueDate\": \"2026-10-28\",\n  \"policyIds\": [\n    \"pol_1\"\n  ],\n  \"deliveryMethod\": [\n    \"email\"\n  ]\n}",
+              "raw": "{\n  \"insurerCode\": \"MALAYAN\",\n  \"periodFrom\": \"2026-09-01\",\n  \"periodTo\": \"2026-09-30\",\n  \"dnDate\": \"2026-09-30\",\n  \"itemIds\": [\n    \"dbi_1\"\n  ],\n  \"remarks\": \"September 2026 placements\",\n  \"submit\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -32820,10 +32905,10 @@
                     "direct-bill"
                   ]
                 },
-                "description": "Generate a direct bill for selected policies\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Generate\n\nAccess: Any authenticated user",
+                "description": "Raise a commission debit note to an insurer for unbilled direct-bill commission (itemIds / policyIds, else all of the period); submit=true sends it for approval\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Raise Debit Note\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"insurerCode\": \"MALAYAN\",\n  \"billingPeriod\": \"2026-09\",\n  \"billDate\": \"2026-09-28\",\n  \"dueDate\": \"2026-10-28\",\n  \"policyIds\": [\n    \"pol_1\"\n  ],\n  \"deliveryMethod\": [\n    \"email\"\n  ]\n}",
+                  "raw": "{\n  \"insurerCode\": \"MALAYAN\",\n  \"periodFrom\": \"2026-09-01\",\n  \"periodTo\": \"2026-09-30\",\n  \"dnDate\": \"2026-09-30\",\n  \"itemIds\": [\n    \"dbi_1\"\n  ],\n  \"remarks\": \"September 2026 placements\",\n  \"submit\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32841,17 +32926,891 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"billNo\": \"BIL-2026-00001\",\n    \"billStatus\": \"Generated\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\",\n    \"lines\": []\n  }\n}"
             }
           ]
         },
         {
-          "name": "Policies that can be direct-billed (insurerCode, productLine, policyStatus)",
+          "name": "One commission debit note with its policy lines and collections",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/remittance/direct-bill/policies?insurerCode=MALAYAN&productLine=Motor",
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One commission debit note with its policy lines and collections\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > View\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One commission debit note with its policy lines and collections\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > View\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\",\n    \"lines\": [],\n    \"collections\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve (opens it for sending and collection) a debit note; maker-checker: not the maker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve (opens it for sending and collection) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Checked against the placements\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve (opens it for sending and collection) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Checked against the placements\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Open\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Raised to the wrong insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Raised to the wrong insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Cancelled\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a payment from the insurer (partial allowed): Dr Cash in Bank + Dr Creditable Withholding Tax / Cr Commission Receivable",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/collections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "collections"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record a payment from the insurer (partial allowed): Dr Cash in Bank + Dr Creditable Withholding Tax / Cr Commission Receivable\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > Collect\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receivedDate\": \"2026-10-15\",\n  \"cashAmount\": 6885,\n  \"ewtAmount\": 675,\n  \"paymentMode\": \"bank-transfer\",\n  \"referenceNo\": \"MAL-OR-55812\",\n  \"form2307No\": \"2307-2026-0091\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/collections",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "collections"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record a payment from the insurer (partial allowed): Dr Cash in Bank + Dr Creditable Withholding Tax / Cr Commission Receivable\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > Collect\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"receivedDate\": \"2026-10-15\",\n  \"cashAmount\": 6885,\n  \"ewtAmount\": 675,\n  \"paymentMode\": \"bank-transfer\",\n  \"referenceNo\": \"MAL-OR-55812\",\n  \"form2307No\": \"2307-2026-0091\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 6885,\n    \"collectedEwt\": 675,\n    \"balance\": 0,\n    \"status\": \"Collected\",\n    \"statusCode\": \"collected\",\n    \"currency\": \"PHP\",\n    \"collection\": {\n      \"collectionNumber\": \"DNC-2026-00001\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse a collection entered in error (reversing journal; balance restored)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/collections/:collectionId/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "collections",
+                ":collectionId",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "collectionId",
+                  "value": "",
+                  "description": "collectionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a collection entered in error (reversing journal; balance restored)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Keyed against the wrong debit note\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/collections/:collectionId/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "collections",
+                    ":collectionId",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "collectionId",
+                      "value": "",
+                      "description": "collectionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a collection entered in error (reversing journal; balance restored)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Keyed against the wrong debit note\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/pdf?download=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > Print\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/pdf?download=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "download",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > Print\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong period\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong period\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Rejected\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "E-mail an approved debit note to the insurer (direct_bill.email_subject / email_body)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "send"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "E-mail an approved debit note to the insurer (direct_bill.email_subject / email_body)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"billing@malayan.example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/send",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "send"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "E-mail an approved debit note to the insurer (direct_bill.email_subject / email_body)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"billing@malayan.example\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\",\n    \"sentTo\": \"billing@malayan.example\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a draft debit note for approval",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a draft debit note for approval\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a draft debit note for approval\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change the billing mode of an issued policy (broker billed or direct bill): refused once premium is collected or remitted, or the commission is on a debit note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/billing-mode",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                "billing-mode"
+              ]
+            },
+            "description": "Change the billing mode of an issued policy (broker billed or direct bill): refused once premium is collected or remitted, or the commission is on a debit note\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Billing Mode\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyNumber\": \"POL-2026-00001\",\n  \"billingMode\": \"direct\",\n  \"reason\": \"Client pays Malayan directly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/billing-mode",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    "billing-mode"
+                  ]
+                },
+                "description": "Change the billing mode of an issued policy (broker billed or direct bill): refused once premium is collected or remitted, or the commission is on a debit note\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Billing Mode\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"policyNumber\": \"POL-2026-00001\",\n  \"billingMode\": \"direct\",\n  \"reason\": \"Client pays Malayan directly\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyNumber\": \"POL-2026-00001\",\n    \"before\": \"Broker billed\",\n    \"billingMode\": \"direct\",\n    \"billingModeLabel\": \"Direct bill\",\n    \"directBill\": {\n      \"items\": 1,\n      \"commissionDue\": 5040,\n      \"unbilled\": 5040,\n      \"collected\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/policies?insurerCode=MALAYAN&from=2026-09-01&to=2026-09-30&productLine=MOTOR",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -32866,12 +33825,20 @@
                   "value": "MALAYAN"
                 },
                 {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
                   "key": "productLine",
-                  "value": "Motor"
+                  "value": "MOTOR"
                 }
               ]
             },
-            "description": "Policies that can be direct-billed (insurerCode, productLine, policyStatus)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
+            "description": "Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -32880,7 +33847,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/remittance/direct-bill/policies?insurerCode=MALAYAN&productLine=Motor",
+                  "raw": "{{baseUrl}}/remittance/direct-bill/policies?insurerCode=MALAYAN&from=2026-09-01&to=2026-09-30&productLine=MOTOR",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -32895,12 +33862,20 @@
                       "value": "MALAYAN"
                     },
                     {
+                      "key": "from",
+                      "value": "2026-09-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    },
+                    {
                       "key": "productLine",
-                      "value": "Motor"
+                      "value": "MOTOR"
                     }
                   ]
                 },
-                "description": "Policies that can be direct-billed (insurerCode, productLine, policyStatus)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
+                "description": "Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -32912,7 +33887,58 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pol_1\",\n      \"policyNo\": \"POL-2026-00001\",\n      \"insuredName\": \"Juan Dela Cruz\",\n      \"product\": \"Motor\",\n      \"effectiveDate\": \"2026-09-01\",\n      \"premium\": 15000,\n      \"outstandingAmount\": 15000,\n      \"billAmount\": 15000\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"dbi_1\",\n      \"policyId\": \"pol_1\",\n      \"policyNo\": \"POL-2026-00001\",\n      \"reference\": \"POL-2026-00001\",\n      \"source\": \"policy\",\n      \"insuredName\": \"Juan Dela Cruz\",\n      \"product\": \"Private Car Comprehensive\",\n      \"lineOfBusiness\": \"MOTOR\",\n      \"bookedOn\": \"2026-09-15\",\n      \"grossPremium\": 30000,\n      \"netPremium\": 25000,\n      \"commissionRate\": 18,\n      \"commission\": 4500,\n      \"vat\": 540,\n      \"totalDue\": 5040,\n      \"expectedEwt\": 450,\n      \"netReceivable\": 4590,\n      \"bookingJournal\": \"JV-2026-00012\"\n    }\n  ],\n  \"summary\": {\n    \"count\": 1,\n    \"grossPremium\": 30000,\n    \"commission\": 4500,\n    \"vat\": 540,\n    \"totalDue\": 5040,\n    \"expectedEwt\": 450,\n    \"netReceivable\": 4590,\n    \"ewtRate\": 0.1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Commission receivable from insurers on direct-bill policies: unbilled, billed outstanding, overdue, notes pending approval",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                "summary"
+              ]
+            },
+            "description": "Commission receivable from insurers on direct-bill policies: unbilled, billed outstanding, overdue, notes pending approval\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    "summary"
+                  ]
+                },
+                "description": "Commission receivable from insurers on direct-bill policies: unbilled, billed outstanding, overdue, notes pending approval\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"unbilled\": 5040,\n    \"billedOutstanding\": 7560,\n    \"overdue\": 0,\n    \"total\": 12600,\n    \"pendingApproval\": 1\n  }\n}"
             }
           ]
         },
