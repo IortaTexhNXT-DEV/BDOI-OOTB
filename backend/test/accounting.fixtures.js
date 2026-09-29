@@ -11,6 +11,7 @@ import { createApp } from '../src/app.js';
 import { errorHandler } from '../src/lib/errors.js';
 import { query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
+import { createOwnBookRole } from './helpers.js';
 
 const FALLBACK = ['auth', 'users', 'notifications', 'settings', 'uploads', 'accounting', 'journal-vouchers', 'receipts', 'collections', 'disbursements', 'commission', 'payments'];
 
@@ -40,7 +41,10 @@ export async function setupFinance() {
   const admin = await login('BrokerVerse', process.env.ADMIN_PASSWORD);
   const as = (token) => (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
   const adminApi = as(admin);
-  const personas = { maker: ['fin.maker', 'finance'], checker: ['fin.checker', 'finance'], agent: ['agt.user', 'agent'], claims: ['clm.user', 'claims'], sales: ['sls.user', 'sales'] };
+  // 'agent': a role restricted to its own book (security.scoped_roles), with the withdrawn agent role's permissions
+  const ownBook = await createOwnBookRole(adminApi);
+  clearSettingsCache();
+  const personas = { maker: ['fin.maker', 'accounting'], checker: ['fin.checker', 'accounting'], agent: ['agt.user', ownBook], claims: ['clm.user', 'claims'], sales: ['sls.user', 'sales'] };
   const tokens = {};
   const ids = {};
   for (const [k, [username, role]] of Object.entries(personas)) {

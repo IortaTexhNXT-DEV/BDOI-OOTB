@@ -12,16 +12,16 @@ database (seeded reference data and sample book). Browser: Chromium, 1600 x 1000
 
 | User | Persona | Role |
 |---|---|---|
-| BrokerVerse | Platform administrator | it-admin |
-| bea.admin | Business administrator (configuration, masters) | ba |
-| maria.sales | Relationship manager | sales |
-| ramon.agent | Agent / referrer | agent |
-| jose.uw | Underwriter (quote checker) | underwriting |
-| ana.cs | Customer service | customer-services |
-| carlo.claims | Claims officer | claims |
+| BrokerVerse | System Administrator (Super Admin Access) | system-admin |
+| bea.admin | System Administrator (configuration, masters) | system-admin |
+| maria.sales | Sales & Marketing (Account Executive) | sales |
+| ramon.agent | Account Executive (the Agent / Referrer login role was withdrawn; referrers do not sign in) | sales |
+| jose.uw | Processing Team (placement and policy processing, quote checker) | processing |
+| ana.cs | Operations (client servicing) | operations |
+| carlo.claims | Claims | claims |
 | lisa.claims2 | Claims approver (checker) | claims |
-| liza.finance | Finance officer (maker) | finance |
-| fe.approver | Finance approver (checker) | finance |
+| liza.finance | Accounting officer (maker) | accounting |
+| fe.approver | Accounting approver (checker) | accounting |
 
 ## Scenario: one motor policy through its whole life
 
@@ -34,7 +34,7 @@ database (seeded reference data and sample book). Browser: Chromium, 1600 x 1000
 | 5 | ramon.agent | Operations > Leads/Prospects > Create | name, mobile, e-mail, birth date, address, product Motor | invalid e-mail / mobile rejected; lead listed under Motor; Agent dashboard lead count +1 |
 | 6 | ramon.agent | Quotation > New (from the lead) | vehicle brand/model/variant/year, plate, chassis, engine, FMV, coverages (BI/PD/PA), insurer | required vehicle fields; premium breakdown = base + VAT + DST + LGT + FST from Configuration; quote number from the numbering prefix |
 | 7 | ramon.agent | Quotation list / dashboard | - | quote listed as Draft; Executive and Agent dashboards: quotes +1; Reports > Lead conversion funnel includes it |
-| 8 | ramon.agent | Quotation > Send for approval | - | status Pending customer; e-mail queued; underwriting notified (bell) |
+| 8 | ramon.agent | Quotation > Send for approval | - | status Pending customer; e-mail queued; Processing Team notified (bell) |
 | 9 | customer | Approval link | accept | status Customer accepted; maker cannot approve their own quote |
 | 10 | ramon.agent | Convert to policy | payment mode, inception date | policy number issued; client created from the lead; policy listed Active |
 | 11 | - | Downstream of 10 | - | Executive dashboard: active policies +1, premium +premium; Reports > Production register contains the policy; Accounting: receivable (bill number) and journal Dr Premium receivable / Cr Premium payable + commission income, balanced; Collections: outstanding = gross premium, bucket Current; Commission: line Accrued for the agent; Remittance > Direct bill: policy available with net due = premium - commission |

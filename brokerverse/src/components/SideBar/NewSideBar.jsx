@@ -229,7 +229,7 @@ const NewSideBar = ({ onNavigate }) => {
         "/",
         "/executive/dashboard",
         "/claims/dashboard",
-        "/underwriting/dashboard",
+        "/processing/dashboard",
         "/agent/home",
       ];
       const isDashboardPath = dashboardPaths.some(

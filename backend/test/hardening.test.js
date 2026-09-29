@@ -11,7 +11,7 @@ import jwt from 'jsonwebtoken';
 import pino from 'pino';
 import request from 'supertest';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, createUserDeskRole } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 import { buildConfig, config, productionConfigProblems } from '../src/config.js';
 import { REDACT_PATHS, redactRequest, redactUrl } from '../src/app.js';
@@ -53,8 +53,9 @@ beforeAll(async () => {
   await makeUser('hd.sales', ['sales']);
   await makeUser('hd.sales2', ['sales']);
   await makeUser('hd.claims', ['claims']);
-  await makeUser('hd.uw', ['underwriting']);
-  await makeUser('hd.uaa', ['user-access-admin']);
+  await makeUser('hd.uw', ['processing']);
+  // user administration without the administrator role (a custom role; the User Access Administrator role was merged into system-admin)
+  await makeUser('hd.uaa', [await createUserDeskRole(ctx.api)]);
 });
 afterAll(async () => { resetRateLimits(); await pool.end(); });
 
@@ -218,7 +219,7 @@ describe('production start-up check (D84)', () => {
     expect(buildConfig({}).jwtSecret).toBe('dev-only-secret-change-me');
   });
   it('accepts only HS256 tokens', async () => {
-    const t384 = jwt.sign({ sub: ids['hd.sales'], type: 'access', roles: ['it-admin'], permissions: [], tv: 0 }, config.jwtSecret, { algorithm: 'HS384' });
+    const t384 = jwt.sign({ sub: ids['hd.sales'], type: 'access', roles: ['system-admin'], permissions: [], tv: 0 }, config.jwtSecret, { algorithm: 'HS384' });
     expect((await bearer(t384, 'get', '/users')).status).toBe(401);
   });
 });
@@ -349,7 +350,7 @@ describe('user administration (D88)', () => {
     expect((await login('hd.role', PW)).status).toBe(200);
   });
 
-  it('a user access administrator cannot reset, lock or turn off 2FA of an administrator, nor change their own access', async () => {
+  it('a non-administrator user desk cannot reset, lock or turn off 2FA of a System Administrator, nor change their own access', async () => {
     const admin = (await query("SELECT id FROM users WHERE username = 'BrokerVerse'")).rows[0].id;
     const uaa = (m, p) => bearer(tokens['hd.uaa'], m, p);
     expect((await uaa('post', `/users/${admin}/reset-password`).send({})).status).toBe(403);
@@ -366,6 +367,23 @@ describe('user administration (D88)', () => {
     expect((await uaa('post', `/users/${ids['hd.role']}/2fa/reset`)).status).toBe(200);
     expect((await uaa('get', `/users/${ids['hd.role']}/login-history`)).status).toBe(200);
     expect((await bearer(tokens['hd.claims'], 'post', `/users/${ids['hd.role']}/reset-password`).send({})).status).toBe(403);
+  });
+
+  it('only a System Administrator grants the administrator role or edits it; nobody changes their own roles or status', async () => {
+    const uaa = (m, p) => bearer(tokens['hd.uaa'], m, p);
+    expect((await uaa('post', '/users').send({ username: 'hd.sneaky', password: PW, displayName: 'X', roles: ['system-admin'] })).status).toBe(403);
+    expect((await uaa('put', `/users/${ids['hd.role']}`).send({ roles: ['system-admin'] })).status).toBe(403);
+    expect((await uaa('put', '/roles/system-admin').send({ permissions: [] })).status).toBe(403);
+    expect((await uaa('put', '/roles/user-desk').send({ permissions: ['read:users', 'write:users', 'read:receipts'] })).status).toBe(403);
+    // an administrator cannot change their own roles or lock themselves either; saving the same roles is fine
+    const admin = (await query("SELECT id FROM users WHERE username = 'BrokerVerse'")).rows[0].id;
+    expect((await ctx.api('put', `/users/${admin}`).send({ roles: ['sales'] })).status).toBe(403);
+    expect((await ctx.api('patch', `/users/${admin}/status`).send({ status: 'locked' })).status).toBe(403);
+    expect((await ctx.api('put', `/users/${admin}`).send({ displayName: 'BrokerVerse Administrator', roles: ['system-admin'] })).status).toBe(200);
+    // a second System Administrator can
+    const second = await makeUser('hd.admin2', ['system-admin']);
+    expect((await bearer(tokens['hd.admin2'], 'put', `/users/${ids['hd.role']}`).send({ roles: ['sales'] })).status).toBe(200);
+    expect(second.roles).toEqual(['system-admin']);
   });
 });
 
@@ -442,9 +460,9 @@ describe('route registry (D90)', () => {
 
 // ------------------------------------------------------------------------------------------------ 13. read scope
 describe('least-privilege reads (D92)', () => {
-  it('claims officers do not list leads; sales and customer services do not read the receipt register', async () => {
-    const cs = await makeUser('hd.cs', ['customer-services']);
-    expect(cs.roles).toEqual(['customer-services']);
+  it('claims officers do not list leads; sales and operations do not read the receipt register', async () => {
+    const cs = await makeUser('hd.cs', ['operations']);
+    expect(cs.roles).toEqual(['operations']);
     expect((await bearer(tokens['hd.claims'], 'get', '/leads')).status).toBe(403);
     expect((await bearer(tokens['hd.claims'], 'get', '/policies')).status).toBe(200);
     for (const u of ['hd.sales', 'hd.cs']) {
@@ -455,11 +473,11 @@ describe('least-privilege reads (D92)', () => {
   });
   it('migration 0091 removes the grants from an existing database', async () => {
     await query(`INSERT INTO role_permissions(role_id, permission_id) SELECT r.id, p.id FROM roles r, permissions p
-      WHERE (r.code = 'claims' AND p.code = 'read:leads') OR (r.code IN ('sales', 'customer-services') AND p.code = 'read:receipts') ON CONFLICT DO NOTHING`);
+      WHERE (r.code = 'claims' AND p.code = 'read:leads') OR (r.code = 'sales' AND p.code = 'read:receipts') ON CONFLICT DO NOTHING`);
     const fs = await import('node:fs');
     await query(fs.readFileSync(new URL('../src/db/migrations/0091_least_privilege_reads.sql', import.meta.url), 'utf8'));
     const left = await query(`SELECT r.code, p.code AS perm FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id
-      WHERE (r.code = 'claims' AND p.code = 'read:leads') OR (r.code IN ('sales', 'customer-services') AND p.code = 'read:receipts')`);
+      WHERE (r.code = 'claims' AND p.code = 'read:leads') OR (r.code = 'sales' AND p.code = 'read:receipts')`);
     expect(left.rows).toEqual([]);
     for (const u of ['hd.sales', 'hd.cs', 'hd.claims']) tokens[u] = await loginAs(ctx.app, u, u === 'hd.sales' ? 'Reset#Pass9' : PW);
   });

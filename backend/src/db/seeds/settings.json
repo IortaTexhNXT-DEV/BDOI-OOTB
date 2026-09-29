@@ -250,7 +250,7 @@
   },
   {
     "key": "commission.eligible_roles",
-    "value": ["agent", "sales"],
+    "value": ["sales"],
     "group": "commission",
     "label": "Roles that earn commission on the policies they produce (administrators and back-office staff do not)",
     "type": "json"

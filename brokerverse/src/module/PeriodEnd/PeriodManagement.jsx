@@ -14,7 +14,7 @@ import { PageHeader, StatusTag, date, dateTime, showError, showSuccess } from ".
 /**
  * Accounts > Period End > Period Management: fiscal years and their periods (1-12 and adjustment period 13) with
  * status open / soft-closed / closed / locked. Closing runs the blocking month-end checks; reopening needs the
- * finance-manager permission and remarks; periods of a closed (locked) fiscal year cannot be reopened.
+ * Accounting Manager's approval permission and remarks; periods of a closed (locked) fiscal year cannot be reopened.
  */
 const PeriodManagement = () => {
   const { t } = useTranslation();

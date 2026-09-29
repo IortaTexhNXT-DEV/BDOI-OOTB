@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { isAdmin, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { audit } from '../../lib/audit.js';
@@ -50,7 +50,7 @@ define({
   method: 'GET', path: '/generated/:id/download', summary: 'Download a generated report file (bearer token or signed ?token= link)', screen: 'Reports > * > Generate (download)',
   auth: false, middleware: [optionalAuth], permissions: ['read:reports (or signed link token)'], query: { token: '<signed link token from downloadUrl>' }, response: '(file: text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet or application/pdf)',
   handler: async (req, res) => {
-    if (req.user && !(req.user.roles.some((r) => ['it-admin', 'ba'].includes(r)) || req.user.permissions.includes('read:reports')) && !req.query.token) {
+    if (req.user && !(isAdmin(req.user) || req.user.permissions.includes('read:reports')) && !req.query.token) {
       res.status(403).json({ success: false, message: 'Requires permission: read:reports' });
       return;
     }
@@ -124,9 +124,9 @@ define({
 // Report filters must not depend on user administration (GET /users needs read:users): every report reader may list the
 // agents a report can be filtered by (D104).
 define({
-  method: 'GET', path: '/filters/agents', summary: 'Agents a report can be filtered by (active users with the agent role), as { label, value }',
+  method: 'GET', path: '/filters/agents', summary: 'Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }',
   screen: 'Reports > * (Agent filter)', middleware: canRead, permissions: ['read:reports'],
-  response: { success: true, data: [{ label: 'Ramon Agent', value: 'usr_1', code: 'AG001' }] },
+  response: { success: true, data: [{ label: 'Maria Santos', value: 'usr_1', code: 'AE001' }] },
   handler: async (_req, res) => ok(res, await svc.agentFilterOptions()),
 });
 

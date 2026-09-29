@@ -46,7 +46,7 @@ const sumOf = (rows, k) => Math.round(rows.reduce((s, r) => s + Number(r[k]), 0)
 beforeAll(async () => {
   ctx = await setup();
   sales = await persona('p.sales', ['sales']);
-  uw = await persona('p.uw', ['underwriting']);
+  uw = await persona('p.uw', ['processing']);
   ic = Object.fromEntries((await q('SELECT code, id FROM insurance_companies')).map((r) => [r.code, r.id]));
 });
 afterAll(async () => { await pool.end(); });

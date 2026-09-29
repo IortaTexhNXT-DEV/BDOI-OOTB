@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { moduleRouter } from '../../lib/registry.js';
-import { loadUser, publicUser, requireAuth, requirePermission, revokeSessions } from '../../lib/auth.js';
+import { ADMIN_ROLES, isAdmin, loadUser, publicUser, requireAuth, requirePermission, revokeSessions } from '../../lib/auth.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
@@ -15,26 +15,33 @@ const admin = [requireAuth, requirePermission('write:users')];
 const viewer = [requireAuth, requirePermission('read:users')];
 const roleAdmin = [requireAuth, requirePermission('write:roles')];
 
-/** Roles that only an IT administrator may grant (segregation of duties). */
-const PRIVILEGED_ROLES = ['it-admin', 'ba'];
-const isItAdmin = (req) => (req.user.roles || []).includes('it-admin');
+/**
+ * Segregation of duties on user administration. Only a System Administrator may grant the administrator role or change
+ * an administrator account (otherwise a user administrator could reset an administrator's password and sign in as
+ * them). Nobody changes their own roles or status through user administration, administrators included: another
+ * administrator does it (own password: Change password in the profile).
+ */
+const hasAdminRole = (roles) => (roles || []).some((r) => ADMIN_ROLES.includes(r));
 function assertCanAssign(req, targetUserId, codes) {
-  if (!isItAdmin(req) && codes.some((c) => PRIVILEGED_ROLES.includes(c))) throw forbidden('Only an IT administrator can grant the IT administrator or business administrator role');
-  if (targetUserId && targetUserId === req.user.id && !isItAdmin(req)) throw forbidden('You cannot change your own roles or access');
+  if (!isAdmin(req.user) && hasAdminRole(codes)) throw forbidden('Only a System Administrator can grant the System Administrator role');
+  if (targetUserId && targetUserId === req.user.id) throw forbidden('You cannot change your own roles or access');
 }
 /**
- * Password, status, two-factor and profile changes on another account: only an IT administrator may change an IT or
- * business administrator (otherwise a user administrator could reset an administrator's password and sign in as
- * them), and only an IT administrator may change their own access this way.
+ * Password, status, two-factor and profile changes on another account: only a System Administrator may change an
+ * administrator account, and nobody may change their own access this way.
  */
 async function assertCanManage(req, targetId) {
   const target = await loadUser('u.id = $1', [targetId]);
   if (!target) throw notFound('User not found');
-  if (!isItAdmin(req)) {
-    if (target.id === req.user.id) throw forbidden('You cannot change your own access; use Change password in your profile');
-    if ((target.roles || []).some((r) => PRIVILEGED_ROLES.includes(r))) throw forbidden('Only an IT administrator can change an IT or business administrator account');
-  }
+  if (target.id === req.user.id) throw forbidden('You cannot change your own access; use Change password in your profile');
+  if (!isAdmin(req.user) && hasAdminRole(target.roles)) throw forbidden('Only a System Administrator can change a System Administrator account');
   return target;
+}
+/** Roles: only a System Administrator changes the administrator role or a role they hold themselves (no self-escalation). */
+function assertCanEditRole(req, role) {
+  if (isAdmin(req.user)) return;
+  if (ADMIN_ROLES.includes(role.code)) throw forbidden('Only a System Administrator can change the System Administrator role');
+  if ((req.user.roles || []).includes(role.code)) throw forbidden('You cannot change a role you hold');
 }
 
 const userRow = (u) => ({
@@ -66,7 +73,7 @@ async function setRoles(client, userId, codes) {
 define({
   method: 'GET', path: '/', summary: 'List users (search, role, status, paging)', screen: 'Master > User Management > User', middleware: viewer,
   query: { search: 'juan', role: 'sales', status: 'active', page: 1, perPage: 10 },
-  response: { success: true, data: [{ userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['agent'], roleNames: ['Agent / Referrer'], status: 'active' }], total: 1, page: 1, perPage: 10 },
+  response: { success: true, data: [{ userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['sales'], roleNames: ['Sales & Marketing (Account Executive)'], status: 'active' }], total: 1, page: 1, perPage: 10 },
   handler: async (req, res) => {
     const pg = paging(req.query);
     const { search, role, status } = req.query;
@@ -126,7 +133,7 @@ define({
 });
 define({
   method: 'GET', path: '/:id', summary: 'Get one user', screen: 'Master > User Management > User > View', middleware: viewer,
-  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', roles: ['agent'] } },
+  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', roles: ['sales'] } },
   handler: async (req, res) => {
     const u = await loadUser('u.id = $1 OR u.username = $1', [req.params.id]);
     if (!u) throw notFound('User not found');
@@ -162,16 +169,21 @@ define({
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Update a user and its roles', screen: 'Master > User Management > User > Edit', middleware: [...admin, validate(userSchema.partial())],
-  request: { displayName: 'Maria Cruz', roles: ['sales', 'customer-services'], status: 'active' }, response: { success: true },
+  request: { displayName: 'Maria Cruz', roles: ['sales', 'operations'], status: 'active' }, response: { success: true },
   handler: async (req, res) => {
     const before = await loadUser('u.id = $1', [req.params.id]);
     if (!before) throw notFound('User not found');
     const b = req.body;
-    if (b.roles) assertCanAssign(req, before.id, b.roles);
-    else if (before.id === req.user.id && b.status) assertCanAssign(req, before.id, []);
-    // Details of an administrator account (e-mail, status) only by an IT administrator: a changed e-mail would let
+    if (b.roles) {
+      // Saving one's own profile with the same roles is fine; changing them is not.
+      const assigned = (await many('SELECT r.code FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = $1', [before.id])).map((r) => r.code);
+      const same = [...new Set(b.roles)].sort().join(',') === [...new Set(assigned)].sort().join(',');
+      if (!(before.id === req.user.id && same)) assertCanAssign(req, before.id, b.roles);
+    }
+    if (before.id === req.user.id && b.status && b.status !== before.status) assertCanAssign(req, before.id, []);
+    // Details of an administrator account (e-mail, status) only by a System Administrator: a changed e-mail would let
     // the password reset code go elsewhere.
-    if (before.id !== req.user.id && !isItAdmin(req) && (before.roles || []).some((r) => PRIVILEGED_ROLES.includes(r))) throw forbidden('Only an IT administrator can change an IT or business administrator account');
+    if (before.id !== req.user.id && !isAdmin(req.user) && hasAdminRole(before.roles)) throw forbidden('Only a System Administrator can change a System Administrator account');
     if (b.password) {
       await assertCanManage(req, before.id);
       await assertPasswordAllowed(b.password, { userId: before.id });
@@ -247,7 +259,7 @@ define({
 const rolesRouter = moduleRouter('User Management', '/roles');
 rolesRouter.define({
   method: 'GET', path: '/', summary: 'List roles with their permissions and user counts', screen: 'Master > User Management > Role', middleware: [requireAuth],
-  response: { success: true, data: [{ id: 1, code: 'sales', name: 'Sales / Relationship Manager', permissions: ['read:leads'], users: 3 }] },
+  response: { success: true, data: [{ id: 1, code: 'sales', name: 'Sales & Marketing (Account Executive)', permissions: ['read:leads'], users: 3 }] },
   handler: async (_req, res) => ok(res, await many(`SELECT r.id, r.code, r.name, r.description, r.is_system AS "isSystem", r.status, r.inherits AS "includesRoles", r.created_at AS "createdAt",
       COALESCE((SELECT array_agg(p.code ORDER BY p.code) FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id), '{}') AS permissions,
       (SELECT count(*)::int FROM user_roles ur WHERE ur.role_id = r.id) AS users FROM roles r ORDER BY r.id`)),
@@ -283,6 +295,7 @@ rolesRouter.define({
   handler: async (req, res) => {
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
     if (!role) throw notFound('Role not found');
+    assertCanEditRole(req, role);
     const b = req.body;
     await withTransaction(async (c) => {
       await c.query('UPDATE roles SET name = COALESCE($2, name), description = COALESCE($3, description), status = COALESCE($4, status) WHERE id = $1', [role.id, b.name, b.description, b.status]);
@@ -302,6 +315,7 @@ rolesRouter.define({
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
     if (!role) throw notFound('Role not found');
     if (role.is_system) throw badRequest('System roles cannot be deleted');
+    assertCanEditRole(req, role);
     if (await one('SELECT 1 FROM user_roles WHERE role_id = $1', [role.id])) throw conflict('Role is assigned to users');
     await query('DELETE FROM roles WHERE id = $1', [role.id]);
     await audit(req, { entity: 'role', entityId: role.id, action: 'delete', before: role });

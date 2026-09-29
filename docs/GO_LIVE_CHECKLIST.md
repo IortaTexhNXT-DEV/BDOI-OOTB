@@ -126,20 +126,25 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 
 - [ ] Master > Configuration > Security: password rules, password age (90 days), history (5), lockout after 5 failed
   sign-ins (`limits.max_login_attempts`), idle sign-out (30 minutes), roles that must use two-step verification
-  (`security.require_2fa_roles`, e.g. it-admin, ba, finance, user-access-admin).
+  (`security.require_2fa_roles`, e.g. system-admin, accounting, accounting-manager).
 - [ ] `security.api_rate_limit`, upload types (`uploads.allowed_types`) and size limits.
-- [ ] Only the IT administrator holds the `it-admin` role; user maintenance is done by User Access Administrators.
+- [ ] Only the few people who administer the system hold the `system-admin` role (System Administrator, Super Admin
+  Access: every module, configuration, user and role). Only a System Administrator can grant that role or change an
+  administrator account, and nobody can change their own roles or status.
 - [ ] Rotate `ADMIN_PASSWORD` after the first sign-in (the environment value is only used to create the account).
 
-## 6. Go-live data (business administrator, with IT)
+## 6. Go-live data (System Administrator, with the business teams)
 
 - [ ] Company details, branches, departments, letterhead (System Settings > General).
-- [ ] Users and roles: create the real users (Master > Generals > User Management); each gets a temporary password
-  shown once and must change it at first sign-in. Do not create the test personas used in development.
+- [ ] Users and roles: create the real users (Master > Generals > User Management) with the broker roles: Sales &
+  Marketing (Account Executive), Processing Team (Placement & Policy Processing), Operations (Client Servicing), Claims,
+  Accounting, Accounting Manager, System Administrator. Each gets a temporary password shown once and must change it
+  at first sign-in. Do not create the test personas used in development. Referrers / sub-agents do not sign in: their
+  business is entered by Sales & Marketing and they are paid from the referrer master.
 - [ ] Insurers (Insurance Company master) with commission rates, contact e-mails for remittance and debit notes.
-- [ ] Agents / referrers with WHT rates and bank accounts; commission rules (COMM codes).
+- [ ] Referrers / sub-agents (referrer master) with WHT rates and bank accounts; commission rules (COMM codes).
 - [ ] Banks and the broker's bank accounts (operating, premium trust); signatories (Master > Signatories).
-- [ ] Chart of accounts review with finance (Master > Main Account / Sub Account); opening balances by journal voucher.
+- [ ] Chart of accounts review with Accounting (Master > Main Account / Sub Account); opening balances by journal voucher.
 - [ ] Product templates and the motor tariff (Product Configurator > MOT-003-2025 > "CTPL & Auto PA"): CTPL amounts per
   vehicle class (confirmed 29 Sep 2026: 300.40 to 1,500.40 annual, 1,660.40 3-year private car), Auto Passenger PA
   rate and limits; 3-year CTPL for other classes when known.
@@ -149,10 +154,10 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   (columns name, username, password, role[, email]) with
   `CONFIRM_PROVISION=yes node scripts/provision-users.js /secure/users.csv` (without CONFIRM_PROVISION it is a dry
   run). Each user must change the initial password at the first sign-in. Delete the CSV afterwards.
-- [ ] Tax codes (Master > Finance > Taxation): the finance / tax team confirms every ATC code, rate and GL account
+- [ ] Tax codes (Master > Finance > Taxation): the Accounting / tax team confirms every ATC code, rate and GL account
   against the current BIR regulations (the OOTB values are a starting point) before the first BIR 2307, SAWT or QAP.
-- [ ] Finance Manager: assign the Finance Manager role (Finance plus month-end / year-end approval) to the users who
-  approve the close; Finance users prepare it.
+- [ ] Accounting Manager: assign the Accounting Manager role (Accounting plus month-end / year-end approval) to the
+  users who approve the close; Accounting users prepare it.
 - [ ] Document numbering (Master > Document Numbering): prefixes, format and the starting number of
   each series (e.g. to continue from the legacy system).
 - [ ] E-mail texts and notification recipients; schedule times (Master > Schedules).

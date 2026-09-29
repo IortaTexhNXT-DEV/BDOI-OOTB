@@ -14,7 +14,7 @@ const pay = moduleRouter('Payments', '/payments');
 const payRead = [requireAuth, requirePermission('read:receipts', 'read:policies')];
 const payment = { id: 'rcv_1', billNumber: 'INV-2026-00001', grossPremium: 11862.5, paidAmount: 11862.5, outstanding: 0, clientId: 'CL-2026-00001', clientName: 'Maria Santos', date: '2026-09-28', policyNumber: 'POL-2026-00001', insurer: 'Malayan Insurance Co., Inc.', product: 'Motor Vehicle Insurance', status: 'PAID', paymentMethod: 'gcash', referenceNumber: 'OR-2026-00001', commission: 1500 };
 pay.define({
-  method: 'GET', path: '/', summary: 'Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); agents see their own policies', screen: 'Agent > Payments',
+  method: 'GET', path: '/', summary: 'Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); roles without the payments overview (e.g. Claims) see only the policies they own', screen: 'Agent > Payments',
   middleware: payRead, query: { status: 'PENDING', search: 'Santos', page: 1, pageSize: 10 },
   response: { success: true, data: [payment], pagination: { page: 1, pageSize: 10, total: 1, totalPages: 1 }, summary: { paid: { count: 1, grossPremium: 11862.5, outstanding: 0 }, pending: { count: 0 }, reviewing: { count: 0 } } },
   handler: async (req, res) => { const pg = pageParams(req.query); const r = await svc.listPayments(pool, req.query, pg, req.user); sendList(res, r.rows, r.total, pg, { summary: r.summary }); },

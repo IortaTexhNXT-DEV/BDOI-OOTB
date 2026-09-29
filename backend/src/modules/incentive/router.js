@@ -1,3 +1,4 @@
+import { isAdmin } from '../../lib/auth.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
 import { forbidden } from '../../lib/errors.js';
@@ -10,9 +11,9 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Incentive', '/incentive');
 const read = canRead('incentive');
 const write = canWrite('incentive');
-// Program set-up is master data (Master > Incentive Programs): business / IT administrators, not the finance users who pay (D102).
+// Program set-up is master data (Master > Incentive Programs): the System Administrator, not the Accounting users who pay (D102).
 const programWrite = canWrite('masters');
-// Agents see their own programs and statements with the profile permission; incentive readers may look up any agent.
+// Producers (Sales & Marketing) see their own programs and statements with the profile permission; incentive readers may look up any agent.
 const self = canRead('incentive', 'read:profile');
 const S = (n) => `Accounts > Incentive > ${n}`;
 const program = { id: 1, programCode: 'INC-2026-001', programName: 'Q3 Premium Achievers', programType: 'Target Based', applicableTo: ['Individual Agent'], startDate: '2026-07-01', endDate: '2026-09-30', targetMetric: 'Premium Volume', baseTarget: 500000, stretchTarget: 750000, Currency: 'PHP', calculationFrequency: 'Quarterly', status: 'Active', structure: [{ level: '80-90%', type: 'Percentage', value: 2, maxPayout: 20000 }] };
@@ -22,7 +23,7 @@ const run = async (req, entity, action, fn) => {
   await audit(req, { entity, entityId: out?.after?.batchId ?? out?.after?.id ?? out?.batchId ?? out?.id ?? req.params.id, action, before: out?.before, after: out?.after ?? out });
   return out?.after ?? out;
 };
-const isReader = (u) => (u.roles || []).some((r) => ['it-admin', 'ba'].includes(r)) || (u.permissions || []).some((p) => ['read:incentive', 'write:incentive'].includes(p));
+const isReader = (u) => isAdmin(u) || (u.permissions || []).some((p) => ['read:incentive', 'write:incentive'].includes(p));
 const agentFor = (req) => {
   const wanted = req.query.agentId;
   if (wanted && wanted !== req.user.id && !isReader(req.user)) throw forbidden('You can only view your own incentives');

@@ -1,19 +1,19 @@
 -- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
--- Sample agents / approvers (used by agency bills, incentives and maker-checker samples). Passwords are random and
+-- Sample Account Executives (Sales & Marketing) and an Accounting approver (used by agency bills, incentives and maker-checker samples). Passwords are random and
 -- unusable; administrators set real ones through Master > User. Idempotent by username.
 INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, employee_code, branch_code, designation, status, must_change_password, created_by)
 SELECT v.u, crypt(gen_random_uuid()::text, gen_salt('bf', 8)), v.f || ' ' || v.l, v.f, v.l, v.e, v.code, v.branch, v.des, 'active', true, 'seed'
 FROM (VALUES
-  ('agent.jdelacruz', 'Juan', 'Dela Cruz', 'juan.delacruz@agents.example', 'AG001', 'HO', 'Senior Agent'),
-  ('agent.msantos', 'Maria', 'Santos', 'maria.santos@agents.example', 'AG002', 'HO', 'Agent'),
-  ('agent.preyes', 'Pedro', 'Reyes', 'pedro.reyes@agents.example', 'AG003', 'HO', 'Agent'),
-  ('agent.agarcia', 'Ana', 'Garcia', 'ana.garcia@agents.example', 'AG004', 'CEB', 'Unit Manager'),
-  ('agent.jmartinez', 'Jose', 'Martinez', 'jose.martinez@agents.example', 'AG005', 'DAV', 'Agent'),
-  ('fin.approver', 'Ramon', 'Aquino', 'ramon.aquino@brokerverse.example', 'EMP-0004', 'HO', 'Finance Manager')
+  ('agent.jdelacruz', 'Juan', 'Dela Cruz', 'juan.delacruz@agents.example', 'AG001', 'HO', 'Senior Account Executive'),
+  ('agent.msantos', 'Maria', 'Santos', 'maria.santos@agents.example', 'AG002', 'HO', 'Account Executive'),
+  ('agent.preyes', 'Pedro', 'Reyes', 'pedro.reyes@agents.example', 'AG003', 'HO', 'Account Executive'),
+  ('agent.agarcia', 'Ana', 'Garcia', 'ana.garcia@agents.example', 'AG004', 'CEB', 'Sales Unit Manager'),
+  ('agent.jmartinez', 'Jose', 'Martinez', 'jose.martinez@agents.example', 'AG005', 'DAV', 'Account Executive'),
+  ('fin.approver', 'Ramon', 'Aquino', 'ramon.aquino@brokerverse.example', 'EMP-0004', 'HO', 'Accounting Supervisor')
 ) AS v(u, f, l, e, code, branch, des)
 ON CONFLICT (username) DO NOTHING;
 INSERT INTO user_roles(user_id, role_id)
-SELECT u.id, r.id FROM users u JOIN roles r ON r.code = CASE WHEN u.username = 'fin.approver' THEN 'finance' ELSE 'agent' END
+SELECT u.id, r.id FROM users u JOIN roles r ON r.code = CASE WHEN u.username = 'fin.approver' THEN 'accounting' ELSE 'sales' END
 WHERE u.username IN ('agent.jdelacruz', 'agent.msantos', 'agent.preyes', 'agent.agarcia', 'agent.jmartinez', 'fin.approver')
 ON CONFLICT DO NOTHING;
 

@@ -21,12 +21,13 @@ import userService from "../../../../../services/userService";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
+import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
 
-/** Only an IT administrator may grant the IT or business administrator role (the server enforces the same rule). */
-const PRIVILEGED_ROLES = ["it-admin", "ba"];
+/** Only a System Administrator may grant the System Administrator role (the server enforces the same rule). */
+const PRIVILEGED_ROLES = ADMIN_ROLES;
 const canGrantPrivileged = () => {
   try {
-    return (JSON.parse(localStorage.getItem("USER_ROLES") || "[]") || []).includes("it-admin");
+    return (JSON.parse(localStorage.getItem("USER_ROLES") || "[]") || []).some((r) => ADMIN_ROLES.includes(r));
   } catch {
     return false;
   }

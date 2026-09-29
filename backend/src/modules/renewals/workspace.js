@@ -124,7 +124,7 @@ define({
 define({
   method: 'POST', path: '/:id/activities', summary: 'Add a negotiation update / contact to the renewal timeline', screen: 'Operations > Renewals > Negotiations > Add Update',
   middleware: [...write, validate(z.object({ type: z.string().min(2).max(60), method: z.string().max(40).optional(), description: z.string().min(1).max(4000), outcome: z.string().max(2000).optional(), nextAction: z.string().max(500).optional(), followUpDate: z.string().optional(), details: z.record(z.any()).optional() }))],
-  request: { type: 'Counter Offer', method: 'Email', description: 'Client asked for a 5% discount', outcome: 'Pending underwriting', nextAction: 'Submit for approval', followUpDate: '2026-10-05' },
+  request: { type: 'Counter Offer', method: 'Email', description: 'Client asked for a 5% discount', outcome: 'Pending processing review', nextAction: 'Submit for approval', followUpDate: '2026-10-05' },
   response: { success: true, data: { id: 1, type: 'Counter Offer', method: 'Email', description: 'Client asked for a 5% discount' } },
   handler: async (req, res) => { const a = await svc.addActivity(req.params.id, req.user, req.body); await audit(req, { entity: 'renewal', entityId: req.params.id, action: 'activity', after: a }); created(res, a, 'Update added'); },
 });

@@ -21,10 +21,10 @@ async function persona(username, roles) {
 beforeAll(async () => {
   ctx = await setup();
   const s = await persona('t.sales', ['sales']);
-  const u = await persona('t.uw', ['underwriting']);
+  const u = await persona('t.uw', ['processing']);
   sales = s.api; salesId = s.id; uw = u.api; underwriterId = u.id;
   claims = (await persona('t.claims', ['claims'])).api;
-  finance = (await persona('t.finance', ['finance'])).api;
+  finance = (await persona('t.finance', ['accounting'])).api;
 });
 afterAll(async () => { await pool.end(); });
 

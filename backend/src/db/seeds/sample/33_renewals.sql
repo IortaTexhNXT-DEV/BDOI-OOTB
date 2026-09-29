@@ -43,7 +43,7 @@ FROM (VALUES
  ('rnw_crs_13', 6, 'Reminder', 'SMS', 'Renewal reminder via SMS', 'Client acknowledged', 'Send quote', 5, '{}'),
  ('rnw_crs_14', 9, 'Quote Generated', NULL, 'Re-rated renewal quote: claims loading applied for 2 claims', NULL, NULL, NULL, '{}'),
  ('rnw_crs_14', 5, 'Meeting', 'Face-to-face', 'Discussed renewal terms and the claims history', 'Client concerned about the premium increase', 'Ask insurer for alternative deductible', 4, '{}'),
- ('rnw_crs_14', 2, 'Counter Offer', 'Email', 'Client requested a maximum 8% increase', 'Referred to underwriting', 'Submit for approval', 3, '{}'),
+ ('rnw_crs_14', 2, 'Counter Offer', 'Email', 'Client requested a maximum 8% increase', 'Referred to the insurer', 'Submit for approval', 3, '{}'),
  ('rnw_crs_15', 3, 'Negotiation', 'Phone', 'Agreed renewal at the re-rated premium with free roadside assistance', 'Accepted', 'Approval', 1, '{}'),
  ('rnw_crs_18', 4, 'Initial Contact', 'Email', 'Sent renewal quote for the delivery fleet', 'Awaiting fleet list update', 'Follow up', 2, '{}'),
  ('rnw_crs_19', 7, 'Reminder', 'Phone', 'Called client - no e-mail on file, notice sent by letter', 'Will visit the office', NULL, NULL, '{}'),

@@ -4685,7 +4685,7 @@
                     "username": "BrokerVerse",
                     "displayName": "BrokerVerse Administrator",
                     "roles": [
-                      "it-admin"
+                      "system-admin"
                     ],
                     "permissions": [
                       "read:leads"
@@ -4863,7 +4863,7 @@
                     "username": "BrokerVerse",
                     "displayName": "BrokerVerse Administrator",
                     "roles": [
-                      "it-admin"
+                      "system-admin"
                     ],
                     "permissions": [
                       "read:leads"
@@ -5290,7 +5290,7 @@
                     "userId": "usr_1",
                     "username": "BrokerVerse",
                     "roles": [
-                      "it-admin"
+                      "system-admin"
                     ]
                   }
                 }
@@ -20085,11 +20085,11 @@
     "/agent/get-dashboard-details": {
       "get": {
         "operationId": "getAgentGetDashboardDetails",
-        "summary": "Agent home: own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",
+        "summary": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",
         "tags": [
           "Dashboards"
         ],
-        "description": "Front-end touchpoint: Dashboard > Agent Dashboard\n\nAccess: read:leads, read:quotations, read:policies",
+        "description": "Front-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies",
         "parameters": [
           {
             "name": "scope",
@@ -20174,7 +20174,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Dashboard > Agent Dashboard",
+        "x-screen": "Dashboard > Sales Dashboard",
         "x-permissions": [
           "read:leads",
           "read:quotations",
@@ -20395,6 +20395,89 @@
         ]
       }
     },
+    "/dashboard/processing": {
+      "get": {
+        "operationId": "getDashboardProcessing",
+        "summary": "Processing Team workbench: quotations with the customer or the insurers, cycle time, data-quality alerts, cases awaiting decision, volume by LOB",
+        "tags": [
+          "Dashboards"
+        ],
+        "description": "Front-end touchpoint: Dashboard > Processing Dashboard\n\nAccess: read:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "workbenchMetrics": {
+                          "type": "object",
+                          "properties": {
+                            "newSubmissions": {
+                              "type": "integer"
+                            },
+                            "olderSubmissions": {
+                              "type": "integer"
+                            },
+                            "avgCycleTime": {
+                              "type": "string"
+                            },
+                            "openAlerts": {
+                              "type": "object",
+                              "properties": {
+                                "totalAlerts": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "myCases": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "workbenchMetrics": {
+                      "newSubmissions": 3,
+                      "olderSubmissions": 1,
+                      "avgCycleTime": "26 Hours",
+                      "openAlerts": {
+                        "totalAlerts": 0
+                      }
+                    },
+                    "myCases": []
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Dashboard > Processing Dashboard",
+        "x-permissions": [
+          "read:quotations"
+        ]
+      }
+    },
     "/dashboard/sales": {
       "get": {
         "operationId": "getDashboardSales",
@@ -20496,89 +20579,6 @@
         "x-screen": "Dashboard > Sales",
         "x-permissions": [
           "read:leads",
-          "read:quotations"
-        ]
-      }
-    },
-    "/dashboard/underwriting": {
-      "get": {
-        "operationId": "getDashboardUnderwriting",
-        "summary": "Underwriting workbench: submissions, cycle time, data-quality alerts, cases awaiting decision, volume by LOB",
-        "tags": [
-          "Dashboards"
-        ],
-        "description": "Front-end touchpoint: Dashboard > Underwriting Dashboard\n\nAccess: read:quotations",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "workbenchMetrics": {
-                          "type": "object",
-                          "properties": {
-                            "newSubmissions": {
-                              "type": "integer"
-                            },
-                            "olderSubmissions": {
-                              "type": "integer"
-                            },
-                            "avgCycleTime": {
-                              "type": "string"
-                            },
-                            "openAlerts": {
-                              "type": "object",
-                              "properties": {
-                                "totalAlerts": {
-                                  "type": "integer"
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "myCases": {
-                          "type": "array",
-                          "items": {}
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "workbenchMetrics": {
-                      "newSubmissions": 3,
-                      "olderSubmissions": 1,
-                      "avgCycleTime": "26 Hours",
-                      "openAlerts": {
-                        "totalAlerts": 0
-                      }
-                    },
-                    "myCases": []
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Dashboard > Underwriting Dashboard",
-        "x-permissions": [
           "read:quotations"
         ]
       }
@@ -32965,7 +32965,7 @@
     "/payments": {
       "get": {
         "operationId": "getPayments",
-        "summary": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); agents see their own policies",
+        "summary": "Premium payment status per bill: PAID, PENDING (unpaid), REVIEWING (partially paid); roles without the payments overview (e.g. Claims) see only the policies they own",
         "tags": [
           "Payments"
         ],
@@ -56739,7 +56739,7 @@
     "/quotations/{id}/send-for-approval": {
       "post": {
         "operationId": "postQuotationsIdSendForApproval",
-        "summary": "Send the quotation to the customer for approval (signed link e-mail) and notify underwriting",
+        "summary": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team",
         "tags": [
           "Quotations"
         ],
@@ -73692,7 +73692,7 @@
                 "type": "Counter Offer",
                 "method": "Email",
                 "description": "Client asked for a 5% discount",
-                "outcome": "Pending underwriting",
+                "outcome": "Pending processing review",
                 "nextAction": "Submit for approval",
                 "followUpDate": "2026-10-05"
               }
@@ -77035,7 +77035,7 @@
     "/reports/filters/agents": {
       "get": {
         "operationId": "getReportsFiltersAgents",
-        "summary": "Agents a report can be filtered by (active users with the agent role), as { label, value }",
+        "summary": "Producers a report Agent filter can use (active users holding a commission-earning role, commission.eligible_roles), as { label, value }",
         "tags": [
           "Reports"
         ],
@@ -77075,9 +77075,9 @@
                   "success": true,
                   "data": [
                     {
-                      "label": "Ramon Agent",
+                      "label": "Maria Santos",
                       "value": "usr_1",
-                      "code": "AG001"
+                      "code": "AE001"
                     }
                   ]
                 }
@@ -78036,7 +78036,7 @@
         "tags": [
           "Schedules"
         ],
-        "description": "Front-end touchpoint: Master > Schedules > Edit\n\nAccess: role:it-admin, role:ba, role:finance",
+        "description": "Front-end touchpoint: Master > Schedules > Edit\n\nAccess: role:accounting",
         "parameters": [
           {
             "name": "code",
@@ -78108,7 +78108,7 @@
         "tags": [
           "Schedules"
         ],
-        "description": "Front-end touchpoint: Master > Schedules > Run now\n\nAccess: role:it-admin, role:ba, role:finance",
+        "description": "Front-end touchpoint: Master > Schedules > Run now\n\nAccess: role:accounting",
         "parameters": [
           {
             "name": "code",
@@ -78535,7 +78535,7 @@
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings\n\nAccess: role:it-admin, role:ba",
+        "description": "Front-end touchpoint: Master > System Settings\n\nAccess: role:system-admin",
         "parameters": [],
         "responses": {
           "200": {
@@ -78605,7 +78605,7 @@
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > Audit trail\n\nAccess: role:it-admin, role:ba, read:audit",
+        "description": "Front-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit",
         "parameters": [
           {
             "name": "entity",
@@ -79864,10 +79864,10 @@
                       "username": "juan.santos",
                       "displayName": "Juan Santos",
                       "roles": [
-                        "agent"
+                        "sales"
                       ],
                       "roleNames": [
-                        "Agent / Referrer"
+                        "Sales & Marketing (Account Executive)"
                       ],
                       "status": "active"
                     }
@@ -80058,7 +80058,7 @@
                     "userId": "usr_1",
                     "username": "juan.santos",
                     "roles": [
-                      "agent"
+                      "sales"
                     ]
                   }
                 }
@@ -80155,7 +80155,7 @@
                 "displayName": "Maria Cruz",
                 "roles": [
                   "sales",
-                  "customer-services"
+                  "operations"
                 ],
                 "status": "active"
               }
@@ -80757,7 +80757,7 @@
                     {
                       "id": 1,
                       "code": "sales",
-                      "name": "Sales / Relationship Manager",
+                      "name": "Sales & Marketing (Account Executive)",
                       "permissions": [
                         "read:leads"
                       ],

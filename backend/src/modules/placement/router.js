@@ -1,7 +1,7 @@
 /**
  * Placement journey API: Broker Slips (market submission, insurer offers, comparison), Placement Slips (firm order,
  * binding per participant, policy issuance), direct policy entry and the journey configuration per line of business.
- * Access follows the quotation permissions (sales / underwriting / customer services / agents on their own book);
+ * Access follows the quotation permissions (Sales & Marketing, Processing Team, Operations);
  * issuing a policy also needs write:policies.
  */
 import { moduleRouter } from '../../lib/registry.js';

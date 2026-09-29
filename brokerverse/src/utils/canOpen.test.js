@@ -23,7 +23,7 @@ describe("actions shown only when the role may use them (N1)", () => {
   });
 
   it("administrators hold every permission; nothing stored leaves the decision to the server", () => {
-    signIn(["ba"], []);
+    signIn(["system-admin"], []);
     expect(hasPermission("write:policies")).toBe(true);
     signIn(["sales"]);
     expect(hasPermission("write:policies")).toBe(true);

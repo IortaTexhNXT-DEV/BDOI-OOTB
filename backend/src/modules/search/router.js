@@ -1,18 +1,17 @@
 /**
  * Global search (header search box): one query across leads, clients, quotations, policies, claims and endorsements by
- * number, name, e-mail, phone and vehicle plate / chassis. Respects record scoping (agents only find their own book)
+ * number, name, e-mail, phone and vehicle plate / chassis. Respects record scoping (a scoped role only finds its own book)
  * and read permissions (a type the user cannot read is skipped). `link` is the front-end route of the detail screen.
  */
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth } from '../../lib/auth.js';
+import { isAdmin, requireAuth } from '../../lib/auth.js';
 import { badRequest } from '../../lib/errors.js';
 import { many } from '../../db/pool.js';
 import { scopeOf, scopeSql } from '../../lib/scope.js';
 import { quoteStatusOut, policyStatusOut, endorsementStatusOut } from '../documents/statuses.js';
 
 const { router, define } = moduleRouter('Search', '');
-const ADMIN = ['it-admin', 'ba'];
-const canRead = (user, module) => (user.roles || []).some((r) => ADMIN.includes(r)) || (user.permissions || []).includes(`read:${module}`);
+const canRead = (user, module) => isAdmin(user) || (user.permissions || []).includes(`read:${module}`);
 
 // $1 = '%q%' pattern, $2 = exact q, $3 = limit; scope parameters follow.
 const TYPES = [

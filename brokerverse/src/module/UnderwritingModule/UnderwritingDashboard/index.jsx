@@ -43,7 +43,7 @@ const UnderwritingDashboard = () => {
 
   useEffect(() => {
     dashboardService
-      .getUnderwriting()
+      .getProcessing()
       .then(setDashboard)
       .catch((error) =>
         toast.current?.show({ severity: "error", summary: "Error", detail: error.message })
@@ -225,7 +225,6 @@ const UnderwritingDashboard = () => {
       <div className="dashboard-header">
         <div className="header-left">
           <h2>{t("underwritingDashboard.myWorkbench")}</h2>
-          <p>{t("underwritingDashboard.connectedUnderwriting")}</p>
         </div>
         <div className="header-right">
           <Dropdown

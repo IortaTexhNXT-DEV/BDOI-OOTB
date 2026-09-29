@@ -81,12 +81,12 @@ define({
     const r = await withTransaction((db) => payments.capturePayment(db, policy, req.body, req.user));
     await audit(req, { entity: 'policy', entityId: policy.id, action: r.option === 'pay-later' ? 'pay-later' : 'payment-capture', after: { ...(r.capture || {}), receiptNumber: r.receipt?.receiptNumber } });
     if (r.capture && !r.posted) {
-      for (const u of await usersWithRoles(['finance'])) {
+      for (const u of await usersWithRoles(['accounting'])) {
         await notify({ userId: u.id, type: 'approval', title: 'Premium payment to verify', message: `${r.capture.paymentModeLabel} ${await formatMoney(r.capture.amount)} (ref ${r.capture.referenceNo || '-'}) on policy ${policy.policy_number}`,
           link: `/agent/policy/paymentoptions/${policy.id}`, entity: 'policy', entityId: policy.id });
       }
     }
-    const message = r.option === 'pay-later' ? 'Pay later recorded: the bill stays open' : r.posted ? `Payment confirmed, receipt ${r.receipt.receiptNumber}` : 'Payment recorded; finance will verify it';
+    const message = r.option === 'pay-later' ? 'Pay later recorded: the bill stays open' : r.posted ? `Payment confirmed, receipt ${r.receipt.receiptNumber}` : 'Payment recorded; Accounting will verify it';
     res.status(r.capture ? 201 : 200).json({ success: true, message, data: r });
   },
 });

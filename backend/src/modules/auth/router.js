@@ -84,7 +84,7 @@ async function throttle(req, res, scope, username, { log = true } = {}) {
   return { keys, limited: true };
 }
 
-const loginExample = { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 1800, issuedAt: '2026-01-01T00:00:00Z', mustChangePassword: false, user: { userId: 'usr_1', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator', roles: ['it-admin'], permissions: ['read:leads'], mustChangePassword: false, twoFactorEnabled: false } };
+const loginExample = { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 1800, issuedAt: '2026-01-01T00:00:00Z', mustChangePassword: false, user: { userId: 'usr_1', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator', roles: ['system-admin'], permissions: ['read:leads'], mustChangePassword: false, twoFactorEnabled: false } };
 
 define({
   method: 'POST', path: '/login', auth: false,
@@ -217,7 +217,7 @@ define({
 
 define({
   method: 'GET', path: '/profile', summary: 'Current user profile', screen: 'Profile',
-  response: { success: true, data: { userId: 'usr_1', username: 'BrokerVerse', roles: ['it-admin'] } },
+  response: { success: true, data: { userId: 'usr_1', username: 'BrokerVerse', roles: ['system-admin'] } },
   handler: async (req, res) => {
     const user = await loadUser('u.id = $1', [req.user.id]);
     res.json({ success: true, data: { ...publicUser(user), firstName: user.first_name, lastName: user.last_name, phone: user.phone, branchCode: user.branch_code, employeeCode: user.employee_code } });

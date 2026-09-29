@@ -54,7 +54,7 @@ beforeAll(async () => {
   ctx = await setupFinance();
   admin = ctx.api;
   maker = ctx.as('maker');
-  await admin('post', '/users').send({ username: 'fin.manager', password: 'Welcome@123', displayName: 'Finance Manager', roles: ['finance-manager'], email: 'fin.manager@example.ph' });
+  await admin('post', '/users').send({ username: 'fin.manager', password: 'Welcome@123', displayName: 'Finance Manager', roles: ['accounting-manager'], email: 'fin.manager@example.ph' });
   const tok = (await request(ctx.app).post('/api/auth/login').send({ username: 'fin.manager', password: 'Welcome@123' })).body.accessToken;
   fm = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${tok}`);
   await query(`INSERT INTO gl_accounts(code, name, account_type, category, is_open_item, allow_manual, fs_group, normal_balance) VALUES ($1, 'Cash in Bank - Test Account', 'asset', 'Cash and Cash Equivalents', false, true, 'Current Assets', 'debit')

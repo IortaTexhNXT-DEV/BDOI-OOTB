@@ -1,5 +1,5 @@
 import { menuList } from "../components/SideBar/list";
-import { getUserRoles, isPathAllowed } from "./menuPermissions";
+import { ADMIN_ROLES, getUserRoles, isPathAllowed } from "./menuPermissions";
 
 /**
  * True when the signed-in user's roles may open the screen at `path` (the same rule as the side menu and the route
@@ -8,9 +8,6 @@ import { getUserRoles, isPathAllowed } from "./menuPermissions";
  * @returns {boolean}
  */
 export const canOpen = (path) => isPathAllowed(path, menuList, getUserRoles());
-
-/** Roles the server treats as administrators (every permission). */
-const ADMIN_ROLES = ["it-admin", "ba"];
 
 /**
  * True when the signed-in user holds an API permission such as "write:policies" (stored at sign-in), the same check

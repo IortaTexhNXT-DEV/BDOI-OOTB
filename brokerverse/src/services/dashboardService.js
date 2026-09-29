@@ -16,7 +16,7 @@ const get = async (path) => {
 const dashboardService = {
   getExecutive: (period = "month") => get(`/dashboard/executive?period=${encodeURIComponent(period)}`),
   getSales: (scope = "mine") => get(`/dashboard/sales?scope=${encodeURIComponent(scope)}`),
-  getUnderwriting: () => get("/dashboard/underwriting"),
+  getProcessing: () => get("/dashboard/processing"),
   getClaims: () => get("/dashboard/claims"),
   getAgentHome: (scope = "mine") => get(`/agent/get-dashboard-details?scope=${encodeURIComponent(scope)}`),
 };

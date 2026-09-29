@@ -8,7 +8,7 @@ import { audit } from '../../lib/audit.js';
 import { runJob, startScheduler } from '../../jobs/scheduler.js';
 
 const { router, define } = moduleRouter('Schedules', '/schedules');
-const admin = [requireAuth, requireRole('it-admin', 'ba', 'finance')];
+const admin = [requireAuth, requireRole('accounting')];
 const row = (j) => ({ id: j.id, code: j.code, name: j.name, description: j.description, cron: j.cron, handler: j.handler, params: j.params, enabled: j.enabled, lastRunAt: j.last_run_at, lastStatus: j.last_status, updatedAt: j.updated_at });
 
 define({

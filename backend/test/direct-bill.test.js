@@ -32,7 +32,7 @@ async function issue({ net = 100000, gross = 125250, rate = 0.15, insurer = 'MAL
   const product = (await query('SELECT id FROM products WHERE code = \'MOTOR\'')).rows[0];
   const r = await withTransaction((db) => issuePolicy(db, {
     clientId: client.id, insuranceCompanyId: ic.id, productId: product.id, sumInsured: 1000000, netPremium: net, grossPremium: gross, commissionAmount: r2(net * rate),
-    commissionRate: rate, currency: 'PHP', insuredName: client.display_name, productType: 'Private Car Comprehensive', lob: 'MOTOR', agentUserId: ctx.userIds.agent, ownerUserId: ctx.userIds.agent,
+    commissionRate: rate, currency: 'PHP', insuredName: client.display_name, productType: 'Private Car Comprehensive', lob: 'MOTOR', agentUserId: ctx.userIds.sales, ownerUserId: ctx.userIds.sales,
   }, { billingMode }, ctx.userIds.maker));
   const policy = (await query('SELECT * FROM policies WHERE id = $1', [r.policyId])).rows[0];
   return { ...r, policy, client };
@@ -58,7 +58,7 @@ describe('direct-bill policy issue', () => {
     const premium = (await query(`SELECT count(*)::int AS n FROM journal_lines WHERE policy_id = $1 AND account_code IN ('1202001', '2201001')`, [d.policyId])).rows[0].n;
     expect(premium).toBe(0);
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
-    // agent commission accrues as for a broker-billed policy
+    // the Account Executive's commission accrues as for a broker-billed policy
     expect((await query('SELECT status FROM commissions WHERE policy_id = $1', [d.policyId])).rows.map((x) => x.status)).toEqual(['Accrued']);
   });
 
@@ -179,7 +179,7 @@ describe('commission debit note', () => {
     expect(await lines(c1.body.data.collection.journalId)).toEqual([{ a: '1102001', d: 7650, c: 0 }, { a: '1302001', d: 750, c: 0 }, { a: '1203001', d: 0, c: 8400 }]);
     // cannot collect more than the balance
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${dn.id}/collections`).send({ cashAmount: 9000, ewtAmount: 0 })).status).toBe(400);
-    // agent commission waits for the insurer's payment
+    // the Account Executive's commission waits for the insurer's payment
     expect((await query('SELECT status FROM commissions WHERE policy_id = $1', [d.policyId])).rows[0].status).toBe('Accrued');
     // the rest, with the EWT as certified on BIR 2307
     const c2 = await ctx.as('maker')('post', `/remittance/direct-bill/${dn.id}/collections`).send({ receivedDate: '2026-02-20', cashAmount: 7650, ewtAmount: 750, paymentMode: 'check', referenceNo: 'FPG-PAY-2', form2307No: '2307-001' });

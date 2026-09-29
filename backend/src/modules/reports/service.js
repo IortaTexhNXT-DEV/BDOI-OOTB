@@ -9,7 +9,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, forbidden, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { verify } from '../../lib/auth.js';
+import { isAdmin, verify } from '../../lib/auth.js';
 import { toCsv } from '../../tools/csv.js';
 import { writeXlsx } from '../../tools/xlsx.js';
 import { buildReportPdf, printContext } from '../../lib/pdf/index.js';
@@ -24,16 +24,19 @@ export const FORMATS = {
   xlsx: { ext: 'xlsx', contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
   pdf: { ext: 'pdf', contentType: 'application/pdf' },
 };
-const ADMIN_ROLES = ['it-admin', 'ba'];
-const isAdmin = (user) => (user?.roles || []).some((r) => ADMIN_ROLES.includes(r));
-
 /* ---------- filter options ---------- */
 
-/** Active users with the agent role, as drop-down options for the report Agent filter (value = user id). */
+/**
+ * Producers a report can be filtered by (the report Agent filter, value = user id): active users holding a role that
+ * earns commission on its production (commission.eligible_roles, falling back to incentive.eligible_roles; by default
+ * Sales & Marketing). Referrers / sub-agents do not sign in; their production is entered by Sales & Marketing.
+ */
 export async function agentFilterOptions() {
+  const setting = (await getSetting('commission.eligible_roles', null)) || (await getSetting('incentive.eligible_roles', [])) || [];
+  const roles = (Array.isArray(setting) ? setting : [setting]).map((r) => String(r).toLowerCase());
   const rows = await many(`SELECT u.id, u.display_name, u.username, u.employee_code FROM users u
-    WHERE u.status = 'active' AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.code = 'agent')
-    ORDER BY lower(COALESCE(u.display_name, u.username))`);
+    WHERE u.status = 'active' AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND lower(r.code) = ANY($1))
+    ORDER BY lower(COALESCE(u.display_name, u.username))`, [roles]);
   return rows.map((u) => ({ label: u.display_name || u.username, value: u.id, code: u.employee_code || u.username }));
 }
 

@@ -159,7 +159,7 @@ for (const method of ['PUT', 'PATCH']) {
   });
 }
 define({
-  method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail) and notify underwriting', screen: `${SCREEN} > Quote detail > Send for customer approval`,
+  method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team', screen: `${SCREEN} > Quote detail > Send for customer approval`,
   middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
   handler: async (req, res) => {
     const r = await svc.sendForApproval(req.params.id, req.user);

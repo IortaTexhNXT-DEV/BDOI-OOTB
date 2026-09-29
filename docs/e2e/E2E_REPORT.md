@@ -1,5 +1,10 @@
 # BrokerVerse end-to-end test report
 
+> Roles renamed since this run (broker terminology, migration 0140): underwriting -> processing (Processing Team),
+> customer-services -> operations, finance -> accounting, finance-manager -> accounting-manager; it-admin, ba and
+> user-access-admin merged into system-admin; the agent login role withdrawn (its users are Sales & Marketing). The
+> Underwriting Dashboard is now the Processing Dashboard (/processing/dashboard). The results below are as recorded.
+
 Manual, screen-by-screen run of the full broking cycle on the production build of `brokerverse/` with the
 `backend/` API and PostgreSQL. Every step was entered through the screens as the persona who does the job, and
 each result was checked in the database, the ledger, the dashboards and the reports. Defects are in

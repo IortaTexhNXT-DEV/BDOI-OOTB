@@ -58,9 +58,9 @@ describe('fiscal calendar and period statuses', () => {
     expect(soft.status, JSON.stringify(soft.body)).toBe(200);
     expect(soft.body.data.status).toBe('soft_closed');
     const lines = [{ accountCode: '4401008', debit: 100, credit: 0 }, { accountCode: '1101001', debit: 0, credit: 100 }];
-    const fin = { id: ctx.userIds.maker, roles: ['finance'], permissions: ['write:journal-vouchers', 'write:period-end'] };
+    const fin = { id: ctx.userIds.maker, roles: ['accounting'], permissions: ['write:journal-vouchers', 'write:period-end'] };
     await expect(withTransaction((db) => createJournal(db, { date: '2026-02-10', lines }, fin))).rejects.toThrow(/soft-closed/);
-    const mgr = { id: 'x', roles: ['finance'], permissions: ['approve:period-end'] };
+    const mgr = { id: 'x', roles: ['accounting'], permissions: ['approve:period-end'] };
     const ok = await withTransaction((db) => createJournal(db, { date: '2026-02-10', lines, description: 'late supplies' }, mgr));
     expect(ok.status).toBe('posted');
     expect((await maker('post', '/period-end/periods/2026-02/status').send({ status: 'open', remarks: 'x' })).status).toBe(403);

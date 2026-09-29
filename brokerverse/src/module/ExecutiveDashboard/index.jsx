@@ -35,7 +35,7 @@ const rangeFor = (period) => {
 /** Quick actions of the dashboard; each is shown only when the user's roles may open its screen (same rules as the side menu). */
 const QUICK_ACTIONS = [
   { label: "executiveDashboard.viewClaims", icon: "pi pi-file", path: "/claims/dashboard" },
-  { label: "executiveDashboard.underwriting", icon: "pi pi-check-square", path: "/underwriting/dashboard" },
+  { label: "executiveDashboard.processing", icon: "pi pi-check-square", path: "/processing/dashboard" },
   { label: "executiveDashboard.newQuote", icon: "pi pi-plus", severity: "success", path: "/agent/createlead" },
   { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", severity: "info", path: "/reports/operationalreports/production" },
   { label: "executiveDashboard.policiesLabel", icon: "pi pi-briefcase", path: "/agent/policy" },

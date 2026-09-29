@@ -98,7 +98,13 @@ export async function requireAuth(req, _res, next) {
   }
 }
 
-const ADMIN_ROLES = ['it-admin', 'ba'];
+/**
+ * The administrator role(s): the System Administrator (Super Admin Access) holds every permission, passes every role
+ * check and is the only role that may grant the administrator role. The single place that names it: code elsewhere uses
+ * isAdmin / ADMIN_ROLES / ADMIN_ROLE rather than repeating the code.
+ */
+export const ADMIN_ROLE = 'system-admin';
+export const ADMIN_ROLES = Object.freeze([ADMIN_ROLE]);
 export const isAdmin = (user) => !!user && (user.roles || []).some((r) => ADMIN_ROLES.includes(r));
 /** Does the user hold the permission (administrator roles hold every permission)? */
 export const hasPermission = (user, perm) => isAdmin(user) || (user?.permissions || []).includes(perm);

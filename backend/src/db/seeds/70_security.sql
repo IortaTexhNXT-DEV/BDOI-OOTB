@@ -1,6 +1,6 @@
 -- Security configuration (Master > System Settings > Configuration, group "security"). Idempotent.
 INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
- ('security.scoped_roles', '["agent"]', 'security', 'Roles that only see their own book (records they own or of clients they own)', 'json', true),
+ ('security.scoped_roles', '[]', 'security', 'Roles that only see their own book (records they own or of clients they own)', 'json', true),
  ('security.login_rate_limit', '{"max":10,"windowSeconds":300}', 'security', 'Sign-in / forgot-password rate limit per IP and per username (max attempts in windowSeconds)', 'json', true),
  ('security.password_min_length', '8', 'security', 'Minimum password length', 'number', true),
  ('security.password_require_upper', 'true', 'security', 'Password must contain an upper-case letter', 'boolean', true),

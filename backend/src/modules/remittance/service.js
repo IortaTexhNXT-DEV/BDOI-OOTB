@@ -2,6 +2,7 @@
  * Remittance core: remittances / bills to insurers and agencies, their lines, the approval queue (maker-checker)
  * and automated remittance generation from policies not yet remitted.
  */
+import { ADMIN_ROLES, isAdmin } from '../../lib/auth.js';
 import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
@@ -425,7 +426,7 @@ export async function getApproval(id) {
 export async function decide(id, action, body, user) {
   const a = await getApproval(id);
   if (a.status !== 'Pending') throw conflict(`Approval is already ${a.status.toLowerCase()}`);
-  if (a.delegated_to && a.delegated_to !== user.id && !(user.roles || []).some((r) => ['it-admin', 'ba'].includes(r))) throw forbidden('This approval has been delegated to another user');
+  if (a.delegated_to && a.delegated_to !== user.id && !isAdmin(user)) throw forbidden('This approval has been delegated to another user');
   const remarks = body.comments ?? body.remarks ?? body.reason ?? null;
   if (action !== 'delegate') {
     if (a.initiator_id === user.id) throw forbidden('Maker-checker: you cannot approve or reject a transaction you initiated');
@@ -476,15 +477,15 @@ export async function settleRemittance(id, b, user) {
 
 /**
  * Users an approval can be delegated to: active users who hold write:remittance through a role, or an administrator role,
- * other than the caller. Finance reads this without read:users (D106).
+ * other than the caller. Accounting reads this without read:users (D106).
  */
 export async function approvers(user) {
   const rows = await many(`SELECT u.id, u.username, u.display_name FROM users u
     WHERE u.status = 'active' AND u.id <> $1 AND EXISTS (
       SELECT 1 FROM user_effective_roles(u.id) er JOIN roles r ON r.id = er.role_id
-      WHERE (r.code IN ('it-admin', 'ba') OR EXISTS (
+      WHERE (r.code = ANY($2) OR EXISTS (
         SELECT 1 FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id AND p.code = 'write:remittance')))
-    ORDER BY lower(COALESCE(u.display_name, u.username))`, [user?.id || '']);
+    ORDER BY lower(COALESCE(u.display_name, u.username))`, [user?.id || '', ADMIN_ROLES]);
   return rows.map((u) => ({ userId: u.id, username: u.username, displayName: u.display_name || u.username }));
 }
 

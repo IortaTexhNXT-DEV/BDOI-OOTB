@@ -8,7 +8,7 @@ let fin;
 let sales;
 beforeAll(async () => {
   ctx = await setup();
-  await ctx.api('post', '/users').send({ username: 'r.finance', password: 'Welcome@123', displayName: 'R Finance', roles: ['finance'] });
+  await ctx.api('post', '/users').send({ username: 'r.finance', password: 'Welcome@123', displayName: 'R Finance', roles: ['accounting'] });
   await ctx.api('post', '/users').send({ username: 'r.sales', password: 'Welcome@123', displayName: 'R Sales', roles: ['sales'] });
   fin = await loginAs(ctx.app, 'r.finance', 'Welcome@123');
   sales = await loginAs(ctx.app, 'r.sales', 'Welcome@123');

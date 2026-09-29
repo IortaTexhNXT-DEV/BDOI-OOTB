@@ -98,13 +98,13 @@ describe('policy payment capture (no mock payment)', () => {
   });
 });
 
-describe('commission accrues only to real agents / referrers', () => {
-  it('no commission line for an administrator who issues a policy; an agent earns one', async () => {
+describe('commission accrues only to producers (Sales & Marketing) and referrers', () => {
+  it('no commission line for an administrator who issues a policy; an Account Executive earns one', async () => {
     const adminId = (await q("SELECT id FROM users WHERE username = 'BrokerVerse'"))[0].id;
     const p = await makePolicy({ net: 10000, owner: adminId });
     const none = await withTransaction((db) => accrueCommission(db, { policyId: p.policy.id, agentUserId: adminId, basis: 10000, rate: 0.15, period: '2026-09' }));
     expect(none).toBeNull();
-    const line = await withTransaction((db) => accrueCommission(db, { policyId: p.policy.id, agentUserId: ctx.userIds.agent, basis: 10000, rate: 0.15, period: '2026-09' }));
+    const line = await withTransaction((db) => accrueCommission(db, { policyId: p.policy.id, agentUserId: ctx.userIds.sales, basis: 10000, rate: 0.15, period: '2026-09' }));
     expect(Number(line.amount)).toBe(1500);
     // no referrer account for the administrator after seeding, and one linked to an administrator is not listed
     const list = await ctx.as('maker')('get', '/commission/referrer-accounts');
