@@ -95,15 +95,19 @@ export function riskSection(x, f) {
   // Other lines: what the record has (description, insured persons, cargo and voyage, limits, obligee ...)
   const d = { ...(x.riskDetails || {}), ...x };
   const persons = Array.isArray(d.insuredPersons) ? d.insuredPersons.length : d.numberOfInsured ?? d.insuredPersonsCount ?? d.numberOfMembers ?? d.members;
-  return { heading: 'Risk details', rows: kv([
+  const known = kv([
     ['Class of insurance', x.productName || x.productType || x.product], ['Policy type', x.policyTypeName],
     ['Description', d.riskDescription || d.description], ['Insured persons', persons], ['Plan', d.planName || d.plan],
     ['Cargo', d.cargoDescription || d.cargo], ['Voyage', [d.voyageFrom, d.voyageTo].filter(Boolean).join(' to ')], ['Conveyance', d.conveyance || d.vesselName],
     ['Limit of liability', present(d.limitOfLiability) ? f.ccy(d.limitOfLiability, x.currency) : ''], ['Obligee', d.obligee], ['Bond type', d.bondType],
     ['Business', d.natureOfBusiness || d.businessDescription], ['Territorial limits', d.territorialLimits],
     [line === 'CASUALTY' || line === 'BOND' ? 'Limit / amount insured' : 'Sum insured', num(x.totalSumInsured ?? x.sumInsured) ? f.ccy(x.totalSumInsured ?? x.sumInsured, x.currency) : ''],
-    ...generic.filter(([k]) => !['Description', 'Obligee', 'Cargo', 'Plan'].includes(k)),
-  ]) };
+  ]);
+  // generic details not already shown under the same label or with the same value
+  const norm = (v) => String(v).trim().toLowerCase();
+  const labels = new Set(known.map(([k]) => norm(k)));
+  const values = new Set(known.map(([, v]) => norm(v)));
+  return { heading: 'Risk details', rows: [...known, ...kv(generic).filter(([k, v]) => !labels.has(norm(k)) && !values.has(norm(v)) && !/sum insured/i.test(k))] };
 }
 
 /** Covers requested on a broker / placement slip: cover, sum insured or limit, deductible. */

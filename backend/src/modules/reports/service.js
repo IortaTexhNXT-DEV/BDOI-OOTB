@@ -13,7 +13,7 @@ import { verify } from '../../lib/auth.js';
 import { toCsv } from '../../tools/csv.js';
 import { writeXlsx } from '../../tools/xlsx.js';
 import { buildReportPdf, printContext } from '../../lib/pdf/index.js';
-import { formatDate, humanize } from '../../lib/pdf/format.js';
+import { formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { companyName } from '../../lib/letterhead.js';
 import { startScheduler } from '../../jobs/scheduler.js';
 import { execute } from './engine.js';
@@ -115,7 +115,12 @@ async function renderFile(format, def, result, meta) {
   if (format === 'pdf') {
     const ctx = meta.print;
     const params = `${describeParams(result.params, ctx.format)}   |   Currency ${meta.currency}   |   ${result.total} row${result.total === 1 ? '' : 's'}`;
-    return buildReportPdf({ ...ctx, title: def.name, params, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize });
+    // the report's summary figures (net income, totals, counts) under the table
+    const AMOUNT = /amount|premium|income|expense|total|balance|commission|due|assets|liabilities|equity|net|vat|tax|payable|receivable|remitted|outstanding/i;
+    const summary = Object.entries(result.summary || {}).filter(([, v]) => v !== null && v !== undefined && v !== '' && typeof v !== 'object')
+      .map(([k, v]) => [humanize(k), Number.isFinite(Number(v)) ? formatAmount(Number(v), AMOUNT.test(k) || !Number.isInteger(Number(v)) ? ctx.format?.decimals ?? 2 : 0) : String(v)]);
+    const sections = summary.length ? [{ heading: 'Summary', table: { columns: ['Item', { label: 'Value', align: 'right' }], widths: [300, 160], rows: summary } }] : [];
+    return buildReportPdf({ ...ctx, title: def.name, params, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize, sections });
   }
   const width = (c) => ({ money: 16, number: 12, integer: 10, date: 12 }[c.type] || Math.min(40, Math.max(12, String(c.label).length + 4)));
   const xcols = columns.map((c) => ({ key: c.key, header: c.label, type: c.type === 'number' ? 'number' : c.type, width: width(c) }));

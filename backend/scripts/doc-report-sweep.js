@@ -155,6 +155,27 @@ async function documents() {
     for (const n of names) await file(D, `Claim - ${n}`, `/claims/getdocuments/${claim.id}?documentName=${encodeURIComponent(n)}`, 'pdf');
   }
 
+  // placement journey documents and the co-insurance placing slip
+  const slip = await q1('SELECT id FROM broker_slips ORDER BY created_at DESC LIMIT 1').catch(() => ({}));
+  if (slip.id) {
+    await file(D, 'Broker slip (to the market)', `/broker-slips/${slip.id}/documents/broker-slip`, 'pdf');
+    const offerIns = await q1('SELECT insurance_company_id AS id FROM insurer_offers WHERE broker_slip_id = $1 ORDER BY id LIMIT 1', [slip.id]).catch(() => ({}));
+    if (offerIns.id) await file(D, 'Broker slip (to one insurer)', `/broker-slips/${slip.id}/documents/broker-slip?insurerId=${offerIns.id}`, 'pdf');
+  }
+  const plc = await q1(`SELECT p.id, (SELECT insurance_company_id FROM risk_participants r WHERE r.entity_type = 'placement' AND r.entity_id = p.id AND NOT r.is_lead ORDER BY r.id LIMIT 1) AS co
+    FROM placements p ORDER BY (SELECT count(*) FROM risk_participants r WHERE r.entity_type = 'placement' AND r.entity_id = p.id) DESC, p.created_at DESC LIMIT 1`).catch(() => ({}));
+  if (plc.id) {
+    await file(D, 'Placement slip (lead insurer)', `/placements/${plc.id}/documents/placement-slip`, 'pdf');
+    await file(D, 'Placement slip (whole security)', `/placements/${plc.id}/documents/placement-slip?all=1`, 'pdf');
+    if (plc.co) await file(D, 'Placement slip (co-insurer share)', `/placements/${plc.id}/documents/placement-slip?insurerId=${plc.co}`, 'pdf');
+  }
+  const coPol = await q1(`SELECT entity_id AS id, max(insurance_company_id) FILTER (WHERE NOT is_lead) AS co FROM risk_participants WHERE entity_type = 'policy'
+    GROUP BY entity_id HAVING count(*) > 1 LIMIT 1`).catch(() => ({}));
+  if (coPol.id) {
+    await file(D, 'Placing slip - co-insured policy (security)', `/policies/${coPol.id}/documents/insurance-placing-slip-fire`, 'pdf');
+    await file(D, 'Placing slip - one co-insurer\'s share', `/policies/${coPol.id}/documents/insurance-placing-slip-fire?insurerId=${coPol.co}`, 'pdf');
+  }
+
   const E = 'Module export';
   await file(E, 'Claims dashboard report', `/claims/report?startDate=${yr}-01-01&endDate=${yr}-12-31&format=excel`, 'xlsx');
   await file(E, 'Lead report', '/leads/report', 'xlsx');
