@@ -17,11 +17,9 @@
 <text text-anchor="start" x="154" y="-216" font-family="Nunito" font-weight="bold" font-size="10.00">PK</text>
 <text text-anchor="start" x="174" y="-215" font-family="Nunito" font-size="10.00">id</text>
 <text text-anchor="start" x="154" y="-198" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
-<text text-anchor="start" x="174" y="-199" font-family="Nunito" font-size="10.00">client_id</text>
-<text text-anchor="start" x="213" y="-199" font-family="Nunito" font-size="10.00" fill="#c0392b">*</text>
+<text text-anchor="start" x="174" y="-198" font-family="Nunito" font-size="10.00">client_id</text>
 <text text-anchor="start" x="154" y="-181" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
-<text text-anchor="start" x="174" y="-182" font-family="Nunito" font-size="10.00">new_policy_id</text>
-<text text-anchor="start" x="238" y="-182" font-family="Nunito" font-size="10.00" fill="#c0392b">*</text>
+<text text-anchor="start" x="174" y="-181" font-family="Nunito" font-size="10.00">new_policy_id</text>
 <text text-anchor="start" x="154" y="-164" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
 <text text-anchor="start" x="174" y="-164" font-family="Nunito" font-size="10.00">policy_id</text>
 <text text-anchor="start" x="154" y="-147" font-family="Nunito" font-size="10.00" fill="#5b6776">{ }</text>
@@ -99,11 +97,9 @@
 <text text-anchor="start" x="33" y="-41" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
 <text text-anchor="start" x="55" y="-41" font-family="Nunito" font-size="10.00">batch_id</text>
 <text text-anchor="start" x="33" y="-24" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
-<text text-anchor="start" x="55" y="-25" font-family="Nunito" font-size="10.00">policy_id</text>
-<text text-anchor="start" x="95" y="-25" font-family="Nunito" font-size="10.00" fill="#c0392b">*</text>
+<text text-anchor="start" x="55" y="-24" font-family="Nunito" font-size="10.00">policy_id</text>
 <text text-anchor="start" x="33" y="-7" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
-<text text-anchor="start" x="55" y="-8" font-family="Nunito" font-size="10.00">renewal_id</text>
-<text text-anchor="start" x="106" y="-8" font-family="Nunito" font-size="10.00" fill="#c0392b">*</text>
+<text text-anchor="start" x="55" y="-7" font-family="Nunito" font-size="10.00">renewal_id</text>
 <polygon fill="none" stroke="#0065b3" points="29,0 29,-104 145,-104 145,0 29,0"/>
 </g>
 <!-- renewals&#45;&gt;renewal_batch_policies -->
