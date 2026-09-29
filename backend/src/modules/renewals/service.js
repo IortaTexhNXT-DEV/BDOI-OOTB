@@ -372,9 +372,11 @@ export async function completeRenewal(id, user, input = {}) {
   const result = await withTransaction(async (db) => {
     const lock = await db.query('SELECT status FROM renewals WHERE id = $1 FOR UPDATE', [r.id]);
     if (lock.rows[0].status !== r.status) throw conflict('The renewal was updated by someone else; reload and try again');
+    // the renewal term keeps the expiring policy's billing mode (broker billed or direct bill)
     const np = await db.query(`INSERT INTO policies(policy_number, client_id, product_id, policy_type_id, insurance_company_id, owner_user_id, status,
-        inception_date, expiry_date, sum_insured, premium_total, commission_amount, currency, details, renewed_from, created_by)
-      VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id, policy_number`, [
+        inception_date, expiry_date, sum_insured, premium_total, commission_amount, currency, details, renewed_from, created_by, billing_mode)
+      VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8,$9,$10,$11,$12,$13,$14,$15,
+        COALESCE((SELECT billing_mode FROM policies WHERE id = $14), 'broker')) RETURNING id, policy_number`, [
       policyNumber, r.policy_client_id, r.product_id, r.policy_type_id, r.insurance_company_id, r.policy_owner, inception, expiry, r.sum_insured, premium, commission,
       r.currency, JSON.stringify({ ...(r.policy_details || {}), businessType: 'Renewal', renewal: { renewalId: r.id, renewalNumber: r.renewal_number, previousPolicyId: r.policy_id, previousPolicyNumber: r.policy_number }, coverageDetails: r.coverage_details || undefined }),
       r.policy_id, user?.username ?? null]);

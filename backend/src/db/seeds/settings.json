@@ -340,5 +340,82 @@
     "group": "premium",
     "label": "Product Configurator template holding the motor tariff (vehicle classes, CTPL tariff premiums, own damage rates, Auto Passenger PA limits and rate)",
     "type": "string"
+  },
+  {
+    "key": "direct_bill.default_billing_mode",
+    "value": "broker",
+    "group": "direct_bill",
+    "label": "Default billing mode when a policy is issued: broker (client pays the broker) or direct (client pays the insurer; the broker bills its commission with a debit note)"
+  },
+  {
+    "key": "direct_bill.broker_vat_registered",
+    "value": true,
+    "group": "direct_bill",
+    "label": "Broker is VAT-registered (output VAT is charged on direct-bill commission)",
+    "type": "boolean"
+  },
+  {
+    "key": "direct_bill.commission_vat_rate",
+    "value": 0.12,
+    "group": "direct_bill",
+    "label": "VAT rate on direct-bill commission",
+    "type": "number"
+  },
+  {
+    "key": "direct_bill.commission_vat_inclusive",
+    "value": false,
+    "group": "direct_bill",
+    "label": "Commission amounts already include VAT (VAT is extracted) instead of VAT being added on top",
+    "type": "boolean"
+  },
+  {
+    "key": "direct_bill.insurer_ewt_rate",
+    "value": 0.1,
+    "group": "direct_bill",
+    "label": "Expanded withholding tax the insurer deducts from the commission (creditable, BIR Form 2307)",
+    "type": "number"
+  },
+  {
+    "key": "direct_bill.debit_note_due_days",
+    "value": 30,
+    "group": "direct_bill",
+    "label": "Days after the debit note date that the commission falls due",
+    "type": "number"
+  },
+  {
+    "key": "direct_bill.debit_note_title",
+    "value": "Commission Debit Note",
+    "group": "direct_bill",
+    "label": "Title printed on the commission debit note"
+  },
+  {
+    "key": "direct_bill.debit_note_remarks",
+    "value": "Please settle the amount due net of the expanded withholding tax on the commission and send BIR Form 2307 for the tax withheld.",
+    "group": "direct_bill",
+    "label": "Payment instructions printed on the commission debit note"
+  },
+  {
+    "key": "direct_bill.email_subject",
+    "value": "Commission debit note {{dnNumber}} – {{companyName}}",
+    "group": "direct_bill",
+    "label": "Debit note e-mail subject ({{dnNumber}}, {{insurerName}}, {{amount}}, {{dueDate}}, {{companyName}})"
+  },
+  {
+    "key": "direct_bill.email_body",
+    "value": "<p>Dear {{insurerName}},</p><p>Please find our commission debit note <b>{{dnNumber}}</b> for {{amount}}, due on {{dueDate}}.</p><p>Kindly settle the amount net of the expanded withholding tax on the commission and send BIR Form 2307 for the tax withheld.</p><p>{{companyName}}</p>",
+    "group": "direct_bill",
+    "label": "Debit note e-mail body (HTML with placeholders)"
+  },
+  {
+    "key": "numbering.commission_debit_note.prefix",
+    "value": "DN",
+    "group": "numbering",
+    "label": "Commission debit note prefix"
+  },
+  {
+    "key": "numbering.dn_collection.prefix",
+    "value": "DNC",
+    "group": "numbering",
+    "label": "Debit note collection (insurer payment) prefix"
   }
 ]

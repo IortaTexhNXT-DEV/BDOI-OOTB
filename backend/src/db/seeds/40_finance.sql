@@ -11,6 +11,8 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('accounting.account.agent_receivable', '"1204001"', 'accounting', 'GL: Receivable from agents (commission clawback)', 'string'),
  ('accounting.account.employee_advances', '"1205001"', 'accounting', 'GL: Employee advances (petty cash returns)', 'string'),
  ('accounting.account.input_vat', '"1301001"', 'accounting', 'GL: Input VAT', 'string'),
+ ('accounting.account.creditable_wht', '"1302001"', 'accounting', 'GL: Creditable withholding tax (BIR 2307) withheld by insurers on commission', 'string'),
+ ('accounting.account.output_vat', '"2204003"', 'accounting', 'GL: Output VAT payable (VAT on commission)', 'string'),
  ('accounting.account.due_to_insurer', '"2201001"', 'accounting', 'GL: Premium payable to insurers', 'string'),
  ('accounting.account.commission_payable', '"2203001"', 'accounting', 'GL: Commission (comsub) payable to agents / referrers', 'string'),
  ('accounting.account.wht_payable', '"2204001"', 'accounting', 'GL: Withholding tax payable', 'string'),
@@ -46,62 +48,155 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('numbering.petty_cash_receipt.prefix', '"PCRC"', 'numbering', 'Petty cash receipt number prefix', 'string')
 ON CONFLICT (key) DO NOTHING;
 
--- Chart of accounts (codes follow the Journal Voucher screen: 1 assets, 2 liabilities, 3 income, 4 expenses, 5 equity)
-INSERT INTO gl_accounts(code, name, account_type, parent_code, category, is_open_item, allow_manual) VALUES
- ('1101001','Cash on Hand','asset',NULL,'Cash',false,true),
- ('1102001','Cash in Bank – BDO Current','asset',NULL,'Cash',false,true),
- ('1102002','Cash in Bank – E-wallet Clearing (GCash)','asset',NULL,'Cash',false,true),
- ('1103001','Petty Cash Fund','asset',NULL,'Cash',false,true),
- ('1202001','Premiums Receivable - Direct Clients','asset',NULL,'Premiums Receivable',true,true),
- ('1202002','Premiums Receivable - Corporate Customers','asset',NULL,'Premiums Receivable',true,true),
- ('1202003','Premiums Receivable - Agents','asset',NULL,'Premiums Receivable',true,true),
- ('1202004','Premiums Receivable - Broker - Local','asset',NULL,'Premiums Receivable',true,true),
- ('1202005','Premiums Receivable - Broker - International','asset',NULL,'Premiums Receivable',true,true),
- ('1202006','Premiums Receivable - Banks','asset',NULL,'Premiums Receivable',true,true),
- ('1202007','Premiums Receivable - Insurance Co - Local','asset',NULL,'Premiums Receivable',true,true),
- ('1202008','Premiums Receivable - Insurance Co - International','asset',NULL,'Premiums Receivable',true,true),
- ('1202020','Provision for Bad Debt','asset',NULL,'Premiums Receivable',false,true),
- ('1203001','Commission Receivable - Insurers','asset',NULL,'Receivables',true,true),
- ('1204001','Receivable from Agents - Clawback','asset',NULL,'Receivables',true,true),
- ('1205001','Employee Advances','asset',NULL,'Receivables',true,true),
- ('1301001','Input VAT','asset',NULL,'Taxes',false,true),
- ('2201001','Premium Payable to Insurers','liability',NULL,'Payables',true,true),
- ('2203001','Commission Accrued - Agents','liability',NULL,'Commission Accrued',true,true),
- ('2203002','Commission Accrued - Banks','liability',NULL,'Commission Accrued',true,true),
- ('2203003','Commission Accrued - Broker - Local','liability',NULL,'Commission Accrued',true,true),
- ('2203004','Commission Accrued - Broker - International','liability',NULL,'Commission Accrued',true,true),
- ('2203005','Commission Accrued - Insurance Co - Local','liability',NULL,'Commission Accrued',true,true),
- ('2203006','Commission Accrued - Insurance Co - International','liability',NULL,'Commission Accrued',true,true),
- ('2204001','Withholding Tax Payable - Expanded','liability',NULL,'Taxes',false,true),
- ('2205001','Client Refunds Payable','liability',NULL,'Payables',true,true),
- ('2206001','Accounts Payable - Suppliers','liability',NULL,'Payables',true,true),
- ('3101001','Gross Written Premium','income',NULL,'Premium',false,true),
- ('3201001','Brokerage Commission Income','income',NULL,'Commission',false,true),
- ('4101001','Gross Claims Paid','expense',NULL,'Claims',false,true),
- ('4401001','Administrative Cost','expense',NULL,'Operating Expenses',false,true),
- ('4401002','Advertising','expense',NULL,'Operating Expenses',false,true),
- ('4401003','Audit Fees','expense',NULL,'Operating Expenses',false,true),
- ('4401004','Bank Charges','expense',NULL,'Operating Expenses',false,true),
- ('4401005','Building Cost Expense','expense',NULL,'Operating Expenses',false,true),
- ('4401006','Consultancy Fees','expense',NULL,'Operating Expenses',false,true),
- ('4401007','Communication and Courier','expense',NULL,'Operating Expenses',false,true),
- ('4401008','Office Supplies','expense',NULL,'Operating Expenses',false,true),
- ('4401009','Bad Debts Written Off','expense',NULL,'Operating Expenses',false,true),
- ('4401010','Commission Expense - Sub-agents (Comsub)','expense',NULL,'Commission',false,true),
- ('5101001','Retained Earnings','equity',NULL,'Equity',false,true)
-ON CONFLICT (code) DO NOTHING;
-INSERT INTO gl_accounts(code, name, account_type, parent_code, category) VALUES
- ('3101001001','Gross Written Premium - Motor','income','3101001','Premium'),('3101001002','Gross Written Premium - Fire','income','3101001','Premium'),
- ('3101001003','Gross Written Premium - Marine','income','3101001','Premium'),('3101001004','Gross Written Premium - Engineering','income','3101001','Premium'),
- ('3101001005','Gross Written Premium - General Accident','income','3101001','Premium'),
- ('4101001001','Gross Claims Paid - Motor','expense','4101001','Claims'),('4101001002','Gross Claims Paid - Fire','expense','4101001','Claims'),
- ('4101001003','Gross Claims Paid - Marine','expense','4101001','Claims'),('4101001004','Gross Claims Paid - Engineering','expense','4101001','Claims'),
- ('4101001005','Gross Claims Paid - General Accident','expense','4101001','Claims'),('4101001006','Gross Claims Paid - Liability','expense','4101001','Claims'),
- ('4101001007','Gross Claims Paid - Bonds','expense','4101001','Claims'),('4101001008','Gross Claims Paid - Aviation','expense','4101001','Claims'),
- ('4101001009','Gross Claims Paid - Oil and Gas','expense','4101001','Claims'),
- ('4401003001','Audit Fees Statutory','expense','4401003','Operating Expenses'),('4401003002','Audit Fees Other','expense','4401003','Operating Expenses'),
- ('4401003003','Internal Audit','expense','4401003','Operating Expenses')
-ON CONFLICT (code) DO NOTHING;
+-- Chart of accounts for a Philippine insurance brokerage (D57), PFRS / BIR style grouping.
+-- Codes follow the Journal Voucher screen: 1 assets, 2 liabilities, 3 income, 4 expenses, 5 equity. Every code the system
+-- posts to (accounting.account.* settings, payable / cash maps) keeps its code; fs_group is the statement line group.
+-- Idempotent: a new account is inserted; an existing one is only classified (fs_group, normal balance, description,
+-- category) and renamed from its former seeded label the first time this chart runs (fs_group still NULL), so an
+-- administrator's later edits are kept.
+WITH chart(code, name, account_type, parent_code, category, is_open_item, allow_manual, fs_group, normal_balance, description, legacy_name) AS (VALUES
+ -- ASSETS: cash and cash equivalents
+ ('1101001','Cash on Hand','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Cash collections pending deposit','Cash on Hand'),
+ ('1101002','Cash on Hand – Undeposited Cheques','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Cheques received and not yet deposited',NULL),
+ ('1102001','Cash in Bank – Operating Account (BDO Current)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Default collection and disbursement account','Cash in Bank – BDO Current'),
+ ('1102002','Cash in Bank – E-wallet Clearing (GCash)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','E-wallet and online collections clearing','Cash in Bank – E-wallet Clearing (GCash)'),
+ ('1102003','Cash in Bank – Premium Trust Account (Clients'' Money)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Segregated account for premiums held for insurers',NULL),
+ ('1102004','Cash in Bank – Payroll Account','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Payroll funding account',NULL),
+ ('1103001','Petty Cash Fund','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Imprest petty cash funds','Petty Cash Fund'),
+ ('1104001','Short-term Placements (Time Deposits)','asset',NULL,'Cash and Cash Equivalents',false,true,'Current Assets','debit','Placements maturing within three months',NULL),
+ -- ASSETS: receivables
+ ('1202001','Premiums Receivable – Direct Clients','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit','Premium billed to clients on broker-billed policies','Premiums Receivable - Direct Clients'),
+ ('1202002','Premiums Receivable – Corporate Clients','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit',NULL,'Premiums Receivable - Corporate Customers'),
+ ('1202003','Premiums Receivable – Agents','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit','Premium collected by agents not yet turned over','Premiums Receivable - Agents'),
+ ('1202004','Premiums Receivable – Local Brokers','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit',NULL,'Premiums Receivable - Broker - Local'),
+ ('1202005','Premiums Receivable – Foreign Brokers','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit',NULL,'Premiums Receivable - Broker - International'),
+ ('1202006','Premiums Receivable – Banks (Bancassurance)','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit',NULL,'Premiums Receivable - Banks'),
+ ('1202007','Premiums Receivable – Local Insurers','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit',NULL,'Premiums Receivable - Insurance Co - Local'),
+ ('1202008','Premiums Receivable – Foreign Insurers','asset',NULL,'Premiums Receivable',true,true,'Current Assets','debit',NULL,'Premiums Receivable - Insurance Co - International'),
+ ('1202020','Allowance for Doubtful Accounts – Premiums Receivable','asset',NULL,'Premiums Receivable',false,true,'Current Assets','credit','Contra-asset (credit balance)','Provision for Bad Debt'),
+ ('1203001','Commission Receivable – Insurers (Direct Bill)','asset',NULL,'Receivables',true,true,'Current Assets','debit','Commission and VAT due from insurers on direct-bill policies (commission debit notes)','Commission Receivable - Insurers'),
+ ('1203002','Due from Insurers','asset',NULL,'Receivables',true,true,'Current Assets','debit','Return premiums, claim advances and other amounts recoverable from insurers',NULL),
+ ('1204001','Receivable from Agents – Commission Clawback','asset',NULL,'Receivables',true,true,'Current Assets','debit',NULL,'Receivable from Agents - Clawback'),
+ ('1204002','Advances to Agents and Referrers','asset',NULL,'Receivables',true,true,'Current Assets','debit','Cash advances against future commission',NULL),
+ ('1205001','Advances to Employees','asset',NULL,'Receivables',true,true,'Current Assets','debit','Cash advances and petty cash returns','Employee Advances'),
+ ('1205002','Other Receivables','asset',NULL,'Receivables',true,true,'Current Assets','debit',NULL,NULL),
+ -- ASSETS: taxes and prepayments
+ ('1301001','Input VAT','asset',NULL,'Taxes',false,true,'Current Assets','debit','VAT on purchases of goods and services (BIR 2550Q)','Input VAT'),
+ ('1302001','Creditable Withholding Tax (BIR Form 2307)','asset',NULL,'Taxes',true,true,'Current Assets','debit','Expanded withholding tax deducted by insurers and clients on commission and fees; credited against income tax',NULL),
+ ('1302002','Prepaid Income Tax','asset',NULL,'Taxes',false,true,'Current Assets','debit','Quarterly income tax payments (BIR 1702Q)',NULL),
+ ('1303001','Prepaid Rent','asset',NULL,'Prepayments',false,true,'Current Assets','debit',NULL,NULL),
+ ('1303002','Prepaid Insurance','asset',NULL,'Prepayments',false,true,'Current Assets','debit',NULL,NULL),
+ ('1303003','Prepaid Expenses – Others','asset',NULL,'Prepayments',false,true,'Current Assets','debit','Subscriptions, licences and other prepayments',NULL),
+ -- ASSETS: non-current
+ ('1401001','Office Equipment','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','debit',NULL,NULL),
+ ('1401002','Furniture and Fixtures','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','debit',NULL,NULL),
+ ('1401003','Computer Equipment','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','debit',NULL,NULL),
+ ('1401004','Transportation Equipment','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','debit',NULL,NULL),
+ ('1401005','Leasehold Improvements','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','debit',NULL,NULL),
+ ('1402001','Accumulated Depreciation – Office Equipment','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','credit','Contra-asset (credit balance)',NULL),
+ ('1402002','Accumulated Depreciation – Furniture and Fixtures','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','credit','Contra-asset (credit balance)',NULL),
+ ('1402003','Accumulated Depreciation – Computer Equipment','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','credit','Contra-asset (credit balance)',NULL),
+ ('1402004','Accumulated Depreciation – Transportation Equipment','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','credit','Contra-asset (credit balance)',NULL),
+ ('1402005','Accumulated Amortization – Leasehold Improvements','asset',NULL,'Property and Equipment',false,true,'Non-current Assets','credit','Contra-asset (credit balance)',NULL),
+ ('1403001','Computer Software and Licences','asset',NULL,'Intangible Assets',false,true,'Non-current Assets','debit',NULL,NULL),
+ ('1403002','Accumulated Amortization – Computer Software','asset',NULL,'Intangible Assets',false,true,'Non-current Assets','credit','Contra-asset (credit balance)',NULL),
+ ('1501001','Security Deposits','asset',NULL,'Other Non-current Assets',false,true,'Non-current Assets','debit','Rental and utility deposits',NULL),
+ -- LIABILITIES: current
+ ('2201001','Premiums Payable to Insurers','liability',NULL,'Payables',true,true,'Current Liabilities','credit','Premium collected from clients, due to insurers net of commission','Premium Payable to Insurers'),
+ ('2202001','Clients'' Deposits and Unapplied Collections','liability',NULL,'Payables',true,true,'Current Liabilities','credit','Collections not yet applied to a bill',NULL),
+ ('2203001','Commission Payable – Agents and Referrers (Comsub)','liability',NULL,'Commission Payable',true,true,'Current Liabilities','credit',NULL,'Commission Accrued - Agents'),
+ ('2203002','Commission Payable – Banks','liability',NULL,'Commission Payable',true,true,'Current Liabilities','credit',NULL,'Commission Accrued - Banks'),
+ ('2203003','Commission Payable – Local Brokers','liability',NULL,'Commission Payable',true,true,'Current Liabilities','credit',NULL,'Commission Accrued - Broker - Local'),
+ ('2203004','Commission Payable – Foreign Brokers','liability',NULL,'Commission Payable',true,true,'Current Liabilities','credit',NULL,'Commission Accrued - Broker - International'),
+ ('2203005','Commission Payable – Local Insurers','liability',NULL,'Commission Payable',true,true,'Current Liabilities','credit',NULL,'Commission Accrued - Insurance Co - Local'),
+ ('2203006','Commission Payable – Foreign Insurers','liability',NULL,'Commission Payable',true,true,'Current Liabilities','credit',NULL,'Commission Accrued - Insurance Co - International'),
+ ('2204001','Expanded Withholding Tax Payable (BIR 1601-EQ)','liability',NULL,'Taxes',false,true,'Current Liabilities','credit','EWT withheld on commission, rent, professional fees and suppliers','Withholding Tax Payable - Expanded'),
+ ('2204002','Withholding Tax on Compensation Payable (BIR 1601-C)','liability',NULL,'Taxes',false,true,'Current Liabilities','credit',NULL,NULL),
+ ('2204003','Output VAT Payable','liability',NULL,'Taxes',false,true,'Current Liabilities','credit','VAT on commission and fees (BIR 2550Q)',NULL),
+ ('2204004','Income Tax Payable','liability',NULL,'Taxes',false,true,'Current Liabilities','credit',NULL,NULL),
+ ('2205001','Client Refunds Payable','liability',NULL,'Payables',true,true,'Current Liabilities','credit','Return premiums and overpayments due to clients','Client Refunds Payable'),
+ ('2206001','Accounts Payable – Suppliers','liability',NULL,'Payables',true,true,'Current Liabilities','credit',NULL,'Accounts Payable - Suppliers'),
+ ('2207001','SSS Contributions Payable','liability',NULL,'Statutory Contributions',false,true,'Current Liabilities','credit','Employee and employer shares',NULL),
+ ('2207002','PhilHealth Contributions Payable','liability',NULL,'Statutory Contributions',false,true,'Current Liabilities','credit','Employee and employer shares',NULL),
+ ('2207003','Pag-IBIG (HDMF) Contributions Payable','liability',NULL,'Statutory Contributions',false,true,'Current Liabilities','credit','Employee and employer shares',NULL),
+ ('2207004','SSS and Pag-IBIG Loans Payable','liability',NULL,'Statutory Contributions',false,true,'Current Liabilities','credit','Employee loan amortisations withheld',NULL),
+ ('2208001','Accrued Expenses Payable','liability',NULL,'Accrued Expenses',false,true,'Current Liabilities','credit',NULL,NULL),
+ ('2208002','Accrued Salaries and Benefits','liability',NULL,'Accrued Expenses',false,true,'Current Liabilities','credit','Including accrued 13th month pay',NULL),
+ ('2209001','Unearned Commission Income','liability',NULL,'Deferred Income',false,true,'Current Liabilities','credit','Commission received for cover not yet effective',NULL),
+ -- LIABILITIES: non-current
+ ('2301001','Retirement Benefit Obligation','liability',NULL,'Employee Benefits',false,true,'Non-current Liabilities','credit','RA 7641 retirement pay',NULL),
+ -- EQUITY
+ ('5100001','Capital Stock – Common','equity',NULL,'Equity',false,true,'Equity','credit',NULL,NULL),
+ ('5100002','Additional Paid-in Capital','equity',NULL,'Equity',false,true,'Equity','credit',NULL,NULL),
+ ('5101001','Retained Earnings','equity',NULL,'Equity',false,true,'Equity','credit',NULL,'Retained Earnings'),
+ ('5102001','Current Year Profit / (Loss)','equity',NULL,'Equity',false,false,'Equity','credit','Income summary used at year-end closing',NULL),
+ -- INCOME
+ ('3201001','Brokerage Commission Income','income',NULL,'Commission',false,true,'Revenue','credit','Commission earned on placements (broker-billed and direct-bill)','Brokerage Commission Income'),
+ ('3201002','Contingent and Profit Commission Income','income',NULL,'Commission',false,true,'Revenue','credit','Volume and profit-sharing commission from insurers',NULL),
+ ('3202001','Service Fees','income',NULL,'Fees',false,true,'Revenue','credit','Policy administration and service fees',NULL),
+ ('3202002','Consultancy and Risk Management Fees','income',NULL,'Fees',false,true,'Revenue','credit',NULL,NULL),
+ ('3301001','Interest Income','income',NULL,'Other Income',false,true,'Other Income','credit','Interest on bank deposits and placements (net of final tax)',NULL),
+ ('3301002','Foreign Exchange Gain','income',NULL,'Other Income',false,true,'Other Income','credit',NULL,NULL),
+ ('3302001','Other Income','income',NULL,'Other Income',false,true,'Other Income','credit',NULL,NULL),
+ -- EXPENSES: cost of services
+ ('4401010','Commission Expense – Agents and Referrers (Comsub)','expense',NULL,'Commission',false,true,'Cost of Services','debit','Commission shared with agents, sub-agents and referrers','Commission Expense - Sub-agents (Comsub)'),
+ -- EXPENSES: personnel
+ ('4301001','Salaries and Wages','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4301002','13th Month Pay and Other Benefits','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4301003','SSS Contributions – Employer Share','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4301004','PhilHealth Contributions – Employer Share','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4301005','Pag-IBIG Contributions – Employer Share','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4301006','Employee Benefits – HMO and Group Insurance','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4301007','Retirement Benefit Expense','expense',NULL,'Personnel Costs',false,true,'Operating Expenses','debit',NULL,NULL),
+ -- EXPENSES: general and administrative
+ ('4401001','Administrative Expenses – General','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,'Administrative Cost'),
+ ('4401002','Advertising and Marketing','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,'Advertising'),
+ ('4401003','Audit Fees','expense',NULL,'Professional Fees',false,true,'Operating Expenses','debit',NULL,'Audit Fees'),
+ ('4401003001','Audit Fees – Statutory','expense','4401003','Professional Fees',false,true,'Operating Expenses','debit',NULL,'Audit Fees Statutory'),
+ ('4401003002','Audit Fees – Other Engagements','expense','4401003','Professional Fees',false,true,'Operating Expenses','debit',NULL,'Audit Fees Other'),
+ ('4401003003','Internal Audit','expense','4401003','Professional Fees',false,true,'Operating Expenses','debit',NULL,'Internal Audit'),
+ ('4401004','Bank Charges','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,'Bank Charges'),
+ ('4401005','Building and Condominium Dues','expense',NULL,'Occupancy',false,true,'Operating Expenses','debit',NULL,'Building Cost Expense'),
+ ('4401006','Professional Fees – Consultancy','expense',NULL,'Professional Fees',false,true,'Operating Expenses','debit',NULL,'Consultancy Fees'),
+ ('4401007','Communication, Postage and Courier','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit','Telephone, internet, mobile, postage and courier','Communication and Courier'),
+ ('4401008','Office Supplies','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,'Office Supplies'),
+ ('4401009','Bad Debts Written Off','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,'Bad Debts Written Off'),
+ ('4402001','Rent Expense','expense',NULL,'Occupancy',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4402002','Light and Water','expense',NULL,'Occupancy',false,true,'Operating Expenses','debit','Electricity and water utilities',NULL),
+ ('4403001','Transportation and Travel','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit','Local and foreign travel, fuel, parking and tolls',NULL),
+ ('4403002','Representation and Entertainment','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit','Subject to the BIR deductibility ceiling',NULL),
+ ('4404001','Professional Fees – Legal and Notarial','expense',NULL,'Professional Fees',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4405001','Taxes and Licenses','expense',NULL,'Taxes and Licenses',false,true,'Operating Expenses','debit','Business permits, IC broker licence, registration and documentary stamp tax',NULL),
+ ('4405002','Insurance Expense','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit','Professional indemnity, fidelity and property insurance',NULL),
+ ('4406001','Depreciation Expense','expense',NULL,'Depreciation and Amortization',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4406002','Amortization Expense','expense',NULL,'Depreciation and Amortization',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4407001','Repairs and Maintenance','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4407002','IT and Software Subscriptions','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit','Software licences, cloud hosting and IT support',NULL),
+ ('4408001','Training and Seminars','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit','Including Insurance Commission continuing education',NULL),
+ ('4408002','Membership Dues and Subscriptions','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4409001','Miscellaneous Expense','expense',NULL,'Operating Expenses',false,true,'Operating Expenses','debit',NULL,NULL),
+ ('4501001','Interest and Finance Charges','expense',NULL,'Finance Costs',false,true,'Other Expenses','debit',NULL,NULL),
+ ('4501002','Foreign Exchange Loss','expense',NULL,'Finance Costs',false,true,'Other Expenses','debit',NULL,NULL),
+ ('4601001','Provision for Income Tax','expense',NULL,'Income Tax',false,true,'Income Tax','debit','Current and deferred income tax expense',NULL))
+INSERT INTO gl_accounts(code, name, account_type, parent_code, category, is_open_item, allow_manual, fs_group, normal_balance, description)
+SELECT code, name, account_type, parent_code, category, is_open_item, allow_manual, fs_group, normal_balance, description FROM chart ORDER BY code
+ON CONFLICT (code) DO UPDATE SET
+  name = CASE WHEN gl_accounts.fs_group IS NULL AND gl_accounts.name = (SELECT c.legacy_name FROM chart c WHERE c.code = EXCLUDED.code) THEN EXCLUDED.name ELSE gl_accounts.name END,
+  category = CASE WHEN gl_accounts.fs_group IS NULL THEN EXCLUDED.category ELSE gl_accounts.category END,
+  normal_balance = CASE WHEN gl_accounts.fs_group IS NULL THEN EXCLUDED.normal_balance ELSE gl_accounts.normal_balance END,
+  description = COALESCE(gl_accounts.description, EXCLUDED.description),
+  fs_group = COALESCE(gl_accounts.fs_group, EXCLUDED.fs_group),
+  updated_at = CASE WHEN gl_accounts.fs_group IS NULL THEN now() ELSE gl_accounts.updated_at END;
+
+-- Earlier seeds carried insurer accounts a broker does not use (gross written premium, gross claims paid). They are
+-- retired (inactive, still visible) where nothing was ever posted to them; any other unclassified account is grouped by type.
+UPDATE gl_accounts a SET status = 'inactive', updated_at = now()
+  WHERE (a.code LIKE '3101001%' OR a.code LIKE '4101001%') AND a.status = 'active' AND a.fs_group IS NULL
+    AND NOT EXISTS (SELECT 1 FROM journal_lines l WHERE l.account_code = a.code);
+UPDATE gl_accounts SET fs_group = CASE account_type WHEN 'asset' THEN 'Current Assets' WHEN 'liability' THEN 'Current Liabilities' WHEN 'equity' THEN 'Equity'
+    WHEN 'income' THEN 'Revenue' ELSE 'Operating Expenses' END
+  WHERE fs_group IS NULL;
+
 
 -- Commission referrers (fictional)
 INSERT INTO commission_referrers(id, name, referrer_type, level, parent_referrer_id, tin, email, phone, wht_rate, wht_applicable, bank_name, bank_account_no, status) VALUES

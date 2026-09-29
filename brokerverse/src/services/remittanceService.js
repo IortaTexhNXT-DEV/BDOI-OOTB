@@ -53,10 +53,33 @@ export const remittanceService = {
   executeAutomated: (payload) => post(`${R}/automated/execute`, payload),
   automatedHistory: () => get(`${R}/automated/history`),
 
-  // direct / agency bills
-  directBillPolicies: (params) => get(`${R}/direct-bill/policies`, params),
+  // direct bill: the client pays the insurer; the broker bills its commission with a commission debit note
+  directBillSummary: () => get(`${R}/direct-bill/summary`),
+  directBillItems: (params) => apiRequest("GET", `${R}/direct-bill/policies`, { params }),
+  listDebitNotes: (params) => apiRequest("GET", `${R}/direct-bill`, { params }),
   listDirectBills: (params) => get(`${R}/direct-bill`, params),
-  createDirectBill: (payload) => post(`${R}/direct-bill`, payload),
+  getDebitNote: (dnId) => get(`${R}/direct-bill/${id(dnId)}`),
+  raiseDebitNote: (payload) => post(`${R}/direct-bill`, payload),
+  submitDebitNote: (dnId) => post(`${R}/direct-bill/${id(dnId)}/submit`),
+  approveDebitNote: (dnId, remarks) => post(`${R}/direct-bill/${id(dnId)}/approve`, { remarks }),
+  rejectDebitNote: (dnId, reason) => post(`${R}/direct-bill/${id(dnId)}/reject`, { reason }),
+  cancelDebitNote: (dnId, reason) => post(`${R}/direct-bill/${id(dnId)}/cancel`, { reason }),
+  sendDebitNote: (dnId, email) => post(`${R}/direct-bill/${id(dnId)}/send`, email ? { email } : {}),
+  collectDebitNote: (dnId, payload) => post(`${R}/direct-bill/${id(dnId)}/collections`, payload),
+  reverseDebitNoteCollection: (dnId, collectionId, reason) => post(`${R}/direct-bill/${id(dnId)}/collections/${id(collectionId)}/reverse`, { reason }),
+  changeBillingMode: (payload) => post(`${R}/direct-bill/billing-mode`, payload),
+  /** Opens the printable debit note (PDF fetched with the session token). */
+  openDebitNotePdf: async (dnId) => {
+    const response = await fetch(`${BASE_URL}${R}/direct-bill/${id(dnId)}/pdf`, { headers: { ...authService.getAuthHeader() } });
+    if (!response.ok) {
+      const json = await response.json().catch(() => null);
+      throw new Error(errorMessage(json, response.status));
+    }
+    const url = URL.createObjectURL(await response.blob());
+    window.open(url, "_blank", "noopener,noreferrer");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  },
+  // agency bills
   agencies: (billPeriod) => get(`${R}/agency-bill/agencies`, { billPeriod }),
   generateAgencyBills: (payload) => post(`${R}/agency-bill/generate`, payload),
   listAgencyBills: (params) => get(`${R}/agency-bill`, params),

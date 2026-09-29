@@ -16,6 +16,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import policyService from "../../../services/policyService";
 import quotationService from "../../../services/quotationService";
+import systemSettingsService from "../../../services/systemSettingsService";
 import S3FileUpload from "../../../components/S3FileUpload";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
@@ -28,6 +29,9 @@ const STATUS_LABEL = { submitted: "Awaiting finance verification", confirmed: "C
  *
  * Replaces the former mock payment that auto-completed and issued an official receipt without any money captured.
  * The user chooses how the client pays:
+ *  - Billing mode at issue: broker billed (the client pays the broker, who remits to the insurer) or direct bill (the
+ *    client pays the insurer directly; no premium bill is raised and the broker bills its commission to the insurer with
+ *    a debit note). The default comes from System Settings (direct_bill.default_billing_mode).
  *  - Pay later: nothing is posted; the bill raised at issuance stays open.
  *  - Bank transfer / cheque / online / cash: mode, reference, amount, date and an optional proof are recorded for
  *    finance to verify. Only a user with write:receipts (finance) posts the official receipt, at capture or by
@@ -56,6 +60,17 @@ const PaymentConfirmation = () => {
   const [option, setOption] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [issueErrors, setIssueErrors] = useState([]);
+  const [billingMode, setBillingMode] = useState("broker");
+
+  useEffect(() => {
+    systemSettingsService
+      .getConfiguration("direct_bill")
+      .then((rows) => {
+        const mode = (rows || []).find((r) => r.key === "direct_bill.default_billing_mode")?.value;
+        if (mode === "direct" || mode === "broker") setBillingMode(mode);
+      })
+      .catch(() => {});
+  }, []);
 
   const policy = state?.policy || state?.policyData || policydetailedlist || {};
   const pick = (...vals) => vals.find((v) => v !== undefined && v !== null && v !== "") ?? 0;
@@ -123,7 +138,7 @@ const PaymentConfirmation = () => {
     setIssueErrors([]);
     const result = await quotationService.convertQuotationToPolicy(
       quotationId,
-      { ...(state?.additionalPolicyData || {}), paymentStatus: "Pending" },
+      { ...(state?.additionalPolicyData || {}), paymentStatus: "Pending", billingMode },
       localStorage.getItem("USERNAME") || "agent",
       state?.lob || null
     );
@@ -136,7 +151,13 @@ const PaymentConfirmation = () => {
       return;
     }
     const created = result.data?.data?.policy || result.data?.policy;
-    showToast("success", t("agent.policyCreated", "Policy issued"), `Policy ${created?.policyNumber || ""} issued; bill ${created?.billNumber || ""} is open for payment`);
+    showToast(
+      "success",
+      t("agent.policyCreated", "Policy issued"),
+      created?.billingMode === "direct" || billingMode === "direct"
+        ? `Policy ${created?.policyNumber || ""} issued as direct bill: the client pays the insurer; finance bills the commission to the insurer`
+        : `Policy ${created?.policyNumber || ""} issued; bill ${created?.billNumber || ""} is open for payment`
+    );
     setPolicyId(created?.policyId || created?.id);
   };
 
@@ -274,8 +295,23 @@ const PaymentConfirmation = () => {
           ) : (
             <>
               <p className="mt-0">
-                Issue the policy first. Issuing raises the bill; it stays open until the client&apos;s payment is recorded and verified by finance.
+                Issue the policy first. Choose who the client pays: the broker (a bill is raised and stays open until the client&apos;s payment is recorded and verified by
+                finance) or the insurer directly (direct bill: no premium bill; the broker&apos;s commission is billed to the insurer).
               </p>
+              <div className="flex flex-column gap-2 mb-3">
+                <div className="flex align-items-center gap-2">
+                  <RadioButton inputId="bill-broker" name="billingMode" value="broker" onChange={(e) => setBillingMode(e.value)} checked={billingMode === "broker"} />
+                  <label htmlFor="bill-broker">
+                    <strong>Broker billed</strong> — the client pays the premium to us; we remit it to the insurer net of commission
+                  </label>
+                </div>
+                <div className="flex align-items-center gap-2">
+                  <RadioButton inputId="bill-direct" name="billingMode" value="direct" onChange={(e) => setBillingMode(e.value)} checked={billingMode === "direct"} />
+                  <label htmlFor="bill-direct">
+                    <strong>Direct bill</strong> — the client pays the premium directly to the insurer; we raise a commission debit note to the insurer
+                  </label>
+                </div>
+              </div>
               {issueErrors.length > 0 && (
                 <Message
                   severity="error"
@@ -299,7 +335,16 @@ const PaymentConfirmation = () => {
             <label className="waiting__payment">Outstanding {formatCurrency(outstanding)}</label>
           </div>
           {loading && !summary && <p>Loading…</p>}
-          {summary && outstanding <= 0 && (
+          {summary?.billingMode === "direct" && (
+            <Message
+              severity="info"
+              className="w-full justify-content-start mt-3"
+              text={`Direct bill: the client pays the premium directly to the insurer. No premium is collected by the broker; our commission of ${formatCurrency(
+                summary.directBill?.commissionDue || 0
+              )} (with VAT) is billed to the insurer by finance (Remittance > Direct Bill Processing).`}
+            />
+          )}
+          {summary && summary.billingMode !== "direct" && outstanding <= 0 && (
             <Message severity="success" className="w-full justify-content-start mt-3" text="This policy has no outstanding premium." />
           )}
           {summary && pendingTotal > 0 && (

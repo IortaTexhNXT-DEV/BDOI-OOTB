@@ -55,8 +55,12 @@ export async function paymentSummary(db, policy, user) {
     const pending = await pendingOn(db, b.id);
     out.push({ receivableId: b.id, billNumber: b.bill_number, source: b.source, amount: Number(b.amount), balance: Number(b.balance), pendingVerification: round2(pending), dueDate: b.due_date });
   }
+  const direct = policy.billing_mode === 'direct';
+  const { directBillSummary } = await import('../remittance/directbill.js');
   return { policyId: policy.id, policyNumber: policy.policy_number, paymentStatus: policy.payment_status, receivables: out,
-    outstanding: round2(out.reduce((s, b) => s + b.balance, 0)), captures, ...(await paymentSettings()), canConfirm: canPostReceipts(user) };
+    outstanding: round2(out.reduce((s, b) => s + b.balance, 0)), captures, ...(await paymentSettings()), canConfirm: canPostReceipts(user),
+    // direct bill: the client pays the insurer; the broker collects only its commission from the insurer (debit note)
+    billingMode: policy.billing_mode || 'broker', directBill: direct ? await directBillSummary(db, policy.id) : null };
 }
 
 async function setPolicyPaymentStatus(db, policyId, userId) {
@@ -87,6 +91,7 @@ async function confirm(db, capture, user) {
  * Returns { option, capture, receipt, posted }.
  */
 export async function capturePayment(db, policy, body, user) {
+  if (policy.billing_mode === 'direct') throw conflict(`Policy ${policy.policy_number} is direct billed: the client pays the premium to the insurer, not to the broker`);
   if (body.option === 'pay-later') {
     await db.query('UPDATE policies SET payment_method = $2, updated_by = $3, updated_at = now() WHERE id = $1', [policy.id, 'Pay later', user.id]);
     await setPolicyPaymentStatus(db, policy.id, user.id);

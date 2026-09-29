@@ -291,6 +291,29 @@ const ExecutiveDashboard = () => {
               </div>
             </Card>
           ))}
+          {dashboard?.receivables && (
+            <>
+              {/* broker-billed premium owed by clients; direct-bill policies owe nothing to us (the client pays the insurer) */}
+              <Card className="kpi-card">
+                <div className="kpi-header">
+                  <span className="kpi-title">Premium receivable (clients)</span>
+                </div>
+                <div className="kpi-value">{money(dashboard.receivables.premiumFromClients)}</div>
+                <div className="kpi-target">
+                  <span>Overdue: {money(dashboard.receivables.premiumOverdue)}</span>
+                </div>
+              </Card>
+              <Card className="kpi-card">
+                <div className="kpi-header">
+                  <span className="kpi-title">Commission receivable (insurers, direct bill)</span>
+                </div>
+                <div className="kpi-value">{money(dashboard.receivables.commissionFromInsurers)}</div>
+                <div className="kpi-target">
+                  <span>Unbilled: {money(dashboard.receivables.commissionUnbilled)} · Overdue: {money(dashboard.receivables.commissionOverdue)}</span>
+                </div>
+              </Card>
+            </>
+          )}
         </div>
       </div>
 

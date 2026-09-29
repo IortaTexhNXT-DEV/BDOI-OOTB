@@ -30,7 +30,8 @@ export async function findClient(db, ref) {
   return (await db.query('SELECT * FROM clients WHERE id = $1 OR client_code = $1 LIMIT 1', [String(ref)])).rows[0] || null;
 }
 
-async function commissionFor(policy, amount, breakdown, source) {
+/** Brokerage commission on a premium amount: the given amount, the policy's own commission for its full premium, else rate x net premium. */
+export async function commissionFor(policy, amount, breakdown, source) {
   if (breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null) return round2(breakdown.commissionAmount);
   const base = breakdown.netPremium > 0 ? breakdown.netPremium : amount;
   if (source === 'policy' && Number(policy.commission_amount) > 0 && Math.abs(Number(policy.premium_total) - amount) < 0.01) return round2(policy.commission_amount);
@@ -42,6 +43,8 @@ const ENTRY_BY_SOURCE = { endorsement: 'ENDORSEMENT', renewal: 'RENEWAL' };
 
 /** Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount, commissionAmount } */
 export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, user = null }) {
+  // Direct bill: the client pays the insurer, so the broker has no premium receivable (commission is billed to the insurer)
+  if (policy.billing_mode === 'direct') throw badRequest(`Policy ${policy.policy_number} is direct billed: the client pays the insurer, so no premium is billed or collected by the broker`);
   const gross = round2(amount);
   if (!(gross > 0)) throw badRequest('Receivable amount must be greater than zero');
   const creditDays = Number(await getSetting('collections.default_credit_days', 30));

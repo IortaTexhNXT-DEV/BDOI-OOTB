@@ -1,11 +1,11 @@
-/** Document specs (see pdf.js) for quotations, policy schedules, placing slips and receipts. */
+/** Document specs (see pdf.js) for quotations, policy schedules, placing slips, receipts and commission debit notes. */
 import { getSetting } from '../../lib/settings.js';
 import { num } from './common.js';
 
 const money = (v) => num(v);
 const val = (v) => (v === null || v === undefined || v === '' ? '-' : String(v));
 
-async function header(title, number) {
+export async function header(title, number) {
   const company = await getSetting('general.company_name', '');
   const system = await getSetting('general.system_name', '');
   return { title, subtitle: `${company}${number ? `  -  ${number}` : ''}`, footer: `${system || company} - generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC` };
@@ -79,4 +79,29 @@ export async function receiptDoc(r, lines) {
   sections: [{ heading: 'Applied to', table: { columns: ['Policy no.', 'Net premium', 'VAT', 'DST', 'LGT', 'Paid'], widths: [125, 80, 75, 75, 75, 85],
     rows: lines.length ? lines.map((l) => [l.policy_number, money(l.net_premium), money(l.vat), money(l.dst), money(l.lgt), money(l.paid)]) : [[r.policy_number || '-', 0, 0, 0, 0, money(r.amount)]] } },
   { heading: 'Remarks', text: r.remarks || 'Thank you for your payment.' }] };
+}
+
+/**
+ * Commission debit note to an insurer (direct bill): one line per policy / endorsement, commission, VAT, total due, the
+ * expanded withholding tax the insurer deducts and the net amount payable. `dn` and `lines` are the API shapes
+ * (remittance/directbill.js#debitNoteOut).
+ */
+export async function commissionDebitNoteDoc(dn, lines) {
+  const h = await header(await getSetting('direct_bill.debit_note_title', 'Commission Debit Note'), dn.dnNumber);
+  const pct = (r) => `${(num(r) * 100).toFixed(2)}%`;
+  const totals = [['Commission', money(dn.commission)], [`Output VAT${dn.vatRate ? ` (${pct(dn.vatRate)})` : ''}`, money(dn.vat)], ['Total amount due', money(dn.amount)],
+    [`Less: expanded withholding tax (${pct(dn.ewtRate)} of commission)`, dn.expectedEwt ? -money(dn.expectedEwt) : 0], ['Net amount payable', money(dn.netPayable)]];
+  if (dn.collectedAmount) totals.push(['Collected to date (cash + tax withheld)', -money(dn.collectedAmount)], ['Balance', money(dn.balance)]);
+  return { ...h, meta: [['Debit note no.', dn.dnNumber], ['Date', dn.dnDate], ['Bill to', dn.insurerName], ['Due date', dn.dueDate], ['Insurer TIN', dn.insurerTin],
+    ['Period', dn.periodFrom || dn.periodTo ? `${val(dn.periodFrom)} to ${val(dn.periodTo)}` : '-'], ['Address', dn.insurerAddress], ['Currency', dn.currency], ['Status', dn.status], ['Policies', String(lines.length)]]
+    .map(([a, b]) => [a, val(b)]),
+  sections: [
+    { heading: 'Commission on direct-bill policies (premium paid by the insured to the insurer)',
+      table: { columns: ['Policy / ref.', 'Insured', 'Product', 'Gross premium', 'Rate', 'Commission', 'VAT', 'Total'], widths: [78, 95, 55, 75, 40, 62, 50, 60],
+        rows: lines.map((l) => [l.reference && l.reference !== l.policyNo ? `${l.policyNo} / ${l.reference}` : l.policyNo, val(l.insuredName), val(l.product), money(l.grossPremium),
+          l.commissionRate === null || l.commissionRate === undefined ? '-' : `${num(l.commissionRate).toFixed(2)}%`, money(l.commission), money(l.vat), money(l.amount)]) } },
+    { heading: `Amount due (${dn.currency})`, table: { columns: ['Item', 'Amount'], widths: [365, 150], rows: totals } },
+    { heading: 'Payment instructions', text: await getSetting('direct_bill.debit_note_remarks', '') },
+    ...(dn.remarks ? [{ heading: 'Remarks', text: dn.remarks }] : []),
+  ] };
 }

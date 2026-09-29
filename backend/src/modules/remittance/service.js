@@ -123,10 +123,14 @@ export async function remittanceDetails(id) {
   };
 }
 
-/** Policy rows eligible for billing / remittance (issued or active, not yet on a live remittance of this kind). */
+/**
+ * Policy rows eligible for billing / remittance (issued or active, not yet on a live remittance of this kind).
+ * Direct-bill policies are never remitted: the client paid the insurer, so no premium is payable (their commission is
+ * billed with a commission debit note, see directbill.js).
+ */
 export async function eligiblePolicies({ insurerId, agentUserId, from, to, productLine, policyIds, kind = 'direct-bill' }) {
   const p = params([kind]);
-  const conds = ['p.status IN (\'issued\', \'active\', \'renewed\')',
+  const conds = ['p.status IN (\'issued\', \'active\', \'renewed\')', 'p.billing_mode <> \'direct\'',
     `NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status NOT IN ('rejected', 'cancelled'))`];
   if (insurerId) conds.push(`p.insurance_company_id = ${p.add(insurerId)}`);
   if (agentUserId) conds.push(`p.owner_user_id = ${p.add(agentUserId)}`);
@@ -144,15 +148,6 @@ export async function eligiblePolicies({ insurerId, agentUserId, from, to, produ
 }
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-export const policyRow = (p) => ({
-  id: p.id, policyNo: p.policy_number, insuredName: p.insured_name, product: cap(p.product_line) || p.product_name, productName: p.product_name,
-  effectiveDate: p.inception_date, premium: Number(p.premium_total), commission: Number(p.commission_amount), tax: toNumber(p.details?.taxTotal, 0),
-  // once billed, outstanding is what is still unpaid (0 when paid in full); an unbilled policy owes its premium
-  outstandingAmount: p.billed ? Number(p.outstanding) : Number(p.premium_total), lastPaymentDate: p.last_payment,
-  billAmount: p.billed ? Number(p.outstanding) : Number(p.premium_total),
-  netAmount: round2(Number(p.premium_total) - Number(p.commission_amount) - toNumber(p.details?.taxTotal, 0)),
-  commissionRate: Number(p.premium_total) ? round2((Number(p.commission_amount) / Number(p.premium_total)) * 100) : 0,
-});
 
 /** Lines from explicit input rows or from policies; returns normalised lines. */
 async function buildLines(lines) {
@@ -434,29 +429,7 @@ export async function createDelegation(b, user) {
   return (await listDelegations()).find((d) => d.id === Number(r.id));
 }
 
-// ---------------- direct bill / agency bill ----------------
-
-export async function directBillPolicies(qs) {
-  const ins = await findInsurer(qs.insurerCode ?? qs.insurerId, { required: false });
-  const rows = await eligiblePolicies({ insurerId: ins?.id, productLine: qs.productLine, from: isoDate(qs.from), to: isoDate(qs.to), kind: 'direct-bill' });
-  const out = rows.map(policyRow);
-  if (qs.policyStatus === 'Grace Period') return out.filter((p) => p.outstandingAmount > 0);
-  return out;
-}
-
-export async function createDirectBill(b, user) {
-  const ins = await findInsurer(b.insurerCode ?? b.insurerId);
-  const ids = Array.isArray(b.policyIds) ? b.policyIds : [];
-  if (!ids.length) throw badRequest('Validation failed', [{ path: 'policyIds', message: 'Select at least one policy' }]);
-  const pols = await eligiblePolicies({ insurerId: ins.id, policyIds: ids, kind: 'direct-bill' });
-  if (pols.length !== ids.length) throw badRequest('Validation failed', [{ path: 'policyIds', message: 'Some policies are not billable for this insurer or are already billed' }]);
-  const lines = await buildLines(pols.map((p) => ({ policyId: p.id })));
-  const billNumber = await nextNumber('remittance_bill');
-  const billDate = isoDate(b.billDate) || new Date().toISOString().slice(0, 10);
-  const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId: ins.id, period: b.billingPeriod || billDate.slice(0, 7), dueDate: isoDate(b.dueDate) || null, lines, billNumber, deliveryMethod: b.deliveryMethod, remarks: b.remarks, date: billDate, userId: user.id }));
-  if (!isoDate(b.dueDate)) await query('UPDATE remittances SET due_date = $2 WHERE id = $1', [id, await defaultDueDate(billDate)]);
-  return getRemittance(id);
-}
+// ---------------- agency bill (direct bill: see directbill.js) ----------------
 
 /** Agents / agencies with their production for a bill period and unpaid balance of earlier agency bills. */
 export async function agencies(qs) {
@@ -469,7 +442,7 @@ export async function agencies(qs) {
       count(p.id)::int AS policies, COALESCE(sum(p.premium_total), 0) AS gross, COALESCE(sum(p.commission_amount), 0) AS commission,
       COALESCE((SELECT sum(r.net_due) FROM remittances r WHERE r.kind = 'agency-bill' AND r.agent_user_id = u.id AND r.status NOT IN ('settled', 'rejected', 'cancelled')), 0) AS prev
     FROM users u
-    LEFT JOIN policies p ON p.owner_user_id = u.id AND p.status IN ('issued', 'active', 'renewed') ${periodCond}
+    LEFT JOIN policies p ON p.owner_user_id = u.id AND p.status IN ('issued', 'active', 'renewed') AND p.billing_mode <> 'direct' ${periodCond}
       AND NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = 'agency-bill' AND rr.status NOT IN ('rejected', 'cancelled'))
     WHERE u.status = 'active' AND (EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id AND ro.code = ANY($1)) OR p.id IS NOT NULL)
     GROUP BY u.id ORDER BY u.display_name`, p.values);

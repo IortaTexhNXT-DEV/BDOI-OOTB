@@ -29,6 +29,9 @@ const creatorJoin = (col) => `LEFT JOIN LATERAL (SELECT id, username, display_na
 const CREATOR_DIMS = `u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,
   u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch`;
 
+/** Billing mode label: broker billed (client pays the broker) or direct bill (client pays the insurer; commission billed by debit note). */
+const BILLING_MODE = "CASE p.billing_mode WHEN 'direct' THEN 'Direct bill' ELSE 'Broker billed' END";
+
 const STANDARD_CRITERIA = { Overall: {}, Agent: { groupBy: 'agent' }, 'Principle Insurance': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' } };
 const POLICY_FILTERS = ['agent', 'insurer', 'branch', 'client', 'product', 'status'];
 
@@ -36,7 +39,7 @@ const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", p.cre
     p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate", to_char(p.inception_date, 'YYYY-MM') AS month,
     CASE WHEN p.renewed_from IS NULL THEN 'New Business' ELSE 'Renewal' END AS "businessType",
     ${POLICY_DIMS}, p.sum_insured AS "sumInsured", p.premium_total AS premium, p.commission_amount AS commission,
-    p.currency, p.status
+    ${BILLING_MODE} AS "billingMode", p.currency, p.status
   FROM policies p ${POLICY_JOINS}
   WHERE p.inception_date BETWEEN $1 AND $2`;
 
@@ -64,15 +67,37 @@ const receivables = `SELECT rv.bill_number AS "billNumber", rv.created_at::date 
   LEFT JOIN branches b ON b.code = u.branch_code`;
 const receivableBuckets = setting('limits.receivable_ageing_buckets', [30, 60, 90, 120], 'int[]');
 
+// trial balance dimensions: statement order (type, then account code) with the statement group
+const TB_DIMS = ['accountType', 'fsGroup', 'accountCode', 'accountName'];
+const ACCOUNT_TYPES = "'asset', 'liability', 'equity', 'income', 'expense'";
+
+// Direct bill: commission receivable from insurers per item (policy / endorsement), billed on a debit note or not yet;
+// the item's share of the note balance is outstanding. Aged from the note due date (unbilled: from the booking date).
+const directBill = `SELECT p.policy_number AS "policyNumber", COALESCE(e.endorsement_number, it.reference) AS reference, ${POLICY_DIMS}, it.booked_on AS "bookedOn",
+    it.booked_on >= $1::date AS "_inPeriod", d.dn_number AS "debitNoteNo", d.dn_date AS "debitNoteDate", d.due_date AS "dueDate",
+    it.gross_premium AS "grossPremium", it.commission, it.vat, it.amount AS "totalDue",
+    CASE WHEN d.id IS NULL OR d.status IN ('draft', 'for-approval') THEN it.amount WHEN d.amount = 0 THEN 0
+      ELSE round(it.amount * d.balance / d.amount, 2)
+        -- the last line of a note takes the rounding difference so the lines add up to the note balance
+        + CASE WHEN row_number() OVER (PARTITION BY d.id ORDER BY it.id DESC) = 1
+            THEN d.balance - sum(round(it.amount * d.balance / NULLIF(d.amount, 0), 2)) OVER (PARTITION BY d.id) ELSE 0 END END AS balance,
+    CASE WHEN d.id IS NULL THEN 'Unbilled' WHEN d.status IN ('draft', 'for-approval') THEN 'Debit note pending approval' WHEN d.status = 'open' THEN 'Billed'
+      WHEN d.status = 'partial' THEN 'Partially collected' ELSE 'Collected' END AS status,
+    ($2::date - COALESCE(d.due_date, it.booked_on)) AS "ageDays", rpt_age_bucket($2::date - COALESCE(d.due_date, it.booked_on), $3::int[]) AS "ageBucket"
+  FROM direct_bill_items it JOIN policies p ON p.id = it.policy_id ${POLICY_JOINS}
+  LEFT JOIN commission_debit_notes d ON d.id = it.debit_note_id LEFT JOIN endorsements e ON e.id = it.endorsement_id
+  WHERE it.status <> 'cancelled' AND it.booked_on <= $2`;
+
 // voucher payee types are stored as picked on screen (Insurer, Agent/Referrer, Customer / Client)
 const AGENT = "lower(d.payee_type) IN ('agent', 'agent/referrer', 'referrer')";
 const INSURER = "lower(d.payee_type) = 'insurer'";
 const CLIENT = "lower(d.payee_type) IN ('client', 'customer')";
 export const QUERIES = {
   production: {
-    sql: production, filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA,
+    sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
-    summary: { newBusiness: 'count(*) FILTER (WHERE f."businessType" = \'New Business\')', renewals: 'count(*) FILTER (WHERE f."businessType" = \'Renewal\')' },
+    summary: { newBusiness: 'count(*) FILTER (WHERE f."businessType" = \'New Business\')', renewals: 'count(*) FILTER (WHERE f."businessType" = \'Renewal\')',
+      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')' },
   },
   premiumByProduct: {
     sql: production, filters: POLICY_FILTERS,
@@ -130,7 +155,8 @@ export const QUERIES = {
         u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch,
         c.id AS _client_id, c.client_code AS _client_code, c.display_name AS client,
         pr.id::text AS _product_id, pr.code AS _product_code, pr.name AS product,
-        cm.basis_amount AS "basisAmount", cm.rate, cm.amount, cm.withholding, cm.net_amount AS "netAmount", cm.status, cm.paid_at::date AS "paidDate"
+        cm.basis_amount AS "basisAmount", cm.rate, cm.amount, cm.withholding, cm.net_amount AS "netAmount", cm.status, cm.paid_at::date AS "paidDate",
+        ${BILLING_MODE} AS "billingMode"
       FROM commissions cm LEFT JOIN policies p ON p.id = cm.policy_id
       LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
       LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
@@ -211,13 +237,14 @@ export const QUERIES = {
     orderBy: 'f."jvDate", f."jvNumber", f."accountCode"',
   },
   trialBalance: {
-    sql: `SELECT jl.account_code AS "accountCode", COALESCE(jl.account_name, jl.account_code) AS "accountName", jv.jv_date AS _date,
-        jl.debit, jl.credit, ${CREATOR_DIMS}
-      FROM journal_lines jl JOIN journal_vouchers jv ON jv.id = jl.jv_id ${creatorJoin('jv.created_by')}
+    sql: `SELECT jl.account_code AS "accountCode", COALESCE(ga.name, jl.account_name, jl.account_code) AS "accountName", ga.account_type AS "accountType",
+        ga.fs_group AS "fsGroup", jv.jv_date AS _date, jl.debit, jl.credit, ${CREATOR_DIMS}
+      FROM journal_lines jl JOIN journal_vouchers jv ON jv.id = jl.jv_id LEFT JOIN gl_accounts ga ON ga.code = jl.account_code ${creatorJoin('jv.created_by')}
       WHERE jv.jv_date <= $2 AND jv.status = ANY($3::text[])`,
     extras: [setting('reports.trial_balance_statuses', ['approved', 'posted'], 'text[]')],
     filters: ['agent', 'branch'],
-    criteria: { Overall: { dims: ['accountCode', 'accountName'] }, Agent: { dims: ['accountCode', 'accountName'] }, 'Principle Insurance': { dims: ['accountCode', 'accountName'] }, Branch: { dims: ['branch', 'accountCode', 'accountName'] } },
+    criteria: { Overall: { dims: TB_DIMS }, Agent: { dims: TB_DIMS }, 'Principle Insurance': { dims: TB_DIMS }, Branch: { dims: ['branch', ...TB_DIMS] } },
+    orderBy: (dims) => dims.map((d) => (d === 'accountType' ? `COALESCE(array_position(ARRAY[${ACCOUNT_TYPES}], f."accountType"), 99)` : `f."${d}"`)).join(', '),
     aggregate: {
       openingBalance: 'COALESCE(sum(t.debit - t.credit) FILTER (WHERE t._date < $1), 0)',
       periodDebit: 'COALESCE(sum(t.debit) FILTER (WHERE t._date >= $1), 0)',
@@ -226,6 +253,14 @@ export const QUERIES = {
       closingCredit: 'GREATEST(sum(t.credit - t.debit), 0)',
     },
     summary: { balanced: 'sum(f."closingDebit") = sum(f."closingCredit")' },
+  },
+  directBillCommission: {
+    sql: directBill, extras: [receivableBuckets], filters: POLICY_FILTERS,
+    criteria: {
+      'Ageing Bucket': { where: 't.balance > 0', groupBy: 'ageBucket' }, 'Principle Insurance': { where: 't.balance > 0', groupBy: 'insurer' },
+      Outstanding: { where: 't.balance > 0' }, Overall: { where: 't."_inPeriod"' },
+    },
+    orderBy: 'f.insurer, f."ageDays" DESC, f."policyNumber"',
   },
   leadFunnel: {
     sql: `SELECT l.status AS stage, l.created_at::date AS "createdDate", u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,

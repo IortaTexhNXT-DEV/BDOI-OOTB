@@ -13,7 +13,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
   'status', 'paymentStatus', 'paymentMethod', 'policyNumber', 'inception', 'inceptionDate', 'expiry', 'expiryDate', 'issuedDate', 'insuredName',
-  'clientId', 'quoteRefId', 'leadId', 'grossPremium', 'netPremium', 'sumInsured', 'totalSumInsured', 'billNumber', 'additionalPolicyData'];
+  'clientId', 'quoteRefId', 'leadId', 'grossPremium', 'netPremium', 'sumInsured', 'totalSumInsured', 'billNumber', 'additionalPolicyData', 'billingMode', 'isDirectBilled'];
 const docOf = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 
 /** LOB for rows created without one (e.g. seeded or imported policies): from the product master line. */
@@ -35,6 +35,7 @@ export function toPolicy(r) {
     expiry: r.expiry_date, expiryDate: r.expiry_date, issuedDate: r.issued_date, production: doc.production || r.issued_date,
     sumInsured: Number(r.sum_insured), totalSumInsured: Number(r.sum_insured), netPremium: Number(r.net_premium), grossPremium: Number(r.premium_total),
     premiumTotal: Number(r.premium_total), commissionAmount: Number(r.commission_amount), currency: r.currency, billNumber: r.bill_number,
+    billingMode: r.billing_mode || 'broker', isDirectBilled: r.billing_mode === 'direct',
     valueAddedTax: quote?.valueAddedTax, documentaryStampTax: quote?.documentaryStampTax, localGovernmentTax: quote?.localGovernmentTax,
     fireServiceTax: quote?.fireServiceTax, discount: quote?.discount, accountPremiumOthers: quote?.accountPremiumOthers,
     renewedFrom: r.renewed_from, renewedTo: r.renewed_to, client, lead: r.lead_row ? toLead(r.lead_row) : null, quotation: quote,
@@ -166,10 +167,18 @@ const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMont
  * Receivable (bill) for a premium amount. Delegates to the finance module so every bill is booked in the
  * ledger at issuance (Dr premium receivable / Cr due to insurer / Cr commission income) and opens a
  * collection item; the bill number comes from numbering.invoice.prefix.
+ * A direct-bill policy (the client pays the insurer) has no premium bill: the commission due from the insurer is booked
+ * instead (Dr commission receivable / Cr commission income / Cr output VAT) and { id: null, bill_number: null, directBill }
+ * is returned.
  */
-export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null }) {
+export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null }) {
   const policy = (await db.query(`SELECT p.*, ic.name AS insurer_name FROM policies p
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
+  if (policy?.billing_mode === 'direct') {
+    const { bookDirectBill } = await import('../remittance/directbill.js');
+    const item = await bookDirectBill(db, { policy, amount: round2(amount), breakdown, source, reference, endorsementId, user });
+    return { id: null, bill_number: null, directBill: item };
+  }
   const { createReceivable: financeReceivable } = await import('../receipts/receivables.js');
   return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, user });
 }
@@ -222,10 +231,14 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
 
 /**
  * Issue a policy inside the caller's transaction: policy row (number from settings unless the insurer's number is given),
- * receivable with bill number, commission accrual. `src` carries the premium figures and references.
+ * receivable with bill number (or, for a direct-bill policy, the commission due from the insurer), commission accrual.
+ * `src` carries the premium figures and references; the billing mode comes from body.billingMode, src.billingMode or
+ * direct_bill.default_billing_mode.
  */
 export async function issuePolicy(db, src, body, userId) {
   const cols = await columnsFrom(db, body);
+  const { billingModeFor } = await import('../remittance/directbill.js');
+  const billingMode = await billingModeFor(body.billingMode ?? (body.isDirectBilled === true ? 'direct' : null) ?? src.billingMode);
   const inception = cols.inception_date || toDate(new Date());
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
@@ -234,12 +247,12 @@ export async function issuePolicy(db, src, body, userId) {
   const paymentStatus = cols.payment_status || 'Pending';
   const r = await db.query(`INSERT INTO policies(policy_number, quote_id, client_id, lead_id, product_id, policy_type_id, insurance_company_id, owner_user_id,
       status, inception_date, expiry_date, issued_date, sum_insured, net_premium, premium_total, commission_amount, currency, insured_name, product_type, lob,
-      payment_status, payment_method, paid_at, doc, created_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) RETURNING id`,
+      payment_status, payment_method, paid_at, doc, created_by, billing_mode)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) RETURNING id`,
   [number, src.quoteId, src.clientId, src.leadId, src.productId, src.policyTypeId, cols.insurance_company_id || src.insuranceCompanyId, src.ownerUserId || userId,
     inception, expiry, cols.issued_date || toDate(new Date()), src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
-    JSON.stringify({ ...(src.doc || {}), ...docOf(body) }), userId]);
+    JSON.stringify({ ...(src.doc || {}), ...docOf(body) }), userId, billingMode]);
   const policyId = r.rows[0].id;
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
   const renewal = src.receivableSource === 'renewal';
