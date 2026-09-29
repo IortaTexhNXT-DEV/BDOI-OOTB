@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { assertProductionConfig, config } from './config.js';
-import { createApp, logger } from './app.js';
+import { createApp } from './app.js';
+import { logger } from './lib/logger.js';
 import { migrate } from './db/migrate.js';
 import { seed } from './db/seed.js';
 import { pool } from './db/pool.js';

@@ -14,7 +14,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setup, loginAs, createUserDeskRole } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 import { buildConfig, config, productionConfigProblems } from '../src/config.js';
-import { REDACT_PATHS, redactRequest, redactUrl } from '../src/app.js';
+import { REDACT_PATHS, redactRequest, redactUrl } from '../src/lib/logger.js';
 import { ROUTES } from '../src/lib/registry.js';
 import { errorHandler } from '../src/lib/errors.js';
 import { resetRateLimits } from '../src/lib/rateLimit.js';

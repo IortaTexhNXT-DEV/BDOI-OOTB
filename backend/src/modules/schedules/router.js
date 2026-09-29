@@ -36,7 +36,7 @@ define({
     const b = req.body;
     const r = await query('UPDATE scheduled_jobs SET cron = COALESCE($2, cron), enabled = COALESCE($3, enabled), params = COALESCE($4, params), name = COALESCE($5, name), description = COALESCE($6, description), updated_at = now() WHERE code = $1 RETURNING *', [req.params.code, b.cron, b.enabled, b.params ? JSON.stringify(b.params) : null, b.name, b.description]);
     if (!r.rowCount) throw notFound('Job not found');
-    await startScheduler(req.log || console);
+    await startScheduler(req.log);
     await audit(req, { entity: 'scheduled_job', entityId: req.params.code, action: 'update', after: b });
     ok(res, row(r.rows[0], await schedulerTimeZone()), 'Schedule updated');
   },

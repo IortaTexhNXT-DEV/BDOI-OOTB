@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { many, one, pool, query } from '../db/pool.js';
 import * as handlers from './handlers.js';
 import { businessTimeZone } from '../lib/dates.js';
+import { logger } from '../lib/logger.js';
 
 const tasks = new Map();
 /** State of the schedules loaded on this instance: time zone, signature of the jobs table, change-watch timer. */
@@ -92,7 +93,7 @@ async function execute(job, triggeredBy) {
  * (general.timezone, Asia/Manila by the seed): "0 6 * * *" runs at 06:00 Manila time whatever the zone of the server
  * clock (containers run on UTC). Does nothing when SCHEDULER_ENABLED is false.
  */
-export async function startScheduler(log = console) {
+export async function startScheduler(log = logger) {
   for (const t of tasks.values()) t.stop();
   tasks.clear();
   if (!schedulerEnabled()) {
@@ -106,8 +107,11 @@ export async function startScheduler(log = console) {
   for (const job of jobs) {
     if (!cron.validate(job.cron)) { log.warn?.(`job ${job.code}: invalid cron ${job.cron}`); continue; }
     tasks.set(job.code, cron.schedule(job.cron, (ctx) => runJob(job, 'schedule', { firedAt: ctx?.date || ctx?.triggeredAt || new Date() })
-      .then((r) => { if (r.status === 'skipped') log.debug?.(`job ${job.code}: ${r.reason}`); })
-      .catch((e) => log.error?.(e)), { timezone: timeZone, name: job.code }));
+      .then((r) => {
+        if (r.status === 'skipped') log.debug?.(`job ${job.code}: ${r.reason}`);
+        if (r.status === 'failed') log.error?.({ job: job.code, runId: r.runId, error: r.error }, `scheduled job ${job.code} failed`);
+      })
+      .catch((e) => log.error?.({ err: e, job: job.code }, `scheduled job ${job.code} could not start`)), { timezone: timeZone, name: job.code }));
   }
   log.info?.(`scheduler: ${tasks.size} job(s) scheduled (time zone ${timeZone})`);
   return tasks.size;
@@ -117,7 +121,7 @@ export async function startScheduler(log = console) {
  * Reload the schedules when the jobs table or the time zone changed since they were loaded on this instance (an edit
  * made through another API instance). Returns true when it reloaded.
  */
-export async function reloadIfChanged(log = console) {
+export async function reloadIfChanged(log = logger) {
   if (!schedulerEnabled() || state.checking) return false;
   state.checking = true;
   try {
@@ -131,7 +135,7 @@ export async function reloadIfChanged(log = console) {
 }
 
 /** Check for schedule changes every SCHEDULER_RELOAD_SECONDS (default 30) so every instance follows an edit. */
-export function watchSchedules(log = console, ms = reloadIntervalMs()) {
+export function watchSchedules(log = logger, ms = reloadIntervalMs()) {
   if (state.watcher || !ms) return;
   state.watcher = setInterval(() => reloadIfChanged(log).catch((e) => log.warn?.(`scheduler: change check failed: ${e.message}`)), ms);
   state.watcher.unref?.();

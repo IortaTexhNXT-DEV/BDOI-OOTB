@@ -11,7 +11,7 @@ import { badRequest, forbidden, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { isAdmin, verify } from '../../lib/auth.js';
 import { toCsv } from '../../lib/csv.js';
-import { writeXlsx } from '../../tools/xlsx.js';
+import { writeXlsx } from '../../lib/xlsx.js';
 import { buildReportPdf, printContext } from '../../lib/pdf/index.js';
 import { formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { companyName } from '../../lib/letterhead.js';
