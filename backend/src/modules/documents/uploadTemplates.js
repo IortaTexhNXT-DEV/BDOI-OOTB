@@ -203,7 +203,7 @@ export function masterUpload(t, { maxRows = BULK_ROWS, withSamples = true } = {}
   const info = masterTemplateInfo(t.code) || {};
   const columns = uploadColumns(t).map((c) => ({ ...c, ...(info.formats?.[c.key] ? { format: info.formats[c.key] } : {}), example: info.samples?.[0]?.[c.key] ?? '' }));
   return {
-    id: `master:${t.code}`, file: `${fileBase(t.label)}_Upload_Template.xlsx`, title: `${t.label} master upload`, menu: `${info.menu || `Master > ${t.label}`} > Upload`,
+    id: `master:${t.code}`, file: `${fileBase(t.label)}_Upload_Template.xlsx`, title: `${t.label} master upload`, menu: info.button ? `${info.menu} > Upload` : `${info.menu || `Master > ${t.label}`} (no Upload button on this screen yet: a System Administrator uploads the file through the API route)`,
     route: `POST /api/masters/${t.code}/upload (multipart field "file")`, columns, maxRows: typeof maxRows === 'number' ? `Up to ${maxRows.toLocaleString('en-US')} data rows per file and 10 MB.` : maxRows,
     samples: withSamples ? info.samples || [] : [],
     notes: [
