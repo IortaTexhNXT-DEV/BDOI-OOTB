@@ -45,6 +45,9 @@ const Login = () => {
   const languageOptions = useLanguageOptions();
   const currentLanguage =
     languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value || "en";
+  const systemName = useSelector(
+    (state) => state.systemSettingsReducer?.systemName || state.systemSettingsReducer?.appTitle || DEFAULT_SYSTEM_SETTINGS.systemName
+  );
   const logoUrl = useSelector(
     (state) =>
       state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
@@ -268,7 +271,7 @@ const Login = () => {
           <img src={logoUrl} alt="Logo" className="bdo-logo" />
         </div>
         <div className="col-12 md:col-12 lg:col-12  ">
-          <div className="login__header">{step === "signin" ? t("login.title") : headings[step][0]}</div>
+          <div className="login__header">{step === "signin" ? t("login.title", { name: systemName }) : headings[step][0]}</div>
           <div className="login__subtitle">{step === "signin" ? t("login.subtitle") : headings[step][1]}</div>
         </div>
         {step === "signin" ? signInForm : <div className="col-12 md:col-12 lg:col-12">{stepBody}</div>}

@@ -19,6 +19,10 @@ const NewSideBar = ({ onNavigate }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  // Product name and logo from System Settings (general.system_name, branding.logo_url)
+  const systemName = useSelector(
+    (state) => state.systemSettingsReducer?.systemName || state.systemSettingsReducer?.appTitle || DEFAULT_SYSTEM_SETTINGS.systemName
+  );
   const logoUrl = useSelector(
     (state) =>
       state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
@@ -326,9 +330,9 @@ const NewSideBar = ({ onNavigate }) => {
     <div className="sidebar__overall__container">
       <ul className="list">
         {/* <div className="stack"> */}
-        <a className="bdoi-brand" href="/" aria-label="BIBS home">
-          <img src={logoUrl} alt="BDO Insure" />
-          <span className="bdoi-brand-product">BIBS · BDOI Broker System</span>
+        <a className="bdoi-brand" href="/" aria-label={`${systemName} home`}>
+          <img src={logoUrl} alt={`${systemName} logo`} />
+          <span className="bdoi-brand-product">{systemName}</span>
         </a>
 
         {/* Search Box */}

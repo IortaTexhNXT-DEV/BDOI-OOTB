@@ -61,8 +61,8 @@
     "validation": "Validation"
   },
   "login": {
-    "title": "Welcome to BIBS",
-    "subtitle": "BDOI Broker System",
+    "title": "Welcome to {{name}}",
+    "subtitle": "Insurance broking platform",
     "userId": "User ID",
     "password": "Password",
     "login": "Login",

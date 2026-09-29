@@ -20,7 +20,7 @@ const App = () => {
 
   const dispatch = useDispatch();
   const appTitle = useSelector(
-    (state) => state.systemSettingsReducer?.appTitle || "Brokerverse"
+    (state) => state.systemSettingsReducer?.appTitle || "BrokerVerse"
   );
 
   const { hasToken, userData } = authState;

@@ -55,8 +55,8 @@
     "optional": "ไม่บังคับ"
   },
   "login": {
-    "title": "ยินดีต้อนรับสู่ BIBS",
-    "subtitle": "BDOI Broker System",
+    "title": "ยินดีต้อนรับสู่ {{name}}",
+    "subtitle": "แพลตฟอร์มนายหน้าประกันภัย",
     "userId": "รหัสผู้ใช้",
     "password": "รหัสผ่าน",
     "login": "เข้าสู่ระบบ",
