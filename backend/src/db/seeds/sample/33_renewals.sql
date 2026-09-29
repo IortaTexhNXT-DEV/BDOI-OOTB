@@ -1,3 +1,4 @@
+-- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Sample renewals (pipeline through renewed / lapsed), quotes, notices, contact log, batches and a win-back campaign. Idempotent.
 INSERT INTO renewals(id, renewal_number, policy_id, client_id, owner_user_id, status, due_date, premium_old, premium_new, notice_stage, last_notice_at,
                      contact_attempts, last_contact_at, submitted_by, submitted_at, approved_by, approved_at, lapse_reason, lapsed_at, renewed_at, new_policy_id, created_by, created_at)

@@ -1,3 +1,4 @@
+-- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Reinsurance sample data: reinsurers, treaties, cessions from seeded policies, recoveries, bordereaux, reconciliation.
 INSERT INTO reinsurers(id, name, short_name, type, country, rating, rating_agency, capacity, contact, status, created_by) VALUES
  ('RE001', 'National Reinsurance Corporation of the Philippines', 'Nat Re', 'Local', 'Philippines', 'A-', 'AM Best', 'PHP 5 Billion', '{"email":"treaty@natre.example","phone":"+63 2 8988 7400","address":"Makati City, Metro Manila"}', 'Active', 'seed'),

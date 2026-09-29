@@ -1,4 +1,7 @@
-/** Seeds: roles, permissions, the BrokerVerse admin, configuration defaults and scheduled jobs. Idempotent. */
+/**
+ * Seeds: roles, permissions, the BrokerVerse admin, configuration defaults, scheduled jobs and the reference data in
+ * seeds/*.sql; the demo data in seeds/sample/*.sql only when SEED_SAMPLE_DATA is on (see seeds/README.md). Idempotent.
+ */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,7 +40,27 @@ const ROLE_PERMS = {
   agent: ['profile', 'leads', 'clients:read', 'quotations', 'policies', 'endorsements', 'claims', 'notifications'],
 };
 
-export async function seed({ log = console.log } = {}) {
+/**
+ * Whether the demo / sample seed files run (SEED_SAMPLE_DATA). An explicit value wins ("true"/"1"/"yes"/"on" or
+ * "false"/"0"/"no"/"off"); otherwise sample data is on in development and test and off when NODE_ENV=production.
+ */
+export function seedSampleData(source = process.env) {
+  const v = String(source.SEED_SAMPLE_DATA ?? '').trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].includes(v)) return true;
+  if (['false', '0', 'no', 'off'].includes(v)) return false;
+  return (source.NODE_ENV || 'development') !== 'production';
+}
+
+/** The SQL seed files to apply, in order: seeds/*.sql (reference) and, with sample, seeds/sample/*.sql, sorted by file name. */
+export function seedFiles({ sample = true } = {}) {
+  const list = (dir, kind) => (fs.existsSync(dir) ? fs.readdirSync(dir).filter((x) => x.endsWith('.sql'))
+    .map((x) => ({ name: kind === 'sample' ? `sample/${x}` : x, base: x, kind, path: path.join(dir, x) })) : []);
+  const files = [...list(path.join(here, 'seeds'), 'reference'), ...(sample ? list(path.join(here, 'seeds', 'sample'), 'sample') : [])];
+  // Same base name: the reference file first (it holds the configuration the sample rows read).
+  return files.sort((a, b) => (a.base === b.base ? (a.kind === 'reference' ? -1 : 1) : a.base < b.base ? -1 : 1));
+}
+
+export async function seed({ log = console.log, sampleData } = {}) {
   for (const [code, name, description, isSystem] of ROLES) {
     await query(`INSERT INTO roles(code, name, description, is_system) VALUES ($1,$2,$3,$4)
                  ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description`, [code, name, description, isSystem]);
@@ -88,13 +111,16 @@ export async function seed({ log = console.log } = {}) {
                  ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, handler = EXCLUDED.handler`,
       [j.code, j.name, j.description, j.cron, j.handler, JSON.stringify(j.params || {}), j.enabled !== false]);
   }
-  // Module seed files (masters and sample data), applied in order, each idempotent
-  const dir = path.join(here, 'seeds');
-  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.sql')).sort()) {
-    await query(fs.readFileSync(path.join(dir, f), 'utf8'));
-    log(`seeded ${f}`);
+  // Module seed files, applied in file-name order (reference and sample interleaved so a sample file runs after the
+  // reference files it builds on), each idempotent. Sample / demo files (seeds/sample) run only when sample data is on.
+  const withSample = sampleData ?? seedSampleData();
+  if (withSample && process.env.NODE_ENV === 'production') log('WARNING: SEED_SAMPLE_DATA is on in production: demo leads, clients, policies and transactions are being seeded');
+  for (const f of seedFiles({ sample: withSample })) {
+    await query(fs.readFileSync(f.path, 'utf8'));
+    log(`seeded ${f.name}`);
   }
-  log('seed complete');
+  log(withSample ? 'seed complete (reference + sample data)' : 'seed complete (reference data only; SEED_SAMPLE_DATA is off)');
+  return { sampleData: withSample };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

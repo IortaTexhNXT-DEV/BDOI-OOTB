@@ -35,7 +35,7 @@ describe('chart of accounts', () => {
       expect(rows.some((r) => r.key === `accounting.account.${role}`), role).toBe(true);
     }
     // codes hard-wired in the sample ledger seed and the petty-cash samples
-    const seedSql = fs.readFileSync(path.join(here, '../src/db/seeds/40_finance.sql'), 'utf8').split('-- Commission referrers')[1];
+    const seedSql = fs.readFileSync(path.join(here, '../src/db/seeds/sample/40_finance.sql'), 'utf8');
     for (const m of seedSql.matchAll(/'([1-5]\d{6})'/g)) codes.add(m[1]);
     const chart = new Map((await accounts()).map((a) => [a.code, a]));
     for (const c of codes) {

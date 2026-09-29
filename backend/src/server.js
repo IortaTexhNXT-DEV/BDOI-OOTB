@@ -5,6 +5,7 @@ import { migrate } from './db/migrate.js';
 import { seed } from './db/seed.js';
 import { pool } from './db/pool.js';
 import { startScheduler, stopScheduler } from './jobs/scheduler.js';
+import { setReady } from './lib/health.js';
 
 try {
   assertProductionConfig();
@@ -13,11 +14,13 @@ try {
   process.exit(1);
 }
 fs.mkdirSync(config.uploadDir, { recursive: true });
+setReady(false); // GET /api/health answers 503 until migrations and seed are applied
 await migrate({ log: (m) => logger.info(m) });
 await seed({ log: (m) => logger.info(m) });
 const app = await createApp();
 const server = app.listen(config.port, () => logger.info(`BrokerVerse API listening on :${config.port}`));
 await startScheduler(logger);
+setReady(true);
 
 /** Graceful shutdown: stop the scheduler, stop accepting connections and drain in-flight requests, then close the pool. */
 let stopping = false;
@@ -25,6 +28,7 @@ async function shutdown(signal) {
   if (stopping) return;
   stopping = true;
   logger.info({ signal }, 'shutting down');
+  setReady(false); // load balancers stop routing new requests here while in-flight ones drain
   const force = setTimeout(() => { logger.error('shutdown timed out; exiting'); process.exit(1); }, Number(process.env.SHUTDOWN_TIMEOUT_MS || 25000));
   force.unref();
   try {

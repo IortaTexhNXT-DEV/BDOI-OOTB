@@ -4,6 +4,7 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY src ./src
+COPY scripts ./scripts
 RUN mkdir -p /app/uploads && chown -R node:node /app
 USER node
 EXPOSE 8000

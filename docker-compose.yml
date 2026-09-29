@@ -28,6 +28,10 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL to the public address, e.g. https://brokerverse.example.ph}
       SMTP_URL: ${SMTP_URL:-}
       UPLOAD_DIR: /app/uploads
+      # reference data only in production; SEED_SAMPLE_DATA=true adds the demo leads, policies, claims... (UAT / demos)
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-false}
+      # scheduled jobs (one run per job across instances: PostgreSQL advisory lock); false on instances that must not run them
+      SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-true}
     volumes:
       - uploads:/app/uploads
     depends_on:

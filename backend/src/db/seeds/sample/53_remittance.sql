@@ -1,3 +1,4 @@
+-- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Sample agents / approvers (used by agency bills, incentives and maker-checker samples). Passwords are random and
 -- unusable; administrators set real ones through Master > User. Idempotent by username.
 INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, employee_code, branch_code, designation, status, must_change_password, created_by)
