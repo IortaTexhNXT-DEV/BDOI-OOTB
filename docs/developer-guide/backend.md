@@ -60,7 +60,7 @@ npm run dev                 # http://localhost:8000/api, restarts on file change
 
 Sign in as `BrokerVerse` with `ADMIN_PASSWORD`. The front end (`brokerverse/`, `npm start`) runs on port 3000 and
 calls the API on port 8000. `docker compose up --build` at the repository root starts the database, the API and the
-web server together (see `docs/DEPLOY.md`).
+web server together (see `deploy/REFERENCE.md`).
 
 ## 3. Tests and checks
 

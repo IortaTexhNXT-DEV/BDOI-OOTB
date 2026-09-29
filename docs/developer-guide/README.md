@@ -18,8 +18,8 @@ defects in production.
 |---|---|
 | `backend/` | Node.js 22 API (Express, PostgreSQL). Modules in `backend/src/modules`, one folder per business area. |
 | `brokerverse/` | React front end. |
-| `docs/DEPLOY.md` | Installing and upgrading a server. |
-| `docs/GO_LIVE_CHECKLIST.md` | What to check before a site goes live. |
+| `deploy/REFERENCE.md` | Installing and upgrading a server. |
+| `deploy/README.md` | What to check before a site goes live. |
 | `docs/review/CODE_REVIEW.md` | Code reviews: what was found, fixed and left open. |
 | `docs/e2e/` | End-to-end test runs on the screens and their defect register. |
 | `docs/architecture/`, `docs/manual/`, `docs/decks/` | Architecture description, user manual, presentations. |

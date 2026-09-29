@@ -154,9 +154,9 @@
     }
   ],
   "paths": {
-    "/posting-rules/account-determination": {
+    "/account-determination": {
       "get": {
-        "operationId": "getPostingRulesAccountDetermination",
+        "operationId": "getAccountDetermination",
         "summary": "Account roles the posting rules use (by section), payable account per payee type, cash account per payment mode, write-off reasons",
         "tags": [
           "Account Determination"
@@ -303,9 +303,9 @@
         ]
       }
     },
-    "/posting-rules/account-determination/maps/{name}": {
+    "/account-determination/maps/{name}": {
       "put": {
-        "operationId": "putPostingRulesAccountDeterminationMapsName",
+        "operationId": "putAccountDeterminationMapsName",
         "summary": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)",
         "tags": [
           "Account Determination"
@@ -401,9 +401,9 @@
         }
       }
     },
-    "/posting-rules/account-determination/roles/{role}": {
+    "/account-determination/roles/{role}": {
       "put": {
-        "operationId": "putPostingRulesAccountDeterminationRolesRole",
+        "operationId": "putAccountDeterminationRolesRole",
         "summary": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules",
         "tags": [
           "Account Determination"
@@ -492,9 +492,9 @@
         }
       }
     },
-    "/posting-rules/account-determination/write-off-reasons": {
+    "/account-determination/write-off-reasons": {
       "get": {
-        "operationId": "getPostingRulesAccountDeterminationWriteOffReasons",
+        "operationId": "getAccountDeterminationWriteOffReasons",
         "summary": "Write-off reasons with their GL account (all statuses)",
         "tags": [
           "Account Determination"
@@ -569,7 +569,7 @@
         ]
       },
       "post": {
-        "operationId": "postPostingRulesAccountDeterminationWriteOffReasons",
+        "operationId": "postAccountDeterminationWriteOffReasons",
         "summary": "Add a write-off reason",
         "tags": [
           "Account Determination"
@@ -669,9 +669,9 @@
         }
       }
     },
-    "/posting-rules/account-determination/write-off-reasons/{code}": {
+    "/account-determination/write-off-reasons/{code}": {
       "put": {
-        "operationId": "putPostingRulesAccountDeterminationWriteOffReasonsCode",
+        "operationId": "putAccountDeterminationWriteOffReasonsCode",
         "summary": "Update a write-off reason (name, GL account, limit, status)",
         "tags": [
           "Account Determination"
@@ -9017,9 +9017,9 @@
         ]
       }
     },
-    "/receipts/billing-statement/endorsement/{id}/generate": {
+    "/billing-statement/endorsement/{id}/generate": {
       "get": {
-        "operationId": "getReceiptsBillingStatementEndorsementIdGenerate",
+        "operationId": "getBillingStatementEndorsementIdGenerate",
         "summary": "Endorsement billing statement (PDF); id = endorsement or policy id",
         "tags": [
           "Billing statements"
@@ -9064,9 +9064,9 @@
         ]
       }
     },
-    "/receipts/billing-statement/endorsement/{id}/preview": {
+    "/billing-statement/endorsement/{id}/preview": {
       "get": {
-        "operationId": "getReceiptsBillingStatementEndorsementIdPreview",
+        "operationId": "getBillingStatementEndorsementIdPreview",
         "summary": "Endorsement billing preview (JSON); id = endorsement or policy id",
         "tags": [
           "Billing statements"
@@ -9153,9 +9153,9 @@
         ]
       }
     },
-    "/receipts/billing-statement/policy/{policyId}/generate": {
+    "/billing-statement/policy/{policyId}/generate": {
       "get": {
-        "operationId": "getReceiptsBillingStatementPolicyPolicyIdGenerate",
+        "operationId": "getBillingStatementPolicyPolicyIdGenerate",
         "summary": "Policy billing statement (PDF)",
         "tags": [
           "Billing statements"
@@ -9200,9 +9200,9 @@
         ]
       }
     },
-    "/receipts/billing-statement/renewal/{policyId}/generate": {
+    "/billing-statement/renewal/{policyId}/generate": {
       "get": {
-        "operationId": "getReceiptsBillingStatementRenewalPolicyIdGenerate",
+        "operationId": "getBillingStatementRenewalPolicyIdGenerate",
         "summary": "Renewal billing statement (PDF)",
         "tags": [
           "Billing statements"
@@ -9247,9 +9247,9 @@
         ]
       }
     },
-    "/placements/broker-slips": {
+    "/broker-slips": {
       "get": {
-        "operationId": "getPlacementsBrokerSlips",
+        "operationId": "getBrokerSlips",
         "summary": "List broker slips (status (comma-separated), lob, leadRefId, clientId, insurerId, search; paging) with offer counts and status counts",
         "tags": [
           "Broker Slips"
@@ -9425,7 +9425,7 @@
         ]
       },
       "post": {
-        "operationId": "postPlacementsBrokerSlips",
+        "operationId": "postBrokerSlips",
         "summary": "Create a broker slip (market submission / RFQ): customer, product / LOB, risk details (motor: quote-shaped doc), requested covers, insurers to approach",
         "tags": [
           "Broker Slips"
@@ -9636,9 +9636,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}": {
+    "/broker-slips/{id}": {
       "get": {
-        "operationId": "getPlacementsBrokerSlipsId",
+        "operationId": "getBrokerSlipsId",
         "summary": "Broker slip with insurer offers, comparison (ranked by gross premium, capacity), journey and links",
         "tags": [
           "Broker Slips"
@@ -9815,7 +9815,7 @@
         ]
       },
       "put": {
-        "operationId": "putPlacementsBrokerSlipsId",
+        "operationId": "putBrokerSlipsId",
         "summary": "Edit an open broker slip (risk, covers, dates, insurers approached: pending insurers taken off the list are removed)",
         "tags": [
           "Broker Slips"
@@ -9983,9 +9983,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/cancel": {
+    "/broker-slips/{id}/cancel": {
       "post": {
-        "operationId": "postPlacementsBrokerSlipsIdCancel",
+        "operationId": "postBrokerSlipsIdCancel",
         "summary": "Cancel the broker slip",
         "tags": [
           "Broker Slips"
@@ -10149,9 +10149,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/close": {
+    "/broker-slips/{id}/close": {
       "post": {
-        "operationId": "postPlacementsBrokerSlipsIdClose",
+        "operationId": "postBrokerSlipsIdClose",
         "summary": "Close the broker slip without a quotation (e.g. not taken up)",
         "tags": [
           "Broker Slips"
@@ -10315,9 +10315,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/comparison": {
+    "/broker-slips/{id}/comparison": {
       "get": {
-        "operationId": "getPlacementsBrokerSlipsIdComparison",
+        "operationId": "getBrokerSlipsIdComparison",
         "summary": "Comparison of the insurer offers (ranked by gross premium, difference from the best, market capacity)",
         "tags": [
           "Broker Slips"
@@ -10446,9 +10446,9 @@
         ]
       }
     },
-    "/placements/broker-slips/{id}/documents/broker-slip": {
+    "/broker-slips/{id}/documents/broker-slip": {
       "get": {
-        "operationId": "getPlacementsBrokerSlipsIdDocumentsBrokerSlip",
+        "operationId": "getBrokerSlipsIdDocumentsBrokerSlip",
         "summary": "Broker Slip PDF (request for quotation); insurerId= addresses it to one insurer of the market",
         "tags": [
           "Broker Slips"
@@ -10501,9 +10501,9 @@
         ]
       }
     },
-    "/placements/broker-slips/{id}/insurers": {
+    "/broker-slips/{id}/insurers": {
       "post": {
-        "operationId": "postPlacementsBrokerSlipsIdInsurers",
+        "operationId": "postBrokerSlipsIdInsurers",
         "summary": "Approach one more insurer (on a submitted slip the request is queued at once)",
         "tags": [
           "Broker Slips"
@@ -10667,9 +10667,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/offers/{offerId}": {
+    "/broker-slips/{id}/offers/{offerId}": {
       "put": {
-        "operationId": "putPlacementsBrokerSlipsIdOffersOfferId",
+        "operationId": "putBrokerSlipsIdOffersOfferId",
         "summary": "Record an insurer's response: offer (premium, rate, taxes, deductibles, terms, validity, line %, reference, attachment) or decline",
         "tags": [
           "Broker Slips"
@@ -10817,9 +10817,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/prepare-placement": {
+    "/broker-slips/{id}/prepare-placement": {
       "post": {
-        "operationId": "postPlacementsBrokerSlipsIdPreparePlacement",
+        "operationId": "postBrokerSlipsIdPreparePlacement",
         "summary": "Prepare the Placement Slip straight from the selected offer(s) (journeys where the Quotation Slip is optional or skipped)",
         "tags": [
           "Broker Slips"
@@ -10917,9 +10917,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/prepare-quotation": {
+    "/broker-slips/{id}/prepare-quotation": {
       "post": {
-        "operationId": "postPlacementsBrokerSlipsIdPrepareQuotation",
+        "operationId": "postBrokerSlipsIdPrepareQuotation",
         "summary": "Prepare the Quotation Slip from the selected offer(s): several offers make it co-insurance with their lines as shares (must total 100%)",
         "tags": [
           "Broker Slips"
@@ -11013,9 +11013,9 @@
         }
       }
     },
-    "/placements/broker-slips/{id}/submit": {
+    "/broker-slips/{id}/submit": {
       "post": {
-        "operationId": "postPlacementsBrokerSlipsIdSubmit",
+        "operationId": "postBrokerSlipsIdSubmit",
         "summary": "Submit the broker slip to the market: queues the request for quotation to each insurer (outbox) and sets the response due date",
         "tags": [
           "Broker Slips"
@@ -14276,71 +14276,6 @@
         }
       }
     },
-    "/clients/customers/codes": {
-      "get": {
-        "operationId": "getClientsCustomersCodes",
-        "summary": "Customer codes for dropdowns",
-        "tags": [
-          "Clients"
-        ],
-        "description": "Front-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "clientId": {
-                            "type": "string"
-                          },
-                          "customerCode": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "clientId": "cl_1",
-                      "customerCode": "CL-2026-00001",
-                      "name": "Juan Dela Cruz"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Disbursement / Receipts",
-        "x-permissions": [
-          "read:clients"
-        ]
-      }
-    },
     "/clients/from-lead/{leadId}": {
       "post": {
         "operationId": "postClientsFromLeadLeadId",
@@ -14462,6 +14397,71 @@
             }
           }
         }
+      }
+    },
+    "/customers/codes": {
+      "get": {
+        "operationId": "getCustomersCodes",
+        "summary": "Customer codes for dropdowns",
+        "tags": [
+          "Clients"
+        ],
+        "description": "Front-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "customerCode": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "clientId": "cl_1",
+                      "customerCode": "CL-2026-00001",
+                      "name": "Juan Dela Cruz"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Disbursement / Receipts",
+        "x-permissions": [
+          "read:clients"
+        ]
       }
     },
     "/collections": {
@@ -24294,9 +24294,9 @@
         ]
       }
     },
-    "/quotations/email/generate": {
+    "/email/generate": {
       "post": {
-        "operationId": "postQuotationsEmailGenerate",
+        "operationId": "postEmailGenerate",
         "summary": "Generate e-mail content (subject, preview, html, text) for a quote from the configured template",
         "tags": [
           "E-mail"
@@ -24417,9 +24417,9 @@
         }
       }
     },
-    "/quotations/email/send": {
+    "/email/send": {
       "post": {
-        "operationId": "postQuotationsEmailSend",
+        "operationId": "postEmailSend",
         "summary": "Send an e-mail composed in the Share dialog",
         "tags": [
           "E-mail"
@@ -24502,9 +24502,9 @@
         }
       }
     },
-    "/quotations/email/share-quote": {
+    "/email/share-quote": {
       "post": {
-        "operationId": "postQuotationsEmailShareQuote",
+        "operationId": "postEmailShareQuote",
         "summary": "E-mail a quotation to a recipient with the standard template",
         "tags": [
           "E-mail"
@@ -24594,9 +24594,9 @@
         }
       }
     },
-    "/quotations/email/share-quote-to-insurers": {
+    "/email/share-quote-to-insurers": {
       "post": {
-        "operationId": "postQuotationsEmailShareQuoteToInsurers",
+        "operationId": "postEmailShareQuoteToInsurers",
         "summary": "Send the quotation to selected insurers (contact e-mail from the insurance company master)",
         "tags": [
           "E-mail"
@@ -26186,9 +26186,9 @@
         }
       }
     },
-    "/s3/upload/file/*": {
+    "/upload/file/*": {
       "get": {
-        "operationId": "getS3UploadFile*",
+        "operationId": "getUploadFile*",
         "summary": "Download a stored file (older link form of /s3/object)",
         "tags": [
           "Files (S3 API)"
@@ -30198,6 +30198,237 @@
         }
       }
     },
+    "/lead/get-all-lead": {
+      "get": {
+        "operationId": "getLeadGetAllLead",
+        "summary": "Legacy: list leads (same as GET /leads)",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "leadId": {
+                            "type": "string"
+                          },
+                          "generatedLeadId": {
+                            "type": "string"
+                          },
+                          "firstName": {
+                            "type": "string"
+                          },
+                          "lastName": {
+                            "type": "string"
+                          },
+                          "leadCategory": {
+                            "type": "string"
+                          },
+                          "lob": {
+                            "type": "string"
+                          },
+                          "emailId": {
+                            "type": "string"
+                          },
+                          "contactNumber": {
+                            "type": "string"
+                          },
+                          "city": {
+                            "type": "string"
+                          },
+                          "province": {
+                            "type": "string"
+                          },
+                          "country": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "quotationsCount": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "leadId": "ld_1",
+                      "generatedLeadId": "LD-2026-00001",
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz",
+                      "leadCategory": "Retail",
+                      "lob": "MOTOR",
+                      "emailId": "juan@example.com",
+                      "contactNumber": "09171234567",
+                      "city": "Makati",
+                      "province": "Metro Manila",
+                      "country": "Philippines",
+                      "status": "New",
+                      "quotationsCount": 0
+                    }
+                  ],
+                  "total": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Leads/Prospects",
+        "x-permissions": [
+          "read:leads"
+        ]
+      }
+    },
+    "/lead/search-lead": {
+      "get": {
+        "operationId": "getLeadSearchLead",
+        "summary": "Legacy: search leads by name (same as GET /leads/search)",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "juan"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "leadId": {
+                            "type": "string"
+                          },
+                          "generatedLeadId": {
+                            "type": "string"
+                          },
+                          "firstName": {
+                            "type": "string"
+                          },
+                          "lastName": {
+                            "type": "string"
+                          },
+                          "leadCategory": {
+                            "type": "string"
+                          },
+                          "lob": {
+                            "type": "string"
+                          },
+                          "emailId": {
+                            "type": "string"
+                          },
+                          "contactNumber": {
+                            "type": "string"
+                          },
+                          "city": {
+                            "type": "string"
+                          },
+                          "province": {
+                            "type": "string"
+                          },
+                          "country": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "quotationsCount": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "leadId": "ld_1",
+                      "generatedLeadId": "LD-2026-00001",
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz",
+                      "leadCategory": "Retail",
+                      "lob": "MOTOR",
+                      "emailId": "juan@example.com",
+                      "contactNumber": "09171234567",
+                      "city": "Makati",
+                      "province": "Metro Manila",
+                      "country": "Philippines",
+                      "status": "New",
+                      "quotationsCount": 0
+                    }
+                  ],
+                  "total": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Leads/Prospects",
+        "x-permissions": [
+          "read:leads"
+        ]
+      }
+    },
     "/leads": {
       "get": {
         "operationId": "getLeads",
@@ -31086,237 +31317,6 @@
             }
           }
         }
-      }
-    },
-    "/leads/lead/get-all-lead": {
-      "get": {
-        "operationId": "getLeadsLeadGetAllLead",
-        "summary": "Legacy: list leads (same as GET /leads)",
-        "tags": [
-          "Leads"
-        ],
-        "description": "Front-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "leadId": {
-                            "type": "string"
-                          },
-                          "generatedLeadId": {
-                            "type": "string"
-                          },
-                          "firstName": {
-                            "type": "string"
-                          },
-                          "lastName": {
-                            "type": "string"
-                          },
-                          "leadCategory": {
-                            "type": "string"
-                          },
-                          "lob": {
-                            "type": "string"
-                          },
-                          "emailId": {
-                            "type": "string"
-                          },
-                          "contactNumber": {
-                            "type": "string"
-                          },
-                          "city": {
-                            "type": "string"
-                          },
-                          "province": {
-                            "type": "string"
-                          },
-                          "country": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "quotationsCount": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    },
-                    "total": {
-                      "type": "integer"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "leadId": "ld_1",
-                      "generatedLeadId": "LD-2026-00001",
-                      "firstName": "Juan",
-                      "lastName": "Dela Cruz",
-                      "leadCategory": "Retail",
-                      "lob": "MOTOR",
-                      "emailId": "juan@example.com",
-                      "contactNumber": "09171234567",
-                      "city": "Makati",
-                      "province": "Metro Manila",
-                      "country": "Philippines",
-                      "status": "New",
-                      "quotationsCount": 0
-                    }
-                  ],
-                  "total": 1
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Operations > Leads/Prospects",
-        "x-permissions": [
-          "read:leads"
-        ]
-      }
-    },
-    "/leads/lead/search-lead": {
-      "get": {
-        "operationId": "getLeadsLeadSearchLead",
-        "summary": "Legacy: search leads by name (same as GET /leads/search)",
-        "tags": [
-          "Leads"
-        ],
-        "description": "Front-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "juan"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "leadId": {
-                            "type": "string"
-                          },
-                          "generatedLeadId": {
-                            "type": "string"
-                          },
-                          "firstName": {
-                            "type": "string"
-                          },
-                          "lastName": {
-                            "type": "string"
-                          },
-                          "leadCategory": {
-                            "type": "string"
-                          },
-                          "lob": {
-                            "type": "string"
-                          },
-                          "emailId": {
-                            "type": "string"
-                          },
-                          "contactNumber": {
-                            "type": "string"
-                          },
-                          "city": {
-                            "type": "string"
-                          },
-                          "province": {
-                            "type": "string"
-                          },
-                          "country": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "quotationsCount": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    },
-                    "total": {
-                      "type": "integer"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "leadId": "ld_1",
-                      "generatedLeadId": "LD-2026-00001",
-                      "firstName": "Juan",
-                      "lastName": "Dela Cruz",
-                      "leadCategory": "Retail",
-                      "lob": "MOTOR",
-                      "emailId": "juan@example.com",
-                      "contactNumber": "09171234567",
-                      "city": "Makati",
-                      "province": "Metro Manila",
-                      "country": "Philippines",
-                      "status": "New",
-                      "quotationsCount": 0
-                    }
-                  ],
-                  "total": 1
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Operations > Leads/Prospects",
-        "x-permissions": [
-          "read:leads"
-        ]
       }
     },
     "/leads/report": {
@@ -32783,9 +32783,9 @@
         ]
       }
     },
-    "/accounting/notifications": {
+    "/notifications": {
       "get": {
-        "operationId": "getAccountingNotifications",
+        "operationId": "getNotifications",
         "summary": "Notifications for the signed-in user (paged; filter type / isRead)",
         "tags": [
           "Notifications"
@@ -32931,7 +32931,7 @@
         "x-screen": "Top bar > Notifications"
       },
       "delete": {
-        "operationId": "deleteAccountingNotifications",
+        "operationId": "deleteNotifications",
         "summary": "Delete several notifications",
         "tags": [
           "Notifications"
@@ -32997,9 +32997,9 @@
         }
       }
     },
-    "/accounting/notifications/{id}": {
+    "/notifications/{id}": {
       "delete": {
-        "operationId": "deleteAccountingNotificationsId",
+        "operationId": "deleteNotificationsId",
         "summary": "Delete one notification",
         "tags": [
           "Notifications"
@@ -33047,9 +33047,9 @@
         "x-screen": "Top bar > Notifications"
       }
     },
-    "/accounting/notifications/{id}/read": {
+    "/notifications/{id}/read": {
       "put": {
-        "operationId": "putAccountingNotificationsIdRead",
+        "operationId": "putNotificationsIdRead",
         "summary": "Mark one notification as read",
         "tags": [
           "Notifications"
@@ -33097,9 +33097,9 @@
         "x-screen": "Top bar > Notifications"
       }
     },
-    "/accounting/notifications/read": {
+    "/notifications/read": {
       "put": {
-        "operationId": "putAccountingNotificationsRead",
+        "operationId": "putNotificationsRead",
         "summary": "Mark several notifications as read",
         "tags": [
           "Notifications"
@@ -33172,9 +33172,9 @@
         }
       }
     },
-    "/accounting/notifications/read-all": {
+    "/notifications/read-all": {
       "put": {
-        "operationId": "putAccountingNotificationsReadAll",
+        "operationId": "putNotificationsReadAll",
         "summary": "Mark all notifications as read",
         "tags": [
           "Notifications"
@@ -33221,9 +33221,9 @@
         "x-screen": "Top bar > Notifications"
       }
     },
-    "/accounting/notifications/stats": {
+    "/notifications/stats": {
       "get": {
-        "operationId": "getAccountingNotificationsStats",
+        "operationId": "getNotificationsStats",
         "summary": "Notification totals by type",
         "tags": [
           "Notifications"
@@ -33274,9 +33274,9 @@
         "x-screen": "Top bar > Notifications"
       }
     },
-    "/accounting/notifications/unread-count": {
+    "/notifications/unread-count": {
       "get": {
-        "operationId": "getAccountingNotificationsUnreadCount",
+        "operationId": "getNotificationsUnreadCount",
         "summary": "Unread notification count",
         "tags": [
           "Notifications"
@@ -33316,9 +33316,9 @@
         "x-screen": "Top bar > Bell"
       }
     },
-    "/payments/open-items": {
+    "/open-items": {
       "get": {
-        "operationId": "getPaymentsOpenItems",
+        "operationId": "getOpenItems",
         "summary": "Open items: pending payments, renewal requests, pending quotes, expiring policies (filter type, search)",
         "tags": [
           "Open Items"
@@ -33460,9 +33460,9 @@
         ]
       }
     },
-    "/payments/open-items/events": {
+    "/open-items/events": {
       "get": {
-        "operationId": "getPaymentsOpenItemsEvents",
+        "operationId": "getOpenItemsEvents",
         "summary": "Upcoming events of the signed-in user",
         "tags": [
           "Open Items"
@@ -33543,7 +33543,7 @@
         "x-screen": "Agent > Open Items > Upcoming events"
       },
       "post": {
-        "operationId": "postPaymentsOpenItemsEvents",
+        "operationId": "postOpenItemsEvents",
         "summary": "Add an event to the signed-in user's calendar",
         "tags": [
           "Open Items"
@@ -33639,9 +33639,9 @@
         }
       }
     },
-    "/payments/open-items/events/{id}": {
+    "/open-items/events/{id}": {
       "delete": {
-        "operationId": "deletePaymentsOpenItemsEventsId",
+        "operationId": "deleteOpenItemsEventsId",
         "summary": "Remove one of the signed-in user's events",
         "tags": [
           "Open Items"
@@ -38372,9 +38372,9 @@
         }
       }
     },
-    "/payments/petty-cash/disbursements": {
+    "/petty-cash/disbursements": {
       "get": {
-        "operationId": "getPaymentsPettyCashDisbursements",
+        "operationId": "getPettyCashDisbursements",
         "summary": "Petty cash disbursements (search, fundId / pettyCashCode, status; paging)",
         "tags": [
           "Petty Cash"
@@ -38507,7 +38507,7 @@
         ]
       },
       "post": {
-        "operationId": "postPaymentsPettyCashDisbursements",
+        "operationId": "postPettyCashDisbursements",
         "summary": "Create a petty cash disbursement (posts its journal)",
         "tags": [
           "Petty Cash"
@@ -38626,9 +38626,9 @@
         }
       }
     },
-    "/payments/petty-cash/disbursements/{id}": {
+    "/petty-cash/disbursements/{id}": {
       "get": {
-        "operationId": "getPaymentsPettyCashDisbursementsId",
+        "operationId": "getPettyCashDisbursementsId",
         "summary": "One petty cash disbursement (id or number)",
         "tags": [
           "Petty Cash"
@@ -38714,9 +38714,9 @@
         ]
       }
     },
-    "/payments/petty-cash/disbursements/{id}/reverse": {
+    "/petty-cash/disbursements/{id}/reverse": {
       "post": {
-        "operationId": "postPaymentsPettyCashDisbursementsIdReverse",
+        "operationId": "postPettyCashDisbursementsIdReverse",
         "summary": "Reverse a petty cash disbursement entered in error (mirror journal, fund cash restored)",
         "tags": [
           "Petty Cash"
@@ -38812,9 +38812,9 @@
         }
       }
     },
-    "/payments/petty-cash/funds": {
+    "/petty-cash/funds": {
       "get": {
-        "operationId": "getPaymentsPettyCashFunds",
+        "operationId": "getPettyCashFunds",
         "summary": "Petty cash funds (search, fundId / pettyCashCode, status; paging)",
         "tags": [
           "Petty Cash"
@@ -38947,7 +38947,7 @@
         ]
       },
       "post": {
-        "operationId": "postPaymentsPettyCashFunds",
+        "operationId": "postPettyCashFunds",
         "summary": "Create a petty cash fund (posts its journal)",
         "tags": [
           "Petty Cash"
@@ -39066,9 +39066,9 @@
         }
       }
     },
-    "/payments/petty-cash/funds/{id}": {
+    "/petty-cash/funds/{id}": {
       "get": {
-        "operationId": "getPaymentsPettyCashFundsId",
+        "operationId": "getPettyCashFundsId",
         "summary": "One petty cash fund (id or number)",
         "tags": [
           "Petty Cash"
@@ -39154,7 +39154,7 @@
         ]
       },
       "put": {
-        "operationId": "putPaymentsPettyCashFundsId",
+        "operationId": "putPettyCashFundsId",
         "summary": "Update fund limits / custodian / status",
         "tags": [
           "Petty Cash"
@@ -39258,9 +39258,9 @@
         }
       }
     },
-    "/payments/petty-cash/receipts": {
+    "/petty-cash/receipts": {
       "get": {
-        "operationId": "getPaymentsPettyCashReceipts",
+        "operationId": "getPettyCashReceipts",
         "summary": "Petty cash receipts (search, fundId / pettyCashCode, status; paging)",
         "tags": [
           "Petty Cash"
@@ -39381,7 +39381,7 @@
         ]
       },
       "post": {
-        "operationId": "postPaymentsPettyCashReceipts",
+        "operationId": "postPettyCashReceipts",
         "summary": "Create a petty cash receipt (posts its journal)",
         "tags": [
           "Petty Cash"
@@ -39476,9 +39476,9 @@
         }
       }
     },
-    "/payments/petty-cash/receipts/{id}": {
+    "/petty-cash/receipts/{id}": {
       "get": {
-        "operationId": "getPaymentsPettyCashReceiptsId",
+        "operationId": "getPettyCashReceiptsId",
         "summary": "One petty cash receipt (id or number)",
         "tags": [
           "Petty Cash"
@@ -39552,9 +39552,9 @@
         ]
       }
     },
-    "/payments/petty-cash/receipts/{id}/reverse": {
+    "/petty-cash/receipts/{id}/reverse": {
       "post": {
-        "operationId": "postPaymentsPettyCashReceiptsIdReverse",
+        "operationId": "postPettyCashReceiptsIdReverse",
         "summary": "Reverse a petty cash receipt entered in error (mirror journal, fund cash restored)",
         "tags": [
           "Petty Cash"
@@ -39650,9 +39650,9 @@
         }
       }
     },
-    "/payments/petty-cash/replenishments": {
+    "/petty-cash/replenishments": {
       "get": {
-        "operationId": "getPaymentsPettyCashReplenishments",
+        "operationId": "getPettyCashReplenishments",
         "summary": "Petty cash replenishments (search, fundId / pettyCashCode, status; paging)",
         "tags": [
           "Petty Cash"
@@ -39765,7 +39765,7 @@
         ]
       },
       "post": {
-        "operationId": "postPaymentsPettyCashReplenishments",
+        "operationId": "postPettyCashReplenishments",
         "summary": "Create a petty cash replenishment (posts its journal)",
         "tags": [
           "Petty Cash"
@@ -39844,9 +39844,9 @@
         }
       }
     },
-    "/payments/petty-cash/replenishments/{id}": {
+    "/petty-cash/replenishments/{id}": {
       "get": {
-        "operationId": "getPaymentsPettyCashReplenishmentsId",
+        "operationId": "getPettyCashReplenishmentsId",
         "summary": "One petty cash replenishment (id or number)",
         "tags": [
           "Petty Cash"
@@ -39912,9 +39912,9 @@
         ]
       }
     },
-    "/payments/petty-cash/replenishments/{id}/reverse": {
+    "/petty-cash/replenishments/{id}/reverse": {
       "post": {
-        "operationId": "postPaymentsPettyCashReplenishmentsIdReverse",
+        "operationId": "postPettyCashReplenishmentsIdReverse",
         "summary": "Reverse a petty cash replenishment entered in error (mirror journal, fund cash restored)",
         "tags": [
           "Petty Cash"
@@ -40010,9 +40010,9 @@
         }
       }
     },
-    "/payments/petty-cash/requests": {
+    "/petty-cash/requests": {
       "get": {
-        "operationId": "getPaymentsPettyCashRequests",
+        "operationId": "getPettyCashRequests",
         "summary": "Petty cash requests (search, fundId / pettyCashCode, status; paging)",
         "tags": [
           "Petty Cash"
@@ -40157,7 +40157,7 @@
         ]
       },
       "post": {
-        "operationId": "postPaymentsPettyCashRequests",
+        "operationId": "postPettyCashRequests",
         "summary": "Create a petty cash request",
         "tags": [
           "Petty Cash"
@@ -40300,9 +40300,9 @@
         }
       }
     },
-    "/payments/petty-cash/requests/{id}": {
+    "/petty-cash/requests/{id}": {
       "get": {
-        "operationId": "getPaymentsPettyCashRequestsId",
+        "operationId": "getPettyCashRequestsId",
         "summary": "One petty cash request (id or number)",
         "tags": [
           "Petty Cash"
@@ -40400,7 +40400,7 @@
         ]
       },
       "put": {
-        "operationId": "putPaymentsPettyCashRequestsId",
+        "operationId": "putPettyCashRequestsId",
         "summary": "Edit a draft / rejected request (lines replace existing)",
         "tags": [
           "Petty Cash"
@@ -40540,9 +40540,9 @@
         }
       }
     },
-    "/payments/petty-cash/requests/{id}/approve": {
+    "/petty-cash/requests/{id}/approve": {
       "post": {
-        "operationId": "postPaymentsPettyCashRequestsIdApprove",
+        "operationId": "postPettyCashRequestsIdApprove",
         "summary": "Approve a submitted request (approver must differ from requester)",
         "tags": [
           "Petty Cash"
@@ -40656,9 +40656,9 @@
         }
       }
     },
-    "/payments/petty-cash/requests/{id}/reject": {
+    "/petty-cash/requests/{id}/reject": {
       "post": {
-        "operationId": "postPaymentsPettyCashRequestsIdReject",
+        "operationId": "postPettyCashRequestsIdReject",
         "summary": "Reject a submitted request (approver must differ from requester)",
         "tags": [
           "Petty Cash"
@@ -40778,9 +40778,9 @@
         }
       }
     },
-    "/payments/petty-cash/requests/{id}/submit": {
+    "/petty-cash/requests/{id}/submit": {
       "post": {
-        "operationId": "postPaymentsPettyCashRequestsIdSubmit",
+        "operationId": "postPettyCashRequestsIdSubmit",
         "summary": "Submit a request for approval",
         "tags": [
           "Petty Cash"
@@ -55587,9 +55587,9 @@
         ]
       }
     },
-    "/quotations/biCoverage/get-bi-coverage": {
+    "/biCoverage/get-bi-coverage": {
       "get": {
-        "operationId": "getQuotationsBiCoverageGetBiCoverage",
+        "operationId": "getBiCoverageGetBiCoverage",
         "summary": "BI coverage options (amount and flat premium) for a policy type",
         "tags": [
           "Quotation masters"
@@ -55670,9 +55670,9 @@
         ]
       }
     },
-    "/quotations/master/account-codes": {
+    "/master/account-codes": {
       "get": {
-        "operationId": "getQuotationsMasterAccountCodes",
+        "operationId": "getMasterAccountCodes",
         "summary": "Account codes for a quote: active referrers (agents, sub-agents, external) as dropdown options",
         "tags": [
           "Quotation masters"
@@ -55744,9 +55744,9 @@
         ]
       }
     },
-    "/quotations/master/banks/get-all-banks": {
+    "/master/banks/get-all-banks": {
       "get": {
-        "operationId": "getQuotationsMasterBanksGetAllBanks",
+        "operationId": "getMasterBanksGetAllBanks",
         "summary": "Banks / mortgagees",
         "tags": [
           "Quotation masters"
@@ -55810,9 +55810,9 @@
         ]
       }
     },
-    "/quotations/master/insurancecompany/get-insurance-companies": {
+    "/master/insurancecompany/get-insurance-companies": {
       "get": {
-        "operationId": "getQuotationsMasterInsurancecompanyGetInsuranceCompanies",
+        "operationId": "getMasterInsurancecompanyGetInsuranceCompanies",
         "summary": "Insurance companies",
         "tags": [
           "Quotation masters"
@@ -55880,9 +55880,9 @@
         ]
       }
     },
-    "/quotations/master/policyType/policy-type": {
+    "/master/policyType/policy-type": {
       "get": {
-        "operationId": "getQuotationsMasterPolicyTypePolicyType",
+        "operationId": "getMasterPolicyTypePolicyType",
         "summary": "Policy types of a product (productId = id or code)",
         "tags": [
           "Quotation masters"
@@ -55963,9 +55963,9 @@
         ]
       }
     },
-    "/quotations/master/signatory/get-all-signatory": {
+    "/master/signatory/get-all-signatory": {
       "get": {
-        "operationId": "getQuotationsMasterSignatoryGetAllSignatory",
+        "operationId": "getMasterSignatoryGetAllSignatory",
         "summary": "Authorised signatories",
         "tags": [
           "Quotation masters"
@@ -56029,9 +56029,9 @@
         ]
       }
     },
-    "/quotations/master/vehicle/get-brands": {
+    "/master/vehicle/get-brands": {
       "get": {
-        "operationId": "getQuotationsMasterVehicleGetBrands",
+        "operationId": "getMasterVehicleGetBrands",
         "summary": "Vehicle brands",
         "tags": [
           "Quotation masters"
@@ -56095,9 +56095,9 @@
         ]
       }
     },
-    "/quotations/master/vehicle/get-models": {
+    "/master/vehicle/get-models": {
       "get": {
-        "operationId": "getQuotationsMasterVehicleGetModels",
+        "operationId": "getMasterVehicleGetModels",
         "summary": "Models of a brand (brand id or name)",
         "tags": [
           "Quotation masters"
@@ -56178,9 +56178,9 @@
         ]
       }
     },
-    "/quotations/master/vehicle/get-seating-capacity": {
+    "/master/vehicle/get-seating-capacity": {
       "get": {
-        "operationId": "getQuotationsMasterVehicleGetSeatingCapacity",
+        "operationId": "getMasterVehicleGetSeatingCapacity",
         "summary": "Seating capacities (optionally of one variant)",
         "tags": [
           "Quotation masters"
@@ -56257,9 +56257,9 @@
         ]
       }
     },
-    "/quotations/master/vehicle/get-variants": {
+    "/master/vehicle/get-variants": {
       "get": {
-        "operationId": "getQuotationsMasterVehicleGetVariants",
+        "operationId": "getMasterVehicleGetVariants",
         "summary": "Variants of a model (model id or name)",
         "tags": [
           "Quotation masters"
@@ -56344,9 +56344,9 @@
         ]
       }
     },
-    "/quotations/master/vehicle/get-vehicle-types": {
+    "/master/vehicle/get-vehicle-types": {
       "get": {
-        "operationId": "getQuotationsMasterVehicleGetVehicleTypes",
+        "operationId": "getMasterVehicleGetVehicleTypes",
         "summary": "Vehicle body types (from the variants master)",
         "tags": [
           "Quotation masters"
@@ -56406,9 +56406,9 @@
         ]
       }
     },
-    "/quotations/paCoverage/get-pa-coverages": {
+    "/paCoverage/get-pa-coverages": {
       "get": {
-        "operationId": "getQuotationsPaCoverageGetPaCoverages",
+        "operationId": "getPaCoverageGetPaCoverages",
         "summary": "PA coverage options (amount and flat premium) for a policy type",
         "tags": [
           "Quotation masters"
@@ -56489,9 +56489,9 @@
         ]
       }
     },
-    "/quotations/pdCoverage/get-pd-coverages": {
+    "/pdCoverage/get-pd-coverages": {
       "get": {
-        "operationId": "getQuotationsPdCoverageGetPdCoverages",
+        "operationId": "getPdCoverageGetPdCoverages",
         "summary": "PD coverage options (amount and flat premium) for a policy type",
         "tags": [
           "Quotation masters"
@@ -56572,9 +56572,9 @@
         ]
       }
     },
-    "/quotations/quote/calculate-premium-quote": {
+    "/quote/calculate-premium-quote": {
       "post": {
-        "operationId": "postQuotationsQuoteCalculatePremiumQuote",
+        "operationId": "postQuoteCalculatePremiumQuote",
         "summary": "Legacy premium calculation (same as POST /quotations/calculate-premium)",
         "tags": [
           "Quotation masters"
@@ -74267,9 +74267,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/{id}": {
+    "/renewals/{id}": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsId",
+        "operationId": "getRenewalsId",
         "summary": "Renewal with quotes, notices and activity timeline",
         "tags": [
           "Renewals workspace"
@@ -74433,9 +74433,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/{id}/activities": {
+    "/renewals/{id}/activities": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdActivities",
+        "operationId": "postRenewalsIdActivities",
         "summary": "Add a negotiation update / contact to the renewal timeline",
         "tags": [
           "Renewals workspace"
@@ -74547,9 +74547,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/approve": {
+    "/renewals/{id}/approve": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdApprove",
+        "operationId": "postRenewalsIdApprove",
         "summary": "Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter",
         "tags": [
           "Renewals workspace"
@@ -74720,9 +74720,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/complete": {
+    "/renewals/{id}/complete": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdComplete",
+        "operationId": "postRenewalsIdComplete",
         "summary": "Complete the renewal: create the new policy term, mark the old policy renewed, raise the premium receivable",
         "tags": [
           "Renewals workspace"
@@ -74927,9 +74927,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/lapse": {
+    "/renewals/{id}/lapse": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdLapse",
+        "operationId": "postRenewalsIdLapse",
         "summary": "Lapse a renewal (reason required)",
         "tags": [
           "Renewals workspace"
@@ -75096,9 +75096,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/notices": {
+    "/renewals/{id}/notices": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdNotices",
+        "operationId": "postRenewalsIdNotices",
         "summary": "Send the next renewal notice (first, second, final in order); stage may be given explicitly",
         "tags": [
           "Renewals workspace"
@@ -75269,9 +75269,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/quote": {
+    "/renewals/{id}/quote": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdQuote",
+        "operationId": "postRenewalsIdQuote",
         "summary": "Generate a renewal quote re-rated at current rates (claims loading, loyalty discount, current taxes) with premium variance",
         "tags": [
           "Renewals workspace"
@@ -75399,9 +75399,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/{id}/reinstate": {
+    "/renewals/{id}/reinstate": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdReinstate",
+        "operationId": "postRenewalsIdReinstate",
         "summary": "Reinstate a lapsed renewal within the reinstatement window",
         "tags": [
           "Renewals workspace"
@@ -75568,9 +75568,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/reminders": {
+    "/renewals/{id}/reminders": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdReminders",
+        "operationId": "postRenewalsIdReminders",
         "summary": "Send / log a renewal reminder (Email | SMS | Phone | Letter)",
         "tags": [
           "Renewals workspace"
@@ -75741,9 +75741,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/submit": {
+    "/renewals/{id}/submit": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdSubmit",
+        "operationId": "postRenewalsIdSubmit",
         "summary": "Submit the quoted renewal terms for checker approval",
         "tags": [
           "Renewals workspace"
@@ -75910,9 +75910,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/{id}/win-back": {
+    "/renewals/{id}/win-back": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsIdWinBack",
+        "operationId": "postRenewalsIdWinBack",
         "summary": "Record a win-back offer on a lapsed renewal (optionally linked to a campaign)",
         "tags": [
           "Renewals workspace"
@@ -76008,9 +76008,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/approvals": {
+    "/renewals/approvals": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsApprovals",
+        "operationId": "getRenewalsApprovals",
         "summary": "Renewal terms awaiting checker approval",
         "tags": [
           "Renewals workspace"
@@ -76100,9 +76100,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/at-risk": {
+    "/renewals/at-risk": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsAtRisk",
+        "operationId": "getRenewalsAtRisk",
         "summary": "At-risk renewals: risk score, factors, recommended actions",
         "tags": [
           "Renewals workspace"
@@ -76217,9 +76217,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/campaigns": {
+    "/renewals/campaigns": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsCampaigns",
+        "operationId": "getRenewalsCampaigns",
         "summary": "Win-back campaigns with statistics",
         "tags": [
           "Renewals workspace"
@@ -76308,7 +76308,7 @@
         ]
       },
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsCampaigns",
+        "operationId": "postRenewalsCampaigns",
         "summary": "Create a win-back campaign",
         "tags": [
           "Renewals workspace"
@@ -76412,9 +76412,9 @@
         }
       }
     },
-    "/policy-renewals/renewals/campaigns/{id}": {
+    "/renewals/campaigns/{id}": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsCampaignsId",
+        "operationId": "getRenewalsCampaignsId",
         "summary": "One win-back campaign",
         "tags": [
           "Renewals workspace"
@@ -76476,9 +76476,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/lapsed": {
+    "/renewals/lapsed": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsLapsed",
+        "operationId": "getRenewalsLapsed",
         "summary": "Lapsed renewals with win-back attempts and reinstatement eligibility",
         "tags": [
           "Renewals workspace"
@@ -76562,9 +76562,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/negotiations": {
+    "/renewals/negotiations": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsNegotiations",
+        "operationId": "getRenewalsNegotiations",
         "summary": "Renewals under negotiation with their contact timeline",
         "tags": [
           "Renewals workspace"
@@ -76663,9 +76663,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/performance": {
+    "/renewals/performance": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsPerformance",
+        "operationId": "getRenewalsPerformance",
         "summary": "Retention KPIs: renewal rate, premium retention, cycle time, by product, by agent, monthly trend",
         "tags": [
           "Renewals workspace"
@@ -76833,9 +76833,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/pipeline/refresh": {
+    "/renewals/pipeline/refresh": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsPipelineRefresh",
+        "operationId": "postRenewalsPipelineRefresh",
         "summary": "Add policies expiring within renewals.pipeline_days to the pipeline; lapse renewals past the grace period",
         "tags": [
           "Renewals workspace"
@@ -76889,9 +76889,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/policies/{policyId}": {
+    "/renewals/policies/{policyId}": {
       "post": {
-        "operationId": "postPolicyRenewalsRenewalsPoliciesPolicyId",
+        "operationId": "postRenewalsPoliciesPolicyId",
         "summary": "Put one policy into the renewal pipeline (returns the open renewal)",
         "tags": [
           "Renewals workspace"
@@ -77040,9 +77040,9 @@
         ]
       }
     },
-    "/policy-renewals/renewals/queue": {
+    "/renewals/queue": {
       "get": {
-        "operationId": "getPolicyRenewalsRenewalsQueue",
+        "operationId": "getRenewalsQueue",
         "summary": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",
         "tags": [
           "Renewals workspace"
@@ -78816,7 +78816,7 @@
         "tags": [
           "Schedules"
         ],
-        "description": "Front-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Master > Schedules\n\nAccess: read:schedules",
         "parameters": [],
         "responses": {
           "200": {
@@ -78884,7 +78884,10 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > Schedules"
+        "x-screen": "Master > Schedules",
+        "x-permissions": [
+          "read:schedules"
+        ]
       }
     },
     "/schedules/{code}": {
@@ -79042,7 +79045,7 @@
         "tags": [
           "Schedules"
         ],
-        "description": "Front-end touchpoint: Master > Schedules > History\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules",
         "parameters": [
           {
             "name": "code",
@@ -79117,7 +79120,10 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > Schedules > History"
+        "x-screen": "Master > Schedules > History",
+        "x-permissions": [
+          "read:schedules"
+        ]
       }
     },
     "/search": {
@@ -80632,6 +80638,364 @@
         }
       }
     },
+    "/roles": {
+      "get": {
+        "operationId": "getRoles",
+        "summary": "List roles with their permissions and user counts",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "permissions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "users": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "code": "sales",
+                      "name": "Sales & Marketing (Account Executive)",
+                      "permissions": [
+                        "read:leads"
+                      ],
+                      "users": 3
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role"
+      },
+      "post": {
+        "operationId": "postRoles",
+        "summary": "Create a role",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role > Add\n\nAccess: write:roles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 9,
+                    "code": "branch-manager"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role > Add",
+        "x-permissions": [
+          "write:roles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "code": "branch-manager",
+                "name": "Branch Manager",
+                "permissions": [
+                  "read:leads",
+                  "read:policies",
+                  "read:reports"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/roles/{id}": {
+      "put": {
+        "operationId": "putRolesId",
+        "summary": "Update a role and its permissions",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role > Edit",
+        "x-permissions": [
+          "write:roles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "name": "Branch Manager",
+                "permissions": [
+                  "read:leads"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteRolesId",
+        "summary": "Delete a non-system role with no users",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role\n\nAccess: write:roles",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role",
+        "x-permissions": [
+          "write:roles"
+        ]
+      }
+    },
+    "/roles/permissions": {
+      "get": {
+        "operationId": "getRolesPermissions",
+        "summary": "All permission codes grouped by module",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role > Add\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "read:leads",
+                      "module": "leads",
+                      "description": "View leads"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role > Add"
+      }
+    },
     "/users": {
       "get": {
         "operationId": "getUsers",
@@ -81586,364 +81950,6 @@
             }
           }
         }
-      }
-    },
-    "/users/roles": {
-      "get": {
-        "operationId": "getUsersRoles",
-        "summary": "List roles with their permissions and user counts",
-        "tags": [
-          "User Management"
-        ],
-        "description": "Front-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "code": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "permissions": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "users": {
-                            "type": "integer"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "id": 1,
-                      "code": "sales",
-                      "name": "Sales & Marketing (Account Executive)",
-                      "permissions": [
-                        "read:leads"
-                      ],
-                      "users": 3
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > User Management > Role"
-      },
-      "post": {
-        "operationId": "postUsersRoles",
-        "summary": "Create a role",
-        "tags": [
-          "User Management"
-        ],
-        "description": "Front-end touchpoint: Master > User Management > Role > Add\n\nAccess: write:roles",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "code": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": 9,
-                    "code": "branch-manager"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > User Management > Role > Add",
-        "x-permissions": [
-          "write:roles"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "permissions": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "example": {
-                "code": "branch-manager",
-                "name": "Branch Manager",
-                "permissions": [
-                  "read:leads",
-                  "read:policies",
-                  "read:reports"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/users/roles/{id}": {
-      "put": {
-        "operationId": "putUsersRolesId",
-        "summary": "Update a role and its permissions",
-        "tags": [
-          "User Management"
-        ],
-        "description": "Front-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > User Management > Role > Edit",
-        "x-permissions": [
-          "write:roles"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "permissions": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "example": {
-                "name": "Branch Manager",
-                "permissions": [
-                  "read:leads"
-                ]
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "deleteUsersRolesId",
-        "summary": "Delete a non-system role with no users",
-        "tags": [
-          "User Management"
-        ],
-        "description": "Front-end touchpoint: Master > User Management > Role\n\nAccess: write:roles",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    }
-                  }
-                },
-                "example": {
-                  "success": true
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > User Management > Role",
-        "x-permissions": [
-          "write:roles"
-        ]
-      }
-    },
-    "/users/roles/permissions": {
-      "get": {
-        "operationId": "getUsersRolesPermissions",
-        "summary": "All permission codes grouped by module",
-        "tags": [
-          "User Management"
-        ],
-        "description": "Front-end touchpoint: Master > User Management > Role > Add\n\nAccess: Any authenticated user",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "code": {
-                            "type": "string"
-                          },
-                          "module": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "code": "read:leads",
-                      "module": "leads",
-                      "description": "View leads"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > User Management > Role > Add"
       }
     },
     "/users/stats": {

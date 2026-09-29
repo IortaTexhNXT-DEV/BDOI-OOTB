@@ -19,7 +19,7 @@ creates the old codes.
 
 `SEED_SAMPLE_DATA`: `true` / `false` (also `1` / `0`, `yes` / `no`, `on` / `off`). Unset: on in development and test,
 off with `NODE_ENV=production`. To remove sample data from a database that was seeded with it, use
-`npm run purge:sample` (`scripts/purge-sample-data.js`, see `docs/DEPLOY.md`).
+`npm run purge:sample` (`scripts/purge-sample-data.js`, see `deploy/REFERENCE.md`).
 
 Rule for new seed rows: data the business needs to operate the system (configuration, catalogues, tariffs, lookups,
 real-world reference lists) is reference; fictional people, companies, accounts and every transaction are sample.

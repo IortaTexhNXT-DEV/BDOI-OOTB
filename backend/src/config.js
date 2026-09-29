@@ -74,6 +74,6 @@ export function productionConfigProblems(cfg = config, source = process.env) {
 export function assertProductionConfig(cfg = config, source = process.env) {
   const problems = productionConfigProblems(cfg, source);
   if (problems.length) {
-    throw new Error(`Refusing to start in production: ${problems.join('; ')}. See docs/DEPLOY.md.`);
+    throw new Error(`Refusing to start in production: ${problems.join('; ')}. See deploy/REFERENCE.md.`);
   }
 }

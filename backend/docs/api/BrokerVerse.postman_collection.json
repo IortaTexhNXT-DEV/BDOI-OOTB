@@ -135,12 +135,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/account-determination",
+              "raw": "{{baseUrl}}/account-determination",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "posting-rules",
                 "account-determination"
               ]
             },
@@ -153,12 +152,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/account-determination",
+                  "raw": "{{baseUrl}}/account-determination",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "posting-rules",
                     "account-determination"
                   ]
                 },
@@ -189,12 +187,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/account-determination/maps/:name",
+              "raw": "{{baseUrl}}/account-determination/maps/:name",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "posting-rules",
                 "account-determination",
                 "maps",
                 ":name"
@@ -230,12 +227,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/account-determination/maps/:name",
+                  "raw": "{{baseUrl}}/account-determination/maps/:name",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "posting-rules",
                     "account-determination",
                     "maps",
                     ":name"
@@ -284,12 +280,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/account-determination/roles/:role",
+              "raw": "{{baseUrl}}/account-determination/roles/:role",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "posting-rules",
                 "account-determination",
                 "roles",
                 ":role"
@@ -325,12 +320,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/account-determination/roles/:role",
+                  "raw": "{{baseUrl}}/account-determination/roles/:role",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "posting-rules",
                     "account-determination",
                     "roles",
                     ":role"
@@ -374,12 +368,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+              "raw": "{{baseUrl}}/account-determination/write-off-reasons",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "posting-rules",
                 "account-determination",
                 "write-off-reasons"
               ]
@@ -393,12 +386,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+                  "raw": "{{baseUrl}}/account-determination/write-off-reasons",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "posting-rules",
                     "account-determination",
                     "write-off-reasons"
                   ]
@@ -430,12 +422,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+              "raw": "{{baseUrl}}/account-determination/write-off-reasons",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "posting-rules",
                 "account-determination",
                 "write-off-reasons"
               ]
@@ -463,12 +454,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons",
+                  "raw": "{{baseUrl}}/account-determination/write-off-reasons",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "posting-rules",
                     "account-determination",
                     "write-off-reasons"
                   ]
@@ -509,12 +499,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons/:code",
+              "raw": "{{baseUrl}}/account-determination/write-off-reasons/:code",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "posting-rules",
                 "account-determination",
                 "write-off-reasons",
                 ":code"
@@ -550,12 +539,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/account-determination/write-off-reasons/:code",
+                  "raw": "{{baseUrl}}/account-determination/write-off-reasons/:code",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "posting-rules",
                     "account-determination",
                     "write-off-reasons",
                     ":code"
@@ -6797,12 +6785,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/receipts/billing-statement/endorsement/:id/generate",
+              "raw": "{{baseUrl}}/billing-statement/endorsement/:id/generate",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "receipts",
                 "billing-statement",
                 "endorsement",
                 ":id",
@@ -6825,12 +6812,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/receipts/billing-statement/endorsement/:id/generate",
+                  "raw": "{{baseUrl}}/billing-statement/endorsement/:id/generate",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "receipts",
                     "billing-statement",
                     "endorsement",
                     ":id",
@@ -6866,12 +6852,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/receipts/billing-statement/endorsement/:id/preview",
+              "raw": "{{baseUrl}}/billing-statement/endorsement/:id/preview",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "receipts",
                 "billing-statement",
                 "endorsement",
                 ":id",
@@ -6894,12 +6879,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/receipts/billing-statement/endorsement/:id/preview",
+                  "raw": "{{baseUrl}}/billing-statement/endorsement/:id/preview",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "receipts",
                     "billing-statement",
                     "endorsement",
                     ":id",
@@ -6935,12 +6919,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/receipts/billing-statement/policy/:policyId/generate",
+              "raw": "{{baseUrl}}/billing-statement/policy/:policyId/generate",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "receipts",
                 "billing-statement",
                 "policy",
                 ":policyId",
@@ -6963,12 +6946,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/receipts/billing-statement/policy/:policyId/generate",
+                  "raw": "{{baseUrl}}/billing-statement/policy/:policyId/generate",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "receipts",
                     "billing-statement",
                     "policy",
                     ":policyId",
@@ -7004,12 +6986,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/receipts/billing-statement/renewal/:policyId/generate",
+              "raw": "{{baseUrl}}/billing-statement/renewal/:policyId/generate",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "receipts",
                 "billing-statement",
                 "renewal",
                 ":policyId",
@@ -7032,12 +7013,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/receipts/billing-statement/renewal/:policyId/generate",
+                  "raw": "{{baseUrl}}/billing-statement/renewal/:policyId/generate",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "receipts",
                     "billing-statement",
                     "renewal",
                     ":policyId",
@@ -7078,12 +7058,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips?status=submitted,responses-in&search=BS-2026",
+              "raw": "{{baseUrl}}/broker-slips?status=submitted,responses-in&search=BS-2026",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips"
               ],
               "query": [
@@ -7106,12 +7085,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips?status=submitted,responses-in&search=BS-2026",
+                  "raw": "{{baseUrl}}/broker-slips?status=submitted,responses-in&search=BS-2026",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips"
                   ],
                   "query": [
@@ -7152,12 +7130,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips",
+              "raw": "{{baseUrl}}/broker-slips",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips"
               ]
             },
@@ -7184,12 +7161,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips",
+                  "raw": "{{baseUrl}}/broker-slips",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips"
                   ]
                 },
@@ -7224,12 +7200,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id",
+              "raw": "{{baseUrl}}/broker-slips/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id"
               ],
@@ -7250,12 +7225,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id",
+                  "raw": "{{baseUrl}}/broker-slips/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id"
                   ],
@@ -7294,12 +7268,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id",
+              "raw": "{{baseUrl}}/broker-slips/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id"
               ],
@@ -7334,12 +7307,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id",
+                  "raw": "{{baseUrl}}/broker-slips/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id"
                   ],
@@ -7387,12 +7359,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/cancel",
+              "raw": "{{baseUrl}}/broker-slips/:id/cancel",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "cancel"
@@ -7428,12 +7399,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/cancel",
+                  "raw": "{{baseUrl}}/broker-slips/:id/cancel",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "cancel"
@@ -7482,12 +7452,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/close",
+              "raw": "{{baseUrl}}/broker-slips/:id/close",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "close"
@@ -7523,12 +7492,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/close",
+                  "raw": "{{baseUrl}}/broker-slips/:id/close",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "close"
@@ -7572,12 +7540,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/comparison",
+              "raw": "{{baseUrl}}/broker-slips/:id/comparison",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "comparison"
@@ -7599,12 +7566,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/comparison",
+                  "raw": "{{baseUrl}}/broker-slips/:id/comparison",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "comparison"
@@ -7639,12 +7605,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/documents/broker-slip?insurerId=2",
+              "raw": "{{baseUrl}}/broker-slips/:id/documents/broker-slip?insurerId=2",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "documents",
@@ -7673,12 +7638,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/documents/broker-slip?insurerId=2",
+                  "raw": "{{baseUrl}}/broker-slips/:id/documents/broker-slip?insurerId=2",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "documents",
@@ -7725,12 +7689,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/insurers",
+              "raw": "{{baseUrl}}/broker-slips/:id/insurers",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "insurers"
@@ -7766,12 +7729,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/insurers",
+                  "raw": "{{baseUrl}}/broker-slips/:id/insurers",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "insurers"
@@ -7820,12 +7782,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/offers/:offerId",
+              "raw": "{{baseUrl}}/broker-slips/:id/offers/:offerId",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "offers",
@@ -7867,12 +7828,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/offers/:offerId",
+                  "raw": "{{baseUrl}}/broker-slips/:id/offers/:offerId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "offers",
@@ -7927,12 +7887,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-placement",
+              "raw": "{{baseUrl}}/broker-slips/:id/prepare-placement",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "prepare-placement"
@@ -7968,12 +7927,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-placement",
+                  "raw": "{{baseUrl}}/broker-slips/:id/prepare-placement",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "prepare-placement"
@@ -8022,12 +7980,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-quotation",
+              "raw": "{{baseUrl}}/broker-slips/:id/prepare-quotation",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "prepare-quotation"
@@ -8063,12 +8020,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/prepare-quotation",
+                  "raw": "{{baseUrl}}/broker-slips/:id/prepare-quotation",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "prepare-quotation"
@@ -8117,12 +8073,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/broker-slips/:id/submit",
+              "raw": "{{baseUrl}}/broker-slips/:id/submit",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "placements",
                 "broker-slips",
                 ":id",
                 "submit"
@@ -8158,12 +8113,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/broker-slips/:id/submit",
+                  "raw": "{{baseUrl}}/broker-slips/:id/submit",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "placements",
                     "broker-slips",
                     ":id",
                     "submit"
@@ -9874,57 +9828,6 @@
           ]
         },
         {
-          "name": "Customer codes for dropdowns",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/clients/customers/codes",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clients",
-                "customers",
-                "codes"
-              ]
-            },
-            "description": "Customer codes for dropdowns\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/clients/customers/codes",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "clients",
-                    "customers",
-                    "codes"
-                  ]
-                },
-                "description": "Customer codes for dropdowns\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientId\": \"cl_1\",\n      \"customerCode\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\"\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
           "name": "Convert a lead into a client (returns the existing client when already converted)",
           "request": {
             "method": "POST",
@@ -10014,6 +9917,55 @@
               ],
               "cookie": [],
               "body": "{\n  \"clientId\": \"cl_1\",\n  \"generatedClientId\": \"CL-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"leadCategory\": \"Retail\",\n  \"policies\": [\n    {\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"status\": \"Active\"\n    }\n  ],\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Customer codes for dropdowns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers/codes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                "codes"
+              ]
+            },
+            "description": "Customer codes for dropdowns\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/codes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "customers",
+                    "codes"
+                  ]
+                },
+                "description": "Customer codes for dropdowns\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientId\": \"cl_1\",\n      \"customerCode\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\"\n    }\n  ]\n}"
             }
           ]
         }
@@ -15151,12 +15103,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/quotations/email/generate",
+              "raw": "{{baseUrl}}/email/generate",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "email",
                 "generate"
               ]
@@ -15184,12 +15135,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/email/generate",
+                  "raw": "{{baseUrl}}/email/generate",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "email",
                     "generate"
                   ]
@@ -15230,12 +15180,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/quotations/email/send",
+              "raw": "{{baseUrl}}/email/send",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "email",
                 "send"
               ]
@@ -15263,12 +15212,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/email/send",
+                  "raw": "{{baseUrl}}/email/send",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "email",
                     "send"
                   ]
@@ -15309,12 +15257,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/quotations/email/share-quote",
+              "raw": "{{baseUrl}}/email/share-quote",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "email",
                 "share-quote"
               ]
@@ -15342,12 +15289,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/email/share-quote",
+                  "raw": "{{baseUrl}}/email/share-quote",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "email",
                     "share-quote"
                   ]
@@ -15388,12 +15334,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/quotations/email/share-quote-to-insurers",
+              "raw": "{{baseUrl}}/email/share-quote-to-insurers",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "email",
                 "share-quote-to-insurers"
               ]
@@ -15421,12 +15366,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/email/share-quote-to-insurers",
+                  "raw": "{{baseUrl}}/email/share-quote-to-insurers",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "email",
                     "share-quote-to-insurers"
                   ]
@@ -16764,12 +16708,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/s3/upload/file/*?exp=1767225600&sig=<hmac>",
+              "raw": "{{baseUrl}}/upload/file/*?exp=1767225600&sig=<hmac>",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "s3",
                 "upload",
                 "file",
                 "*"
@@ -16797,12 +16740,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/s3/upload/file/*?exp=1767225600&sig=<hmac>",
+                  "raw": "{{baseUrl}}/upload/file/*?exp=1767225600&sig=<hmac>",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "s3",
                     "upload",
                     "file",
                     "*"
@@ -19015,6 +18957,116 @@
       "name": "Leads",
       "item": [
         {
+          "name": "Legacy: list leads (same as GET /leads)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lead/get-all-lead",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead",
+                "get-all-lead"
+              ]
+            },
+            "description": "Legacy: list leads (same as GET /leads)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/lead/get-all-lead",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead",
+                    "get-all-lead"
+                  ]
+                },
+                "description": "Legacy: list leads (same as GET /leads)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Legacy: search leads by name (same as GET /leads/search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lead/search-lead?name=juan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead",
+                "search-lead"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "juan"
+                }
+              ]
+            },
+            "description": "Legacy: search leads by name (same as GET /leads/search)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/lead/search-lead?name=juan",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead",
+                    "search-lead"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "juan"
+                    }
+                  ]
+                },
+                "description": "Legacy: search leads by name (same as GET /leads/search)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
           "name": "List leads (filters leadCategory, country, province, city, lob, status; search query; paging)",
           "request": {
             "method": "GET",
@@ -19471,120 +19523,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 3 rows: 3 created, 0 failed\",\n    \"total\": 3,\n    \"created\": 3,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Legacy: list leads (same as GET /leads)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/leads/lead/get-all-lead",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "leads",
-                "lead",
-                "get-all-lead"
-              ]
-            },
-            "description": "Legacy: list leads (same as GET /leads)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/leads/lead/get-all-lead",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "leads",
-                    "lead",
-                    "get-all-lead"
-                  ]
-                },
-                "description": "Legacy: list leads (same as GET /leads)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
-            }
-          ]
-        },
-        {
-          "name": "Legacy: search leads by name (same as GET /leads/search)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/leads/lead/search-lead?name=juan",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "leads",
-                "lead",
-                "search-lead"
-              ],
-              "query": [
-                {
-                  "key": "name",
-                  "value": "juan"
-                }
-              ]
-            },
-            "description": "Legacy: search leads by name (same as GET /leads/search)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/leads/lead/search-lead?name=juan",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "leads",
-                    "lead",
-                    "search-lead"
-                  ],
-                  "query": [
-                    {
-                      "key": "name",
-                      "value": "juan"
-                    }
-                  ]
-                },
-                "description": "Legacy: search leads by name (same as GET /leads/search)\n\nFront-end touchpoint: Operations > Leads/Prospects\n\nAccess: read:leads"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
             }
           ]
         },
@@ -20736,12 +20674,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications?page=1&pageSize=20&type=reminder&isRead=false",
+              "raw": "{{baseUrl}}/notifications?page=1&pageSize=20&type=reminder&isRead=false",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications"
               ],
               "query": [
@@ -20772,12 +20709,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications?page=1&pageSize=20&type=reminder&isRead=false",
+                  "raw": "{{baseUrl}}/notifications?page=1&pageSize=20&type=reminder&isRead=false",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications"
                   ],
                   "query": [
@@ -20826,12 +20762,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications",
+              "raw": "{{baseUrl}}/notifications",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications"
               ]
             },
@@ -20858,12 +20793,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications",
+                  "raw": "{{baseUrl}}/notifications",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications"
                   ]
                 },
@@ -20898,12 +20832,11 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications/:id",
+              "raw": "{{baseUrl}}/notifications/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications",
                 ":id"
               ],
@@ -20924,12 +20857,11 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications/:id",
+                  "raw": "{{baseUrl}}/notifications/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications",
                     ":id"
                   ],
@@ -20963,12 +20895,11 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications/:id/read",
+              "raw": "{{baseUrl}}/notifications/:id/read",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications",
                 ":id",
                 "read"
@@ -20990,12 +20921,11 @@
                 "method": "PUT",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications/:id/read",
+                  "raw": "{{baseUrl}}/notifications/:id/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications",
                     ":id",
                     "read"
@@ -21035,12 +20965,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications/read",
+              "raw": "{{baseUrl}}/notifications/read",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications",
                 "read"
               ]
@@ -21068,12 +20997,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications/read",
+                  "raw": "{{baseUrl}}/notifications/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications",
                     "read"
                   ]
@@ -21109,12 +21037,11 @@
             "method": "PUT",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications/read-all",
+              "raw": "{{baseUrl}}/notifications/read-all",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications",
                 "read-all"
               ]
@@ -21128,12 +21055,11 @@
                 "method": "PUT",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications/read-all",
+                  "raw": "{{baseUrl}}/notifications/read-all",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications",
                     "read-all"
                   ]
@@ -21160,12 +21086,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications/stats",
+              "raw": "{{baseUrl}}/notifications/stats",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications",
                 "stats"
               ]
@@ -21179,12 +21104,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications/stats",
+                  "raw": "{{baseUrl}}/notifications/stats",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications",
                     "stats"
                   ]
@@ -21211,12 +21135,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/accounting/notifications/unread-count",
+              "raw": "{{baseUrl}}/notifications/unread-count",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "accounting",
                 "notifications",
                 "unread-count"
               ]
@@ -21230,12 +21153,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/accounting/notifications/unread-count",
+                  "raw": "{{baseUrl}}/notifications/unread-count",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "accounting",
                     "notifications",
                     "unread-count"
                   ]
@@ -21267,12 +21189,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/open-items?type=payment&search=Santos",
+              "raw": "{{baseUrl}}/open-items?type=payment&search=Santos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "open-items"
               ],
               "query": [
@@ -21295,12 +21216,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/open-items?type=payment&search=Santos",
+                  "raw": "{{baseUrl}}/open-items?type=payment&search=Santos",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "open-items"
                   ],
                   "query": [
@@ -21336,12 +21256,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/open-items/events?from=2026-09-28",
+              "raw": "{{baseUrl}}/open-items/events?from=2026-09-28",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "open-items",
                 "events"
               ],
@@ -21361,12 +21280,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/open-items/events?from=2026-09-28",
+                  "raw": "{{baseUrl}}/open-items/events?from=2026-09-28",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "open-items",
                     "events"
                   ],
@@ -21404,12 +21322,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/open-items/events",
+              "raw": "{{baseUrl}}/open-items/events",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "open-items",
                 "events"
               ]
@@ -21437,12 +21354,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/open-items/events",
+                  "raw": "{{baseUrl}}/open-items/events",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "open-items",
                     "events"
                   ]
@@ -21478,12 +21394,11 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/open-items/events/:id",
+              "raw": "{{baseUrl}}/open-items/events/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "open-items",
                 "events",
                 ":id"
@@ -21505,12 +21420,11 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/open-items/events/:id",
+                  "raw": "{{baseUrl}}/open-items/events/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "open-items",
                     "events",
                     ":id"
@@ -25000,12 +24914,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/disbursements?search=PCF&page=1&pageSize=10",
+              "raw": "{{baseUrl}}/petty-cash/disbursements?search=PCF&page=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "disbursements"
               ],
@@ -25033,12 +24946,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/disbursements?search=PCF&page=1&pageSize=10",
+                  "raw": "{{baseUrl}}/petty-cash/disbursements?search=PCF&page=1&pageSize=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "disbursements"
                   ],
@@ -25084,12 +24996,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/disbursements",
+              "raw": "{{baseUrl}}/petty-cash/disbursements",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "disbursements"
               ]
@@ -25117,12 +25028,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/disbursements",
+                  "raw": "{{baseUrl}}/petty-cash/disbursements",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "disbursements"
                   ]
@@ -25158,12 +25068,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/disbursements/:id",
+              "raw": "{{baseUrl}}/petty-cash/disbursements/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "disbursements",
                 ":id"
@@ -25185,12 +25094,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/disbursements/:id",
+                  "raw": "{{baseUrl}}/petty-cash/disbursements/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "disbursements",
                     ":id"
@@ -25230,12 +25138,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/disbursements/:id/reverse",
+              "raw": "{{baseUrl}}/petty-cash/disbursements/:id/reverse",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "disbursements",
                 ":id",
@@ -25272,12 +25179,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/disbursements/:id/reverse",
+                  "raw": "{{baseUrl}}/petty-cash/disbursements/:id/reverse",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "disbursements",
                     ":id",
@@ -25322,12 +25228,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/funds?search=PCF&page=1&pageSize=10",
+              "raw": "{{baseUrl}}/petty-cash/funds?search=PCF&page=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "funds"
               ],
@@ -25355,12 +25260,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/funds?search=PCF&page=1&pageSize=10",
+                  "raw": "{{baseUrl}}/petty-cash/funds?search=PCF&page=1&pageSize=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "funds"
                   ],
@@ -25406,12 +25310,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/funds",
+              "raw": "{{baseUrl}}/petty-cash/funds",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "funds"
               ]
@@ -25439,12 +25342,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/funds",
+                  "raw": "{{baseUrl}}/petty-cash/funds",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "funds"
                   ]
@@ -25480,12 +25382,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/funds/:id",
+              "raw": "{{baseUrl}}/petty-cash/funds/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "funds",
                 ":id"
@@ -25507,12 +25408,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/funds/:id",
+                  "raw": "{{baseUrl}}/petty-cash/funds/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "funds",
                     ":id"
@@ -25552,12 +25452,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/funds/:id",
+              "raw": "{{baseUrl}}/petty-cash/funds/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "funds",
                 ":id"
@@ -25593,12 +25492,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/funds/:id",
+                  "raw": "{{baseUrl}}/petty-cash/funds/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "funds",
                     ":id"
@@ -25642,12 +25540,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/receipts?search=PCF&page=1&pageSize=10",
+              "raw": "{{baseUrl}}/petty-cash/receipts?search=PCF&page=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "receipts"
               ],
@@ -25675,12 +25572,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/receipts?search=PCF&page=1&pageSize=10",
+                  "raw": "{{baseUrl}}/petty-cash/receipts?search=PCF&page=1&pageSize=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "receipts"
                   ],
@@ -25726,12 +25622,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/receipts",
+              "raw": "{{baseUrl}}/petty-cash/receipts",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "receipts"
               ]
@@ -25759,12 +25654,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/receipts",
+                  "raw": "{{baseUrl}}/petty-cash/receipts",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "receipts"
                   ]
@@ -25800,12 +25694,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/receipts/:id",
+              "raw": "{{baseUrl}}/petty-cash/receipts/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "receipts",
                 ":id"
@@ -25827,12 +25720,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/receipts/:id",
+                  "raw": "{{baseUrl}}/petty-cash/receipts/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "receipts",
                     ":id"
@@ -25872,12 +25764,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/receipts/:id/reverse",
+              "raw": "{{baseUrl}}/petty-cash/receipts/:id/reverse",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "receipts",
                 ":id",
@@ -25914,12 +25805,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/receipts/:id/reverse",
+                  "raw": "{{baseUrl}}/petty-cash/receipts/:id/reverse",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "receipts",
                     ":id",
@@ -25964,12 +25854,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/replenishments?search=PCF&page=1&pageSize=10",
+              "raw": "{{baseUrl}}/petty-cash/replenishments?search=PCF&page=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "replenishments"
               ],
@@ -25997,12 +25886,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/replenishments?search=PCF&page=1&pageSize=10",
+                  "raw": "{{baseUrl}}/petty-cash/replenishments?search=PCF&page=1&pageSize=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "replenishments"
                   ],
@@ -26048,12 +25936,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/replenishments",
+              "raw": "{{baseUrl}}/petty-cash/replenishments",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "replenishments"
               ]
@@ -26081,12 +25968,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/replenishments",
+                  "raw": "{{baseUrl}}/petty-cash/replenishments",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "replenishments"
                   ]
@@ -26122,12 +26008,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/replenishments/:id",
+              "raw": "{{baseUrl}}/petty-cash/replenishments/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "replenishments",
                 ":id"
@@ -26149,12 +26034,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/replenishments/:id",
+                  "raw": "{{baseUrl}}/petty-cash/replenishments/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "replenishments",
                     ":id"
@@ -26194,12 +26078,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/replenishments/:id/reverse",
+              "raw": "{{baseUrl}}/petty-cash/replenishments/:id/reverse",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "replenishments",
                 ":id",
@@ -26236,12 +26119,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/replenishments/:id/reverse",
+                  "raw": "{{baseUrl}}/petty-cash/replenishments/:id/reverse",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "replenishments",
                     ":id",
@@ -26286,12 +26168,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests?search=PCF&page=1&pageSize=10",
+              "raw": "{{baseUrl}}/petty-cash/requests?search=PCF&page=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests"
               ],
@@ -26319,12 +26200,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests?search=PCF&page=1&pageSize=10",
+                  "raw": "{{baseUrl}}/petty-cash/requests?search=PCF&page=1&pageSize=10",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests"
                   ],
@@ -26370,12 +26250,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests",
+              "raw": "{{baseUrl}}/petty-cash/requests",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests"
               ]
@@ -26403,12 +26282,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests",
+                  "raw": "{{baseUrl}}/petty-cash/requests",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests"
                   ]
@@ -26444,12 +26322,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests/:id",
+              "raw": "{{baseUrl}}/petty-cash/requests/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests",
                 ":id"
@@ -26471,12 +26348,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests/:id",
+                  "raw": "{{baseUrl}}/petty-cash/requests/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests",
                     ":id"
@@ -26516,12 +26392,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests/:id",
+              "raw": "{{baseUrl}}/petty-cash/requests/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests",
                 ":id"
@@ -26557,12 +26432,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests/:id",
+                  "raw": "{{baseUrl}}/petty-cash/requests/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests",
                     ":id"
@@ -26611,12 +26485,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests/:id/approve",
+              "raw": "{{baseUrl}}/petty-cash/requests/:id/approve",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests",
                 ":id",
@@ -26653,12 +26526,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests/:id/approve",
+                  "raw": "{{baseUrl}}/petty-cash/requests/:id/approve",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests",
                     ":id",
@@ -26708,12 +26580,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests/:id/reject",
+              "raw": "{{baseUrl}}/petty-cash/requests/:id/reject",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests",
                 ":id",
@@ -26750,12 +26621,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests/:id/reject",
+                  "raw": "{{baseUrl}}/petty-cash/requests/:id/reject",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests",
                     ":id",
@@ -26805,12 +26675,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/payments/petty-cash/requests/:id/submit",
+              "raw": "{{baseUrl}}/petty-cash/requests/:id/submit",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "payments",
                 "petty-cash",
                 "requests",
                 ":id",
@@ -26847,12 +26716,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/payments/petty-cash/requests/:id/submit",
+                  "raw": "{{baseUrl}}/petty-cash/requests/:id/submit",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "payments",
                     "petty-cash",
                     "requests",
                     ":id",
@@ -36448,12 +36316,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/biCoverage/get-bi-coverage?PolicyTypeId=1",
+              "raw": "{{baseUrl}}/biCoverage/get-bi-coverage?PolicyTypeId=1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "biCoverage",
                 "get-bi-coverage"
               ],
@@ -36473,12 +36340,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/biCoverage/get-bi-coverage?PolicyTypeId=1",
+                  "raw": "{{baseUrl}}/biCoverage/get-bi-coverage?PolicyTypeId=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "biCoverage",
                     "get-bi-coverage"
                   ],
@@ -36511,12 +36377,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/account-codes",
+              "raw": "{{baseUrl}}/master/account-codes",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "account-codes"
               ]
@@ -36530,12 +36395,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/account-codes",
+                  "raw": "{{baseUrl}}/master/account-codes",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "account-codes"
                   ]
@@ -36562,12 +36426,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/banks/get-all-banks",
+              "raw": "{{baseUrl}}/master/banks/get-all-banks",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "banks",
                 "get-all-banks"
@@ -36582,12 +36445,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/banks/get-all-banks",
+                  "raw": "{{baseUrl}}/master/banks/get-all-banks",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "banks",
                     "get-all-banks"
@@ -36615,12 +36477,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/insurancecompany/get-insurance-companies",
+              "raw": "{{baseUrl}}/master/insurancecompany/get-insurance-companies",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "insurancecompany",
                 "get-insurance-companies"
@@ -36635,12 +36496,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/insurancecompany/get-insurance-companies",
+                  "raw": "{{baseUrl}}/master/insurancecompany/get-insurance-companies",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "insurancecompany",
                     "get-insurance-companies"
@@ -36668,12 +36528,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/policyType/policy-type?productId=MOTOR",
+              "raw": "{{baseUrl}}/master/policyType/policy-type?productId=MOTOR",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "policyType",
                 "policy-type"
@@ -36694,12 +36553,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/policyType/policy-type?productId=MOTOR",
+                  "raw": "{{baseUrl}}/master/policyType/policy-type?productId=MOTOR",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "policyType",
                     "policy-type"
@@ -36733,12 +36591,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/signatory/get-all-signatory",
+              "raw": "{{baseUrl}}/master/signatory/get-all-signatory",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "signatory",
                 "get-all-signatory"
@@ -36753,12 +36610,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/signatory/get-all-signatory",
+                  "raw": "{{baseUrl}}/master/signatory/get-all-signatory",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "signatory",
                     "get-all-signatory"
@@ -36786,12 +36642,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/vehicle/get-brands",
+              "raw": "{{baseUrl}}/master/vehicle/get-brands",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "vehicle",
                 "get-brands"
@@ -36806,12 +36661,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/vehicle/get-brands",
+                  "raw": "{{baseUrl}}/master/vehicle/get-brands",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "vehicle",
                     "get-brands"
@@ -36839,12 +36693,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/vehicle/get-models?brand=Toyota",
+              "raw": "{{baseUrl}}/master/vehicle/get-models?brand=Toyota",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "vehicle",
                 "get-models"
@@ -36865,12 +36718,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/vehicle/get-models?brand=Toyota",
+                  "raw": "{{baseUrl}}/master/vehicle/get-models?brand=Toyota",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "vehicle",
                     "get-models"
@@ -36904,12 +36756,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/vehicle/get-seating-capacity?variant=1.3 XLE CVT",
+              "raw": "{{baseUrl}}/master/vehicle/get-seating-capacity?variant=1.3 XLE CVT",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "vehicle",
                 "get-seating-capacity"
@@ -36930,12 +36781,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/vehicle/get-seating-capacity?variant=1.3 XLE CVT",
+                  "raw": "{{baseUrl}}/master/vehicle/get-seating-capacity?variant=1.3 XLE CVT",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "vehicle",
                     "get-seating-capacity"
@@ -36969,12 +36819,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/vehicle/get-variants?model=Vios",
+              "raw": "{{baseUrl}}/master/vehicle/get-variants?model=Vios",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "vehicle",
                 "get-variants"
@@ -36995,12 +36844,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/vehicle/get-variants?model=Vios",
+                  "raw": "{{baseUrl}}/master/vehicle/get-variants?model=Vios",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "vehicle",
                     "get-variants"
@@ -37034,12 +36882,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/master/vehicle/get-vehicle-types",
+              "raw": "{{baseUrl}}/master/vehicle/get-vehicle-types",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "master",
                 "vehicle",
                 "get-vehicle-types"
@@ -37054,12 +36901,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/master/vehicle/get-vehicle-types",
+                  "raw": "{{baseUrl}}/master/vehicle/get-vehicle-types",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "master",
                     "vehicle",
                     "get-vehicle-types"
@@ -37087,12 +36933,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/paCoverage/get-pa-coverages?PolicyTypeId=1",
+              "raw": "{{baseUrl}}/paCoverage/get-pa-coverages?PolicyTypeId=1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "paCoverage",
                 "get-pa-coverages"
               ],
@@ -37112,12 +36957,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/paCoverage/get-pa-coverages?PolicyTypeId=1",
+                  "raw": "{{baseUrl}}/paCoverage/get-pa-coverages?PolicyTypeId=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "paCoverage",
                     "get-pa-coverages"
                   ],
@@ -37150,12 +36994,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/quotations/pdCoverage/get-pd-coverages?PolicyTypeId=1",
+              "raw": "{{baseUrl}}/pdCoverage/get-pd-coverages?PolicyTypeId=1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "pdCoverage",
                 "get-pd-coverages"
               ],
@@ -37175,12 +37018,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/pdCoverage/get-pd-coverages?PolicyTypeId=1",
+                  "raw": "{{baseUrl}}/pdCoverage/get-pd-coverages?PolicyTypeId=1",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "pdCoverage",
                     "get-pd-coverages"
                   ],
@@ -37218,12 +37060,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/quotations/quote/calculate-premium-quote",
+              "raw": "{{baseUrl}}/quote/calculate-premium-quote",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "quotations",
                 "quote",
                 "calculate-premium-quote"
               ]
@@ -37251,12 +37092,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/quotations/quote/calculate-premium-quote",
+                  "raw": "{{baseUrl}}/quote/calculate-premium-quote",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "quotations",
                     "quote",
                     "calculate-premium-quote"
                   ]
@@ -48867,12 +48707,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id",
+              "raw": "{{baseUrl}}/renewals/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id"
               ],
@@ -48893,12 +48732,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id",
+                  "raw": "{{baseUrl}}/renewals/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id"
                   ],
@@ -48937,12 +48775,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/activities",
+              "raw": "{{baseUrl}}/renewals/:id/activities",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "activities"
@@ -48978,12 +48815,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/activities",
+                  "raw": "{{baseUrl}}/renewals/:id/activities",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "activities"
@@ -49032,12 +48868,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/approve",
+              "raw": "{{baseUrl}}/renewals/:id/approve",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "approve"
@@ -49073,12 +48908,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/approve",
+                  "raw": "{{baseUrl}}/renewals/:id/approve",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "approve"
@@ -49127,12 +48961,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/complete",
+              "raw": "{{baseUrl}}/renewals/:id/complete",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "complete"
@@ -49168,12 +49001,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/complete",
+                  "raw": "{{baseUrl}}/renewals/:id/complete",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "complete"
@@ -49222,12 +49054,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/lapse",
+              "raw": "{{baseUrl}}/renewals/:id/lapse",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "lapse"
@@ -49263,12 +49094,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/lapse",
+                  "raw": "{{baseUrl}}/renewals/:id/lapse",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "lapse"
@@ -49317,12 +49147,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/notices",
+              "raw": "{{baseUrl}}/renewals/:id/notices",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "notices"
@@ -49358,12 +49187,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/notices",
+                  "raw": "{{baseUrl}}/renewals/:id/notices",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "notices"
@@ -49407,12 +49235,11 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/quote",
+              "raw": "{{baseUrl}}/renewals/:id/quote",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "quote"
@@ -49434,12 +49261,11 @@
                 "method": "POST",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/quote",
+                  "raw": "{{baseUrl}}/renewals/:id/quote",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "quote"
@@ -49479,12 +49305,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/reinstate",
+              "raw": "{{baseUrl}}/renewals/:id/reinstate",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "reinstate"
@@ -49520,12 +49345,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/reinstate",
+                  "raw": "{{baseUrl}}/renewals/:id/reinstate",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "reinstate"
@@ -49574,12 +49398,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/reminders",
+              "raw": "{{baseUrl}}/renewals/:id/reminders",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "reminders"
@@ -49615,12 +49438,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/reminders",
+                  "raw": "{{baseUrl}}/renewals/:id/reminders",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "reminders"
@@ -49669,12 +49491,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/submit",
+              "raw": "{{baseUrl}}/renewals/:id/submit",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "submit"
@@ -49710,12 +49531,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/submit",
+                  "raw": "{{baseUrl}}/renewals/:id/submit",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "submit"
@@ -49764,12 +49584,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/:id/win-back",
+              "raw": "{{baseUrl}}/renewals/:id/win-back",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 ":id",
                 "win-back"
@@ -49805,12 +49624,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/:id/win-back",
+                  "raw": "{{baseUrl}}/renewals/:id/win-back",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     ":id",
                     "win-back"
@@ -49854,12 +49672,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/approvals",
+              "raw": "{{baseUrl}}/renewals/approvals",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "approvals"
               ]
@@ -49873,12 +49690,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/approvals",
+                  "raw": "{{baseUrl}}/renewals/approvals",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "approvals"
                   ]
@@ -49905,12 +49721,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/at-risk",
+              "raw": "{{baseUrl}}/renewals/at-risk",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "at-risk"
               ]
@@ -49924,12 +49739,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/at-risk",
+                  "raw": "{{baseUrl}}/renewals/at-risk",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "at-risk"
                   ]
@@ -49956,12 +49770,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/campaigns",
+              "raw": "{{baseUrl}}/renewals/campaigns",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "campaigns"
               ]
@@ -49975,12 +49788,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/campaigns",
+                  "raw": "{{baseUrl}}/renewals/campaigns",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "campaigns"
                   ]
@@ -50012,12 +49824,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/campaigns",
+              "raw": "{{baseUrl}}/renewals/campaigns",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "campaigns"
               ]
@@ -50045,12 +49856,11 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/campaigns",
+                  "raw": "{{baseUrl}}/renewals/campaigns",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "campaigns"
                   ]
@@ -50086,12 +49896,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/campaigns/:id",
+              "raw": "{{baseUrl}}/renewals/campaigns/:id",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "campaigns",
                 ":id"
@@ -50113,12 +49922,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/campaigns/:id",
+                  "raw": "{{baseUrl}}/renewals/campaigns/:id",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "campaigns",
                     ":id"
@@ -50153,12 +49961,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/lapsed",
+              "raw": "{{baseUrl}}/renewals/lapsed",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "lapsed"
               ]
@@ -50172,12 +49979,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/lapsed",
+                  "raw": "{{baseUrl}}/renewals/lapsed",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "lapsed"
                   ]
@@ -50204,12 +50010,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/negotiations",
+              "raw": "{{baseUrl}}/renewals/negotiations",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "negotiations"
               ]
@@ -50223,12 +50028,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/negotiations",
+                  "raw": "{{baseUrl}}/renewals/negotiations",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "negotiations"
                   ]
@@ -50255,12 +50059,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/performance?from=2025-10-01&to=2026-09-30",
+              "raw": "{{baseUrl}}/renewals/performance?from=2025-10-01&to=2026-09-30",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "performance"
               ],
@@ -50284,12 +50087,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/performance?from=2025-10-01&to=2026-09-30",
+                  "raw": "{{baseUrl}}/renewals/performance?from=2025-10-01&to=2026-09-30",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "performance"
                   ],
@@ -50326,12 +50128,11 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/pipeline/refresh",
+              "raw": "{{baseUrl}}/renewals/pipeline/refresh",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "pipeline",
                 "refresh"
@@ -50346,12 +50147,11 @@
                 "method": "POST",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/pipeline/refresh",
+                  "raw": "{{baseUrl}}/renewals/pipeline/refresh",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "pipeline",
                     "refresh"
@@ -50379,12 +50179,11 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/policies/:policyId",
+              "raw": "{{baseUrl}}/renewals/policies/:policyId",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "policies",
                 ":policyId"
@@ -50406,12 +50205,11 @@
                 "method": "POST",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/policies/:policyId",
+                  "raw": "{{baseUrl}}/renewals/policies/:policyId",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "policies",
                     ":policyId"
@@ -50446,12 +50244,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policy-renewals/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20",
+              "raw": "{{baseUrl}}/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "policy-renewals",
                 "renewals",
                 "queue"
               ],
@@ -50495,12 +50292,11 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policy-renewals/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20",
+                  "raw": "{{baseUrl}}/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "policy-renewals",
                     "renewals",
                     "queue"
                   ],
@@ -51524,7 +51320,7 @@
                 "schedules"
               ]
             },
-            "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user"
+            "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: read:schedules"
           },
           "response": [
             {
@@ -51541,7 +51337,7 @@
                     "schedules"
                   ]
                 },
-                "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: Any authenticated user"
+                "description": "Scheduled jobs (renewal notices, expiries, ageing, daily reports, e-mail outbox, housekeeping); cron expressions are read in timeZone (general.timezone)\n\nFront-end touchpoint: Master > Schedules\n\nAccess: read:schedules"
               },
               "status": "OK",
               "code": 200,
@@ -51736,7 +51532,7 @@
                 }
               ]
             },
-            "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: Any authenticated user"
+            "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
           },
           "response": [
             {
@@ -51762,7 +51558,7 @@
                     }
                   ]
                 },
-                "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: Any authenticated user"
+                "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
               },
               "status": "OK",
               "code": 200,
@@ -52718,6 +52514,331 @@
       "name": "User Management",
       "item": [
         {
+          "name": "List roles with their permissions and user counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "description": "List roles with their permissions and user counts\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/roles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles"
+                  ]
+                },
+                "description": "List roles with their permissions and user counts\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"sales\",\n      \"name\": \"Sales & Marketing (Account Executive)\",\n      \"permissions\": [\n        \"read:leads\"\n      ],\n      \"users\": 3\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "description": "Create a role\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: write:roles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"branch-manager\",\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\",\n    \"read:policies\",\n    \"read:reports\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/roles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles"
+                  ]
+                },
+                "description": "Create a role\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: write:roles",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"branch-manager\",\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\",\n    \"read:policies\",\n    \"read:reports\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 9,\n    \"code\": \"branch-manager\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a role and its permissions",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a role and its permissions\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/roles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a role and its permissions\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a non-system role with no users",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a non-system role with no users\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: write:roles"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/roles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a non-system role with no users\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: write:roles"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "All permission codes grouped by module",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "permissions"
+              ]
+            },
+            "description": "All permission codes grouped by module\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/roles/permissions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    "permissions"
+                  ]
+                },
+                "description": "All permission codes grouped by module\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"read:leads\",\n      \"module\": \"leads\",\n      \"description\": \"View leads\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "List users (search, role, status, paging)",
           "request": {
             "method": "GET",
@@ -53552,341 +53673,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"status\": \"active\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "List roles with their permissions and user counts",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/roles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "roles"
-              ]
-            },
-            "description": "List roles with their permissions and user counts\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/users/roles",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "roles"
-                  ]
-                },
-                "description": "List roles with their permissions and user counts\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"sales\",\n      \"name\": \"Sales & Marketing (Account Executive)\",\n      \"permissions\": [\n        \"read:leads\"\n      ],\n      \"users\": 3\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Create a role",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/users/roles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "roles"
-              ]
-            },
-            "description": "Create a role\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: write:roles",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"code\": \"branch-manager\",\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\",\n    \"read:policies\",\n    \"read:reports\"\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/users/roles",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "roles"
-                  ]
-                },
-                "description": "Create a role\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: write:roles",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"code\": \"branch-manager\",\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\",\n    \"read:policies\",\n    \"read:reports\"\n  ]\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 9,\n    \"code\": \"branch-manager\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Update a role and its permissions",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/users/roles/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "roles",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Update a role and its permissions\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\"\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/users/roles/:id",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "roles",
-                    ":id"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Update a role and its permissions\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\"\n  ]\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true\n}"
-            }
-          ]
-        },
-        {
-          "name": "Delete a non-system role with no users",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/roles/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "roles",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Delete a non-system role with no users\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: write:roles"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/users/roles/:id",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "roles",
-                    ":id"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Delete a non-system role with no users\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: write:roles"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true\n}"
-            }
-          ]
-        },
-        {
-          "name": "All permission codes grouped by module",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/roles/permissions",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "roles",
-                "permissions"
-              ]
-            },
-            "description": "All permission codes grouped by module\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: Any authenticated user"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/users/roles/permissions",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "users",
-                    "roles",
-                    "permissions"
-                  ]
-                },
-                "description": "All permission codes grouped by module\n\nFront-end touchpoint: Master > User Management > Role > Add\n\nAccess: Any authenticated user"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"read:leads\",\n      \"module\": \"leads\",\n      \"description\": \"View leads\"\n    }\n  ]\n}"
             }
           ]
         },

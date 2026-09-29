@@ -1,7 +1,16 @@
-# BrokerVerse go-live checklist (DevOps)
+# Deploying BrokerVerse on the existing URL
 
-For the DevOps team taking the revised build from `IortaTexhNXT-DEV/BDOI-OOTB`, branch `brokerverse-platform`, into
-the private repositories and hosting it on the existing BrokerVerse URL.
+For the iorta TechNXT DevOps team connecting the GitHub source (`IortaTexhNXT-DEV/BDOI-OOTB`, branch
+`brokerverse-platform`, release tag `v1.0.0`) to the existing BrokerVerse URL. Work through the sections in order and tick
+each item. The runtime details (every environment variable, seed data, health checks, start-up rules) are in
+[REFERENCE.md](REFERENCE.md).
+
+| File in this folder | Use |
+|---|---|
+| `README.md` | this checklist |
+| `REFERENCE.md` | environment variables, seed data, scheduled jobs, health checks, production start-up rules |
+| `backend.env.example` | the backend environment with placeholders; copy the names into the secret store |
+| `frontend.env.example` | the one build variable of the front end |
 
 | Part | Folder in this branch | Where it goes |
 |---|---|---|
@@ -10,7 +19,7 @@ the private repositories and hosting it on the existing BrokerVerse URL.
 | Database | created by the backend | New PostgreSQL 16 database (e.g. Amazon RDS in ap-southeast-1) |
 | Documents and uploads | `UPLOAD_DIR` of the backend | Persistent disk mounted into the backend container |
 
-**Important:** the new front end calls the new backend's API (565 endpoints). It does not work against the old
+**Important:** the new front end calls the new backend's API (about 700 endpoints). It does not work against the old
 `brokerverse-api` backend. Data held by the old backend is not migrated; the new database starts with reference data
 only. Users, insurers, agents and opening balances are set up in the new system (section 6).
 
@@ -84,22 +93,13 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 - [ ] Replace the contents of the private front-end repository with `brokerverse/` from this branch (it already
   contains `.github/workflows/deploy.yml`, `package.json`, `package-lock.json`, `craco.config.js`, `public/`, `src/`,
   `scripts/`). Do not copy `node_modules`, `build/` or `.env`. Review that no environment file with secrets is added.
-- [ ] **Set the API address for the build.** The app reads `REACT_APP_BASE_URL` at build time. Add it to the workflow's
-  "Build application" step, from a GitHub repository variable:
-
-  ```yaml
-      - name: Build application
-        run: npm run build
-        env:
-          NODE_ENV: production
-          CI: false
-          REACT_APP_BASE_URL: ${{ vars.REACT_APP_BASE_URL }}   # e.g. https://<brokerverse-url>/api
-  ```
-
-  Without it the app is built with no API address and every screen fails.
+- [ ] **Set the API address for the build.** The app reads `REACT_APP_BASE_URL` at build time. The workflow
+  (`brokerverse/.github/workflows/deploy.yml`) takes it from the repository variable `REACT_APP_BASE_URL`: create that
+  variable (Settings > Secrets and variables > Actions > Variables), e.g. `https://<brokerverse-url>/api`. The build
+  stops with an error if it is missing, so an app without an API address can never be published.
 - [ ] Keep the existing GitHub secrets (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET`,
   `CLOUDFRONT_DISTRIBUTION_ID`). The workflow deploys on a push to `dev`.
-- [ ] Node version: the workflow uses Node 20 (`NODE_VERSION`); the app builds with Node 20 or 22.
+- [ ] The workflow builds with Node 22 and runs the front-end tests before it deploys; a failing test stops the deployment.
 - [ ] CloudFront: the app is a single-page application. Keep (or add) custom error responses so 403 and 404 from S3
   return `/index.html` with status 200; otherwise refreshing a deep link (e.g. `/agent/policy`) shows an S3 error.
 - [ ] If you use the same-domain option, add the `/api/*` behaviour before the default behaviour and do not cache it.
@@ -116,7 +116,8 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 - [ ] Master > System Settings and Master > Configuration load (company name, currency PHP, time zone Asia/Manila,
   date format DD/MM/YYYY, tax rates VAT 12%, DST 12.5%, LGT 0.75%).
 - [ ] Master > Schedules lists the jobs; run "Receivable ageing" once and see it in the run history.
-- [ ] Reports > All Reports lists the 19 reports; generate one as XLSX and PDF.
+- [ ] Reports > All Reports lists the report catalogue; generate one report as XLSX and one as PDF and check the
+  letterhead on the PDF.
 - [ ] Upload a test document (e.g. a user photo or an ID card on a test client) and open it; copy its link into a
   private browser window without the `sig` part: it must be refused.
 - [ ] Browser developer tools: no calls to `localhost`, all API calls go to the production API; no mixed-content warnings.
@@ -135,8 +136,9 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 
 ## 6. Go-live data (System Administrator, with the business teams)
 
-- [ ] Company details, branches, departments, letterhead (System Settings > General).
-- [ ] Users and roles: create the real users (Master > Generals > User Management) with the broker roles: Sales &
+- [ ] The step-by-step business set-up (company, users, insurers, products, accounts, opening balances) is in
+  `docs/onboarding/GO_LIVE_DATA_SETUP.md`; the items below are the ones DevOps and the administrator agree on.
+- [ ] Users and roles: create the real users (Master > User Management > User) with the broker roles: Sales &
   Marketing (Account Executive), Processing Team (Placement & Policy Processing), Operations (Client Servicing), Claims,
   Accounting, Accounting Manager, System Administrator. Each gets a temporary password shown once and must change it
   at first sign-in. Do not create the test personas used in development. Referrers / sub-agents do not sign in: their
@@ -199,7 +201,7 @@ Set `SEED_SAMPLE_DATA=false` before starting again.
 
 ## References
 
-- `docs/DEPLOY.md`: deployment options (Render, Docker Compose) and production checks.
-- `docs/manual/BrokerVerse_User_Manual.pdf`: user manual (167 pages).
-- `docs/e2e/E2E_REPORT.md`, `docs/e2e/DEFECTS.md`: end-to-end test results and the defect log.
+- [REFERENCE.md](REFERENCE.md): environment variables, seed data, scheduled jobs, health checks.
+- `docs/developer-guide/`: developer and production support guide (tracing a defect, logs, configuration).
+- `docs/onboarding/`: getting-started guide, go-live data set-up, upload templates, support and acceptance scripts.
 - `backend/docs/api/`: OpenAPI, Postman collection and the API touchpoint list.

@@ -48,7 +48,7 @@ has never seen the code can find their way, and whether the code reads as one co
 | Report catalogue vs queries | 39 / 39, consistent | |
 | Scheduled jobs vs handlers | 15 / 15, consistent | |
 | Magic values | 2 | e-mail outbox retry count and batch size; the list of daily reports |
-| Comments that no longer match the code | 4 | `reports/queries.js` pointed at `FILTERS in service.js` (it is in `engine.js`); `queueEmail` said it may send at once (it never does); `docs/MODULE_GUIDE.md` named the retired admin roles `it-admin` / `ba`, the withdrawn `agent` role and the old `next_number()`; `docs/DEPLOY.md` pointed at a tracker entry |
+| Comments that no longer match the code | 4 | `reports/queries.js` pointed at `FILTERS in service.js` (it is in `engine.js`); `queueEmail` said it may send at once (it never does); `docs/MODULE_GUIDE.md` named the retired admin roles `it-admin` / `ba`, the withdrawn `agent` role and the old `next_number()`; `deploy/REFERENCE.md` pointed at a tracker entry |
 | Modules without `service.js` | 13 of 38 | Most split their logic into named files (period-end, placement, bank-reconciliation); `auth` (405 lines) and `users` (328) keep logic in the router |
 
 ### Defects fixed

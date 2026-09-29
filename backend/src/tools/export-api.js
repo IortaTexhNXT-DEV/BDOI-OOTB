@@ -30,8 +30,12 @@ export async function collectRoutes(modulesDir = path.join(ROOT, 'src', 'modules
     try {
       const m = await import(pathToFileURL(file).href);
       const mount = m.mount && m.mount !== '/' ? m.mount : '';
+      // A route's registry path already carries its router's prefix. Only the module's main router without a
+      // prefix of its own is served under the module mount; extra routers are mounted at their own prefix.
+      const mountOf = new Map((m.extraMounts || []).map(([prefix, router]) => [router, prefix === '/' ? '' : prefix]));
       for (const r of ROUTES.slice(start)) {
-        const p = mount && !r.path.startsWith(mount) ? mount + r.path : r.path;
+        const base = r.router === m.default ? mount : (mountOf.get(r.router) ?? '');
+        const p = !r.prefix && base && !r.path.startsWith(base) ? base + r.path : r.path;
         routes.push({ ...r, folder, path: (p.length > 1 ? p.replace(/\/$/, '') : p) || '/' });
       }
     } catch (e) {

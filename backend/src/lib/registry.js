@@ -26,10 +26,13 @@ export function moduleRouter(module, prefix = '') {
     const given = (r.middleware || []).flat();
     const mws = auth ? [requireAuth, ...given.filter((m) => m !== requireAuth)] : given;
     router[method](r.path, ...mws, wrap(r.handler));
-    ROUTES.push({ module, method: r.method.toUpperCase(), path: prefix + r.path, summary: r.summary || '',
+    const entry = { module, method: r.method.toUpperCase(), path: prefix + r.path, summary: r.summary || '',
       auth, roles: unique([...(r.roles || []), ...given.flatMap((m) => m.roles || [])]),
       permissions: unique([...(r.permissions || []), ...given.flatMap((m) => m.permissions || [])]),
-      screen: r.screen || '', request: r.request, query: r.query, response: r.response });
+      screen: r.screen || '', request: r.request, query: r.query, response: r.response };
+    // The router and its prefix, for tools that rebuild the full path (not part of the exported documentation).
+    Object.defineProperties(entry, { router: { value: router }, prefix: { value: prefix } });
+    ROUTES.push(entry);
   };
   return { router, define, prefix };
 }
