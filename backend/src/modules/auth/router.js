@@ -14,6 +14,7 @@ import { clearKey, hit, ipKey, isLimited, loginLimits, userKey } from '../../lib
 import { generateSecret, otpauthUrl, verifyTotp } from '../../lib/totp.js';
 import { decryptSecret, encryptSecret, hashCode, sameHash } from '../../lib/secrets.js';
 import { renderTemplate } from '../documents/common.js';
+import { companyName } from '../../lib/letterhead.js';
 
 const { router, define } = moduleRouter('Auth', '/auth');
 
@@ -291,7 +292,7 @@ define({
       const code = String(crypto.randomInt(100000, 1000000));
       // Lifetime and wording from System Settings (security.reset_code_minutes, security.reset_email_subject / _body)
       const minutes = Number(await getSetting('security.reset_code_minutes', 15)) || 15;
-      const vars = { code, minutes, companyName: (await getSetting('general.company_name')) ?? '' };
+      const vars = { code, minutes, companyName: await companyName() };
       const subject = renderTemplate(await getSetting('security.reset_email_subject'), vars);
       const html = renderTemplate(await getSetting('security.reset_email_body'), vars);
       await withTransaction(async (c) => {

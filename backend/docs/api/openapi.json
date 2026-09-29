@@ -19060,7 +19060,7 @@
     "/disbursements/printDisbursement": {
       "get": {
         "operationId": "getDisbursementsPrintDisbursement",
-        "summary": "Print vouchers for a customer-code and date range (PDF download URL)",
+        "summary": "Print payment vouchers, one per page, for a customer-code and date range or one disbursementId (PDF download URL)",
         "tags": [
           "Disbursements"
         ],
@@ -56506,7 +56506,7 @@
     "/receipts/printReceipt": {
       "get": {
         "operationId": "getReceiptsPrintReceipt",
-        "summary": "Print receipts (one receiptId, or customer-code and date range) to a PDF download URL",
+        "summary": "Print official receipts, one per page (one receiptId, or customer-code and date range) to a PDF download URL",
         "tags": [
           "Receipts"
         ],

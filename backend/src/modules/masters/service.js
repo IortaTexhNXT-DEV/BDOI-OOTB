@@ -6,6 +6,7 @@
 import { many, one, query } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { asBool, isoDate, params, parseStatus, statusLabel } from './helpers.js';
+import { assertSinglePrimary, afterCompanyChange } from './company.js';
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
 /** Reference tables a master type may be stored in (identifiers are never taken from user input). */
@@ -338,6 +339,7 @@ async function tableColumns(t, values) {
 export async function createRecord(t, body, user) {
   const { values, status } = validateRecord(t, body);
   await assertUnique(t, values);
+  await assertSinglePrimary(t, values, status || 'active');
   let id;
   if (t.storage === 'generic') {
     const r = await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by, updated_by)
@@ -354,6 +356,7 @@ export async function createRecord(t, body, user) {
     const r = await query(sql, p.values).catch(pgConflict(t));
     id = r.rows[0].id;
   }
+  await afterCompanyChange(t, user.id);
   return getRecord(t, id);
 }
 
@@ -361,6 +364,7 @@ export async function updateRecord(t, id, body, user) {
   const before = await getRecord(t, id);
   const { values, status } = validateRecord(t, body, { partial: true });
   await assertUnique(t, { ...before, ...values }, id);
+  await assertSinglePrimary(t, { ...before, ...values }, status || (before.isActive ? 'active' : 'inactive'), id);
   if (t.storage === 'generic') {
     const keep = ([k]) => t.fields.some((f) => f.name === k) || (t.allow_extra && !SYSTEM_KEYS.has(k));
     const merged = { ...Object.fromEntries(Object.entries(before).filter(keep)), ...values };
@@ -375,13 +379,16 @@ export async function updateRecord(t, id, body, user) {
     if (status) sets.push(`status = ${p.add(status)}`);
     await query(`UPDATE ${q(t.table_name)} SET ${sets.join(', ')} WHERE id = $1`, p.values).catch(pgConflict(t));
   }
+  await afterCompanyChange(t, user.id);
   return { before, after: await getRecord(t, id) };
 }
 
 export async function setRecordStatus(t, id, status, user) {
   const before = await getRecord(t, id);
+  await assertSinglePrimary(t, before, status, id);
   const table = t.storage === 'generic' ? 'master_records' : q(t.table_name);
   await query(`UPDATE ${table} SET status = $2, updated_by = $3, updated_at = now() WHERE id = $1`, [Number(id), status, user.id]);
+  await afterCompanyChange(t, user.id);
   return { before, after: status === 'deleted' ? { ...before, status: 'Deleted' } : await getRecord(t, id) };
 }
 

@@ -55,9 +55,10 @@ UPDATE policies SET renewed_to = 'pol_crs_24' WHERE id = 'pol_crs_23' AND renewe
 UPDATE policies SET renewed_from = 'pol_crs_23', details = details || '{"businessType": "Renewal"}' WHERE id = 'pol_crs_24' AND renewed_from IS NULL;
 
 -- Premium receivables: paid for most terms, unpaid on two (claims acceptance control demo, payment status in batches)
-INSERT INTO receivables(id, bill_number, policy_id, client_id, amount, balance, due_date, status)
+-- billed on the inception date, due 30 days later
+INSERT INTO receivables(id, bill_number, policy_id, client_id, amount, balance, due_date, status, created_at)
 SELECT 'rcv_crs_' || substr(p.id, 9), 'INV-' || substr(p.policy_number, 5), p.id, p.client_id, p.premium_total,
        CASE WHEN p.id IN ('pol_crs_03', 'pol_crs_16') THEN p.premium_total ELSE 0 END, p.inception_date + 30,
-       CASE WHEN p.id IN ('pol_crs_03', 'pol_crs_16') THEN 'open' ELSE 'paid' END
+       CASE WHEN p.id IN ('pol_crs_03', 'pol_crs_16') THEN 'open' ELSE 'paid' END, p.inception_date::timestamptz
 FROM policies p WHERE p.id LIKE 'pol_crs_%'
 ON CONFLICT (id) DO NOTHING;

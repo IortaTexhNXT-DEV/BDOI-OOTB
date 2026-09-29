@@ -12,7 +12,9 @@ import { queueEmail } from '../../lib/mailer.js';
 import { verify } from '../../lib/auth.js';
 import { toCsv } from '../../tools/csv.js';
 import { writeXlsx } from '../../tools/xlsx.js';
-import { writePdf } from '../../tools/pdf.js';
+import { buildReportPdf, printContext } from '../../lib/pdf/index.js';
+import { formatDate, humanize } from '../../lib/pdf/format.js';
+import { companyName } from '../../lib/letterhead.js';
 import { startScheduler } from '../../jobs/scheduler.js';
 import { execute } from './engine.js';
 import { QUERIES } from './queries.js';
@@ -99,18 +101,21 @@ export function verifyDownloadToken(token, id) {
 }
 export const downloadUrl = async (id) => `${config.publicBaseUrl}/api/reports/generated/${id}/download?token=${await signDownload(id)}`;
 
-const describeParams = (np) => [
-  `Period ${np.from} to ${np.to}`,
+/** Parameter line printed under a report title: period, criteria and filters. */
+export const describeParams = (np, fmt) => [
+  `Period ${formatDate(np.from, fmt)} to ${formatDate(np.to, fmt)}`,
   np.criteria ? `Criteria: ${np.criteria}` : null,
-  ...Object.entries(np.filters).map(([k, v]) => `${k}: ${v}`),
-].filter(Boolean).join(' | ');
+  ...Object.entries(np.filters || {}).map(([k, v]) => `${humanize(k)}: ${Array.isArray(v) ? v.join(', ') : v}`),
+].filter(Boolean).join('   |   ');
 
 async function renderFile(format, def, result, meta) {
   const { columns, rows, totals } = result;
   const totalRow = Object.keys(totals).length ? { ...Object.fromEntries(columns.map((c) => [c.key, null])), ...totals, [columns[0]?.key]: 'TOTAL' } : null;
   if (format === 'csv') return Buffer.from(toCsv(columns, totalRow ? [...rows, totalRow] : rows), 'utf8');
   if (format === 'pdf') {
-    return writePdf({ title: `${meta.companyName} - ${def.name}`, subtitle: `${describeParams(result.params)} | Generated ${meta.generatedAt} by ${meta.by} | Currency ${meta.currency}`, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize });
+    const ctx = meta.print;
+    const params = `${describeParams(result.params, ctx.format)}   |   Currency ${meta.currency}   |   ${result.total} row${result.total === 1 ? '' : 's'}`;
+    return buildReportPdf({ ...ctx, title: def.name, params, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize });
   }
   const width = (c) => ({ money: 16, number: 12, integer: 10, date: 12 }[c.type] || Math.min(40, Math.max(12, String(c.label).length + 4)));
   const xcols = columns.map((c) => ({ key: c.key, header: c.label, type: c.type === 'number' ? 'number' : c.type, width: width(c) }));
@@ -161,8 +166,10 @@ export async function generateReport(code, params = {}, triggeredBy = 'user', op
   try {
     const result = await execute(def, cleanParams, { all: true, maxRows: await getSetting('reports.max_rows', 50000) });
     const generatedAt = new Date().toISOString();
+    const print = await printContext({ user: opts.user || null });
+    if (!print.generatedBy) print.generatedBy = triggeredBy === 'schedule' ? 'scheduled run' : by;
     const meta = {
-      generatedAt, by, companyName: ((await getSetting('general.company_name')) ?? ''),
+      generatedAt: print.generatedAt, by: print.generatedBy, companyName: await companyName(), print,
       currency: await getSetting('currency.default', 'PHP'), pageSize: await getSetting('reports.pdf_page_size', 'A4'),
     };
     const buf = await renderFile(format, def, result, meta);
@@ -305,7 +312,7 @@ export async function scheduledReport(params = {}) {
     const rpt = await generateReport(code, { ...(s?.params || params.params || {}) }, 'schedule', { format: s?.format || params.format, scheduleId: s?.id });
     const vars = {
       reportName: rpt.name, from: rpt.params.from, to: rpt.params.to, rows: rpt.rowCount, format: rpt.format.toUpperCase(), fileName: rpt.fileName,
-      downloadUrl: rpt.downloadUrl, companyName: ((await getSetting('general.company_name')) ?? ''), generatedAt: rpt.createdAt instanceof Date ? rpt.createdAt.toISOString() : rpt.createdAt,
+      downloadUrl: rpt.downloadUrl, companyName: await companyName(), generatedAt: rpt.createdAt instanceof Date ? rpt.createdAt.toISOString() : rpt.createdAt,
     };
     const subject = fill(await getSetting('reports.email_subject'), vars, false);
     const html = fill(await getSetting('reports.email_body'), vars, true);

@@ -12,6 +12,7 @@ import { errorHandler } from './lib/errors.js';
 import { verify } from './lib/auth.js';
 import { apiRateLimit } from './lib/rateLimit.js';
 import { signFileLinks } from './lib/fileLinks.js';
+import { requestContext } from './lib/requestContext.js';
 import { healthHandler, livenessHandler } from './lib/health.js';
 
 /**
@@ -82,6 +83,7 @@ export async function createApp() {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use(requestId);
+  app.use(requestContext);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins, exposedHeaders: ['x-request-id', 'Retry-After', 'Content-Disposition'] }));
   app.use(pinoHttp({

@@ -19,9 +19,7 @@ import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 import CustomToast from "../../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
-import { FileUpload } from "primereact/fileupload";
 import DepartMentList from "../../BranchMaster/AddBranch/DepartMentList";
-import SvgUploadCancelIcon from "../../../../../assets/icons/SvgUploadCancelIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchCompanyEditMiddleware,
@@ -29,6 +27,9 @@ import {
 } from "../store/companyMiddleware";
 import useMasterOptions from "../../../common/useMasterOptions";
 import { phoneCountryCode } from "../../../../../utility/phoneFormat";
+import { Checkbox } from "primereact/checkbox";
+import { BASE_URL } from "../../../../../utility/constant";
+import authService from "../../../../../services/authService";
 
 
 function AddCompany({ action }) {
@@ -133,6 +134,8 @@ function AddCompany({ action }) {
     CompanyCode: "",
     CompanyName: "",
     LicenseNumber: "",
+    TIN: "",
+    IsPrimary: false,
     EmailID: "",
     Logo: "",
     Websitelink: "",
@@ -173,26 +176,10 @@ function AddCompany({ action }) {
     if (!values.CompanyName) {
       errors.CompanyName = "This field is required";
     }
-    if (!values.LicenseNumber) {
-      errors.LicenseNumber = "This field is required";
-    }
-
-    if (!values.EmailID) {
-      errors.EmailID = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
+    // Licence, TIN, e-mail, website, description, postal code, phone and fax are optional: what is filled in is
+    // printed on the letterhead of documents and reports (primary company).
+    if (values.EmailID && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
-    }
-
-
-    if (!values.Websitelink) {
-      errors.Websitelink = "This field is required";
-    }
-    if (!values.Description) {
-      errors.Description = "This field is required";
-    }
-
-    if (!values.PinCode) {
-      errors.PinCode = "This field is required";
     }
     if (!values.City) {
       errors.City = "This field is required";
@@ -204,13 +191,8 @@ function AddCompany({ action }) {
       errors.Country = "This field is required";
     }
 
-    if (!values.PhoneNumber) {
-      errors.PhoneNumber = "Phone Number is required";
-    } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.PhoneNumber)) {
+    if (values.PhoneNumber && !/^\+?[\d\s()-]{7,20}$/.test(values.PhoneNumber)) {
       errors.PhoneNumber = "Invalid phone number";
-    }
-    if (!values.Fax) {
-      errors.Fax = "This field is required";
     }
 
     return errors;
@@ -231,6 +213,8 @@ function AddCompany({ action }) {
         CompanyCode: getcompanyEdit?.CompanyCode,
         CompanyName: getcompanyEdit?.CompanyName,
         LicenseNumber: getcompanyEdit?.LicenseNumber,
+        TIN: getcompanyEdit?.TIN || "",
+        IsPrimary: getcompanyEdit?.IsPrimary === true || getcompanyEdit?.IsPrimary === "true",
         EmailID: getcompanyEdit?.EmailID,
         Logo: getcompanyEdit?.Logo,
         Websitelink: getcompanyEdit?.Websitelink,
@@ -253,6 +237,33 @@ function AddCompany({ action }) {
   useEffect(() => {
     setFormikValues();
   }, [getcompanyEdit]);
+
+  // Logo: uploaded to the file store; the canonical object URL (without the expiring signature) is saved on the company
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState("");
+  const uploadLogo = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "company-logo");
+      const response = await fetch(`${BASE_URL}/s3/upload`, { method: "POST", headers: { ...authService.getAuthHeader() }, body: formData });
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(json.message || `Upload failed (${response.status})`);
+      const signed = String(json.url || json.data?.url || "");
+      formik.setFieldValue("Logo", signed.split("?")[0]);
+      setLogoPreview(signed);
+    } catch (error) {
+      toastRef.current?.showToast({ severity: "error", detail: error.message });
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+  const view = action === "view";
+  const record = action === "view" ? companyView || {} : formik.values;
 
   return (
     <div className="overall__addcompany__container">
@@ -370,44 +381,48 @@ function AddCompany({ action }) {
               </div>
             )}
           </div>
-
+          <div class="col-12 md:col-6 lg:col-3">
+            <InputField
+              classNames="field__container"
+              label="TIN"
+              placeholder={t("generalMasters.enter")}
+              value={record.TIN || ""}
+              onChange={formik.handleChange("TIN")}
+              disabled={view}
+            />
+          </div>
+          <div class="col-12 md:col-6 lg:col-6" style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 28 }}>
+            <Checkbox
+              inputId="company-is-primary"
+              checked={record.IsPrimary === true || record.IsPrimary === "true"}
+              onChange={(e) => formik.setFieldValue("IsPrimary", !!e.checked)}
+              disabled={view}
+            />
+            <label htmlFor="company-is-primary">Letterhead company — used on documents and reports</label>
+          </div>
         </div>
 
         <div class="grid">
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
-            <label className="uploadtext_container">Logo</label>
-
-            <span className="p-input-icon-right" style={{ width: "100%" }}>
-              <i>
-                {
-                  <>
-                    {action === "view" && (
-                      <FileUpload
-                        mode="basic"
-                        name="demo[]"
-                        url="/api/upload"
-                        accept="image/*"
-                        maxFileSize={1000000}
-                        // onUpload={onUpload}
-                        chooseLabel="Upload"
-                        className={
-                          action === "view"
-                            ? "uploadbutton_container_invisible"
-                            : "uploadbutton_container"
-                        }
-                      ></FileUpload>
-                    )}
-                    {action === "edit" && (
-                      <div className="cancel__icon__container">
-                        <SvgUploadCancelIcon />
-                      </div>
-                    )}
-                  </>
-                }
-              </i>
-
-              <InputText className="field__container" disabled={action === "view" ? true : false} />
-            </span>
+            <label className="uploadtext_container">Logo (printed on documents)</label>
+            <div className="p-inputgroup flex-1">
+              <InputText
+                className="field__container"
+                placeholder="Logo URL or upload"
+                value={record.Logo || ""}
+                onChange={formik.handleChange("Logo")}
+                disabled={view}
+              />
+              {!view && (
+                <label className="p-button p-component p-button-outlined" style={{ cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {logoUploading ? "Uploading..." : "Upload"}
+                  <input type="file" accept="image/png,image/jpeg" style={{ display: "none" }} onChange={uploadLogo} />
+                </label>
+              )}
+            </div>
+            {(logoPreview || record.Logo) && (
+              <img src={logoPreview || record.Logo} alt="Logo" style={{ maxHeight: 40, maxWidth: 160, marginTop: 6 }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
+            )}
           </div>
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>

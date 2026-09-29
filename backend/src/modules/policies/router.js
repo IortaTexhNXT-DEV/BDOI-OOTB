@@ -13,7 +13,7 @@ import { forbidden } from '../../lib/errors.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
-import { placingSlipDoc } from '../documents/templates.js';
+import { placingSlipDoc, printablePolicy } from '../documents/templates.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 
@@ -152,7 +152,8 @@ define({
   method: 'GET', path: '/:id/documents/insurance-placing-slip-fire', summary: 'Insurance placing slip PDF: the security (each participating insurer with its share); insurerId= gives one participant\'s slip showing its share',
   screen: `${SCREEN} > Policy detail > Insurance placing slip`, middleware: [...canRead, ownRecord('policy')], query: { insurerId: 2 }, response: 'application/pdf',
   handler: async (req, res) => {
-    const p = await svc.policyWithParticipants(await svc.getPolicyRow(req.params.id));
+    const row = await svc.getPolicyRow(req.params.id);
+    const p = await printablePolicy(await svc.policyWithParticipants(row), row);
     sendPdf(res, buildPdf(await placingSlipDoc(p, req.query.insurerId)), `placing-slip-${p.policyNumber}.pdf`);
   },
 });

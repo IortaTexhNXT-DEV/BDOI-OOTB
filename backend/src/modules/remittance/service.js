@@ -14,6 +14,7 @@ import { isoDate, params, round2, toNumber } from '../masters/helpers.js';
 import { createInsurerRemittance } from '../disbursements/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postEvent } from '../accounting/lib/posting.js';
+import { companyName } from '../../lib/letterhead.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -573,7 +574,7 @@ export async function sendBill(id, b, user) {
   if (to) {
     const currency = r.currency || (await getSetting('currency.default', 'PHP'));
     const vars = { billNumber: r.bill_number, billDate: r.remittance_date, currency, amount: round2(Number(r.net_due) + Number(r.previous_balance)).toLocaleString('en-US', { minimumFractionDigits: 2 }),
-      dueDate: r.due_date, companyName: (await getSetting('general.company_name')) ?? '' };
+      dueDate: r.due_date, companyName: await companyName() };
     await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.bill_email_subject'), vars), html: renderTemplate(await getSetting('remittance.bill_email_body'), vars),
       template: 'remittance-bill', entity: 'remittance', entityId: r.id });
   }

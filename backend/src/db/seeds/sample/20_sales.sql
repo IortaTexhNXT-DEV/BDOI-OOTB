@@ -68,7 +68,7 @@ WITH rate AS (
  ('qt_sls_03','95003','ld_sls_03','converted','MOTOR','Motor','CV','PIONEER',1600000,1.50,'Ford','Ranger','2022','GAB 3380',135),
  ('qt_sls_04','95004','ld_sls_04','converted','FIRE','Fire and Allied Perils','FIRE-COM','STANDARD',38000000,0.28,NULL,NULL,NULL,NULL,115),
  ('qt_sls_05','95005','ld_sls_05','converted','MOTOR','Motor','PC','FPG',1150000,1.65,'Mitsubishi','Xpander','2024','NEF 5510',90),
- ('qt_sls_06','95006','ld_sls_06','converted','IAR','Industrial All Risks','2009','MERCANTILE',95000000,0.12,NULL,NULL,NULL,NULL,65),
+ ('qt_sls_06','95006','ld_sls_06','converted','IAR','Industrial All Risks','IAR-STD','MERCANTILE',95000000,0.12,NULL,NULL,NULL,NULL,65),
  ('qt_sls_07','95007','ld_sls_07','converted','MOTOR','Motor','PC','SECUREGUARD',1320000,1.55,'Nissan','Terra','2023','FAB 7721',40),
  ('qt_sls_08','95008','ld_sls_08','converted','FIRE','Fire and Allied Perils','FIRE-RES','APEX',6500000,0.30,NULL,NULL,NULL,NULL,16),
  ('qt_sls_09','95009','ld_sls_09','draft','MOTOR','Motor','PC','MALAYAN',1250000,1.60,'Toyota','Vios','2025','NGG 9001',11),
@@ -76,7 +76,7 @@ WITH rate AS (
  ('qt_sls_11','95011','ld_sls_11','accepted','FIRE','Fire and Allied Perils','FIRE-COM','PIONEER',52000000,0.26,NULL,NULL,NULL,NULL,8),
  ('qt_sls_12','95012','ld_sls_12','submitted','MOTOR','Motor','PC','STANDARD',1750000,1.50,'Isuzu','mu-X','2024','NJK 1212',6),
  ('qt_sls_13','95013','ld_sls_13','approved','MOTOR','Motor','PC','LIBERTYSHIELD',1050000,1.60,'Suzuki','Ertiga','2025','NKL 1313',4),
- ('qt_sls_14','95014','ld_sls_14','rejected','IAR','Industrial All Risks','2009','FPG',120000000,0.10,NULL,NULL,NULL,NULL,3)
+ ('qt_sls_14','95014','ld_sls_14','rejected','IAR','Industrial All Risks','IAR-STD','FPG',120000000,0.10,NULL,NULL,NULL,NULL,3)
 ), calc AS (
   SELECT v.*, round(v.si * v.rpct / 100, 2) AS net, ic.id AS ic_id, ic.name AS ic_name, ic.commission_rate AS crate, r.* FROM v CROSS JOIN rate r JOIN insurance_companies ic ON ic.code = v.insurer
 )

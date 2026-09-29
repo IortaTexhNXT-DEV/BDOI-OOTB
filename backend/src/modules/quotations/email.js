@@ -12,6 +12,7 @@ import { getSetting } from '../../lib/settings.js';
 import { renderTemplate, emailTemplate, num } from '../documents/common.js';
 import { getQuoteRow } from './service.js';
 import { ownRecord } from '../../lib/scope.js';
+import { companyName } from '../../lib/letterhead.js';
 
 const { router, define } = moduleRouter('E-mail', '/email');
 const SCREEN = 'Operations > Quotation > Quote detail > Share';
@@ -20,7 +21,7 @@ const money = (v) => num(v).toLocaleString('en-US', { minimumFractionDigits: 2, 
 
 async function quoteVars(q, extra = {}) {
   return {
-    companyName: ((await getSetting('general.company_name')) ?? ''), quotationNumber: q.quote_number, productType: q.product_type || q.lob,
+    companyName: await companyName(), quotationNumber: q.quote_number, productType: q.product_type || q.lob,
     customerName: [q.lead_row?.first_name, q.lead_row?.last_name].filter(Boolean).join(' ') || q.lead_row?.company_name || 'Customer',
     grossPremium: money(q.premium_total), netPremium: money(q.premium_base), sumInsured: money(q.sum_insured), currency: q.currency,
     validUntil: q.valid_until || '', insurerName: q.insurer_name || '', ...extra,
@@ -34,7 +35,7 @@ define({
   handler: async (req, res) => {
     const { context = {}, recipient = {} } = req.body || {};
     const t = await emailTemplate('share_quote');
-    const v = { companyName: ((await getSetting('general.company_name')) ?? ''), customerName: recipient.name || 'Customer', quotationNumber: context.quotationNumber || '',
+    const v = { companyName: await companyName(), customerName: recipient.name || 'Customer', quotationNumber: context.quotationNumber || '',
       productType: context.productType || '', grossPremium: money(context.grossPremium), netPremium: money(context.netPremium),
       currency: await getSetting('currency.default', 'PHP'), message: context.customMessage || '', insurerName: context.insuranceCompany || '', validUntil: context.expiryDate || '' };
     const html = renderTemplate(t.html, v);

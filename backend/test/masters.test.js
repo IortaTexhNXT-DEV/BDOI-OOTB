@@ -78,7 +78,10 @@ describe('generic master (company)', () => {
   it('validates required fields, types and duplicate codes', async () => {
     const r = await ctx.api('post', '/masters/company').send({ CompanyCode: 'X' });
     expect(r.status).toBe(400);
-    expect(r.body.errors.map((e) => e.path)).toEqual(expect.arrayContaining(['CompanyName', 'EmailID']));
+    // licence, e-mail and phone are optional (the letterhead prints what is filled in); the name is required
+    expect(r.body.errors.map((e) => e.path)).toEqual(expect.arrayContaining(['CompanyName']));
+    const badEmail = await ctx.api('post', '/masters/company').send({ CompanyCode: 'X2', CompanyName: 'X2', EmailID: 'not-an-email' });
+    expect(badEmail.body.errors.map((e) => e.path)).toEqual(['EmailID']);
     const bad = await ctx.api('post', '/masters/taxation').send({ taxCode: 'T1', taxName: 'x', taxRate: 'abc', basis: 'Premium', effectiveFrom: '2026-01-01' });
     expect(bad.status).toBe(400);
     const dup = await ctx.api('post', '/masters/company').send({ CompanyCode: 'bvb', CompanyName: 'Dup', LicenseNumber: '1', EmailID: 'd@x.example', PhoneNumber: '1' });

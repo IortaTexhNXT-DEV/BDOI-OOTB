@@ -11103,7 +11103,7 @@
           ]
         },
         {
-          "name": "Print vouchers for a customer-code and date range (PDF download URL)",
+          "name": "Print payment vouchers, one per page, for a customer-code and date range or one disbursementId (PDF download URL)",
           "request": {
             "method": "GET",
             "header": [],
@@ -11135,7 +11135,7 @@
                 }
               ]
             },
-            "description": "Print vouchers for a customer-code and date range (PDF download URL)\n\nFront-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk print\n\nAccess: read:disbursements"
+            "description": "Print payment vouchers, one per page, for a customer-code and date range or one disbursementId (PDF download URL)\n\nFront-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk print\n\nAccess: read:disbursements"
           },
           "response": [
             {
@@ -11171,7 +11171,7 @@
                     }
                   ]
                 },
-                "description": "Print vouchers for a customer-code and date range (PDF download URL)\n\nFront-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk print\n\nAccess: read:disbursements"
+                "description": "Print payment vouchers, one per page, for a customer-code and date range or one disbursementId (PDF download URL)\n\nFront-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk print\n\nAccess: read:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -36377,7 +36377,7 @@
           ]
         },
         {
-          "name": "Print receipts (one receiptId, or customer-code and date range) to a PDF download URL",
+          "name": "Print official receipts, one per page (one receiptId, or customer-code and date range) to a PDF download URL",
           "request": {
             "method": "GET",
             "header": [],
@@ -36409,7 +36409,7 @@
                 }
               ]
             },
-            "description": "Print receipts (one receiptId, or customer-code and date range) to a PDF download URL\n\nFront-end touchpoint: Accounts > Receipts > Bulk print / Print\n\nAccess: read:receipts"
+            "description": "Print official receipts, one per page (one receiptId, or customer-code and date range) to a PDF download URL\n\nFront-end touchpoint: Accounts > Receipts > Bulk print / Print\n\nAccess: read:receipts"
           },
           "response": [
             {
@@ -36445,7 +36445,7 @@
                     }
                   ]
                 },
-                "description": "Print receipts (one receiptId, or customer-code and date range) to a PDF download URL\n\nFront-end touchpoint: Accounts > Receipts > Bulk print / Print\n\nAccess: read:receipts"
+                "description": "Print official receipts, one per page (one receiptId, or customer-code and date range) to a PDF download URL\n\nFront-end touchpoint: Accounts > Receipts > Bulk print / Print\n\nAccess: read:receipts"
               },
               "status": "OK",
               "code": 200,

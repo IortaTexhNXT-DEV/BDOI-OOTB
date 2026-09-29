@@ -1,9 +1,9 @@
 [
   {
     "key": "general.company_name",
-    "value": "BrokerVerse",
+    "value": "iorta TechNXT Corp.",
     "group": "general",
-    "label": "Company name"
+    "label": "Company name (fallback: documents, reports and e-mails use the primary company of the Company master)"
   },
   {
     "key": "general.system_name",
@@ -567,5 +567,9 @@
     "group": "quote",
     "label": "Property damage limits offered on motor quotes and endorsements",
     "type": "json"
-  }
+  },
+  { "key": "documents.default_logo_path", "value": "assets/iorta-technxt.png", "group": "documents", "label": "Letterhead logo used when the primary company has no logo (PNG or JPEG path, relative to the backend folder; empty = no logo)" },
+  { "key": "documents.accent_color", "value": "#1f4e79", "group": "documents", "label": "Accent colour of printed documents and report PDFs", "type": "color" },
+  { "key": "documents.payment_instructions", "value": "Please settle the total amount due on or before the due date. Make cheques payable to {{companyName}} and quote the bill number as the payment reference. For bank transfers or e-wallet payments, send the proof of payment to your account officer.", "group": "documents", "label": "Payment instructions printed on billing statements ({{companyName}} = letterhead company)" },
+  { "key": "documents.receipt_footer", "value": "", "group": "documents", "label": "Footer text printed on official receipts (e.g. BIR permit / ATP details); empty = none" }
 ]

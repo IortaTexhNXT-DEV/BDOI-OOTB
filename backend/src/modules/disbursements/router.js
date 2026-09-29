@@ -8,7 +8,8 @@ import { ok, created } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { isoDate, num, pageParams, sendList, sendNoData } from '../accounting/lib/http.js';
-import { makePdf, padRow, storeFile } from '../accounting/lib/files.js';
+import { storeFile } from '../accounting/lib/files.js';
+import { vouchersPdf } from '../documents/finance.js';
 import { excelDate, readSheet } from '../accounting/lib/sheet.js';
 import * as svc from './service.js';
 
@@ -48,7 +49,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/printDisbursement', summary: 'Print vouchers for a customer-code and date range (PDF download URL)', screen: `${SCREEN} > Bulk print`, middleware: read,
+  method: 'GET', path: '/printDisbursement', summary: 'Print payment vouchers, one per page, for a customer-code and date range or one disbursementId (PDF download URL)', screen: `${SCREEN} > Bulk print`, middleware: read,
   query: { customerCodeFrom: 'CL-2026-00001', customerCodeTo: 'CL-2026-00099', createdAtFrom: '2026-09-01', createdAtTo: '2026-09-30' },
   response: { success: true, message: 'Disbursements exported', data: { url: 'http://host/api/s3/object/print/…pdf?exp=1767225600&sig=...', filename: 'disbursements.pdf', count: 3 } },
   handler: async (req, res) => {
@@ -57,11 +58,7 @@ define({
       AND ($3::date IS NULL OR voucher_date >= $3) AND ($4::date IS NULL OR voucher_date <= $4) AND ($5::text IS NULL OR id = $5) ORDER BY customer_code, voucher_date`,
     [q.customerCodeFrom || q.customerCode || null, q.customerCodeTo || q.customerCodeFrom || q.customerCode || null, isoDate(q.createdAtFrom), isoDate(q.createdAtTo), q.disbursementId || null])).rows;
     if (!rows.length) { sendNoData(res, 'No disbursements found for the selected filters'); return; }
-    const widths = [16, 14, 12, 28, 16, 14, 10];
-    const lines = [padRow(['Voucher', 'Customer', 'Date', 'Payee', 'Policy', 'Amount', 'Status'], widths), '-'.repeat(116),
-      ...rows.map((d) => padRow([d.voucher_number, d.customer_code, d.voucher_date, d.payee_name, d.policy_number, Number(d.amount).toFixed(2), d.status], widths))];
-    const title = `${((await getSetting('general.company_name')) ?? '')} – Payment Vouchers`;
-    const file = await storeFile(pool, { category: 'print', fileName: 'disbursements.pdf', contentType: 'application/pdf', buffer: makePdf(title, lines), entity: 'disbursement', userId: req.user.id });
+    const file = await storeFile(pool, { category: 'print', fileName: rows.length === 1 ? `${rows[0].voucher_number}.pdf` : 'disbursements.pdf', contentType: 'application/pdf', buffer: await vouchersPdf(pool, rows), entity: 'disbursement', entityId: rows.length === 1 ? rows[0].id : null, userId: req.user.id });
     ok(res, { url: file.url, filename: file.fileName, key: file.key, count: rows.length }, 'Disbursements exported');
   },
 });

@@ -10,6 +10,7 @@ import { publicUrl } from '../uploads/storage.js';
 import { premiumBreakdown } from '../quotations/premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { companyName } from '../../lib/letterhead.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -186,7 +187,7 @@ export async function sendToCustomer(id, userId, cancel) {
   if (client?.email) {
     const t = await emailTemplate('endorsement_customer');
     const v = { customerName: client.display_name, endorsementNumber: e.endorsement_number, policyNumber: e.policy_number,
-      premiumDelta: Number(e.premium_delta).toFixed(2), currency: await getSetting('currency.default', 'PHP'), companyName: ((await getSetting('general.company_name')) ?? ''),
+      premiumDelta: Number(e.premium_delta).toFixed(2), currency: await getSetting('currency.default', 'PHP'), companyName: await companyName(),
       action: cancel ? 'cancellation' : 'endorsement' };
     await queueEmail({ to: client.email, subject: renderTemplate(t.subject, v), html: renderTemplate(t.html, v), template: 'endorsement_customer', entity: 'endorsement', entityId: e.id });
   }

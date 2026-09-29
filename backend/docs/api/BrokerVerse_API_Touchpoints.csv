@@ -3299,7 +3299,7 @@
     ""checkbooks"": []
   }
 }"
-142,Disbursements,GET,/api/disbursements/printDisbursement,Print vouchers for a customer-code and date range (PDF download URL),Accounts > Disbursement (Payment Voucher) > Bulk print,Bearer JWT,read:disbursements,Query: ?customerCodeFrom=CL-2026-00001&customerCodeTo=CL-2026-00099&createdAtFrom=2026-09-01&createdAtTo=2026-09-30,"{
+142,Disbursements,GET,/api/disbursements/printDisbursement,"Print payment vouchers, one per page, for a customer-code and date range or one disbursementId (PDF download URL)",Accounts > Disbursement (Payment Voucher) > Bulk print,Bearer JWT,read:disbursements,Query: ?customerCodeFrom=CL-2026-00001&customerCodeTo=CL-2026-00099&createdAtFrom=2026-09-01&createdAtTo=2026-09-30,"{
   ""success"": true,
   ""message"": ""Disbursements exported"",
   ""data"": {
@@ -9270,7 +9270,7 @@
     }
   ]
 }"
-474,Receipts,GET,/api/receipts/printReceipt,"Print receipts (one receiptId, or customer-code and date range) to a PDF download URL",Accounts > Receipts > Bulk print / Print,Bearer JWT,read:receipts,Query: ?customerCodeFrom=CL-2026-00001&customerCodeTo=CL-2026-00099&createdAtFrom=2026-09-01&createdAtTo=2026-09-30,"{
+474,Receipts,GET,/api/receipts/printReceipt,"Print official receipts, one per page (one receiptId, or customer-code and date range) to a PDF download URL",Accounts > Receipts > Bulk print / Print,Bearer JWT,read:receipts,Query: ?customerCodeFrom=CL-2026-00001&customerCodeTo=CL-2026-00099&createdAtFrom=2026-09-01&createdAtTo=2026-09-30,"{
   ""success"": true,
   ""message"": ""Receipts exported"",
   ""data"": {

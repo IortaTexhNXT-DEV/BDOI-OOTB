@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { writeXlsx, colLetter } from '../src/tools/xlsx.js';
-import { writePdf } from '../src/tools/pdf.js';
+import { buildReportPdf } from '../src/lib/pdf/index.js';
 import { toCsv } from '../src/tools/csv.js';
 import { collectRoutes } from '../src/tools/export-api.js';
 
@@ -46,7 +46,7 @@ describe('file writers', () => {
   });
   it('writes a multi-page PDF with a valid cross-reference table', () => {
     const rows = Array.from({ length: 120 }, (_, i) => ({ no: `POL-${i + 1}`, name: `Client (${i}) \\ ₱`, amt: i * 10.5 }));
-    const buf = writePdf({ title: 'Test Report', subtitle: 'Period 2026', columns: [{ key: 'no', label: 'No.' }, { key: 'name', label: 'Name' }, { key: 'amt', label: 'Amount', type: 'money' }], rows, totals: { amt: 74970 } });
+    const buf = buildReportPdf({ title: 'Test Report', params: 'Period 2026', columns: [{ key: 'no', label: 'No.' }, { key: 'name', label: 'Name' }, { key: 'amt', label: 'Amount', type: 'money' }], rows, totals: { amt: 74970 } });
     const s = buf.toString('latin1');
     expect(s.startsWith('%PDF-1.4')).toBe(true);
     expect(s.trimEnd().endsWith('%%EOF')).toBe(true);
@@ -56,7 +56,7 @@ describe('file writers', () => {
     expect(s.slice(startxref, startxref + 4)).toBe('xref');
     const offsets = [...s.slice(startxref).matchAll(/(\d{10}) 00000 n /g)].map((m) => Number(m[1]));
     offsets.forEach((o, i) => expect(s.slice(o, o + `${i + 1} 0 obj`.length)).toBe(`${i + 1} 0 obj`));
-    expect(s).toContain('(Client \\(5\\) \\\\ PHP )');
+    expect(s).toContain('(Client \\(5\\) \\\\ PHP)');
     expect(s).toContain('(74,970.00)');
   });
   it('writes CSV with quoting and formula-injection guard', () => {

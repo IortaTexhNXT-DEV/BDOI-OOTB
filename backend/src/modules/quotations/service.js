@@ -21,6 +21,7 @@ import { addDays, today } from '../../lib/dates.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { participantsFromDoc, writeParticipants, legacyParticipantDetails, leadOf, participantsOf, participantInputs } from '../placement/participants.js';
 import { journeyFor, assertStep } from '../placement/journey.js';
+import { companyName } from '../../lib/letterhead.js';
 
 export async function getQuoteRow(id, db = null) {
   const r = await (db || { query }).query(`${QUOTE_SELECT} WHERE (q.id = $1 OR q.quote_number = $1) AND q.deleted_at IS NULL`, [id]);
@@ -150,7 +151,7 @@ export async function changeStatus(id, label, user) {
 
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const vars = async (q, extra = {}) => ({
-  companyName: ((await getSetting('general.company_name')) ?? ''), quotationNumber: q.quote_number,
+  companyName: await companyName(), quotationNumber: q.quote_number,
   customerName: [q.lead_row?.first_name, q.lead_row?.last_name].filter(Boolean).join(' ') || q.lead_row?.company_name || 'Customer',
   productType: q.product_type || q.lob, grossPremium: Number(q.premium_total).toLocaleString('en-US', { minimumFractionDigits: 2 }),
   currency: q.currency, validUntil: q.valid_until, insurerName: q.insurer_name || '', ...extra,
