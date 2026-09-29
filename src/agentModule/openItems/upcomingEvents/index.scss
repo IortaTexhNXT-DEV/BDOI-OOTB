@@ -1,0 +1,52 @@
+.overall__upcoming__event__container {
+  .notificaition__container__titles {
+    font-size: 24px;
+    font-weight: 600;
+    font-family: Poppins;
+    line-height: 36px;
+    color: #111927;
+  }
+  .notificaition__container__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .notificaition__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .p-card {
+    background: #ffffff;
+    color: #4b5563;
+    box-shadow: none !important;
+    fill: none !important;
+    filter: none !important;
+    margin-top: 10px;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+  }
+  .today__text {
+    font-size: 16px;
+    font-weight: 400;
+    font-family: Poppins;
+    line-height: 24px;
+    color: #111927;
+  }
+  .card__title{
+    font-size: 14px;
+    font-weight: 500;
+    font-family: Poppins;
+    line-height: 21px;
+    color: #111927;
+  }
+  .client__name{
+    font-size: 14px;
+    font-weight: 500;
+    font-family: Poppins;
+    line-height: 21px;
+    color: #6C737F;
+  }
+}

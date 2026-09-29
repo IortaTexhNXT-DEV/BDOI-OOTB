@@ -1,0 +1,93 @@
+{
+  "feature_id": "P1",
+  "feature_name": "Treaty Management",
+  "description": "Comprehensive management of reinsurance treaties including setup, monitoring, and renewal",
+  "implementation_priority": "HIGH",
+  "master_screens": [
+    {
+      "name": "Treaty Master",
+      "path": "/master/reinsurance/treaty",
+      "purpose": "Configure and manage reinsurance treaty agreements",
+      "features": [
+        "Treaty type selection (Quota Share, Surplus, XOL, Stop Loss)",
+        "Coverage limits and retention levels",
+        "Commission structures (sliding scale, flat rate)",
+        "Automatic cession rules",
+        "Treaty period management",
+        "Reinstatement provisions"
+      ]
+    }
+  ],
+  "user_screens": [
+    {
+      "name": "Treaty Dashboard",
+      "path": "/reinsurance/treaties",
+      "purpose": "Monitor and manage active treaties",
+      "features": [
+        "Treaty utilization tracking",
+        "Capacity monitoring with alerts",
+        "Treaty renewal management",
+        "Performance metrics",
+        "Document management"
+      ]
+    },
+    {
+      "name": "Treaty Details",
+      "path": "/reinsurance/treaty/:id",
+      "purpose": "View detailed treaty information and transactions",
+      "features": [
+        "Treaty terms and conditions",
+        "Cession history",
+        "Claims recovery status",
+        "Financial summary",
+        "Amendment tracking"
+      ]
+    }
+  ],
+  "treaty_types": [
+    {
+      "type": "Quota Share",
+      "description": "Fixed percentage of all risks ceded",
+      "common_lines": ["Motor", "Fire", "Marine"],
+      "typical_cession": "30-70%"
+    },
+    {
+      "type": "Surplus",
+      "description": "Cession of risks exceeding retention",
+      "common_lines": ["Property", "Engineering"],
+      "lines_of_surplus": "5-10 lines"
+    },
+    {
+      "type": "Excess of Loss (XOL)",
+      "description": "Coverage for losses exceeding retention",
+      "common_lines": ["Catastrophe", "Per Risk"],
+      "layers": "Multiple layers with different limits"
+    },
+    {
+      "type": "Stop Loss",
+      "description": "Aggregate protection for total losses",
+      "trigger": "Loss ratio exceeding threshold",
+      "typical_threshold": "75-90%"
+    }
+  ],
+  "philippines_market_features": [
+    "Support for National Reinsurance Corporation of the Philippines (NRCP)",
+    "Catastrophe treaties for typhoon and earthquake",
+    "Compliance with Insurance Commission Circular Letters",
+    "PHP currency with multi-currency support",
+    "Local reinsurer preferences"
+  ],
+  "integration_points": [
+    "Policy module for automatic cessions",
+    "Claims module for recovery tracking",
+    "Finance module for premium and commission accounting",
+    "Reporting module for bordereaux generation"
+  ],
+  "business_rules": [
+    "Automatic cession based on sum insured",
+    "Facultative placement for risks exceeding treaty",
+    "Commission calculation based on treaty terms",
+    "Reinstatement premium calculation",
+    "Treaty capacity monitoring and alerts"
+  ]
+}

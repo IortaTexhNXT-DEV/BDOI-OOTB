@@ -1,0 +1,73 @@
+.commission__modal__container {
+    width: 40%;
+    .input__label__jv {
+        color: #111927 !important;
+        font-family: 'Inter', sans-serif;
+        font-size: 16px !important;
+        font-style: normal !important;
+        font-weight: 400 !important;
+        line-height: normal !important;
+    }
+
+    .select__label__jv {
+        color: #111927 !important;
+        font-family: 'Inter', sans-serif;
+        font-size: 16px !important;
+        font-style: normal !important;
+        font-weight: 500 !important;
+        line-height: normal !important;
+    }
+
+    .input__field__jv {
+        color: #111927;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        width: 100%;
+        border-radius: 10px;
+
+        .p-dropdown-label {
+            color: #111927;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+        }
+    }
+
+    .jv__btn__reversal {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 500;
+        background-color: #6366f1;
+        border-radius: 30px;
+        height: 45px;
+        // width: 140px;
+        padding: 0 40px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .jv__save {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 500;
+        border-radius: 30px;
+        background: rgba(99, 102, 241, 0.50);
+        height: 45px;
+        // width: 163px;
+        padding: 0 30px;
+        font-family: 'Inter', sans-serif;
+    }
+    
+}
+.p-dialog .p-dialog-header .p-dialog-header-icon {
+    width: 2rem;
+    height: 2rem;
+    color: #6366f1 !important;
+    border: 0 none;
+    background: transparent;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    margin-right: 0.5rem;
+}

@@ -1,0 +1,210 @@
+{
+  "remittance_module_structure": {
+    "overview": "Complete separation of Admin/Setup screens from User Transaction screens",
+    "menu_hierarchy": {
+      "Finance": {
+        "Master": {
+          "description": "Admin-only configuration screens",
+          "access": ["ADMIN", "FINANCE_MANAGER"],
+          "Remittance_Master": {
+            "K1": "Automated Remittance Setup",
+            "K3": "Statement Template Master",
+            "K4": "Settlement Parameter Master",
+            "K7": "Remittance Schedule Master",
+            "K9": "Approval Workflow Master"
+          }
+        },
+        "Setups": {
+          "description": "System-wide configuration",
+          "access": ["ADMIN", "FINANCE_MANAGER"],
+          "Remittance_Setup": {
+            "GL_Account_Setup": "Default GL accounts for remittance",
+            "Approval_Matrix": "Amount-based approval levels",
+            "Bank_Setup": "Bank account configuration",
+            "Notification_Templates": "Email and alert templates"
+          }
+        },
+        "Remittance": {
+          "description": "User transaction screens",
+          "access": ["USER", "SUPERVISOR", "MANAGER"],
+          "Automated_Processing": {
+            "K1_Execute": "Run automated remittances",
+            "K1_Monitor": "View execution status"
+          },
+          "Tracking": {
+            "K2_View_Status": "Track remittance status",
+            "K2_History": "View remittance history"
+          },
+          "Statements": {
+            "K3_Generate": "Generate statements",
+            "K3_History": "View generated statements"
+          },
+          "Settlement": {
+            "K4_Process": "Create settlements",
+            "K4_Approve": "Approve settlements",
+            "K4_History": "Settlement history"
+          },
+          "Reconciliation": {
+            "K5_Process": "Reconcile remittances",
+            "K5_Exceptions": "Handle exceptions"
+          },
+          "Bulk_Processing": {
+            "K6_Upload": "Upload bulk files",
+            "K6_Process": "Process bulk remittances"
+          },
+          "Electronic_Transfer": {
+            "K8_Create": "Create electronic transfers",
+            "K8_Monitor": "Monitor transfer status"
+          },
+          "Reports": {
+            "K11_Generate": "Generate reports",
+            "K11_Schedule": "Schedule reports"
+          },
+          "Analytics": {
+            "K17_Dashboard": "Analytics dashboard",
+            "K17_Insights": "Business insights"
+          }
+        }
+      }
+    },
+    "screen_categories": {
+      "MASTER": {
+        "description": "Master data configuration screens",
+        "characteristics": [
+          "Accessed via Finance > Master menu",
+          "Admin/Manager access only",
+          "Define rules and parameters",
+          "Create templates and workflows",
+          "System-wide impact"
+        ],
+        "examples": [
+          "Automated Remittance Setup",
+          "Statement Template Master",
+          "Settlement Parameter Master"
+        ]
+      },
+      "SETUP": {
+        "description": "One-time system setup screens",
+        "characteristics": [
+          "Accessed via Finance > Setups menu",
+          "Admin access only",
+          "GL account mappings",
+          "Default values",
+          "Approval matrices"
+        ],
+        "examples": [
+          "Remittance GL Setup",
+          "Approval Matrix Setup",
+          "Bank Account Setup"
+        ]
+      },
+      "TRANSACTION": {
+        "description": "Daily operational screens",
+        "characteristics": [
+          "Accessed via Finance > Remittance menu",
+          "User/Supervisor/Manager access",
+          "Process transactions",
+          "View and track status",
+          "Generate outputs"
+        ],
+        "examples": [
+          "Process Settlement",
+          "Generate Statement",
+          "Track Remittances"
+        ]
+      }
+    },
+    "feature_mapping": {
+      "K1_Automated_Remittance": {
+        "admin_screens": [
+          "Automated Remittance Master (Setup rules)",
+          "GL Account Mapping"
+        ],
+        "user_screens": [
+          "Execute Automated Remittance",
+          "Monitor Execution Status"
+        ]
+      },
+      "K2_Remittance_Tracking": {
+        "admin_screens": [
+          "Tracking Parameter Setup"
+        ],
+        "user_screens": [
+          "View Remittance Status",
+          "Remittance Dashboard",
+          "Track History"
+        ]
+      },
+      "K3_Statement_Generation": {
+        "admin_screens": [
+          "Statement Template Master",
+          "Column Configuration",
+          "Format Settings"
+        ],
+        "user_screens": [
+          "Generate Statement (Wizard)",
+          "View Statement History",
+          "Download/Email Statements"
+        ]
+      },
+      "K4_Insurer_Settlement": {
+        "admin_screens": [
+          "Settlement Parameter Master",
+          "Approval Limits Setup",
+          "GL Account Configuration"
+        ],
+        "user_screens": [
+          "Process Settlement",
+          "Settlement Approval",
+          "Payment Processing",
+          "Settlement History"
+        ]
+      }
+    },
+    "security_model": {
+      "roles": {
+        "ADMIN": {
+          "access": ["MASTER", "SETUP", "TRANSACTION"],
+          "capabilities": ["create", "read", "update", "delete", "approve"]
+        },
+        "FINANCE_MANAGER": {
+          "access": ["MASTER", "SETUP", "TRANSACTION"],
+          "capabilities": ["create", "read", "update", "approve"]
+        },
+        "SUPERVISOR": {
+          "access": ["TRANSACTION"],
+          "capabilities": ["create", "read", "update", "limited_approve"]
+        },
+        "USER": {
+          "access": ["TRANSACTION"],
+          "capabilities": ["create", "read", "update"]
+        },
+        "VIEWER": {
+          "access": ["TRANSACTION"],
+          "capabilities": ["read"]
+        }
+      }
+    },
+    "ui_patterns": {
+      "master_screens": {
+        "characteristics": [
+          "Tab-based navigation",
+          "Multiple sections per tab",
+          "Lookup buttons for related masters",
+          "Save/Delete/Close buttons",
+          "List view with grid"
+        ]
+      },
+      "transaction_screens": {
+        "characteristics": [
+          "Search/filter section",
+          "Dashboard cards for KPIs",
+          "Action-oriented grids",
+          "Bulk operations",
+          "Submit/Approve workflows",
+          "Print/Export options"
+        ]
+      }
+    }
+  }
+}

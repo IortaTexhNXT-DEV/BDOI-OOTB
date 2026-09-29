@@ -1,0 +1,181 @@
+.upload__vehicle__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 24px 16px;
+    }
+  }
+  .customer__info__main__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: Poppins;
+    line-height: 51px;
+    color: #111927;
+  }
+  .upload__label {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .upload__card__container {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+
+    .file_icon_selector {
+      position: relative;
+      width: 100%;
+      display: grid;
+      gap: 4px;
+      padding: 20px;
+
+      .icon_click_option {
+        text-align: center;
+        margin-top: -56px;
+        height: max-content;
+        width: max-content;
+        text-align: center;
+        justify-self: center;
+      }
+      .p-fileupload .p-icon {
+        display: none;
+      }
+      .p-fileupload .p-button-label {
+        display: none;
+      }
+      .p-fileupload {
+        z-index: 1;
+        text-align: center;
+      }
+      .p-fileupload-choose {
+        background-color: transparent;
+        height: 50px;
+        width: 50px;
+        border-radius: none !important;
+        border: white;
+        border-style: none !important;
+      }
+    }
+  }
+  .upload__image__area {
+    height: 156px;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    border: 1px solid #e5e7eb;
+
+    .image__view {
+      flex: 1 1;
+    }
+  }
+  .before__upload__action {
+    display: grid;
+    justify-content: center;
+    padding: 24px 0;
+    gap: 4px;
+  }
+  .upload__caption {
+    color: #6366f1;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  .customer__info__back__btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .icon__container {
+      display: flex;
+      align-items: center;
+    }
+    .customer__info__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+      display: flex;
+      align-items: center;
+      .arrow__outer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+    }
+    .customer__info__quote__title {
+      color: #111927;
+      font-family: Poppins;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+  .customer__info__title {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 34px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    padding: 0 8px;
+  }
+  .customer__info__subtitle {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    padding: 0 8px;
+  }
+  .back__next__btn__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 24px;
+  }
+  .back__btn__container {
+    .p-button {
+      color: #111927;
+      background: #ffffff;
+      border: 1px solid #ffffff;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400 !important;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .next__btn__container {
+    .p-button {
+      color: #ffffff;
+      background: #6366f1;
+      border: 1px solid #6366f1;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #ffffff;
+    }
+  }
+}

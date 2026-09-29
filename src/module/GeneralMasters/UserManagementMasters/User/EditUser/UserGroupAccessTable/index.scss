@@ -1,0 +1,59 @@
+.transactioncode__master__table_UserGroupAccess{
+    .empty-table-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-top: 2%;
+        padding-bottom: 2%;
+      }
+      .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+        border: 0px solid #fff !important;
+      }.table__selector {
+        text-align: center;
+        flex: 1 0;
+        .pagedropdown_container {
+          border: none;
+          margin: 0 !important;
+          background-color: #FAFAFA;
+        }
+      }
+      .p-tabview .p-tabview-panels {
+        background: #ffffff;
+        padding: 0rem !important; 
+        border: 0 none;
+        color: #4b5563;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
+    }
+    .pagedropdown_container{
+      margin-right: 20px;
+    }
+      .no__data__found {
+        color: #b1b1b1;
+        font-family: 'Inter', sans-serif;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        text-align: center;
+      }
+    //   .p-paginator-bottom.p-paginator.p-component {
+    //     display: flex !important;
+    //     justify-content: flex-end !important;
+    // }
+    // .p-dropdown {
+    //     background: #ffffff;
+    //     border: 1px solid #d1d5db;
+    //     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    //     border-radius: 6px;
+    //     margin-top: 0.5rem !important;
+    //     width: 100% !important;
+    // }
+   
+    
+}
+.inputdialog__fieled{
+  width:100%
+}
+.tabel_selector{text-align: center;
+flex: 1 0;}

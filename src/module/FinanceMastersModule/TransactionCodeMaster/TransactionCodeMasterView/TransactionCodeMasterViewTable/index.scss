@@ -1,0 +1,39 @@
+.view__tale{
+
+    .btn__container{
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+      }
+      .add__btn {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 500 !important;
+        background-color: #6366f1;
+        border-radius: 60px !important;
+        padding-right: 1rem;
+        padding-left: 1rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin: 10px;
+        font-family: 'Inter', sans-serif;
+        column-gap: 0.4rem;
+        padding-top: 0.6rem;
+        padding-bottom: 0.6rem;
+      }
+
+}
+.p-card .p-card-content {
+    padding: 0rem 0 !important; 
+}
+.p-tabview .p-tabview-nav {
+    background: #ffffff;
+    border: 1px solid #fff !important; 
+    border-width: 0 0 2px 0;
+}
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem; 
+  }

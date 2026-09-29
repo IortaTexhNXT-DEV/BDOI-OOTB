@@ -1,0 +1,48 @@
+.calculaition__inputfield__container {
+  position: relative;
+
+  .input__field {
+    position: relative;
+    height: 64px;
+    padding-top: 30px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Inter var";
+    line-height: 24px;
+    color: #111927;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    width: 100%;
+    &:focus {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0.1rem #e5e7eb;
+      border-color: #d1d5db;
+    }
+  }
+
+  .label {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    color: #6c737f;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: "Inter var";
+    line-height: 21px;
+  }
+
+  .input__value {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    color: #6366f1;
+    font-size: 16px;
+    font-weight: 400;
+    font-family: "Inter var";
+    line-height: 24px;
+  }
+}

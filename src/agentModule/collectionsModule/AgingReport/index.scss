@@ -1,0 +1,94 @@
+.aging-report-container {
+  padding: 20px;
+
+  .report-header {
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 10px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+
+    .summary-card {
+      .card-content {
+        text-align: center;
+
+        h3 {
+          margin: 0 0 10px 0;
+          font-size: 14px;
+          color: #7f8c8d;
+          font-weight: 500;
+        }
+
+        .amount {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 700;
+          color: #2c3e50;
+        }
+
+        .percentage {
+          display: inline-block;
+          margin-top: 5px;
+          padding: 3px 8px;
+          background-color: #f8f9fa;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+      }
+
+      &.total {
+        .card-content {
+          .amount {
+            color: #1976d2;
+            font-size: 24px;
+          }
+        }
+      }
+
+      &.current {
+        border-left: 4px solid #4caf50;
+      }
+
+      &.days-1-30 {
+        border-left: 4px solid #ffc107;
+      }
+
+      &.days-31-60 {
+        border-left: 4px solid #ff9800;
+      }
+
+      &.days-61-90 {
+        border-left: 4px solid #f44336;
+      }
+
+      &.over-90 {
+        border-left: 4px solid #9c27b0;
+      }
+    }
+  }
+
+  .chart-card,
+  .table-card {
+    margin-bottom: 20px;
+  }
+
+  .chart-card {
+    .p-card-body {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+  }
+}
+

@@ -1,0 +1,177 @@
+.view__endorsement__container {
+  .card__container {
+    border-radius: 20px !important;
+    background: #fff !important;
+    box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.07) !important;
+  }
+  .view__endorsement__container__title {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: Poppins;
+    line-height: 51px;
+    color: #111927;
+  }
+
+  .view__endorsement__container__back__btn__container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .view__endorsement__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+
+  .view__endorsement__container__quote__container {
+    display: flex;
+    justify-content: flex-end;
+
+    .view__endorsement__container__quote__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .view__endorsement__card__container {
+    .view__endorsement__card__container__title {
+      font-size: 34px;
+      font-weight: 600;
+      font-family: Poppins;
+      line-height: 51px;
+      color: #111927 !important;
+    }
+    .view__endorsement__card__sub__title {
+      color: #111927;
+      font-family: Poppins;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+    }
+
+    .upload__card__container {
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 1rem;
+      .file_icon_selector {
+        position: relative;
+        width: 100%;
+        display: grid;
+        gap: 4px;
+        padding: 20px;
+
+        .icon_click_option {
+          text-align: center;
+          margin-top: -56px;
+          height: max-content;
+          width: max-content;
+          text-align: center;
+          justify-self: center;
+        }
+        .p-fileupload .p-icon {
+          display: none;
+        }
+        .p-fileupload .p-button-label {
+          display: none;
+        }
+        .p-fileupload {
+          z-index: 1;
+          text-align: center;
+        }
+        .p-fileupload-choose {
+          background-color: transparent;
+          height: 50px;
+          width: 50px;
+          border-radius: none !important;
+          border: white;
+          border-style: none !important;
+        }
+      }
+      .upload__caption {
+        font-size: 16px;
+        font-weight: 400;
+        font-family: Poppins;
+        line-height: 24px;
+        color: #6366f1 !important;
+      }
+    }
+
+    .back__complete__btn__container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+    }
+    .back__btn__container {
+      .p-button {
+        color: #111927;
+        background: #ffffff;
+        border: 1px solid #ffffff;
+        padding: 8px 16px 8px 16px;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 400 !important;
+        font-family: Poppins;
+        line-height: 24px;
+        color: #111927;
+      }
+    }
+
+    .complete__btn__container {
+      .p-button {
+        color: #ffffff;
+        background: #6366f1;
+        border: 1px solid #6366f1;
+        padding: 8px 16px 8px 16px;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+          box-shadow 0.2s;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 400;
+        font-family: Poppins;
+        line-height: 24px;
+        color: #ffffff;
+      }
+    }
+  }
+  .endorsement__detail__view__box {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    height: 69px;
+    padding: 0.5rem 1rem;
+  }
+
+  .endorsement__detail__view__box__title {
+    font-size: 16px;
+    font-weight: 400;
+    font-family: Poppins;
+    line-height: 24px;
+    color: #111927;
+  }
+
+  .endorsement__detail__view__box__sub__title {
+    font-size: 16px;
+    font-weight: 400;
+    font-family: Poppins;
+    line-height: 24px;
+    color: #6366f1;
+  }
+
+  .endorsement__detail__view__box__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+  }
+}

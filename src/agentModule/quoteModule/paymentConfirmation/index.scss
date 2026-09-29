@@ -1,0 +1,98 @@
+.overall__payment__confirmation{
+    .header__title {
+        color: #111927;
+        font-family: Poppins;
+        font-size: 34px;
+        font-weight: 600;
+      }
+      .table__header {
+        color: #111927;
+        font-family: Poppins;
+        font-size: 34px;
+        font-weight: 600;
+        padding:0 0.5rem;
+      }
+      .left__arrow {
+        display: flex;
+        gap: 10px;
+      }
+      .left__arrow__text {
+        color: #111927;
+        font-family: Poppins;
+        font-size: 16px;
+        font-weight: 400;
+      }
+      .sub__title{
+        color: #111927;
+font-family: Poppins;
+font-size: 24px;
+font-weight: 400;
+padding:0 0.5rem;
+      }
+    .premium__header{
+        display: flex;
+        justify-content: space-between;
+        padding:0 0.5rem;
+    }
+    .net__premium{
+        color: #6C737F;
+font-family: Poppins;
+font-size: 16px;
+font-weight: 400;
+
+    }
+    .premium__id{
+        color: #111927;
+font-family: Poppins;
+font-size: 16px;
+font-weight: 400;
+    }
+    .gross__premium{
+        color: #6366F1;
+        font-family: Poppins;
+        font-size: 20px;
+        font-weight: 500;
+
+    }
+    .gross__id{
+        color: #6366F1;
+        font-family: Poppins;
+        font-size: 20px;
+        font-weight: 500;
+    }
+    .policy_button {
+        color: #fff;
+        font-family: Poppins;
+        font-size: 16px;
+        font-weight: 400;
+        justify-content: space-between;
+        gap: 5%;
+      }
+      .button_component {
+        align-items: flex-end;
+        justify-content: flex-end;
+        display: flex;
+        gap: 2%;
+        margin: 24px 0px;
+      }
+    .sub__title__header{
+        display: flex;
+        justify-content:space-between
+    }
+    .waiting__payment{
+        color: #B54708;
+font-family: Inter var;
+font-size: 14px;
+font-weight: 400;
+border-radius: 25px;
+background: #FEF2E1;
+padding: 10px;
+    }
+      .download_button {
+        color: #111927;
+        font-family: Poppins;
+        font-size: 16px;
+        font-weight: 400;
+        margin-left: 10px;
+      }
+}

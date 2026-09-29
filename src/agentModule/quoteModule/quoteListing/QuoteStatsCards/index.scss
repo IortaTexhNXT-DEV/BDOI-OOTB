@@ -1,0 +1,420 @@
+@import "../../../../Color.scss";
+
+.quote-stats-container {
+  margin-bottom: 2rem;
+  // background-color: transparent !important;
+
+  // KPI Section - Executive Dashboard Style
+  .kpi-section {
+    margin-bottom: 2rem;
+    // background-color: transparent;
+
+    .kpi-scroll-container {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scroll-behavior: smooth;
+      background-color: $main-background;
+
+      // Custom scrollbar styling
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+      }
+    }
+
+    .kpi-card {
+      min-width: 280px;
+      padding: 1rem;
+      flex-shrink: 0;
+      background: $card-background;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        background: $card-background;
+      }
+
+      .p-card-body {
+        background: $card-background;
+        padding: 0;
+      }
+
+      .p-card-content {
+        padding: 1.5rem;
+        background: $card-background;
+      }
+
+      .kpi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        background-color: transparent;
+
+        .kpi-title {
+          font-size: 0.875rem;
+          color: #6c757d;
+          font-weight: 500;
+          background-color: transparent;
+        }
+
+        .status-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background-color: transparent;
+
+          .pi {
+            font-size: 1rem;
+          }
+
+          .kpi-title {
+            margin: 0;
+            background-color: transparent;
+          }
+        }
+
+        .p-tag {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+
+          .pi {
+            font-size: 0.625rem;
+            margin-right: 0.25rem;
+          }
+        }
+      }
+
+      // Status card specific styles within KPI cards
+      &.status-card {
+        background: $card-background;
+
+        .status-progress {
+          width: 100%;
+          height: 6px;
+          background-color: #e9ecef;
+          border-radius: 3px;
+          overflow: hidden;
+          margin-bottom: 0.5rem;
+
+          .status-progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+          }
+        }
+      }
+
+      .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #0066cc 0%, #001e60 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-color: transparent;
+      }
+
+      .kpi-subtitle {
+        font-size: 0.75rem;
+        color: #95a5a6;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        background-color: transparent;
+      }
+
+      .kpi-warning-tag {
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+        font-weight: 600;
+        background-color: transparent;
+
+        .p-tag-icon {
+          font-size: 0.6rem;
+          margin-right: 0.25rem;
+        }
+      }
+    }
+  }
+
+  // Status Section
+  .status-section {
+    margin-top: 2rem;
+    background-color: transparent;
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e9ecef;
+      background-color: transparent;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      background-color: transparent;
+
+      .status-card {
+        background: $card-background;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        padding: 1rem;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+          background: $card-background;
+        }
+
+        .p-card-body {
+          background: $card-background;
+        }
+
+        .p-card-content {
+          padding: 1rem;
+          background: $card-background;
+        }
+
+        .status-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+          background-color: transparent;
+
+          .status-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: transparent;
+
+            .pi {
+              font-size: 1.25rem;
+            }
+
+            .status-name {
+              font-size: 0.875rem;
+              font-weight: 500;
+              color: #495057;
+              background-color: transparent;
+            }
+          }
+
+          .status-count-tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            font-weight: 600;
+          }
+        }
+
+        .status-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #2c3e50;
+          margin-bottom: 0.5rem;
+          background-color: transparent;
+        }
+
+        .status-progress {
+          width: 100%;
+          height: 8px;
+          background-color: #e9ecef;
+          border-radius: 4px;
+          overflow: hidden;
+          margin-bottom: 0.5rem;
+
+          .status-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+          }
+        }
+
+        .status-percentage {
+          font-size: 0.75rem;
+          color: #6c757d;
+          font-weight: 500;
+          background-color: transparent;
+        }
+      }
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 1200px) {
+    .kpi-section {
+      .kpi-scroll-container {
+        gap: 1rem;
+      }
+
+      .kpi-card {
+        min-width: 250px;
+
+        .p-card-content {
+          padding: 1.25rem;
+        }
+
+        .kpi-value {
+          font-size: 1.75rem;
+        }
+      }
+    }
+
+    .status-section {
+      .status-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.75rem;
+
+        .status-card {
+          .status-value {
+            font-size: 1.75rem;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.5rem;
+
+    .kpi-section {
+      .kpi-scroll-container {
+        gap: 0.75rem;
+      }
+
+      .kpi-card {
+        min-width: 220px;
+        border-radius: 8px;
+
+        .p-card-content {
+          padding: 1rem;
+        }
+
+        .kpi-header {
+          margin-bottom: 0.75rem;
+
+          .kpi-title {
+            font-size: 0.8rem;
+          }
+
+          .p-tag {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+
+            .pi {
+              font-size: 0.6rem;
+            }
+          }
+        }
+
+        .kpi-value {
+          font-size: 1.5rem;
+        }
+
+        .kpi-subtitle {
+          font-size: 0.7rem;
+        }
+      }
+    }
+
+    .status-section {
+      .section-title {
+        font-size: 1.1rem;
+      }
+
+      .status-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+
+        .status-card {
+          .status-value {
+            font-size: 1.5rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Override PrimeReact Card styles
+  .kpi-card {
+    .p-card-body {
+      padding: 0;
+      background: $card-background;
+    }
+
+    .p-card-content {
+      padding: 1.5rem;
+      background: $card-background;
+    }
+
+    // Skeleton loading state
+    .p-skeleton {
+      background-color: #e9ecef;
+    }
+  }
+
+  // Message error state
+  .p-message {
+    background-color: #ffffff;
+    border: 1px solid #f8d7da;
+
+    &.p-message-error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+  }
+}
+
+// Tag customizations
+.quote-stats-container .p-tag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+  border-radius: 4px;
+
+  &.p-tag-success {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  &.p-tag-danger {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  &.p-tag-warning {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .pi {
+    font-size: 0.625rem;
+    margin-right: 0.25rem;
+  }
+}

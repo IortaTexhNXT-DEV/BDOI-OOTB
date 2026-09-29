@@ -1,0 +1,75 @@
+.reports__Payables__container {
+  .reports__production__heading {
+    color: #111927;
+    font-family: "Inter", sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+  }
+  .breadcrumbs__container {
+    border: none !important;
+    padding-left: 0px !important;
+    margin-left: 0pc !important;
+  }
+  .reports__card__container {
+    border-radius: 20px;
+    margin: 20px 0px;
+  }
+  .dropdown__container {
+    width: 100%;
+    height: 44px;
+    border-radius: 11px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    margin: 10px 0px;
+  }
+  .field__container {
+    width: 100%;
+    height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    margin: 10px 0px;
+  }
+  .Submit__but_reports {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 80px;
+  }
+  .submit_button {
+    padding: 0px 34px !important;
+    height: 42px;
+    border-radius: 30px;
+    background: #6366f1;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .calendar_container {
+    width: 100% !important;
+    margin-top: 6px;
+  }
+  .labelfield_container {
+    color: #111927;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .p-calendar-w-btn-right .p-datepicker-trigger {
+    background-color: #fff !important;
+    border-left: none !important;
+    border: 1px solid #d1d5db;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: #6366f1;
+  }
+  .dropdown__container_disabled {
+    width: 100%;
+    height: 44px;
+    border-radius: 11px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    margin: 10px 0px;
+    color: #d1d5db;
+  }
+}

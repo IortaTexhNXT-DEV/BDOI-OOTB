@@ -1,0 +1,59 @@
+.agent__edit__profile__container {
+    .back__btn__container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+    .agent__profile__detail__container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      .agent__profile__name {
+        font-size: 34px;
+        font-weight: 600;
+        font-family: Poppins;
+        line-height: 24px;
+        color: #111927;
+        line-height: 51px;
+      }
+      .agent__profile__id{
+          font-size: 16px;
+          font-weight: 500;
+          font-family: Poppins;
+          line-height: 24px;
+          color: #111927;
+      }
+   
+    }
+    .profile__container__btn {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      margin-right: 0.8%;
+      .p-button-label {
+        font-size: 16px !important;
+        font-weight: 400 !important;
+        font-family: Poppins !important;
+        line-height: 24px !important;
+      }
+      .p-button {
+        margin: 0;
+        display: inline-flex;
+        cursor: pointer;
+        user-select: none;
+        align-items: center;
+        vertical-align: bottom;
+        padding: 0.55rem 0.55rem !important;
+        text-align: center;
+        overflow: hidden;
+        position: relative;
+        gap: 10px !important;
+      }
+    }
+  }
+  

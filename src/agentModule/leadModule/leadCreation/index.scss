@@ -1,0 +1,104 @@
+.overall_Leadcreat_container {
+  .btn_lable_save_container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  .p-card .p-card-title {
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 51px;
+    font-family: Poppins;
+    color: #111927;
+  }
+
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    margin-top: 10px;
+
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+
+  .innerlead_container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+  }
+
+  .arrowlabel_txt {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+
+  .subheadinglabel_txt {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  .labeltxt_container {
+    color: #111927;
+    margin-left: 6px;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  .save_continue_conatiner {
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+    margin-top: 1rem;
+  }
+
+  .btn_lable_container {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .btnsave_lable_container {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 400;
+    border-radius: 6px;
+  }
+
+  .category__style {
+    font-family: Poppins;
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 24px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #111927;
+
+  }
+
+  .btn_lable_save_container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    .p-button-label {
+      font-family: Poppins !important;
+      font-size: 16px !important;
+      font-weight: 400 !important;
+      line-height: 24px !important;
+    }
+  }
+}

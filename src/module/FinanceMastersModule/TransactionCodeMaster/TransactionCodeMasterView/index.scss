@@ -1,0 +1,118 @@
+.transactioncode__master__view{
+  .label_header {
+
+    color: #111927;
+    font-family: 'Inter', sans-serif;
+    font-size: 30px;
+    // font-style: normal;
+    font-weight: 600;
+    margin-left: 10px;
+    // line-height: normal;
+}
+
+    @layer primereact {
+        .p-card {
+          background: #ffffff;
+          color: #4b5563;
+          box-shadow: none !important;
+          // border-radius: 6px !important;
+          fill: #fff !important;
+          // stroke-width: 1px !important;
+          // stroke: #fff !important;
+          filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+        }
+      }
+      .p-datatable .p-datatable-tbody > tr > td {
+        text-align: left;
+        border: 1px solid #e5e7eb;
+        border-width: 0 0 1px 0;
+        padding: 1rem 0.4rem;
+      }
+      .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+        color: #b1b1b1 !important;
+      }
+      .breadCrums {
+        padding: 0;
+        border: none !important;
+        font-weight: 500;
+        color: #000;
+        font-size: 16px;
+      }
+      .p-breadcrumb {
+        background: #ffffff;
+        border: none !important;
+        border-radius: 6px;
+        padding: 0rem;
+        margin-top: 1rem;
+      }
+      .sidebar {
+        width: 100%;
+        color: #000;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+        color: #000;
+        font-size: 16px;
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+      }
+      .btn__container{
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+      }
+      .input__filed{
+        width:100%
+      }
+      .add__btn {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 500 !important;
+        background-color: #6366f1;
+        border-radius: 60px !important;
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin: 10px;
+        font-family: 'Inter', sans-serif;
+        column-gap: 0.4rem;
+        padding-top: 0.6rem;
+        padding-bottom: 0.6rem;
+      }
+      .Transaction__Code__Master__title{
+        color: #111927;
+        font-size: 30px;
+        font-style: normal;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+      // .p-dropdown {
+      //   background: #ffffff;
+      //   border: 1px solid #d1d5db;
+      //   transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+      //   border-radius: 6px;
+      //   margin-top: 0.5rem !important;
+      //   width: 100% !important;
+      // }
+     
+    .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+      font-weight: 400 !important;
+      font-family: 'Inter', sans-serif;
+      border: none !important;
+    }
+    .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+      background: #ffffff;
+      border-color: #6366F1;
+      color: #6366F1;
+      
+      font-weight: 500 !important;
+      font-family: 'Inter', sans-serif;
+  }
+ 
+}

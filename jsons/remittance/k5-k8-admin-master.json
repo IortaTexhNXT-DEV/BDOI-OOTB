@@ -1,0 +1,1129 @@
+{
+  "remittance_admin_masters_k5_k8": {
+    "k5_reconciliation_master": {
+      "featureId": "K5-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Remittance Reconciliation Master",
+      "screenCode": "FIN_MAS_REM_005",
+      "menuPath": "Finance > Master > Remittance Master > Reconciliation Setup",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "general",
+          "tabLabel": "General",
+          "sections": [
+            {
+              "sectionTitle": "Reconciliation Rules",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Rule Code",
+                  "fieldId": "ruleCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "REC-{0000}",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Rule Name",
+                  "fieldId": "ruleName",
+                  "type": "text",
+                  "required": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Active",
+                  "fieldId": "isActive",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "33%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Matching Criteria",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Match By",
+                  "fieldId": "matchBy",
+                  "type": "checkbox-group",
+                  "options": [
+                    {"value": "policyNo", "label": "Policy Number"},
+                    {"value": "amount", "label": "Amount"},
+                    {"value": "date", "label": "Transaction Date"},
+                    {"value": "reference", "label": "Reference Number"}
+                  ],
+                  "defaultChecked": ["policyNo", "amount"],
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Tolerance Settings",
+                  "fieldId": "tolerance",
+                  "type": "nested-fields",
+                  "fields": [
+                    {
+                      "fieldName": "Amount Tolerance (%)",
+                      "fieldId": "amountTolerance",
+                      "type": "decimal",
+                      "defaultValue": 0.00,
+                      "min": 0,
+                      "max": 10
+                    },
+                    {
+                      "fieldName": "Date Tolerance (Days)",
+                      "fieldId": "dateTolerance",
+                      "type": "number",
+                      "defaultValue": 3,
+                      "min": 0,
+                      "max": 30
+                    }
+                  ],
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "autoMatch",
+          "tabLabel": "Auto-Match Rules",
+          "sections": [
+            {
+              "sectionTitle": "Automatic Matching Configuration",
+              "layout": "single-column",
+              "fields": [
+                {
+                  "fieldName": "Enable Auto-Matching",
+                  "fieldId": "enableAutoMatch",
+                  "type": "checkbox",
+                  "defaultValue": false
+                },
+                {
+                  "fieldName": "Matching Priority",
+                  "fieldId": "matchPriority",
+                  "type": "sortable-list",
+                  "items": [
+                    {"id": "exact", "label": "Exact Match", "order": 1},
+                    {"id": "partial", "label": "Partial Match", "order": 2},
+                    {"id": "fuzzy", "label": "Fuzzy Match", "order": 3},
+                    {"id": "manual", "label": "Manual Review", "order": 4}
+                  ]
+                },
+                {
+                  "fieldName": "Confidence Level (%)",
+                  "fieldId": "confidenceLevel",
+                  "type": "slider",
+                  "min": 50,
+                  "max": 100,
+                  "defaultValue": 85,
+                  "step": 5,
+                  "helpText": "Minimum confidence level for auto-matching"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "glMapping",
+          "tabLabel": "GL Mapping",
+          "sections": [
+            {
+              "sectionTitle": "Reconciliation Accounts",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Suspense Account",
+                  "fieldId": "suspenseAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "lookupScreen": "glAccountMaster",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Clearing Account",
+                  "fieldId": "clearingAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Difference Account",
+                  "fieldId": "differenceAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "helpText": "For unmatched differences",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Write-off Account",
+                  "fieldId": "writeOffAccount",
+                  "type": "text",
+                  "required": true,
+                  "lookupButton": true,
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "exceptions",
+          "tabLabel": "Exception Handling",
+          "sections": [
+            {
+              "sectionTitle": "Exception Rules",
+              "type": "editable-grid",
+              "toolbar": [
+                {"label": "Add Rule", "action": "addRule", "icon": "plus"},
+                {"label": "Delete", "action": "deleteRule", "icon": "delete"}
+              ],
+              "columns": [
+                {
+                  "field": "exceptionType",
+                  "header": "Exception Type",
+                  "type": "dropdown",
+                  "options": ["Amount Mismatch", "Missing Policy", "Duplicate Entry", "Date Mismatch"],
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "condition",
+                  "header": "Condition",
+                  "type": "text",
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "action",
+                  "header": "Action",
+                  "type": "dropdown",
+                  "options": ["Auto-Resolve", "Flag for Review", "Reject", "Hold"],
+                  "width": "25%",
+                  "editable": true
+                },
+                {
+                  "field": "notifyRole",
+                  "header": "Notify",
+                  "type": "dropdown",
+                  "source": "userRoles",
+                  "width": "20%",
+                  "editable": true
+                },
+                {
+                  "field": "actions",
+                  "header": "",
+                  "type": "row-actions",
+                  "actions": ["delete"],
+                  "width": "5%"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "k6_bulk_processing_master": {
+      "featureId": "K6-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Bulk Remittance Processing Master",
+      "screenCode": "FIN_MAS_REM_006",
+      "menuPath": "Finance > Master > Remittance Master > Bulk Processing Setup",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "fileFormat",
+          "tabLabel": "File Format",
+          "sections": [
+            {
+              "sectionTitle": "Format Configuration",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Format Code",
+                  "fieldId": "formatCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "BFM-{000}",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Format Name",
+                  "fieldId": "formatName",
+                  "type": "text",
+                  "required": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "File Type",
+                  "fieldId": "fileType",
+                  "type": "dropdown",
+                  "options": ["CSV", "Excel", "XML", "Fixed Width", "JSON"],
+                  "required": true,
+                  "width": "33%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "File Structure",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Delimiter",
+                  "fieldId": "delimiter",
+                  "type": "dropdown",
+                  "options": ["Comma", "Tab", "Pipe", "Semicolon"],
+                  "conditional": "fileType=CSV",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Has Header Row",
+                  "fieldId": "hasHeader",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Sheet Name",
+                  "fieldId": "sheetName",
+                  "type": "text",
+                  "conditional": "fileType=Excel",
+                  "defaultValue": "Sheet1",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Date Format",
+                  "fieldId": "dateFormat",
+                  "type": "dropdown",
+                  "options": ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"],
+                  "defaultValue": "DD/MM/YYYY",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Column Mapping",
+              "type": "mapping-grid",
+              "columns": [
+                {
+                  "field": "sourceColumn",
+                  "header": "Source Column",
+                  "type": "text",
+                  "editable": true,
+                  "width": "25%"
+                },
+                {
+                  "field": "targetField",
+                  "header": "Target Field",
+                  "type": "dropdown",
+                  "source": "remittanceFields",
+                  "editable": true,
+                  "width": "25%"
+                },
+                {
+                  "field": "dataType",
+                  "header": "Data Type",
+                  "type": "dropdown",
+                  "options": ["Text", "Number", "Date", "Decimal"],
+                  "editable": true,
+                  "width": "20%"
+                },
+                {
+                  "field": "required",
+                  "header": "Required",
+                  "type": "checkbox",
+                  "editable": true,
+                  "width": "10%"
+                },
+                {
+                  "field": "defaultValue",
+                  "header": "Default Value",
+                  "type": "text",
+                  "editable": true,
+                  "width": "15%"
+                }
+              ],
+              "toolbar": [
+                {"label": "Add Mapping", "action": "addMapping", "icon": "plus"},
+                {"label": "Auto-Map", "action": "autoMap", "icon": "magic"}
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "validation",
+          "tabLabel": "Validation Rules",
+          "sections": [
+            {
+              "sectionTitle": "File Validation",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Max File Size (MB)",
+                  "fieldId": "maxFileSize",
+                  "type": "number",
+                  "defaultValue": 50,
+                  "min": 1,
+                  "max": 500,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Max Records",
+                  "fieldId": "maxRecords",
+                  "type": "number",
+                  "defaultValue": 10000,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Allow Duplicates",
+                  "fieldId": "allowDuplicates",
+                  "type": "checkbox",
+                  "defaultValue": false,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Skip Invalid Records",
+                  "fieldId": "skipInvalid",
+                  "type": "checkbox",
+                  "defaultValue": false,
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Data Validation Rules",
+              "type": "rule-builder",
+              "fields": [
+                {
+                  "fieldName": "Validation Rules",
+                  "fieldId": "validationRules",
+                  "type": "dynamic-rules",
+                  "ruleTypes": [
+                    "Required Field",
+                    "Range Check",
+                    "Format Check",
+                    "Lookup Validation",
+                    "Custom Expression"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "processing",
+          "tabLabel": "Processing",
+          "sections": [
+            {
+              "sectionTitle": "Processing Configuration",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Processing Mode",
+                  "fieldId": "processingMode",
+                  "type": "dropdown",
+                  "options": ["Batch", "Real-time", "Scheduled"],
+                  "defaultValue": "Batch",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Batch Size",
+                  "fieldId": "batchSize",
+                  "type": "number",
+                  "defaultValue": 100,
+                  "conditional": "processingMode=Batch",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Error Handling",
+                  "fieldId": "errorHandling",
+                  "type": "dropdown",
+                  "options": ["Stop on Error", "Continue", "Rollback All"],
+                  "defaultValue": "Continue",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Auto-Approve",
+                  "fieldId": "autoApprove",
+                  "type": "checkbox",
+                  "defaultValue": false,
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "k7_schedule_master": {
+      "featureId": "K7-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Remittance Schedule Master",
+      "screenCode": "FIN_MAS_REM_007",
+      "menuPath": "Finance > Master > Remittance Master > Schedule Configuration",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "schedule",
+          "tabLabel": "Schedule Setup",
+          "sections": [
+            {
+              "sectionTitle": "Schedule Configuration",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Schedule Code",
+                  "fieldId": "scheduleCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "SCH-{0000}",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Schedule Name",
+                  "fieldId": "scheduleName",
+                  "type": "text",
+                  "required": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Active",
+                  "fieldId": "isActive",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "33%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Schedule Pattern",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Schedule Type",
+                  "fieldId": "scheduleType",
+                  "type": "dropdown",
+                  "options": ["Fixed Date", "Recurring", "Business Days", "Custom"],
+                  "required": true,
+                  "onChange": "toggleScheduleFields",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Frequency",
+                  "fieldId": "frequency",
+                  "type": "dropdown",
+                  "options": ["Daily", "Weekly", "Bi-Weekly", "Monthly", "Quarterly", "Annually"],
+                  "conditional": "scheduleType=Recurring",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Execution Day",
+                  "fieldId": "executionDay",
+                  "type": "number",
+                  "min": 1,
+                  "max": 31,
+                  "conditional": "frequency=Monthly",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Business Day Rule",
+                  "fieldId": "businessDayRule",
+                  "type": "dropdown",
+                  "options": ["Previous Business Day", "Next Business Day", "Same Day"],
+                  "conditional": "scheduleType=Business Days",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Time Configuration",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Execution Time",
+                  "fieldId": "executionTime",
+                  "type": "time",
+                  "required": true,
+                  "format": "24hr",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Time Zone",
+                  "fieldId": "timeZone",
+                  "type": "dropdown",
+                  "source": "timeZones",
+                  "defaultValue": "Local",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Cut-off Time",
+                  "fieldId": "cutoffTime",
+                  "type": "time",
+                  "format": "24hr",
+                  "helpText": "Latest time to include transactions",
+                  "width": "33%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "insurers",
+          "tabLabel": "Insurer Assignment",
+          "sections": [
+            {
+              "sectionTitle": "Insurer Selection",
+              "type": "dual-listbox",
+              "fields": [
+                {
+                  "fieldName": "Assigned Insurers",
+                  "fieldId": "assignedInsurers",
+                  "leftTitle": "Available Insurers",
+                  "rightTitle": "Scheduled Insurers",
+                  "source": "insurerMaster",
+                  "displayFields": ["code", "name", "type"],
+                  "searchable": true
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Insurer-Specific Settings",
+              "type": "editable-grid",
+              "columns": [
+                {
+                  "field": "insurerCode",
+                  "header": "Insurer Code",
+                  "width": "15%",
+                  "readonly": true
+                },
+                {
+                  "field": "insurerName",
+                  "header": "Insurer Name",
+                  "width": "25%",
+                  "readonly": true
+                },
+                {
+                  "field": "customDay",
+                  "header": "Custom Day",
+                  "type": "number",
+                  "width": "15%",
+                  "editable": true,
+                  "helpText": "Override schedule day"
+                },
+                {
+                  "field": "leadTime",
+                  "header": "Lead Time (Days)",
+                  "type": "number",
+                  "width": "15%",
+                  "editable": true
+                },
+                {
+                  "field": "priority",
+                  "header": "Priority",
+                  "type": "dropdown",
+                  "options": ["High", "Medium", "Low"],
+                  "width": "15%",
+                  "editable": true
+                },
+                {
+                  "field": "active",
+                  "header": "Active",
+                  "type": "checkbox",
+                  "width": "15%",
+                  "editable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "holidays",
+          "tabLabel": "Holiday Calendar",
+          "sections": [
+            {
+              "sectionTitle": "Holiday Configuration",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Holiday Calendar",
+                  "fieldId": "holidayCalendar",
+                  "type": "dropdown",
+                  "source": "holidayCalendars",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Skip Holidays",
+                  "fieldId": "skipHolidays",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Custom Holidays",
+              "type": "date-list",
+              "fields": [
+                {
+                  "fieldName": "Additional Holidays",
+                  "fieldId": "customHolidays",
+                  "type": "date-picker-multiple",
+                  "format": "DD/MM/YYYY"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "k8_electronic_transfer_master": {
+      "featureId": "K8-ADMIN",
+      "screenCategory": "MASTER",
+      "screenTitle": "Electronic Transfer Master",
+      "screenCode": "FIN_MAS_REM_008",
+      "menuPath": "Finance > Master > Remittance Master > Electronic Transfer Setup",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "tabs": [
+        {
+          "tabId": "bankSetup",
+          "tabLabel": "Bank Configuration",
+          "sections": [
+            {
+              "sectionTitle": "Transfer Configuration",
+              "layout": "three-column",
+              "fields": [
+                {
+                  "fieldName": "Config Code",
+                  "fieldId": "configCode",
+                  "type": "text",
+                  "required": true,
+                  "unique": true,
+                  "format": "ETM-{000}",
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Config Name",
+                  "fieldId": "configName",
+                  "type": "text",
+                  "required": true,
+                  "width": "33%"
+                },
+                {
+                  "fieldName": "Transfer Type",
+                  "fieldId": "transferType",
+                  "type": "dropdown",
+                  "options": ["Domestic", "International", "SEPA", "SWIFT"],
+                  "required": true,
+                  "width": "33%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Bank Details",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Bank Code",
+                  "fieldId": "bankCode",
+                  "type": "dropdown",
+                  "source": "bankMaster",
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Bank Name",
+                  "fieldId": "bankName",
+                  "type": "text",
+                  "readonly": true,
+                  "autoPopulate": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Account Number",
+                  "fieldId": "accountNumber",
+                  "type": "text",
+                  "required": true,
+                  "encrypted": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Account Type",
+                  "fieldId": "accountType",
+                  "type": "dropdown",
+                  "options": ["Current", "Savings", "Settlement"],
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "SWIFT Code",
+                  "fieldId": "swiftCode",
+                  "type": "text",
+                  "conditional": "transferType=International||SWIFT",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "IBAN",
+                  "fieldId": "iban",
+                  "type": "text",
+                  "conditional": "transferType=International||SEPA",
+                  "width": "50%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "transferMethods",
+          "tabLabel": "Transfer Methods",
+          "sections": [
+            {
+              "sectionTitle": "Supported Methods",
+              "layout": "checkbox-grid",
+              "fields": [
+                {
+                  "fieldName": "Available Methods",
+                  "fieldId": "availableMethods",
+                  "type": "checkbox-group",
+                  "options": [
+                    {"value": "NEFT", "label": "NEFT"},
+                    {"value": "RTGS", "label": "RTGS"},
+                    {"value": "IMPS", "label": "IMPS"},
+                    {"value": "ACH", "label": "ACH"},
+                    {"value": "Wire", "label": "Wire Transfer"},
+                    {"value": "SWIFT", "label": "SWIFT"},
+                    {"value": "SEPA", "label": "SEPA Transfer"}
+                  ],
+                  "layout": "grid",
+                  "columns": 3
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Method Limits",
+              "type": "editable-grid",
+              "columns": [
+                {
+                  "field": "method",
+                  "header": "Method",
+                  "width": "20%",
+                  "readonly": true
+                },
+                {
+                  "field": "minAmount",
+                  "header": "Min Amount",
+                  "type": "decimal",
+                  "width": "20%",
+                  "editable": true
+                },
+                {
+                  "field": "maxAmount",
+                  "header": "Max Amount",
+                  "type": "decimal",
+                  "width": "20%",
+                  "editable": true
+                },
+                {
+                  "field": "dailyLimit",
+                  "header": "Daily Limit",
+                  "type": "decimal",
+                  "width": "20%",
+                  "editable": true
+                },
+                {
+                  "field": "charges",
+                  "header": "Charges",
+                  "type": "decimal",
+                  "width": "15%",
+                  "editable": true
+                },
+                {
+                  "field": "active",
+                  "header": "Active",
+                  "type": "checkbox",
+                  "width": "5%",
+                  "editable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "fileFormats",
+          "tabLabel": "File Formats",
+          "sections": [
+            {
+              "sectionTitle": "Export Format Configuration",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "File Format",
+                  "fieldId": "fileFormat",
+                  "type": "dropdown",
+                  "options": ["ISO 20022 XML", "MT940", "MT103", "BAI2", "Custom CSV", "Fixed Width"],
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "File Encoding",
+                  "fieldId": "fileEncoding",
+                  "type": "dropdown",
+                  "options": ["UTF-8", "ASCII", "ISO-8859-1", "Windows-1252"],
+                  "defaultValue": "UTF-8",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Include Header",
+                  "fieldId": "includeHeader",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Include Footer",
+                  "fieldId": "includeFooter",
+                  "type": "checkbox",
+                  "defaultValue": true,
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "Field Mapping",
+              "type": "mapping-config",
+              "fields": [
+                {
+                  "fieldName": "Field Mappings",
+                  "fieldId": "fieldMappings",
+                  "type": "field-mapper",
+                  "sourceFields": "systemFields",
+                  "targetFormat": "selectedFileFormat"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tabId": "security",
+          "tabLabel": "Security",
+          "sections": [
+            {
+              "sectionTitle": "Authentication",
+              "layout": "two-column",
+              "fields": [
+                {
+                  "fieldName": "Authentication Type",
+                  "fieldId": "authType",
+                  "type": "dropdown",
+                  "options": ["Username/Password", "Certificate", "Token", "OAuth2"],
+                  "required": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Encryption",
+                  "fieldId": "encryption",
+                  "type": "dropdown",
+                  "options": ["None", "PGP", "AES-256", "RSA"],
+                  "defaultValue": "AES-256",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Username",
+                  "fieldId": "username",
+                  "type": "text",
+                  "conditional": "authType=Username/Password",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Password",
+                  "fieldId": "password",
+                  "type": "password",
+                  "conditional": "authType=Username/Password",
+                  "encrypted": true,
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Certificate Path",
+                  "fieldId": "certPath",
+                  "type": "file",
+                  "conditional": "authType=Certificate",
+                  "accept": ".pem,.crt,.cer",
+                  "width": "50%"
+                },
+                {
+                  "fieldName": "Private Key",
+                  "fieldId": "privateKey",
+                  "type": "file",
+                  "conditional": "authType=Certificate",
+                  "accept": ".key,.pem",
+                  "width": "50%"
+                }
+              ]
+            },
+            {
+              "sectionTitle": "IP Restrictions",
+              "fields": [
+                {
+                  "fieldName": "Allowed IPs",
+                  "fieldId": "allowedIPs",
+                  "type": "tag-input",
+                  "placeholder": "Enter IP addresses",
+                  "validation": "ipAddress",
+                  "multiple": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "remittance_setups_k5_k8": {
+    "reconciliation_gl_setup": {
+      "featureId": "K5-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Reconciliation GL Setup",
+      "screenCode": "FIN_SET_REM_005",
+      "menuPath": "Finance > Setups > Remittance Setup > Reconciliation GL Setup",
+      "accessRoles": ["ADMIN", "FINANCE_MANAGER"],
+      "sections": [
+        {
+          "sectionTitle": "Reconciliation GL Accounts",
+          "layout": "two-column",
+          "fields": [
+            {
+              "fieldName": "Remittance Control Account",
+              "fieldId": "remittanceControlAcc",
+              "type": "text",
+              "required": true,
+              "lookupButton": true,
+              "lookupScreen": "glAccountMaster",
+              "width": "50%"
+            },
+            {
+              "fieldName": "Bank Clearing Account",
+              "fieldId": "bankClearingAcc",
+              "type": "text",
+              "required": true,
+              "lookupButton": true,
+              "width": "50%"
+            },
+            {
+              "fieldName": "Suspense Account",
+              "fieldId": "suspenseAcc",
+              "type": "text",
+              "required": true,
+              "lookupButton": true,
+              "width": "50%"
+            },
+            {
+              "fieldName": "Difference Account",
+              "fieldId": "differenceAcc",
+              "type": "text",
+              "required": true,
+              "lookupButton": true,
+              "width": "50%"
+            }
+          ]
+        }
+      ]
+    },
+    "bulk_processing_limits": {
+      "featureId": "K6-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Bulk Processing Limits",
+      "screenCode": "FIN_SET_REM_006",
+      "menuPath": "Finance > Setups > Remittance Setup > Bulk Processing Limits",
+      "accessRoles": ["ADMIN"],
+      "gridSection": {
+        "title": "Processing Limits by User Role",
+        "editable": true,
+        "columns": [
+          {
+            "field": "userRole",
+            "header": "User Role",
+            "type": "dropdown",
+            "source": "userRoles",
+            "width": "25%",
+            "editable": true
+          },
+          {
+            "field": "maxFileSize",
+            "header": "Max File Size (MB)",
+            "type": "number",
+            "width": "25%",
+            "editable": true
+          },
+          {
+            "field": "maxRecords",
+            "header": "Max Records",
+            "type": "number",
+            "width": "25%",
+            "editable": true
+          },
+          {
+            "field": "requiresApproval",
+            "header": "Requires Approval",
+            "type": "checkbox",
+            "width": "25%",
+            "editable": true
+          }
+        ]
+      }
+    },
+    "electronic_transfer_limits": {
+      "featureId": "K8-SETUP",
+      "screenCategory": "SETUP",
+      "screenTitle": "Electronic Transfer Limits",
+      "screenCode": "FIN_SET_REM_008",
+      "menuPath": "Finance > Setups > Remittance Setup > Electronic Transfer Limits",
+      "accessRoles": ["ADMIN"],
+      "sections": [
+        {
+          "sectionTitle": "Daily Transfer Limits",
+          "type": "editable-grid",
+          "columns": [
+            {
+              "field": "transferMethod",
+              "header": "Transfer Method",
+              "width": "20%",
+              "readonly": true
+            },
+            {
+              "field": "userLimit",
+              "header": "User Limit",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "supervisorLimit",
+              "header": "Supervisor Limit",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "managerLimit",
+              "header": "Manager Limit",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            },
+            {
+              "field": "cfoLimit",
+              "header": "CFO Limit",
+              "type": "decimal",
+              "width": "20%",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

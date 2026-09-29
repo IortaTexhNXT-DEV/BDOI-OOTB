@@ -1,0 +1,166 @@
+.signtoriesaction__cover_container {
+  .main__account__title {
+    color: #111927;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    font-family: 'Inter', sans-serif;
+    // margin-bottom: 30px;
+  }
+  .breadCrums__view__reversal {
+    border: none;
+    padding: 1px 0;
+    margin: 20px 0px;
+  }
+
+  .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+  }
+  .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
+    color: #b1b1b1 !important;
+  }
+  .card__container {
+    background: #fff;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08));
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 20px;
+  }
+  .select__label__corrections__inactive {
+    color: #b1b1b1 !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: normal !important;
+  }
+  .svgback_container {
+    gap: 8px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+  }
+  .input__label__corrections {
+    color: #111927 !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: normal !important;
+  }
+  .select__label__corrections {
+    color: #111927 !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: normal !important;
+  }
+  .input__field__corrections {
+    color: #111927;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 100%;
+    .p-dropdown-label {
+      color: #111927;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+    }
+  }
+  .input__field__corrections__inactive {
+    color: #b1b1b1;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 100%;
+    .p-component:disabled {
+      opacity: 1 !important;
+    }
+  }
+  .select__switch__option {
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    overflow: hidden;
+    .p-button {
+      width: 50%;
+      border: none;
+      span {
+        color: #111927;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px !important;
+        font-style: normal;
+        font-weight: 400 !important;
+        line-height: normal;
+      }
+    }
+    .p-highlight {
+      border-radius: 10px;
+      span {
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px !important;
+        font-style: normal;
+        font-weight: 400 !important;
+        line-height: normal;
+      }
+    }
+  }
+  .save__action {
+    color: #fff;
+    background-color: #6366f1;
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+  }
+  // @media only screen and (min-width: 768px) and (max-width: 991px) {
+  //   .main__account__title {
+  //     font-size: 26px;
+  //   }
+  //   .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+  //     font-size: 12px;
+  //   }
+  //   .input__label__corrections {
+  //     font-size: 12px !important;
+  //   }
+  //   .select__label__corrections {
+  //     font-size: 12px !important;
+  //   }
+  //   .input__field__corrections {
+  //     font-size: 10px;
+
+  //     .p-dropdown-label {
+  //       font-size: 10px;
+  //     }
+  //   }
+  //   .input__field__corrections__inactive {
+  //     font-size: 12px;
+  //   }
+  //   .save__action {
+  //     font-size: 16px;
+  //   }
+  // }
+
+  // @media only screen and (min-width: 992px) and (max-width: 1440px) {
+  //   .main__account__title {
+  //     font-size: 28px;
+  //   }
+  //   .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
+  //     font-size: 14px;
+  //   }
+  //   .save__action {
+  //     font-size: 16px;
+  //   }
+  // }
+}

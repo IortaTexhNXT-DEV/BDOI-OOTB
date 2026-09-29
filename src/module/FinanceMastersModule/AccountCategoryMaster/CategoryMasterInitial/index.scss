@@ -1,0 +1,108 @@
+.overall_category_master_initial_container {
+  .label_header {
+    color: #111927;
+    font-family: 'Inter', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+  }
+  .p-paginator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end !important;
+    flex-wrap: wrap;
+  }
+
+  .addtext {
+    color: #fff;
+
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .dropdown__container {
+    width: 100%;
+    height: 44px;
+    border-radius: 11px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    margin: 10px 0px;
+  }
+
+  .breadcrumbs_container {
+    // margin-bottom: 60px;
+
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #fff !important;
+    border-radius: 6px !important;
+    padding: 2rem 0rem !important;
+  }
+  .addbutton_container {
+    background-color: #6366f1;
+    border-radius: 60px;
+    width: 100px !important;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+  }
+  .filterbutton_container {
+    display: flex;
+
+    align-items: center;
+    margin: 16px 0px;
+    gap: 20px;
+  }
+  .overallfilter_container {
+    display: flex;
+    align-items: self-start;
+    justify-content: space-between;
+  }
+  .overallcard_container {
+    width: 1236px;
+    height: 700px;
+  }
+  .searchinput_left {
+    width: 100%;
+    border-radius: 8px;
+  }
+  .searchiput_container {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .sorbyfilter_container {
+    flex-direction: row-reverse;
+
+    height: 46px;
+    border-color: #d1d5db;
+    width: 85%;
+    margin-left: 8px;
+  }
+  .pagedropdown_container {
+    margin-right: 30%;
+    border-style: hidden;
+    background-color: #fafafa;
+  }
+  .header_search_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .fieldvalue_container {
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+  }
+  .branch_text {
+    color: #111927;
+    font-family: Inter;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+}

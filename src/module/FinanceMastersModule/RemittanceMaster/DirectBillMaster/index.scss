@@ -1,0 +1,123 @@
+.direct-bill-master {
+  padding: 1rem;
+
+  .header-section {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  }
+
+  .form-section {
+    h3 {
+      color: #34495e;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+  }
+
+  .insurer-setup-section {
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .insurer-grid {
+      .p-datatable-thead > tr > th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .gl-mapping-section {
+    h3 {
+      color: #34495e;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .p-inputgroup {
+      .p-button {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        color: #495057;
+
+        &:hover {
+          background-color: #e9ecef;
+        }
+      }
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .p-tabview {
+    .p-tabview-nav {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #e0e0e0;
+
+      .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+
+        &:not(.p-disabled):not(.p-highlight):hover {
+          background: #f8f9fa;
+          color: #495057;
+        }
+      }
+
+      .p-highlight .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #007bff;
+        color: #007bff;
+      }
+    }
+
+    .p-tabview-panels {
+      background: transparent;
+      padding: 1.5rem 0;
+    }
+  }
+}

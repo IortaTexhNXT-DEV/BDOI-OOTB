@@ -1,0 +1,72 @@
+.paymentapproval__status__container {
+  .p-card {
+    background: #ffffff;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: #fff !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    .p-card-body {
+      padding: 24px;
+    }
+  }
+  .claim__request__upload__main__title {
+    color: #111927;
+    font-family: Poppins;
+    font-size: 34px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+  .claim__request__upload__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .claim__request__upload__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .paymentapproval__status__main__content__text {
+    color: #111927;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-top: 24px;
+  }
+
+  .back__next__btn__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+  .next__btn__container {
+    .p-button {
+      color: #ffffff;
+      background: #6366f1;
+      border: 1px solid #6366f1;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: Poppins;
+      line-height: 24px;
+      color: #ffffff;
+    }
+  }
+  .overall__container {
+    height: 60vh;
+    align-items: flex-end;
+    justify-content: center;
+  }
+}

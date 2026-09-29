@@ -1,0 +1,1 @@
+export { CessionDashboard as default } from '../ReinsuranceScreens';

@@ -1,0 +1,611 @@
+.collection-detail-container {
+  padding: 20px;
+
+  .detail-header {
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 10px 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+  }
+
+  .info-card,
+  .financial-card,
+  .aging-card,
+  .actions-card,
+  .history-card {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .p-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #007ad9;
+    }
+
+    // Ensure tooltips stay within card boundaries
+    &.history-card {
+      .p-tooltip {
+        max-width: calc(100% - 40px);
+
+        .p-tooltip-text {
+          max-width: calc(100% - 20px);
+        }
+      }
+    }
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+
+      label {
+        font-weight: 600;
+        color: #7f8c8d;
+        font-size: 13px;
+      }
+
+      span {
+        font-size: 15px;
+        color: #2c3e50;
+      }
+
+      .highlight-danger {
+        color: #e74c3c;
+        font-weight: 600;
+      }
+
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        display: inline-block;
+        width: fit-content;
+
+        &.status-pending {
+          background-color: #e3f2fd;
+          color: #1976d2;
+        }
+
+        &.status-current {
+          background-color: #e8f5e9;
+          color: #388e3c;
+        }
+
+        &.status-overdue {
+          background-color: #ffebee;
+          color: #d32f2f;
+        }
+
+        &.status-partiallypaid {
+          background-color: #fff3e0;
+          color: #f57c00;
+        }
+
+        &.status-committed {
+          background-color: #f3e5f5;
+          color: #7b1fa2;
+        }
+
+        &.status-escalated {
+          background-color: #ffccbc;
+          color: #bf360c;
+        }
+      }
+
+      .level-badge {
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        width: fit-content;
+
+        &.level-1 {
+          background-color: #fff9c4;
+          color: #f57f17;
+        }
+
+        &.level-2 {
+          background-color: #ffe0b2;
+          color: #ef6c00;
+        }
+
+        &.level-3 {
+          background-color: #ffcdd2;
+          color: #c62828;
+        }
+      }
+    }
+  }
+
+  .financial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+
+    .financial-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      min-height: 60px;
+      justify-content: center;
+
+      label {
+        font-weight: 500;
+        color: #7f8c8d;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      span {
+        padding-top: 5px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.2;
+      }
+
+      &.total {
+        background-color: #e3f2fd;
+        border: 2px solid #1976d2;
+
+        span {
+          color: #1976d2;
+          font-size: 16px;
+        }
+      }
+
+      &.paid {
+        background-color: #e8f5e9;
+
+        span {
+          color: #388e3c;
+        }
+      }
+
+      &.outstanding {
+        background-color: #ffebee;
+        border: 2px solid #d32f2f;
+
+        span {
+          color: #d32f2f;
+          font-size: 16px;
+          font-weight: 700;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+      }
+    }
+  }
+
+  .aging-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+
+    .aging-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      border-left: 4px solid #3498db;
+
+      label {
+        font-weight: 500;
+        color: #7f8c8d;
+        font-size: 13px;
+      }
+
+      span {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 16px;
+      }
+
+      &.danger {
+        background-color: #ffebee;
+        border-left-color: #e74c3c;
+
+        span {
+          color: #e74c3c;
+        }
+      }
+    }
+  }
+
+  .action-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .follow-up-table,
+  .payment-table {
+    margin-top: 10px;
+
+    // Custom scrollbar styling
+    .p-datatable-scrollable-body {
+      &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+
+        &:hover {
+          background: #a8a8a8;
+        }
+      }
+    }
+
+    // Notes cell styling
+    .notes-cell {
+      cursor: pointer;
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #007ad9;
+        text-decoration: underline;
+      }
+    }
+
+    // Professional table cell styling
+    .p-datatable-tbody > tr > td {
+      padding: 14px 12px;
+      vertical-align: top;
+      border-bottom: 1px solid #e9ecef;
+      transition: background-color 0.2s ease;
+    }
+
+    // Professional header styling
+    .p-datatable-thead > tr > th {
+      padding: 16px 12px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-bottom: 2px solid #007ad9;
+      color: #2c3e50;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    // Enhanced row hover effect
+    .p-datatable-tbody > tr {
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba(0, 122, 217, 0.05);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    // Professional table container
+    .p-datatable-wrapper {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e9ecef;
+    }
+  }
+
+  // Professional Tooltip customization - compact width
+  .p-tooltip {
+    .p-tooltip-text {
+      max-width: 250px;
+      min-width: 150px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 10px 12px;
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: #ffffff;
+      border-radius: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+
+    // Responsive width constraints
+    @media (max-width: 768px) {
+      .p-tooltip-text {
+        max-width: 200px;
+        min-width: 120px;
+        font-size: 11px;
+        padding: 8px 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .p-tooltip-text {
+        max-width: 180px;
+        min-width: 100px;
+        font-size: 10px;
+        padding: 6px 8px;
+      }
+    }
+
+    .p-tooltip-arrow {
+      border-color: #2c3e50 transparent transparent transparent;
+      border-width: 6px 6px 0 6px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    // Enhanced positioning and animation
+    &.p-tooltip-top .p-tooltip-arrow {
+      border-color: transparent transparent #2c3e50 transparent;
+      border-width: 0 6px 6px 6px;
+    }
+
+    &.p-tooltip-bottom .p-tooltip-arrow {
+      border-color: #2c3e50 transparent transparent transparent;
+      border-width: 6px 6px 0 6px;
+    }
+
+    &.p-tooltip-left .p-tooltip-arrow {
+      border-color: transparent #2c3e50 transparent transparent;
+      border-width: 6px 6px 6px 0;
+    }
+
+    &.p-tooltip-right .p-tooltip-arrow {
+      border-color: transparent transparent transparent #2c3e50;
+      border-width: 6px 0 6px 6px;
+    }
+  }
+
+  // Notes cell enhanced styling
+  .notes-cell {
+    cursor: pointer;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+    position: relative;
+
+    &:hover {
+      color: #007ad9;
+      background-color: rgba(0, 122, 217, 0.08);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 122, 217, 0.2);
+    }
+
+    // Add a subtle indicator that content is truncated
+    &:after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 122, 217, 0.1)
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover:after {
+      opacity: 1;
+    }
+  }
+
+  .co-insurance-collection-section {
+    .p-card-body {
+      padding-top: 16px;
+    }
+
+    .co-insurance-collection-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .co-insurance-collection-section__title {
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  }
+
+  .co-insurance-policy-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .co-insurance-collection-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: none;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+      line-height: 20px;
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    th {
+      color: #9ca3af;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    td {
+      color: #111927;
+      font-weight: 400;
+    }
+
+    .insurer-cell {
+      font-weight: 600;
+    }
+
+    .numeric {
+      text-align: right;
+    }
+
+    .paid {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .outstanding {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 18%;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 14%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 10%;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 15%;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+      width: 14%;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+      width: 15%;
+    }
+
+    th:nth-child(7),
+    td:nth-child(7) {
+      width: 14%;
+    }
+
+    .total-row td {
+      font-weight: 700;
+      border-bottom: none;
+    }
+  }
+
+  .role-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    white-space: nowrap;
+  }
+
+  .role-pill--lead {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .role-pill--co {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .status-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  .status-text--active {
+    color: #16a34a;
+  }
+
+  .co-insurance-collection-note {
+    margin-top: 12px;
+    color: #3b82f6;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 18px;
+  }
+}

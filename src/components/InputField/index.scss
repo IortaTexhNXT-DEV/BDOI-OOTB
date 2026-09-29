@@ -1,0 +1,114 @@
+@import "../../Color.scss";
+.input__block {
+  .label__block {
+    height: 40px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .label__title {
+    font-family: Poppins;
+    color: $black;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .input__field {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: $white;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem !important;
+  }
+  .p-inputtext {
+    font-family: var(--font-family);
+    font-feature-settings: var(--font-feature-settings, normal);
+    font-size: 1rem;
+    color: #4b5563;
+    background: #ffffff;
+    padding: 0.75rem 0.75rem;
+    border: 1px solid #d1d5db;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    border-radius: 6px;
+    margin-top: 0.5rem !important;
+    width:100%
+}
+
+  .input__field__dark__curved {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: $silver;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .input__field.p-inputtext::placeholder {
+    color: $grey;
+    font-family: Poppins;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .input__field__login {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: $white;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .input__field__login__dark {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: $silver;
+    border: none;
+    border-radius: 20px;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .input__field__login.p-inputtext::placeholder {
+    color: $sky-Blue;
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-size: 15px !important;
+    line-height: 22.5px !important;
+  }
+  .input__field__dark__box {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background-color: $silver;
+    border: none;
+    border-radius: 0px;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  @layer primereact {
+    .p-inputtext:enabled:focus {
+      outline: 0 none;
+      outline-offset: 0;
+      box-shadow: 0 0 0 0rem $pale-Blue;
+      border-color: $royal-Blue;
+    }
+  }
+  .required__label {
+    color: $red;
+  }
+  .formik__error {
+    color: red;
+    font-size: 10px;
+    display: flex;
+    justify-content: flex-start;
+    margin-left: 12px;
+    margin-top: 5px;
+  }
+}

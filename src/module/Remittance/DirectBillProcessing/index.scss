@@ -1,0 +1,253 @@
+.direct-bill-processing {
+  padding: 1rem;
+
+  .header-section {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      color: #2c3e50;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  }
+
+  .header-card {
+    .grid {
+      align-items: flex-end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .value-field {
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border-radius: 4px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .progress-container {
+    position: relative;
+    padding: 0 1rem;
+
+    .step-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+
+      span {
+        font-size: 0.85rem;
+        color: #999;
+        transition: color 0.3s;
+
+        &.active {
+          color: #007bff;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .filter-section {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+  }
+
+  .policy-grid, .insured-bills-grid, .overdue-grid {
+    .p-datatable-thead > tr > th {
+      background-color: #f8f9fa;
+      color: #495057;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .p-datatable-tbody > tr:hover {
+      background-color: #f0f7ff;
+    }
+  }
+
+  .selection-summary {
+    text-align: right;
+    padding: 1rem;
+    background: #e8f5e9;
+    border-radius: 4px;
+
+    .p-tag {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+    }
+  }
+
+  .summary-cards {
+    .summary-card {
+      text-align: center;
+      padding: 1rem;
+
+      .card-title {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+      }
+
+      .card-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      &.highlight {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+
+        .card-title, .card-value {
+          color: white;
+        }
+      }
+    }
+  }
+
+  .late-charge-section {
+    h3 {
+      color: #34495e;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 1.5rem 0 1rem;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .no-late-charges {
+      padding: 2rem;
+      text-align: center;
+      background: #f8f9fa;
+      border-radius: 8px;
+      color: #666;
+      font-size: 1rem;
+      margin-top: 2rem;
+
+      i {
+        color: #17a2b8;
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .generation-options {
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .final-summary {
+      margin-top: 2rem;
+      background: #f8f9fa;
+
+      h3 {
+        color: #34495e;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .summary-table {
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.75rem 0;
+          font-size: 0.95rem;
+
+          &.total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #007bff;
+          }
+        }
+
+        .divider {
+          border-top: 1px solid #dee2e6;
+          margin: 0.5rem 0;
+        }
+      }
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .p-tabview {
+    .p-tabview-nav {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #e0e0e0;
+
+      .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+
+        &:not(.p-disabled):not(.p-highlight):hover {
+          background: #f8f9fa;
+          color: #495057;
+        }
+      }
+
+      .p-highlight .p-tabview-nav-link {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #007bff;
+        color: #007bff;
+      }
+    }
+
+    .p-tabview-panels {
+      background: transparent;
+      padding: 1.5rem 0;
+    }
+  }
+}
