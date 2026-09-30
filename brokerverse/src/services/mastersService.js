@@ -16,8 +16,16 @@ const headers = () => ({
 
 /** "Validation failed: Code is required, ..." from an API error body. */
 export const apiErrorMessage = (json = {}, status) => {
-  const details = Array.isArray(json.errors) ? json.errors.map((e) => e.message || e).join(", ") : "";
   const message = json.message || `Request failed (${status})`;
+  // A field message the summary already states (e.g. "Password must contain a digit") is not repeated after it
+  const lower = message.toLowerCase();
+  const details = (Array.isArray(json.errors) ? json.errors.map((e) => String(e.message || e)) : [])
+    .filter((d) => {
+      const text = d.toLowerCase();
+      const tail = text.split(" ").slice(2).join(" ");
+      return !lower.includes(text) && !(tail.length > 8 && lower.includes(tail));
+    })
+    .join(", ");
   return details ? `${message}: ${details}` : message;
 };
 
