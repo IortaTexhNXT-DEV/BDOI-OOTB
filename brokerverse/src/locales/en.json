@@ -825,7 +825,7 @@
     "riskScore": "Risk Score",
     "createActionPlan": "Create Action Plan",
     "saveActionPlan": "Save Action Plan",
-    "recommendedActions": "Recommended Actions",
+    "recommendedActions": "Recommended actions",
     "immediateActionsRequired": "Immediate Actions Required",
     "currentActionPlan": "Current Action Plan",
     "actionPlanDetails": "Action Plan Details",
@@ -952,7 +952,25 @@
     "chooseNegotiation": "Select a renewal from the list to see its timeline, details and communications.",
     "addNote": "Add note",
     "requestApproval": "Request approval",
-    "negotiations": "Negotiations"
+    "negotiations": "Negotiations",
+    "shareOfOpen": "{{pct}}% of open renewals",
+    "noRecommendedActions": "No action stands out in this period.",
+    "indicatorAtRisk": "High or critical retention risk",
+    "indicatorClaims": "Claims on the expiring term",
+    "indicatorUnpaid": "Unpaid premium",
+    "indicatorNoContact": "No notice or contact yet",
+    "actionLineTitle": "Review {{line}} renewals",
+    "actionLineText": "Renewal rate {{rate}} against {{overall}} overall.",
+    "actionSalesTitle": "Support {{name}}",
+    "actionSalesText": "Renewal rate {{rate}} against {{overall}} overall.",
+    "actionUnpaidTitle": "Collect unpaid premium before renewal",
+    "actionUnpaidText": "{{count}} open renewal(s) still have premium outstanding on the expiring term.",
+    "actionContactTitle": "Contact clients not yet reached",
+    "actionContactText": "{{count}} open renewal(s) have had no notice or contact.",
+    "notMeasured": "Not measured",
+    "targetMet": "Target met",
+    "ofTarget": "{{pct}}% of target",
+    "currentPeriod": "Current period"
   },
   "pettyCash": {
     "accounts": "Accounts",
@@ -7917,5 +7935,26 @@
       "renewed": "Renewed",
       "closed": "Lapsed"
     }
+  },
+  "renewalTerm": {
+    "title": "Renewal",
+    "loading": "Loading the policy...",
+    "expiringTerm": "Expiring term",
+    "renewalTerm": "Renewal term",
+    "policyNumber": "Policy number",
+    "client": "Client",
+    "product": "Product",
+    "insurer": "Insurer",
+    "currentTerm": "Current term",
+    "currentSumInsured": "Sum insured",
+    "currentNetPremium": "Net premium",
+    "currentGrossPremium": "Gross premium",
+    "sumInsured": "Sum insured of the renewal term",
+    "netPremium": "Net premium of the renewal term",
+    "taxesNote": "Documentary stamp tax, VAT or premium tax and local government tax are added on the order summary at the rates of the line.",
+    "sumInsuredRequired": "Enter the sum insured",
+    "netPremiumRequired": "Enter the net premium",
+    "back": "Back",
+    "next": "Next"
   }
 }

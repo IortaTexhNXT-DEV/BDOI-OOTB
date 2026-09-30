@@ -14,7 +14,6 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
 import { Knob } from "primereact/knob";
-import { Badge } from "primereact/badge";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
@@ -34,6 +33,7 @@ const RetentionAnalytics = () => {
   const [chartOptions, setChartOptions] = useState({});
   const [analyticsData, setAnalyticsData] = useState({});
   const [riskCounts, setRiskCounts] = useState({});
+  const [queueItems, setQueueItems] = useState([]);
   const toast = useRef(null);
 
   const timeFilterOptions = [
@@ -80,6 +80,7 @@ const RetentionAnalytics = () => {
         renewalsWorkspaceService.getQueue()
       ]);
       setAnalyticsData(performance);
+      setQueueItems(queue.items || []);
       setRiskCounts(queue.items.reduce((counts, item) => ({ ...counts, [item.retentionRisk]: (counts[item.retentionRisk] || 0) + 1 }), {}));
     } catch (error) {
       toast.current.show({
@@ -111,7 +112,7 @@ const RetentionAnalytics = () => {
           backgroundColor: `${primaryColor}20`,
           borderColor: primaryColor,
           borderWidth: 2,
-          tension: 0.4
+          tension: 0
         }
       ]
     };
@@ -255,6 +256,39 @@ const RetentionAnalytics = () => {
   };
 
   const formatPercentage = (value, decimals = 1) => formatPercent(value ?? 0, { decimals });
+
+  // indicators of the open renewals (Renewal Queue), as counts and shares of the open renewals
+  const openCount = queueItems.length;
+  const share = (n) => (openCount ? Math.round((n / openCount) * 100) : 0);
+  const indicator = (key, label, count) => ({ key, label, count, pct: share(count) });
+  const riskIndicators = [
+    indicator("risk", t("renewal.indicatorAtRisk"), queueItems.filter((i) => ["High", "Critical"].includes(i.retentionRisk)).length),
+    indicator("claims", t("renewal.indicatorClaims"), queueItems.filter((i) => Number(i.claimsHistory?.totalClaims) > 0).length),
+    indicator("unpaid", t("renewal.indicatorUnpaid"), queueItems.filter((i) => Number(i.outstandingPremium) > 0).length),
+    indicator("contact", t("renewal.indicatorNoContact"), queueItems.filter((i) => !i.contactAttempts && !i.noticeStage).length),
+  ];
+
+  // actions drawn from the figures on this page: the weakest line and sales person, unpaid and uncontacted renewals
+  const recommendedActions = (() => {
+    const out = [];
+    const overall = Number(analyticsData.overall?.renewalRate) || 0;
+    const lines = productKeys.map((k) => ({ k, ...analyticsData.byProduct[k] })).filter((l) => (l.renewed || 0) + (l.lapsed || 0) > 0);
+    const weakLine = lines.sort((x, y) => x.renewalRate - y.renewalRate)[0];
+    if (weakLine && weakLine.renewalRate < overall) {
+      out.push({ key: "line", title: t("renewal.actionLineTitle", { line: productLabel(weakLine.k) }), text: t("renewal.actionLineText", { rate: formatPercentage(weakLine.renewalRate), overall: formatPercentage(overall) }) });
+    }
+    const people = (analyticsData.byAgent || []).filter((a) => a.agentName && (a.policiesRenewed || 0) > 0);
+    const weakPerson = [...people].sort((x, y) => x.renewalRate - y.renewalRate)[0];
+    if (people.length > 1 && weakPerson && weakPerson.renewalRate < overall) {
+      out.push({ key: "sales", title: t("renewal.actionSalesTitle", { name: weakPerson.agentName }), text: t("renewal.actionSalesText", { rate: formatPercentage(weakPerson.renewalRate), overall: formatPercentage(overall) }) });
+    }
+    const unpaid = riskIndicators.find((i) => i.key === "unpaid").count;
+    if (unpaid) out.push({ key: "unpaid", title: t("renewal.actionUnpaidTitle"), text: t("renewal.actionUnpaidText", { count: unpaid }) });
+    const noContact = riskIndicators.find((i) => i.key === "contact").count;
+    if (noContact) out.push({ key: "contact", title: t("renewal.actionContactTitle"), text: t("renewal.actionContactText", { count: noContact }) });
+    return out;
+  })();
+
 
 
   const agentRankingTemplate = (rowData) => {
@@ -444,7 +478,7 @@ const RetentionAnalytics = () => {
               </div>
               <div className="kpi-info">
                 <span className="kpi-label">Customer Satisfaction</span>
-                <span className="kpi-value">{analyticsData.overall?.customerSatisfaction ?? '-'}/5.0</span>
+                <span className="kpi-value">{analyticsData.overall?.customerSatisfaction == null ? t("renewal.notMeasured") : `${analyticsData.overall.customerSatisfaction} / 5`}</span>
                 <span className="kpi-change">{analyticsData.overall?.customerSatisfaction == null ? "No survey data captured" : "Client survey average"}</span>
               </div>
             </div>
@@ -459,7 +493,7 @@ const RetentionAnalytics = () => {
                 <Card className="chart-card">
                   <div className="chart-header">
                     <h3>Renewal Rate Trend</h3>
-                    <Badge value="12 months" severity="info" />
+                    <span className="chart-caption">12 months</span>
                   </div>
                   <div className="chart-container">
                     <Chart
@@ -478,7 +512,7 @@ const RetentionAnalytics = () => {
                 <Card className="chart-card">
                   <div className="chart-header">
                     <h3>Renewal Rate by Product</h3>
-                    <Badge value="Current period" severity="info" />
+                    <span className="chart-caption">Current period</span>
                   </div>
                   <div className="chart-container">
                     <Chart
@@ -517,7 +551,7 @@ const RetentionAnalytics = () => {
                 <Card className="chart-card">
                   <div className="chart-header">
                     <h3>Sales Performance Comparison</h3>
-                    <Badge value="Dual axis" severity="info" />
+                    <span className="chart-caption">Dual axis</span>
                   </div>
                   <div className="chart-container">
                     <Chart
@@ -577,7 +611,7 @@ const RetentionAnalytics = () => {
                 <Card className="chart-card">
                   <div className="chart-header">
                     <h3>Risk Distribution</h3>
-                    <Badge value="Current portfolio" severity="info" />
+                    <span className="chart-caption">Current portfolio</span>
                   </div>
                   <div className="chart-container">
                     <Chart
@@ -594,41 +628,16 @@ const RetentionAnalytics = () => {
                     <h3>Risk Indicators</h3>
                   </div>
                   <div className="risk-indicators">
-                    <div className="risk-indicator">
-                      <div className="indicator-header">
-                        <span>Policies at Risk</span>
-                        <Badge value="24" severity="danger" />
+                    {riskIndicators.map((ind) => (
+                      <div className="risk-indicator" key={ind.key}>
+                        <div className="indicator-header">
+                          <span>{ind.label}</span>
+                          <strong>{ind.count}</strong>
+                        </div>
+                        <ProgressBar value={ind.pct} showValue={false} className="risk-bar" />
+                        <span className="indicator-text">{t("renewal.shareOfOpen", { pct: ind.pct })}</span>
                       </div>
-                      <ProgressBar value={15} className="risk-bar danger" />
-                      <span className="indicator-text">15% of total portfolio</span>
-                    </div>
-
-                    <div className="risk-indicator">
-                      <div className="indicator-header">
-                        <span>High Claims Ratio</span>
-                        <Badge value="8" severity="warning" />
-                      </div>
-                      <ProgressBar value={5} className="risk-bar warning" />
-                      <span className="indicator-text">5% of total portfolio</span>
-                    </div>
-
-                    <div className="risk-indicator">
-                      <div className="indicator-header">
-                        <span>Payment Issues</span>
-                        <Badge value="12" severity="info" />
-                      </div>
-                      <ProgressBar value={8} className="risk-bar info" />
-                      <span className="indicator-text">8% of total portfolio</span>
-                    </div>
-
-                    <div className="risk-indicator">
-                      <div className="indicator-header">
-                        <span>Competitor Activity</span>
-                        <Badge value="6" severity="secondary" />
-                      </div>
-                      <ProgressBar value={4} className="risk-bar secondary" />
-                      <span className="indicator-text">4% of total portfolio</span>
-                    </div>
+                    ))}
                   </div>
                 </Card>
               </div>
@@ -640,43 +649,20 @@ const RetentionAnalytics = () => {
         <div className="action-section">
           <Card>
             <div className="action-header">
-              <h3>Recommended Actions</h3>
-              <Badge value="Priority" severity="danger" />
+              <h3>{t("renewal.recommendedActions")}</h3>
             </div>
-            <div className="action-items">
-              <div className="action-item high">
-                <div className="action-content">
-                  <i className="pi pi-exclamation-triangle"></i>
-                  <div className="action-text">
-                    <h4>Focus on Marine Insurance Renewals</h4>
-                    <p>Marine insurance has the lowest renewal rate at 75%. Consider targeted retention campaigns.</p>
-                  </div>
-                </div>
-                <Button label="Take Action" className="p-button-danger p-button-sm" />
-              </div>
-
-              <div className="action-item medium">
-                <div className="action-content">
-                  <i className="pi pi-clock"></i>
-                  <div className="action-text">
-                    <h4>Reduce Cycle Time</h4>
-                    <p>Average cycle time increased by 1.2 days. Review and optimize renewal processes.</p>
-                  </div>
-                </div>
-                <Button label="Take Action" className="p-button-warning p-button-sm" />
-              </div>
-
-              <div className="action-item low">
-                <div className="action-content">
-                  <i className="pi pi-users"></i>
-                  <div className="action-text">
-                    <h4>Sales Training Opportunity</h4>
-                    <p>Carlos Mendoza's performance is below average. Consider additional training or support.</p>
-                  </div>
-                </div>
-                <Button label="Take Action" className="p-button-info p-button-sm" />
-              </div>
-            </div>
+            {recommendedActions.length === 0 ? (
+              <p className="text-color-secondary m-0">{t("renewal.noRecommendedActions")}</p>
+            ) : (
+              <ul className="action-list">
+                {recommendedActions.map((a) => (
+                  <li key={a.key}>
+                    <strong>{a.title}</strong>
+                    <span>{a.text}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </div>
       </div>

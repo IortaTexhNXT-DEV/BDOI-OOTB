@@ -12,7 +12,6 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { TabView, TabPanel } from "primereact/tabview";
 import { ProgressBar } from "primereact/progressbar";
-import { Badge } from "primereact/badge";
 import { Knob } from "primereact/knob";
 import { Avatar } from "primereact/avatar";
 import { Calendar } from "primereact/calendar";
@@ -32,6 +31,8 @@ const PerformanceTracking = () => {
   const [productFilter, setProductFilter] = useState('All Products');
   const [dateRange, setDateRange] = useState([null, null]);
   const [performanceData, setPerformanceData] = useState({});
+  // KPI targets from the renewal settings
+  const [targets, setTargets] = useState({});
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
   const toast = useRef(null);
@@ -65,6 +66,10 @@ const PerformanceTracking = () => {
   ];
 
   const home = { icon: <SvgDot />, url: "#" };
+
+  useEffect(() => {
+    renewalsWorkspaceService.getSettings("renewals").then(setTargets).catch(() => setTargets({}));
+  }, []);
 
   useEffect(() => {
     loadPerformanceData();
@@ -105,7 +110,7 @@ const PerformanceTracking = () => {
           data: performanceData.trends?.monthly?.map(item => item.rate) || [],
           borderColor: primaryColor,
           backgroundColor: `${primaryColor}20`,
-          tension: 0.4,
+          tension: 0,
           fill: true
         }
       ]
@@ -319,26 +324,26 @@ const PerformanceTracking = () => {
   const kpiData = [
     {
       category: 'Renewal Rate',
-      target: 85,
+      target: Number(targets["renewals.target_renewal_rate"] ?? 85),
       achieved: performanceData.overall?.renewalRate ?? 0,
       unit: '%'
     },
     {
       category: 'Premium Retention',
-      target: 90,
+      target: Number(targets["renewals.target_premium_retention"] ?? 90),
       achieved: performanceData.overall?.premiumRetention ?? 0,
       unit: '%'
     },
     {
       category: 'Cycle Time',
-      target: 15,
+      target: Number(targets["renewals.target_cycle_days"] ?? 15),
       achieved: performanceData.overall?.avgCycleTime ?? 0,
       unit: 'days',
       inverse: true // Lower is better
     },
     {
       category: 'Customer Satisfaction',
-      target: 4.5,
+      target: Number(targets["renewals.target_satisfaction"] ?? 4.5),
       achieved: performanceData.overall?.customerSatisfaction,
       unit: '/5'
     }
@@ -404,7 +409,7 @@ const PerformanceTracking = () => {
       <div className="kpi-achievement">
         <ProgressBar value={progressValue(percentage)} showValue={false} className={getSeverity(percentage)} />
         <span className="achievement-text">
-          {percentage >= 100 ? '✓ Achieved' : `${Math.round(percentage)}% of target`}
+          {percentage >= 100 ? t('renewal.targetMet') : t('renewal.ofTarget', { pct: Math.round(percentage) })}
         </span>
       </div>
     );
@@ -493,7 +498,7 @@ const PerformanceTracking = () => {
           <Card>
             <div className="kpi-header">
               <h3>Key Performance Indicators</h3>
-              <Badge value="Current Period" severity="info" />
+              <span className="chart-caption">{t("renewal.currentPeriod")}</span>
             </div>
             <div className="kpi-grid">
               {kpiData.map((kpi, index) => (
@@ -535,7 +540,7 @@ const PerformanceTracking = () => {
                 <Card className="trend-chart">
                   <div className="chart-header">
                     <h3>Renewal Rate Trend</h3>
-                    <Badge value="12 months" severity="info" />
+                    <span className="chart-caption">12 months</span>
                   </div>
                   <Chart
                     type="line"
@@ -553,7 +558,7 @@ const PerformanceTracking = () => {
                   <Card className="comparison-chart">
                     <div className="chart-header">
                       <h3>Sales Performance Comparison</h3>
-                      <Badge value="Dual metrics" severity="info" />
+                      <span className="chart-caption">Dual metrics</span>
                     </div>
                     <Chart
                       type="bar"
@@ -609,7 +614,7 @@ const PerformanceTracking = () => {
                   <Card className="product-chart">
                     <div className="chart-header">
                       <h3>Product Performance Distribution</h3>
-                      <Badge value="Renewal rates" severity="info" />
+                      <span className="chart-caption">Renewal rates</span>
                     </div>
                     <Chart
                       type="doughnut"
@@ -644,7 +649,7 @@ const PerformanceTracking = () => {
                 <Card>
                   <div className="chart-header">
                     <h3>Performance Scorecard</h3>
-                    <Badge value="vs Targets" severity="info" />
+                    <span className="chart-caption">vs Targets</span>
                   </div>
                   <DataTable
                     value={kpiData}

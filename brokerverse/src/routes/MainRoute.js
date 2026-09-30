@@ -135,6 +135,7 @@ import Notification from "../agentModule/dashBoardModule/notification";
 import LeadCreation from "../agentModule/leadModule/leadCreation";
 import LeadListing from "../agentModule/leadModule/leadListing";
 import CoverageDeatails from "../agentModule/quoteModule/coverageDetails";
+import RenewalCoverageStep from "../agentModule/quoteModule/renewalTerm";
 import PolicyDetails from "../agentModule/quoteModule/policyDetails";
 import Accessories from "../agentModule/quoteModule/accessories";
 import OrderSummary from "../agentModule/quoteModule/orderSummary";
@@ -1464,9 +1465,7 @@ const Maincomponent = () => {
           />
           <Route
             path="/agent/renewalquote/coveragedetails/coveragedetail/:id"
-            element={
-              <CoverageDeatails action="coveragedetail" flow="renewal" />
-            }
+            element={<RenewalCoverageStep />}
           />
           <Route
             path="/agent/renewalquote/accessories/accessorirsdetails/:id"

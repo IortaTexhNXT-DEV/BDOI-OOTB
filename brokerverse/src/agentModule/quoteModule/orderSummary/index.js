@@ -226,6 +226,7 @@ const OrderSummary = ({ action, flow }) => {
   const { t } = useTranslation();
   // why the renewal step could not be saved, shown on the step
   const [stepError, setStepError] = useState(null);
+  const [renewalIsMotor, setRenewalIsMotor] = useState(null);
   const params = useParams();
   const { quotationId, leadRefId, id: policyId } = params;
 
@@ -303,6 +304,7 @@ const OrderSummary = ({ action, flow }) => {
           name: response.data.clientName,
           code: response.data.clientCode,
         });
+        setRenewalIsMotor(response.data.isMotor);
         setQuotationData(transformRenewalPrefillToQuotationFormat(response.data));
       }
       // NORMAL/EDIT FLOW: Use Redux or navigation state
@@ -636,7 +638,9 @@ const OrderSummary = ({ action, flow }) => {
   const handleBackNavigation = () => {
     // a renewal goes back to its accessories step; history may not hold it (opened from a link or after a reload)
     if (flow === "renewal" && policyId) {
-      navigate(`/agent/renewalquote/accessories/accessorirsdetails/${policyId}`, { state: { policyId } });
+      // motor renewals come from the accessories step, the other lines from the renewal terms step
+      const step = renewalIsMotor === false ? "coveragedetails/coveragedetail" : "accessories/accessorirsdetails";
+      navigate(`/agent/renewalquote/${step}/${policyId}`, { state: { policyId } });
       return;
     }
     customHistory.back();
