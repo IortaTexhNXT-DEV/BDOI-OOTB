@@ -36,7 +36,7 @@ import logger from "../../../utility/logger";
 
 const FieldError = ({ formik, name }) =>
   formik.touched[name] && formik.errors[name] ? (
-    <div style={{ fontSize: 12, color: "red" }} className="mt-2">
+    <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-2">
       {formik.errors[name]}
     </div>
   ) : null;
@@ -472,9 +472,9 @@ const CustomerInfo = ({ action }) => {
           <div style={{ textAlign: "center", padding: "2rem" }}>
             <i
               className="pi pi-times-circle"
-              style={{ fontSize: "2rem", color: "#f44336" }}
+              style={{ fontSize: "2rem", color: "var(--color-danger)" }}
             ></i>
-            <p style={{ marginTop: "1rem", color: "#f44336" }}>
+            <p style={{ marginTop: "1rem", color: "var(--color-danger)" }}>
               {quotationLoadError}
             </p>
             <Button
@@ -678,7 +678,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("MotorNumber")}
             />
             {formik.touched.MotorNumber && formik.errors.MotorNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.MotorNumber}
               </div>
             )}
@@ -690,7 +690,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("ChassisNumber")}
             />
             {formik.touched.ChassisNumber && formik.errors.ChassisNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ChassisNumber}
               </div>
             )}
@@ -704,7 +704,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("Mortgage", e.value)}
             />
             {formik.touched.Mortgage && formik.errors.Mortgage && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Mortgage}
               </div>
             )}
@@ -716,7 +716,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("CertNumber")}
             />
             {formik.touched.CertNumber && formik.errors.CertNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.CertNumber}
               </div>
             )}
@@ -728,7 +728,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("PlateNumber")}
             />
             {formik.touched.PlateNumber && formik.errors.PlateNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PlateNumber}
               </div>
             )}
@@ -740,7 +740,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("MVFileNumber")}
             />
             {formik.touched.MVFileNumber && formik.errors.MVFileNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.MVFileNumber}
               </div>
             )}
@@ -752,7 +752,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("AuthenCode")}
             />
             {formik.touched.AuthenCode && formik.errors.AuthenCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.AuthenCode}
               </div>
             )}
@@ -767,7 +767,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("TruckType", e.value)}
             />
             {formik.touched.TruckType && formik.errors.TruckType && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.TruckType}
               </div>
             )}
@@ -781,7 +781,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("Aluminium", e.value)}
             />
             {formik.touched.Aluminium && formik.errors.Aluminium && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Aluminium}
               </div>
             )}
@@ -795,7 +795,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("AirBag", e.value)}
             />
             {formik.touched.AirBag && formik.errors.AirBag && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.AirBag}
               </div>
             )}
@@ -810,7 +810,7 @@ const CustomerInfo = ({ action }) => {
               error={formik.touched.TNVS && formik.errors.TNVS}
             />
             {formik.touched.TNVS && formik.errors.TNVS && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.TNVS}
               </div>
             )}

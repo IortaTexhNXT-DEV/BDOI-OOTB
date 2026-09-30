@@ -245,7 +245,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.employeeCode && formik.errors.employeeCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.employeeCode}
               </div>
             )}
@@ -261,7 +261,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.firstName && formik.errors.firstName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.firstName}
               </div>
             )}
@@ -278,7 +278,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.middleName && formik.errors.middleName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.middleName}
               </div>
             )}
@@ -294,7 +294,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.lastName && formik.errors.lastName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.lastName}
               </div>
             )}
@@ -314,7 +314,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.employeeType && formik.errors.employeeType && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.employeeType}
               </div>
             )}
@@ -335,7 +335,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.designation && formik.errors.designation && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.designation}
               </div>
             )}
@@ -355,7 +355,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.reportingTo && formik.errors.reportingTo && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.reportingTo}
               </div>
             )}
@@ -375,7 +375,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.branchCode && formik.errors.branchCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.branchCode}
               </div>
             )}
@@ -395,7 +395,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.departmentCode && formik.errors.departmentCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.departmentCode}
               </div>
             )}
@@ -415,7 +415,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.idProofType && formik.errors.idProofType && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.idProofType}
               </div>
             )}
@@ -431,7 +431,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.idNumber && formik.errors.idNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.idNumber}
               </div>
             )}
@@ -447,7 +447,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.addressLine1 && formik.errors.addressLine1 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine1}
               </div>
             )}
@@ -463,7 +463,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.addressLine2 && formik.errors.addressLine2 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine2}
               </div>
             )}
@@ -479,7 +479,7 @@ const AddEmployee = ({ action }) => {
               placeholder={t("generalMasters.enter")}
             />
             {formik.touched.addressLine3 && formik.errors.addressLine3 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine3}
               </div>
             )}
@@ -500,7 +500,7 @@ const AddEmployee = ({ action }) => {
             />
 
             {formik.touched.city && formik.errors.city && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.city}
               </div>
             )}
@@ -520,7 +520,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.state && formik.errors.state && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.state}
               </div>
             )}
@@ -541,7 +541,7 @@ const AddEmployee = ({ action }) => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.country && formik.errors.country && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.country}
               </div>
             )}

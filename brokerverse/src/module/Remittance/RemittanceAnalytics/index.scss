@@ -88,7 +88,7 @@
                 }
 
                 &.negative {
-                  color: #dc3545;
+                  color: var(--color-danger);
                 }
 
                 i {
@@ -251,7 +251,7 @@
       }
 
       &.negative {
-        color: #dc3545;
+        color: var(--color-danger);
       }
 
       i {

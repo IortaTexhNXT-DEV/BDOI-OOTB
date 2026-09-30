@@ -125,7 +125,7 @@ const AddCurrency = () => {
             />
             {formik.touched.CurrencyCode && formik.errors.CurrencyCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.CurrencyCode}
@@ -149,7 +149,7 @@ const AddCurrency = () => {
             />
             {formik.touched.ISOcode && formik.errors.ISOcode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.ISOcode}
@@ -167,7 +167,7 @@ const AddCurrency = () => {
             />
             {formik.touched.SmallestUnit && formik.errors.SmallestUnit && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.SmallestUnit}
@@ -185,7 +185,7 @@ const AddCurrency = () => {
             />
             {formik.touched.UnitDescription && formik.errors.UnitDescription && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.UnitDescription}
@@ -205,7 +205,7 @@ const AddCurrency = () => {
             />
             {formik.touched.CurrencyName && formik.errors.CurrencyName && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.CurrencyName}
@@ -224,7 +224,7 @@ const AddCurrency = () => {
             />
             {formik.touched.Description && formik.errors.Description && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.Description}
@@ -244,7 +244,7 @@ const AddCurrency = () => {
             />
             {formik.touched.CurrencyFormat && formik.errors.CurrencyFormat && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.CurrencyFormat}
@@ -262,7 +262,7 @@ const AddCurrency = () => {
             />
             {formik.touched.NumberofDecimals && formik.errors.NumberofDecimals && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.NumberofDecimals}

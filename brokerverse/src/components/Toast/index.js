@@ -4,48 +4,6 @@ import "./index.scss";
 
 const CustomToast = forwardRef((props, ref) => {
   const { message, messageType } = props;
-  const formatMessage = (Message) => {
-    if (!Message) return null;
-
-    const parts = Message?.split(/\s+/) || [];
-
-    const formattedParts = parts.map((part, index) => {
-      if (!isNaN(part)) {
-        return (
-          <span
-            key={index}
-            style={{
-              color: "#29CE00",
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontSize: "16px",
-              fontWeight: 500,
-            }}
-          >
-            {part}
-          </span>
-        );
-      } else {
-        return (
-          <span
-            key={index}
-            style={{
-              color: "black",
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontSize: "16px",
-              fontWeight: 500,
-            }}
-          >
-            {part}
-          </span>
-        );
-      }
-    });
-
-    return formattedParts.reduce((acc, curr) => [acc, " ", curr]);
-  };
-
-  const formattedMessage = formatMessage(message);
-
   useImperativeHandle(ref, () => ({
     // Accepts showToast({ severity, summary, detail }) or showToast(severity, summary, detail).
     showToast(options = {}, positionalSummary, positionalDetail) {
@@ -69,7 +27,7 @@ const CustomToast = forwardRef((props, ref) => {
         severity,
         summary,
         // an error never falls back to the screen's success message
-        detail: detail || (severity === "error" ? summary : formattedMessage || message),
+        detail: detail || (severity === "error" ? summary : message),
         icon: `${icons[severity] || icons.success} custom-icon`,
         className: "custom-toast",
       });

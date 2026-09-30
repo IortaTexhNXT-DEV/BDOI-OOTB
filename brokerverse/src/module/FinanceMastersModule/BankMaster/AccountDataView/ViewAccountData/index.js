@@ -110,7 +110,7 @@ function ViewAccountDetail() {
 
   const headerStyle = {
     // width: '12rem',
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -166,7 +166,7 @@ function ViewAccountDetail() {
                 onChange={formik.handleChange("AccountNumber")}
               />
               {formik.touched.AccountNumber && formik.errors.AccountNumber && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AccountNumber}
                 </div>
               )}
@@ -182,7 +182,7 @@ function ViewAccountDetail() {
                 onChange={formik.handleChange("AccountName")}
               />
               {formik.touched.AccountName && formik.errors.AccountName && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AccountName}
                 </div>
               )}
@@ -200,7 +200,7 @@ function ViewAccountDetail() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.AccountType && formik.errors.AccountType && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AccountType}
                 </div>
               )}
@@ -219,7 +219,7 @@ function ViewAccountDetail() {
                 onChange={formik.handleChange("MainAccount")}
               />
               {formik.touched.MainAccount && formik.errors.MainAccount && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.MainAccount}
                 </div>
               )}
@@ -236,7 +236,7 @@ function ViewAccountDetail() {
               />
               {formik.touched.MainAccountDescription &&
                 formik.errors.MainAccountDescription && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.MainAccountDescription}
                   </div>
                 )}
@@ -254,7 +254,7 @@ function ViewAccountDetail() {
               />
               {formik.touched.TransactionLimit &&
                 formik.errors.TransactionLimit && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.TransactionLimit}
                   </div>
                 )}

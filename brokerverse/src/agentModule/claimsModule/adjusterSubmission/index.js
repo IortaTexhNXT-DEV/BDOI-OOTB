@@ -559,7 +559,7 @@ const AdjusterSubmission = () => {
         </div>
         <Card className="mt-4">
           <div className="claim__request__upload__title">{t("agent.claimRequest")}</div>
-          <div className="text-center p-4" style={{ color: "red" }}>
+          <div className="text-center p-4" style={{ color: "var(--color-danger)" }}>
             <div>{t("agent.errorLoadingClaimDetails")} {claimDetailsError}</div>
           </div>
         </Card>
@@ -594,7 +594,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("adjusterName")}
             />
             {formik.touched.adjusterName && formik.errors.adjusterName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.adjusterName}
               </div>
             )}
@@ -606,7 +606,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("claimNumber")}
             />
             {formik.touched.claimNumber && formik.errors.claimNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.claimNumber}
               </div>
             )}
@@ -619,7 +619,7 @@ return `${policyHolderName} / ${
             />
             {formik.touched.insuranceCompanyClaimNumber &&
               formik.errors.insuranceCompanyClaimNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.insuranceCompanyClaimNumber}
                 </div>
               )}
@@ -637,7 +637,7 @@ return `${policyHolderName} / ${
               dateFormat="yy-mm-dd"
             />
             {formik.touched.dateOfReported && formik.errors.dateOfReported && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.dateOfReported}
               </div>
             )}
@@ -655,7 +655,7 @@ return `${policyHolderName} / ${
               dateFormat="yy-mm-dd"
             />
             {formik.touched.dateOfLoss && formik.errors.dateOfLoss && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.dateOfLoss}
               </div>
             )}
@@ -672,7 +672,7 @@ return `${policyHolderName} / ${
             />
             {formik.touched.placeOfAccident &&
               formik.errors.placeOfAccident && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.placeOfAccident}
                 </div>
               )}
@@ -688,7 +688,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("driversName")}
             />
             {formik.touched.driversName && formik.errors.driversName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.driversName}
               </div>
             )}
@@ -701,7 +701,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("houseNumber")}
             />
             {formik.touched.houseNumber && formik.errors.houseNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.houseNumber}
               </div>
             )}
@@ -713,7 +713,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("barangay")}
             />
             {formik.touched.barangay && formik.errors.barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.barangay}
               </div>
             )}
@@ -733,7 +733,7 @@ return `${policyHolderName} / ${
               optionValue="value"
             />
             {formik.touched.country && formik.errors.country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.country}
               </div>
             )}
@@ -752,7 +752,7 @@ return `${policyHolderName} / ${
               disabled={!formik.values.country}
             />
             {formik.touched.province && formik.errors.province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.province}
               </div>
             )}
@@ -768,7 +768,7 @@ return `${policyHolderName} / ${
               disabled={!formik.values.province}
             />
             {formik.touched.city && formik.errors.city && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.city}
               </div>
             )}
@@ -781,7 +781,7 @@ return `${policyHolderName} / ${
               maxLength={isPhilippines(formik.values.country) ? 4 : undefined}
             />
             {formik.touched.zipCode && formik.errors.zipCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.zipCode}
               </div>
             )}
@@ -818,7 +818,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("name")}
             />
             {formik.touched.name && formik.errors.name && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.name}
               </div>
             )}
@@ -830,7 +830,7 @@ return `${policyHolderName} / ${
               onChange={formik.handleChange("contactNumber")}
             />
             {formik.touched.contactNumber && formik.errors.contactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.contactNumber}
               </div>
             )}
@@ -844,7 +844,7 @@ return `${policyHolderName} / ${
                   onChange={formik.handleChange("plateNumber")}
                 />
                 {formik.touched.plateNumber && formik.errors.plateNumber && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.plateNumber}
                   </div>
                 )}
@@ -856,7 +856,7 @@ return `${policyHolderName} / ${
                   onChange={formik.handleChange("unit")}
                 />
                 {formik.touched.unit && formik.errors.unit && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.unit}
                   </div>
                 )}
@@ -868,7 +868,7 @@ return `${policyHolderName} / ${
                   onChange={formik.handleChange("shop")}
                 />
                 {formik.touched.shop && formik.errors.shop && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.shop}
                   </div>
                 )}
@@ -883,7 +883,7 @@ return `${policyHolderName} / ${
             />
             {formik.touched.insuranceCompanyName &&
               formik.errors.insuranceCompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.insuranceCompanyName}
                 </div>
               )}
@@ -918,7 +918,7 @@ return `${policyHolderName} / ${
             </div>
           </div>
           {formik.touched.file && formik.errors.file && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.file}
             </div>
           )}

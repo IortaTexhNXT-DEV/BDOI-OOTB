@@ -159,7 +159,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.policyTypeCode && formik.errors.policyTypeCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.policyTypeCode}
               </div>
             )}
@@ -177,7 +177,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.policyTypeName && formik.errors.policyTypeName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.policyTypeName}
               </div>
             )}
@@ -196,7 +196,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
             />
             {formik.touched.policyTypeDescription &&
               formik.errors.policyTypeDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.policyTypeDescription}
                 </div>
               )}
@@ -212,7 +212,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
               onChange={(e) => formik.setFieldValue("Product", e.target.value)}
             />
             {formik.touched.Product && formik.errors.Product && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.Product}
               </div>
             )}

@@ -248,7 +248,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.insuranceCompanyCode &&
               formik.errors.insuranceCompanyCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.insuranceCompanyCode}
                 </div>
               )}
@@ -274,7 +274,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.insuranceCompanyName &&
               formik.errors.insuranceCompanyName && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.insuranceCompanyName}
                 </div>
               )}
@@ -303,7 +303,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.insuranceCompanyDescription &&
               formik.errors.insuranceCompanyDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.insuranceCompanyDescription}
                 </div>
               )}
@@ -328,7 +328,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.addressLine1 && formik.errors.addressLine1 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine1}
               </div>
             )}
@@ -353,7 +353,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.addressLine2 && formik.errors.addressLine2 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine2}
               </div>
             )}
@@ -378,7 +378,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.addressLine3 && formik.errors.addressLine3 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine3}
               </div>
             )}
@@ -405,7 +405,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.city && formik.errors.city && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.city}
@@ -435,7 +435,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.state && formik.errors.state && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.state}
@@ -464,7 +464,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.country && formik.errors.country && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.country}
@@ -491,7 +491,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.phoneNumber}
               </div>
             )}
@@ -514,7 +514,7 @@ const InsuranceDetailsAction = ({ action }) => {
               onChange={(e) => formik.setFieldValue("email", e.target.value)}
             />
             {formik.touched.email && formik.errors.email && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.email}
               </div>
             )}
@@ -530,7 +530,7 @@ const InsuranceDetailsAction = ({ action }) => {
               onChange={(e) => formik.setFieldValue("tin", e.target.value)}
             />
             {formik.touched.tin && formik.errors.tin && (
-              <div style={{ fontSize: 12, color: "red" }}>{formik.errors.tin}</div>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.tin}</div>
             )}
           </div>
           <div className="col-12 p-0 pl-2 pt-3">
@@ -552,7 +552,7 @@ const InsuranceDetailsAction = ({ action }) => {
                 onChange={(e) => formik.setFieldValue(key, e.target.value)}
               />
               {formik.errors[key] && (
-                <div style={{ fontSize: 12, color: "red" }}>{formik.errors[key]}</div>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors[key]}</div>
               )}
             </div>
           ))}

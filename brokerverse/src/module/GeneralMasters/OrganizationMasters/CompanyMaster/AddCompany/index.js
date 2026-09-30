@@ -248,7 +248,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.CompanyCode && formik.errors.CompanyCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.CompanyCode}
               </div>
             )}
@@ -271,7 +271,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.CompanyName && formik.errors.CompanyName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.CompanyName}
               </div>
             )}
@@ -292,7 +292,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.LicenseNumber && formik.errors.LicenseNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.LicenseNumber}
               </div>
             )}
@@ -316,7 +316,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.EmailID && formik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.EmailID}
               </div>
             )}
@@ -381,7 +381,7 @@ function AddCompany({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.Websitelink && formik.errors.Websitelink && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Websitelink}
                 </div>
               )}
@@ -404,7 +404,7 @@ function AddCompany({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}
@@ -429,7 +429,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.AddressLine1 && formik.errors.AddressLine1 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.AddressLine1}
               </div>
             )}
@@ -450,7 +450,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.AddressLine2 && formik.errors.AddressLine2 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.AddressLine2}
               </div>
             )}
@@ -471,7 +471,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.AddressLine3 && formik.errors.AddressLine3 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.AddressLine3}
               </div>
             )}
@@ -492,7 +492,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.PinCode && formik.errors.PinCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.PinCode}
               </div>
             )}
@@ -519,7 +519,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.City && formik.errors.City && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.City}
               </div>
             )}
@@ -543,7 +543,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.State && formik.errors.State && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.State}
               </div>
             )}
@@ -568,7 +568,7 @@ function AddCompany({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.Country && formik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.Country}
               </div>
             )}
@@ -594,7 +594,7 @@ function AddCompany({ action }) {
               />
             </div>
             {formik.touched.PhoneNumber && formik.errors.PhoneNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.PhoneNumber}
               </div>
             )}
@@ -623,7 +623,7 @@ function AddCompany({ action }) {
               />
             </div>
             {formik.touched.Fax && formik.errors.Fax && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.Fax}
               </div>
             )}

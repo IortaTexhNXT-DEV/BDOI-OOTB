@@ -198,7 +198,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.BranchCode && formik.errors.BranchCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.BranchCode}
               </div>
             )}
@@ -219,7 +219,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.BranchName && formik.errors.BranchName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.BranchName}
               </div>
             )}
@@ -243,7 +243,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.CompanyName && formik.errors.CompanyName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.CompanyName}
               </div>
             )}
@@ -264,7 +264,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.EmailID && formik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.EmailID}
               </div>
             )}
@@ -289,7 +289,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}
@@ -312,7 +312,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.AddressLine1 && formik.errors.AddressLine1 && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AddressLine1}
                 </div>
               )}
@@ -335,7 +335,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.AddressLine2 && formik.errors.AddressLine2 && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AddressLine2}
                 </div>
               )}
@@ -361,7 +361,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.AddressLine3 && formik.errors.AddressLine3 && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AddressLine3}
                 </div>
               )}
@@ -386,7 +386,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.City && formik.errors.City && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.City}
               </div>
             )}
@@ -410,7 +410,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.State && formik.errors.State && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.State}
               </div>
             )}
@@ -434,7 +434,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.Country && formik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.Country}
               </div>
             )}
@@ -462,7 +462,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.PhoneNumber && formik.errors.PhoneNumber && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.PhoneNumber}
                 </div>
               )}
@@ -488,7 +488,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.Fax && formik.errors.Fax && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Fax}
                 </div>
               )}

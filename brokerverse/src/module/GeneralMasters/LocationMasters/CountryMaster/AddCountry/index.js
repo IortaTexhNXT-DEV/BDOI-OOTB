@@ -166,7 +166,7 @@ function AddExchange({ action }) {
                 }
               />
               {formik.touched.CountryName && formik.errors.CountryName && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.CountryName}
                 </div>
               )}
@@ -185,7 +185,7 @@ function AddExchange({ action }) {
                 }
               />
               {formik.touched.ISOCode && formik.errors.ISOCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.ISOCode}
                 </div>
               )}
@@ -204,7 +204,7 @@ function AddExchange({ action }) {
                 }
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}
@@ -243,7 +243,7 @@ function AddExchange({ action }) {
                 }
               />
               {formik.touched.Modifiedby && formik.errors.Modifiedby && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Modifiedby}
                 </div>
               )}
@@ -262,7 +262,7 @@ function AddExchange({ action }) {
                 }
               />
               {formik.touched.ModifiedOn && formik.errors.ModifiedOn && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.ModifiedOn}
                 </div>
               )}

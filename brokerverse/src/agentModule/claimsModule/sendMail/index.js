@@ -184,7 +184,7 @@ const SendMail = () => {
             onChange={formik.handleChange("mailSubject")}
           />
           {formik.touched.mailSubject && formik.errors.mailSubject && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.mailSubject}
             </div>
           )}
@@ -200,7 +200,7 @@ const SendMail = () => {
             onChange={formik.handleChange("write")}
           />
           {formik.touched.write && formik.errors.write && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.write}
             </div>
           )}
@@ -235,7 +235,7 @@ const SendMail = () => {
             </div>
           </div>
           {formik.touched.file && formik.errors.file && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.file}
             </div>
           )}
@@ -252,7 +252,7 @@ const SendMail = () => {
         </div>
 
         {error && (
-          <div className="mt-3" style={{ color: "red", fontSize: "14px" }}>
+          <div className="mt-3" style={{ color: "var(--color-danger)", fontSize: "14px" }}>
             {error}
           </div>
         )}

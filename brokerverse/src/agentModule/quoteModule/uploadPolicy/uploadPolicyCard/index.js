@@ -635,7 +635,7 @@ const UploadPolicyCard = ({
               disabled={!!(policySource?.policyNumber || state?.policyNumber)}
             />
             {formik.touched.PolicyNumber && formik.errors.PolicyNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PolicyNumber}
               </div>
             )}
@@ -653,7 +653,7 @@ const UploadPolicyCard = ({
             />
             {formik.touched.InsuranceCompany &&
               formik.errors.InsuranceCompany && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.InsuranceCompany}
                 </div>
               )}
@@ -671,7 +671,7 @@ const UploadPolicyCard = ({
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Production && formik.errors.Production && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Production}
               </div>
             )}
@@ -688,7 +688,7 @@ const UploadPolicyCard = ({
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Inception && formik.errors.Inception && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Inception}
               </div>
             )}
@@ -704,7 +704,7 @@ const UploadPolicyCard = ({
               dateFormat="yy-mm-dd"
             />
             {formik.touched.IssuedDate && formik.errors.IssuedDate && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.IssuedDate}
               </div>
             )}
@@ -716,7 +716,7 @@ const UploadPolicyCard = ({
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Expiry && formik.errors.Expiry && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Expiry}
               </div>
             )}
@@ -783,7 +783,7 @@ const UploadPolicyCard = ({
         {showUploadError && !policyDocumentUrl && (
           <div
             className="text-sm mt-2"
-            style={{ color: "#dc3545", fontWeight: 500 }}
+            style={{ color: "var(--color-danger)", fontWeight: 500 }}
           >
             ⚠ {t("agent.uploadPolicyDocumentRequired")}
           </div>

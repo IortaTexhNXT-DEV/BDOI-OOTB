@@ -25,7 +25,7 @@ import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 const ACTION_STYLE = {
   create: { icon: "pi pi-plus", color: "#4CAF50" },
   approve: { icon: "pi pi-verified", color: "#4CAF50" },
-  reject: { icon: "pi pi-times", color: "#F44336" },
+  reject: { icon: "pi pi-times", color: "var(--color-danger)" },
   submit: { icon: "pi pi-send", color: "#2196F3" },
 };
 const HISTORY_COLUMNS = [

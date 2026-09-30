@@ -186,7 +186,7 @@ function Bankdetailselection() {
   };
 
   const headerStyle = {
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,

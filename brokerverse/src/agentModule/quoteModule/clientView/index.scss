@@ -476,7 +476,7 @@ $tablet-md: 1024px;
   .error-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: #dc3545;
+    color: var(--color-danger);
 
     @include mobile-sm {
       padding: 2rem 0.75rem;

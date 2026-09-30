@@ -54,7 +54,7 @@ const pad = (n) => String(n).padStart(2, "0");
 const toDateText = (date) =>
   date instanceof Date ? `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` : date || undefined;
 
-const errorText = (text) => (text ? <div style={{ fontSize: 12, color: "red" }}>{text}</div> : null);
+const errorText = (text) => (text ? <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{text}</div> : null);
 
 function BranchAdding() {
   const { t } = useTranslation();

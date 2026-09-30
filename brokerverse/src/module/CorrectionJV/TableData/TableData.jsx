@@ -271,7 +271,7 @@ const TableData = ({ newDataTable, editID }) => {
               />
               {formik.touched.mainAccount && formik.errors.mainAccount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.mainAccount}
@@ -302,7 +302,7 @@ const TableData = ({ newDataTable, editID }) => {
               />
               {formik.touched.entryType && formik.errors.entryType && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.entryType}
@@ -328,7 +328,7 @@ const TableData = ({ newDataTable, editID }) => {
               />
               {formik.touched.subAccount && formik.errors.subAccount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.subAccount}
@@ -363,7 +363,7 @@ const TableData = ({ newDataTable, editID }) => {
               />
               {formik.touched.branchCode && formik.errors.branchCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.branchCode}
@@ -381,7 +381,7 @@ const TableData = ({ newDataTable, editID }) => {
               {formik.touched.branchCodeDescription &&
                 formik.errors.branchCodeDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.branchCodeDescription}
@@ -410,7 +410,7 @@ const TableData = ({ newDataTable, editID }) => {
               {formik.touched.departmentCode &&
                 formik.errors.departmentCode && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.departmentCode}
@@ -428,7 +428,7 @@ const TableData = ({ newDataTable, editID }) => {
               {formik.touched.departmentDescription &&
                 formik.errors.departmentDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.departmentDescription}
@@ -454,7 +454,7 @@ const TableData = ({ newDataTable, editID }) => {
               />
               {formik.touched.currencyCode && formik.errors.currencyCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.currencyCode}
@@ -472,7 +472,7 @@ const TableData = ({ newDataTable, editID }) => {
               {formik.touched.currencyDescription &&
                 formik.errors.currencyDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.currencyDescription}
@@ -492,7 +492,7 @@ const TableData = ({ newDataTable, editID }) => {
               />
               {formik.touched.foreignAmount && formik.errors.foreignAmount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.foreignAmount}

@@ -955,7 +955,7 @@ const ClaimDetailsCard = ({
                   maxDate={new Date()}
                 />
                 {formik.touched.dateOfIncident && formik.errors.dateOfIncident && (
-                  <div style={{ fontSize: 12, color: "red" }}>{formik.errors.dateOfIncident}</div>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.dateOfIncident}</div>
                 )}
               </div>
               <div className="col-12 md:col-6 lg:col-6">
@@ -1012,7 +1012,7 @@ const ClaimDetailsCard = ({
                   placeholder={t("claimDetails.select")}
                 />
                 {formik.touched.typeOfIncident && formik.errors.typeOfIncident && (
-                  <div style={{ fontSize: 12, color: "red" }}>{formik.errors.typeOfIncident}</div>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.typeOfIncident}</div>
                 )}
               </div>
             </div>
@@ -1064,7 +1064,7 @@ const ClaimDetailsCard = ({
               }}
             />
             {formik.touched.driverName && formik.errors.driverName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.driverName}
               </div>
             )}
@@ -1217,7 +1217,7 @@ const ClaimDetailsCard = ({
                 onChange={formik.handleChange("name")}
               />
               {formik.touched.name && formik.errors.name && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.name}
                 </div>
               )}
@@ -1229,7 +1229,7 @@ const ClaimDetailsCard = ({
                 onChange={formik.handleChange("contactNumber")}
               />
               {formik.touched.contactNumber && formik.errors.contactNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.contactNumber}
                 </div>
               )}
@@ -1245,7 +1245,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("plateNumber")}
                 />
                 {formik.touched.plateNumber && formik.errors.plateNumber && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.plateNumber}
                   </div>
                 )}
@@ -1257,7 +1257,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("unit")}
                 />
                 {formik.touched.unit && formik.errors.unit && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.unit}
                   </div>
                 )}
@@ -1274,7 +1274,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("shop")}
                 />
                 {formik.touched.shop && formik.errors.shop && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.shop}
                   </div>
                 )}
@@ -1288,7 +1288,7 @@ const ClaimDetailsCard = ({
               />
               {formik.touched.InsuranceCompanyN &&
                 formik.errors.InsuranceCompanyN && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.InsuranceCompanyN}
                   </div>
                 )}

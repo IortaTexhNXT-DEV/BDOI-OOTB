@@ -323,7 +323,7 @@ const AddJournalVocture = () => {
 
             {formik.touched.transationCode && formik.errors.transationCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.transationCode}
@@ -344,7 +344,7 @@ const AddJournalVocture = () => {
             {formik.touched.transationDescription &&
               formik.errors.transationDescription && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.transationDescription}
@@ -423,7 +423,7 @@ const AddJournalVocture = () => {
               />
               {formik.touched.totalCredit && formik.errors.totalCredit && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.totalCredit}
@@ -440,7 +440,7 @@ const AddJournalVocture = () => {
               />
               {formik.touched.totalDebit && formik.errors.totalDebit && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.totalDebit}
@@ -457,7 +457,7 @@ const AddJournalVocture = () => {
               />
               {formik.touched.net && formik.errors.net && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.net}

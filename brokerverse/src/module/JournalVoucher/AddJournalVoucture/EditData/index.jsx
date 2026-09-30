@@ -266,7 +266,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.mainAccount && formik.errors.mainAccount && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.mainAccount}
@@ -297,7 +297,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.entryType && formik.errors.entryType && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.entryType}
@@ -324,7 +324,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.subAccount && formik.errors.subAccount && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.subAccount}
@@ -359,7 +359,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.branchCode && formik.errors.branchCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.branchCode}
@@ -377,7 +377,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             {formik.touched.branchCodeDescription &&
               formik.errors.branchCodeDescription && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.branchCodeDescription}
@@ -403,7 +403,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.departmentCode && formik.errors.departmentCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.departmentCode}
@@ -421,7 +421,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             {formik.touched.departmentDescription &&
               formik.errors.departmentDescription && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.departmentDescription}
@@ -447,7 +447,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.currencyCode && formik.errors.currencyCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.currencyCode}
@@ -465,7 +465,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             {formik.touched.currencyDescription &&
               formik.errors.currencyDescription && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.currencyDescription}
@@ -483,7 +483,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.foreignAmount && formik.errors.foreignAmount && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.foreignAmount}
@@ -502,7 +502,7 @@ const EditData = ({ visibleEdit, setVisibleEdit, handleUpdate }) => {
             />
             {formik.touched.remarks && formik.errors.remarks && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.remarks}

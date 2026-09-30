@@ -401,9 +401,116 @@ $text-strong: #1f2937;
   }
 }
 
-.p-toast .p-toast-message {
+// ---------------------------------------------------------------- messages
+// Toasts, message boxes and field errors share one quiet style: white or lightly tinted surface, dark text,
+// a thin coloured rule on the left and a small icon. Colour marks the kind of message; it does not fill the box.
+
+@mixin bv-message($accent, $tint) {
+  background: $tint !important;
+  border: 1px solid $color-border !important;
+  border-left: 3px solid $accent !important;
+  color: $color-heading !important;
+
+  .p-toast-message-icon,
+  .p-message-icon,
+  .p-inline-message-icon {
+    color: $accent !important;
+  }
+}
+
+.p-toast {
+  width: 24rem;
+
+  .p-toast-message {
+    border-radius: $radius-sm;
+    box-shadow: $shadow-md;
+    margin-bottom: 8px;
+    @include bv-message($brand-blue, $color-surface);
+
+    &.p-toast-message-success {
+      @include bv-message($color-success, $color-surface);
+    }
+
+    &.p-toast-message-warn {
+      @include bv-message($color-warning, $color-surface);
+    }
+
+    &.p-toast-message-error {
+      @include bv-message($color-danger, $color-surface);
+    }
+
+    .p-toast-message-content {
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+
+    .p-toast-message-icon {
+      width: 18px !important;
+      height: 18px !important;
+      font-size: 18px !important;
+      margin-top: 1px;
+    }
+
+    .p-toast-message-text {
+      margin: 0;
+    }
+
+    .p-toast-summary {
+      font-size: 14px;
+      font-weight: 600;
+      color: $color-heading !important;
+    }
+
+    .p-toast-detail {
+      margin: 2px 0 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: $color-text !important;
+    }
+
+    .p-toast-icon-close {
+      width: 24px;
+      height: 24px;
+      color: $color-text-muted !important;
+    }
+  }
+}
+
+.p-message,
+.p-inline-message {
   border-radius: $radius-sm;
-  box-shadow: $shadow-md;
+  font-size: 13px;
+  @include bv-message($brand-blue, $brand-blue-050);
+
+  &.p-message-success,
+  &.p-inline-message-success {
+    @include bv-message($color-success, $color-success-050);
+  }
+
+  &.p-message-warn,
+  &.p-inline-message-warn {
+    @include bv-message($color-warning, $color-warning-050);
+  }
+
+  &.p-message-error,
+  &.p-inline-message-error {
+    @include bv-message($color-danger, $color-danger-050);
+  }
+}
+
+// validation text under a field, and the border of an invalid field
+.p-error,
+small.p-error {
+  color: $color-danger !important;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.p-invalid.p-component,
+.p-invalid .p-inputtext,
+.p-inputtext.p-invalid {
+  border-color: $color-danger !important;
 }
 
 // ---------------------------------------------------------------- accessibility

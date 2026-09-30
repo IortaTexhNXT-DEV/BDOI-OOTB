@@ -185,7 +185,7 @@ function AddBankMaster() {
               />
               {formik.touched.bankCode && formik.errors.bankCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
 
                 >
                   {formik.errors.bankCode}
@@ -205,7 +205,7 @@ function AddBankMaster() {
               />
               {formik.touched.bankName && formik.errors.bankName && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
 
                 >
                   {formik.errors.bankName}
@@ -226,7 +226,7 @@ function AddBankMaster() {
               />
               {formik.touched.bankBranch && formik.errors.bankBranch && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
 
                 >
                   {formik.errors.bankBranch}
@@ -249,7 +249,7 @@ function AddBankMaster() {
             />
             {formik.touched.ifscCode && formik.errors.ifscCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.ifscCode}
@@ -267,7 +267,7 @@ function AddBankMaster() {
             />
             {formik.touched.AddressLine1 && formik.errors.AddressLine1 && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.AddressLine1}
@@ -285,7 +285,7 @@ function AddBankMaster() {
             />
             {formik.touched.AddressLine2 && formik.errors.AddressLine2 && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.AddressLine2}
@@ -303,7 +303,7 @@ function AddBankMaster() {
             />
             {formik.touched.AddressLine3 && formik.errors.AddressLine3 && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.AddressLine3}
@@ -330,7 +330,7 @@ function AddBankMaster() {
             />
             {formik.touched.City && formik.errors.City && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.City}
@@ -353,7 +353,7 @@ function AddBankMaster() {
             />
             {formik.touched.state && formik.errors.state && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.state}
@@ -376,7 +376,7 @@ function AddBankMaster() {
             />
             {formik.touched.Country && formik.errors.Country && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.Country}
@@ -398,7 +398,7 @@ function AddBankMaster() {
             </div>
             {formik.touched.mobile && formik.errors.mobile && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.mobile}
@@ -424,7 +424,7 @@ function AddBankMaster() {
 
             {formik.touched.Fax && formik.errors.Fax && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.Fax}
@@ -441,7 +441,7 @@ function AddBankMaster() {
             />
             {formik.touched.email && formik.errors.email && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.email}

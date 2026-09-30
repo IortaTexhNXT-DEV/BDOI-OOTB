@@ -147,7 +147,7 @@ const Login = () => {
           name="username"
         />
         {formik.touched.EmailAddress && formik.errors.EmailAddress && (
-          <div style={{ fontSize: 12, color: "red" }} className="mt-1">
+          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-1">
             {formik.errors.EmailAddress}
           </div>
         )}
@@ -172,7 +172,7 @@ const Login = () => {
           />
         </div>
         {formik.touched.Password && formik.errors.Password && (
-          <div style={{ fontSize: 12, color: "red" }} className="mt-1">
+          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-1">
             {formik.errors.Password}
           </div>
         )}
@@ -184,7 +184,7 @@ const Login = () => {
           </div>
         )}
         {errorMessage && (
-          <div style={{ fontSize: 12, color: "red" }} className="mb-2" role="alert">
+          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mb-2" role="alert">
             {errorMessage}
           </div>
         )}

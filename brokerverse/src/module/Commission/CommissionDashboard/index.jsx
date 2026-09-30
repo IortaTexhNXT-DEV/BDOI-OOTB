@@ -66,8 +66,8 @@ const CommissionDashboard = () => {
         {
           label: "Comsub gross",
           data: data.monthlyTrend.map((m) => m.comsubGross),
-          borderColor: "#ef4444",
-          backgroundColor: "#ef4444",
+          borderColor: "#b42318",
+          backgroundColor: "#b42318",
           tension: 0.25,
           fill: false,
         },

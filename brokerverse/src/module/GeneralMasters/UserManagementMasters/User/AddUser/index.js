@@ -346,7 +346,7 @@ const AddUser = ({ action }) => {
               isRequired={true}
             />
             {formik.touched.roles && formik.errors.roles && (
-              <div className="mt-2" style={{ fontSize: 10, color: "red" }}>
+              <div className="mt-2" style={{ fontSize: 10, color: "var(--color-danger)" }}>
                 {formik.errors.roles}
               </div>
             )}

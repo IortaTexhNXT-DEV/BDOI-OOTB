@@ -277,7 +277,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                         />
                         {formik.touched.InsurancePolicyType &&
                             formik.errors.InsurancePolicyType && (
-                                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                     {formik.errors.InsurancePolicyType}
                                 </div>
                             )}
@@ -293,7 +293,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             optionLabel="label"
                         />
                         {formik.touched.AccountCode && formik.errors.AccountCode && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.AccountCode}
                             </div>
                         )}
@@ -312,7 +312,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                         />
                         {formik.touched.PaymentType &&
                             formik.errors.PaymentType && (
-                                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                     {formik.errors.PaymentType}
                                 </div>
                             )}
@@ -340,7 +340,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             />
                             {formik.touched.InstallmentType &&
                                 formik.errors.InstallmentType && (
-                                    <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                                    <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                         {formik.errors.InstallmentType}
                                     </div>
                                 )}
@@ -364,7 +364,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             optionLabel="label"
                         />
                         {formik.touched.VehicleBrand && formik.errors.VehicleBrand && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.VehicleBrand}
                             </div>
                         )}
@@ -377,7 +377,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("Occupation")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}
@@ -394,7 +394,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("Occupation")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}
@@ -406,7 +406,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("PlaceOfWork")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}
@@ -421,7 +421,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("EstimatedAnnualEarning")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}
@@ -437,7 +437,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             optionLabel="label"
                         />
                         {formik.touched.ModelYear && formik.errors.ModelYear && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.ModelYear}
                             </div>
                         )}
@@ -451,7 +451,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("LimitPerPerson")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}
@@ -463,7 +463,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("LimitPerOccurrence")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}
@@ -475,7 +475,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onChange={formik.handleChange("Remarks")}
                         />
                         {formik.touched.CompanyName && formik.errors.CompanyName && (
-                            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                                 {formik.errors.CompanyName}
                             </div>
                         )}

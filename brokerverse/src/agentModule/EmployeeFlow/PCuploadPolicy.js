@@ -162,7 +162,7 @@ sumInsured
               value={formik.values.PolicyNumber}
               onChange={formik.handleChange("PolicyNumber")} />
             {formik.touched.PolicyNumber && formik.errors.PolicyNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PolicyNumber}
               </div>
             )}
@@ -179,7 +179,7 @@ sumInsured
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Production && formik.errors.Production && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Production}
               </div>
             )}
@@ -195,7 +195,7 @@ sumInsured
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Inception && formik.errors.Inception && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Inception}
               </div>
             )}
@@ -211,7 +211,7 @@ sumInsured
               dateFormat="yy-mm-dd"
             />
             {formik.touched.IssuedDate && formik.errors.IssuedDate && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.IssuedDate}
               </div>
             )}
@@ -223,7 +223,7 @@ sumInsured
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Expiry && formik.errors.Expiry && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Expiry}
               </div>
             )}
@@ -258,7 +258,7 @@ sumInsured
           </div>
         </div>
         {formik.touched.file && formik.errors.file && (
-          <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
             {formik.errors.file}
           </div>
         )}

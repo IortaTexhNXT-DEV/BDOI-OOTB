@@ -63,7 +63,7 @@ const InputTextField = ({
       {error && (
         <div
           className="formik__error"
-          style={{ color: "red", fontSize: "12px", marginTop: "4px" }}
+          style={{ color: "var(--color-danger)", fontSize: "12px", marginTop: "4px" }}
         >
           {error}
         </div>

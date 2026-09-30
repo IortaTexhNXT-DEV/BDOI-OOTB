@@ -314,7 +314,7 @@ const SettlementDetails = () => {
                 placeholder={t("settlementDetails.select")}
               />
               {formik.touched.settlementType && formik.errors.settlementType && (
-                <div style={{ fontSize: 12, color: "red" }}>{formik.errors.settlementType}</div>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.settlementType}</div>
               )}
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -324,7 +324,7 @@ const SettlementDetails = () => {
                 onChange={formik.handleChange("settlementAmount")}
               />
               {formik.touched.settlementAmount && formik.errors.settlementAmount && (
-                <div style={{ fontSize: 12, color: "red" }}>{formik.errors.settlementAmount}</div>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.settlementAmount}</div>
               )}
             </div>
           </div>
@@ -350,7 +350,7 @@ const SettlementDetails = () => {
                 dateFormat="dd/mm/yy"
               />
               {formik.touched.settlementDate && formik.errors.settlementDate && (
-                <div style={{ fontSize: 12, color: "red" }}>{formik.errors.settlementDate}</div>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.settlementDate}</div>
               )}
             </div>
           </div>

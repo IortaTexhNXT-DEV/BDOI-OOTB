@@ -164,7 +164,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleCode && formik.errors.vehicleCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleCode}
               </div>
             )}
@@ -182,7 +182,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleName && formik.errors.vehicleName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleName}
               </div>
             )}
@@ -200,7 +200,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleVariant && formik.errors.vehicleVariant && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleVariant}
               </div>
             )}
@@ -218,7 +218,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleModel && formik.errors.vehicleModel && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleModel}
               </div>
             )}
@@ -236,7 +236,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleBrand && formik.errors.vehicleBrand && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleBrand}
               </div>
             )}
@@ -255,7 +255,7 @@ const VehicleDetailsAction = ({ action }) => {
             />
             {formik.touched.seatingCapacity &&
               formik.errors.seatingCapacity && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.seatingCapacity}
                 </div>
               )}

@@ -88,7 +88,7 @@ const ModalEditData = ({
               }
             />
             {formik.touched.categoryCode && formik.errors.categoryCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.categoryCode}
               </div>
             )}
@@ -105,7 +105,7 @@ const ModalEditData = ({
               }
             />
             {formik.touched.categoryName && formik.errors.categoryName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.categoryName}
               </div>
             )}
@@ -122,7 +122,7 @@ const ModalEditData = ({
               }
             />
             {formik.touched.description && formik.errors.description && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.description}
               </div>
             )}

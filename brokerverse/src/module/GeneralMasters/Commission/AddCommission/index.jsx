@@ -171,7 +171,7 @@ const AddCommission = () => {
   minDate.setDate(minDate.getDate() + 1);
   const headerStyle = {
     // width: '10rem',
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -274,7 +274,7 @@ const AddCommission = () => {
             />
             {formik.touched.commissionCode && formik.errors.commissionCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.commissionCode}
@@ -305,7 +305,7 @@ const AddCommission = () => {
 
             {formik.touched.insuranceCompany && formik.errors.insuranceCompany && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.insuranceCompany}
@@ -327,7 +327,7 @@ const AddCommission = () => {
             />
             {formik.touched.desc && formik.errors.desc && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.desc}
@@ -358,7 +358,7 @@ const AddCommission = () => {
 
             {formik.touched.product && formik.errors.product && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.product}
@@ -390,7 +390,7 @@ const AddCommission = () => {
             />
 
             {formik.touched.selectCover && formik.errors.selectCover && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.selectCover}
               </div>
             )}
@@ -410,7 +410,7 @@ const AddCommission = () => {
             />
             {formik.touched.maxRate && formik.errors.maxRate && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.maxRate}
@@ -448,7 +448,7 @@ const AddCommission = () => {
               </LabelWrapper>
             </div>
             {formik.touched.effectiveFrom && formik.errors.effectiveFrom && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.effectiveFrom}
               </div>
             )}
@@ -484,7 +484,7 @@ const AddCommission = () => {
               </LabelWrapper>
             </div>
             {formik.touched.effectiveTo && formik.errors.effectiveTo && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.effectiveTo}
               </div>
             )}
@@ -513,7 +513,7 @@ const AddCommission = () => {
             />
 
             {formik.touched.selectAgent && formik.errors.selectAgent && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.selectAgent}
               </div>
             )}

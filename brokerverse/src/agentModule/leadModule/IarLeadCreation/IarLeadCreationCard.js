@@ -850,7 +850,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.CompanyName &&
               personalFormik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.CompanyName}
                 </div>
               )}
@@ -863,7 +863,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.TaxNumber &&
               personalFormik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.TaxNumber}
                 </div>
               )}
@@ -880,7 +880,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.FirstName &&
             personalFormik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.FirstName}
               </div>
             )}
@@ -893,7 +893,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.LastName &&
             personalFormik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.LastName}
               </div>
             )}
@@ -909,7 +909,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.PreferredName &&
             personalFormik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.PreferredName}
               </div>
             )}
@@ -925,7 +925,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.DateofBirth &&
             personalFormik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.DateofBirth}
               </div>
             )}
@@ -969,7 +969,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.EmailID &&
             personalFormik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.EmailID}
               </div>
             )}
@@ -984,7 +984,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.ContactNumber &&
             personalFormik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.ContactNumber}
               </div>
             )}
@@ -1007,7 +1007,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.Country &&
             personalFormik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.Country}
               </div>
             )}
@@ -1030,7 +1030,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           )}
           {personalFormik.touched.ZIPCode &&
             personalFormik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.ZIPCode}
               </div>
             )}
@@ -1056,7 +1056,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.Province &&
             personalFormik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.Province}
               </div>
             )}
@@ -1077,7 +1077,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             disabled={!personalFormik.values.Province}
           />
           {personalFormik.touched.City && personalFormik.errors.City && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {personalFormik.errors.City}
             </div>
           )}
@@ -1110,7 +1110,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           )}
           {personalFormik.touched.Barangay &&
             personalFormik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.Barangay}
               </div>
             )}
@@ -1123,7 +1123,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.HouseNo &&
             personalFormik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.HouseNo}
               </div>
             )}

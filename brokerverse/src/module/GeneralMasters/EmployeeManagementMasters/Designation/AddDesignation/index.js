@@ -183,7 +183,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.designationCode &&
                 formik.errors.designationCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.designationCode}
                   </div>
                 )}
@@ -200,7 +200,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.designationName &&
                 formik.errors.designationName && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.designationName}
                   </div>
                 )}
@@ -218,7 +218,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.designationDescription &&
                 formik.errors.designationDescription && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.designationDescription}
                   </div>
                 )}
@@ -239,7 +239,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.departmentCode &&
                 formik.errors.departmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.departmentCode}
                   </div>
                 )}
@@ -262,7 +262,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.level &&
                 formik.errors.level && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.level}
                   </div>
                 )}
@@ -284,7 +284,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.reportingtoLevel &&
                 formik.errors.reportingtoLevel && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.reportingtoLevel}
                   </div>
                 )}

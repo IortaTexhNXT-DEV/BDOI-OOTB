@@ -576,7 +576,7 @@ function Createvoucher() {
               />
               {formik.touched.DepartmentCode &&
                 formik.errors.DepartmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.DepartmentCode}
                   </div>
                 )}
@@ -595,7 +595,7 @@ function Createvoucher() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.BranchCode && formik.errors.BranchCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.BranchCode}
                 </div>
               )}
@@ -614,7 +614,7 @@ function Createvoucher() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.PayeeType && formik.errors.PayeeType && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.PayeeType}
                 </div>
               )}
@@ -633,7 +633,7 @@ function Createvoucher() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.Criteria && formik.errors.Criteria && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Criteria}
                 </div>
               )}
@@ -657,7 +657,7 @@ function Createvoucher() {
                 disabled={referrersLoading}
               />
               {formik.touched.AgentReferrer && formik.errors.AgentReferrer && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AgentReferrer}
                 </div>
               )}
@@ -678,7 +678,7 @@ function Createvoucher() {
                   disabled={clientsLoading}
                 />
                 {formik.touched.CustomerCode && formik.errors.CustomerCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.CustomerCode}
                   </div>
                 )}
@@ -697,7 +697,7 @@ function Createvoucher() {
                 />
                 {formik.touched.CustomerName &&
                   formik.errors.CustomerName && (
-                    <div style={{ fontSize: 12, color: "red" }}>
+                    <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                       {formik.errors.CustomerName}
                     </div>
                   )}
@@ -746,7 +746,7 @@ function Createvoucher() {
             />
             {formik.touched.Transactioncode &&
               formik.errors.Transactioncode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Transactioncode}
                 </div>
               )}
@@ -779,7 +779,7 @@ function Createvoucher() {
             />
             {formik.touched.SelectInstrumentCurrency &&
               formik.errors.SelectInstrumentCurrency && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.SelectInstrumentCurrency}
                 </div>
               )}

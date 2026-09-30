@@ -151,7 +151,7 @@ const CoverDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.coverCode && formik.errors.coverCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.coverCode}
               </div>
             )}
@@ -169,7 +169,7 @@ const CoverDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.coverName && formik.errors.coverName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.coverName}
               </div>
             )}
@@ -188,7 +188,7 @@ const CoverDetailsAction = ({ action }) => {
             />
             {formik.touched.coverDescription &&
               formik.errors.coverDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.coverDescription}
                 </div>
               )}

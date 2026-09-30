@@ -85,7 +85,7 @@ const QuoteStatsCards = ({ leadRefId }) => {
       Approved: { color: "#2196f3", icon: "pi-check-circle", severity: "info" },
       Pending: { color: "#ff9800", icon: "pi-hourglass", severity: "warning" },
       Rejected: {
-        color: "#f44336",
+        color: "var(--color-danger)",
         icon: "pi-times-circle",
         severity: "danger",
       },

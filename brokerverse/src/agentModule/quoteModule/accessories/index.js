@@ -245,7 +245,7 @@ const Accessories = ({ action, flow }) => {
               />
 
               {formik.touched.aircon && formik.errors.aircon && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.aircon}
                 </div>
               )}
@@ -257,7 +257,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Stereo")}
               />
               {formik.touched.stereo && formik.errors.stereo && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.stereo}
                 </div>
               )}
@@ -272,7 +272,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Magwheels")}
               />
               {formik.touched.magWheels && formik.errors.magWheels && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.magWheels}
                 </div>
               )}
@@ -284,7 +284,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Others")}
               />
               {formik.touched.others && formik.errors.others && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.others}
                 </div>
               )}
@@ -299,7 +299,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Deductible")}
               />
               {formik.touched.deductible && formik.errors.deductible && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.deductible}
                 </div>
               )}
@@ -311,7 +311,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Towing")}
               />
               {formik.touched.towing && formik.errors.towing && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.towing}
                 </div>
               )}
@@ -325,7 +325,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("RepairLimit")}
               />
               {formik.touched.repairLimit && formik.errors.repairLimit && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.repairLimit}
                 </div>
               )}

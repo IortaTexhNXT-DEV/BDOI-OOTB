@@ -184,7 +184,7 @@ const ProductMatserDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.productCode && formik.errors.productCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.productCode}
               </div>
             )}
@@ -202,7 +202,7 @@ const ProductMatserDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.productName && formik.errors.productName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.productName}
               </div>
             )}
@@ -221,7 +221,7 @@ const ProductMatserDetailsAction = ({ action }) => {
             />
             {formik.touched.productDescription &&
               formik.errors.productDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.productDescription}
                 </div>
               )}
@@ -242,7 +242,7 @@ const ProductMatserDetailsAction = ({ action }) => {
               placeholder={t("productClassification.select")}
             />
             {formik.touched.lineofBusiness && formik.errors.lineofBusiness && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.lineofBusiness}
               </div>
             )}
@@ -264,7 +264,7 @@ const ProductMatserDetailsAction = ({ action }) => {
                 placeholder={t("productClassification.select")}
               />
               {formik.touched[f.name] && formik.errors[f.name] && (
-                <div style={{ fontSize: 12, color: "red" }}>{formik.errors[f.name]}</div>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors[f.name]}</div>
               )}
             </div>
           ))}

@@ -26,7 +26,7 @@ const ClientListingCard = () => {
             <ProgressSpinner />
           </div>
         ) : error ? (
-          <div style={{ textAlign: 'center', padding: '50px', color: '#ef4444' }}>
+          <div style={{ textAlign: 'center', padding: '50px', color: 'var(--color-danger)' }}>
             <p>{t("clients.errorLoadingClients", { message: error })}</p>
           </div>
         ) : (

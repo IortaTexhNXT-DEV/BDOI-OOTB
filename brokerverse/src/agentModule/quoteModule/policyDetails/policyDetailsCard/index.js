@@ -420,7 +420,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
             />
             {formik.touched.InsurancePolicyType &&
               formik.errors.InsurancePolicyType && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.InsurancePolicyType}
                 </div>
               )}
@@ -436,7 +436,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.AccountCode && formik.errors.AccountCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.AccountCode}
               </div>
             )}
@@ -454,7 +454,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.PaymentType && formik.errors.PaymentType && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PaymentType}
               </div>
             )}
@@ -492,7 +492,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               />
               {formik.touched.InstallmentType &&
                 formik.errors.InstallmentType && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.InstallmentType}
                   </div>
                 )}
@@ -520,7 +520,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.VehicleType && formik.errors.VehicleType && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.VehicleType}
               </div>
             )}
@@ -540,7 +540,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.VehicleBrand && formik.errors.VehicleBrand && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.VehicleBrand}
               </div>
             )}
@@ -556,7 +556,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.ModelYear && formik.errors.ModelYear && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ModelYear}
               </div>
             )}
@@ -578,7 +578,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.VehicleModel && formik.errors.VehicleModel && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.VehicleModel}
               </div>
             )}
@@ -598,7 +598,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.ModelVariant && formik.errors.ModelVariant && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ModelVariant}
               </div>
             )}
@@ -617,7 +617,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               optionLabel="label"
             />
             {formik.touched.VehicleColor && formik.errors.VehicleColor && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.VehicleColor}
               </div>
             )}
@@ -630,7 +630,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
             />
             {formik.touched.SeatingCapacity &&
               formik.errors.SeatingCapacity && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.SeatingCapacity}
                 </div>
               )}

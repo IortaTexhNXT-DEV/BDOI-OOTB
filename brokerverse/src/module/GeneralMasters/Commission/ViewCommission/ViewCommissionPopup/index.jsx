@@ -76,7 +76,7 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
                         />
                         {formik.touched.level && formik.errors.level && (
                             <div
-                                style={{ fontSize: 12, color: "red" }}
+                                style={{ fontSize: 12, color: "var(--color-danger)" }}
                                 className="formik__errror__JV"
                             >
                                 {formik.errors.level}
@@ -96,7 +96,7 @@ const ViewCommissionPopup = ({ showViewPopup, setShowViewPopup, handleUpdate }) 
                         />
                       {formik.touched.sharingRate && formik.errors.sharingRate && (
                             <div
-                                style={{ fontSize: 12, color: "red" }}
+                                style={{ fontSize: 12, color: "var(--color-danger)" }}
                                 className="formik__errror__JV"
                             >
                                 {formik.errors.sharingRate}

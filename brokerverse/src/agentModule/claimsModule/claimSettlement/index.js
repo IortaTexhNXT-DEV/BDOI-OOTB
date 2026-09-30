@@ -273,7 +273,7 @@ const ClaimSettlement = () => {
         </div>
         <Card>
           <div className="claim__title">{t("claimSettlementDetail.claimSettlement")}</div>
-          <div className="text-center p-4" style={{ color: "red" }}>
+          <div className="text-center p-4" style={{ color: "var(--color-danger)" }}>
             <div>{t("claimSettlementDetail.errorLoadingClaimDetails", { error: claimDetailsError })}</div>
           </div>
         </Card>

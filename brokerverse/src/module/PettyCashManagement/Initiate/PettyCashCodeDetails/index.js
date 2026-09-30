@@ -42,7 +42,7 @@ const PettyCashCodeDetails = () => {
     {
       label: t("pettyCash.pettyCashCodeDetails"),
       to: "/accounts/pettycash/PettyCashCodeDetails",
-      color: "red",
+      color: "var(--color-danger)",
     },
   ];
   const Initiate = { label: t("pettyCash.accounts") };

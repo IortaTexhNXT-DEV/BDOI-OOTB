@@ -126,7 +126,7 @@ const AddPettyCash = () => {
             }
           />
           {formik.touched.pettycashcode && formik.errors.pettycashcode && (
-            <div style={{ fontSize: 12, color: "red" }}>
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
               {formik.errors.pettycashcode}
             </div>
           )}
@@ -143,7 +143,7 @@ const AddPettyCash = () => {
             }
           />
           {formik.touched.pettycashname && formik.errors.pettycashname && (
-            <div style={{ fontSize: 12, color: "red" }}>
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
               {formik.errors.pettycashname}
             </div>
           )}
@@ -160,7 +160,7 @@ const AddPettyCash = () => {
             }
           />
           {formik.touched.pettycashsize && formik.errors.pettycashsize && (
-            <div style={{ fontSize: 12, color: "red" }}>
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
               {formik.errors.pettycashsize}
             </div>
           )}
@@ -177,7 +177,7 @@ const AddPettyCash = () => {
             }
           />
           {formik.touched.avilabelcash && formik.errors.avilabelcash && (
-            <div style={{ fontSize: 12, color: "red" }}>
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
               {formik.errors.avilabelcash}
             </div>
           )}
@@ -194,7 +194,7 @@ const AddPettyCash = () => {
             }
           />
           {formik.touched.minicashbox && formik.errors.minicashbox && (
-            <div style={{ fontSize: 12, color: "red" }}>
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
               {formik.errors.minicashbox}
             </div>
           )}
@@ -212,7 +212,7 @@ const AddPettyCash = () => {
           />
           {formik.touched.transactionlimit &&
             formik.errors.transactionlimit && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.transactionlimit}
               </div>
             )}

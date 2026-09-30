@@ -214,7 +214,7 @@ const UploadEndorsement = () => {
                 disabled={!!endorsementData?.policyNumber}
               />
               {formik.touched.policyNumber && formik.errors.policyNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.policyNumber}
                 </div>
               )}
@@ -227,7 +227,7 @@ const UploadEndorsement = () => {
               />
               {formik.touched.endrosementNumber &&
                 formik.errors.endrosementNumber && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.endrosementNumber}
                   </div>
                 )}
@@ -246,7 +246,7 @@ const UploadEndorsement = () => {
                 dateFormat="yy-mm-dd"
               />
               {formik.touched.production && formik.errors.production && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.production}
                 </div>
               )}
@@ -265,7 +265,7 @@ const UploadEndorsement = () => {
                 dateFormat="yy-mm-dd"
               />
               {formik.touched.inception && formik.errors.inception && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.inception}
                 </div>
               )}
@@ -282,7 +282,7 @@ const UploadEndorsement = () => {
                 dateFormat="yy-mm-dd"
               />
               {formik.touched.issuedDate && formik.errors.issuedDate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.issuedDate}
                 </div>
               )}
@@ -299,7 +299,7 @@ const UploadEndorsement = () => {
                 dateFormat="yy-mm-dd"
               />
               {formik.touched.expiry && formik.errors.expiry && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.expiry}
                 </div>
               )}
@@ -352,7 +352,7 @@ const UploadEndorsement = () => {
           )}
 
           {formik.errors.document && !documentUrl && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.document}
             </div>
           )}

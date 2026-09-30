@@ -162,7 +162,7 @@ const Reversals = () => {
           />
 
           {formik.touched.transactionCode && formik.errors.transactionCode && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.transactionCode}
             </div>
           )}
@@ -203,7 +203,7 @@ const Reversals = () => {
           />
           {formik.touched.transactionNumber &&
             formik.errors.transactionNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.transactionNumber}
               </div>
             )}
@@ -234,7 +234,7 @@ const Reversals = () => {
           {formik.touched.reversalJVTransactionCode &&
             formik.errors.reversalJVTransactionCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV mt-3"
               >
                 {formik.errors.reversalJVTransactionCode}

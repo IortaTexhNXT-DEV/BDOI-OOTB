@@ -172,7 +172,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               optionLabel="label"
             />
             {formik.touched.BodilyInjury && formik.errors.BodilyInjury && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.BodilyInjury}
               </div>
             )}
@@ -188,7 +188,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               optionLabel="label"
             />
             {formik.touched.BodilyInjury && formik.errors.BodilyInjury && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.BodilyInjury}
               </div>
             )}
@@ -203,7 +203,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             />
             {formik.touched.LossandDamagecoverageRate &&
               formik.errors.LossandDamagecoverageRate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoverageRate}
                 </div>
               )}
@@ -229,7 +229,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
 
             {formik.touched.LossandDamagecoveragepremium &&
               formik.errors.LossandDamagecoveragepremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoveragepremium}
                 </div>
               )}
@@ -244,7 +244,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             />
             {formik.touched.ActsofNatureRate &&
               formik.errors.ActsofNatureRate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.ActsofNatureRate}
                 </div>
               )}
@@ -268,7 +268,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             }
             {formik.touched.ActsofNaturepremium &&
               formik.errors.ActsofNaturepremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.ActsofNaturepremium}
                 </div>
               )}
@@ -286,7 +286,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               optionLabel="label"
             />
             {formik.touched.BodilyInjury && formik.errors.BodilyInjury && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.BodilyInjury}
               </div>
             )}
@@ -305,7 +305,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             />
             }    {formik.touched.BodilyInjuryCoveragePremium &&
               formik.errors.BodilyInjuryCoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.BodilyInjuryCoveragePremium}
                 </div>
               )}
@@ -323,7 +323,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               optionLabel="label"
             />
             {formik.touched.PropertyDamage && formik.errors.PropertyDamage && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PropertyDamage}
               </div>
             )}
@@ -344,7 +344,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             />}
             {formik.touched.PropertyDamageCoveragePremium &&
               formik.errors.PropertyDamageCoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.PropertyDamageCoveragePremium}
                 </div>
               )}
@@ -360,7 +360,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             />
             {formik.touched.APPATotalCoverage &&
               formik.errors.APPATotalCoverage && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.APPATotalCoverage}
                 </div>
               )}
@@ -377,7 +377,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
             />}
             {formik.touched.APPACoveragePremium &&
               formik.errors.APPACoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.APPACoveragePremium}
                 </div>
               )}
@@ -398,7 +398,7 @@ const CoverageDetailsCard = ({ action, flow, coInsurance, installmentType }) => 
               />}
             {formik.touched.TotalSumInsured &&
               formik.errors.TotalSumInsured && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.TotalSumInsured}
                 </div>
               )}

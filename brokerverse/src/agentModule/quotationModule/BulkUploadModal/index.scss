@@ -157,7 +157,7 @@
             padding: 0.5rem 0;
 
             .error-message {
-              color: #ef4444;
+              color: var(--color-danger);
               font-size: 13px;
               margin-bottom: 0.5rem;
             }

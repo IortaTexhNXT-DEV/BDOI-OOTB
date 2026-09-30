@@ -535,7 +535,7 @@ const LeadCreationCard = ({ flow, action }) => {
                 onChange={formik.handleChange("CompanyName")}
               />
               {formik.touched.CompanyName && formik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.CompanyName}
                 </div>
               )}
@@ -547,7 +547,7 @@ const LeadCreationCard = ({ flow, action }) => {
                 onChange={formik.handleChange("TaxNumber")}
               />
               {formik.touched.TaxNumber && formik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.TaxNumber}
                 </div>
               )}
@@ -563,7 +563,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("FirstName")}
             />
             {formik.touched.FirstName && formik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.FirstName}
               </div>
             )}
@@ -575,7 +575,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("LastName")}
             />
             {formik.touched.LastName && formik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.LastName}
               </div>
             )}
@@ -590,7 +590,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("PreferredName")}
             />
             {formik.touched.PreferredName && formik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PreferredName}
               </div>
             )}
@@ -606,7 +606,7 @@ const LeadCreationCard = ({ flow, action }) => {
             />
 
             {formik.touched.DateofBirth && formik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.DateofBirth}
               </div>
             )}
@@ -649,7 +649,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("EmailID")}
             />
             {formik.touched.EmailID && formik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.EmailID}
               </div>
             )}
@@ -663,7 +663,7 @@ const LeadCreationCard = ({ flow, action }) => {
               hint={mobileHint()}
             />
             {formik.touched.ContactNumber && formik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ContactNumber}
               </div>
             )}
@@ -685,7 +685,7 @@ const LeadCreationCard = ({ flow, action }) => {
               }}
             />
             {formik.touched.Country && formik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Country}
               </div>
             )}
@@ -701,7 +701,7 @@ const LeadCreationCard = ({ flow, action }) => {
               <div style={{ fontSize: 12, color: "#666" }} className="mt-1">{t("leadCreation.lookupInProgress")}</div>
             )}
             {formik.touched.ZIPCode && formik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ZIPCode}
               </div>
             )}
@@ -722,7 +722,7 @@ const LeadCreationCard = ({ flow, action }) => {
               disabled={!formik.values.Country}
             />
             {formik.touched.Province && formik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Province}
               </div>
             )}
@@ -739,7 +739,7 @@ const LeadCreationCard = ({ flow, action }) => {
               disabled={!formik.values.Province}
             />
             {formik.touched.City && formik.errors.City && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.City}
               </div>
             )}
@@ -764,7 +764,7 @@ const LeadCreationCard = ({ flow, action }) => {
               />
             )}
             {formik.touched.Barangay && formik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Barangay}
               </div>
             )}
@@ -776,7 +776,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("HouseNo")}
             />
             {formik.touched.HouseNo && formik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.HouseNo}
               </div>
             )}

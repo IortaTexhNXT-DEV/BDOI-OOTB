@@ -155,7 +155,7 @@
         color: #212529;
 
         &.negative {
-          color: #dc3545;
+          color: var(--color-danger);
         }
       }
 

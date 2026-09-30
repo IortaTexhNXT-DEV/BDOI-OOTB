@@ -22,8 +22,11 @@ $color-border: #e4e4e4; // dividers and borders
 $color-border-strong: #c2c2c1; // Light Grey: separators, disabled fills
 
 $color-success: #1d7f4e;
-$color-danger: #d32f2f;
+$color-danger: #b42318; // errors: a deep red that reads as a notice, not an alarm
+$color-danger-050: #fdf3f2;
 $color-warning: #8a5a00;
+$color-warning-050: #fdf8ec;
+$color-success-050: #eff7f2;
 
 // Typography: Nunito, Arial as the approved fallback
 $font-heading: "Nunito", Arial, sans-serif;
@@ -54,6 +57,9 @@ $sidebar-width: 280px;
   --color-text-muted: #{$color-text-muted};
   --color-placeholder: #{$color-placeholder};
   --color-border: #{$color-border};
+  --color-danger: #{$color-danger};
+  --color-success: #{$color-success};
+  --color-warning: #{$color-warning};
   --font-heading: #{$font-heading};
   --font-body: #{$font-body};
 }

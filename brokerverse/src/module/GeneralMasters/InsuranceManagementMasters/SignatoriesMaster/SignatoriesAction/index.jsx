@@ -150,7 +150,7 @@ const SignatoriesDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.signatoryCode && formik.errors.signatoryCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.signatoryCode}
               </div>
             )}
@@ -168,7 +168,7 @@ const SignatoriesDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.signatoryName && formik.errors.signatoryName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.signatoryName}
               </div>
             )}
@@ -187,7 +187,7 @@ const SignatoriesDetailsAction = ({ action }) => {
             />
             {formik.touched.signatoryDescription &&
               formik.errors.signatoryDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.signatoryDescription}
                 </div>
               )}

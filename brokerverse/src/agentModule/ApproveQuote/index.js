@@ -116,7 +116,7 @@ const ApproveQuote = () => {
       <div className="approve-quote-container">
         <Card>
           <div style={{textAlign: 'center', padding: '40px'}}>
-            <i className="pi pi-times-circle" style={{fontSize: '3rem', color: '#d32f2f'}}></i>
+            <i className="pi pi-times-circle" style={{fontSize: '3rem', color: 'var(--color-danger)'}}></i>
             <h2>{t('approveQuote.error')}</h2>
             <p>{error}</p>
           </div>

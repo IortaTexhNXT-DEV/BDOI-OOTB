@@ -249,7 +249,7 @@
 
                   &::after {
                     content: "*";
-                    color: #dc3545;
+                    color: var(--color-danger);
                     margin-left: 0.25rem;
                   }
                 }

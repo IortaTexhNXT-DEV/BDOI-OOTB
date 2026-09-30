@@ -343,7 +343,7 @@ function SpecificVoucher() {
 
   const headerStyle = {
     width: "9rem",
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,

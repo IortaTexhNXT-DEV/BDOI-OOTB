@@ -159,7 +159,7 @@ const AutomatedRemittanceProcessing = () => {
           <p>{t("remittance.youAreAboutToProcess", { count: selectedRemittances.length })}</p>
           <p><strong>{t("remittance.totalAmount")} {formatCurrency(totalAmount)}</strong></p>
           <p>{t("remittance.processingDate")} {formatDate(processingDate)}</p>
-          {overrideCutoff && <p style={{color: '#ef4444'}}>⚠ {t("remittance.cutoffOverrideEnabled")}</p>}
+          {overrideCutoff && <p style={{color: 'var(--color-danger)'}}>⚠ {t("remittance.cutoffOverrideEnabled")}</p>}
           <p>{t("remittance.doYouWantToContinue")}</p>
         </div>
       ),
@@ -488,7 +488,7 @@ const AutomatedRemittanceProcessing = () => {
                   <span>Valid: {validationResults.validCount}</span>
                 </div>
                 <div className="summary-item">
-                  <i className="pi pi-times-circle" style={{color: 'red'}}></i>
+                  <i className="pi pi-times-circle" style={{color: 'var(--color-danger)'}}></i>
                   <span>Invalid: {validationResults.invalidCount}</span>
                 </div>
               </div>

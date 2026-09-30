@@ -238,7 +238,7 @@ function PolicyReceipts() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.bankcode && formik.errors.bankcode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.bankcode}
                 </div>
               )}
@@ -273,7 +273,7 @@ function PolicyReceipts() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.bankAccount && formik.errors.bankAccount && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.bankAccount}
                 </div>
               )}
@@ -308,7 +308,7 @@ function PolicyReceipts() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.paymentType && formik.errors.paymentType && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.paymentType}
                 </div>
               )}

@@ -356,7 +356,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('EmployeeID')}
                         />
                         {formik.errors.EmployeeID && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.EmployeeID}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.EmployeeID}</div>
                         )}
 
                         <InputTextField
@@ -365,7 +365,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Name')}
                         />
                         {formik.errors.Name && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Name}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Name}</div>
                         )}
 
                         <div className="field">
@@ -385,7 +385,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 }}
                             />
                             {formik.errors.DateofBirth && (
-                                <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.DateofBirth}</div>
+                                <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.DateofBirth}</div>
                             )}
                         </div>
 
@@ -403,7 +403,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 className="w-full"
                             />
                             {formik.errors.Gender && (
-                                <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Gender}</div>
+                                <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Gender}</div>
                             )}
                         </div>
 
@@ -413,7 +413,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Occupation')}
                         />
                         {formik.errors.Occupation && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Occupation}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Occupation}</div>
                         )}
 
                         <InputTextField
@@ -422,7 +422,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Salary')}
                         />
                         {formik.errors.Salary && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Salary}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Salary}</div>
                         )}
 
                         <InputTextField
@@ -431,7 +431,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('PlanClass')}
                         />
                         {formik.errors.PlanClass && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.PlanClass}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.PlanClass}</div>
                         )}
 
                         <InputTextField
@@ -440,7 +440,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('SumInsured')}
                         />
                         {formik.errors.SumInsured && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.SumInsured}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.SumInsured}</div>
                         )}
 
                         <InputTextField
@@ -449,7 +449,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Remarks')}
                         />
                         {formik.errors.Remarks && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Remarks}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Remarks}</div>
                         )}
 
                         <div style={{ marginTop: '20px', textAlign: 'right' }}>

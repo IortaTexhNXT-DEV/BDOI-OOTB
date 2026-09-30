@@ -242,7 +242,7 @@ const ViewCommission = () => {
 
             {formik.touched.transactionCode &&
               formik.errors.transactionCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.transactionCode}
                 </div>
               )}
@@ -273,7 +273,7 @@ const ViewCommission = () => {
 
             {formik.touched.transactionCode &&
               formik.errors.transactionCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.transactionCode}
                 </div>
               )}
@@ -366,7 +366,7 @@ const ViewCommission = () => {
 
             {formik.touched.transactionCode &&
               formik.errors.transactionCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.transactionCode}
                 </div>
               )}

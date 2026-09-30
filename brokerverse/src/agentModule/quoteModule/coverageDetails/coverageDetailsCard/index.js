@@ -846,7 +846,7 @@ const CoverageDetailsCard = ({
             />
             {formik.touched.LossandDamagecoverage &&
               formik.errors.LossandDamagecoverage && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoverage}
                 </div>
               )}
@@ -861,7 +861,7 @@ const CoverageDetailsCard = ({
             />
             {formik.touched.LossandDamagecoverageRate &&
               formik.errors.LossandDamagecoverageRate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoverageRate}
                 </div>
               )}
@@ -883,7 +883,7 @@ const CoverageDetailsCard = ({
 
             {formik.touched.LossandDamagecoveragepremium &&
               formik.errors.LossandDamagecoveragepremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoveragepremium}
                 </div>
               )}
@@ -925,7 +925,7 @@ const CoverageDetailsCard = ({
               />
             )}
             {includeCTPL && !ctplTariffPremium && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {t("coverageDetailsCard.ctplNeedsVehicleType")}
               </div>
             )}
@@ -956,7 +956,7 @@ const CoverageDetailsCard = ({
               />
               {formik.touched.ActsofNatureRate &&
                 formik.errors.ActsofNatureRate && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.ActsofNatureRate}
                   </div>
                 )}
@@ -977,7 +977,7 @@ const CoverageDetailsCard = ({
               )}
               {formik.touched.ActsofNaturepremium &&
                 formik.errors.ActsofNaturepremium && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.ActsofNaturepremium}
                   </div>
                 )}
@@ -1009,7 +1009,7 @@ const CoverageDetailsCard = ({
               />
               {formik.touched.RoadsideAssistanceRate &&
                 formik.errors.RoadsideAssistanceRate && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.RoadsideAssistanceRate}
                   </div>
                 )}
@@ -1030,7 +1030,7 @@ const CoverageDetailsCard = ({
               )}
               {formik.touched.RoadsideAssistancepremium &&
                 formik.errors.RoadsideAssistancepremium && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.RoadsideAssistancepremium}
                   </div>
                 )}
@@ -1061,7 +1061,7 @@ const CoverageDetailsCard = ({
               />
               {formik.touched.PersonalAccidentCoverRate &&
                 formik.errors.PersonalAccidentCoverRate && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.PersonalAccidentCoverRate}
                   </div>
                 )}
@@ -1082,7 +1082,7 @@ const CoverageDetailsCard = ({
               )}
               {formik.touched.PersonalAccidentCoverpremium &&
                 formik.errors.PersonalAccidentCoverpremium && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.PersonalAccidentCoverpremium}
                   </div>
                 )}
@@ -1102,7 +1102,7 @@ const CoverageDetailsCard = ({
               optionValue="value"
             />
             {formik.touched.BodilyInjury && formik.errors.BodilyInjury && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.BodilyInjury}
               </div>
             )}
@@ -1123,7 +1123,7 @@ const CoverageDetailsCard = ({
             )}{" "}
             {formik.touched.BodilyInjuryCoveragePremium &&
               formik.errors.BodilyInjuryCoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.BodilyInjuryCoveragePremium}
                 </div>
               )}
@@ -1142,7 +1142,7 @@ const CoverageDetailsCard = ({
               optionValue="value"
             />
             {formik.touched.PropertyDamage && formik.errors.PropertyDamage && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PropertyDamage}
               </div>
             )}
@@ -1163,7 +1163,7 @@ const CoverageDetailsCard = ({
             )}
             {formik.touched.PropertyDamageCoveragePremium &&
               formik.errors.PropertyDamageCoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.PropertyDamageCoveragePremium}
                 </div>
               )}
@@ -1183,7 +1183,7 @@ const CoverageDetailsCard = ({
             />
             {formik.touched.AutopassengerpersonalAccident &&
               formik.errors.AutopassengerpersonalAccident && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.AutopassengerpersonalAccident}
                 </div>
               )}
@@ -1229,7 +1229,7 @@ const CoverageDetailsCard = ({
             )}
             {formik.touched.TotalSumInsured &&
               formik.errors.TotalSumInsured && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.TotalSumInsured}
                 </div>
               )}

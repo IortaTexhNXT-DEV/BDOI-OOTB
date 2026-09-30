@@ -118,7 +118,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                         />
                         {formik.touched.UserRole && formik.errors.UserRole && (
                             <div
-                                style={{ fontSize: 12, color: "red" }}
+                                style={{ fontSize: 12, color: "var(--color-danger)" }}
                                 className="formik__errror__JV"
                             >
                                 {formik.errors.UserRole}

@@ -177,7 +177,7 @@ function AddCity({ action }) {
                 }
               />
               {formik.touched.CityCode && formik.errors.CityCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.CityCode}
                 </div>
               )}
@@ -196,7 +196,7 @@ function AddCity({ action }) {
                 }
               />
               {formik.touched.CityName && formik.errors.CityName && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.CityName}
                 </div>
               )}
@@ -215,7 +215,7 @@ function AddCity({ action }) {
                 }
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}
@@ -241,7 +241,7 @@ function AddCity({ action }) {
                 }
               />
               {formik.touched.State && formik.errors.State && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.State}
                 </div>
               )}
@@ -261,7 +261,7 @@ function AddCity({ action }) {
                 }
               />
               {formik.touched.Modifiedby && formik.errors.Modifiedby && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Modifiedby}
                 </div>
               )}
@@ -280,7 +280,7 @@ function AddCity({ action }) {
                 }
               />
               {formik.touched.ModifiedOn && formik.errors.ModifiedOn && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.ModifiedOn}
                 </div>
               )}

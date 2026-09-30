@@ -49,7 +49,7 @@
       }
 
       &.red i {
-        color: #f44336;
+        color: var(--color-danger);
       }
     }
   }

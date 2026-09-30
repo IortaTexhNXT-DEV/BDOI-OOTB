@@ -120,7 +120,7 @@ function ViewExchange() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.CurrencyCode && formik.errors.CurrencyCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.CurrencyCode}
                 </div>
               )}
@@ -160,7 +160,7 @@ function ViewExchange() {
               />
               {formik.touched.ToCurrencyCode &&
                 formik.errors.ToCurrencyCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.ToCurrencyCode}
                   </div>
                 )}
@@ -215,7 +215,7 @@ function ViewExchange() {
               onChange={formik.handleChange("ExchangeRate")}
             />
             {formik.touched.ExchangeRate && formik.errors.ExchangeRate && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.ExchangeRate}
               </div>
             )}

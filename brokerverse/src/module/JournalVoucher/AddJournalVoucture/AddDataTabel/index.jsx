@@ -322,7 +322,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.mainAccount && formik.errors.mainAccount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.mainAccount}
@@ -350,7 +350,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.entryType && formik.errors.entryType && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.entryType}
@@ -374,7 +374,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.subAccount && formik.errors.subAccount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.subAccount}
@@ -403,7 +403,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.branchCode && formik.errors.branchCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.branchCode}
@@ -419,7 +419,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               {formik.touched.branchCodeDescription &&
                 formik.errors.branchCodeDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.branchCodeDescription}
@@ -444,7 +444,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               {formik.touched.departmentCode &&
                 formik.errors.departmentCode && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.departmentCode}
@@ -460,7 +460,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               {formik.touched.departmentDescription &&
                 formik.errors.departmentDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.departmentDescription}
@@ -484,7 +484,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.currencyCode && formik.errors.currencyCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.currencyCode}
@@ -500,7 +500,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               {formik.touched.currencyDescription &&
                 formik.errors.currencyDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.currencyDescription}
@@ -519,7 +519,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.foreignAmount && formik.errors.foreignAmount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.foreignAmount}
@@ -540,7 +540,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.remarks && formik.errors.remarks && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.remarks}

@@ -122,7 +122,7 @@ const City = () => {
 
   const headerStyle = {
     // width: '10rem',
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,

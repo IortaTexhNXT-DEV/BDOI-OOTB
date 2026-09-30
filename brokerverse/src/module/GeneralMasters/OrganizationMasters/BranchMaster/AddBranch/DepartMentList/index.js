@@ -249,7 +249,7 @@ const DepartMentList = ({ action, branchCode }) => {
               />
               {formik.touched.DepartmentCode &&
                 formik.errors.DepartmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.DepartmentCode}
                   </div>
                 )}
@@ -266,7 +266,7 @@ const DepartMentList = ({ action, branchCode }) => {
               />
               {formik.touched.DepartmentName &&
                 formik.errors.DepartmentName && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.DepartmentName}
                   </div>
                 )}
@@ -284,7 +284,7 @@ const DepartMentList = ({ action, branchCode }) => {
                 onChange={formik.handleChange("Description")}
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}

@@ -153,7 +153,7 @@ const LineBusinessDetailsAction = ({ action }) => {
             />
             {formik.touched.lineofBusinessCode &&
               formik.errors.lineofBusinessCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.lineofBusinessCode}
                 </div>
               )}
@@ -169,7 +169,7 @@ const LineBusinessDetailsAction = ({ action }) => {
               onChange={(e) => formik.setFieldValue("LOBName", e.target.value)}
             />
             {formik.touched.LOBName && formik.errors.LOBName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.LOBName}
               </div>
             )}
@@ -187,7 +187,7 @@ const LineBusinessDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.LOBDescription && formik.errors.LOBDescription && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.LOBDescription}
               </div>
             )}
