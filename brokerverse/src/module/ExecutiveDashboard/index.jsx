@@ -40,7 +40,7 @@ const QUICK_ACTIONS = [
   { label: "executiveDashboard.newQuote", icon: "pi pi-plus", severity: "success", path: "/agent/createlead" },
   { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", severity: "info", path: "/reports/operationalreports/production" },
   { label: "executiveDashboard.policiesLabel", icon: "pi pi-briefcase", path: "/agent/policy" },
-  { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", severity: "warning", path: "/agent/home" },
+  { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", severity: "warning", path: "/sales/dashboard" },
 ];
 
 const CHART_COLORS = [

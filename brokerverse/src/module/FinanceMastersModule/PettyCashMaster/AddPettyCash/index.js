@@ -39,9 +39,6 @@ const AddPettyCash = () => {
   const customValidation = (values) => {
     const errors = {};
 
-    if (!values.pettycashcode) {
-      errors.pettycashcode = t("validation.fieldRequired");
-    }
 
     if (!values.pettycashname) {
       errors.pettycashname = t("financeMasters.thisFieldIsRequired");
@@ -121,9 +118,8 @@ const AddPettyCash = () => {
             label={t("financeMasters.pettyCashCode")}
             placeholder={t("financeMasters.enter")}
             value={formik.values.pettycashcode}
-            onChange={(e) =>
-              formik.setFieldValue("pettycashcode", e.target.value)
-            }
+            disabled
+            placeholder={t("generalMasters.issuedOnSave")}
           />
           {formik.touched.pettycashcode && formik.errors.pettycashcode && (
             <div style={{ fontSize: 12, color: "var(--color-danger)" }}>

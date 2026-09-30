@@ -14,9 +14,18 @@ import placementService from "../../services/placementService";
 import { calendarDateFormat } from "../../utility/dateFormat";
 import { CustomerPicker, PageHeader, RiskDetailsEditor, customerFields, customerName, round2, usePlacementOptions } from "./shared";
 import { isoDate } from "./dates";
+import useMasterOptions from "../GeneralMasters/common/useMasterOptions";
 import "./index.scss";
 
 const blankCover = () => ({ cover: "", sumInsured: null, deductible: "" });
+
+/** End of a one-year term: the day before the anniversary of the inception (30 Sep 2026 -> 29 Sep 2027). */
+const termEnd = (start) => {
+  if (!start) return null;
+  const d = new Date(start.getFullYear() + 1, start.getMonth(), start.getDate());
+  d.setDate(d.getDate() - 1);
+  return d;
+};
 
 /** The picked lead of a prefilled request (from the Fire / IAR quote cards or Quick Quote). */
 const prefilledCustomer = (prefill) =>
@@ -43,8 +52,10 @@ const BrokerSlipCreate = () => {
   const [vehicle, setVehicle] = useState({ vehicleBrand: "", vehicleModel: "", modelYear: "", plateNumber: "", fmv: null });
   const [covers, setCovers] = useState(() => (prefill?.requestedCovers?.length ? prefill.requestedCovers.map((c) => ({ ...blankCover(), ...c })) : [blankCover()]));
   const [insurers, setInsurers] = useState([]);
-  const [inception, setInception] = useState(null);
-  const [expiry, setExpiry] = useState(null);
+  const [inception, setInception] = useState(() => new Date());
+  const [expiry, setExpiry] = useState(() => termEnd(new Date()));
+  // the expiry follows the inception (one-year term) until the user sets it
+  const [expiryTouched, setExpiryTouched] = useState(false);
   const [responseDue, setResponseDue] = useState(null);
   const [remarks, setRemarks] = useState("");
   const [saving, setSaving] = useState(false);
@@ -58,6 +69,12 @@ const BrokerSlipCreate = () => {
   }, [options.products, prefill, productId]);
 
   const product = options.products.find((p) => p.id === productId);
+  // covers of the product's line from the Cover master (covers without a line are offered for every line)
+  const coverOptions = useMasterOptions("cover", { filter: product?.line ? { linesOfBusiness: product.line } : {}, enabled: Boolean(product) });
+  const coverChoices = (current) => {
+    const list = coverOptions.map((o) => ({ label: o.label, value: o.label }));
+    return current && !list.some((o) => o.value === current) ? [...list, { label: current, value: current }] : list;
+  };
   // non-package products are placed through requests for quotation; package ones are offered on request
   const productChoices = options.products.filter((p) => showPackage || p.businessType !== "package" || p.id === productId);
   const motor = product?.lob === "MOTOR";
@@ -117,11 +134,11 @@ const BrokerSlipCreate = () => {
           </div>
           <div className="col-12 md:col-3">
             <label>{t("placement.fields.inception")}</label>
-            <Calendar value={inception} onChange={(e) => setInception(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
+            <Calendar value={inception} onChange={(e) => { setInception(e.value); if (!expiryTouched) setExpiry(termEnd(e.value)); }} dateFormat={calendarDateFormat()} showIcon className="w-full" />
           </div>
           <div className="col-12 md:col-3">
             <label>{t("placement.fields.expiry")}</label>
-            <Calendar value={expiry} onChange={(e) => setExpiry(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
+            <Calendar value={expiry} onChange={(e) => { setExpiry(e.value); setExpiryTouched(true); }} minDate={inception || undefined} dateFormat={calendarDateFormat()} showIcon className="w-full" />
           </div>
           <div className="col-12 md:col-3">
             <label>{t("placement.fields.responseDue")}</label>
@@ -158,7 +175,7 @@ const BrokerSlipCreate = () => {
           <tbody>
             {covers.map((c, i) => (
               <tr key={i}>
-                <td><InputText value={c.cover} onChange={(e) => setCover(i, { cover: e.target.value })} className="w-full" placeholder={t("placement.fields.coverPlaceholder")} /></td>
+                <td><Dropdown value={c.cover} options={coverChoices(c.cover)} onChange={(e) => setCover(i, { cover: e.value })} filter className="w-full" disabled={!product} placeholder={product ? t("placement.fields.chooseCover") : t("placement.fields.chooseProductFirst")} emptyMessage={t("placement.fields.noCovers")} /></td>
                 <td style={{ width: "14rem" }}><InputNumber value={c.sumInsured} onValueChange={(e) => setCover(i, { sumInsured: e.value })} mode="decimal" minFractionDigits={2} className="w-full" inputClassName="w-full text-right" /></td>
                 <td><InputText value={c.deductible} onChange={(e) => setCover(i, { deductible: e.target.value })} className="w-full" /></td>
                 <td className="center"><Button icon="pi pi-trash" text rounded severity="danger" onClick={() => setCovers(covers.length > 1 ? covers.filter((_, k) => k !== i) : [blankCover()])} aria-label={t("placement.actions.remove")} /></td>

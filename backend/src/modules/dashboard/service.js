@@ -229,3 +229,116 @@ export async function agentHome(book) {
     commission: { unpaid: round2(commission.unpaid), paid: round2(commission.paid) },
     premium: { gross: round2(premium.gross), collected: round2(premium.collected), receivable: round2(premium.receivable) }, clients: clients.n };
 }
+
+const OPEN_QUOTES = ['draft', 'sent', 'accepted', 'submitted', 'approved'];
+/** Sales person of a record: the owner column, else whoever entered it (created_by holds a user id or a username). */
+const personOf = (col, alias) => `(SELECT u.id FROM users u WHERE u.id = COALESCE(${alias}.${col}, ${alias}.created_by) OR u.username = COALESCE(${alias}.${col}, ${alias}.created_by) LIMIT 1)`;
+
+/**
+ * Sales Dashboard: prospects, quotations, conversion and premium for a date range (default this month), the current
+ * pipeline by stage and the figures per sales person. `book` (ownBook) limits every figure to one sales person's book;
+ * null is the whole book.
+ */
+export async function salesOverview({ book = null, from, to } = {}) {
+  const p = [];
+  const lead = inBook(book, 'lead', 'l', p);
+  const quote = inBook(book, 'quote', 'q', p);
+  const policy = inBook(book, 'policy', 'po', p);
+  p.push(await businessTimeZone());
+  const tz = `$${p.length}`;
+  p.push(from);
+  const f = `$${p.length}::date`;
+  p.push(to);
+  const t = `$${p.length}::date`;
+  p.push(OPEN_QUOTES);
+  const open = `$${p.length}::text[]`;
+  const day = (col) => `(${col} AT TIME ZONE ${tz})::date`;
+  const inRange = (col) => `${day(col)} BETWEEN ${f} AND ${t}`;
+  const issued = `COALESCE(po.issued_date, ${day('po.created_at')})`;
+  const k = await one(`SELECT
+      (SELECT count(*)::int FROM leads l WHERE l.deleted_at IS NULL AND ${lead}) AS prospects,
+      (SELECT count(*)::int FROM leads l WHERE l.deleted_at IS NULL AND ${lead} AND ${inRange('l.created_at')}) AS new_prospects,
+      (SELECT count(*)::int FROM leads l WHERE l.deleted_at IS NULL AND ${lead} AND ${inRange('l.created_at')} AND lower(l.status) = 'converted') AS converted_prospects,
+      (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND ${inRange('q.created_at')}) AS quotations,
+      (SELECT COALESCE(sum(q.premium_total), 0) FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND ${inRange('q.created_at')}) AS quoted_premium,
+      (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND ${inRange('q.created_at')} AND q.status = 'converted') AS converted_quotes,
+      (SELECT count(*)::int FROM policies po WHERE ${policy} AND ${issued} BETWEEN ${f} AND ${t}) AS policies,
+      (SELECT COALESCE(sum(po.premium_total), 0) FROM policies po WHERE ${policy} AND ${issued} BETWEEN ${f} AND ${t}) AS premium,
+      (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND q.status = ANY(${open})) AS pipeline_count,
+      (SELECT COALESCE(sum(q.premium_total), 0) FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND q.status = ANY(${open})) AS pipeline_value`, p);
+
+  // current pipeline: open prospects by status (in the configured order), then open quotations by status
+  const statuses = await getSetting('leads.statuses', ['New', 'Contacted', 'Qualified', 'QuoteGenerated', 'Converted', 'Lost']);
+  const lp = [];
+  const leadRows = await many(`SELECT l.status, count(*)::int AS count FROM leads l WHERE l.deleted_at IS NULL AND ${inBook(book, 'lead', 'l', lp)} GROUP BY 1`, lp);
+  const order = (s) => { const i = statuses.findIndex((x) => String(x).toLowerCase() === String(s).toLowerCase()); return i < 0 ? statuses.length : i; };
+  const qp = [OPEN_QUOTES];
+  const quoteRows = await many(`SELECT q.status, count(*)::int AS count, COALESCE(sum(q.premium_total), 0) AS premium FROM quotes q
+    WHERE q.deleted_at IS NULL AND q.status = ANY($1::text[]) AND ${inBook(book, 'quote', 'q', qp)} GROUP BY 1`, qp);
+  const pipeline = {
+    prospects: leadRows.sort((a, b) => order(a.status) - order(b.status)).map((r) => ({ stage: r.status, count: r.count })),
+    quotations: OPEN_QUOTES.map((s) => quoteRows.find((r) => r.status === s)).filter(Boolean)
+      .map((r) => ({ stage: quoteStatusOut(r.status), count: r.count, premium: round2(r.premium) })),
+  };
+
+  // per sales person over the same range
+  const sp = [];
+  const bl = inBook(book, 'lead', 'l', sp);
+  const bq = inBook(book, 'quote', 'q', sp);
+  const bp = inBook(book, 'policy', 'po', sp);
+  sp.push(await businessTimeZone());
+  const stz = `$${sp.length}`;
+  sp.push(from);
+  const sf = `$${sp.length}::date`;
+  sp.push(to);
+  const st = `$${sp.length}::date`;
+  const sday = (col) => `(${col} AT TIME ZONE ${stz})::date`;
+  const people = await many(`WITH l AS (SELECT ${personOf('owner_user_id', 'l')} AS uid, count(*)::int AS prospects,
+        count(*) FILTER (WHERE lower(l.status) = 'converted')::int AS converted
+        FROM leads l WHERE l.deleted_at IS NULL AND ${bl} AND ${sday('l.created_at')} BETWEEN ${sf} AND ${st} GROUP BY 1),
+      q AS (SELECT ${personOf('agent_user_id', 'q')} AS uid, count(*)::int AS quotations, COALESCE(sum(q.premium_total), 0) AS quoted
+        FROM quotes q WHERE q.deleted_at IS NULL AND ${bq} AND ${sday('q.created_at')} BETWEEN ${sf} AND ${st} GROUP BY 1),
+      po AS (SELECT ${personOf('owner_user_id', 'po')} AS uid, count(*)::int AS policies, COALESCE(sum(po.premium_total), 0) AS premium
+        FROM policies po WHERE ${bp} AND COALESCE(po.issued_date, ${sday('po.created_at')}) BETWEEN ${sf} AND ${st} GROUP BY 1),
+      ids AS (SELECT uid FROM l UNION SELECT uid FROM q UNION SELECT uid FROM po)
+    SELECT ids.uid, u.display_name AS name, u.branch_code AS branch, COALESCE(l.prospects, 0) AS prospects, COALESCE(l.converted, 0) AS converted,
+      COALESCE(q.quotations, 0) AS quotations, COALESCE(q.quoted, 0) AS quoted, COALESCE(po.policies, 0) AS policies, COALESCE(po.premium, 0) AS premium
+    FROM ids LEFT JOIN users u ON u.id = ids.uid LEFT JOIN l ON l.uid IS NOT DISTINCT FROM ids.uid
+      LEFT JOIN q ON q.uid IS NOT DISTINCT FROM ids.uid LEFT JOIN po ON po.uid IS NOT DISTINCT FROM ids.uid
+    ORDER BY premium DESC, quotations DESC, prospects DESC`, sp);
+
+  const pr = [];
+  const own = inBook(book, 'policy', 'po', pr);
+  pr.push(await businessTimeZone(), from, to);
+  const n = pr.length;
+  const byProduct = await many(`SELECT COALESCE(po.product_type, pr.name, po.lob, 'Other') AS product, COALESCE(sum(po.premium_total), 0) AS premium, count(*)::int AS policies
+    FROM policies po LEFT JOIN products pr ON pr.id = po.product_id
+    WHERE ${own} AND COALESCE(po.issued_date, (po.created_at AT TIME ZONE $${n - 2})::date) BETWEEN $${n - 1}::date AND $${n}::date
+    GROUP BY 1 ORDER BY 2 DESC`, pr);
+
+  return {
+    period: { from, to },
+    kpis: {
+      prospects: k.prospects, newProspects: k.new_prospects, convertedProspects: k.converted_prospects, quotations: k.quotations,
+      quotedPremium: round2(k.quoted_premium), convertedQuotations: k.converted_quotes, policies: k.policies, premium: round2(k.premium),
+      prospectConversionRate: pct(k.converted_prospects, k.new_prospects), quoteConversionRate: pct(k.converted_quotes, k.quotations),
+      pipelineCount: k.pipeline_count, pipelineValue: round2(k.pipeline_value),
+    },
+    pipeline,
+    bySalesPerson: people.map((r) => ({
+      userId: r.uid, name: r.name || 'Unassigned', branch: r.branch, prospects: r.prospects, quotations: r.quotations, quotedPremium: round2(r.quoted),
+      policies: r.policies, premium: round2(r.premium), conversionRate: pct(r.converted, r.prospects),
+    })),
+    premiumByProduct: { labels: byProduct.map((r) => r.product), data: byProduct.map((r) => round2(r.premium)), policies: byProduct.map((r) => r.policies) },
+    monthlyTrend: await monthlyTrend(12, book),
+  };
+}
+
+/** Sales persons for the dashboard filter: active users holding the sales role, and anyone who owns prospects or quotations. */
+export async function salesPersons() {
+  return many(`SELECT u.id, u.display_name AS name FROM users u WHERE u.status = 'active' AND (
+      EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.code = 'sales')
+      OR EXISTS (SELECT 1 FROM leads l WHERE l.deleted_at IS NULL AND (l.owner_user_id = u.id OR l.created_by IN (u.id, u.username)))
+      OR EXISTS (SELECT 1 FROM quotes q WHERE q.deleted_at IS NULL AND (q.agent_user_id = u.id OR q.created_by IN (u.id, u.username))))
+    ORDER BY u.display_name`);
+}

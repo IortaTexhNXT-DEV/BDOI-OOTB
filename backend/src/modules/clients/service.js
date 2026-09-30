@@ -110,7 +110,8 @@ export async function clientFromLead(db, leadId, overrides = {}, userId = null) 
   const existing = (await db.query('SELECT id FROM clients WHERE lead_id = $1', [leadId])).rows[0];
   const lead = (await db.query('SELECT * FROM leads WHERE id = $1', [leadId])).rows[0];
   if (!lead) throw notFound('Lead not found');
-  let clientId = existing?.id;
+  // a prospect raised for an existing customer already names its client
+  let clientId = existing?.id || lead.client_id || null;
   if (!clientId) {
     await assertBirthDate(columnsFrom(overrides).cols.birth_date);
     const cols = {

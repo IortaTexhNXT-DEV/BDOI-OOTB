@@ -111,7 +111,7 @@ describe('master upload and template download', () => {
     const tpl = await api('get', '/masters/cover/template').buffer(true).parse((res, cb) => { const b = []; res.on('data', (x) => b.push(x)); res.on('end', () => cb(null, Buffer.concat(b))); });
     expect(tpl.status).toBe(200);
     expect(tpl.headers['content-disposition']).toContain('Cover_Upload_Template.xlsx');
-    expect(readXlsx(tpl.body)[0]).toEqual(['Cover Code', 'Cover Name', 'Cover Description', 'Status']);
+    expect(readXlsx(tpl.body)[0]).toEqual(['Cover Code', 'Cover Name', 'Cover Description', 'Lines of business (blank: every line)', 'Status']);
     const r = await upload('/masters/cover/upload', 'covers.csv', {}, csvBuffer([['Cover Code', 'Cover Name', 'Cover Description', 'Status'], ['TPL-X', 'Test cover', 'Uploaded cover', 'Inactive'], ['', 'No code', 'x', '']]));
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.data).toMatchObject({ total: 2, created: 1, failed: 1 });

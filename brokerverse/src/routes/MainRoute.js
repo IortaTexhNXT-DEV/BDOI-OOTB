@@ -192,6 +192,7 @@ import Production from "../module/Reports/OperationalReports/Production";
 // Dashboard Imports
 import ExecutiveDashboard from "../module/ExecutiveDashboard";
 import ClaimsDashboard from "../module/ClaimsModule/ClaimsDashboard";
+import SalesDashboard from "../module/SalesDashboard";
 import UnderwritingDashboard from "../module/UnderwritingModule/UnderwritingDashboard";
 import SoaPremiumReceivable from "../module/Reports/FinancialReports/SoaPremiumReceivable";
 import Claims from "../module/Reports/OperationalReports/Claims";
@@ -1399,6 +1400,7 @@ const Maincomponent = () => {
           <Route path="/" element={<ExecutiveDashboard />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
+          <Route path="/sales/dashboard" element={<SalesDashboard />} />
           <Route
             path="/processing/dashboard"
             element={<UnderwritingDashboard />}

@@ -35,7 +35,8 @@ import EditCommissionPopup from "../EditCommission/EditCommissionPopup";
 import ViewCommissionPopup from "../ViewCommission/ViewCommissionPopup";
 import { Card } from "primereact/card";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
-import { calendarDateFormat } from "../../../../utility/dateFormat";
+import { calendarDateFormat, toIsoDate } from "../../../../utility/dateFormat";
+import { MultiSelect } from "primereact/multiselect";
 
 const AddCommission = () => {
   const { t } = useTranslation();
@@ -73,9 +74,6 @@ const AddCommission = () => {
   const customValidation = (values) => {
     const errors = {};
 
-    if (!values.commissionCode) {
-      errors.commissionCode = t("validation.fieldRequired");
-    }
        if (!values.insuranceCompany) {
       errors.insuranceCompany = t("validation.fieldRequired");
     }
@@ -86,20 +84,18 @@ const AddCommission = () => {
     if (!values.product) {
       errors.product = t("validation.fieldRequired");
     }
-    if (!values.selectCover) {
+    if (!values.selectCover?.length) {
       errors.selectCover = t("validation.fieldRequired");
     }
     if (!values.maxRate) {
       errors.maxRate = t("validation.fieldRequired");
     }
-    if (!values.selectAgent) {
-      errors.selectAgent = t("validation.fieldRequired");
-    }
     if (!values.effectiveFrom) {
       errors.effectiveFrom = t("validation.fieldRequired");
     }
-    if (!values.effectiveTo) {
-      errors.effectiveTo = t("validation.fieldRequired");
+    // Effective To is optional (open ended) and may not be before Effective From
+    if (values.effectiveTo && values.effectiveFrom && values.effectiveTo < values.effectiveFrom) {
+      errors.effectiveTo = t("generalMasters.effectiveToBeforeFrom");
     }
 
     return errors;
@@ -139,11 +135,11 @@ const AddCommission = () => {
       // pettycashname: "",
       insuranceCompany: "",
       product: "",
-      selectCover: "",
+      selectCover: [],
       maxRate: "",
       selectAgent: "",
-      effectiveFrom: new Date(),
-      effectiveTo: new Date(),
+      effectiveFrom: toIsoDate(new Date()),
+      effectiveTo: "",
     },
     validate: customValidation,
 
@@ -266,11 +262,9 @@ const AddCommission = () => {
                   : "input__label__reversal__inactive"
               }
               label={t("generalMasters.commissionCode")}
-              placeholder={t("generalMasters.enter")}
+              placeholder={t("generalMasters.issuedOnSave")}
               value={formik.values.commissionCode}
-              onChange={(e) =>
-                formik.setFieldValue("commissionCode", e.target.value)
-              }
+              disabled
             />
             {formik.touched.commissionCode && formik.errors.commissionCode && (
               <div
@@ -366,28 +360,19 @@ const AddCommission = () => {
             )}
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
-            <DropDowns
-              disabled={step === 0 ? false : true}
-              className={
-                step === 0
-                  ? "input__field__reversal"
-                  : "input__field__reversal__inactive"
-              }
-              classNames={
-                step === 0
-                  ? "input__label__reversal"
-                  : "input__label__reversal__inactive"
-              }
-              label={t("generalMasters.selectCovers")}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={formik.values.selectCover}
-              onChange={(e) =>
-                formik.setFieldValue("selectCover", e.target.value)
-              }
-              options={selectCover}
-              optionLabel="value"
-              placeholder={"Select"}
-            />
+            <LabelWrapper label={t("generalMasters.selectCovers")} textSize={"16px"} textColor={"#000"} textWeight={"300"} classNames="input__field__reversal">
+              <MultiSelect
+                value={formik.values.selectCover}
+                onChange={(e) => formik.setFieldValue("selectCover", e.value)}
+                options={selectCover}
+                optionLabel="label"
+                optionValue="value"
+                display="chip"
+                filter
+                placeholder={t("generalMasters.selectCoversPlaceholder")}
+                className="w-full"
+              />
+            </LabelWrapper>
 
             {formik.touched.selectCover && formik.errors.selectCover && (
               <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
@@ -433,9 +418,7 @@ const AddCommission = () => {
                       : null
                   }
                   onChange={(e) => {
-                    formik.handleChange("effectiveFrom")(
-                      e.value.toISOString().split("T")[0]
-                    );
+                    formik.setFieldValue("effectiveFrom", toIsoDate(e.value));
                   }}
                   dateFormat={calendarDateFormat()}
                   showIcon
@@ -469,13 +452,13 @@ const AddCommission = () => {
                       : null
                   }
                   onChange={(e) => {
-                    formik.handleChange("effectiveTo")(
-                      e.value.toISOString().split("T")[0]
-                    );
+                    formik.setFieldValue("effectiveTo", e.value ? toIsoDate(e.value) : "");
                   }}
                   dateFormat={calendarDateFormat()}
                   showIcon
-                  minDate={minDate}
+                  minDate={formik.values.effectiveFrom ? new Date(formik.values.effectiveFrom) : undefined}
+                  showButtonBar
+                  placeholder={t("generalMasters.openEnded")}
                   className="calender_field_claim"
                 />
                 <div className="calender_icon_claim">
@@ -501,7 +484,7 @@ const AddCommission = () => {
                   ? "input__label__reversal"
                   : "input__label__reversal__inactive"
               }
-              label={t("generalMasters.selectAgents")}
+              label={t("generalMasters.salesPersonOptional")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
               value={formik.values.selectAgent}
               onChange={(e) =>

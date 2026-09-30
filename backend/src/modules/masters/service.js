@@ -7,6 +7,7 @@ import { many, one, query } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { asBool, isoDate, params, parseStatus, statusLabel } from './helpers.js';
 import { assertSinglePrimary, afterCompanyChange } from './company.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
 /** Reference tables a master type may be stored in (identifiers are never taken from user input). */
@@ -67,6 +68,9 @@ export function cleanFieldDefs(fields) {
     if (f.optionsFrom) out.optionsFrom = String(f.optionsFrom);
     if (f.maxLength) out.maxLength = Number(f.maxLength);
     if (f.default !== undefined) out.default = f.default;
+    if (f.numbering && /^[a-z][a-z0-9_]*$/.test(String(f.numbering))) out.numbering = String(f.numbering);
+    if (f.notBefore && typeof f.notBefore === 'string') out.notBefore = f.notBefore;
+    if (f.blankMatchesAll) out.blankMatchesAll = true;
     return out;
   });
 }
@@ -143,7 +147,12 @@ function coerce(f, v, errors) {
       if (!/^#[0-9a-fA-F]{3,8}$/.test(s)) errors.push({ path: f.name, message: `${label} must be a hex colour` });
       return s;
     }
-    case 'multiselect': return Array.isArray(v) ? v : String(v).split(',').map((x) => x.trim()).filter(Boolean);
+    case 'multiselect': {
+      if (Array.isArray(v)) return v;
+      // an uploaded cell lists values with semicolons when a value itself has a comma, else with commas
+      const s = String(v);
+      return s.split(s.includes(';') ? ';' : ',').map((x) => x.trim()).filter(Boolean);
+    }
     case 'json': return v;
     case 'select': {
       const s = typeof v === 'object' ? v : String(v);
@@ -166,6 +175,8 @@ export function validateRecord(t, body, { partial = false } = {}) {
   for (const f of t.fields) {
     if (f.auto || f.type === 'audit-user' || f.type === 'audit-date') continue;
     const v = body[f.name];
+    // A code the system issues may be left out; it is filled in when the record is saved.
+    if (f.numbering && !partial && (v === undefined || v === null || String(v).trim() === '')) continue;
     if (v === undefined) {
       if (!partial && f.required) errors.push({ path: f.name, message: `${f.label || f.name} is required` });
       else if (!partial && f.default !== undefined) values[f.name] = f.default;
@@ -185,6 +196,35 @@ export function validateRecord(t, body, { partial = false } = {}) {
   }
   if (errors.length) throw badRequest('Validation failed', errors);
   return { values, status: parseStatus(body.status ?? body.isActive) };
+}
+
+/** Date fields declared with notBefore (e.g. Effective To after Effective From); a blank end date is open ended. */
+export function assertDateOrder(t, rec) {
+  const errors = [];
+  for (const f of t.fields) {
+    if (!f.notBefore || !rec[f.name] || !rec[f.notBefore]) continue;
+    if (String(rec[f.name]).slice(0, 10) < String(rec[f.notBefore]).slice(0, 10)) {
+      const other = t.fields.find((x) => x.name === f.notBefore);
+      errors.push({ path: f.name, message: `${f.label || f.name} must be on or after ${other?.label || f.notBefore}` });
+    }
+  }
+  if (errors.length) throw badRequest('Validation failed', errors);
+}
+
+/**
+ * Codes issued by the system: a field declared with numbering (a Document Numbering series) gets the next number of
+ * that series when the record is created without one.
+ */
+async function withIssuedCodes(t, body) {
+  const out = { ...body };
+  for (const f of t.fields) {
+    if (!f.numbering) continue;
+    const v = out[f.name];
+    if (v !== undefined && v !== null && String(v).trim() !== '') continue;
+    const unique = t.storage === 'generic' ? { table: 'master_records', column: 'code' } : null;
+    out[f.name] = await nextDocumentNumber(f.numbering, { unique });
+  }
+  return out;
 }
 
 // ---------- storage adapters ----------
@@ -252,6 +292,33 @@ function selectSql(t) {
 
 const RESERVED_QUERY = new Set(['page', 'perPage', 'pageSize', 'pageNo', 'pageNumber', 'limit', 'offset', 'search', 'q', 'status', 'sortBy', 'sortOrder', 'includeDeleted', 'valueField']);
 
+/** JSON value of a field kept in the document (generic data or the attrs of a table row); null for column fields. */
+function jsonExpr(t, f, add) {
+  if (t.storage === 'generic') return `(m.data->${add(f.name)})`;
+  return fieldExpr(t, f) ? null : `(t.attrs->${add(f.name)})`;
+}
+
+/**
+ * Filter on one field. A multi-select field matches when the list holds the value (older records kept one value as
+ * text); a field declared blankMatchesAll also matches records that leave it empty (e.g. a commission for every
+ * sales person).
+ */
+function fieldFilter(t, f, value, add) {
+  const text = textExpr(t, f, add);
+  // the JSON expression is built only when used: every parameter added must appear in the query
+  const needsJson = f.type === 'multiselect' || f.blankMatchesAll;
+  const json = needsJson ? jsonExpr(t, f, add) : null;
+  const v = add(value);
+  const cond = f.type === 'multiselect' && json
+    ? `(CASE WHEN jsonb_typeof(${json}) = 'array'
+         THEN EXISTS (SELECT 1 FROM jsonb_array_elements_text(${json}) e WHERE lower(e) = lower(${v}))
+         ELSE ${text} ILIKE ${v} END)`
+    : `${text} ILIKE ${v}`;
+  if (!f.blankMatchesAll) return cond;
+  const blank = json ? `(${json} IS NULL OR ${json} IN ('null'::jsonb, '""'::jsonb, '[]'::jsonb))` : `COALESCE(${text}, '') = ''`;
+  return `(${cond} OR ${blank})`;
+}
+
 function whereFor(t, qs, p) {
   const conds = [];
   const alias = t.storage === 'generic' ? 'm' : 't';
@@ -263,7 +330,7 @@ function whereFor(t, qs, p) {
   if (term) conds.push(`${alias}::text ILIKE ${p.add(`%${term}%`)}`);
   for (const f of t.fields) {
     if (RESERVED_QUERY.has(f.name) || qs[f.name] === undefined || qs[f.name] === '') continue;
-    conds.push(`${textExpr(t, f, p.add)} ILIKE ${p.add(String(qs[f.name]))}`);
+    conds.push(fieldFilter(t, f, String(qs[f.name]), p.add));
   }
   return conds.join(' AND ');
 }
@@ -343,7 +410,10 @@ async function tableColumns(t, values) {
 }
 
 export async function createRecord(t, body, user) {
-  const { values, status } = validateRecord(t, body);
+  const valid = validateRecord(t, body);
+  assertDateOrder(t, valid.values);
+  const values = await withIssuedCodes(t, valid.values);
+  const { status } = valid;
   await assertUnique(t, values);
   await assertSinglePrimary(t, values, status || 'active');
   let id;
@@ -369,6 +439,7 @@ export async function createRecord(t, body, user) {
 export async function updateRecord(t, id, body, user) {
   const before = await getRecord(t, id);
   const { values, status } = validateRecord(t, body, { partial: true });
+  assertDateOrder(t, { ...before, ...values });
   await assertUnique(t, { ...before, ...values }, id);
   await assertSinglePrimary(t, { ...before, ...values }, status || (before.isActive ? 'active' : 'inactive'), id);
   if (t.storage === 'generic') {
@@ -405,7 +476,7 @@ export const NOT_UPLOADABLE = new Map([['main-account', 'the Chart of Accounts u
 
 const FORMAT = {
   string: 'Text', text: 'Text', number: 'Number', integer: 'Whole number', boolean: 'Yes or No', date: 'Date YYYY-MM-DD', email: 'E-mail address',
-  select: 'One of the allowed values', multiselect: 'Values separated by commas', json: 'JSON text', color: 'Colour, e.g. #1F4E78', url: 'Web address',
+  select: 'One of the allowed values', multiselect: 'Values separated by commas (semicolons when a value has a comma)', json: 'JSON text', color: 'Colour, e.g. #1F4E78', url: 'Web address',
 };
 
 /**
@@ -414,7 +485,7 @@ const FORMAT = {
  */
 export function uploadColumns(t) {
   const cols = (t.fields || []).filter((f) => !f.auto && f.type !== 'audit-user' && f.type !== 'audit-date').map((f) => ({
-    key: f.name, header: f.label || f.name, aliases: [], required: !!f.required,
+    key: f.name, header: f.label || f.name, aliases: [], required: !!f.required && !f.numbering,
     format: f.ref ? `Name${f.ref.codeColumn ? ' or code' : ''} of an existing ${f.ref.type.replace(/-/g, ' ')} record` : FORMAT[f.type || 'string'] || 'Text',
     ...(Array.isArray(f.options) && f.options.length ? { allowed: f.options } : {}),
   }));

@@ -32,6 +32,7 @@ import { Card } from "primereact/card";
 import AddCommissionPopup from "../AddCommission/AddCommissionPopup";
 import { useTranslation } from "react-i18next";
 import { calendarDateFormat, toIsoDate } from "../../../../utility/dateFormat";
+import { MultiSelect } from "primereact/multiselect";
 
 const EditCommission = () => {
   const { t } = useTranslation();
@@ -75,9 +76,6 @@ const EditCommission = () => {
   const customValidation = (values) => {
     const errors = {};
 
-    if (!values.commissionCode) {
-      errors.commissionCode = t("commission.commissionCodeRequired");
-    }
 
     if (!values.desc) {
       errors.desc = t("validation.fieldRequired");
@@ -85,20 +83,18 @@ const EditCommission = () => {
     if (!values.product) {
       errors.product = t("commission.productRequired");
     }
-    if (!values.selectCover) {
+    if (!values.selectCover?.length) {
       errors.selectCover = t("commission.selectCoverRequired");
     }
     if (!values.maxRate) {
       errors.maxRate = t("commission.maxRateRequired");
     }
-    if (!values.selectAgent) {
-      errors.selectAgent = t("commission.selectAgentRequired");
-    }
     if (!values.effectiveFrom) {
       errors.effectiveFrom = t("validation.fieldRequired");
     }
-    if (!values.effectiveTo) {
-      errors.effectiveTo = t("validation.fieldRequired");
+    // Effective To is optional (open ended) and may not be before Effective From
+    if (values.effectiveTo && values.effectiveFrom && values.effectiveTo < values.effectiveFrom) {
+      errors.effectiveTo = t("generalMasters.effectiveToBeforeFrom");
     }
 
     return errors;
@@ -134,7 +130,7 @@ const EditCommission = () => {
       insuranceCompany: getCommissionEdit?.insuranceCompany,
       product: productData,
       desc: getCommissionEdit?.desc,
-      selectCover: selectCoversData,
+      selectCover: Array.isArray(selectCoversData) ? selectCoversData : selectCoversData ? [selectCoversData] : [],
       effectiveFrom: getCommissionEdit?.effectiveFrom,
       effectiveTo: getCommissionEdit?.effectiveTo,
       maxRate: getCommissionEdit?.maxRate,
@@ -277,9 +273,7 @@ const EditCommission = () => {
               label={t("generalMasters.commissionCode")}
               placeholder={t("generalMasters.enter")}
               value={formik.values.commissionCode}
-              onChange={(e) =>
-                formik.setFieldValue("commissionCode", e.target.value)
-              }
+              disabled
             />
             {formik.touched.commissionCode && formik.errors.commissionCode && (
               <div
@@ -373,28 +367,19 @@ const EditCommission = () => {
             )}
           </div>
           <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view__reversal">
-            <DropDowns
-              disabled={step === 0 ? false : true}
-              className={
-                step === 0
-                  ? "input__field__reversal"
-                  : "input__field__reversal__inactive"
-              }
-              classNames={
-                step === 0
-                  ? "input__label__reversal"
-                  : "input__label__reversal__inactive"
-              }
-              label={t("generalMasters.selectCovers")}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={formik.values.selectCover}
-              onChange={(e) =>
-                formik.setFieldValue("selectCover", e.target.value)
-              }
-              options={selectedCoverOption}
-              optionLabel="value"
-              placeholder={"Select"}
-            />
+            <LabelWrapper label={t("generalMasters.selectCovers")} textSize={"16px"} textColor={"#000"} textWeight={"300"} classNames="label__sub__add">
+              <MultiSelect
+                value={formik.values.selectCover}
+                onChange={(e) => formik.setFieldValue("selectCover", e.value)}
+                options={selectedCoverOption}
+                optionLabel="label"
+                optionValue="value"
+                display="chip"
+                filter
+                placeholder={t("generalMasters.selectCoversPlaceholder")}
+                className="w-full"
+              />
+            </LabelWrapper>
 
             {formik.touched.selectCover && formik.errors.selectCover && (
               <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
@@ -481,6 +466,9 @@ const EditCommission = () => {
                   }}
                   dateFormat={calendarDateFormat()}
                   showIcon
+                  showButtonBar
+                  placeholder={t("generalMasters.openEnded")}
+                  minDate={formik.values.effectiveFrom ? new Date(formik.values.effectiveFrom) : undefined}
                   className="calender_field_claim"
                 />
                 <div className="calender_icon_claim">
@@ -506,7 +494,7 @@ const EditCommission = () => {
                   ? "input__label__reversal"
                   : "input__label__reversal__inactive"
               }
-              label={t("generalMasters.selectAgents")}
+              label={t("generalMasters.salesPersonOptional")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
               value={formik.values.selectAgent}
               onChange={(e) =>

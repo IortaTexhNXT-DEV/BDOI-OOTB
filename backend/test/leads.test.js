@@ -171,3 +171,16 @@ describe('leads', () => {
     expect((await sales('delete', '/leads/ld_sls_01')).status).toBe(400);
   });
 });
+
+describe('prospect for an existing customer', () => {
+  it('links the prospect to the client and converts without a second client', async () => {
+    const client = (await ctx.api('post', '/clients').send({ firstName: 'Existing', lastName: 'Customer', emailId: 'existing.customer@example.ph', contactNumber: '09171234567' })).body.data;
+    const found = await ctx.api('get', '/clients?search=09171234567');
+    expect(found.body.data.clients.map((c) => c.clientId || c.id)).toContain(client.clientId || client.id);
+    const lead = await ctx.api('post', '/leads').send({ firstName: 'Existing', lastName: 'Customer', clientId: client.clientId || client.id, lob: 'MOTOR' });
+    expect(lead.status).toBe(201);
+    expect(lead.body.data.clientId).toBe(client.clientId || client.id);
+    const bad = await ctx.api('post', '/leads').send({ firstName: 'Nobody', clientId: 'cl_missing' });
+    expect(bad.status).toBe(400);
+  });
+});

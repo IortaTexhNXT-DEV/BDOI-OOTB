@@ -150,3 +150,35 @@ describe('master type definitions', () => {
     expect((await as(salesToken, 'post', '/masters').send({ code: 'zz', fields: [{ name: 'a' }] })).status).toBe(403);
   });
 });
+
+describe('commission master', () => {
+  it('issues the code, leaves Effective To open, keeps several covers and matches every sales person when none is set', async () => {
+    const base = { desc: 'Motor comprehensive, all sales', insuranceCompany: 'Any Insurer', product: 'Motor', maxRate: 15, effectiveFrom: '2026-01-01' };
+    const c = await ctx.api('post', '/masters/commission').send({ ...base, selectCover: ['Own Damage', 'Theft'] });
+    expect(c.status).toBe(201);
+    const rec = c.body.data;
+    expect(rec.commissionCode).toMatch(/^COM-\d+/);
+    expect(rec.effectiveTo ?? null).toBeNull();
+    expect(rec.selectCover).toEqual(['Own Damage', 'Theft']);
+    const byCover = await ctx.api('get', '/masters/commission?selectCover=theft');
+    expect(byCover.body.data.map((x) => x.id)).toContain(rec.id);
+    const bySales = await ctx.api('get', '/masters/commission?selectAgent=ana.reyes');
+    expect(bySales.body.data.map((x) => x.id)).toContain(rec.id);
+    const bad = await ctx.api('post', '/masters/commission').send({ ...base, selectCover: ['Theft'], effectiveTo: '2025-12-31' });
+    expect(bad.status).toBe(400);
+    expect(JSON.stringify(bad.body)).toContain('effectiveTo');
+  });
+});
+
+describe('covers by line of business', () => {
+  it('offers the covers of a line and those without a line', async () => {
+    const extra = await ctx.api('post', '/masters/cover').send({ coverCode: 'ANYLINE', coverName: 'Any line cover', coverDescription: 'Offered for every line' });
+    expect(extra.status).toBe(201);
+    const fire = (await ctx.api('get', '/masters/cover/options?linesOfBusiness=fire')).body.data.map((o) => o.code);
+    expect(fire).toEqual(expect.arrayContaining(['FLEXA', 'EQ', 'ANYLINE']));
+    expect(fire).not.toContain('OD');
+    const motor = (await ctx.api('get', '/masters/cover/options?linesOfBusiness=motor')).body.data.map((o) => o.code);
+    expect(motor).toEqual(expect.arrayContaining(['OD', 'CTPL', 'ANYLINE']));
+    expect(motor).not.toContain('FLEXA');
+  });
+});

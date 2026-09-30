@@ -120,11 +120,9 @@ const EditPettyCash = () => {
               // : "input__label__reversal__inactive"
             }
             label="Petty Cash Code"
-            placeholder="Enter"
             value={formik.values.pettycashcode}
-            onChange={(e) =>
-              formik.setFieldValue("pettycashcode", e.target.value)
-            }
+            disabled
+            placeholder={t("generalMasters.issuedOnSave")}
           />
           {formik.touched.pettycashcode && formik.errors.pettycashcode && (
             <div style={{ fontSize: 12, color: "var(--color-danger)" }}>

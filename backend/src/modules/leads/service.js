@@ -63,6 +63,12 @@ export async function createLead(body, userId, db = null) {
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   await assertBirthDate(cols.birth_date);
   const run = async (c) => {
+    // a prospect raised for an existing customer is linked to that client (no second client when it converts)
+    if (body.clientId) {
+      const client = (await c.query('SELECT id FROM clients WHERE id = $1 OR client_code = $1', [String(body.clientId)])).rows[0];
+      if (!client) throw badRequest('Validation failed', [{ path: 'clientId', message: 'The selected client does not exist' }]);
+      cols.client_id = client.id;
+    }
     const number = await nextDocumentNumber('lead', { db: c, unique: { table: 'leads', column: 'lead_number' } });
     const status = cols.status || await getSetting('leads.default_status', 'New');
     const data = { ...cols, status, lead_number: number, display_name: displayName(body), extra: JSON.stringify(extra),
@@ -133,7 +139,7 @@ export async function leadStats(q) {
       count(*) FILTER (WHERE l.created_at >= now() - make_interval(days => $${params.length + 1}))::int AS recent,
       count(*) FILTER (WHERE l.created_at >= now() - interval '30 days')::int AS last30,
       count(*) FILTER (WHERE l.created_at >= now() - interval '60 days' AND l.created_at < now() - interval '30 days')::int AS prev30,
-      count(*) FILTER (WHERE l.status = 'Converted' OR l.client_id IS NOT NULL)::int AS converted,
+      count(*) FILTER (WHERE l.status = 'Converted')::int AS converted,
       count(*) FILTER (WHERE EXISTS (SELECT 1 FROM quotes q WHERE q.lead_id = l.id AND q.deleted_at IS NULL))::int AS with_quotes
     FROM leads l WHERE ${where}`, [...params, recentDays]);
   const group = (col, alias) => many(`SELECT COALESCE(${col}, 'Unknown') AS "${alias}", count(*)::int AS count FROM leads l WHERE ${where} GROUP BY 1 ORDER BY 2 DESC`, params);

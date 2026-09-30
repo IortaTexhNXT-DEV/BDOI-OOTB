@@ -2383,7 +2383,12 @@
     "roleNameRequired": "Role Name is required",
     "menuAccessRequired": "Menu Access is required",
     "permissionsRequired": "Permissions is required",
-    "completeRequiredFields": "Complete the required fields"
+    "completeRequiredFields": "Complete the required fields",
+    "issuedOnSave": "Issued when saved",
+    "selectCoversPlaceholder": "Select one or more covers",
+    "openEnded": "Open ended",
+    "effectiveToBeforeFrom": "Effective To cannot be before Effective From",
+    "salesPersonOptional": "Sales person (blank: all)"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -6349,7 +6354,10 @@
       "commissionDefault": "Insurer default",
       "billingMode": "Billing mode",
       "sent": "Sent",
-      "bound": "Bound"
+      "bound": "Bound",
+      "chooseCover": "Select a cover",
+      "chooseProductFirst": "Choose the product first",
+      "noCovers": "No cover for this line in the Cover master"
     },
     "list": {
       "allStatuses": "All statuses",
@@ -7828,5 +7836,28 @@
     "awaitingChecker": "A second claims user must approve it before the claim is settled.",
     "settlementRecorded": "Settlement recorded",
     "submitSettlement": "Submit settlement"
+  },
+  "prospectChooser": {
+    "title": "Create prospect",
+    "kindQuestion": "Is the customer new, or already one of our clients?",
+    "new": "New customer",
+    "newHint": "Enter the customer's details on the prospect form.",
+    "existing": "Existing client",
+    "existingHint": "Find the client by name, mobile number or e-mail; the prospect is linked to that client.",
+    "searchLabel": "Client name, mobile number or e-mail",
+    "searchPlaceholder": "Type at least 3 characters",
+    "typeMore": "Type at least 3 characters to search.",
+    "noMatch": "No client matches. Go back and choose New customer.",
+    "clientCode": "Client code",
+    "name": "Name",
+    "mobile": "Mobile",
+    "email": "E-mail",
+    "useClient": "Use this client",
+    "linkedTo": "Prospect for {{name}} ({{code}})",
+    "productQuestion": "Which product is the prospect for?",
+    "packageProducts": "Package products (Quick Quote)",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue"
   }
 }

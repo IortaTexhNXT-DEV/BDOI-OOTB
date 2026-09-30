@@ -198,7 +198,9 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
   const location = useLocation();
   const { state: locationState } = location;
   const existingLeadRefId = locationState?.leadRefId || locationState?.leadId;
-  const existingLeadFromState = locationState?.lead;
+  // an existing customer picked in Create prospect pre-fills the personal details, and the prospect is linked to it
+  const existingClient = locationState?.existingClient;
+  const existingLeadFromState = locationState?.lead || existingClient;
 
   const currentLeadDetails = useSelector(
     (state) => state.leadReducers?.currentLeadDetails
@@ -265,6 +267,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       // Step 1 = Lead only: Create Lead API with personal details
       const leadPayload = {
         lob: "FIRE",
+        ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
         companyName: values.CompanyName || null,
         taxInformationNumber: values.TaxNumber || null,
         firstName: values.FirstName,

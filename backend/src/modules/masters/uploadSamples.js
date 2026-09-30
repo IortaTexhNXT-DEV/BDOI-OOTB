@@ -106,9 +106,11 @@ export const MASTER_TEMPLATES = [
   },
   {
     type: 'commission', menu: 'Master > Generals > Commission',
-    formats: { maxRate: 'Percent, e.g. 25 for 25%', sharing: 'JSON list of sharing levels, e.g. [{"level":"Agent","sharingRate":60}]; may be left empty' },
-    samples: [{ commissionCode: 'COM-FIRE-CHA', desc: 'Fire - Charter Ping An', insuranceCompany: 'Charter Ping An Insurance Corporation', product: 'Fire and Allied Perils', selectCover: 'Fire',
-      maxRate: '25', selectAgent: '', effectiveFrom: '2026-10-01', effectiveTo: '2027-09-30' }],
+    formats: { commissionCode: 'Leave empty to take the next number of the Commission Code series', selectCover: 'Covers separated by semicolons, e.g. Fire and Lightning; Earthquake Shock',
+      selectAgent: 'Sales person; leave empty when the commission applies to every sales person', effectiveTo: 'Date YYYY-MM-DD; leave empty when open ended',
+      maxRate: 'Percent, e.g. 25 for 25%', sharing: 'JSON list of sharing levels, e.g. [{"level":"Sales person","sharingRate":60}]; may be left empty' },
+    samples: [{ commissionCode: '', desc: 'Fire - Charter Ping An', insuranceCompany: 'Charter Ping An Insurance Corporation', product: 'Fire and Allied Perils', selectCover: 'Fire and Lightning; Earthquake Shock',
+      maxRate: '25', selectAgent: '', effectiveFrom: '2026-10-01', effectiveTo: '' }],
   },
   {
     type: 'hierarchy', menu: 'Master > Generals > Employee Management > Hierarchy',

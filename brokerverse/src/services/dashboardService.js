@@ -16,6 +16,11 @@ const get = async (path) => {
 const dashboardService = {
   getExecutive: (period = "month") => get(`/dashboard/executive?period=${encodeURIComponent(period)}`),
   getSales: (scope = "mine") => get(`/dashboard/sales?scope=${encodeURIComponent(scope)}`),
+  /** Sales Dashboard: { period } or { from, to }, optional salesPerson (user id). */
+  getSalesOverview: (query = {}) => {
+    const qs = new URLSearchParams(Object.entries(query).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
+    return get(`/dashboard/sales/overview${qs ? `?${qs}` : ""}`);
+  },
   getProcessing: () => get("/dashboard/processing"),
   getClaims: () => get("/dashboard/claims"),
   getAgentHome: (scope = "mine") => get(`/agent/get-dashboard-details?scope=${encodeURIComponent(scope)}`),

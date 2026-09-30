@@ -7,7 +7,7 @@ import DropdownField from "../../../component/DropdownField";
 import { Button } from "primereact/button";
 import DatepickerField from "../../../component/datePicker";
 import CustomToast from "../../../../components/Toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchLeadEditMiddleWare,
@@ -62,6 +62,7 @@ const LeadCreationCard = ({ flow, action }) => {
   const toastRef = useRef(null);
   const toastErrorRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   // Fetch lead data when in edit mode
@@ -335,6 +336,30 @@ const LeadCreationCard = ({ flow, action }) => {
       }
 
       return values;
+    }
+    // a prospect for an existing customer starts from the client's details and stays linked to the client
+    const client = location.state?.existingClient;
+    if (action !== "edit" && client) {
+      return {
+        ...initialValue,
+        clientId: client.clientId || client.id,
+        CompanyName: client.companyName || "",
+        TaxNumber: client.taxNumber || "",
+        FirstName: client.firstName || "",
+        LastName: client.lastName || "",
+        PreferredName: client.preferredName || "",
+        EmailID: client.emailId || client.email || "",
+        ContactNumber: client.contactNumber || client.phone || "",
+        HouseNo: client.houseNo || "",
+        Barangay: client.barangay || "",
+        Country: client.country || initialValue.Country || "",
+        Province: client.province || "",
+        City: client.city || "",
+        ZIPCode: client.zipCode || "",
+        DateofBirth: client.DOB ? new Date(client.DOB) : "",
+        category: client.leadCategory || initialValue.category || "Retail",
+        gender: client.gender || initialValue.gender || "Male",
+      };
     }
     return initialValue;
   };

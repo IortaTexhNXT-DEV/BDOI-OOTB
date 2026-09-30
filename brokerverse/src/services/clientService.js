@@ -16,6 +16,25 @@ class ClientService {
    * @param {Number} pageSize - Items per page (default: 10)
    * @returns {Promise<Object>} API response with data, page, pageSize, total
    */
+  /**
+   * Clients matching a name, client code, mobile number or e-mail (first 10), for picking an existing customer.
+   * @param {string} term - Text to search for
+   * @returns {Promise<{success: boolean, data?: Object[], error?: string}>}
+   */
+  async searchClients(term) {
+    try {
+      const response = await fetch(`${this.baseURL}/clients?search=${encodeURIComponent(term)}&page=1&pageSize=10`, {
+        headers: { 'Content-Type': 'application/json', ...authService.getAuthHeader() },
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.message || 'Failed to search clients');
+      const list = body.data?.clients || body.clients || [];
+      return { success: true, data: list.map((c) => ({ ...c, displayName: c.displayName || c.fullName || [c.firstName, c.lastName].filter(Boolean).join(' ') || c.companyName })) };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
   async getClients(page = 1, pageSize = 10) {
     try {
       const controller = new AbortController();

@@ -69,6 +69,7 @@ export const postCreateleadMiddleware = createAsyncThunk(
         leadCategory: payload?.category || "Retail", // Map to the selected category
         companyName: payload?.CompanyName || null,
         taxInformationNumber: payload?.TaxNumber || null,
+        ...(payload?.clientId ? { clientId: payload.clientId } : {}),
         createdBy: (() => {
           try {
             const userData = JSON.parse(localStorage.getItem('user') || '{}');

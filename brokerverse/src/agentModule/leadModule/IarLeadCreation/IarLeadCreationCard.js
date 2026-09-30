@@ -145,7 +145,9 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   const setStep = onStepChange;
   const currentStep = step;
 
-  const existingLeadFromState = location.state?.lead;
+  // an existing customer picked in Create prospect pre-fills the personal details, and the prospect is linked to it
+  const existingClient = location.state?.existingClient;
+  const existingLeadFromState = location.state?.lead || existingClient;
   const existingLeadRefId =
     location.state?.leadRefId ||
     location.state?.leadId ||
@@ -211,6 +213,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       try {
         const payload = {
           lob: "IAR",
+          ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
           companyName: values.CompanyName || null,
           taxInformationNumber: values.TaxNumber || null,
           firstName: values.FirstName,

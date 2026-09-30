@@ -37,8 +37,8 @@ export const menuList = [
       {
         id: 4,
         name: "Sales Dashboard",
-        path: "/agent/home",
-        includes: ["/agent/home"],
+        path: "/sales/dashboard",
+        includes: ["/sales/dashboard", "/agent/home"],
         permissions: ["read:agent-dashboard"],
       },
     ],

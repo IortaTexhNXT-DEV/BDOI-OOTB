@@ -97,9 +97,6 @@ const AddEmployee = ({ action }) => {
   };
   const validate = (values) => {
     const errors = {};
-    if (!values.employeeCode) {
-      errors.employeeCode = "Employee Code is required";
-    }
     if (!values.firstName) {
       errors.firstName = "First name is required";
     }
@@ -236,9 +233,9 @@ const AddEmployee = ({ action }) => {
         <div className="grid add__account__sub__container p-3">
           <div className="col-12 md:col-3 lg:col-3">
             <InputField
-              disabled={action === "view" ? true : false}
               value={formik.values.employeeCode}
-              onChange={formik.handleChange("employeeCode")}
+              disabled
+              placeholder={t("generalMasters.issuedOnSave")}
               label={t("generalMasters.employeeCode")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
