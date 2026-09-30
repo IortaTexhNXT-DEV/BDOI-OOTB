@@ -114,15 +114,17 @@ export async function premiumSplit(db, policy, gross, breakdown = {}, source = '
  * Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount,
  * commissionAmount }. date: the date of the billing event (policy issue date, endorsement issue date); the booking journal
  * is dated with it (never later than today) and the credit days run from it, or from the inception when that is later.
+ * `split` (optional): the split per insurer in the shape of premiumSplit(), used as given.
  */
-export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, date = null, user = null }) {
+export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, date = null, user = null, split: given = null }) {
   // Direct bill: the client pays the insurer, so the broker has no premium receivable (commission is billed to the insurer)
   if (policy.billing_mode === 'direct') throw badRequest(`Policy ${policy.policy_number} is direct billed: the client pays the insurer, so no premium is billed or collected by the broker`);
   const gross = round2(amount);
   if (!(gross > 0)) throw badRequest('Receivable amount must be greater than zero');
   const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db })).premiumWarrantyDays;
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
-  const split = await premiumSplit(db, policy, gross, breakdown, source);
+  // a package gives its own split (each insurer carries its own sections); otherwise the premium is split by share
+  const split = given || await premiumSplit(db, policy, gross, breakdown, source);
   const { commission } = split;
   const bookedOn = await postingDate(date);
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, $3::date) + $2::int)::date AS d', [policy.inception_date || bookedOn, creditDays, bookedOn])).rows[0].d;

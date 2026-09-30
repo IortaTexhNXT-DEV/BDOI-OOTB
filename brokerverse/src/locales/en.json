@@ -7325,5 +7325,15 @@
     "remitBy": "Remit by (terms)",
     "daysOverdue": "Days overdue",
     "amountDue": "Amount due"
+  },
+  "packagedProducts": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "breakdown": {
+      "basePremium": "Base premium",
+      "discount": "Bundle discount",
+      "premium": "Premium",
+      "total": "Total amount due"
+    }
   }
 }

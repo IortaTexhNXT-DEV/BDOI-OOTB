@@ -295,6 +295,11 @@ import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
 import BrokerSlipList from "../module/Placement/BrokerSlipList";
 import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
 import QuickQuote from "../module/Sales/QuickQuote";
+import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
+import BundleProducts from "../module/PackagedProducts/BundleProducts";
+import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
+import LguTaxRates from "../module/PackagedProducts/LguTaxRates";
+import PaymentGateways from "../module/PackagedProducts/PaymentGateways";
 import BrokerSlipDetail from "../module/Placement/BrokerSlipDetail";
 import PlacementList from "../module/Placement/PlacementList";
 import PlacementDetail from "../module/Placement/PlacementDetail";
@@ -1190,6 +1195,11 @@ const Maincomponent = () => {
           />
           {/* Placement journey */}
           <Route path="/sales/quick-quote" element={<QuickQuote />} />
+          <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
+          <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
+          <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
+          <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />
+          <Route path="/master/finance/payment-gateways" element={<PaymentGateways />} />
           <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
           <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
           <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />

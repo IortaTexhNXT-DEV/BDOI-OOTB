@@ -433,6 +433,32 @@ export const menuList = [
             includes: ["/master/finance/accounting-flow"],
           },
           {
+            // packaged products: bundles sold under one master policy, and each insurer's rates for comparisons
+            id: 41,
+            name: "Package Bundles",
+            path: "/master/finance/package-bundles",
+            includes: ["/master/finance/package-bundles"],
+          },
+          {
+            id: 42,
+            name: "Insurer Rate Tables",
+            path: "/master/finance/insurer-rate-tables",
+            includes: ["/master/finance/insurer-rate-tables"],
+          },
+          {
+            // premium tax and charge engine: VAT or premium tax, DST, FST and the local government tax per city
+            id: 43,
+            name: "Premium Taxes & LGU Rates",
+            path: "/master/finance/premium-taxes",
+            includes: ["/master/finance/premium-taxes"],
+          },
+          {
+            id: 44,
+            name: "Payment Gateways",
+            path: "/master/finance/payment-gateways",
+            includes: ["/master/finance/payment-gateways"],
+          },
+          {
             id: 40,
             name: "Commission Rate Matrix",
             path: "/master/finance/commission-rate-matrix",
@@ -698,6 +724,14 @@ export const menuList = [
             name: "Quick Quote",
             path: "/sales/quick-quote",
             includes: ["/sales/quick-quote"],
+            permissions: ["write:quotations"],
+          },
+          {
+            // package products: premiums of several insurers side by side from their rate tables
+            id: 35,
+            name: "Compare Insurers",
+            path: "/sales/compare-insurers",
+            includes: ["/sales/compare-insurers"],
             permissions: ["write:quotations"],
           },
           {

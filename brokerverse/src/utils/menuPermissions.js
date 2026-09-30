@@ -117,7 +117,9 @@ export const roleMenuPermissions = {
     // Account Determination and Posting Rules: Accounting reads them; the Accounting Manager proposes changes and approves
     // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
-      "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats"],
+      "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
+      // premium taxes (write:premium-charges) and the payment links collected through the gateways
+      "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],

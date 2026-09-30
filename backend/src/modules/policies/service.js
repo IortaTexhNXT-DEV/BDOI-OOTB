@@ -181,7 +181,7 @@ const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMont
  * instead (Dr commission receivable / Cr commission income / Cr output VAT) and { id: null, bill_number: null, directBill }
  * is returned.
  */
-export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null }) {
+export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null, split = null }) {
   const policy = (await db.query(`SELECT p.*, ic.name AS insurer_name FROM policies p
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
   if (policy?.billing_mode === 'direct') {
@@ -190,7 +190,7 @@ export async function createReceivable(db, { policyId, amount, source = 'policy'
     return { id: null, bill_number: null, directBill: item };
   }
   const { createReceivable: financeReceivable } = await import('../receipts/receivables.js');
-  return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, date, user });
+  return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, date, user, split });
 }
 
 /** Roles that earn commission on the policies they produce (commission.eligible_roles, falling back to incentive.eligible_roles). */
@@ -243,7 +243,8 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
  * Issue a policy inside the caller's transaction: policy row (number from settings unless the insurer's number is given),
  * receivable with bill number (or, for a direct-bill policy, the commission due from the insurer), commission accrual.
  * `src` carries the premium figures and references; the billing mode comes from body.billingMode, src.billingMode or
- * direct_bill.default_billing_mode.
+ * direct_bill.default_billing_mode. `src.split` (optional) is the premium split per insurer of the booking, for a
+ * package whose insurers carry different sections (packages module); by default it is split by participant share.
  */
 export async function issuePolicy(db, src, body, userId) {
   const cols = await columnsFrom(db, body);
@@ -299,7 +300,7 @@ export async function issuePolicy(db, src, body, userId) {
   // booked on the issue date, so a policy keyed in after its issue lands in the month it was issued
   const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId }, date: issuedOn,
     breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount,
-      ...(renewal ? { commissionAmount: src.commissionAmount } : {}) } });
+      ...(renewal ? { commissionAmount: src.commissionAmount } : {}) }, split: src.split || null });
   await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [policyId, receivable.bill_number]);
   await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
   const commission = await accrueCommission(db, { policyId, quoteId: src.quoteId, agentUserId: src.agentUserId, basis: src.netPremium, rate: src.commissionRate,

@@ -116,9 +116,9 @@ describe("Sales & Marketing menu", () => {
     (filterMenuForRoles(menuList, roles).find((m) => m.name === "Operations")?.submenu || [])
       .find((i) => i.name === "Sales & Marketing")?.submenu.map((i) => i.name) || [];
 
-  it("groups prospects, quick quote, requests for quotation, quotations and placement slips", () => {
-    expect(items(["system-admin"])).toEqual(["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips"]);
-    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(5);
+  it("groups prospects, quick quote, insurer comparison, requests for quotation, quotations and placement slips", () => {
+    expect(items(["system-admin"])).toEqual(["Prospects", "Quick Quote", "Compare Insurers", "Request for Quotation", "Quotations", "Placement Slips"]);
+    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(6);
   });
   it("the Processing Team works the market side but does not create quick quotes; claims has no sales menu", () => {
     expect(items(["processing"])).toEqual(["Prospects", "Request for Quotation", "Quotations", "Placement Slips"]);

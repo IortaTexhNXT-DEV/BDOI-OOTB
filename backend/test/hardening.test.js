@@ -426,6 +426,9 @@ describe('route registry', () => {
     'GET /version', 'POST /auth/login', 'POST /auth/login/2fa', 'POST /auth/refresh', 'POST /auth/logout', 'GET /auth/password-policy',
     'POST /auth/forgot-password', 'POST /auth/reset-password', 'POST /quotations/approve-by-customer', 'GET /quotations/approve-by-customer',
     'GET /reports/generated/:id/download', 'GET /settings/public', 'GET /system-settings/', 'GET /s3/object/*', 'GET /upload/file/*',
+    // client checkout by the payment link's random token, and the gateways' signed webhooks / postbacks
+    'GET /public/payments/:token', 'POST /public/payments/:token/sandbox', 'GET /public/payments/:token/policy.pdf',
+    'POST /public/payments/webhooks/:gateway', 'GET /public/payments/webhooks/:gateway',
   ]);
   it('declares only the intended public routes', () => {
     const open = ROUTES.filter((r) => !r.auth).map((r) => `${r.method} ${r.path}`);

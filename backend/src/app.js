@@ -67,7 +67,8 @@ export async function createApp() {
     serializers: { req: redactRequest },
   }));
   app.use(apiRateLimit(rateKey));
-  app.use(express.json({ limit: config.jsonBodyLimit }));
+  // the raw bytes are kept for webhook signatures computed over the exact body (payment gateways)
+  app.use(express.json({ limit: config.jsonBodyLimit, verify: (req, _res, buf) => { req.rawBody = buf; } }));
   app.use(signFileLinks);
 
   const api = express.Router();

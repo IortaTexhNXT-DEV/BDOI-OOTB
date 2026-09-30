@@ -56,6 +56,10 @@ export const TRANSACTION_TABLES = [
   'insurer_statements', 'insurer_statement_lines', 'insurer_statement_resolutions',
   // credit control (client credit limits are a column of clients)
   'premium_instalment_plans', 'premium_instalments', 'premium_warranty_extensions', 'premium_warranty_actions', 'client_credit_exceptions',
+  // packaged products: bundle quotations and policies, payment links; the sample bundles and insurer rate tables are
+  // demo configuration and go too (tax and charge rules, LGU rates and gateway settings stay)
+  'package_endorsements', 'package_sections', 'package_quotes', 'package_bundle_sections', 'package_bundles', 'insurer_rate_tables',
+  'payment_events', 'payment_links',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

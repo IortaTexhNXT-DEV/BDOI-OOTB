@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (772 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (821 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -25065,6 +25065,2610 @@
       ]
     },
     {
+      "name": "Packaged Products",
+      "item": [
+        {
+          "name": "Bundle products with their sections (status, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/bundles?status=active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "bundles"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Bundle products with their sections (status, search)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: read:quotations, read:products, read:masters, read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/bundles?status=active",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "bundles"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "active"
+                    }
+                  ]
+                },
+                "description": "Bundle products with their sections (status, search)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: read:quotations, read:products, read:masters, read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"SME-SHIELD\",\n      \"name\": \"SME Shield\",\n      \"customerSegment\": \"sme\",\n      \"discountPercent\": 10,\n      \"termMonths\": 12,\n      \"autoIssue\": true,\n      \"status\": \"active\",\n      \"sections\": [\n        {\n          \"sectionNo\": 1,\n          \"name\": \"Fire\",\n          \"productId\": 4,\n          \"productName\": \"Fire and Allied Perils\",\n          \"defaultSumInsured\": 2000000,\n          \"ratePercent\": 0.2,\n          \"minimumPremium\": 2000,\n          \"property\": true,\n          \"optional\": false,\n          \"insurerIds\": [\n            2,\n            3\n          ],\n          \"insurers\": [\n            {\n              \"id\": 2,\n              \"name\": \"Malayan Insurance Co., Inc.\"\n            }\n          ],\n          \"benefits\": [\n            \"Fire and lightning\"\n          ]\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a bundle product: sections (product, default sum insured, rate, minimum premium, insurers), discount %, term",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/bundles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "bundles"
+              ]
+            },
+            "description": "Add a bundle product: sections (product, default sum insured, rate, minimum premium, insurers), discount %, term\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: write:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SME-SHIELD\",\n  \"name\": \"SME Shield\",\n  \"discountPercent\": 10,\n  \"sections\": [\n    {\n      \"name\": \"Fire\",\n      \"productId\": 4,\n      \"defaultSumInsured\": 2000000,\n      \"ratePercent\": 0.2,\n      \"insurerIds\": [\n        2,\n        3\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/bundles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "bundles"
+                  ]
+                },
+                "description": "Add a bundle product: sections (product, default sum insured, rate, minimum premium, insurers), discount %, term\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: write:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"SME-SHIELD\",\n  \"name\": \"SME Shield\",\n  \"discountPercent\": 10,\n  \"sections\": [\n    {\n      \"name\": \"Fire\",\n      \"productId\": 4,\n      \"defaultSumInsured\": 2000000,\n      \"ratePercent\": 0.2,\n      \"insurerIds\": [\n        2,\n        3\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"SME-SHIELD\",\n    \"name\": \"SME Shield\",\n    \"customerSegment\": \"sme\",\n    \"discountPercent\": 10,\n    \"termMonths\": 12,\n    \"autoIssue\": true,\n    \"status\": \"active\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"productId\": 4,\n        \"productName\": \"Fire and Allied Perils\",\n        \"defaultSumInsured\": 2000000,\n        \"ratePercent\": 0.2,\n        \"minimumPremium\": 2000,\n        \"property\": true,\n        \"optional\": false,\n        \"insurerIds\": [\n          2,\n          3\n        ],\n        \"insurers\": [\n          {\n            \"id\": 2,\n            \"name\": \"Malayan Insurance Co., Inc.\"\n          }\n        ],\n        \"benefits\": [\n          \"Fire and lightning\"\n        ]\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One bundle product (id or code)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/bundles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "bundles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One bundle product (id or code)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: read:quotations, read:products, read:masters, read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/bundles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "bundles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One bundle product (id or code)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: read:quotations, read:products, read:masters, read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"SME-SHIELD\",\n    \"name\": \"SME Shield\",\n    \"customerSegment\": \"sme\",\n    \"discountPercent\": 10,\n    \"termMonths\": 12,\n    \"autoIssue\": true,\n    \"status\": \"active\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"productId\": 4,\n        \"productName\": \"Fire and Allied Perils\",\n        \"defaultSumInsured\": 2000000,\n        \"ratePercent\": 0.2,\n        \"minimumPremium\": 2000,\n        \"property\": true,\n        \"optional\": false,\n        \"insurerIds\": [\n          2,\n          3\n        ],\n        \"insurers\": [\n          {\n            \"id\": 2,\n            \"name\": \"Malayan Insurance Co., Inc.\"\n          }\n        ],\n        \"benefits\": [\n          \"Fire and lightning\"\n        ]\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a bundle product (sections are replaced when given)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/bundles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "bundles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a bundle product (sections are replaced when given)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: write:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discountPercent\": 12.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/bundles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "bundles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a bundle product (sections are replaced when given)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: write:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"discountPercent\": 12.5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"SME-SHIELD\",\n    \"name\": \"SME Shield\",\n    \"customerSegment\": \"sme\",\n    \"discountPercent\": 10,\n    \"termMonths\": 12,\n    \"autoIssue\": true,\n    \"status\": \"active\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"productId\": 4,\n        \"productName\": \"Fire and Allied Perils\",\n        \"defaultSumInsured\": 2000000,\n        \"ratePercent\": 0.2,\n        \"minimumPremium\": 2000,\n        \"property\": true,\n        \"optional\": false,\n        \"insurerIds\": [\n          2,\n          3\n        ],\n        \"insurers\": [\n          {\n            \"id\": 2,\n            \"name\": \"Malayan Insurance Co., Inc.\"\n          }\n        ],\n        \"benefits\": [\n          \"Fire and lightning\"\n        ]\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a bundle product (deactivated instead once quoted)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/bundles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "bundles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a bundle product (deactivated instead once quoted)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/bundles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "bundles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a bundle product (deactivated instead once quoted)\n\nFront-end touchpoint: Master > Packaged Products > Bundle Products\n\nAccess: write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"SME-SHIELD\",\n    \"name\": \"SME Shield\",\n    \"customerSegment\": \"sme\",\n    \"discountPercent\": 10,\n    \"termMonths\": 12,\n    \"autoIssue\": true,\n    \"status\": \"active\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"productId\": 4,\n        \"productName\": \"Fire and Allied Perils\",\n        \"defaultSumInsured\": 2000000,\n        \"ratePercent\": 0.2,\n        \"minimumPremium\": 2000,\n        \"property\": true,\n        \"optional\": false,\n        \"insurerIds\": [\n          2,\n          3\n        ],\n        \"insurers\": [\n          {\n            \"id\": 2,\n            \"name\": \"Malayan Insurance Co., Inc.\"\n          }\n        ],\n        \"benefits\": [\n          \"Fire and lightning\"\n        ]\n      }\n    ],\n    \"deactivated\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/compare",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "compare"
+              ]
+            },
+            "description": "Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers\n\nAccess: read:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/compare",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "compare"
+                  ]
+                },
+                "description": "Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers\n\nAccess: read:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"product\": {\n      \"id\": 11,\n      \"code\": \"HOME\",\n      \"name\": \"Householder Insurance\",\n      \"line\": \"fire\",\n      \"lob\": \"FIRE\",\n      \"taxRegime\": \"vat\"\n    },\n    \"sumInsured\": 1000000,\n    \"date\": \"2026-09-30\",\n    \"lgu\": {\n      \"code\": \"MKT\",\n      \"name\": \"Makati\",\n      \"rate\": 0.2\n    },\n    \"currency\": \"PHP\",\n    \"cheapestId\": 2,\n    \"columns\": [\n      {\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"rateTableId\": 1,\n        \"rateBasis\": \"percent\",\n        \"rate\": 0.25,\n        \"premium\": 2500,\n        \"vat\": 300,\n        \"premiumTax\": 0,\n        \"dst\": 312.5,\n        \"fst\": 50,\n        \"lgt\": 5,\n        \"otherCharges\": 0,\n        \"taxes\": 667.5,\n        \"totalCharges\": 667.5,\n        \"total\": 3167.5,\n        \"deductible\": \"PHP 2,500 each and every loss\",\n        \"keyBenefits\": [\n          \"Fire and lightning\"\n        ],\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 500\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/compare/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "compare",
+                "pdf"
+              ]
+            },
+            "description": "Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Print\n\nAccess: read:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"preparedFor\": \"Maria Santos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/compare/pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "compare",
+                    "pdf"
+                  ]
+                },
+                "description": "Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Print\n\nAccess: read:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"preparedFor\": \"Maria Santos\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/compare/quotation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "compare",
+                "quotation"
+              ]
+            },
+            "description": "Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Proceed\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"insuranceCompanyId\": 2,\n  \"leadRefId\": \"ld_0123456789abcdef\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/compare/quotation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "compare",
+                    "quotation"
+                  ]
+                },
+                "description": "Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Proceed\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"insuranceCompanyId\": 2,\n  \"leadRefId\": \"ld_0123456789abcdef\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationId\": \"qt_0123456789abcdef\",\n    \"quotationNumber\": \"QT-2026-00042\",\n    \"premiumTotal\": 3167.5\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Package policies (status, clientId, search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/policies?search=PKG-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "policies"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "PKG-2026"
+                }
+              ]
+            },
+            "description": "Package policies (status, clientId, search; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/policies?search=PKG-2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "policies"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "PKG-2026"
+                    }
+                  ]
+                },
+                "description": "Package policies (status, clientId, search; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"policyId\": \"pol_0123456789abcdef\",\n      \"policyNumber\": \"PKG-2026-00001\",\n      \"status\": \"active\",\n      \"bundleName\": \"SME Shield\",\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"sumInsured\": 3200000,\n      \"netPremium\": 8100,\n      \"grossPremium\": 10190.7,\n      \"billNumber\": \"INV-2026-00077\",\n      \"sections\": [\n        {\n          \"sectionNo\": 1,\n          \"name\": \"Fire\",\n          \"insuranceCompanyId\": 2,\n          \"insurerName\": \"Malayan Insurance Co., Inc.\",\n          \"sumInsured\": 2000000,\n          \"basePremium\": 5000,\n          \"discountAmount\": 500,\n          \"netPremium\": 4500,\n          \"vat\": 540,\n          \"dst\": 562.5,\n          \"fst\": 90,\n          \"lgt\": 9,\n          \"totalCharges\": 1201.5,\n          \"totalAmount\": 5701.5,\n          \"commissionRate\": 0.2,\n          \"commissionAmount\": 900\n        }\n      ],\n      \"endorsements\": []\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "A package policy with its sections (insurer, premium, taxes, commission per section) and section endorsements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/policies/:policyId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "policies",
+                ":policyId"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "A package policy with its sections (insurer, premium, taxes, commission per section) and section endorsements\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/policies/:policyId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "policies",
+                    ":policyId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A package policy with its sections (insurer, premium, taxes, commission per section) and section endorsements\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyId\": \"pol_0123456789abcdef\",\n    \"policyNumber\": \"PKG-2026-00001\",\n    \"status\": \"active\",\n    \"bundleName\": \"SME Shield\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"sumInsured\": 3200000,\n    \"netPremium\": 8100,\n    \"grossPremium\": 10190.7,\n    \"billNumber\": \"INV-2026-00077\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ],\n    \"endorsements\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Renew the whole package: a package quotation for the next term with the same sections, sums insured and insurers at the rates in force",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/policies/:policyId/renew",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "policies",
+                ":policyId",
+                "renew"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Renew the whole package: a package quotation for the next term with the same sections, sums insured and insurers at the rates in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Renew\n\nAccess: write:renewals, write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/policies/:policyId/renew",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "policies",
+                    ":policyId",
+                    "renew"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Renew the whole package: a package quotation for the next term with the same sections, sums insured and insurers at the rates in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Renew\n\nAccess: write:renewals, write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"draft\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ],\n    \"renewalOf\": \"pol_0123456789abcdef\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Package policy schedule PDF: one policy number, sections with their insurers, premium and charges",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/policies/:policyId/schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "policies",
+                ":policyId",
+                "schedule"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Package policy schedule PDF: one policy number, sections with their insurers, premium and charges\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Policy schedule\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/policies/:policyId/schedule",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "policies",
+                    ":policyId",
+                    "schedule"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Package policy schedule PDF: one policy number, sections with their insurers, premium and charges\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Policy schedule\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Endorse one section: new sum insured from a date; the additional premium (pro rata, less the package discount) is billed and due to that section's insurer only",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/policies/:policyId/sections/:sectionNo/endorse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "policies",
+                ":policyId",
+                "sections",
+                ":sectionNo",
+                "endorse"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                },
+                {
+                  "key": "sectionNo",
+                  "value": "",
+                  "description": "sectionNo (path parameter)"
+                }
+              ]
+            },
+            "description": "Endorse one section: new sum insured from a date; the additional premium (pro rata, less the package discount) is billed and due to that section's insurer only\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Endorse section\n\nAccess: write:endorsements, write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sumInsured\": 2500000,\n  \"effectiveDate\": \"2027-01-01\",\n  \"remarks\": \"Additional stock\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/policies/:policyId/sections/:sectionNo/endorse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "policies",
+                    ":policyId",
+                    "sections",
+                    ":sectionNo",
+                    "endorse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    },
+                    {
+                      "key": "sectionNo",
+                      "value": "",
+                      "description": "sectionNo (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Endorse one section: new sum insured from a date; the additional premium (pro rata, less the package discount) is billed and due to that section's insurer only\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Endorse section\n\nAccess: write:endorsements, write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sumInsured\": 2500000,\n  \"effectiveDate\": \"2027-01-01\",\n  \"remarks\": \"Additional stock\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"endorsement\": {\n      \"endorsementNumber\": \"END-2026-00012\",\n      \"sectionNo\": 1,\n      \"netPremium\": 1125,\n      \"totalAmount\": 1425.6,\n      \"billNumber\": \"INV-2026-00090\"\n    },\n    \"policy\": {\n      \"policyId\": \"pol_0123456789abcdef\",\n      \"policyNumber\": \"PKG-2026-00001\",\n      \"status\": \"active\",\n      \"bundleName\": \"SME Shield\",\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"sumInsured\": 3200000,\n      \"netPremium\": 8100,\n      \"grossPremium\": 10190.7,\n      \"billNumber\": \"INV-2026-00077\",\n      \"sections\": [\n        {\n          \"sectionNo\": 1,\n          \"name\": \"Fire\",\n          \"insuranceCompanyId\": 2,\n          \"insurerName\": \"Malayan Insurance Co., Inc.\",\n          \"sumInsured\": 2000000,\n          \"basePremium\": 5000,\n          \"discountAmount\": 500,\n          \"netPremium\": 4500,\n          \"vat\": 540,\n          \"dst\": 562.5,\n          \"fst\": 90,\n          \"lgt\": 9,\n          \"totalCharges\": 1201.5,\n          \"totalAmount\": 5701.5,\n          \"commissionRate\": 0.2,\n          \"commissionAmount\": 900\n        }\n      ],\n      \"endorsements\": []\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Package quotations (status (comma-separated), clientId, bundleId, search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes?status=draft,accepted&search=PQ-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "draft,accepted"
+                },
+                {
+                  "key": "search",
+                  "value": "PQ-2026"
+                }
+              ]
+            },
+            "description": "Package quotations (status (comma-separated), clientId, bundleId, search; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes?status=draft,accepted&search=PQ-2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "draft,accepted"
+                    },
+                    {
+                      "key": "search",
+                      "value": "PQ-2026"
+                    }
+                  ]
+                },
+                "description": "Package quotations (status (comma-separated), clientId, bundleId, search; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pq_0123456789abcdef\",\n      \"quoteNumber\": \"PQ-2026-00001\",\n      \"bundleId\": 1,\n      \"bundleName\": \"SME Shield\",\n      \"clientId\": \"cl_0123456789abcdef\",\n      \"insuredName\": \"Rosario Bakeshop\",\n      \"lguCode\": \"MKT\",\n      \"inceptionDate\": \"2026-10-01\",\n      \"status\": \"draft\",\n      \"discountPercent\": 10,\n      \"sumInsured\": 3200000,\n      \"basePremium\": 9000,\n      \"discountAmount\": 900,\n      \"netPremium\": 8100,\n      \"vat\": 972,\n      \"premiumTax\": 0,\n      \"dst\": 1012.5,\n      \"fst\": 90,\n      \"lgt\": 16.2,\n      \"otherCharges\": 0,\n      \"totalCharges\": 2090.7,\n      \"totalAmount\": 10190.7,\n      \"commissionAmount\": 1377,\n      \"currency\": \"PHP\",\n      \"sections\": [\n        {\n          \"sectionNo\": 1,\n          \"name\": \"Fire\",\n          \"insuranceCompanyId\": 2,\n          \"insurerName\": \"Malayan Insurance Co., Inc.\",\n          \"sumInsured\": 2000000,\n          \"basePremium\": 5000,\n          \"discountAmount\": 500,\n          \"netPremium\": 4500,\n          \"vat\": 540,\n          \"dst\": 562.5,\n          \"fst\": 90,\n          \"lgt\": 9,\n          \"totalCharges\": 1201.5,\n          \"totalAmount\": 5701.5,\n          \"commissionRate\": 0.2,\n          \"commissionAmount\": 900\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 10,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a package quotation for a client or prospect (priced on the server)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes"
+              ]
+            },
+            "description": "Create a package quotation for a client or prospect (priced on the server)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > New\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bundleId\": 1,\n  \"clientId\": \"cl_0123456789abcdef\",\n  \"lguCode\": \"MKT\",\n  \"inceptionDate\": \"2026-10-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes"
+                  ]
+                },
+                "description": "Create a package quotation for a client or prospect (priced on the server)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > New\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bundleId\": 1,\n  \"clientId\": \"cl_0123456789abcdef\",\n  \"lguCode\": \"MKT\",\n  \"inceptionDate\": \"2026-10-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"draft\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One package quotation with its sections",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One package quotation with its sections\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One package quotation with its sections\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"draft\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change and re-price a draft package quotation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change and re-price a draft package quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sections\": [\n    {\n      \"sectionNo\": 1,\n      \"sumInsured\": 2500000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change and re-price a draft package quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sections\": [\n    {\n      \"sectionNo\": 1,\n      \"sumInsured\": 2500000\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"draft\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The client accepted the package quotation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id",
+                "accept"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The client accepted the package quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id",
+                    "accept"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The client accepted the package quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"accepted\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a package quotation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a package quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a package quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"cancelled\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Issue the package: one policy number (package_policy series), section records per insurer, one bill and one booking journal with lines per insurer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id/issue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id",
+                "issue"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Issue the package: one policy number (package_policy series), section records per insurer, one bill and one booking journal with lines per insurer\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Issue policy\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inceptionDate\": \"2026-10-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id/issue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id",
+                    "issue"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Issue the package: one policy number (package_policy series), section records per insurer, one bill and one booking journal with lines per insurer\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Issue policy\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"inceptionDate\": \"2026-10-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyId\": \"pol_0123456789abcdef\",\n    \"policyNumber\": \"PKG-2026-00001\",\n    \"billNumber\": \"INV-2026-00077\",\n    \"quote\": {\n      \"id\": \"pq_0123456789abcdef\",\n      \"quoteNumber\": \"PQ-2026-00001\",\n      \"bundleId\": 1,\n      \"bundleName\": \"SME Shield\",\n      \"clientId\": \"cl_0123456789abcdef\",\n      \"insuredName\": \"Rosario Bakeshop\",\n      \"lguCode\": \"MKT\",\n      \"inceptionDate\": \"2026-10-01\",\n      \"status\": \"draft\",\n      \"discountPercent\": 10,\n      \"sumInsured\": 3200000,\n      \"basePremium\": 9000,\n      \"discountAmount\": 900,\n      \"netPremium\": 8100,\n      \"vat\": 972,\n      \"premiumTax\": 0,\n      \"dst\": 1012.5,\n      \"fst\": 90,\n      \"lgt\": 16.2,\n      \"otherCharges\": 0,\n      \"totalCharges\": 2090.7,\n      \"totalAmount\": 10190.7,\n      \"commissionAmount\": 1377,\n      \"currency\": \"PHP\",\n      \"sections\": [\n        {\n          \"sectionNo\": 1,\n          \"name\": \"Fire\",\n          \"insuranceCompanyId\": 2,\n          \"insurerName\": \"Malayan Insurance Co., Inc.\",\n          \"sumInsured\": 2000000,\n          \"basePremium\": 5000,\n          \"discountAmount\": 500,\n          \"netPremium\": 4500,\n          \"vat\": 540,\n          \"dst\": 562.5,\n          \"fst\": 90,\n          \"lgt\": 9,\n          \"totalCharges\": 1201.5,\n          \"totalAmount\": 5701.5,\n          \"commissionRate\": 0.2,\n          \"commissionAmount\": 900\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Package quotation for the client (letterhead, sections, premium and charges; no commission)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Package quotation for the client (letterhead, sections, premium and charges; no commission)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Print\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id/pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id",
+                    "pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Package quotation for the client (letterhead, sections, premium and charges; no commission)\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > Print\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Reopen an accepted package quotation for changes",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/:id/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                ":id",
+                "reopen"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reopen an accepted package quotation for changes\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/:id/reopen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    ":id",
+                    "reopen"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reopen an accepted package quotation for changes\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles\n\nAccess: write:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pq_0123456789abcdef\",\n    \"quoteNumber\": \"PQ-2026-00001\",\n    \"bundleId\": 1,\n    \"bundleName\": \"SME Shield\",\n    \"clientId\": \"cl_0123456789abcdef\",\n    \"insuredName\": \"Rosario Bakeshop\",\n    \"lguCode\": \"MKT\",\n    \"inceptionDate\": \"2026-10-01\",\n    \"status\": \"draft\",\n    \"discountPercent\": 10,\n    \"sumInsured\": 3200000,\n    \"basePremium\": 9000,\n    \"discountAmount\": 900,\n    \"netPremium\": 8100,\n    \"vat\": 972,\n    \"premiumTax\": 0,\n    \"dst\": 1012.5,\n    \"fst\": 90,\n    \"lgt\": 16.2,\n    \"otherCharges\": 0,\n    \"totalCharges\": 2090.7,\n    \"totalAmount\": 10190.7,\n    \"commissionAmount\": 1377,\n    \"currency\": \"PHP\",\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Price a bundle without saving: sections with their insurer, premium, discount, taxes and commission, and totals",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/quotes/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "quotes",
+                "preview"
+              ]
+            },
+            "description": "Price a bundle without saving: sections with their insurer, premium, discount, taxes and commission, and totals\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > New\n\nAccess: read:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bundleId\": 1,\n  \"lguCode\": \"MKT\",\n  \"sections\": [\n    {\n      \"sectionNo\": 3,\n      \"included\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/quotes/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "quotes",
+                    "preview"
+                  ]
+                },
+                "description": "Price a bundle without saving: sections with their insurer, premium, discount, taxes and commission, and totals\n\nFront-end touchpoint: Operations > Sales & Marketing > Package Bundles > New\n\nAccess: read:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bundleId\": 1,\n  \"lguCode\": \"MKT\",\n  \"sections\": [\n    {\n      \"sectionNo\": 3,\n      \"included\": true\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"bundle\": {\n      \"id\": 1,\n      \"name\": \"SME Shield\"\n    },\n    \"date\": \"2026-10-01\",\n    \"discountPercent\": 10,\n    \"lgu\": {\n      \"code\": \"MKT\"\n    },\n    \"sections\": [\n      {\n        \"sectionNo\": 1,\n        \"name\": \"Fire\",\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"sumInsured\": 2000000,\n        \"basePremium\": 5000,\n        \"discountAmount\": 500,\n        \"netPremium\": 4500,\n        \"vat\": 540,\n        \"dst\": 562.5,\n        \"fst\": 90,\n        \"lgt\": 9,\n        \"totalCharges\": 1201.5,\n        \"totalAmount\": 5701.5,\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 900\n      }\n    ],\n    \"totals\": {}\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insurer rate tables (insuranceCompanyId, productId, active, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/rate-tables?productId=11&active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "rate-tables"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "11"
+                },
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Insurer rate tables (insuranceCompanyId, productId, active, search)\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: read:quotations, read:products, read:masters, read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/rate-tables?productId=11&active=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "rate-tables"
+                  ],
+                  "query": [
+                    {
+                      "key": "productId",
+                      "value": "11"
+                    },
+                    {
+                      "key": "active",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Insurer rate tables (insuranceCompanyId, productId, active, search)\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: read:quotations, read:products, read:masters, read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"insuranceCompanyId\": 2,\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"productId\": 11,\n      \"productName\": \"Householder Insurance\",\n      \"rateBasis\": \"percent\",\n      \"rate\": 0.25,\n      \"minimumPremium\": 1500,\n      \"deductible\": \"PHP 2,500 each and every loss\",\n      \"keyBenefits\": [\n        \"Fire and lightning\",\n        \"Typhoon and flood\"\n      ],\n      \"commissionRate\": 0.2,\n      \"effectiveFrom\": \"2026-01-01\",\n      \"effectiveTo\": null,\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add an insurer rate table row (no overlap with an active row of the same insurer and product)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/rate-tables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "rate-tables"
+              ]
+            },
+            "description": "Add an insurer rate table row (no overlap with an active row of the same insurer and product)\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: write:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCompanyId\": 2,\n  \"productId\": 11,\n  \"rateBasis\": \"percent\",\n  \"rate\": 0.25,\n  \"minimumPremium\": 1500,\n  \"effectiveFrom\": \"2026-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/rate-tables",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "rate-tables"
+                  ]
+                },
+                "description": "Add an insurer rate table row (no overlap with an active row of the same insurer and product)\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: write:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insuranceCompanyId\": 2,\n  \"productId\": 11,\n  \"rateBasis\": \"percent\",\n  \"rate\": 0.25,\n  \"minimumPremium\": 1500,\n  \"effectiveFrom\": \"2026-01-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 2,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 11,\n    \"productName\": \"Householder Insurance\",\n    \"rateBasis\": \"percent\",\n    \"rate\": 0.25,\n    \"minimumPremium\": 1500,\n    \"deductible\": \"PHP 2,500 each and every loss\",\n    \"keyBenefits\": [\n      \"Fire and lightning\",\n      \"Typhoon and flood\"\n    ],\n    \"commissionRate\": 0.2,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update an insurer rate table row",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/packages/rate-tables/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "rate-tables",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update an insurer rate table row\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: write:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 0.3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/rate-tables/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "rate-tables",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update an insurer rate table row\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: write:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate\": 0.3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 2,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 11,\n    \"productName\": \"Householder Insurance\",\n    \"rateBasis\": \"percent\",\n    \"rate\": 0.25,\n    \"minimumPremium\": 1500,\n    \"deductible\": \"PHP 2,500 each and every loss\",\n    \"keyBenefits\": [\n      \"Fire and lightning\",\n      \"Typhoon and flood\"\n    ],\n    \"commissionRate\": 0.2,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a rate table row (deactivated instead when a package section used it)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/packages/rate-tables/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "packages",
+                "rate-tables",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a rate table row (deactivated instead when a package section used it)\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/packages/rate-tables/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "packages",
+                    "rate-tables",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a rate table row (deactivated instead when a package section used it)\n\nFront-end touchpoint: Master > Packaged Products > Insurer Rate Tables\n\nAccess: write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 2,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"productId\": 11,\n    \"productName\": \"Householder Insurance\",\n    \"rateBasis\": \"percent\",\n    \"rate\": 0.25,\n    \"minimumPremium\": 1500,\n    \"deductible\": \"PHP 2,500 each and every loss\",\n    \"keyBenefits\": [\n      \"Fire and lightning\",\n      \"Typhoon and flood\"\n    ],\n    \"commissionRate\": 0.2,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true,\n    \"deactivated\": false\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payment Gateways",
+      "item": [
+        {
+          "name": "Payment gateways with their settings and whether their credentials are present in the environment (the values are never returned)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-gateways?enabled=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-gateways"
+              ],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Payment gateways with their settings and whether their credentials are present in the environment (the values are never returned)\n\nFront-end touchpoint: Master > Packaged Products > Payment Gateways\n\nAccess: read:settings, read:receipts, write:quotations, write:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-gateways?enabled=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-gateways"
+                  ],
+                  "query": [
+                    {
+                      "key": "enabled",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Payment gateways with their settings and whether their credentials are present in the environment (the values are never returned)\n\nFront-end touchpoint: Master > Packaged Products > Payment Gateways\n\nAccess: read:settings, read:receipts, write:quotations, write:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"PAYMONGO\",\n      \"name\": \"PayMongo (GCash, Maya, GrabPay, cards)\",\n      \"provider\": \"paymongo\",\n      \"enabled\": true,\n      \"mode\": \"sandbox\",\n      \"methods\": [\n        \"gcash\",\n        \"maya\",\n        \"grabpay\",\n        \"card\"\n      ],\n      \"feeHandling\": \"absorb\",\n      \"feePercent\": 2.5,\n      \"feeFixed\": 0,\n      \"credentialsPrefix\": \"PAYMONGO\",\n      \"credentialsConfigured\": true,\n      \"credentials\": [\n        {\n          \"name\": \"PAYMONGO_SECRET_KEY\",\n          \"present\": true\n        },\n        {\n          \"name\": \"PAYMONGO_WEBHOOK_SECRET\",\n          \"present\": true\n        }\n      ],\n      \"linkValidityHours\": null,\n      \"autoIssue\": true,\n      \"bankAccountCode\": null\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Gateway settings: enabled, mode (sandbox / live; live needs the credentials in the environment), methods, fee handling, link validity, automatic issuance, settlement bank account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payment-gateways/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-gateways",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Gateway settings: enabled, mode (sandbox / live; live needs the credentials in the environment), methods, fee handling, link validity, automatic issuance, settlement bank account\n\nFront-end touchpoint: Master > Packaged Products > Payment Gateways\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"feeHandling\": \"pass_on\",\n  \"feePercent\": 2.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-gateways/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-gateways",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Gateway settings: enabled, mode (sandbox / live; live needs the credentials in the environment), methods, fee handling, link validity, automatic issuance, settlement bank account\n\nFront-end touchpoint: Master > Packaged Products > Payment Gateways\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": true,\n  \"feeHandling\": \"pass_on\",\n  \"feePercent\": 2.5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"PAYMONGO\",\n    \"name\": \"PayMongo (GCash, Maya, GrabPay, cards)\",\n    \"provider\": \"paymongo\",\n    \"enabled\": true,\n    \"mode\": \"sandbox\",\n    \"methods\": [\n      \"gcash\",\n      \"maya\",\n      \"grabpay\",\n      \"card\"\n    ],\n    \"feeHandling\": \"absorb\",\n    \"feePercent\": 2.5,\n    \"feeFixed\": 0,\n    \"credentialsPrefix\": \"PAYMONGO\",\n    \"credentialsConfigured\": true,\n    \"credentials\": [\n      {\n        \"name\": \"PAYMONGO_SECRET_KEY\",\n        \"present\": true\n      },\n      {\n        \"name\": \"PAYMONGO_WEBHOOK_SECRET\",\n        \"present\": true\n      }\n    ],\n    \"linkValidityHours\": null,\n    \"autoIssue\": true,\n    \"bankAccountCode\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payments log: every gateway notification received or simulated (gatewayCode, linkId, status, valid=false; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-gateways/events?gatewayCode=PAYMONGO&valid=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-gateways",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "gatewayCode",
+                  "value": "PAYMONGO"
+                },
+                {
+                  "key": "valid",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Payments log: every gateway notification received or simulated (gatewayCode, linkId, status, valid=false; paging)\n\nFront-end touchpoint: Master > Packaged Products > Payment Gateways > Payments log\n\nAccess: read:settings, read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-gateways/events?gatewayCode=PAYMONGO&valid=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-gateways",
+                    "events"
+                  ],
+                  "query": [
+                    {
+                      "key": "gatewayCode",
+                      "value": "PAYMONGO"
+                    },
+                    {
+                      "key": "valid",
+                      "value": "false"
+                    }
+                  ]
+                },
+                "description": "Payments log: every gateway notification received or simulated (gatewayCode, linkId, status, valid=false; paging)\n\nFront-end touchpoint: Master > Packaged Products > Payment Gateways > Payments log\n\nAccess: read:settings, read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"linkNumber\": \"PL-2026-00001\",\n      \"gatewayCode\": \"SANDBOX\",\n      \"eventType\": \"payment.paid\",\n      \"signatureValid\": true,\n      \"status\": \"paid\",\n      \"amount\": 7367.2\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payment Links",
+      "item": [
+        {
+          "name": "Payment links (status (comma-separated), applyStatus, gatewayCode, targetType, targetId, search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-links?status=pending,paid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-links"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending,paid"
+                }
+              ]
+            },
+            "description": "Payment links (status (comma-separated), applyStatus, gatewayCode, targetType, targetId, search; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: read:quotations, read:policies, read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-links?status=pending,paid",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-links"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending,paid"
+                    }
+                  ]
+                },
+                "description": "Payment links (status (comma-separated), applyStatus, gatewayCode, targetType, targetId, search; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: read:quotations, read:policies, read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pl_0123456789abcdef\",\n      \"linkNumber\": \"PL-2026-00001\",\n      \"targetType\": \"package_quote\",\n      \"targetId\": \"pq_0123456789abcdef\",\n      \"targetNumber\": \"PQ-2026-00001\",\n      \"payerName\": \"Rosario Dizon\",\n      \"description\": \"SME Shield package PQ-2026-00001\",\n      \"amount\": 7367.2,\n      \"fee\": 0,\n      \"total\": 7367.2,\n      \"currency\": \"PHP\",\n      \"gatewayCode\": \"SANDBOX\",\n      \"status\": \"pending\",\n      \"checkoutUrl\": \"http://localhost:3000/pay/Zx9...\",\n      \"payUrl\": \"http://localhost:3000/pay/Zx9...\",\n      \"expiresAt\": \"2026-10-03T09:00:00Z\",\n      \"applyStatus\": \"not_applied\"\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a payment link for a package quotation, quotation or policy premium; the gateway checkout is opened and the client address (payUrl) returned",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payment-links",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-links"
+              ]
+            },
+            "description": "Create a payment link for a package quotation, quotation or policy premium; the gateway checkout is opened and the client address (payUrl) returned\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: write:quotations, write:policies, write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"package_quote\",\n  \"targetId\": \"PQ-2026-00001\",\n  \"gatewayCode\": \"SANDBOX\",\n  \"method\": \"gcash\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-links",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-links"
+                  ]
+                },
+                "description": "Create a payment link for a package quotation, quotation or policy premium; the gateway checkout is opened and the client address (payUrl) returned\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: write:quotations, write:policies, write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"targetType\": \"package_quote\",\n  \"targetId\": \"PQ-2026-00001\",\n  \"gatewayCode\": \"SANDBOX\",\n  \"method\": \"gcash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pl_0123456789abcdef\",\n    \"linkNumber\": \"PL-2026-00001\",\n    \"targetType\": \"package_quote\",\n    \"targetId\": \"pq_0123456789abcdef\",\n    \"targetNumber\": \"PQ-2026-00001\",\n    \"payerName\": \"Rosario Dizon\",\n    \"description\": \"SME Shield package PQ-2026-00001\",\n    \"amount\": 7367.2,\n    \"fee\": 0,\n    \"total\": 7367.2,\n    \"currency\": \"PHP\",\n    \"gatewayCode\": \"SANDBOX\",\n    \"status\": \"pending\",\n    \"checkoutUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"payUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"expiresAt\": \"2026-10-03T09:00:00Z\",\n    \"applyStatus\": \"not_applied\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One payment link with its gateway events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-links/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-links",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One payment link with its gateway events\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: read:quotations, read:policies, read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-links/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-links",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One payment link with its gateway events\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: read:quotations, read:policies, read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pl_0123456789abcdef\",\n    \"linkNumber\": \"PL-2026-00001\",\n    \"targetType\": \"package_quote\",\n    \"targetId\": \"pq_0123456789abcdef\",\n    \"targetNumber\": \"PQ-2026-00001\",\n    \"payerName\": \"Rosario Dizon\",\n    \"description\": \"SME Shield package PQ-2026-00001\",\n    \"amount\": 7367.2,\n    \"fee\": 0,\n    \"total\": 7367.2,\n    \"currency\": \"PHP\",\n    \"gatewayCode\": \"SANDBOX\",\n    \"status\": \"pending\",\n    \"checkoutUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"payUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"expiresAt\": \"2026-10-03T09:00:00Z\",\n    \"applyStatus\": \"not_applied\",\n    \"events\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Apply a paid link that is awaiting its policy or failed to apply: issue the package policy when allowed, then the official receipt",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-links/:id/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-links",
+                ":id",
+                "apply"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Apply a paid link that is awaiting its policy or failed to apply: issue the package policy when allowed, then the official receipt\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: write:receipts, write:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-links/:id/apply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-links",
+                    ":id",
+                    "apply"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Apply a paid link that is awaiting its policy or failed to apply: issue the package policy when allowed, then the official receipt\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: write:receipts, write:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pl_0123456789abcdef\",\n    \"linkNumber\": \"PL-2026-00001\",\n    \"targetType\": \"package_quote\",\n    \"targetId\": \"pq_0123456789abcdef\",\n    \"targetNumber\": \"PQ-2026-00001\",\n    \"payerName\": \"Rosario Dizon\",\n    \"description\": \"SME Shield package PQ-2026-00001\",\n    \"amount\": 7367.2,\n    \"fee\": 0,\n    \"total\": 7367.2,\n    \"currency\": \"PHP\",\n    \"gatewayCode\": \"SANDBOX\",\n    \"status\": \"paid\",\n    \"checkoutUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"payUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"expiresAt\": \"2026-10-03T09:00:00Z\",\n    \"applyStatus\": \"applied\",\n    \"receiptNumber\": \"OR-2026-00031\",\n    \"policyNumber\": \"PKG-2026-00001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a pending (or failed) payment link",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-links/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-links",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a pending (or failed) payment link\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: write:quotations, write:policies, write:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-links/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-links",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a pending (or failed) payment link\n\nFront-end touchpoint: Operations > Sales & Marketing > Payment Links\n\nAccess: write:quotations, write:policies, write:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pl_0123456789abcdef\",\n    \"linkNumber\": \"PL-2026-00001\",\n    \"targetType\": \"package_quote\",\n    \"targetId\": \"pq_0123456789abcdef\",\n    \"targetNumber\": \"PQ-2026-00001\",\n    \"payerName\": \"Rosario Dizon\",\n    \"description\": \"SME Shield package PQ-2026-00001\",\n    \"amount\": 7367.2,\n    \"fee\": 0,\n    \"total\": 7367.2,\n    \"currency\": \"PHP\",\n    \"gatewayCode\": \"SANDBOX\",\n    \"status\": \"cancelled\",\n    \"checkoutUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"payUrl\": \"http://localhost:3000/pay/Zx9...\",\n    \"expiresAt\": \"2026-10-03T09:00:00Z\",\n    \"applyStatus\": \"not_applied\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Payments",
       "item": [
         {
@@ -35173,6 +37777,688 @@
       ]
     },
     {
+      "name": "Premium Taxes and Charges",
+      "item": [
+        {
+          "name": "Taxes and charges of a premium: product (line, tax regime), location (LGU) and date; the breakdown shown on screens and prints",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/calculate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "calculate"
+              ]
+            },
+            "description": "Taxes and charges of a premium: product (line, tax regime), location (LGU) and date; the breakdown shown on screens and prints\n\nFront-end touchpoint: Operations > Sales & Marketing > Quick Quote / Package Bundles\n\nAccess: read:quotations, read:policies, read:masters, read:products, read:receipts, write:premium-charges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"premium\": 10000,\n  \"productId\": 11,\n  \"lguCode\": \"MKT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/calculate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "calculate"
+                  ]
+                },
+                "description": "Taxes and charges of a premium: product (line, tax regime), location (LGU) and date; the breakdown shown on screens and prints\n\nFront-end touchpoint: Operations > Sales & Marketing > Quick Quote / Package Bundles\n\nAccess: read:quotations, read:policies, read:masters, read:products, read:receipts, write:premium-charges",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"premium\": 10000,\n  \"productId\": 11,\n  \"lguCode\": \"MKT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"premium\": 10000,\n    \"lines\": [\n      {\n        \"code\": \"VAT\",\n        \"name\": \"Value Added Tax\",\n        \"kind\": \"vat\",\n        \"method\": \"percent\",\n        \"rate\": 12,\n        \"base\": 10000,\n        \"amount\": 1200\n      },\n      {\n        \"code\": \"DST\",\n        \"name\": \"Documentary Stamp Tax\",\n        \"kind\": \"dst\",\n        \"method\": \"per_unit\",\n        \"rate\": 12.5,\n        \"base\": 10000,\n        \"amount\": 1250\n      },\n      {\n        \"code\": \"FST\",\n        \"name\": \"Fire Service Tax\",\n        \"kind\": \"fst\",\n        \"method\": \"percent\",\n        \"rate\": 2,\n        \"base\": 10000,\n        \"amount\": 200\n      },\n      {\n        \"code\": \"LGT\",\n        \"name\": \"Local Government Tax\",\n        \"kind\": \"lgt\",\n        \"method\": \"percent\",\n        \"rate\": 0.2,\n        \"base\": 10000,\n        \"amount\": 20\n      }\n    ],\n    \"vat\": 1200,\n    \"premiumTax\": 0,\n    \"dst\": 1250,\n    \"fst\": 200,\n    \"lgt\": 20,\n    \"other\": 0,\n    \"taxes\": 2670,\n    \"totalCharges\": 2670,\n    \"total\": 12670,\n    \"line\": \"fire\",\n    \"regime\": \"vat\",\n    \"date\": \"2026-09-30\",\n    \"lgu\": {\n      \"code\": \"MKT\",\n      \"name\": \"Makati\",\n      \"rate\": 0.2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Local government tax rates by city / municipality (active, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/lgu-rates?active=true&search=Makati",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "lgu-rates"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                },
+                {
+                  "key": "search",
+                  "value": "Makati"
+                }
+              ]
+            },
+            "description": "Local government tax rates by city / municipality (active, search)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: read:quotations, read:policies, read:masters, read:products, read:receipts, write:premium-charges"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/lgu-rates?active=true&search=Makati",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "lgu-rates"
+                  ],
+                  "query": [
+                    {
+                      "key": "active",
+                      "value": "true"
+                    },
+                    {
+                      "key": "search",
+                      "value": "Makati"
+                    }
+                  ]
+                },
+                "description": "Local government tax rates by city / municipality (active, search)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: read:quotations, read:policies, read:masters, read:products, read:receipts, write:premium-charges"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"MKT\",\n      \"name\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"cityId\": 8,\n      \"cityName\": \"Makati\",\n      \"rate\": 0.2,\n      \"effectiveFrom\": \"2026-01-01\",\n      \"effectiveTo\": null,\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add the local government tax rate of a city or municipality",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/lgu-rates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "lgu-rates"
+              ]
+            },
+            "description": "Add the local government tax rate of a city or municipality\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: write:premium-charges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"VAL\",\n  \"name\": \"Valenzuela\",\n  \"province\": \"Metro Manila\",\n  \"cityId\": 19,\n  \"rate\": 0.2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/lgu-rates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "lgu-rates"
+                  ]
+                },
+                "description": "Add the local government tax rate of a city or municipality\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: write:premium-charges",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"VAL\",\n  \"name\": \"Valenzuela\",\n  \"province\": \"Metro Manila\",\n  \"cityId\": 19,\n  \"rate\": 0.2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"MKT\",\n    \"name\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"cityId\": 8,\n    \"cityName\": \"Makati\",\n    \"rate\": 0.2,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update an LGU tax rate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/lgu-rates/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "lgu-rates",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update an LGU tax rate\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: write:premium-charges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 0.25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/lgu-rates/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "lgu-rates",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update an LGU tax rate\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: write:premium-charges",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate\": 0.25\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"MKT\",\n    \"name\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"cityId\": 8,\n    \"cityName\": \"Makati\",\n    \"rate\": 0.2,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete an LGU tax rate",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/lgu-rates/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "lgu-rates",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete an LGU tax rate\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: write:premium-charges"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/lgu-rates/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "lgu-rates",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete an LGU tax rate\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates\n\nAccess: write:premium-charges"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"MKT\",\n    \"name\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"cityId\": 8,\n    \"cityName\": \"Makati\",\n    \"rate\": 0.2,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Premium tax and charge rules (active=true|false)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/rules?active=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "rules"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Premium tax and charge rules (active=true|false)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: read:quotations, read:policies, read:masters, read:products, read:receipts, write:premium-charges"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/rules?active=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "rules"
+                  ],
+                  "query": [
+                    {
+                      "key": "active",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Premium tax and charge rules (active=true|false)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: read:quotations, read:policies, read:masters, read:products, read:receipts, write:premium-charges"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"DST\",\n      \"name\": \"Documentary Stamp Tax\",\n      \"kind\": \"dst\",\n      \"method\": \"per_unit\",\n      \"rate\": 0,\n      \"unitAmount\": 0.5,\n      \"unitSize\": 4,\n      \"fractionRule\": \"round_up\",\n      \"lines\": null,\n      \"regimes\": null,\n      \"minimumAmount\": 0,\n      \"sortOrder\": 30,\n      \"active\": true,\n      \"effectiveFrom\": \"2026-01-01\",\n      \"effectiveTo\": null,\n      \"remarks\": \"NIRC: P0.50 on each P4.00 of premium or fractional part thereof (12.5%)\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a charge rule (percent, per unit or flat; lines and tax regimes it applies to)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "rules"
+              ]
+            },
+            "description": "Add a charge rule (percent, per unit or flat; lines and tax regimes it applies to)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: write:premium-charges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"NOTARIAL2\",\n  \"name\": \"Notarial fee\",\n  \"kind\": \"other\",\n  \"method\": \"flat\",\n  \"unitAmount\": 150\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "rules"
+                  ]
+                },
+                "description": "Add a charge rule (percent, per unit or flat; lines and tax regimes it applies to)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: write:premium-charges",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"NOTARIAL2\",\n  \"name\": \"Notarial fee\",\n  \"kind\": \"other\",\n  \"method\": \"flat\",\n  \"unitAmount\": 150\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"DST\",\n    \"name\": \"Documentary Stamp Tax\",\n    \"kind\": \"dst\",\n    \"method\": \"per_unit\",\n    \"rate\": 0,\n    \"unitAmount\": 0.5,\n    \"unitSize\": 4,\n    \"fractionRule\": \"round_up\",\n    \"lines\": null,\n    \"regimes\": null,\n    \"minimumAmount\": 0,\n    \"sortOrder\": 30,\n    \"active\": true,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"remarks\": \"NIRC: P0.50 on each P4.00 of premium or fractional part thereof (12.5%)\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a charge rule (rate, method, lines, effective dates, active)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/rules/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "rules",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a charge rule (rate, method, lines, effective dates, active)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: write:premium-charges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 12,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/rules/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "rules",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a charge rule (rate, method, lines, effective dates, active)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: write:premium-charges",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate\": 12,\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"DST\",\n    \"name\": \"Documentary Stamp Tax\",\n    \"kind\": \"dst\",\n    \"method\": \"per_unit\",\n    \"rate\": 0,\n    \"unitAmount\": 0.5,\n    \"unitSize\": 4,\n    \"fractionRule\": \"round_up\",\n    \"lines\": null,\n    \"regimes\": null,\n    \"minimumAmount\": 0,\n    \"sortOrder\": 30,\n    \"active\": true,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"remarks\": \"NIRC: P0.50 on each P4.00 of premium or fractional part thereof (12.5%)\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete an \"other\" charge (statutory taxes are switched off instead)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/premium-charges/rules/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "premium-charges",
+                "rules",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete an \"other\" charge (statutory taxes are switched off instead)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: write:premium-charges"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/premium-charges/rules/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "premium-charges",
+                    "rules",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete an \"other\" charge (statutory taxes are switched off instead)\n\nFront-end touchpoint: Master > Packaged Products > LGU Tax Rates > Taxes & Charges\n\nAccess: write:premium-charges"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"DST\",\n    \"name\": \"Documentary Stamp Tax\",\n    \"kind\": \"dst\",\n    \"method\": \"per_unit\",\n    \"rate\": 0,\n    \"unitAmount\": 0.5,\n    \"unitSize\": 4,\n    \"fractionRule\": \"round_up\",\n    \"lines\": null,\n    \"regimes\": null,\n    \"minimumAmount\": 0,\n    \"sortOrder\": 30,\n    \"active\": true,\n    \"effectiveFrom\": \"2026-01-01\",\n    \"effectiveTo\": null,\n    \"remarks\": \"NIRC: P0.50 on each P4.00 of premium or fractional part thereof (12.5%)\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Product Configurator",
       "item": [
         {
@@ -40546,6 +43832,474 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public Payments",
+      "item": [
+        {
+          "name": "Client checkout page data: amount, gateway, status; once paid and issued, the policy number and PDF availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/payments/:token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "payments",
+                ":token"
+              ],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "description": "token (path parameter)"
+                }
+              ]
+            },
+            "description": "Client checkout page data: amount, gateway, status; once paid and issued, the policy number and PDF availability\n\nFront-end touchpoint: Public > Pay (/pay/:token)\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/public/payments/:token",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "payments",
+                    ":token"
+                  ],
+                  "variable": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "description": "token (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Client checkout page data: amount, gateway, status; once paid and issued, the policy number and PDF availability\n\nFront-end touchpoint: Public > Pay (/pay/:token)\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"linkNumber\": \"PL-2026-00001\",\n    \"description\": \"SME Shield package PQ-2026-00001\",\n    \"total\": 7367.2,\n    \"currency\": \"PHP\",\n    \"status\": \"pending\",\n    \"gateway\": {\n      \"name\": \"Sandbox\",\n      \"provider\": \"sandbox\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The digital policy of a paid link once issued (package schedule, or the policy schedule)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/payments/:token/policy.pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "payments",
+                ":token",
+                "policy.pdf"
+              ],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "description": "token (path parameter)"
+                }
+              ]
+            },
+            "description": "The digital policy of a paid link once issued (package schedule, or the policy schedule)\n\nFront-end touchpoint: Public > Pay (/pay/:token) > Policy\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/public/payments/:token/policy.pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "payments",
+                    ":token",
+                    "policy.pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "description": "token (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The digital policy of a paid link once issued (package schedule, or the policy schedule)\n\nFront-end touchpoint: Public > Pay (/pay/:token) > Policy\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Sandbox gateway only: simulate the client paying (outcome paid) or the payment failing (failed); processed as a signed notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/payments/:token/sandbox",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "payments",
+                ":token",
+                "sandbox"
+              ],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "description": "token (path parameter)"
+                }
+              ]
+            },
+            "description": "Sandbox gateway only: simulate the client paying (outcome paid) or the payment failing (failed); processed as a signed notification\n\nFront-end touchpoint: Public > Pay (/pay/:token) > Sandbox\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"paid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/payments/:token/sandbox",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "payments",
+                    ":token",
+                    "sandbox"
+                  ],
+                  "variable": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "description": "token (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Sandbox gateway only: simulate the client paying (outcome paid) or the payment failing (failed); processed as a signed notification\n\nFront-end touchpoint: Public > Pay (/pay/:token) > Sandbox\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outcome\": \"paid\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"paid\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Gateway postback sent as a GET (Dragonpay): same verification and processing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/payments/webhooks/:gateway?txnid=PL-2026-00001&refno=ABC123&status=S&message=Paid&digest=...",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "payments",
+                "webhooks",
+                ":gateway"
+              ],
+              "query": [
+                {
+                  "key": "txnid",
+                  "value": "PL-2026-00001"
+                },
+                {
+                  "key": "refno",
+                  "value": "ABC123"
+                },
+                {
+                  "key": "status",
+                  "value": "S"
+                },
+                {
+                  "key": "message",
+                  "value": "Paid"
+                },
+                {
+                  "key": "digest",
+                  "value": "..."
+                }
+              ],
+              "variable": [
+                {
+                  "key": "gateway",
+                  "value": "",
+                  "description": "gateway (path parameter)"
+                }
+              ]
+            },
+            "description": "Gateway postback sent as a GET (Dragonpay): same verification and processing\n\nFront-end touchpoint: Gateway to server\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/public/payments/webhooks/:gateway?txnid=PL-2026-00001&refno=ABC123&status=S&message=Paid&digest=...",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "payments",
+                    "webhooks",
+                    ":gateway"
+                  ],
+                  "query": [
+                    {
+                      "key": "txnid",
+                      "value": "PL-2026-00001"
+                    },
+                    {
+                      "key": "refno",
+                      "value": "ABC123"
+                    },
+                    {
+                      "key": "status",
+                      "value": "S"
+                    },
+                    {
+                      "key": "message",
+                      "value": "Paid"
+                    },
+                    {
+                      "key": "digest",
+                      "value": "..."
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "gateway",
+                      "value": "",
+                      "description": "gateway (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Gateway postback sent as a GET (Dragonpay): same verification and processing\n\nFront-end touchpoint: Gateway to server\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(text/plain) result=OK"
+            }
+          ]
+        },
+        {
+          "name": "Gateway webhook / postback: signature verified per provider (PayMongo Paymongo-Signature, Dragonpay digest, sandbox HMAC); a paid notification applies the payment; 401 when the signature is invalid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/payments/webhooks/:gateway",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "payments",
+                "webhooks",
+                ":gateway"
+              ],
+              "variable": [
+                {
+                  "key": "gateway",
+                  "value": "",
+                  "description": "gateway (path parameter)"
+                }
+              ]
+            },
+            "description": "Gateway webhook / postback: signature verified per provider (PayMongo Paymongo-Signature, Dragonpay digest, sandbox HMAC); a paid notification applies the payment; 401 when the signature is invalid\n\nFront-end touchpoint: Gateway to server\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"type\": \"checkout_session.payment.paid\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/payments/webhooks/:gateway",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "payments",
+                    "webhooks",
+                    ":gateway"
+                  ],
+                  "variable": [
+                    {
+                      "key": "gateway",
+                      "value": "",
+                      "description": "gateway (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Gateway webhook / postback: signature verified per provider (PayMongo Paymongo-Signature, Dragonpay digest, sandbox HMAC); a paid notification applies the payment; 401 when the signature is invalid\n\nFront-end touchpoint: Gateway to server\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"type\": \"checkout_session.payment.paid\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"paid\",\n    \"linkNumber\": \"PL-2026-00001\"\n  }\n}"
             }
           ]
         }
