@@ -149,11 +149,11 @@ const TableData = ({ navigate }) => {
         scrollHeight="40vh"
       >
         <Column
-          field="businessCode"
+          field="lineofBusinessCode"
           header="Line of Business Code"
           className="fieldvalue_container"
           sortable
-          body={(rowData) => rowData.businessCode?.toUpperCase()}
+          body={(rowData) => rowData.lineofBusinessCode?.toUpperCase()}
         ></Column>
         <Column
           field="LOBName"
@@ -163,10 +163,10 @@ const TableData = ({ navigate }) => {
         ></Column>
 
         <Column
-          field="modifiedby"
+          field="modifiedBy"
           header="Modified by"
           className="fieldvalue_container"
-          body={(rowData) => rowData.modifiedby?.toUpperCase()}
+          body={(rowData) => rowData.modifiedBy?.toUpperCase()}
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"

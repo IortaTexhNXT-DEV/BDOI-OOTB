@@ -223,10 +223,16 @@ function tableOut(t, row) {
   return withAudit(t, rec, row);
 }
 
+/** Who last changed a record: the last editor, else its creator; rows loaded at set-up show "System". */
+const lastChangedBy = (row) => {
+  const who = row.updated_by_name || row.updated_by || row.created_by_name || row.created_by || null;
+  return who && ['seed', 'system', 'migration'].includes(String(who).toLowerCase()) ? 'System' : who;
+};
+
 function withAudit(t, rec, row) {
   const updatedOn = row.updated_at ? new Date(row.updated_at).toISOString().slice(0, 10) : null;
   for (const f of t.fields) {
-    if (f.type === 'audit-user') rec[f.name] = row.updated_by_name || row.updated_by || null;
+    if (f.type === 'audit-user') rec[f.name] = lastChangedBy(row);
     if (f.type === 'audit-date') rec[f.name] = updatedOn;
   }
   return {

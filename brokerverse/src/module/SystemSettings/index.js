@@ -27,7 +27,6 @@ import "./index.scss";
 
 const LANGUAGE_OPTIONS = [
   { label: "English", value: "en" },
-  { label: "Thai", value: "th" },
 ];
 
 /** Preset theme colors — label includes hex so users can pick or type a code */

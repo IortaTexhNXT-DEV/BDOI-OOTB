@@ -146,7 +146,7 @@ const TableData = ({ navigate }) => {
         scrollHeight="40vh"
       >
         <Column
-          field="policytypeCode"
+          field="policyTypeCode"
           header="Policy type Code"
           className="fieldvalue_container"
           sortable
@@ -157,13 +157,13 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
         ></Column>
         <Column
-          field="product"
+          field="Product"
           header="Product"
           className="fieldvalue_container"
         ></Column>
 
         <Column
-          field="modifiedby"
+          field="modifiedBy"
           header="Modified by"
           className="fieldvalue_container"
         ></Column>

@@ -151,11 +151,11 @@ const TableData = ({ navigate }) => {
         scrollHeight="40vh"
       >
         <Column
-          field="signatoriesCode"
+          field="signatoryCode"
           header="Signatories Code"
           className="fieldvalue_container"
           sortable
-          body={(rowData) => rowData.signatoriesCode?.toUpperCase()}
+          body={(rowData) => rowData.signatoryCode?.toUpperCase()}
         ></Column>
         <Column
           field="signatoryName"
@@ -164,10 +164,10 @@ const TableData = ({ navigate }) => {
           body={(rowData) => rowData.signatoryName?.toUpperCase()}
         ></Column>
         <Column
-          field="modifiedby"
+          field="modifiedBy"
           header="Modified by"
           className="fieldvalue_container"
-          body={(rowData) => rowData.modifiedby?.toUpperCase()}
+          body={(rowData) => rowData.modifiedBy?.toUpperCase()}
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"

@@ -205,11 +205,11 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="CompanyName"
+              field="BranchName"
               header={t("generalMasters.branchName")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.CompanyName?.toUpperCase()}
+              body={(rowData) => rowData.BranchName?.toUpperCase()}
             ></Column>
             <Column
               field="Country"

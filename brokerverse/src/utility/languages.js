@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import i18n from "../i18n";
 import systemSettingsService from "../services/systemSettingsService";
 
-const FALLBACK_LABELS = { en: "English", th: "Thai", fil: "Filipino" };
+const FALLBACK_LABELS = { en: "English", fil: "Filipino" };
 
 /** Language codes with a bundled translation. */
 export const translatedLanguages = () => Object.keys(i18n.options?.resources || { en: {} });
