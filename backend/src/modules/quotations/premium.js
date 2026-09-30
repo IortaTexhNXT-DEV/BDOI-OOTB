@@ -11,6 +11,7 @@ import { getSetting } from '../../lib/settings.js';
 import { num, round2, lobOf } from '../documents/common.js';
 import { motorFixedCovers } from './motorTariff.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
+import { engineOn, quotationCharges } from '../premium-charges/service.js';
 
 const RATE_COVERS = [
   // [premium field, sum-insured field, rate field, default-rate key]
@@ -90,9 +91,19 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   const ncdPct = num(v.ncdPercent);
   const ncd = ncdPct ? round2((net * ncdPct) / 100) : num(v.NCD);
   net = round2(net - (ncdPct ? ncd : 0));
-  const rates = await taxRates(lob);
-  const tax = Object.fromEntries(Object.entries(rates).map(([k, r]) => [k, round2(net * r)]));
-  const others = round2(num(v.accountPremiumOthers));
+  let rates = await taxRates(lob);
+  let tax = Object.fromEntries(Object.entries(rates).map(([k, r]) => [k, round2(net * r)]));
+  let others = round2(num(v.accountPremiumOthers));
+  // Premium tax and charge engine (premium-charges module): LGU rate, DST per P4.00, FST on property lines, premium tax
+  // regime of the product. Used when the setting is on or the quotation was priced from a comparison / package.
+  let charges = null;
+  if (await engineOn(v)) {
+    const c = await quotationCharges(v, net, lob);
+    tax = c.tax;
+    others = round2(others + c.others);
+    charges = c.charges;
+    rates = Object.fromEntries(Object.entries(tax).map(([k, x]) => [k, net ? Math.round((x / net) * 1e6) / 1e6 : 0]));
+  }
   const discount = round2(num(v.discount));
   const gross = Math.max(0, round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + ctpl + others - discount));
   const si = (k) => (k in amounts ? num(amounts[k]) : num(v[k]));
@@ -102,7 +113,7 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   return {
     lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, ctplTermYears: motor.ctplTermYears ?? null, appaSeats: motor.appaSeats ?? null,
       APPAtotalCoverage: amounts.APPAtotalCoverage, APPARate: motor.APPARate ?? null } : {}), netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,
-    totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate),
+    totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate), ...(charges ? { charges } : {}),
     currency: await getSetting('currency.default', 'PHP'),
   };
 }
