@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (723 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (741 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -18553,6 +18553,1475 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"agentName\": \"Juan Dela Cruz\",\n    \"period\": \"August 2026\",\n    \"totalEarnings\": 13500,\n    \"ytdEarnings\": 38500,\n    \"pendingPayment\": 13500,\n    \"pendingPeriods\": [\n      \"August 2026\"\n    ],\n    \"lastPaymentPeriods\": [\n      \"July 2026\"\n    ],\n    \"contact\": {\n      \"companyName\": \"BrokerVerse Insurance Brokerage\",\n      \"email\": \"info@brokerverse.ph\",\n      \"phone\": \"+63 2 8888 0000\"\n    },\n    \"programBreakdown\": [],\n    \"monthlyTrend\": []\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Insurer Reconciliation",
+      "item": [
+        {
+          "name": "Insurer statement formats (column mapping per insurer); insurerId limits to the insurer's own formats and the generic ones; all=true includes inactive",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/formats?insurerId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "formats"
+              ],
+              "query": [
+                {
+                  "key": "insurerId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Insurer statement formats (column mapping per insurer); insurerId limits to the insurer's own formats and the generic ones; all=true includes inactive\n\nFront-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: read:remittance, read:masters"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/formats?insurerId=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "formats"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurerId",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Insurer statement formats (column mapping per insurer); insurerId limits to the insurer's own formats and the generic ones; all=true includes inactive\n\nFront-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: read:remittance, read:masters"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"MALAYAN-SOA\",\n      \"name\": \"Malayan statement of account\",\n      \"insurerId\": 1,\n      \"fileType\": \"xlsx\",\n      \"skipRows\": 2,\n      \"hasHeader\": true,\n      \"columns\": {\n        \"policyNo\": \"policy no\",\n        \"insured\": \"assured\",\n        \"date\": \"date\",\n        \"grossPremium\": \"gross premium\",\n        \"commission\": \"commission\",\n        \"taxes\": \"taxes\",\n        \"amountPaid\": \"amount received\"\n      },\n      \"dateFormat\": \"MM/DD/YYYY\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add an insurer statement format",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/formats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "formats"
+              ]
+            },
+            "description": "Add an insurer statement format\n\nFront-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: write:remittance, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"MALAYAN-SOA\",\n  \"name\": \"Malayan statement of account\",\n  \"insurerId\": 1,\n  \"fileType\": \"xlsx\",\n  \"skipRows\": 2,\n  \"hasHeader\": true,\n  \"columns\": {\n    \"policyNo\": \"policy no\",\n    \"insured\": \"assured\",\n    \"date\": \"date\",\n    \"grossPremium\": \"gross premium\",\n    \"commission\": \"commission\",\n    \"taxes\": \"taxes\",\n    \"amountPaid\": \"amount received\"\n  },\n  \"dateFormat\": \"MM/DD/YYYY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/formats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "formats"
+                  ]
+                },
+                "description": "Add an insurer statement format\n\nFront-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: write:remittance, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"MALAYAN-SOA\",\n  \"name\": \"Malayan statement of account\",\n  \"insurerId\": 1,\n  \"fileType\": \"xlsx\",\n  \"skipRows\": 2,\n  \"hasHeader\": true,\n  \"columns\": {\n    \"policyNo\": \"policy no\",\n    \"insured\": \"assured\",\n    \"date\": \"date\",\n    \"grossPremium\": \"gross premium\",\n    \"commission\": \"commission\",\n    \"taxes\": \"taxes\",\n    \"amountPaid\": \"amount received\"\n  },\n  \"dateFormat\": \"MM/DD/YYYY\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"MALAYAN-SOA\",\n    \"name\": \"Malayan statement of account\",\n    \"insurerId\": 1,\n    \"fileType\": \"xlsx\",\n    \"skipRows\": 2,\n    \"hasHeader\": true,\n    \"columns\": {\n      \"policyNo\": \"policy no\",\n      \"insured\": \"assured\",\n      \"date\": \"date\",\n      \"grossPremium\": \"gross premium\",\n      \"commission\": \"commission\",\n      \"taxes\": \"taxes\",\n      \"amountPaid\": \"amount received\"\n    },\n    \"dateFormat\": \"MM/DD/YYYY\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change an insurer statement format (columns, date format, rows to skip, active)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/formats/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "formats",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change an insurer statement format (columns, date format, rows to skip, active)\n\nFront-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: write:remittance, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"columns\": {\n    \"policyNo\": \"policy no\",\n    \"insured\": \"assured\",\n    \"date\": \"date\",\n    \"grossPremium\": \"gross premium\",\n    \"commission\": \"commission\",\n    \"taxes\": \"taxes\",\n    \"amountPaid\": \"amount received\"\n  },\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/formats/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "formats",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change an insurer statement format (columns, date format, rows to skip, active)\n\nFront-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: write:remittance, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"columns\": {\n    \"policyNo\": \"policy no\",\n    \"insured\": \"assured\",\n    \"date\": \"date\",\n    \"grossPremium\": \"gross premium\",\n    \"commission\": \"commission\",\n    \"taxes\": \"taxes\",\n    \"amountPaid\": \"amount received\"\n  },\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"MALAYAN-SOA\",\n    \"name\": \"Malayan statement of account\",\n    \"insurerId\": 1,\n    \"fileType\": \"xlsx\",\n    \"skipRows\": 2,\n    \"hasHeader\": true,\n    \"columns\": {\n      \"policyNo\": \"policy no\",\n      \"insured\": \"assured\",\n      \"date\": \"date\",\n      \"grossPremium\": \"gross premium\",\n      \"commission\": \"commission\",\n      \"taxes\": \"taxes\",\n      \"amountPaid\": \"amount received\"\n    },\n    \"dateFormat\": \"MM/DD/YYYY\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Imported insurer statements (insurerId, status, statementType, from / to)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements?insurerId=1&status=draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements"
+              ],
+              "query": [
+                {
+                  "key": "insurerId",
+                  "value": "1"
+                },
+                {
+                  "key": "status",
+                  "value": "draft"
+                }
+              ]
+            },
+            "description": "Imported insurer statements (insurerId, status, statementType, from / to)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: read:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements?insurerId=1&status=draft",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurerId",
+                      "value": "1"
+                    },
+                    {
+                      "key": "status",
+                      "value": "draft"
+                    }
+                  ]
+                },
+                "description": "Imported insurer statements (insurerId, status, statementType, from / to)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: read:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"isr_1\",\n      \"statementNumber\": \"ISR-2026-00001\",\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"statementType\": \"premium\",\n      \"statementRef\": \"SOA-0926\",\n      \"periodFrom\": \"2026-09-01\",\n      \"periodTo\": \"2026-09-30\",\n      \"tolerance\": 1,\n      \"lineCount\": 12,\n      \"status\": \"draft\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Statement with its lines, matches, differences report and resolutions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Statement with its lines, matches, differences report and resolutions\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: read:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Statement with its lines, matches, differences report and resolutions\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: read:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"isr_1\",\n    \"statementNumber\": \"ISR-2026-00001\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"statementType\": \"premium\",\n    \"statementRef\": \"SOA-0926\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"tolerance\": 1,\n    \"lineCount\": 12,\n    \"status\": \"draft\",\n    \"summary\": {},\n    \"lines\": [],\n    \"missingInBroker\": [],\n    \"missingInInsurer\": [],\n    \"amountDifferences\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve the reconciliation: posts the adjustment journals (posting rule insurer_statement.adjustment) and locks it; not the preparer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve the reconciliation: posts the adjustment journals (posting rule insurer_statement.adjustment) and locks it; not the preparer\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: approve:insurer-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Agreed with the insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve the reconciliation: posts the adjustment journals (posting rule insurer_statement.adjustment) and locks it; not the preparer\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: approve:insurer-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Agreed with the insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"isr_1\",\n    \"statementNumber\": \"ISR-2026-00001\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"statementType\": \"premium\",\n    \"statementRef\": \"SOA-0926\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"tolerance\": 1,\n    \"lineCount\": 12,\n    \"status\": \"approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the automatic matching again on the unmatched lines (policy number, then amount and insured)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/auto-match",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "auto-match"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Run the automatic matching again on the unmatched lines (policy number, then amount and insured)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/auto-match",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "auto-match"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Run the automatic matching again on the unmatched lines (policy number, then amount and insured)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"matched\": 10,\n    \"differences\": 1,\n    \"unmatched\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a draft statement imported in error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a draft statement imported in error\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a draft statement imported in error\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"cancelled\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Broker records of the insurer a line can be matched to (search on policy number or insured)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/candidates?search=POL-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "candidates"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "POL-2026"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Broker records of the insurer a line can be matched to (search on policy number or insured)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Manual match\n\nAccess: read:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/candidates?search=POL-2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "candidates"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "POL-2026"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Broker records of the insurer a line can be matched to (search on policy number or insured)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Manual match\n\nAccess: read:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"type\": \"remittance_line\",\n      \"id\": \"12\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"grossPremium\": 12525,\n      \"commission\": 1500,\n      \"amount\": 11025\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Match a statement line by hand to a broker record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/lines/:lineId/match",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "lines",
+                ":lineId",
+                "match"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "lineId",
+                  "value": "",
+                  "description": "lineId (path parameter)"
+                }
+              ]
+            },
+            "description": "Match a statement line by hand to a broker record\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Manual match\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brokerType\": \"policy\",\n  \"brokerId\": \"pol_1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/lines/:lineId/match",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "lines",
+                    ":lineId",
+                    "match"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "lineId",
+                      "value": "",
+                      "description": "lineId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Match a statement line by hand to a broker record\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Manual match\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"brokerType\": \"policy\",\n  \"brokerId\": \"pol_1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lineId\": 3,\n    \"status\": \"matched\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Undo the match of a statement line",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/lines/:lineId/match",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "lines",
+                ":lineId",
+                "match"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "lineId",
+                  "value": "",
+                  "description": "lineId (path parameter)"
+                }
+              ]
+            },
+            "description": "Undo the match of a statement line\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/lines/:lineId/match",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "lines",
+                    ":lineId",
+                    "match"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "lineId",
+                      "value": "",
+                      "description": "lineId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Undo the match of a statement line\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject the reconciliation back to draft (reason required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject the reconciliation back to draft (reason required)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: approve:insurer-reconciliation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Line 4 needs the endorsement\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject the reconciliation back to draft (reason required)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: approve:insurer-reconciliation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Line 4 needs the endorsement\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"isr_1\",\n    \"statementNumber\": \"ISR-2026-00001\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"statementType\": \"premium\",\n    \"statementRef\": \"SOA-0926\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"tolerance\": 1,\n    \"lineCount\": 12,\n    \"status\": \"draft\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Differences report download: format=xlsx (default), csv or pdf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/report?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "report"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Differences report download: format=xlsx (default), csv or pdf\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Differences report\n\nAccess: read:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/report?format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "report"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Differences report download: format=xlsx (default), csv or pdf\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Differences report\n\nAccess: read:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/vnd.openxmlformats-officedocument.spreadsheetml.sheet | text/csv | application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Resolve a difference (lineId, or brokerType + brokerId for a record missing on the statement) with a note or an adjustment (posted on approval)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/resolutions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "resolutions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Resolve a difference (lineId, or brokerType + brokerId for a record missing on the statement) with a note or an adjustment (posted on approval)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Resolve\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lineId\": 3,\n  \"kind\": \"adjustment\",\n  \"note\": \"Insurer applied the corrected rate\",\n  \"premiumAdjustment\": 150,\n  \"commissionAdjustment\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/resolutions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "resolutions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Resolve a difference (lineId, or brokerType + brokerId for a record missing on the statement) with a note or an adjustment (posted on approval)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Resolve\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lineId\": 3,\n  \"kind\": \"adjustment\",\n  \"note\": \"Insurer applied the corrected rate\",\n  \"premiumAdjustment\": 150,\n  \"commissionAdjustment\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"kind\": \"adjustment\",\n    \"premiumAdjustment\": 150,\n    \"commissionAdjustment\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remove a resolution (draft statements only)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/resolutions/:resolutionId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "resolutions",
+                ":resolutionId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "resolutionId",
+                  "value": "",
+                  "description": "resolutionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Remove a resolution (draft statements only)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Resolve\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/resolutions/:resolutionId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "resolutions",
+                    ":resolutionId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "resolutionId",
+                      "value": "",
+                      "description": "resolutionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remove a resolution (draft statements only)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Resolve\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit the reconciliation for approval (every difference resolved when insurer_reconciliation.require_resolved)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit the reconciliation for approval (every difference resolved when insurer_reconciliation.require_resolved)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit the reconciliation for approval (every difference resolved when insurer_reconciliation.require_resolved)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"isr_1\",\n    \"statementNumber\": \"ISR-2026-00001\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"statementType\": \"premium\",\n    \"statementRef\": \"SOA-0926\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"tolerance\": 1,\n    \"lineCount\": 12,\n    \"status\": \"submitted\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Import an insurer statement (premium remittance confirmation or commission statement) and auto-match it to the broker's records",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                "import"
+              ]
+            },
+            "description": "Import an insurer statement (premium remittance confirmation or commission statement) and auto-match it to the broker's records\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Import statement\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(multipart) statement.xlsx\",\n  \"insurerId\": 1,\n  \"statementType\": \"premium\",\n  \"periodFrom\": \"2026-09-01\",\n  \"periodTo\": \"2026-09-30\",\n  \"statementRef\": \"SOA-0926\",\n  \"formatCode\": \"GENERIC\",\n  \"tolerance\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    "import"
+                  ]
+                },
+                "description": "Import an insurer statement (premium remittance confirmation or commission statement) and auto-match it to the broker's records\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Import statement\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(multipart) statement.xlsx\",\n  \"insurerId\": 1,\n  \"statementType\": \"premium\",\n  \"periodFrom\": \"2026-09-01\",\n  \"periodTo\": \"2026-09-30\",\n  \"statementRef\": \"SOA-0926\",\n  \"formatCode\": \"GENERIC\",\n  \"tolerance\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"isr_1\",\n    \"statementNumber\": \"ISR-2026-00001\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"statementType\": \"premium\",\n    \"statementRef\": \"SOA-0926\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"tolerance\": 1,\n    \"lineCount\": 12,\n    \"status\": \"draft\",\n    \"summary\": {\n      \"matched\": 10,\n      \"differences\": 1,\n      \"missingInBroker\": 1,\n      \"missingInInsurer\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Parse an insurer statement file (CSV / XLSX) with a format and show the lines, totals and the rows that cannot be read; nothing is saved",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                "preview"
+              ]
+            },
+            "description": "Parse an insurer statement file (CSV / XLSX) with a format and show the lines, totals and the rows that cannot be read; nothing is saved\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Import statement\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(multipart) statement.xlsx\",\n  \"insurerId\": 1,\n  \"formatCode\": \"GENERIC\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    "preview"
+                  ]
+                },
+                "description": "Parse an insurer statement file (CSV / XLSX) with a format and show the lines, totals and the rows that cannot be read; nothing is saved\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Import statement\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(multipart) statement.xlsx\",\n  \"insurerId\": 1,\n  \"formatCode\": \"GENERIC\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"format\": \"GENERIC\",\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"policyNo\": \"POL-2026-00001\",\n        \"grossPremium\": 12525,\n        \"commission\": 1500\n      }\n    ],\n    \"errors\": [],\n    \"totals\": {\n      \"count\": 1\n    }\n  }\n}"
             }
           ]
         }

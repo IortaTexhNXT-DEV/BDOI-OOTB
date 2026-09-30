@@ -219,6 +219,9 @@ import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRu
 import BankStatementFormats from "../module/BankReconciliation/StatementFormats";
 import BankTransactionTypes from "../module/BankReconciliation/TransactionTypes";
 import BankRecReportPage from "../module/BankReconciliation/ReportPage";
+import InsurerStatements from "../module/InsurerReconciliation/Statements";
+import InsurerStatementWorkspace from "../module/InsurerReconciliation/Workspace";
+import InsurerStatementFormats from "../module/InsurerReconciliation/Formats";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -989,6 +992,7 @@ const Maincomponent = () => {
           <Route path="master/finance/taxation-legacy" element={<TaxationMaster />} />
           <Route path="master/finance/close-checklist" element={<CloseChecklist />} />
           <Route path="master/finance/bank-statement-formats" element={<BankStatementFormats />} />
+          <Route path="master/finance/insurer-statement-formats" element={<InsurerStatementFormats />} />
           <Route path="master/finance/bank-transaction-types" element={<BankTransactionTypes />} />
           <Route
             path="master/finance/taxation/addtaxation"
@@ -1742,6 +1746,8 @@ const Maincomponent = () => {
           <Route path="/accounts/bank-reconciliation/reconciliations" element={<BankReconciliations />} />
           <Route path="/accounts/bank-reconciliation/reconciliations/:id" element={<BankReconciliationRun />} />
           <Route path="/accounts/bank-reconciliation/reports/:code" element={<BankRecReportPage />} />
+          <Route path="/accounts/insurer-reconciliation/statements" element={<InsurerStatements />} />
+          <Route path="/accounts/insurer-reconciliation/statements/:id" element={<InsurerStatementWorkspace />} />
 
           {/* OperationalReports */}
           <Route

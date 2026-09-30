@@ -78,6 +78,9 @@
       "name": "Incentive"
     },
     {
+      "name": "Insurer Reconciliation"
+    },
+    {
       "name": "Journal Vouchers"
     },
     {
@@ -29513,6 +29516,2003 @@
           "write:incentive",
           "read:profile"
         ]
+      }
+    },
+    "/insurer-reconciliation/formats": {
+      "get": {
+        "operationId": "getInsurerReconciliationFormats",
+        "summary": "Insurer statement formats (column mapping per insurer); insurerId limits to the insurer's own formats and the generic ones; all=true includes inactive",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: read:remittance, read:masters",
+        "parameters": [
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "insurerId": {
+                            "type": "integer"
+                          },
+                          "fileType": {
+                            "type": "string"
+                          },
+                          "skipRows": {
+                            "type": "integer"
+                          },
+                          "hasHeader": {
+                            "type": "boolean"
+                          },
+                          "columns": {
+                            "type": "object",
+                            "properties": {
+                              "policyNo": {
+                                "type": "string"
+                              },
+                              "insured": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "grossPremium": {
+                                "type": "string"
+                              },
+                              "commission": {
+                                "type": "string"
+                              },
+                              "taxes": {
+                                "type": "string"
+                              },
+                              "amountPaid": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "dateFormat": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "MALAYAN-SOA",
+                      "name": "Malayan statement of account",
+                      "insurerId": 1,
+                      "fileType": "xlsx",
+                      "skipRows": 2,
+                      "hasHeader": true,
+                      "columns": {
+                        "policyNo": "policy no",
+                        "insured": "assured",
+                        "date": "date",
+                        "grossPremium": "gross premium",
+                        "commission": "commission",
+                        "taxes": "taxes",
+                        "amountPaid": "amount received"
+                      },
+                      "dateFormat": "MM/DD/YYYY"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Insurer Statement Formats",
+        "x-permissions": [
+          "read:remittance",
+          "read:masters"
+        ]
+      },
+      "post": {
+        "operationId": "postInsurerReconciliationFormats",
+        "summary": "Add an insurer statement format",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: write:remittance, write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "insurerId": {
+                          "type": "integer"
+                        },
+                        "fileType": {
+                          "type": "string"
+                        },
+                        "skipRows": {
+                          "type": "integer"
+                        },
+                        "hasHeader": {
+                          "type": "boolean"
+                        },
+                        "columns": {
+                          "type": "object",
+                          "properties": {
+                            "policyNo": {
+                              "type": "string"
+                            },
+                            "insured": {
+                              "type": "string"
+                            },
+                            "date": {
+                              "type": "string"
+                            },
+                            "grossPremium": {
+                              "type": "string"
+                            },
+                            "commission": {
+                              "type": "string"
+                            },
+                            "taxes": {
+                              "type": "string"
+                            },
+                            "amountPaid": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "dateFormat": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "MALAYAN-SOA",
+                    "name": "Malayan statement of account",
+                    "insurerId": 1,
+                    "fileType": "xlsx",
+                    "skipRows": 2,
+                    "hasHeader": true,
+                    "columns": {
+                      "policyNo": "policy no",
+                      "insured": "assured",
+                      "date": "date",
+                      "grossPremium": "gross premium",
+                      "commission": "commission",
+                      "taxes": "taxes",
+                      "amountPaid": "amount received"
+                    },
+                    "dateFormat": "MM/DD/YYYY"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Insurer Statement Formats",
+        "x-permissions": [
+          "write:remittance",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "insurerId": {
+                    "type": "integer"
+                  },
+                  "fileType": {
+                    "type": "string"
+                  },
+                  "skipRows": {
+                    "type": "integer"
+                  },
+                  "hasHeader": {
+                    "type": "boolean"
+                  },
+                  "columns": {
+                    "type": "object",
+                    "properties": {
+                      "policyNo": {
+                        "type": "string"
+                      },
+                      "insured": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string"
+                      },
+                      "grossPremium": {
+                        "type": "string"
+                      },
+                      "commission": {
+                        "type": "string"
+                      },
+                      "taxes": {
+                        "type": "string"
+                      },
+                      "amountPaid": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "dateFormat": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "MALAYAN-SOA",
+                "name": "Malayan statement of account",
+                "insurerId": 1,
+                "fileType": "xlsx",
+                "skipRows": 2,
+                "hasHeader": true,
+                "columns": {
+                  "policyNo": "policy no",
+                  "insured": "assured",
+                  "date": "date",
+                  "grossPremium": "gross premium",
+                  "commission": "commission",
+                  "taxes": "taxes",
+                  "amountPaid": "amount received"
+                },
+                "dateFormat": "MM/DD/YYYY"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/formats/{code}": {
+      "put": {
+        "operationId": "putInsurerReconciliationFormatsCode",
+        "summary": "Change an insurer statement format (columns, date format, rows to skip, active)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Insurer Statement Formats\n\nAccess: write:remittance, write:masters",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "insurerId": {
+                          "type": "integer"
+                        },
+                        "fileType": {
+                          "type": "string"
+                        },
+                        "skipRows": {
+                          "type": "integer"
+                        },
+                        "hasHeader": {
+                          "type": "boolean"
+                        },
+                        "columns": {
+                          "type": "object",
+                          "properties": {
+                            "policyNo": {
+                              "type": "string"
+                            },
+                            "insured": {
+                              "type": "string"
+                            },
+                            "date": {
+                              "type": "string"
+                            },
+                            "grossPremium": {
+                              "type": "string"
+                            },
+                            "commission": {
+                              "type": "string"
+                            },
+                            "taxes": {
+                              "type": "string"
+                            },
+                            "amountPaid": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "dateFormat": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "MALAYAN-SOA",
+                    "name": "Malayan statement of account",
+                    "insurerId": 1,
+                    "fileType": "xlsx",
+                    "skipRows": 2,
+                    "hasHeader": true,
+                    "columns": {
+                      "policyNo": "policy no",
+                      "insured": "assured",
+                      "date": "date",
+                      "grossPremium": "gross premium",
+                      "commission": "commission",
+                      "taxes": "taxes",
+                      "amountPaid": "amount received"
+                    },
+                    "dateFormat": "MM/DD/YYYY"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Insurer Statement Formats",
+        "x-permissions": [
+          "write:remittance",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "columns": {
+                    "type": "object",
+                    "properties": {
+                      "policyNo": {
+                        "type": "string"
+                      },
+                      "insured": {
+                        "type": "string"
+                      },
+                      "date": {
+                        "type": "string"
+                      },
+                      "grossPremium": {
+                        "type": "string"
+                      },
+                      "commission": {
+                        "type": "string"
+                      },
+                      "taxes": {
+                        "type": "string"
+                      },
+                      "amountPaid": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "columns": {
+                  "policyNo": "policy no",
+                  "insured": "assured",
+                  "date": "date",
+                  "grossPremium": "gross premium",
+                  "commission": "commission",
+                  "taxes": "taxes",
+                  "amountPaid": "amount received"
+                },
+                "active": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/statements": {
+      "get": {
+        "operationId": "getInsurerReconciliationStatements",
+        "summary": "Imported insurer statements (insurerId, status, statementType, from / to)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: read:remittance",
+        "parameters": [
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "draft"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "statementNumber": {
+                            "type": "string"
+                          },
+                          "insurerName": {
+                            "type": "string"
+                          },
+                          "statementType": {
+                            "type": "string"
+                          },
+                          "statementRef": {
+                            "type": "string"
+                          },
+                          "periodFrom": {
+                            "type": "string"
+                          },
+                          "periodTo": {
+                            "type": "string"
+                          },
+                          "tolerance": {
+                            "type": "integer"
+                          },
+                          "lineCount": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "isr_1",
+                      "statementNumber": "ISR-2026-00001",
+                      "insurerName": "Malayan Insurance Co., Inc.",
+                      "statementType": "premium",
+                      "statementRef": "SOA-0926",
+                      "periodFrom": "2026-09-01",
+                      "periodTo": "2026-09-30",
+                      "tolerance": 1,
+                      "lineCount": 12,
+                      "status": "draft"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "read:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}": {
+      "get": {
+        "operationId": "getInsurerReconciliationStatementsId",
+        "summary": "Statement with its lines, matches, differences report and resolutions",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: read:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "statementNumber": {
+                          "type": "string"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "statementType": {
+                          "type": "string"
+                        },
+                        "statementRef": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "tolerance": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "missingInBroker": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "missingInInsurer": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "amountDifferences": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "isr_1",
+                    "statementNumber": "ISR-2026-00001",
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "statementType": "premium",
+                    "statementRef": "SOA-0926",
+                    "periodFrom": "2026-09-01",
+                    "periodTo": "2026-09-30",
+                    "tolerance": 1,
+                    "lineCount": 12,
+                    "status": "draft",
+                    "summary": {},
+                    "lines": [],
+                    "missingInBroker": [],
+                    "missingInInsurer": [],
+                    "amountDifferences": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "read:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/approve": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdApprove",
+        "summary": "Approve the reconciliation: posts the adjustment journals (posting rule insurer_statement.adjustment) and locks it; not the preparer",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: approve:insurer-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "statementNumber": {
+                          "type": "string"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "statementType": {
+                          "type": "string"
+                        },
+                        "statementRef": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "tolerance": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "isr_1",
+                    "statementNumber": "ISR-2026-00001",
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "statementType": "premium",
+                    "statementRef": "SOA-0926",
+                    "periodFrom": "2026-09-01",
+                    "periodTo": "2026-09-30",
+                    "tolerance": 1,
+                    "lineCount": 12,
+                    "status": "approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "approve:insurer-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Agreed with the insurer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/auto-match": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdAutoMatch",
+        "summary": "Run the automatic matching again on the unmatched lines (policy number, then amount and insured)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "matched": {
+                          "type": "integer"
+                        },
+                        "differences": {
+                          "type": "integer"
+                        },
+                        "unmatched": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "matched": 10,
+                    "differences": 1,
+                    "unmatched": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "write:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/cancel": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdCancel",
+        "summary": "Cancel a draft statement imported in error",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "cancelled"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Wrong insurer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/candidates": {
+      "get": {
+        "operationId": "getInsurerReconciliationStatementsIdCandidates",
+        "summary": "Broker records of the insurer a line can be matched to (search on policy number or insured)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Manual match\n\nAccess: read:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "POL-2026"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "grossPremium": {
+                            "type": "integer"
+                          },
+                          "commission": {
+                            "type": "integer"
+                          },
+                          "amount": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "type": "remittance_line",
+                      "id": "12",
+                      "policyNumber": "POL-2026-00001",
+                      "grossPremium": 12525,
+                      "commission": 1500,
+                      "amount": 11025
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Manual match",
+        "x-permissions": [
+          "read:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/lines/{lineId}/match": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdLinesLineIdMatch",
+        "summary": "Match a statement line by hand to a broker record",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Manual match\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lineId": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "lineId": 3,
+                    "status": "matched"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Manual match",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "brokerType": {
+                    "type": "string"
+                  },
+                  "brokerId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "brokerType": "policy",
+                "brokerId": "pol_1"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteInsurerReconciliationStatementsIdLinesLineIdMatch",
+        "summary": "Undo the match of a statement line",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "write:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/reject": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdReject",
+        "summary": "Reject the reconciliation back to draft (reason required)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: approve:insurer-reconciliation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "statementNumber": {
+                          "type": "string"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "statementType": {
+                          "type": "string"
+                        },
+                        "statementRef": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "tolerance": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "isr_1",
+                    "statementNumber": "ISR-2026-00001",
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "statementType": "premium",
+                    "statementRef": "SOA-0926",
+                    "periodFrom": "2026-09-01",
+                    "periodTo": "2026-09-30",
+                    "tolerance": 1,
+                    "lineCount": 12,
+                    "status": "draft"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "approve:insurer-reconciliation"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Line 4 needs the endorsement"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/report": {
+      "get": {
+        "operationId": "getInsurerReconciliationStatementsIdReport",
+        "summary": "Differences report download: format=xlsx (default), csv or pdf",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Differences report\n\nAccess: read:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(application/vnd.openxmlformats-officedocument.spreadsheetml.sheet | text/csv | application/pdf)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Differences report",
+        "x-permissions": [
+          "read:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/resolutions": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdResolutions",
+        "summary": "Resolve a difference (lineId, or brokerType + brokerId for a record missing on the statement) with a note or an adjustment (posted on approval)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Resolve\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "premiumAdjustment": {
+                          "type": "integer"
+                        },
+                        "commissionAdjustment": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "kind": "adjustment",
+                    "premiumAdjustment": 150,
+                    "commissionAdjustment": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Resolve",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lineId": {
+                    "type": "integer"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  },
+                  "premiumAdjustment": {
+                    "type": "integer"
+                  },
+                  "commissionAdjustment": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "lineId": 3,
+                "kind": "adjustment",
+                "note": "Insurer applied the corrected rate",
+                "premiumAdjustment": 150,
+                "commissionAdjustment": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/resolutions/{resolutionId}": {
+      "delete": {
+        "operationId": "deleteInsurerReconciliationStatementsIdResolutionsResolutionId",
+        "summary": "Remove a resolution (draft statements only)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Resolve\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resolutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {}
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Resolve",
+        "x-permissions": [
+          "write:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/{id}/submit": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsIdSubmit",
+        "summary": "Submit the reconciliation for approval (every difference resolved when insurer_reconciliation.require_resolved)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "statementNumber": {
+                          "type": "string"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "statementType": {
+                          "type": "string"
+                        },
+                        "statementRef": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "tolerance": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "isr_1",
+                    "statementNumber": "ISR-2026-00001",
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "statementType": "premium",
+                    "statementRef": "SOA-0926",
+                    "periodFrom": "2026-09-01",
+                    "periodTo": "2026-09-30",
+                    "tolerance": 1,
+                    "lineCount": 12,
+                    "status": "submitted"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation",
+        "x-permissions": [
+          "write:remittance"
+        ]
+      }
+    },
+    "/insurer-reconciliation/statements/import": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsImport",
+        "summary": "Import an insurer statement (premium remittance confirmation or commission statement) and auto-match it to the broker's records",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Import statement\n\nAccess: write:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "statementNumber": {
+                          "type": "string"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "statementType": {
+                          "type": "string"
+                        },
+                        "statementRef": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "tolerance": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "missingInBroker": {
+                              "type": "integer"
+                            },
+                            "missingInInsurer": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "isr_1",
+                    "statementNumber": "ISR-2026-00001",
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "statementType": "premium",
+                    "statementRef": "SOA-0926",
+                    "periodFrom": "2026-09-01",
+                    "periodTo": "2026-09-30",
+                    "tolerance": 1,
+                    "lineCount": 12,
+                    "status": "draft",
+                    "summary": {
+                      "matched": 10,
+                      "differences": 1,
+                      "missingInBroker": 1,
+                      "missingInInsurer": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Import statement",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "insurerId": {
+                    "type": "integer"
+                  },
+                  "statementType": {
+                    "type": "string"
+                  },
+                  "periodFrom": {
+                    "type": "string"
+                  },
+                  "periodTo": {
+                    "type": "string"
+                  },
+                  "statementRef": {
+                    "type": "string"
+                  },
+                  "formatCode": {
+                    "type": "string"
+                  },
+                  "tolerance": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "file": "(multipart) statement.xlsx",
+                "insurerId": 1,
+                "statementType": "premium",
+                "periodFrom": "2026-09-01",
+                "periodTo": "2026-09-30",
+                "statementRef": "SOA-0926",
+                "formatCode": "GENERIC",
+                "tolerance": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-reconciliation/statements/preview": {
+      "post": {
+        "operationId": "postInsurerReconciliationStatementsPreview",
+        "summary": "Parse an insurer statement file (CSV / XLSX) with a format and show the lines, totals and the rows that cannot be read; nothing is saved",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Import statement\n\nAccess: write:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "format": {
+                          "type": "string"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "policyNo": {
+                                "type": "string"
+                              },
+                              "grossPremium": {
+                                "type": "integer"
+                              },
+                              "commission": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "format": "GENERIC",
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "policyNo": "POL-2026-00001",
+                        "grossPremium": 12525,
+                        "commission": 1500
+                      }
+                    ],
+                    "errors": [],
+                    "totals": {
+                      "count": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Import statement",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "insurerId": {
+                    "type": "integer"
+                  },
+                  "formatCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "file": "(multipart) statement.xlsx",
+                "insurerId": 1,
+                "formatCode": "GENERIC"
+              }
+            }
+          }
+        }
       }
     },
     "/journal-vouchers": {

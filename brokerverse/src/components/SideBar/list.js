@@ -524,6 +524,12 @@ export const menuList = [
             includes: ["/master/finance/bank-transaction-types"],
           },
           {
+            id: 23,
+            name: "Insurer Statement Formats",
+            path: "/master/finance/insurer-statement-formats",
+            includes: ["/master/finance/insurer-statement-formats"],
+          },
+          {
             id: 9,
             name: "Petty cash",
             path: "/master/finance/pettycash",
@@ -1015,6 +1021,18 @@ export const menuList = [
           { id: 5, name: "Deposits in Transit", path: "/accounts/bank-reconciliation/reports/bank-deposits-in-transit", includes: ["/accounts/bank-reconciliation/reports/bank-deposits-in-transit"] },
           { id: 6, name: "Unmatched Bank Lines", path: "/accounts/bank-reconciliation/reports/bank-unmatched-lines", includes: ["/accounts/bank-reconciliation/reports/bank-unmatched-lines"] },
           { id: 7, name: "Bank Book", path: "/accounts/bank-reconciliation/reports/bank-book", includes: ["/accounts/bank-reconciliation/reports/bank-book"] },
+        ],
+      },
+      {
+        id: 23,
+        name: "Insurer Reconciliation",
+        submenu: [
+          {
+            id: 1,
+            name: "Insurer Statements",
+            path: "/accounts/insurer-reconciliation/statements",
+            includes: ["/accounts/insurer-reconciliation/statements"],
+          },
         ],
       },
       {

@@ -52,6 +52,8 @@ export const TRANSACTION_TABLES = [
   'commission_adjustments', 'claim_settlement_movements', 'insurer_refund_credits',
   // client payments to insurers recorded on direct-bill policies
   'direct_bill_client_payments',
+  // insurer statement reconciliation (statement formats are configuration and stay)
+  'insurer_statements', 'insurer_statement_lines', 'insurer_statement_resolutions',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

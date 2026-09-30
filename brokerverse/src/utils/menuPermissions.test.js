@@ -89,6 +89,17 @@ describe("persona walk: menu grants match the API", () => {
   });
 });
 
+describe("finance control screens", () => {
+  it("accounting and the accounting manager reach the insurer reconciliation, its formats, account determination and posting rules; sales does not", () => {
+    for (const p of ["/accounts/insurer-reconciliation/statements", "/accounts/insurer-reconciliation/statements/isr_1", "/master/finance/insurer-statement-formats",
+      "/master/finance/account-determination", "/master/finance/posting-rules"]) {
+      expect(isPathAllowed(p, menuList, ["accounting"])).toBe(true);
+      expect(isPathAllowed(p, menuList, ["accounting-manager", "accounting"])).toBe(true);
+      expect(isPathAllowed(p, menuList, ["sales"])).toBe(false);
+    }
+  });
+});
+
 describe("bank reconciliation menu", () => {
   it("accounting (and the accounting manager through inheritance) reaches the workspace, runs, reports and masters; sales does not", () => {
     for (const p of ["/accounts/bank-reconciliation", "/accounts/bank-reconciliation/reconciliations", "/accounts/bank-reconciliation/reports/bank-book",

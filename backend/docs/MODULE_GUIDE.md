@@ -27,7 +27,7 @@ minimal, clearly-correct front-end fix.
   endpoints only). Gate writes with `requirePermission('write:<module>')` and reads with
   `requirePermission('read:<module>')`; the System Administrator (`system-admin`, `ADMIN_ROLE` in `src/lib/auth.js`)
   always passes. Permission codes are `read:` / `write:` + one of the modules in `MODULES` in `src/db/seed.js`, plus
-  `approve:period-end` and `approve:bank-reconciliation`. Which role holds which permission is `ROLE_PERMS` in the
+  `approve:period-end`, `approve:bank-reconciliation` and `approve:insurer-reconciliation`. Which role holds which permission is `ROLE_PERMS` in the
   same file.
 - Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use
   `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`

@@ -102,11 +102,13 @@ export const roleMenuPermissions = {
       "Tax",
       // bank reconciliation (approval: accounting-manager, approve:bank-reconciliation)
       "Bank Reconciliation",
+      // insurer statements of account (approval: accounting-manager, approve:insurer-reconciliation)
+      "Insurer Reconciliation",
     ],
     // Account Determination and Posting Rules: Accounting reads them (commission tax set-up included); changes are
     // configuration made by the administrator
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
-      "Finance > Account Determination", "Finance > Posting Rules"],
+      "Finance > Account Determination", "Finance > Posting Rules", "Finance > Insurer Statement Formats"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],
