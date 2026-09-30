@@ -105,6 +105,11 @@ define({
   handler: async (req, res) => ok(res, await svc.getRenewal(req.params.id)),
 });
 define({
+  method: 'GET', path: '/:id/timeline', summary: 'Negotiation timeline of a renewal, newest first (notes, contacts, notices, quotes, quotations, status changes)', screen: 'Operations > Renewals > Negotiations',
+  middleware: read, response: { success: true, data: [{ id: 'act-5', date: '2026-09-27T05:31:28Z', type: 'Counter Offer', category: 'offer', method: 'Phone', description: 'Client asked for a 5% discount', by: 'ana.reyes' }] },
+  handler: async (req, res) => { const r = await svc.getRenewal(req.params.id, { withDetail: false }); ok(res, (await an.timelines([r.id])).get(r.id) || []); },
+});
+define({
   method: 'POST', path: '/:id/quote', summary: 'Generate a renewal quote re-rated at current rates (claims loading, loyalty discount, current taxes) with premium variance', screen: 'Operations > Renewals > Quote Generation',
   middleware: write, response: { success: true, data: { quoteNumber: 'RQ-2026-00001', previousPremium: 18500, quotedPremium: 21450.5, premiumVariance: 2950.5, premiumVariancePct: 15.95, premiumCalculation: { basePremium: 23375, claimsLoading: 0, loyaltyDiscount: -467.5, subtotal: 22907.5, taxes: { vat: 2748.9, dst: 2863.44, lgt: 171.81, fst: 0 }, totalPremium: 28691.65 } } },
   handler: command('quote', async (req) => { const r = await svc.generateQuote(req.params.id, req.user); return { before: r.before, data: r.quote, audit: { quoteNumber: r.quote.quoteNumber, premium: r.quote.quotedPremium, variancePct: r.quote.premiumVariancePct } }; }, 'Renewal quote generated'),

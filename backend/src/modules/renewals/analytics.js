@@ -36,20 +36,82 @@ export async function atRisk() {
     currentPremium: a.currentPremium, renewalPremium: a.renewalPremium, riskScore: a.riskScore, riskCategory: a.retentionRisk, riskFactors: a.factors,
     recommendedActions: [...new Set(a.factors.flatMap((f) => actions[f.factor] || []))],
     actionPlan: { priority: a.retentionRisk === 'Critical' ? 'Critical' : a.retentionRisk === 'High' ? 'Urgent' : 'Normal', assignedTo: a.assignedAgent, deadline: a.expiryDate },
+    expired: a.daysToExpiry < 0, inGracePeriod: a.inGracePeriod, pastGracePeriod: a.pastGracePeriod,
+    premiumChangePct: a.premiumVariancePct, premiumChangeReview: a.premiumChangeReview, salesPerson: a.salesPerson,
   })).sort((x, y) => y.riskScore - x.riskScore);
 }
-/** Renewals in negotiation (quoted / pending approval or with contact history) with their timeline. */
+/**
+ * Negotiation timeline of renewals, newest first: notes and contacts recorded on the renewal, notices sent, re-rated
+ * quotes, renewal quotations (prepared, sent to the client, accepted) and the status milestones (opened, submitted,
+ * approved, lapsed, renewed). Events already recorded as an activity are not repeated.
+ */
+export async function timelines(ids) {
+  if (!ids.length) return new Map();
+  const [acts, notices, rquotes, quotes, rens] = await Promise.all([
+    many('SELECT * FROM renewal_activities WHERE renewal_id = ANY($1) ORDER BY at, id', [ids]),
+    many('SELECT * FROM renewal_notices WHERE renewal_id = ANY($1) ORDER BY sent_at', [ids]),
+    many('SELECT * FROM renewal_quotes WHERE renewal_id = ANY($1) ORDER BY created_at', [ids]),
+    many(`SELECT id, quote_number, status, premium_total, created_at, approval_sent_at, approval_sent_to, customer_accepted_at, doc->'renewal'->>'renewalId' AS renewal_id
+      FROM quotes WHERE doc->'renewal'->>'renewalId' = ANY($1) AND deleted_at IS NULL ORDER BY created_at`, [ids]),
+    many(`SELECT r.id, r.created_at, r.created_by, r.submitted_at, r.approved_at, r.lapsed_at, r.lapse_reason, r.renewed_at, r.approval_note,
+      (SELECT display_name FROM users u WHERE u.id = r.submitted_by) AS submitted_name, (SELECT display_name FROM users u WHERE u.id = r.approved_by) AS approved_name
+      FROM renewals r WHERE r.id = ANY($1)`, [ids]),
+  ]);
+  const out = new Map(ids.map((id) => [id, []]));
+  const push = (id, e) => out.get(id)?.push({ id: e.id, date: e.date, at: e.date, type: e.type, category: e.category, method: e.method || null,
+    description: e.description || null, outcome: e.outcome || null, nextAction: e.nextAction || null, followUpDate: e.followUpDate || null, by: e.by || null, source: e.source });
+  const money = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const CATEGORY = { Note: 'note', 'Counter Offer': 'offer', 'Revised Offer': 'offer', 'Competitor Quote': 'offer', 'Quote Generated': 'quote',
+    'Submitted for Approval': 'status', Approved: 'status', Returned: 'status', Renewed: 'status', Lapsed: 'status', Reinstated: 'status' };
+  for (const a of acts) {
+    const x = activityApi(a);
+    push(a.renewal_id, { ...x, id: `act-${a.id}`, date: a.at, category: CATEGORY[a.activity_type] || (/notice/i.test(a.activity_type) ? 'notice' : 'contact'), source: 'activity' });
+  }
+  const logged = (id, pred) => acts.some((a) => a.renewal_id === id && pred(a));
+  for (const n of notices) {
+    if (!logged(n.renewal_id, (a) => /notice/i.test(a.activity_type) && Math.abs(new Date(a.at) - new Date(n.sent_at)) < 60000)) {
+      push(n.renewal_id, { id: `ntc-${n.id}`, date: n.sent_at, type: 'Renewal notice sent', category: 'notice', method: n.method, description: `Notice ${n.stage} (${n.notice_type}) to ${n.recipient || 'the client'}`, by: n.sent_by, source: 'notice' });
+    }
+  }
+  for (const q of rquotes) {
+    if (!logged(q.renewal_id, (a) => a.activity_type === 'Quote Generated' && Math.abs(new Date(a.at) - new Date(q.created_at)) < 60000)) {
+      push(q.renewal_id, { id: `rq-${q.id}`, date: q.created_at, type: 'Quote Generated', category: 'quote', description: `Re-rated quote ${q.quote_number}: ${money(q.total_premium)}`, by: q.created_by, source: 'quote' });
+    }
+  }
+  for (const q of quotes) {
+    if (!logged(q.renewal_id, (a) => a.details?.quoteId === q.id)) {
+      push(q.renewal_id, { id: `qt-${q.id}`, date: q.created_at, type: 'Quotation prepared', category: 'quote', description: `Renewal quotation ${q.quote_number}: ${money(q.premium_total)}`, source: 'quotation' });
+    }
+    if (q.approval_sent_at) push(q.renewal_id, { id: `qs-${q.id}`, date: q.approval_sent_at, type: 'Quotation sent to client', category: 'quote', method: 'Email', description: `Quotation ${q.quote_number} sent${q.approval_sent_to ? ` to ${q.approval_sent_to}` : ''} for acceptance`, source: 'quotation' });
+    if (q.customer_accepted_at) push(q.renewal_id, { id: `qa-${q.id}`, date: q.customer_accepted_at, type: 'Client accepted the quotation', category: 'status', description: `Quotation ${q.quote_number} accepted`, source: 'quotation' });
+  }
+  for (const r of rens) {
+    push(r.id, { id: `open-${r.id}`, date: r.created_at, type: 'Renewal opened', category: 'status', by: r.created_by, source: 'renewal' });
+    const has = (type) => logged(r.id, (a) => a.activity_type === type);
+    if (r.submitted_at && !has('Submitted for Approval')) push(r.id, { id: `sub-${r.id}`, date: r.submitted_at, type: 'Submitted for Approval', category: 'status', description: r.approval_note, by: r.submitted_name, source: 'renewal' });
+    if (r.approved_at && !has('Approved')) push(r.id, { id: `apr-${r.id}`, date: r.approved_at, type: 'Approved', category: 'status', by: r.approved_name, source: 'renewal' });
+    if (r.lapsed_at && !has('Lapsed')) push(r.id, { id: `lap-${r.id}`, date: r.lapsed_at, type: 'Lapsed', category: 'status', description: r.lapse_reason, source: 'renewal' });
+    if (r.renewed_at && !has('Renewed')) push(r.id, { id: `ren-${r.id}`, date: r.renewed_at, type: 'Renewed', category: 'status', source: 'renewal' });
+  }
+  for (const list of out.values()) list.sort((x, y) => new Date(y.date) - new Date(x.date));
+  return out;
+}
+
+/** Renewals in negotiation (quoted / pending approval / approved, or with contact history) with their timeline. */
 export async function negotiations() {
   const ctx = await readContext();
   const rows = await many(`${BASE} WHERE r.status = ANY($1) AND (r.status IN ('quoted', 'pending-approval', 'approved')
-    OR EXISTS (SELECT 1 FROM renewal_activities a WHERE a.renewal_id = r.id)) ORDER BY r.updated_at DESC`, [OPEN]);
-  const acts = await many('SELECT * FROM renewal_activities WHERE renewal_id = ANY($1) ORDER BY at, id', [rows.map((r) => r.id)]);
+    OR EXISTS (SELECT 1 FROM renewal_activities a WHERE a.renewal_id = r.id) OR EXISTS (SELECT 1 FROM renewal_notices n WHERE n.renewal_id = r.id)
+    OR EXISTS (SELECT 1 FROM quotes q WHERE q.doc->'renewal'->>'renewalId' = r.id AND q.deleted_at IS NULL)) ORDER BY r.updated_at DESC`, [OPEN]);
+  const tl = await timelines(rows.map((r) => r.id));
   return rows.map((r) => {
     const a = toApi(r, ctx);
+    const timeline = tl.get(r.id) || [];
     return {
-      negotiationId: a.renewalNumber, id: a.id, renewalId: a.id, policyNumber: a.policyNumber, clientName: a.clientName, currentStage: a.renewalStatus,
-      currentPremium: a.currentPremium, proposedPremium: a.renewalPremium, premiumVariancePct: a.premiumVariancePct, expiryDate: a.expiryDate,
-      timeline: acts.filter((x) => x.renewal_id === r.id).map(activityApi),
+      negotiationId: a.renewalNumber, id: a.id, renewalId: a.id, renewalNumber: a.renewalNumber, policyNumber: a.policyNumber, clientName: a.clientName,
+      product: a.product, insurer: a.insurer, salesPerson: a.salesPerson, currentStage: a.renewalStatus, statusCode: a.statusCode,
+      currentPremium: a.currentPremium, proposedPremium: a.renewalPremium, premiumVariancePct: a.premiumVariancePct, premiumChangeReview: a.premiumChangeReview,
+      expiryDate: a.expiryDate, daysToExpiry: a.daysToExpiry, lastActivityAt: timeline[0]?.date || null, timeline,
     };
   });
 }

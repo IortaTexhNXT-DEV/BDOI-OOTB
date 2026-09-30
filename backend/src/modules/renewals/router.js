@@ -133,13 +133,45 @@ define({
   },
 });
 
+define({
+  method: 'POST', path: '/batches/:id/generate-quotes', summary: 'Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)', screen: 'Operations > Renewals > Renewal Batch > Generate Renewal Quotes',
+  middleware: [...write, validate(z.object({ selectedPolicyIds: z.array(z.string()).optional(), policyIds: z.array(z.string()).optional() }).passthrough())],
+  request: { selectedPolicyIds: ['pol_1', 'pol_2'] }, response: { success: true, message: 'Renewal quotes queued', data: { jobId: '17', queued: 2, batchId: 'RB-2026-00001' } },
+  handler: async (req, res) => {
+    const r = await batches.queueQuotes(req.params.id, req.body.selectedPolicyIds || req.body.policyIds, req.user);
+    await audit(req, { entity: 'renewal-batch', entityId: req.params.id, action: 'generate-quotes', after: r });
+    ok(res, r, 'Renewal quotes queued');
+  },
+});
+
+// ---------------------------------------------------------------- policies due for renewal
+define({
+  method: 'GET', path: '/renewable-policies', summary: 'Policies due for renewal with their renewal state (due, in grace period, lapsed renewable, in progress, renewed); expiryFrom, expiryTo, search, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus, state, includeRenewed, renewableOnly',
+  screen: 'Operations > Renewals > Renewal Policy; Renewal Batch > Generate Policy List', middleware: wizardRead,
+  query: { expiryFrom: '2026-09-30', expiryTo: '2026-10-30', paymentStatus: 'All', page: 1, limit: 50 },
+  response: { success: true, data: [{ policyId: 'pol_1', policyNumber: 'POL-2025-00012', clientName: 'Maria Santos', expiryDate: '2026-10-20', daysToExpiry: 20, renewalState: 'due', renewalStateLabel: 'Due for renewal', canRenew: true }], pagination: { page: 1, limit: 50, total: 1, totalPages: 1 } },
+  handler: async (req, res) => { const pg = paging(req.query, { page: 1, perPage: 50 }); const { total, items } = await svc.renewablePolicies(await withScope(req), pg); listMeta(res, items, total, pg, 'policies'); },
+});
+define({
+  method: 'GET', path: '/options', summary: 'Renewal criteria defaults (expiry window from today, grace period) and insurer / product choices', screen: 'Operations > Renewals > Renewal Batch > Create Batch; Renewal Policy',
+  middleware: wizardRead, response: { success: true, data: { today: '2026-09-30', windowDays: 30, expiryFrom: '2026-09-30', expiryTo: '2026-10-30', graceDays: 30, insurers: [{ id: 'ic_1', name: 'MAPFRE Insurance Corporation' }], products: [{ id: 2, name: 'Motor Vehicle Insurance', line: 'motor' }] } },
+  handler: async (_req, res) => ok(res, await svc.renewalOptions()),
+});
+
 // ---------------------------------------------------------------- renewals of a policy
 define({
-  method: 'POST', path: '/policies/:policyId/renewals', summary: 'Create (or update the open) renewal of a policy with the wizard data', screen: 'Operations > Policy > Renew (coverage details, order summary)',
+  method: 'POST', path: '/policies/:policyId/validate', summary: 'Validate the renewal wizard data of a step (full=true: every step and the premium) without saving; answers { valid, errors: [{ path, message }] }',
+  screen: 'Operations > Renewals > Renewal Policy > Renewal (Next on each step)', middleware: [...wizardRead, ownRecord('policy', 'policyId'), validate(captureSchema)],
+  request: { coverageDetails: { autoPassengerPersonalAccident: '25000', appaSeats: 5 } }, response: { success: true, data: { valid: false, errors: [{ path: 'coverageDetails.appaSeats', message: 'Enter the number of seats covered (driver and passengers) for Auto Passenger Personal Accident' }] } },
+  handler: async (req, res) => ok(res, await svc.validateRenewal(req.params.policyId, req.body, { full: ['true', true].includes(req.query.full) })),
+});
+define({
+  method: 'POST', path: '/policies/:policyId/renewals', summary: 'Create (or update the open) renewal of a policy with the wizard data (422 with field errors when a step does not validate)', screen: 'Operations > Policy > Renew (coverage details, order summary)',
   middleware: [...wizardWrite, ownRecord('policy', 'policyId'), validate(captureSchema)],
   request: { coverageDetails: { lossAndDamageCoverage: '850000', bodilyInjury: '200000' }, accessories: [], orderSummary: { netPremium: 17800, grossPremium: 21450.5 }, effectiveDate: '2026-10-31', expiryDate: '2027-10-30' },
   response: { success: true, message: 'Renewal saved', data: renewalExample },
   handler: async (req, res) => {
+    await svc.assertRenewalValid(req.params.policyId, req.body);
     const { id, created: isNew } = await svc.ensureRenewal(req.params.policyId, req.user);
     const r = await svc.captureRenewal(id, req.body);
     await audit(req, { entity: 'renewal', entityId: id, action: isNew ? 'create' : 'update', before: isNew ? null : svc.toApi(r.before, await svc.readContext()), after: r.after });

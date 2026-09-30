@@ -10,6 +10,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/service.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
+import { lobOf, num } from '../documents/common.js';
 import { renderTemplate } from '../claims/docs.js';
 import { daysBetween, round2, today, unprocessable, usersWithRole } from '../claims/util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -46,6 +47,8 @@ export async function readContext() {
   return {
     todayStr: await today(), labels: (await getSetting('renewals.status_labels', {})) || {},
     grace: Number(await getSetting('renewals.grace_period_days', 30)),
+    lapsedDays: Number(await getSetting('renewals.lapsed_renewal_days', 90)),
+    changeCap: Number(await getSetting('renewals.premium_change_display_cap', 300)) || 0,
     weights: (await getSetting('renewals.risk_weights', {})) || {}, bands: (await getSetting('renewals.risk_bands', { Low: 0 })) || { Low: 0 },
     stages: (await getSetting('renewals.notice_stages', [])) || [],
     thresholds: { ...RISK_THRESHOLDS, ...((await getSetting('renewals.risk_thresholds', {})) || {}) },
@@ -62,12 +65,28 @@ export function riskOf(r, ctx, daysToExpiry, variancePct) {
   if (r.unpaid > 0) add('Unpaid Premium', w.unpaid || 0, `Outstanding premium ${r.unpaid}`);
   if (!r.loyalty_years) add('First Renewal', w.firstRenewal || 0, 'Statistically higher lapse rate');
   if (!r.contact_attempts && !r.notice_stage && daysToExpiry <= th.noContactDays) add('No Contact', w.noContact || 0, 'No notice or contact yet');
-  if (variancePct > th.increasePercent) add('Premium Increase', w.increase || 0, `${variancePct}% increase quoted`);
-  if (daysToExpiry <= th.dueSoonDays) add('Due Soon', w.dueSoon || 0, `${daysToExpiry} day(s) to expiry`);
+  if (variancePct != null && variancePct > th.increasePercent) add('Premium Increase', w.increase || 0, `${changeText(variancePct, ctx.changeCap)} increase quoted`);
+  const grace = ctx.grace ?? 30;
+  if (daysToExpiry < -grace) add('Past Grace Period', w.dueSoon || 0, `Expired ${-daysToExpiry} day(s) ago, past the ${grace}-day grace period`);
+  else if (daysToExpiry < 0) add('In Grace Period', w.dueSoon || 0, `Expired ${-daysToExpiry} day(s) ago, within the ${grace}-day grace period`);
+  else if (daysToExpiry <= th.dueSoonDays) add('Due Soon', w.dueSoon || 0, `${daysToExpiry} day(s) to expiry`);
   const score = Math.min(100, factors.reduce((s, f) => s + f.score, 0));
   const band = Object.entries(ctx.bands).sort((a, b) => b[1] - a[1]).find(([, min]) => score >= min)?.[0] || 'Low';
   return { score, band, factors };
 }
+
+/**
+ * Premium change in percent from the expiring premium to the renewal premium: null when either is missing or zero (a
+ * seeded or imported policy without premium would otherwise read as a change of thousands of percent).
+ */
+export function premiumChangePct(previous, renewal) {
+  const oldP = Number(previous);
+  const newP = Number(renewal);
+  if (!(oldP > 0) || !(newP > 0)) return null;
+  return round2(((newP - oldP) / oldP) * 100);
+}
+/** "15.3%", or "more than 300%" above the configured display cap. */
+export const changeText = (pct, cap) => (cap > 0 && Math.abs(pct) > cap ? `more than ${cap}%` : `${Number(pct).toFixed(1)}%`);
 
 /** API shape: fields read by the client-view renewals tab, the renewal quote wizard and the Renewals workspace. */
 export function toApi(r, ctx) {
@@ -78,9 +97,10 @@ export function toApi(r, ctx) {
   const inGracePeriod = isOpen && daysToExpiry < 0 && -daysToExpiry <= ctx.grace;
   const previous = r.premium_old ?? r.premium_total;
   const renewalPremium = r.premium_new ?? null;
-  const variance = renewalPremium == null ? null : round2(renewalPremium - previous);
-  const variancePct = renewalPremium == null || !previous ? 0 : round2((variance / previous) * 100);
+  const variancePct = premiumChangePct(previous, renewalPremium);
+  const variance = variancePct == null ? null : round2(renewalPremium - previous);
   const risk = riskOf(r, ctx, daysToExpiry, variancePct);
+  const pastGrace = isOpen && daysToExpiry < -ctx.grace;
   const next = isOpen ? ctx.stages.find((s) => s.stage === r.notice_stage + 1) || null : null;
   const paymentStatus = r.unpaid > 0 ? 'Pending' : 'Paid';
   return {
@@ -88,13 +108,15 @@ export function toApi(r, ctx) {
     clientId: r.client_id || r.policy_client_id, clientName: r.client_name, insuredName: r.client_name,
     insuredContact: { mobile: r.client_phone, email: r.client_email, preferredContact: r.client_email ? 'Email' : 'Phone' },
     insurer: r.insurer_name, insuranceCompanyName: r.insurer_name, product: r.product_name, productType: r.product_name, lob: r.product_line,
-    status: inGracePeriod ? 'In Grace Period' : statusLabel, renewalStatus: statusLabel, statusCode: r.status, isOpen, inGracePeriod,
+    status: inGracePeriod ? 'In Grace Period' : pastGrace ? 'Past Grace Period' : statusLabel, renewalStatus: statusLabel, statusCode: r.status, isOpen, inGracePeriod,
+    pastGracePeriod: pastGrace, renewalType: r.renewal_type || 'regular',
     dueDate: r.due_date, expiryDate: expiry, policyExpiry: expiry, policyIssued: r.inception_date, issuedDate: r.inception_date, daysToExpiry,
     currentPremium: previous, renewalPremium, grossPremium: renewalPremium ?? previous, totalPremium: renewalPremium ?? previous,
-    premiumVariance: variance, premiumVariancePct: variancePct, sumInsured: r.sum_insured, currency: r.currency,
+    premiumVariance: variance, premiumVariancePct: variancePct,
+    premiumChangeReview: variancePct != null && ctx.changeCap > 0 && Math.abs(variancePct) > ctx.changeCap, sumInsured: r.sum_insured, currency: r.currency,
     noticeStage: r.notice_stage, lastNoticeAt: r.last_notice_at, nextNotice: next,
     renewalAttempts: r.contact_attempts, contactAttempts: r.contact_attempts, lastContactDate: r.last_contact_at,
-    assignedAgent: r.agent_name, priority: r.priority || (risk.band === 'Critical' || daysToExpiry <= 7 ? 'High' : 'Normal'),
+    assignedAgent: r.agent_name, salesPerson: r.agent_name, priority: r.priority || (risk.band === 'Critical' || daysToExpiry <= 7 ? 'High' : 'Normal'),
     retentionRisk: risk.band, riskScore: risk.score,
     claimsHistory: { hasClaimsLastYear: r.claims_count > 0, totalClaims: r.claims_count, claimsAmount: r.claims_amount },
     paymentHistory: r.unpaid > 0 ? 'Outstanding' : 'Good', paymentStatus, payment: paymentStatus, outstandingPremium: r.unpaid,
@@ -168,17 +190,55 @@ export async function resolvePolicy(ref, db = null) {
   return p;
 }
 
-/** Return the open renewal of a policy, creating it (status pipeline) when there is none. */
+/**
+ * Renewal state of a policy (Renewal Policy list, renewal batch, renewal wizard). A policy is renewable before expiry
+ * and in the grace period (renewals.grace_period_days: the new term continues from the old expiry); after the grace
+ * period, and for renewals.lapsed_renewal_days more, it can still be renewed as a lapsed renewal (the new term starts
+ * on the renewal date, no backdated cover). Later it has to be quoted as new business. A policy already renewed, or
+ * with a renewal in progress, is never offered for a second renewal.
+ */
+export function policyRenewalState(p, ctx) {
+  const days = daysBetween(ctx.todayStr, p.expiry_date);
+  const base = { daysToExpiry: days, canRenew: false, renewalType: null };
+  if (p.renewed_to || p.status === 'renewed') {
+    return { ...base, state: 'renewed', label: 'Renewed', newPolicyId: p.renewed_to || null, newPolicyNumber: p.new_policy_number || null,
+      message: `Policy ${p.policy_number} was already renewed${p.new_policy_number ? ` as policy ${p.new_policy_number}` : ''}` };
+  }
+  if (p.status === 'cancelled') return { ...base, state: 'cancelled', label: 'Cancelled', message: `Policy ${p.policy_number} is cancelled` };
+  const renewalType = days >= 0 ? 'regular' : -days <= ctx.grace ? 'grace' : 'lapsed';
+  if (p.open_renewal_id) {
+    return { ...base, state: 'in-progress', label: 'Renewal in progress', canRenew: true, renewalType, renewalId: p.open_renewal_id,
+      renewalNumber: p.open_renewal_number, message: `Renewal ${p.open_renewal_number} is in progress` };
+  }
+  if (renewalType === 'regular') return { ...base, state: 'due', label: 'Due for renewal', canRenew: true, renewalType };
+  if (renewalType === 'grace') {
+    return { ...base, state: 'grace', label: 'In grace period', canRenew: true, renewalType, message: `Expired ${-days} day(s) ago, within the ${ctx.grace}-day grace period` };
+  }
+  if (-days <= ctx.grace + ctx.lapsedDays) {
+    return { ...base, state: 'lapsed', label: 'Lapsed, renewable', canRenew: true, renewalType,
+      message: `Expired ${-days} day(s) ago, past the grace period: a lapsed renewal, the new term starts on the renewal date` };
+  }
+  return { ...base, state: 'closed', label: 'Lapsed', message: `Policy ${p.policy_number} expired ${-days} day(s) ago; the renewal window has closed, quote it as new business` };
+}
+
+/** Return the open renewal of a policy, creating it (status pipeline) when there is none and the policy is renewable. */
 export async function ensureRenewal(policyRef, user) {
   const policy = await resolvePolicy(policyRef);
   const existing = await one(`SELECT id FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1`, [policy.id, ['renewed', 'lapsed']]);
   if (existing) return { id: existing.id, created: false, policy };
-  if (policy.status === 'renewed' || policy.renewed_to) throw conflict(`Policy ${policy.policy_number} has already been renewed`);
-  if (policy.status === 'cancelled') throw conflict(`Policy ${policy.policy_number} is cancelled`);
+  const ctx = await readContext();
+  const next = policy.renewed_to ? await one('SELECT policy_number FROM policies WHERE id = $1', [policy.renewed_to]) : null;
+  const st = policyRenewalState({ ...policy, new_policy_number: next?.policy_number }, ctx);
+  if (st.state === 'renewed' || st.state === 'cancelled') throw conflict(st.message);
+  if (!st.canRenew) throw unprocessable(st.message);
+  // a lapsed renewal is not backdated: the new term starts on the renewal date
+  const effective = st.renewalType === 'lapsed' ? ctx.todayStr : null;
   const number = await nextDocumentNumber('renewal', { unique: { table: 'renewals', column: 'renewal_number' } });
   try {
-    const r = await one(`INSERT INTO renewals(renewal_number, policy_id, client_id, owner_user_id, status, due_date, premium_old, created_by)
-      VALUES ($1,$2,$3,$4,'pipeline',$5,$6,$7) RETURNING id`, [number, policy.id, policy.client_id, policy.owner_user_id, policy.expiry_date, policy.premium_total, user?.username ?? null]);
+    const r = await one(`INSERT INTO renewals(renewal_number, policy_id, client_id, owner_user_id, status, due_date, premium_old, created_by, renewal_type, effective_date)
+      VALUES ($1,$2,$3,$4,'pipeline',$5,$6,$7,$8,$9) RETURNING id`,
+    [number, policy.id, policy.client_id, policy.owner_user_id, policy.expiry_date, policy.premium_total, user?.username ?? null, st.renewalType, effective]);
+    if (st.renewalType !== 'regular') await activity(null, r.id, user, { type: st.renewalType === 'lapsed' ? 'Lapsed Renewal' : 'Grace Period Renewal', description: st.message });
     return { id: r.id, created: true, policy };
   } catch (e) {
     if (e.code === '23505') {
@@ -187,6 +247,74 @@ export async function ensureRenewal(policyRef, user) {
     }
     throw e;
   }
+}
+
+const UNPAID_SQL = "(SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.policy_id = p.id AND rv.balance > 0 AND rv.status NOT IN ('paid','written-off'))";
+const OPEN_RENEWAL = (col) => `(SELECT r.${col} FROM renewals r WHERE r.policy_id = p.id AND r.status <> ALL('{renewed,lapsed}') ORDER BY r.created_at DESC LIMIT 1)`;
+
+/**
+ * Policies for the Renewal Policy list and the renewal batch, each with its renewal state. Filters: expiryFrom / expiryTo
+ * (default: expired within the lapsed-renewal window up to renewals.pipeline_days ahead), search, insurerId or insurer
+ * name, productId or product, premiumMin / premiumMax, clientName, paymentStatus (Paid | Unpaid | All), state,
+ * includeRenewed, renewableOnly.
+ */
+export async function renewablePolicies(q = {}, pg = { limit: 500, offset: 0 }) {
+  const ctx = await readContext();
+  const pipelineDays = Number(await getSetting('renewals.pipeline_days', 90));
+  const where = ["p.status IN ('active', 'issued', 'expired', 'renewed')"];
+  const params = [];
+  const add = (sql, ...vals) => { let s = sql; for (const v of vals) { params.push(v); s = s.replace('?', `$${params.length}`); } where.push(s); };
+  add('p.expiry_date >= ?::date', (await businessDate(q.expiryFrom || q.expiryDateFrom)) || addDays(ctx.todayStr, -(ctx.grace + ctx.lapsedDays)));
+  add('p.expiry_date <= ?::date', (await businessDate(q.expiryTo || q.expiryDateTo)) || addDays(ctx.todayStr, pipelineDays));
+  if (!['true', true].includes(q.includeRenewed)) where.push("p.renewed_to IS NULL AND p.status <> 'renewed'");
+  if (q.search) add('(p.policy_number ILIKE ? OR cl.display_name ILIKE ? OR cl.client_code ILIKE ?)', ...Array(3).fill(`%${q.search}%`));
+  if (q.insurerId) add('p.insurance_company_id::text = ?', String(q.insurerId));
+  else if (q.insuranceCompanyName) add('ic.name ILIKE ?', `%${q.insuranceCompanyName}%`);
+  if (q.productId) add('p.product_id::text = ?', String(q.productId));
+  else if (q.productType) add('(pr.name ILIKE ? OR pr.code ILIKE ? OR pr.line ILIKE ?)', `%${q.productType}%`, q.productType, q.productType);
+  if (q.premiumMin != null && q.premiumMin !== '') add('p.premium_total >= ?', Number(q.premiumMin));
+  if (q.premiumMax != null && q.premiumMax !== '') add('p.premium_total <= ?', Number(q.premiumMax));
+  if (q.clientName) add('cl.display_name ILIKE ?', `%${q.clientName}%`);
+  const pay = String(q.paymentStatus || '').toLowerCase();
+  if (['paid', 'completed'].includes(pay)) where.push(`${UNPAID_SQL} = 0`);
+  else if (['unpaid', 'pending', 'outstanding'].includes(pay)) where.push(`${UNPAID_SQL} > 0`);
+  if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', params));
+  const rows = await many(`SELECT p.*, cl.display_name AS client_name, cl.client_code, ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line,
+      ou.display_name AS sales_name, ${UNPAID_SQL}::numeric AS unpaid, np.policy_number AS new_policy_number,
+      ${OPEN_RENEWAL('id')} AS open_renewal_id, ${OPEN_RENEWAL('renewal_number')} AS open_renewal_number
+    FROM policies p LEFT JOIN clients cl ON cl.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
+    LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN users ou ON ou.id = p.owner_user_id LEFT JOIN policies np ON np.id = p.renewed_to
+    WHERE ${where.join(' AND ')} ORDER BY p.expiry_date, p.policy_number`, params);
+  let items = rows.map((p) => policyRow(p, policyRenewalState(p, ctx)));
+  if (q.state && q.state !== 'All') items = items.filter((x) => String(q.state).split(',').includes(x.renewalState));
+  if (['true', true].includes(q.renewableOnly)) items = items.filter((x) => x.canRenew);
+  return { total: items.length, items: items.slice(pg.offset, pg.offset + pg.limit), all: items };
+}
+
+const policyRow = (p, st) => ({
+  id: p.id, policyId: p.id, policyNumber: p.policy_number, clientId: p.client_id, clientCode: p.client_code, clientName: p.client_name,
+  insurerId: p.insurance_company_id, insuranceCompanyName: p.insurer_name, productId: p.product_id, product: p.product_name, productType: p.product_name,
+  line: p.product_line, lob: lineOf(p), salesPerson: p.sales_name, inceptionDate: p.inception_date, expiryDate: p.expiry_date, daysToExpiry: st.daysToExpiry,
+  sumInsured: Number(p.sum_insured || 0), grossPremium: Number(p.premium_total || 0), outstanding: Number(p.unpaid || 0),
+  paymentStatus: Number(p.unpaid) > 0 ? 'Unpaid' : 'Paid', policyStatus: p.status,
+  renewalState: st.state, renewalStateLabel: st.label, canRenew: st.canRenew, renewalType: st.renewalType, message: st.message || null,
+  renewalId: st.renewalId || null, renewalNumber: st.renewalNumber || null, newPolicyId: st.newPolicyId || null, newPolicyNumber: st.newPolicyNumber || null,
+});
+
+/** Line of business of a policy: the products master line (motor, fire, accident, ...), else the policy's own lob / product type. */
+export const lineOf = (p) => lobOf(p.product_line, p.lob, p.product_type, p.product_name);
+
+/** Defaults and choices of the renewal batch criteria (expiry window from today, insurers, products). */
+export async function renewalOptions() {
+  const ctx = await readContext();
+  const windowDays = Number(await getSetting('renewals.batch_window_days', 30));
+  return {
+    today: ctx.todayStr, windowDays, expiryFrom: ctx.todayStr, expiryTo: addDays(ctx.todayStr, windowDays), graceDays: ctx.grace, lapsedRenewalDays: ctx.lapsedDays,
+    pipelineDays: Number(await getSetting('renewals.pipeline_days', 90)),
+    insurers: await many("SELECT id, name FROM insurance_companies WHERE status = 'active' ORDER BY name"),
+    products: await many("SELECT id, name, line FROM products WHERE status = 'active' ORDER BY name"),
+    paymentStatuses: ['All', 'Paid', 'Unpaid'],
+  };
 }
 
 const CAPTURE = { coverageDetails: 'coverage_details', accessories: 'accessories', orderSummary: 'order_summary', policyLimits: 'policy_limits', premiumBreakdown: 'premium_breakdown' };
@@ -470,22 +598,27 @@ export async function refreshPipeline(user = null) {
 export const COVERAGE_KEYS = ['lossAndDamageCoverage', 'lossAndDamageCoverageRate', 'lossAndDamageCoveragePremium', 'actsOfNatureRate', 'actsOfNaturePremium',
   'ctplCoverageRate', 'roadsideAssistanceRate', 'roadsideAssistancePremium', 'personalAccidentCoverRate', 'personalAccidentCoverPremium', 'bodilyInjury',
   'bodilyInjuryCoveragePremium', 'propertyDamage', 'propertyDamageCoveragePremium', 'autoPassengerPersonalAccident', 'APPAtotalCoverage', 'APPAcoveragePremium',
-  'totalSumInsured'];
+  'totalSumInsured', 'appaSeats', 'includeCTPL', 'ctplTermYears', 'ctplCoveragePremium'];
+/** Term fields of a non-motor renewal (travel, personal accident, fire, ...). */
+const TERM_KEYS = ['totalSumInsured', 'netPremium'];
 export const ACCESSORY_KEYS = ['aircon', 'stereo', 'magWheels', 'others', 'deductible', 'towing', 'repairLimit'];
 /** Risk / vehicle fields carried from the expiring term into the renewal quotation. */
 const CARRY_KEYS = ['insuranceVehicleDetails', 'plateNumber', 'chassisNumber', 'motorNumber', 'mvFileNumber', 'certNumber', 'authenCode', 'vehicleType',
   'vehicleBrand', 'modelYear', 'vehicleModel', 'modelVariant', 'vehicleColor', 'seatingCapacity', 'mortgage', 'truckType', 'aluminum', 'airBag', 'TNVS',
   'idCard', 'idCardNumber', 'insurancePolicyType', 'accountCode', 'paymentType', 'installmentType', 'isCoInsurance', 'participantDetails', 'authorizedSignature',
   'fireRiskDetails', 'firePremiumDetails'];
+/** The vehicle part of CARRY_KEYS, carried on motor renewals only. */
+const MOTOR_CARRY_KEYS = CARRY_KEYS.slice(0, CARRY_KEYS.indexOf('TNVS') + 1);
 const present = (v) => v !== undefined && v !== null && v !== '';
 const pickPresent = (src, keys) => Object.fromEntries(keys.filter((k) => present(src?.[k])).map((k) => [k, src[k]]));
 const hasReferrers = (d) => Boolean(d && [d.primary, ...(d.chain || [])].some((e) => e && e.referrerId && e.referrerId !== 'direct'));
 
 async function expiringPolicy(ref) {
   const p = await one(`SELECT p.*, c.client_code, c.display_name AS client_name, c.email AS client_email, ic.name AS insurer_name, pr.name AS product_name,
-      pr.line AS product_line, q.doc AS quote_doc
+      pr.line AS product_line, q.doc AS quote_doc, np.policy_number AS new_policy_number
     FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
-    LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN quotes q ON q.id = p.quote_id WHERE p.id = $1 OR p.policy_number = $1`, [String(ref)]);
+    LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN quotes q ON q.id = p.quote_id LEFT JOIN policies np ON np.id = p.renewed_to
+    WHERE p.id = $1 OR p.policy_number = $1`, [String(ref)]);
   if (!p) throw notFound(`Policy ${ref} not found`);
   return p;
 }
@@ -493,32 +626,137 @@ async function expiringPolicy(ref) {
 /**
  * Prefill of the renewal wizard for a policy. Values come only from this renewal's saved wizard data, the expiring
  * policy's own quotation / policy document, or the policy row (sum insured, insurer, product, client) when the policy
- * has no quotation (seeded or imported policies). Nothing is defaulted: absent accessories stay blank.
+ * has no quotation (seeded or imported policies). Nothing is defaulted: absent accessories stay blank. Motor covers,
+ * vehicle and accessories belong to motor products only (products master line); another line (travel, personal
+ * accident, fire...) is renewed on its sum insured and net premium.
  */
 export async function renewalPrefill(policyRef) {
   const p = await expiringPolicy(policyRef);
   const open = await one('SELECT * FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1', [p.id, ['renewed', 'lapsed']]);
+  const ctx = await readContext();
+  const eligibility = policyRenewalState({ ...p, open_renewal_id: open?.id, open_renewal_number: open?.renewal_number }, ctx);
+  const lob = lineOf(p);
+  const isMotor = lob === 'MOTOR';
   const source = { ...(p.quote_doc || {}), ...(p.doc || {}) };
   const details = p.details || {};
-  const coverage = { ...pickPresent(details.coverageDetails, COVERAGE_KEYS), ...pickPresent(source, COVERAGE_KEYS) };
   let from = p.quote_id ? 'quotation' : 'policy';
-  if (!present(coverage.lossAndDamageCoverage) && Number(p.sum_insured) > 0) coverage.lossAndDamageCoverage = Number(p.sum_insured);
-  if (!present(coverage.totalSumInsured) && Number(p.sum_insured) > 0) coverage.totalSumInsured = Number(p.sum_insured);
-  const captured = pickPresent(open?.coverage_details, COVERAGE_KEYS);
+  let coverage;
+  let captured;
+  if (isMotor) {
+    coverage = { ...pickPresent(details.coverageDetails, COVERAGE_KEYS), ...pickPresent(source, COVERAGE_KEYS) };
+    if (!present(coverage.lossAndDamageCoverage) && Number(p.sum_insured) > 0) coverage.lossAndDamageCoverage = Number(p.sum_insured);
+    if (!present(coverage.totalSumInsured) && Number(p.sum_insured) > 0) coverage.totalSumInsured = Number(p.sum_insured);
+    captured = pickPresent(open?.coverage_details, COVERAGE_KEYS);
+  } else {
+    coverage = { totalSumInsured: Number(p.sum_insured) || '', netPremium: Number(p.net_premium) || '' };
+    captured = pickPresent(open?.coverage_details, TERM_KEYS);
+  }
   if (Object.keys(captured).length) from = 'renewal';
   // Accessories saved on this renewal (even when cleared) win over the expiring term's own values.
   const capturedObject = open?.accessories && typeof open.accessories === 'object' && !Array.isArray(open.accessories);
   const accessorySource = capturedObject ? open.accessories : source;
-  const accessories = Object.fromEntries(ACCESSORY_KEYS.map((k) => [k, present(accessorySource[k]) ? accessorySource[k] : '']));
+  const accessories = isMotor ? Object.fromEntries(ACCESSORY_KEYS.map((k) => [k, present(accessorySource[k]) ? accessorySource[k] : ''])) : {};
+  const vehicle = pickPresent(source, isMotor ? CARRY_KEYS : CARRY_KEYS.filter((k) => !MOTOR_CARRY_KEYS.includes(k)));
+  const coverageDetails = { ...coverage, ...captured };
+  let seats = null;
+  if (isMotor) {
+    const { vehicleOf } = await import('../quotations/motorTariff.js');
+    seats = vehicleOf({ ...vehicle, ...coverageDetails }).seats || null;
+  }
   return {
     policyId: p.id, policyNumber: p.policy_number, status: p.status, clientId: p.client_id, clientCode: p.client_code, clientName: p.client_name || p.insured_name,
     clientEmail: p.client_email, leadId: p.lead_id, quoteId: p.quote_id, insuranceCompanyId: p.insurance_company_id, insuranceCompanyName: p.insurer_name,
-    productId: p.product_id, productType: p.product_type || source.productType || p.product_name, lob: p.lob || (p.product_line ? p.product_line.toUpperCase() : null),
+    productId: p.product_id, productName: p.product_name, productType: p.product_type || source.productType || p.product_name, lob, line: p.product_line, isMotor,
     sumInsured: Number(p.sum_insured), netPremium: Number(p.net_premium), grossPremium: Number(p.premium_total), inceptionDate: p.inception_date, expiryDate: p.expiry_date,
-    renewal: open ? { id: open.id, renewalNumber: open.renewal_number, status: open.status } : null,
-    coverageDetails: { ...coverage, ...captured }, accessories, vehicle: pickPresent(source, CARRY_KEYS),
+    renewal: open ? { id: open.id, renewalNumber: open.renewal_number, status: open.status, renewalType: open.renewal_type } : null,
+    eligibility, seats, coverageDetails, accessories, vehicle,
     orderSummary: open?.order_summary || null, commissionDetails: details.commissionDetails || source.commissionDetails || null, source: from,
   };
+}
+
+/** The quotation document of a renewal: expiring risk details, the wizard's covers (motor) or term (other lines), order summary. */
+function renewalQuoteBody(pre, policy, r, input) {
+  const order = input.orderSummary || {};
+  const commissionDetails = hasReferrers(order.commissionDetails) ? order.commissionDetails : (pre.commissionDetails || order.commissionDetails || null);
+  const vehicle = pre.vehicle;
+  const body = {
+    ...vehicle,
+    ...(pre.isMotor ? { ...pre.coverageDetails, ...pre.accessories } : { totalSumInsured: pre.coverageDetails.totalSumInsured }),
+    participantDetails: vehicle.participantDetails?.length ? vehicle.participantDetails : (pre.insuranceCompanyName ? [{ insuranceCompanyName: pre.insuranceCompanyName, sharePercentage: 100 }] : []),
+    ...pickPresent(order, ['discount', 'accountPremiumOthers', 'NCD', 'authorizedSignature']),
+    commissionDetails,
+    lob: pre.lob, productId: pre.productId || undefined,
+    productType: pre.productType || pre.productName, insuranceCompanyId: pre.insuranceCompanyId, insuranceCompanyName: pre.insuranceCompanyName,
+    clientId: pre.clientId, businessType: 'Renewal', isRenewal: true, renewedFromPolicyId: policy.id, renewedFromPolicyNumber: policy.policy_number,
+    renewal: { renewalId: r?.id, renewalNumber: r?.renewal_number, policyId: policy.id, policyNumber: policy.policy_number, previousExpiryDate: policy.expiry_date },
+    remarks: input.remarks || `Renewal of policy ${policy.policy_number}`,
+  };
+  // Lines other than motor are not priced from cover rates: the renewal is quoted on the net premium entered on the
+  // wizard, else the expiring term's (a quotation without premium could be accepted but never issued).
+  if (!pre.isMotor) {
+    const given = num(input.coverageDetails?.netPremium ?? input.orderSummary?.netPremium ?? pre.coverageDetails.netPremium);
+    body.netPremium = given > 0 ? given : Number(pre.netPremium) || undefined;
+  }
+  if (pre.leadId) body.leadRefId = pre.leadId;
+  return body;
+}
+
+/**
+ * Validation of the renewal wizard, run when a step is saved (Next) so that every problem shows on that step next to
+ * its field rather than when the quotation is completed. Rules follow the product line: seats, Auto Passenger PA and
+ * CTPL apply to motor products only. Returns { valid, errors: [{ path, message }] }; `full` also checks every step and
+ * prices the quotation (without saving it).
+ */
+export async function validateRenewal(policyRef, input = {}, { full = false } = {}) {
+  const pre = await renewalPrefill(policyRef);
+  const errors = [];
+  const add = (path, message) => errors.push({ path, message });
+  if (!pre.eligibility.canRenew) add('policy', pre.eligibility.message);
+  const checkCoverage = full || input.coverageDetails !== undefined;
+  const cov = { ...pre.coverageDetails, ...(input.coverageDetails || {}) };
+  if (checkCoverage && pre.isMotor) {
+    const { motorTariff, vehicleClass, vehicleOf } = await import('../quotations/motorTariff.js');
+    const t = await motorTariff();
+    const { vehicleType, seats } = vehicleOf({ ...pre.vehicle, ...cov });
+    const cls = vehicleClass(t, vehicleType);
+    const perPerson = num(cov.autoPassengerPersonalAccident);
+    if (perPerson > 0 && !(seats || cls?.defaultSeats)) add('coverageDetails.appaSeats', 'Enter the number of seats covered (driver and passengers) for Auto Passenger Personal Accident');
+    if (perPerson > 0 && t.appa.limits.length && !t.appa.limits.includes(perPerson)) {
+      add('coverageDetails.autoPassengerPersonalAccident', `Choose a limit per person of ${t.appa.limits.map((x) => x.toLocaleString('en-US')).join(', ')}`);
+    }
+    const wantsCtpl = present(cov.includeCTPL) ? [true, 'true'].includes(cov.includeCTPL) : num(cov.ctplCoverageRate ?? cov.ctplCoveragePremium) > 0;
+    if (wantsCtpl && (!cls || cls.ctplPremium === null)) {
+      add('coverageDetails.includeCTPL', 'CTPL needs the vehicle type (Insurance Commission vehicle class) of the insured vehicle; untick CTPL or record the vehicle type on the policy');
+    }
+    if (num(cov.lossAndDamageCoverage) < 0) add('coverageDetails.lossAndDamageCoverage', 'The own damage sum insured cannot be negative');
+    else if (!wantsCtpl && !['lossAndDamageCoverage', 'bodilyInjury', 'propertyDamage', 'autoPassengerPersonalAccident'].some((k) => num(cov[k]) > 0)) {
+      add('coverageDetails.lossAndDamageCoverage', 'Enter the own damage sum insured or choose at least one cover');
+    }
+  } else if (checkCoverage) {
+    if (!(num(cov.totalSumInsured) > 0)) add('coverageDetails.totalSumInsured', 'Enter the sum insured of the renewal term');
+    if (!(num(input.coverageDetails?.netPremium ?? input.orderSummary?.netPremium ?? cov.netPremium) > 0)) add('coverageDetails.netPremium', 'Enter the net premium of the renewal term');
+  }
+  const o = input.orderSummary;
+  if (o && num(o.discount) < 0) add('orderSummary.discount', 'The discount cannot be negative');
+  if (full && !errors.length) {
+    const { premiumBreakdown } = await import('../quotations/premium.js');
+    const policy = await resolvePolicy(pre.policyId);
+    try {
+      await premiumBreakdown(renewalQuoteBody({ ...pre, coverageDetails: cov }, policy, null, input), { insurerId: pre.insuranceCompanyId });
+    } catch (e) {
+      if (e.status >= 400 && e.status < 500) add('', e.message); else throw e;
+    }
+  }
+  return { valid: !errors.length, errors, lob: pre.lob, isMotor: pre.isMotor, eligibility: pre.eligibility };
+}
+
+/** Throw 422 with the field errors when the wizard data does not validate. */
+export async function assertRenewalValid(policyRef, input, opts) {
+  const v = await validateRenewal(policyRef, input, opts);
+  // a renewed or cancelled policy is a state conflict, not a data problem on the step
+  if (['renewed', 'cancelled'].includes(v.eligibility?.state)) throw conflict(v.eligibility.message);
+  if (!v.valid) throw unprocessable(v.errors.length === 1 ? v.errors[0].message : 'Check the highlighted fields', v.errors);
+  return v;
 }
 
 /**
@@ -530,36 +768,15 @@ export async function renewalPrefill(policyRef) {
 export async function createRenewalQuote(policyRef, input, user) {
   const { createQuote, updateQuote, getQuoteRow } = await import('../quotations/service.js');
   const policy = await resolvePolicy(policyRef);
+  await assertRenewalValid(policy.id, input, { full: true });
   const { id: renewalId } = await ensureRenewal(policy.id, user);
   const capture = {};
   for (const k of ['coverageDetails', 'accessories', 'orderSummary', 'effectiveDate', 'expiryDate', 'remarks']) if (input[k] !== undefined) capture[k] = input[k];
   if (Object.keys(capture).length) await captureRenewal(renewalId, capture);
   const pre = await renewalPrefill(policy.id);
   const r = await loadRow(renewalId);
-  const order = input.orderSummary || {};
-  const commissionDetails = hasReferrers(order.commissionDetails) ? order.commissionDetails : (pre.commissionDetails || order.commissionDetails || null);
   const vehicle = pre.vehicle;
-  const body = {
-    ...vehicle,
-    ...pre.coverageDetails,
-    ...pre.accessories,
-    participantDetails: vehicle.participantDetails?.length ? vehicle.participantDetails : (pre.insuranceCompanyName ? [{ insuranceCompanyName: pre.insuranceCompanyName, sharePercentage: 100 }] : []),
-    ...pickPresent(order, ['discount', 'accountPremiumOthers', 'NCD', 'authorizedSignature']),
-    commissionDetails,
-    productType: pre.productType || 'Motor', insuranceCompanyId: pre.insuranceCompanyId, insuranceCompanyName: pre.insuranceCompanyName,
-    clientId: pre.clientId, businessType: 'Renewal', isRenewal: true, renewedFromPolicyId: policy.id, renewedFromPolicyNumber: policy.policy_number,
-    renewal: { renewalId: r.id, renewalNumber: r.renewal_number, policyId: policy.id, policyNumber: policy.policy_number, previousExpiryDate: policy.expiry_date },
-    remarks: input.remarks || `Renewal of policy ${policy.policy_number}`,
-  };
-  // Lines other than motor are not priced from cover rates here: the renewal is quoted on the net premium entered on the
-  // wizard, else the expiring term's (a quotation without premium could be accepted but never issued).
-  const lob = String(pre.lob || '').toUpperCase();
-  if (lob && lob !== 'MOTOR') {
-    const given = Number(input.coverageDetails?.netPremium ?? input.orderSummary?.netPremium);
-    body.netPremium = given > 0 ? given : Number(pre.netPremium) || undefined;
-    delete body.lossAndDamageCoverage;
-  }
-  if (pre.leadId) body.leadRefId = pre.leadId;
+  const body = renewalQuoteBody(pre, policy, r, input);
   const existing = await one(`SELECT id, status FROM quotes WHERE doc->'renewal'->>'renewalId' = $1 AND deleted_at IS NULL AND status IN ('draft', 'sent')
     ORDER BY created_at DESC LIMIT 1`, [r.id]);
   let quoteId;

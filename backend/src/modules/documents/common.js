@@ -36,6 +36,13 @@ export function lobOf(...values) {
     if (u === 'IAR' || u.includes('INDUSTRIAL ALL RISK') || u.includes('INDUSTRIAL_ALL_RISK')) return 'IAR';
     if (u.includes('FIRE')) return 'FIRE';
     if (u.includes('EMPLOYEE') || u === 'EB') return 'EB';
+    // product names of the non-motor lines (products master): a Travel or Personal Accident product is never priced as
+    // motor, and "Comprehensive General Liability" is casualty, not a comprehensive motor cover
+    if (u.includes('TRAVEL') || u.includes('PERSONAL ACCIDENT') || u === 'PA' || u === 'GPA' || u.includes('MICRO')) return 'ACCIDENT';
+    if (u.includes('LIABILITY') || u.includes('BOND') || u.includes('MONEY') || u.includes('BURGLARY')) return 'CASUALTY';
+    if (u.includes('HOUSEHOLD')) return 'FIRE';
+    if (u.includes('ALL RISK') || u.includes('MACHINERY') || u === 'CAR' || u === 'EAR') return 'ENGINEERING';
+    if (u.includes('CARGO') || u.includes('HULL')) return 'MARINE';
     if (u.includes('MOTOR') || u.includes('CTPL') || u.includes('COMPREHENSIVE')) return 'MOTOR';
   }
   return 'MOTOR';

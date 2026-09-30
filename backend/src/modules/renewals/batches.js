@@ -4,12 +4,12 @@ import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2 } from '../claims/util.js';
 import { enqueue, registerJobType } from './queue.js';
-import { ensureRenewal, sendNotice } from './service.js';
+import { ensureRenewal, generateQuote, renewablePolicies, sendNotice } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
-import { businessDate } from '../../lib/dates.js';
 
 export const QUEUE = 'renewal-notices';
 export const JOB_TYPE = 'renewal-batch-notices';
+export const QUOTE_JOB_TYPE = 'renewal-batch-quotes';
 
 const POLICY_COLS = `bp.*, p.policy_number, p.expiry_date, p.premium_total, p.status AS policy_status, cl.display_name AS client_name, cl.email AS client_email,
   ic.name AS insurer_name, pr.name AS product_name,
@@ -20,22 +20,25 @@ const POLICY_FROM = `FROM renewal_batch_policies bp JOIN policies p ON p.id = bp
 const policyApi = (r) => ({
   id: r.id, policyId: r.policy_id, renewalId: r.renewal_id, isSelected: r.is_selected, noticeStatus: r.notice_status, noticeSentAt: r.notice_sent_at,
   error: r.error, attempts: r.attempts, createdAt: r.created_at,
+  quoteStatus: r.quote_status, quoteNumber: r.quote_number, quotedPremium: r.quoted_premium, quotedAt: r.quoted_at,
   policy: {
     id: r.policy_id, policyNumber: r.policy_number, insuranceCompanyName: r.insurer_name, clientName: r.client_name, ClientName: r.client_name,
     productType: r.product_name, expiry: r.expiry_date, expiryDate: r.expiry_date, grossPremium: r.premium_total, status: r.policy_status,
-    paymentStatus: r.unpaid > 0 ? 'Pending' : 'Paid', email: r.client_email,
+    paymentStatus: r.unpaid > 0 ? 'Unpaid' : 'Paid', email: r.client_email,
   },
 });
 const batchApi = (b) => ({
   id: b.id, batchId: b.batch_number, batchNumber: b.batch_number, status: b.status, criteriaOption: b.criteria || {},
   totalPolicies: b.total_policies ?? 0, processedCount: b.sent_count ?? 0, sentCount: b.sent_count ?? 0, failedCount: b.failed_count ?? 0,
-  queuedCount: b.queued_count ?? 0, notSentCount: b.not_sent_count ?? 0, createdBy: b.created_by, createdAt: b.created_at, updatedAt: b.updated_at, completedAt: b.completed_at,
+  queuedCount: b.queued_count ?? 0, notSentCount: b.not_sent_count ?? 0, quotedCount: b.quoted_count ?? 0, selectedCount: b.selected_count ?? 0, createdBy: b.created_by, createdAt: b.created_at, updatedAt: b.updated_at, completedAt: b.completed_at,
 });
 const COUNTS = `(SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id)::int AS total_policies,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Sent')::int AS sent_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Failed')::int AS failed_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Queued')::int AS queued_count,
-  (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'NotSent')::int AS not_sent_count`;
+  (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'NotSent')::int AS not_sent_count,
+  (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.quote_status = 'Quoted')::int AS quoted_count,
+  (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.is_selected)::int AS selected_count`;
 
 async function loadBatch(id) {
   const b = await one(`SELECT b.*, ${COUNTS} FROM renewal_batches b WHERE b.id = $1 OR b.batch_number = $1`, [String(id)]);
@@ -43,24 +46,11 @@ async function loadBatch(id) {
   return b;
 }
 
-/** Policies matching the batch criteria (expiry range, insurer, product, premium range, client, payment status). */
+/** Renewable policies matching the batch criteria (expiry range, insurer, product, premium range, client, payment status). */
 async function policiesByCriteria(c = {}, limit) {
-  const where = ['p.status IN (\'active\', \'issued\', \'expired\')', 'p.renewed_to IS NULL'];
-  const params = [];
-  const add = (sql, ...vals) => { let s = sql; for (const v of vals) { params.push(v); s = s.replace('?', `$${params.length}`); } where.push(s); };
-  if (c.expiryDateFrom) add('p.expiry_date >= ?::date', await businessDate(c.expiryDateFrom));
-  if (c.expiryDateTo) add('p.expiry_date <= ?::date', await businessDate(c.expiryDateTo));
-  if (c.insuranceCompanyName) add('ic.name ILIKE ?', `%${c.insuranceCompanyName}%`);
-  if (c.productType) add('(pr.name ILIKE ? OR pr.code ILIKE ? OR pr.line ILIKE ?)', `%${c.productType}%`, c.productType, c.productType);
-  if (c.premiumMin != null && c.premiumMin !== '') add('p.premium_total >= ?', Number(c.premiumMin));
-  if (c.premiumMax != null && c.premiumMax !== '') add('p.premium_total <= ?', Number(c.premiumMax));
-  if (c.clientName) add('cl.display_name ILIKE ?', `%${c.clientName}%`);
-  const unpaid = '(SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.policy_id = p.id AND rv.balance > 0 AND rv.status NOT IN (\'paid\',\'written-off\'))';
-  if (c.paymentStatus && /paid/i.test(c.paymentStatus) && !/un/i.test(c.paymentStatus)) where.push(`${unpaid} = 0`);
-  else if (c.paymentStatus) where.push(`${unpaid} > 0`);
-  params.push(limit);
-  return many(`SELECT p.id FROM policies p LEFT JOIN clients cl ON cl.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
-    LEFT JOIN products pr ON pr.id = p.product_id WHERE ${where.join(' AND ')} ORDER BY p.expiry_date LIMIT $${params.length}`, params);
+  const { all } = await renewablePolicies({ ...c, renewableOnly: 'true' }, { limit, offset: 0 });
+  // a policy with a renewal already in progress stays with that renewal (it is not batched a second time)
+  return all.filter((p) => p.renewalState !== 'in-progress').slice(0, limit).map((p) => ({ id: p.policyId }));
 }
 
 export async function createBatch(input, user) {
@@ -73,6 +63,10 @@ export async function createBatch(input, user) {
     if (missing.length) throw badRequest(`Unknown policies: ${missing.join(', ')}`);
     const done = found.filter((f) => f.renewed_to || ['renewed', 'cancelled'].includes(f.status));
     if (done.length) throw conflict(`Already renewed or cancelled: ${done.map((f) => f.policy_number).join(', ')}`);
+    // only policies still renewable (before expiry, in the grace period or within the lapsed-renewal window)
+    const { all } = await renewablePolicies({ expiryFrom: '1900-01-01', expiryTo: '2999-12-31' }, { limit: 100000, offset: 0 });
+    const closed = found.filter((f) => !all.some((x) => x.policyId === f.id && x.canRenew));
+    if (closed.length) throw conflict(`No longer renewable: ${closed.map((f) => f.policy_number).join(', ')}`);
     ids = [...new Set(found.map((f) => f.id))];
   } else {
     ids = (await policiesByCriteria(input.criteriaOption || {}, max)).map((p) => p.id);
@@ -166,9 +160,21 @@ export async function retryFailed(id, user) {
   return startJob(b, rows.map((r) => r.id), user);
 }
 
-async function startJob(b, itemIds, user) {
+/** Queue re-rated renewal quotes for the selected policies (not yet quoted); processed by the renewal-batch-quotes job. */
+export async function queueQuotes(id, policyRefs, user) {
+  const b = await loadBatch(id);
+  if (b.status === 'Cancelled') throw conflict('Batch is cancelled');
+  const refs = (policyRefs || []).map(String);
+  if (!refs.length) throw badRequest('Select at least one policy to prepare renewal quotes');
+  const rows = await many(`UPDATE renewal_batch_policies bp SET is_selected = true, quote_status = 'Queued', error = NULL FROM policies p
+    WHERE bp.batch_id = $1 AND p.id = bp.policy_id AND (p.id = ANY($2) OR p.policy_number = ANY($2) OR bp.id::text = ANY($2)) AND bp.quote_status IN ('NotQuoted', 'Failed') RETURNING bp.id`, [b.id, refs]);
+  if (!rows.length) throw conflict('The selected policies already have a renewal quote');
+  return startJob(b, rows.map((r) => r.id), user, QUOTE_JOB_TYPE);
+}
+
+async function startJob(b, itemIds, user, type = JOB_TYPE) {
   await query('UPDATE renewal_batches SET status = \'Processing\', updated_at = now() WHERE id = $1', [b.id]);
-  const job = await enqueue(QUEUE, JOB_TYPE, { batchId: b.id, itemIds, user: user ? { id: user.id, username: user.username } : null }, { userId: user?.id, total: itemIds.length });
+  const job = await enqueue(QUEUE, type, { batchId: b.id, itemIds, user: user ? { id: user.id, username: user.username } : null }, { userId: user?.id, total: itemIds.length });
   return { jobId: job.id, queued: itemIds.length, batchId: b.batch_number };
 }
 
@@ -192,16 +198,50 @@ export async function runBatchNoticesJob(payload, { progress }) {
     }
     await progress({ processed: succeeded + failed, succeeded, failed });
   }
-  const left = (await one('SELECT count(*)::int AS n FROM renewal_batch_policies WHERE batch_id = $1 AND notice_status = \'Queued\'', [batchId])).n;
-  if (!left) await query('UPDATE renewal_batches SET status = \'Completed\', completed_at = now(), updated_at = now() WHERE id = $1 AND status = \'Processing\'', [batchId]);
+  await settleBatch(batchId);
   return { batchId, succeeded, failed, total: itemIds.length };
 }
 registerJobType(JOB_TYPE, runBatchNoticesJob);
 
+/** When nothing is queued: Completed once every selected policy had its notice sent (or tried), else back to Draft. */
+async function settleBatch(batchId) {
+  const c = await one(`SELECT count(*) FILTER (WHERE notice_status = 'Queued' OR quote_status = 'Queued')::int AS queued,
+    count(*) FILTER (WHERE is_selected AND notice_status = 'NotSent')::int AS open FROM renewal_batch_policies WHERE batch_id = $1`, [batchId]);
+  if (c.queued) return;
+  await query(`UPDATE renewal_batches SET status = CASE WHEN $2 THEN 'Completed' ELSE 'Draft' END, completed_at = CASE WHEN $2 THEN now() END, updated_at = now()
+    WHERE id = $1 AND status = 'Processing'`, [batchId, c.open === 0]);
+}
+
+/** Job handler: open the renewal and prepare its re-rated quote for each queued batch policy (Quoted / Failed per policy). */
+export async function runBatchQuotesJob(payload, { progress }) {
+  const { batchId, itemIds = [], user = null } = payload;
+  let succeeded = 0;
+  let failed = 0;
+  for (const itemId of itemIds) {
+    const item = await one('SELECT * FROM renewal_batch_policies WHERE id = $1', [itemId]);
+    if (item && item.quote_status === 'Queued') {
+      try {
+        const { id: renewalId } = await ensureRenewal(item.policy_id, user);
+        const { quote } = await generateQuote(renewalId, user);
+        await query(`UPDATE renewal_batch_policies SET quote_status = 'Quoted', quote_number = $3, quoted_premium = $4, quoted_at = now(), renewal_id = $2 WHERE id = $1`,
+          [itemId, renewalId, quote.quoteNumber, quote.quotedPremium]);
+        succeeded += 1;
+      } catch (e) {
+        await query('UPDATE renewal_batch_policies SET quote_status = \'Failed\', error = $2 WHERE id = $1', [itemId, e.message]);
+        failed += 1;
+      }
+    }
+    await progress({ processed: succeeded + failed, succeeded, failed });
+  }
+  await settleBatch(batchId);
+  return { batchId, succeeded, failed, total: itemIds.length };
+}
+registerJobType(QUOTE_JOB_TYPE, runBatchQuotesJob);
+
 export async function noticeStatus(id) {
   const b = await loadBatch(id);
   return { batchId: b.batch_number, status: b.status, total: b.total_policies, NotSent: b.not_sent_count, Queued: b.queued_count, Sent: b.sent_count, Failed: b.failed_count,
-    notSent: b.not_sent_count, queued: b.queued_count, sent: b.sent_count, failed: b.failed_count };
+    notSent: b.not_sent_count, queued: b.queued_count, sent: b.sent_count, failed: b.failed_count, quoted: b.quoted_count };
 }
 
 export async function statistics(id) {
@@ -214,7 +254,7 @@ export async function statistics(id) {
 
 export const REPORT_COLUMNS = [
   ['policyNumber', 'Policy No.'], ['clientName', 'Client'], ['email', 'E-mail'], ['insurer', 'Insurer'], ['product', 'Product'], ['expiryDate', 'Expiry'],
-  ['premium', 'Gross premium'], ['paymentStatus', 'Payment'], ['noticeStatus', 'Notice status'], ['noticeSentAt', 'Sent at'], ['attempts', 'Attempts'], ['error', 'Error'],
+  ['premium', 'Gross premium'], ['paymentStatus', 'Payment'], ['quoteNumber', 'Renewal quote'], ['quotedPremium', 'Renewal premium'], ['noticeStatus', 'Notice status'], ['noticeSentAt', 'Sent at'], ['attempts', 'Attempts'], ['error', 'Error'],
 ].map(([key, header]) => ({ key, header }));
 export async function reportRows(id) {
   const b = await getBatch(id);
@@ -222,7 +262,7 @@ export async function reportRows(id) {
     batch: b,
     rows: b.policies.map((p) => ({
       policyNumber: p.policy.policyNumber, clientName: p.policy.clientName, email: p.policy.email, insurer: p.policy.insuranceCompanyName, product: p.policy.productType,
-      expiryDate: p.policy.expiryDate, premium: p.policy.grossPremium, paymentStatus: p.policy.paymentStatus, noticeStatus: p.noticeStatus,
+      expiryDate: p.policy.expiryDate, premium: p.policy.grossPremium, paymentStatus: p.policy.paymentStatus, quoteNumber: p.quoteNumber || '', quotedPremium: p.quotedPremium ?? '', noticeStatus: p.noticeStatus,
       noticeSentAt: p.noticeSentAt ? new Date(p.noticeSentAt).toISOString() : '', attempts: p.attempts, error: p.error || '',
     })),
   };
