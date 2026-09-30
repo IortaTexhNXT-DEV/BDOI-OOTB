@@ -507,7 +507,10 @@ export async function settleClaim(id, input, user, files) {
   const amount = toNum(input.settlementAmount);
   if (input.settlementType) {
     const types = await settlementTypes();
-    if (types.length && !types.some((x) => String(x.value).toLowerCase() === String(input.settlementType).toLowerCase())) {
+    // value or label of the master; older screens and uploads say "Paid through broker"
+    const given = String(input.settlementType).toLowerCase();
+    const known = types.some((x) => [x.value, x.label].some((v) => String(v || '').toLowerCase() === given)) || /broker/.test(given);
+    if (types.length && !known) {
       throw badRequest('Validation failed', [{ path: 'settlementType', message: `Settlement type "${input.settlementType}" is not in the settlement types master` }]);
     }
   }

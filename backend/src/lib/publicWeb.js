@@ -14,7 +14,7 @@ const trim = (u) => String(u || '').trim().replace(/\/+$/, '');
 const isHttp = (u) => /^https?:\/\/[^\s/]+/i.test(u);
 
 export async function publicWebUrl({ env = process.env, cfg = config } = {}) {
-  const configured = trim(await getSetting('general.frontend_url', ''));
+  const configured = trim(await getSetting('general.frontend_url', 'http://localhost:3000'));
   if (isHttp(configured) && !isLocal(configured)) return configured;
   const fromEnv = trim(env.PUBLIC_WEB_URL);
   if (isHttp(fromEnv)) return fromEnv;

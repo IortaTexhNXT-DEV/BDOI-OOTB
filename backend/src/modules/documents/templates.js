@@ -300,7 +300,7 @@ export async function acknowledgementReceiptDoc(c) {
   const cl = c.client || {};
   const address = [cl.address, cl.city, cl.state].filter(present).join(', ');
   const status = c.status === 'confirmed' ? `Confirmed${c.receiptNumber ? `, official receipt ${c.receiptNumber}` : ''}` : c.status === 'rejected' ? 'Rejected' : 'Awaiting verification by Accounting';
-  const note = (await getSetting('documents.acknowledgement_receipt_note', '')) || '';
+  const note = (await getSetting('documents.acknowledgement_receipt_note', 'This acknowledgement receipt is not an official receipt. The official receipt is issued once the payment is verified by Accounting.')) || '';
   return { ...h, footerNote: note,
     meta: kv([['Date received', f.date(c.paymentDate)], ['Received from', c.clientName], ['Customer code', c.clientCode], ['TIN', cl.tin], ['Address', address],
       ['Amount', f.ccy(c.amount, currency), { bold: true }], ['Payment mode', c.paymentModeLabel], ['Reference', c.referenceNo], ['Status', status]]),
