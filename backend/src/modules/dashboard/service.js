@@ -20,8 +20,6 @@ const change = (cur, prev) => (prev ? Math.round(((cur - prev) / prev) * 1000) /
 /** Window of the "renewals due" counters and lists (dashboard.renewals_due_days). */
 const renewalsDueDays = async () => Number(await getSetting('dashboard.renewals_due_days', 60)) || 0;
 const PRODUCT = "COALESCE(p.product_type, pr.name, p.lob, 'Other')";
-/** Start of a business date (Manila midnight by general.timezone) as a timestamptz, for comparing created_at. */
-const START = (date, tz) => `(${date}::date::timestamp AT TIME ZONE ${tz})`;
 
 /**
  * Premium written in the current and previous period, policies in force, new business, claims ratio, retention.
@@ -30,8 +28,10 @@ const START = (date, tz) => `(${date}::date::timestamp AT TIME ZONE ${tz})`;
  */
 export async function executive(period = 'month') {
   const range = await calendarPeriod(period);
-  const cur = `created_at >= ${START('$1', '$4')} AND created_at < ${START('$2', '$4')}`;
-  const prev = `created_at >= ${START('$3', '$4')} AND created_at < ${START('$1', '$4')}`;
+  // premium is written on the policy's issue date (a policy keyed in later still counts in the month it was issued)
+  const written = 'COALESCE(issued_date, (created_at AT TIME ZONE $4)::date)';
+  const cur = `${written} >= $1::date AND ${written} < $2::date`;
+  const prev = `${written} >= $3::date AND ${written} < $1::date`;
   const k = await one(`SELECT
       COALESCE(sum(premium_total) FILTER (WHERE ${cur}), 0) AS premium_cur,
       COALESCE(sum(premium_total) FILTER (WHERE ${prev}), 0) AS premium_prev,
@@ -102,9 +102,11 @@ export async function monthlyTrend(months = 12, book = null) {
   params.push(await businessTimeZone());
   const tz = `$${params.length}`;
   const month = (col) => `date_trunc('month', ${col} AT TIME ZONE ${tz})`;
+  // policies count in the month of their issue date; quotations and leads in the month they were entered
+  const issued = `date_trunc('month', COALESCE(p.issued_date::timestamp, p.created_at AT TIME ZONE ${tz}))`;
   const rows = await many(`SELECT to_char(m, 'YYYY-MM') AS month, to_char(m, 'Mon') AS label,
-      COALESCE((SELECT sum(premium_total) FROM policies p WHERE ${month('p.created_at')} = m AND ${pol}), 0) AS premium,
-      (SELECT count(*)::int FROM policies p WHERE ${month('p.created_at')} = m AND ${pol}) AS policies,
+      COALESCE((SELECT sum(premium_total) FROM policies p WHERE ${issued} = m AND ${pol}), 0) AS premium,
+      (SELECT count(*)::int FROM policies p WHERE ${issued} = m AND ${pol}) AS policies,
       (SELECT count(*)::int FROM quotes q WHERE ${month('q.created_at')} = m AND q.deleted_at IS NULL AND ${quo}) AS quotes,
       (SELECT count(*)::int FROM leads l WHERE ${month('l.created_at')} = m AND l.deleted_at IS NULL AND ${lea}) AS leads
     FROM generate_series(${month('now()')} - make_interval(months => $1 - 1), ${month('now()')}, interval '1 month') AS m ORDER BY m`, params);
@@ -158,7 +160,8 @@ export async function sales(book = null) {
       (SELECT count(DISTINCT q.lead_id)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quoted_leads,
       (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote}) AS quotes,
       (SELECT count(*)::int FROM policies po WHERE ${policy}) AS policies,
-      (SELECT COALESCE(sum(po.premium_total),0) FROM policies po WHERE ${policy} AND date_trunc('month', po.created_at AT TIME ZONE ${tz}) = date_trunc('month', now() AT TIME ZONE ${tz})) AS premium_month,
+      (SELECT COALESCE(sum(po.premium_total),0) FROM policies po WHERE ${policy}
+        AND date_trunc('month', COALESCE(po.issued_date::timestamp, po.created_at AT TIME ZONE ${tz})) = date_trunc('month', now() AT TIME ZONE ${tz})) AS premium_month,
       (SELECT count(*)::int FROM policies po WHERE ${policy} AND po.status IN ('active','issued') AND po.expiry_date BETWEEN ${day} AND ${day} + ${dueDays}) AS renewals_due`, p);
   return {
     funnel: { leads: f.leads, quotedLeads: f.quoted_leads, quotations: f.quotes, policies: f.policies, leadToQuoteRate: pct(f.quoted_leads, f.leads), quoteToPolicyRate: pct(f.policies, f.quotes), leadToPolicyRate: pct(f.policies, f.leads) },

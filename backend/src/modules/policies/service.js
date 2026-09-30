@@ -11,7 +11,7 @@ import { publicUrl } from '../uploads/storage.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { writeParticipants, legacyParticipantDetails, leadOf, participantsOf } from '../placement/participants.js';
-import { isoDate } from '../../lib/dates.js';
+import { isoDate, postingDate, today } from '../../lib/dates.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
@@ -181,16 +181,16 @@ const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMont
  * instead (Dr commission receivable / Cr commission income / Cr output VAT) and { id: null, bill_number: null, directBill }
  * is returned.
  */
-export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null }) {
+export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null }) {
   const policy = (await db.query(`SELECT p.*, ic.name AS insurer_name FROM policies p
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
   if (policy?.billing_mode === 'direct') {
     const { bookDirectBill } = await import('../remittance/directbill.js');
-    const item = await bookDirectBill(db, { policy, amount: round2(amount), breakdown, source, reference, endorsementId, user });
+    const item = await bookDirectBill(db, { policy, amount: round2(amount), breakdown, source, reference, endorsementId, date: date ? await postingDate(date) : null, user });
     return { id: null, bill_number: null, directBill: item };
   }
   const { createReceivable: financeReceivable } = await import('../receipts/receivables.js');
-  return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, user });
+  return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, date, user });
 }
 
 /** Roles that earn commission on the policies they produce (commission.eligible_roles, falling back to incentive.eligible_roles). */
@@ -261,9 +261,10 @@ export async function issuePolicy(db, src, body, userId) {
   // product from the quotation, else the product whose code is the line of business (MOTOR, FIRE ...) or the product type
   const productId = src.productId || (await db.query('SELECT id FROM products WHERE upper(code) = ANY($1::text[]) ORDER BY id LIMIT 1',
     [[src.lob, src.productType].filter(Boolean).map((x) => String(x).toUpperCase())])).rows[0]?.id || null;
-  const inception = cols.inception_date || isoDate(new Date());
+  const inception = cols.inception_date || await today();
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
+  const issuedOn = cols.issued_date || await today();
   const number = cols.policy_number || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
   if (cols.policy_number) await assertUniqueNumber(db, number, null);
   const paymentStatus = cols.payment_status || 'Pending';
@@ -272,7 +273,7 @@ export async function issuePolicy(db, src, body, userId) {
       payment_status, payment_method, paid_at, doc, created_by, billing_mode)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) RETURNING id`,
   [number, src.quoteId, src.clientId, src.leadId, productId, src.policyTypeId, cols.insurance_company_id || src.insuranceCompanyId, src.ownerUserId || userId,
-    inception, expiry, cols.issued_date || isoDate(new Date()), src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
+    inception, expiry, issuedOn, src.sumInsured, src.netPremium, src.grossPremium, src.commissionAmount, src.currency,
     cols.insured_name || src.insuredName, src.productType, src.lob, paymentStatus, cols.payment_method || null, paymentStatus === 'Completed' ? new Date() : null,
     JSON.stringify(policyDoc), userId, billingMode]);
   const policyId = r.rows[0].id;
@@ -295,7 +296,8 @@ export async function issuePolicy(db, src, body, userId) {
   }
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
   const renewal = src.receivableSource === 'renewal';
-  const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId },
+  // booked on the issue date, so a policy keyed in after its issue lands in the month it was issued
+  const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId }, date: issuedOn,
     breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount,
       ...(renewal ? { commissionAmount: src.commissionAmount } : {}) } });
   await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [policyId, receivable.bill_number]);

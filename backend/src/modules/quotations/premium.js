@@ -93,7 +93,9 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   const rates = await taxRates(lob);
   const tax = Object.fromEntries(Object.entries(rates).map(([k, r]) => [k, round2(net * r)]));
   const others = round2(num(v.accountPremiumOthers));
-  const discount = round2(num(v.discount));
+  // CTPL is the tariff amount and is never discounted: a discount reduces at most the rest of the premium
+  const discountable = round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + others);
+  const discount = Math.min(Math.max(0, round2(num(v.discount))), Math.max(0, discountable));
   const gross = Math.max(0, round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + ctpl + others - discount));
   const si = (k) => (k in amounts ? num(amounts[k]) : num(v[k]));
   const sumInsured = round2(num(v.totalSumInsured) || si('lossAndDamageCoverage') + si('bodilyInjury') + si('propertyDamage') + si('APPAtotalCoverage')

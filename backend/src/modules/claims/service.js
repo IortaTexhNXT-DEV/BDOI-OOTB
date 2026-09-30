@@ -21,7 +21,10 @@ import { printContext, buildPdf } from '../../lib/pdf/index.js';
 import { formatDate } from '../../lib/pdf/format.js';
 import { daysBetween, parseJsonField, round2, storeUpload, toBool, toNum, today, unprocessable, usersWithRole } from './util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
-import { businessDate } from '../../lib/dates.js';
+import { businessDate, postingDate } from '../../lib/dates.js';
+
+/** When a settlement is settled: its settlement date (not after today), else now. */
+const settledAt = async (settlement) => (settlement?.settlementDate ? postingDate(settlement.settlementDate) : new Date());
 
 export const STATUSES = ['registered', 'in-review', 'pending-approval', 'approved', 'settled', 'closed', 'rejected'];
 export const PLACEHOLDER_REFS = new Set(['POLICY-001', 'LEAD-001', 'QUOTE-001', '']);
@@ -176,7 +179,7 @@ export async function postBrokerSettlement(claimId, user) {
     const shares = allocate(amount, parts.map((p) => p.share));
     const jv = await postEvent('claim.settlement.paid_through_broker', {
       source: 'claims', entryType: 'CLAIM_SETTLEMENT', entrySubType: isCoInsured(parts) ? 'CO_INSURANCE' : null, transactionCode: c.claim_number, referenceType: 'Claim', referenceId: c.id,
-      clientId: c.client_id || c.policy_client_id, policyId: c.policy_id, policyNumber: c.policy_number, amounts: { amount },
+      clientId: c.client_id || c.policy_client_id, policyId: c.policy_id, policyNumber: c.policy_number, amounts: { amount }, date: await postingDate(c.settlement?.settlementDate),
       participants: parts.map((p, i) => ({ insurerId: p.insurerId, insurerName: p.insurerName, share: p.share, amounts: { amount: shares[i] } })),
       vars: { claimNumber: c.claim_number, policyNumber: c.policy_number, claimant: c.settlement?.payee || c.client_name || 'claimant', insurer: parts[0]?.insurerName || 'insurer' },
     }, { db, user });
@@ -493,7 +496,7 @@ export async function settleClaim(id, input, user, files) {
   if (from === 'approved') {
     const final = settlement.settlementAmount ?? row.approved_amount;
     if (row.approved_amount != null && final > row.approved_amount) throw unprocessable(`Settlement amount exceeds the approved amount ${row.approved_amount}`);
-    await transition(row, 'settled', user, { note: 'Settlement paid', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), settled_amount: final, settled_at: new Date() } });
+    await transition(row, 'settled', user, { note: 'Settlement paid', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), settled_amount: final, settled_at: await settledAt(settlement) } });
     await postBrokerSettlement(row.id, user);
     return { from, claim: await getClaim(row.id) };
   }
@@ -509,7 +512,7 @@ export async function settleClaim(id, input, user, files) {
     }
     return { from, claim: await getClaim(row.id), pendingApproval: true };
   }
-  await transition(row, 'settled', user, { note: 'Settled', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), approved_amount: amount, settled_amount: amount, settled_at: new Date() } });
+  await transition(row, 'settled', user, { note: 'Settled', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), approved_amount: amount, settled_amount: amount, settled_at: await settledAt(settlement) } });
   await postBrokerSettlement(row.id, user);
   return { from, claim: await getClaim(row.id) };
 }
@@ -529,7 +532,7 @@ export async function approveSettlement(id, { decision = 'approve', approvedAmou
   await transition(row, 'approved', user, { note: note || `Settlement of ${amount} approved`, action: 'Settlement Approved', sets: { approved_amount: round2(amount), settlement: JSON.stringify(settlement), settlement_approved_by: user?.id ?? null, settlement_approved_at: new Date() } });
   if (await getSetting('claims.auto_settle_on_approval', true)) {
     const settledAmount = Math.min(round2(settlement.settlementAmount ?? amount), round2(amount));
-    await transition(row, 'settled', user, { note: 'Settlement released', action: 'Claim Settled', sets: { settled_amount: settledAmount, settled_at: new Date() } });
+    await transition(row, 'settled', user, { note: 'Settlement released', action: 'Claim Settled', sets: { settled_amount: settledAmount, settled_at: await settledAt(settlement) } });
     await postBrokerSettlement(row.id, user);
   }
   return { from, claim: await getClaim(row.id) };

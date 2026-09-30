@@ -18,22 +18,22 @@ export async function remittanceAgeing(db, qs = {}) {
   const defaultDays = Number(await getSetting('remittance.default_due_days', 30)) || 0;
   const insurer = qs.insurerId ? String(qs.insurerId) : null;
   // single-insurer policies: the collection is remitted when its invoice list is on an approved / paid voucher
-  const single = (await db.query(`SELECT a.id, a.amount, a.applied_at::date AS collected_on, r.amount AS bill_amount, r.commission_amount, r.commission_vat, r.commission_ewt, r.bill_number,
+  const single = (await db.query(`SELECT a.id, a.amount, a.collected_on, r.amount AS bill_amount, r.commission_amount, r.commission_vat, r.commission_ewt, r.bill_number,
       p.policy_number, c.display_name AS client_name, ic.id AS insurer_id, ic.code AS insurer_code, ic.name AS insurer_name, COALESCE(ic.remittance_terms_days, $2::int) AS terms,
       rc.receipt_number
     FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = p.client_id
     JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN receipts rc ON rc.id = a.receipt_id
-    WHERE a.status = 'applied' AND a.applied_at::date <= $1::date AND p.billing_mode <> 'direct'
+    WHERE a.status = 'applied' AND a.collected_on <= $1::date AND p.billing_mode <> 'direct'
       AND (SELECT count(*) FROM risk_participants x WHERE x.entity_type = 'policy' AND x.entity_id = p.id AND x.status = 'active') <= 1
       AND NOT (a.remitted_invoice_id IS NOT NULL AND ${REMITTED('a.remitted_invoice_id')})
       AND ($3::text IS NULL OR ic.id::text = $3 OR ic.code = $3)`, [asOf, defaultDays, insurer])).rows;
   // co-insured policies: one row per participant not yet remitted its share
-  const co = (await db.query(`SELECT a.id, a.amount, a.applied_at::date AS collected_on, r.id AS receivable_id, r.amount AS bill_amount, r.commission_amount, r.bill_number,
+  const co = (await db.query(`SELECT a.id, a.amount, a.collected_on, r.id AS receivable_id, r.amount AS bill_amount, r.commission_amount, r.bill_number,
       p.id AS policy_id, p.policy_number, c.display_name AS client_name, ic.id AS insurer_id, ic.code AS insurer_code, ic.name AS insurer_name,
       COALESCE(ic.remittance_terms_days, $2::int) AS terms, rp.gross AS part_gross, rp.commission AS part_commission, rp.commission_vat AS part_vat, rp.commission_ewt AS part_ewt, rc.receipt_number
     FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = p.client_id
     JOIN receivable_participants rp ON rp.receivable_id = r.id JOIN insurance_companies ic ON ic.id = rp.insurance_company_id LEFT JOIN receipts rc ON rc.id = a.receipt_id
-    WHERE a.status = 'applied' AND a.applied_at::date <= $1::date AND p.billing_mode <> 'direct'
+    WHERE a.status = 'applied' AND a.collected_on <= $1::date AND p.billing_mode <> 'direct'
       AND NOT EXISTS (SELECT 1 FROM remittance_allocations al WHERE al.receipt_application_id = a.id AND al.insurance_company_id = rp.insurance_company_id
         AND al.invoice_list_id IS NOT NULL AND ${REMITTED('al.invoice_list_id')})
       AND ($3::text IS NULL OR ic.id::text = $3 OR ic.code = $3)`, [asOf, defaultDays, insurer])).rows;

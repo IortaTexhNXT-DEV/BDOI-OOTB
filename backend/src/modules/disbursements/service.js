@@ -12,6 +12,7 @@ import { assertChecker, isoDate, num, round2, str, today } from '../accounting/l
 import { findClient, findPolicy } from '../receipts/receivables.js';
 import { payLines, lineView } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { postingDate } from '../../lib/dates.js';
 
 const AGENT = 'Agent/Referrer';
 /** Payee types of a payment voucher. */
@@ -259,6 +260,8 @@ async function approveCheque(db, c, amount, user) {
     policyId: inv?.policy_id || d?.policy_id || null, policyNumber: inv?.policy_number || d?.policy_number || null,
     description: `Cheque ${c.instrument_no || ''} – ${d?.payee_name || c.customer_name || c.customer_code || payeeType}`.trim(),
     payeeType, bankAccount: c.main_account || null, paymentMode: 'check',
+    // the payment is booked on the cheque date (today when it is post-dated), so the bank book shows it when it was issued
+    date: await postingDate(c.instrument_date),
     amounts: { amount, payable: round2(amount - taxes.vat - taxes.dst - taxes.lgt), ...taxes },
     vars: { payeeType, payeeName: d?.payee_name || c.customer_name || c.customer_code || payeeType, instrumentNo: c.instrument_no || '' },
   }, { db, user });
@@ -267,6 +270,18 @@ async function approveCheque(db, c, amount, user) {
   if (d) {
     await db.query(`UPDATE disbursements SET status = 'approved', approved_by = $2, approved_at = now(), journal_id = COALESCE(journal_id, $3),
       amount = CASE WHEN amount = 0 THEN $4 ELSE amount END, updated_at = now() WHERE id = $1`, [d.id, user.id, jv.id, amount]);
+    // A cheque drawn on the whole voucher (no single payable named) pays the voucher's payables once the approved cheques
+    // cover the voucher, so they no longer show as open payables to the insurer (aged payables, remittances due)
+    if (!inv) await settleVoucherPayables(db, d.id);
+  }
+}
+
+/** Mark the payables (invoice lists) of a voucher paid when its approved cheques cover the voucher amount. */
+async function settleVoucherPayables(db, disbursementId) {
+  const v = (await db.query(`SELECT d.amount, COALESCE((SELECT sum(c.totale_amount) FROM checkbooks c WHERE c.disbursement_id = d.id AND c.status IN ('Approved', 'Printed')), 0) AS paid
+    FROM disbursements d WHERE d.id = $1`, [disbursementId])).rows[0];
+  if (v && Number(v.paid) + 0.005 >= Number(v.amount)) {
+    await db.query("UPDATE invoice_lists SET status = 'paid', updated_at = now() WHERE disbursement_id = $1 AND status IN ('open', 'in-voucher')", [disbursementId]);
   }
 }
 
@@ -294,6 +309,10 @@ export async function updateCheckbook(db, id, b, user) {
     if (c.journal_id) await reverseJournal(db, c.journal_id, user, { description: `Cheque ${c.instrument_no || c.id} cancelled` });
     await db.query('UPDATE checkbooks SET status = \'Cancelled\', updated_at = now() WHERE id = $1', [id]);
     if (c.invoice_list_id) await db.query('UPDATE invoice_lists SET status = \'open\', updated_at = now() WHERE id = $1', [c.invoice_list_id]);
+    // a cancelled cheque on the whole voucher leaves its payables on the voucher, unpaid
+    else if (c.disbursement_id && c.status === 'Approved') {
+      await db.query("UPDATE invoice_lists SET status = 'in-voucher', updated_at = now() WHERE disbursement_id = $1 AND status = 'paid'", [c.disbursement_id]);
+    }
   } else {
     throw conflict(`Cheque cannot move from ${c.status} to ${next}`);
   }
@@ -379,7 +398,7 @@ export async function createInsurerRemittance(db, b, user) {
   const apps = (await db.query(`SELECT a.*, r.amount AS rcv_amount, r.commission_amount, r.commission_vat, r.commission_ewt, r.client_id, p.id AS policy_id, p.policy_number, c.client_code
     FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id
     WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND p.insurance_company_id = $1 AND NOT ${CO_INSURED}
-      AND ($2::date IS NULL OR a.applied_at::date >= $2) AND ($3::date IS NULL OR a.applied_at::date <= $3)
+      AND ($2::date IS NULL OR a.collected_on >= $2) AND ($3::date IS NULL OR a.collected_on <= $3)
       AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, filter)).rows;
   // Co-insured policies: the insurer's share of each collection (its share of the premium less its own commission)
   const coApps = (await db.query(`SELECT a.*, r.amount AS rcv_amount, r.commission_amount, r.client_id, p.id AS policy_id, p.policy_number, c.client_code
@@ -387,7 +406,7 @@ export async function createInsurerRemittance(db, b, user) {
     WHERE a.status = 'applied' AND ${CO_INSURED}
       AND EXISTS (SELECT 1 FROM risk_participants x WHERE x.entity_type = 'policy' AND x.entity_id = p.id AND x.status = 'active' AND x.insurance_company_id = $1)
       AND NOT EXISTS (SELECT 1 FROM remittance_allocations al WHERE al.receipt_application_id = a.id AND al.insurance_company_id = $1)
-      AND ($2::date IS NULL OR a.applied_at::date >= $2) AND ($3::date IS NULL OR a.applied_at::date <= $3)
+      AND ($2::date IS NULL OR a.collected_on >= $2) AND ($3::date IS NULL OR a.collected_on <= $3)
       AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, filter)).rows;
   if (!apps.length && !coApps.length) throw conflict(`No collected premium awaiting remittance to ${insurer.name}`);
   const d = await createDisbursement(db, { payeeType: 'Insurer', insurerName: insurer.name, transactionCode: b.transactionCode || 'REMT', criteria: 'Payall',

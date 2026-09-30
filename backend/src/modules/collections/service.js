@@ -111,7 +111,7 @@ export async function getCollection(db, id) {
     ...itemRow(x),
     isCoInsurancePolicy: coRows.length > 0, coInsuranceCollectionRows: coRows,
     followUpActions: actions.map((a) => ({ id: a.id, actionType: a.action_type, actionDate: a.action_date, actionBy: a.action_by, callOutcome: a.call_outcome, notes: a.notes, commitmentDate: a.commitment_date })),
-    paymentHistory: pays.map((a) => ({ id: a.id, paymentDate: a.applied_at, paymentAmount: Number(a.amount), paymentMethod: a.payment_mode, referenceNumber: a.receipt_number || a.reference_no,
+    paymentHistory: pays.map((a) => ({ id: a.id, paymentDate: a.collected_on || a.applied_at, paymentAmount: Number(a.amount), paymentMethod: a.payment_mode, referenceNumber: a.receipt_number || a.reference_no,
       remarks: a.status === 'reversed' ? 'Reversed' : a.remarks, status: a.status })),
   };
 }
@@ -223,7 +223,7 @@ export async function dashboardStats(db) {
   const t = await thresholds();
   const rows = (await db.query(`SELECT collection_status AS s, count(*)::int AS n, COALESCE(sum(balance),0) AS amt FROM (${BASE}) y GROUP BY collection_status`, baseParams(t))).rows;
   const by = Object.fromEntries(rows.map((r) => [r.s, { count: r.n, amount: round2(r.amt) }]));
-  const collected = (await db.query('SELECT COALESCE(sum(amount),0) AS a FROM receipt_applications WHERE status = \'applied\' AND applied_at >= date_trunc(\'month\', now())')).rows[0].a;
+  const collected = (await db.query('SELECT COALESCE(sum(amount),0) AS a FROM receipt_applications WHERE status = \'applied\' AND collected_on >= date_trunc(\'month\', now())::date')).rows[0].a;
   const open = rows.filter((r) => r.s !== 'Paid');
   return { totalOutstanding: round2(open.reduce((s, r) => s + Number(r.amt), 0)), totalItems: open.reduce((s, r) => s + r.n, 0), overdueCount: by.Overdue?.count || 0,
     overdueAmount: by.Overdue?.amount || 0, committedCount: by.Committed?.count || 0, escalatedCount: by.Escalated?.count || 0, collectedThisMonth: round2(collected),

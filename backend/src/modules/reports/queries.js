@@ -40,7 +40,7 @@ const BILLING_MODE = "CASE p.billing_mode WHEN 'direct' THEN 'Direct bill' ELSE 
 const STANDARD_CRITERIA = { Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' } };
 const POLICY_FILTERS = ['agent', 'insurer', 'branch', 'client', 'product', 'status'];
 
-const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", p.created_at::date AS "issueDate",
+const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", COALESCE(p.issued_date, p.created_at::date) AS "issueDate",
     p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate", to_char(p.inception_date, 'YYYY-MM') AS month,
     CASE WHEN p.renewed_from IS NULL THEN 'New Business' ELSE 'Renewal' END AS "businessType",
     ${POLICY_DIMS}, p.sum_insured AS "sumInsured", p.premium_total AS premium, p.commission_amount AS commission,
@@ -60,7 +60,9 @@ const claimExtras = [setting('reports.claim_ageing_buckets', [30, 60, 90, 180], 
   setting('reports.claim_settled_statuses', ['settled', 'closed'], 'text[]'),
   setting('reports.claim_rejected_statuses', ['rejected'], 'text[]'), businessToday];
 
-const receivables = `SELECT rv.bill_number AS "billNumber", rv.created_at::date AS "billDate", rv.due_date AS "dueDate",
+// the date of a bill is the date of its booking journal (the issue / endorsement date), else the day it was entered
+const BILL_DATE = '(SELECT bj.jv_date FROM journal_vouchers bj WHERE bj.id = rv.booking_jv_id)';
+const receivables = `SELECT rv.bill_number AS "billNumber", COALESCE(${BILL_DATE}, rv.created_at::date) AS "billDate", rv.due_date AS "dueDate",
     p.policy_number AS "policyNumber", ${POLICY_DIMS},
     rv.amount, (rv.amount - rv.balance) AS paid, rv.balance, rv.status,
     ($2::date - rv.due_date) AS "ageDays", rpt_age_bucket($2::date - rv.due_date, $3::int[]) AS "ageBucket"
@@ -159,7 +161,7 @@ const coInsurance = `SELECT p.id AS _id, p.policy_number AS "policyNumber", p.in
 // Premium due to each insurer per bill (a co-insured bill: each participant's share as booked), how much of it the broker has
 // collected (pro rata to the bill's payments), remitted (insurer payment vouchers) and still holds
 const dueToInsurers = `SELECT x.*, round(x."collectedDue" - x.remitted, 2) AS outstanding, round(x."dueToInsurer" - x."collectedDue", 2) AS uncollected FROM (
-    SELECT r.bill_number AS "billNumber", r.created_at::date AS "billDate", p.policy_number AS "policyNumber",
+    SELECT r.bill_number AS "billNumber", COALESCE((SELECT bj.jv_date FROM journal_vouchers bj WHERE bj.id = r.booking_jv_id), r.created_at::date) AS "billDate", p.policy_number AS "policyNumber",
       ic.id::text AS _insurer_id, ic.code AS _insurer_code, ic.name AS insurer, CASE WHEN pt.co THEN 'Co-insured' ELSE 'Single insurer' END AS placement,
       u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent, u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch,
       c.id AS _client_id, c.client_code AS _client_code, c.display_name AS client, pr.id::text AS _product_id, pr.code AS _product_code, pr.name AS product, r.status,
@@ -175,7 +177,7 @@ const dueToInsurers = `SELECT x.*, round(x."collectedDue" - x.remitted, 2) AS ou
     JOIN insurance_companies ic ON ic.id = pt.iid
     LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id) LEFT JOIN products pr ON pr.id = p.product_id
     LEFT JOIN users u ON u.id = p.owner_user_id LEFT JOIN branches b ON b.code = u.branch_code
-    WHERE r.status <> 'cancelled' AND r.created_at::date BETWEEN $1 AND $2) x`;
+    WHERE r.status <> 'cancelled' AND COALESCE((SELECT bj.jv_date FROM journal_vouchers bj WHERE bj.id = r.booking_jv_id), r.created_at::date) BETWEEN $1 AND $2) x`;
 
 export const QUERIES = {
   ...PERIOD_END_QUERIES,
@@ -260,16 +262,16 @@ export const QUERIES = {
     },
   },
   remittances: {
-    sql: `SELECT rm.remittance_number AS "remittanceNumber", rm.created_at::date AS "remittanceDate", rm.kind, rm.period,
+    sql: `SELECT rm.remittance_number AS "remittanceNumber", COALESCE(rm.remittance_date, rm.created_at::date) AS "remittanceDate", rm.kind, rm.period,
         ic.id::text AS _insurer_id, ic.code AS _insurer_code, ic.name AS insurer, ${CREATOR_DIMS},
         (SELECT count(*) FROM remittance_lines l WHERE l.remittance_id = rm.id) AS policies,
         rm.gross_premium AS "grossPremium", rm.commission, rm.net_due AS "netDue", rm.status, rm.settled_at::date AS "settledDate"
       FROM remittances rm LEFT JOIN insurance_companies ic ON ic.id = rm.insurance_company_id ${creatorJoin('rm.created_by')}
-      WHERE rm.created_at::date BETWEEN $1 AND $2`,
+      WHERE COALESCE(rm.remittance_date, rm.created_at::date) BETWEEN $1 AND $2`,
     filters: ['agent', 'insurer', 'branch', 'status'], criteria: STANDARD_CRITERIA, orderBy: 'f."remittanceDate", f."remittanceNumber"',
   },
   commissions: {
-    sql: `SELECT p.policy_number AS "policyNumber", cm.period, cm.created_at::date AS "accruedDate",
+    sql: `SELECT p.policy_number AS "policyNumber", cm.period, COALESCE(p.issued_date, cm.created_at::date) AS "accruedDate",
         u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,
         ic.id::text AS _insurer_id, ic.code AS _insurer_code, ic.name AS insurer,
         u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch,
@@ -282,22 +284,22 @@ export const QUERIES = {
       LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
       LEFT JOIN users u ON u.id = COALESCE(cm.agent_user_id, p.owner_user_id)
       LEFT JOIN branches b ON b.code = u.branch_code
-      WHERE cm.created_at::date BETWEEN $1 AND $2`,
+      WHERE COALESCE(p.issued_date, cm.created_at::date) BETWEEN $1 AND $2`,
     filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA, orderBy: 'f.agent, f."accruedDate", f."policyNumber"',
   },
   premiumReceivable: {
-    sql: `${receivables} WHERE rv.created_at::date BETWEEN $1 AND $2`, extras: [receivableBuckets],
+    sql: `${receivables} WHERE COALESCE(${BILL_DATE}, rv.created_at::date) BETWEEN $1 AND $2`, extras: [receivableBuckets],
     filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA, orderBy: 'f.client, f."dueDate", f."billNumber"',
   },
   collectionsAgeing: {
-    sql: `${receivables} WHERE rv.balance > 0 AND rv.status <> 'written-off' AND rv.created_at::date <= $2`, extras: [receivableBuckets],
+    sql: `${receivables} WHERE rv.balance > 0 AND rv.status <> 'written-off' AND COALESCE(${BILL_DATE}, rv.created_at::date) <= $2`, extras: [receivableBuckets],
     filters: POLICY_FILTERS,
     criteria: { 'Ageing Bucket': { groupBy: 'ageBucket' }, Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' }, Client: { groupBy: 'client' } },
     orderBy: 'f."ageDays" DESC, f."billNumber"',
   },
   collections: {
     sql: `SELECT x.*, round(100.0 * x.collected / NULLIF(x.billed, 0), 2) AS "collectionRate" FROM (
-        SELECT rv.bill_number AS "billNumber", rv.created_at::date AS "billDate", rv.due_date AS "dueDate", p.policy_number AS "policyNumber",
+        SELECT rv.bill_number AS "billNumber", COALESCE(${BILL_DATE}, rv.created_at::date) AS "billDate", rv.due_date AS "dueDate", p.policy_number AS "policyNumber",
           ${POLICY_DIMS}, rv.amount AS billed,
           COALESCE((SELECT sum(r.amount) FROM receipts r WHERE r.receivable_id = rv.id AND r.status = 'posted' AND r.received_date <= $2), 0) AS collected,
           rv.balance, rv.status
@@ -328,7 +330,7 @@ export const QUERIES = {
     orderBy: 'f."receivedDate", f."receiptNumber"',
   },
   disbursements: {
-    sql: `SELECT d.voucher_number AS "voucherNumber", d.created_at::date AS "voucherDate", d.payee_type AS "payeeType", d.payee_name AS "payeeName",
+    sql: `SELECT d.voucher_number AS "voucherNumber", COALESCE(d.voucher_date, d.created_at::date) AS "voucherDate", d.payee_type AS "payeeType", d.payee_name AS "payeeName",
         d.purpose, d.payment_mode AS "paymentMode", bk.name AS bank, d.reference_no AS "referenceNo", d.amount, d.status,
         d.approved_at::date AS "approvedDate", d.paid_at::date AS "paidDate",
         CASE WHEN ${AGENT} THEN COALESCE(d.referrer_id, d.payee_id) END AS _agent_id, CASE WHEN ${AGENT} THEN COALESCE(d.referrer_name, d.payee_name) END AS agent,
@@ -343,7 +345,7 @@ export const QUERIES = {
       LEFT JOIN insurance_companies ic ON ${INSURER} AND ic.id::text = COALESCE(d.insurance_company_id::text, d.payee_id)
       LEFT JOIN clients cl ON ${CLIENT} AND cl.id = COALESCE(d.client_id, d.payee_id)
       ${creatorJoin('d.created_by')}
-      WHERE d.created_at::date BETWEEN $1 AND $2`,
+      WHERE COALESCE(d.voucher_date, d.created_at::date) BETWEEN $1 AND $2`,
     filters: ['agent', 'insurer', 'branch', 'client', 'status'],
     criteria: { ...STANDARD_CRITERIA, 'Payee Type': { groupBy: 'payeeType' } }, orderBy: 'f."voucherDate", f."voucherNumber"',
   },
@@ -398,10 +400,10 @@ export const QUERIES = {
   },
   cessions: {
     sql: `SELECT rt.name AS treaty, rt.reinsurer, rt.treaty_type AS "treatyType", p.policy_number AS "policyNumber", ${POLICY_DIMS},
-        cs.created_at::date AS "cessionDate", p.sum_insured AS "sumInsured", cs.ceded_sum AS "cededSum", cs.ceded_premium AS "cededPremium",
+        COALESCE(cs.cession_date, cs.created_at::date) AS "cessionDate", p.sum_insured AS "sumInsured", cs.ceded_sum AS "cededSum", cs.ceded_premium AS "cededPremium",
         round(100.0 * cs.ceded_sum / NULLIF(p.sum_insured, 0), 2) AS "cededPct"
       FROM cessions cs JOIN reinsurance_treaties rt ON rt.id = cs.treaty_id JOIN policies p ON p.id = cs.policy_id ${POLICY_JOINS}
-      WHERE cs.created_at::date BETWEEN $1 AND $2`,
+      WHERE COALESCE(cs.cession_date, cs.created_at::date) BETWEEN $1 AND $2`,
     filters: POLICY_FILTERS, criteria: { Overall: {}, Treaty: { groupBy: 'treaty' }, Reinsurer: { groupBy: 'reinsurer' }, 'Principal Insurer': { groupBy: 'insurer' } },
     orderBy: 'f."cessionDate", f."policyNumber"',
   },

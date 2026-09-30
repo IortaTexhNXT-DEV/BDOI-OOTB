@@ -38,7 +38,7 @@ export async function settlementCash(db, id) {
   const insurers = parts.map((p, i) => ({ insurerId: p.insurerId, insurer: p.insurerName, share: p.share, recoverable: shares[i] || 0, received: received(p.insurerId),
     outstanding: round2((shares[i] || 0) - received(p.insurerId)) }));
   const paid = round2(moves.filter((m) => m.kind === 'paid-to-claimant').reduce((s, m) => s + m.amount, 0));
-  const bankAccounts = (await db.query(`SELECT code, name, data->>'glAccount' AS gl, data->>'bankName' AS bank FROM master_records
+  const bankAccounts = (await db.query(`SELECT code, name, COALESCE(NULLIF(btrim(data->>'glAccountCode'), ''), data->>'glAccount') AS gl, data->>'bankName' AS bank FROM master_records
     WHERE type_code = 'bank-account' AND status = 'active' ORDER BY code`)).rows.map((b) => ({ code: b.code, name: b.name, glAccount: b.gl, bankName: b.bank }));
   return {
     claimId: c.id, claimNumber: c.claim_number, policyNumber: c.policy_number, status: c.status, paidThroughBroker: throughBroker, settlementPosted: !!c.settlement_jv_id,

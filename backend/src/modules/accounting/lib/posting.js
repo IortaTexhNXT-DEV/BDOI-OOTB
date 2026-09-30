@@ -107,11 +107,16 @@ export const AMOUNT_KEYS = [...new Set(Object.values(EVENTS).flatMap((e) => e.am
 
 // ---------- account resolvers ----------
 
-/** GL account of a bank account (bank-account master glAccount, or the code itself when it is an active cash account). */
+/**
+ * GL account of a bank account: the GL cash account it is linked to for bank reconciliation (glAccountCode), else the
+ * master's glAccount, or the code itself when it is an active cash account. The reconciliation link comes first, so
+ * money received into or paid from a bank account is booked on the GL account its bank statements are matched against.
+ */
 export async function bankAccountGl(db, ref) {
   if (!ref) return null;
   const r = (await db.query('SELECT data FROM master_records WHERE type_code = \'bank-account\' AND status <> \'deleted\' AND (code = $1 OR data->>\'accountCode\' = $1) LIMIT 1', [String(ref)])).rows[0];
-  if (r?.data?.glAccount) return String(r.data.glAccount);
+  const linked = String(r?.data?.glAccountCode || '').trim() || String(r?.data?.glAccount || '').trim();
+  if (linked) return linked;
   const gl = (await db.query('SELECT code FROM gl_accounts WHERE code = $1 AND status = \'active\' AND category = \'Cash and Cash Equivalents\'', [String(ref)])).rows[0];
   return gl ? gl.code : null;
 }

@@ -15,7 +15,7 @@ const ALL_PAYMENTS_ROLES = ['accounting', 'sales', 'operations', 'processing'];
 export const ownOnly = (user) => !isAdmin(user) && !(user.roles || []).some((r) => ALL_PAYMENTS_ROLES.includes(r));
 
 const PAY_SQL = `SELECT r.*, ${STATUS_SQL} AS pay_status, p.policy_number, p.owner_user_id, p.billing_mode, c.client_code, c.display_name, ic.name AS insurer_name, pr.name AS product_name,
-  la.payment_mode AS last_mode, la.applied_at AS last_paid_at, COALESCE(rc.receipt_number, la.reference_no) AS last_reference
+  la.payment_mode AS last_mode, COALESCE(la.collected_on::timestamptz, la.applied_at) AS last_paid_at, COALESCE(rc.receipt_number, la.reference_no) AS last_reference
   FROM receivables r LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = r.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
   LEFT JOIN products pr ON pr.id = p.product_id
   LEFT JOIN LATERAL (SELECT * FROM receipt_applications a WHERE a.receivable_id = r.id AND a.status = 'applied' ORDER BY a.applied_at DESC LIMIT 1) la ON true
@@ -59,7 +59,7 @@ export async function getPayment(db, id, user) {
   const x = (await db.query(`${PAY_SQL} ${f.sql} AND (r.id = $${f.params.length + 1} OR r.bill_number = $${f.params.length + 1})`, [...f.params, id])).rows[0];
   if (!x) throw notFound('Payment record not found');
   const apps = (await db.query(`SELECT a.*, rc.receipt_number FROM receipt_applications a LEFT JOIN receipts rc ON rc.id = a.receipt_id WHERE a.receivable_id = $1 ORDER BY a.applied_at`, [x.id])).rows;
-  return { ...paymentRow(x), payments: apps.map((a) => ({ id: a.id, amount: Number(a.amount), paymentMethod: a.payment_mode, receiptNumber: a.receipt_number, referenceNumber: a.reference_no, date: a.applied_at, status: a.status })) };
+  return { ...paymentRow(x), payments: apps.map((a) => ({ id: a.id, amount: Number(a.amount), paymentMethod: a.payment_mode, receiptNumber: a.receipt_number, referenceNumber: a.reference_no, date: a.collected_on || a.applied_at, status: a.status })) };
 }
 
 /** Open items for the signed-in user (agents: own records; others: all). */

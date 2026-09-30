@@ -20,7 +20,7 @@ import { toQuote, stripReserved, QUOTE_SELECT } from './shape.js';
 import { addDays, today } from '../../lib/dates.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { participantsFromDoc, writeParticipants, legacyParticipantDetails, leadOf, participantsOf, participantInputs } from '../placement/participants.js';
-import { journeyFor, assertStep } from '../placement/journey.js';
+import { journeyFor, assertStep, resolveLob } from '../placement/journey.js';
 import { companyName } from '../../lib/letterhead.js';
 
 export async function getQuoteRow(id, db = null) {
@@ -78,6 +78,10 @@ export async function createQuote(body, userId, db = null) {
       const journey = await journeyFor({ lob: body.lob, productType: body.productType, productId: body.productId }, c);
       assertStep(journey, 'brokerSlip', ['required'], `The ${journey.lob} placement journey starts with a Broker Slip: prepare the Quotation Slip from the broker slip's offers`);
     }
+    // the product the quotation is for (Quick Quote, broker slip): its line of business prices the quotation when none is
+    // given (a Personal Accident quotation is not priced as motor); without a product the database links one by type or line
+    const productId = body.productId ? (await c.query('SELECT id FROM products WHERE id::text = $1::text', [String(body.productId)])).rows[0]?.id ?? null : null;
+    if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const b = await premiumBreakdown(doc, { insurerId: icId });
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
@@ -86,7 +90,7 @@ export async function createQuote(body, userId, db = null) {
     const data = { quote_number: number, lead_id: leadId, client_id: body.clientId || null, insurance_company_id: icId, status,
       product_type: body.productType || (b.lob === 'MOTOR' ? 'Motor' : body.productType), lob: b.lob, agent_user_id: userId, created_by: userId,
       valid_until: addDays(await today(), validity), remarks: body.remarks || null,
-      doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), ...premiumCols(b), broker_slip_id: body.brokerSlipId || null };
+      doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), ...premiumCols(b), broker_slip_id: body.brokerSlipId || null, product_id: productId };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO quotes(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
     if (parts.length) await writeParticipants(c, 'quote', r.rows[0].id, parts, quoteTotals(b), { userId, commissionRate: b.commissionRate });
@@ -199,6 +203,8 @@ async function issueApprovalToken(q) {
 export async function sendForApproval(id, user) {
   const q = await getQuoteRow(id);
   if (!['draft', 'sent'].includes(q.status)) throw badRequest(`Only Draft quotations can be sent for approval (current: ${quoteStatusOut(q.status)})`);
+  // a quotation without premium could be accepted but never issued (the policy bill would be nil)
+  if (!(Number(q.premium_total) > 0)) throw badRequest(`Quotation ${q.quote_number} has no premium: price the cover before sending it to the customer`);
   const email = await emailSendingStatus();
   // Quotations without a lead (e.g. renewals of imported policies) go to the client's address.
   const client = q.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [q.client_id]) : null;

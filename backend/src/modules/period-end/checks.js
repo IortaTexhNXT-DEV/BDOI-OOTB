@@ -63,6 +63,8 @@ export const AUTO_CHECKS = {
     const { end } = bounds(p);
     const rows = (await db.query(`SELECT p.policy_number AS "policyNumber", p.inception_date AS "inceptionDate", p.premium_total AS premium FROM policies p
       WHERE p.billing_mode = 'broker' AND p.status IN ('active','issued') AND p.inception_date <= $1 AND p.premium_total > 0
+        -- in-force policies migrated at go-live were billed by the old system (their open premium is an opening item)
+        AND COALESCE(p.doc->>'source', '') <> 'go-live-migration'
         AND NOT EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id)
         AND NOT EXISTS (SELECT 1 FROM journal_vouchers j WHERE j.policy_id = p.id AND j.status <> 'cancelled')
       ORDER BY p.inception_date`, [end])).rows;

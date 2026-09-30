@@ -48,12 +48,12 @@ async function seedSample() {
   await query(`INSERT INTO commissions(policy_id, agent_user_id, basis_amount, rate, amount, withholding, net_amount, status, period, created_at) VALUES
     ('pol_rpt1', 'usr_rpt_a1', 10000, 0.15, 1500, 150, 1350, 'paid', '2025-02', '2025-02-15'),
     ('pol_rpt3', 'usr_rpt_a2', 15000, 0.15, 2250, 225, 2025, 'accrued', '2025-03', '2025-03-25')`);
-  await query(`INSERT INTO remittances(id, remittance_number, insurance_company_id, period, gross_premium, commission, net_due, status, created_by, created_at) VALUES
-    ('rm_rpt1', 'RPT-RM-1', $1, '2025-03', 25000, 3750, 21250, 'settled', 'rpt.maker', '2025-04-30')`, [mapfre]);
+  await query(`INSERT INTO remittances(id, remittance_number, insurance_company_id, period, gross_premium, commission, net_due, status, created_by, created_at, remittance_date) VALUES
+    ('rm_rpt1', 'RPT-RM-1', $1, '2025-03', 25000, 3750, 21250, 'settled', 'rpt.maker', '2025-04-30', '2025-04-30')`, [mapfre]);
   await query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net) VALUES ('rm_rpt1', 'pol_rpt1', 10000, 1500, 8500), ('rm_rpt1', 'pol_rpt3', 15000, 2250, 12750)`);
-  await query(`INSERT INTO disbursements(voucher_number, payee_type, payee_id, payee_name, amount, status, purpose, created_by, created_at) VALUES
-    ('RPT-PV-1', 'Insurer', $1::text, 'MAPFRE Insurance Corporation', 21250, 'paid', 'Premium remittance', 'usr_rpt_mk', '2025-05-02'),
-    ('RPT-PV-2', 'Agent/Referrer', 'usr_rpt_a1', 'Ramon Bautista', 1350, 'paid', 'Commission payout', 'usr_rpt_mk', '2025-05-03')`, [mapfre]);
+  await query(`INSERT INTO disbursements(voucher_number, payee_type, payee_id, payee_name, amount, status, purpose, created_by, created_at, voucher_date) VALUES
+    ('RPT-PV-1', 'Insurer', $1::text, 'MAPFRE Insurance Corporation', 21250, 'paid', 'Premium remittance', 'usr_rpt_mk', '2025-05-02', '2025-05-02'),
+    ('RPT-PV-2', 'Agent/Referrer', 'usr_rpt_a1', 'Ramon Bautista', 1350, 'paid', 'Commission payout', 'usr_rpt_mk', '2025-05-03', '2025-05-03')`, [mapfre]);
   await query(`INSERT INTO journal_vouchers(id, jv_number, jv_date, description, status, total_debit, total_credit, created_by) VALUES
     ('jv_rpt1', 'RPT-JV-1', '2024-12-31', 'Opening capital', 'approved', 1000, 1000, 'rpt.maker'),
     ('jv_rpt2', 'RPT-JV-2', '2025-03-01', 'Premium collected', 'posted', 10000, 10000, 'rpt.maker'),
@@ -66,7 +66,7 @@ async function seedSample() {
     ('RPT-LD-1', 'Juan Reyes', 'new', 'usr_rpt_a1', 'referral', '2025-02-01'), ('RPT-LD-2', 'Ana Lim', 'new', 'usr_rpt_a1', 'walk-in', '2025-02-02'),
     ('RPT-LD-3', 'Pedro Tan', 'contacted', 'usr_rpt_a2', 'referral', '2025-02-03'), ('RPT-LD-4', 'Maria Santos', 'converted', 'usr_rpt_a2', 'website', '2025-02-04')`);
   const t = await one(`INSERT INTO reinsurance_treaties(name, reinsurer, treaty_type, share) VALUES ('RPT Quota Share 2025', 'Fictional Re', 'quota-share', 0.5) RETURNING id`);
-  await query(`INSERT INTO cessions(treaty_id, policy_id, ceded_sum, ceded_premium, created_at) VALUES ($1, 'pol_rpt2', 1000000, 10000, '2025-03-06')`, [t.id]);
+  await query(`INSERT INTO cessions(treaty_id, policy_id, ceded_sum, ceded_premium, created_at, cession_date) VALUES ($1, 'pol_rpt2', 1000000, 10000, '2025-03-06', '2025-03-06')`, [t.id]);
   const ip = await one(`INSERT INTO incentive_programs(name, metric, target, period_from, period_to) VALUES ('RPT Q1 Motor Push', 'premium', 100000, '2025-01-01', '2025-03-31') RETURNING id`);
   await query(`INSERT INTO incentive_results(program_id, agent_user_id, achieved, payout, period) VALUES ($1, 'usr_rpt_a1', 30000, 0, '2025-Q1'), ($1, 'usr_rpt_a2', 120000, 5000, '2025-Q1')`, [ip.id]);
 }
