@@ -416,6 +416,12 @@ export const menuList = [
             includes: ["/master/finance/posting-rules"],
           },
           {
+            id: 3,
+            name: "Configuration Approvals",
+            path: "/master/finance/configuration-approvals",
+            includes: ["/master/finance/configuration-approvals"],
+          },
+          {
             id: 40,
             name: "Commission Rate Matrix",
             path: "/master/finance/commission-rate-matrix",

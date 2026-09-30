@@ -4,9 +4,11 @@ import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { findPolicy, premiumSplit, returnPremium } from '../src/modules/receipts/receivables.js';
 import { commissionTaxes } from '../src/modules/accounting/lib/commissionTax.js';
+import { withoutConfigurationApproval } from './helpers.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+// set-up changes apply at once here; their approval is covered in configuration-controls.test.js
+beforeAll(async () => { ctx = await setupFinance(); await withoutConfigurationApproval(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;

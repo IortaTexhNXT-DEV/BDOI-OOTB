@@ -16,6 +16,7 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 | `steps.js` | The valuation steps of a run: unearned commission deferral and FX revaluation. |
 | `journals.js` | Recurring and accrual journal templates, the automatic reversal on day 1 of the next period, and the undo of a run's own journals before a rerun. |
 | `checks.js` | The automatic checklist items (one function per checklist code of type auto). |
+| `tieout.js` | Checklist item `subledger_tieout`: premium receivable, commission receivable and due to insurers sub-ledgers against their GL control accounts, with the manual journals on an account that does not tie out. |
 | `yearend.js` | Year-end close (`YEC-` numbers): closing entries in period 13, opening balances, locking the year, reversal. |
 | `tax.js` | Tax codes master and BIR Form 2307 (issued and received). |
 | `jobs.js` | Scheduled jobs: month-end reminder, recurring journals, accrual reversal, period auto soft-close. All four are disabled by default. |
@@ -40,7 +41,7 @@ and expense to Current Year P/L, then to Retained Earnings), writes the balance-
 
 ## Key settings
 
-`accounting.fiscal_year_start_month`, `accounting.period_close_requires_approval`,
+`accounting.fiscal_year_start_month`, `accounting.period_close_requires_approval`, `period_end.tieout_tolerance`,
 `accounting.fx_revaluation_account_types`, `accounting.account.current_year_pl`,
 `accounting.account.retained_earnings`, `bir.atc_by_payee`, `bir.sawt_default_atc`, `bir.withholding_agent_tin`,
 `bir.registered_name`, `bir.registered_address`, `bir.zip_code`. Job parameters (days before period end, grace days)

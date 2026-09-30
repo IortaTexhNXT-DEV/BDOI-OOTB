@@ -9,11 +9,12 @@ Rules) and `/account-determination` (Master > Finance > Account Determination). 
 | File | What it does |
 |---|---|
 | `router.js` | Routes of both screens. |
-| `service.js` | Event catalogue, rule versions (validation, simulation, activation), account roles and maps, commission tax set-up, write-off reasons. |
+| `service.js` | Event catalogue, rule versions (validation, simulation, activation), account roles and maps, commission tax set-up, write-off reasons, the maker-checker on configuration changes. |
 
 ## Main tables
 
-`posting_rules` (one row per version of an event's rule), `posting_rule_lines`, `write_off_reasons`. Account roles and
+`posting_rules` (one row per version of an event's rule, with its `approval_status`), `posting_rule_lines`,
+`accounting_config_changes` (changes waiting for approval and their decision), `write_off_reasons`. Account roles and
 maps are settings: `accounting.account.<role>`, `accounting.payable_account_by_payee`,
 `accounting.cash_account_by_payment_mode`.
 
@@ -27,12 +28,21 @@ maps are settings: `accounting.account.<role>`, `accounting.payable_account_by_p
   output VAT line and a creditable withholding tax line (resolvers `commission_vat_account` and
   `commission_ewt_account`: the GL account of the tax code, else the account role). The Commission taxes tab of
   Account Determination switches each tax on or off and chooses its tax code.
+- Maker-checker (`accounting.configuration_maker_checker`, on by default): a new rule version is stored `pending` and
+  inactive, and a (de)activation, an account role, an account map or a commission tax change is stored in
+  `accounting_config_changes`. Nothing changes posting until a different user with `approve:posting-rules` (Accounting
+  Manager, System Administrator) approves it on Master > Finance > Configuration Approvals; the rule of "not the
+  requester" applies even when `finance.maker_checker_enabled` is off. The requester or an approver may withdraw a
+  pending change. `activeRule` only uses approved versions. While maker-checker is on, System Settings and
+  Configuration refuse to change the controlled keys (`accounting.account.*`, the two maps, the commission tax keys).
+  Proposing needs `write:settings`, `write:masters` or `write:posting-rules` (Accounting Manager). Write-off reasons are
+  not under maker-checker.
 
 ## Key settings
 
 `accounting.account.*`, `accounting.payable_account_by_payee`, `accounting.cash_account_by_payment_mode`,
 `accounting.split_premium_taxes`, `accounting.broker_billed_commission_vat`, `accounting.broker_billed_commission_ewt`,
-`tax.commission_vat_code`, `tax.commission_ewt_code`.
+`tax.commission_vat_code`, `tax.commission_ewt_code`, `accounting.configuration_maker_checker`.
 
 ## Debugging
 

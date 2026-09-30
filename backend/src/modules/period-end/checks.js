@@ -54,6 +54,11 @@ export const AUTO_CHECKS = {
     const { monthEndCheck } = await import('../bank-reconciliation/reconcile.js');
     return monthEndCheck(db, p, bounds(p));
   },
+  // premium receivable, commission receivable and due to insurers against their GL control accounts
+  async subledger_tieout(db) {
+    const { tieOutCheck } = await import('./tieout.js');
+    return tieOutCheck(db);
+  },
   async policies_without_accounting(db, p) {
     const { end } = bounds(p);
     const rows = (await db.query(`SELECT p.policy_number AS "policyNumber", p.inception_date AS "inceptionDate", p.premium_total AS premium FROM policies p

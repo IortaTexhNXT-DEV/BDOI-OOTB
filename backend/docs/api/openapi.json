@@ -458,7 +458,7 @@
         "tags": [
           "Account Determination"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [],
         "responses": {
           "200": {
@@ -557,7 +557,8 @@
         "x-screen": "Master > Finance > Account Determination",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,
@@ -586,7 +587,7 @@
         "tags": [
           "Account Determination"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [
           {
             "name": "name",
@@ -644,7 +645,8 @@
         "x-screen": "Master > Finance > Account Determination",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,
@@ -684,7 +686,7 @@
         "tags": [
           "Account Determination"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [
           {
             "name": "role",
@@ -746,7 +748,8 @@
         "x-screen": "Master > Finance > Account Determination",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,
@@ -850,7 +853,7 @@
         "tags": [
           "Account Determination"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [],
         "responses": {
           "200": {
@@ -911,7 +914,8 @@
         "x-screen": "Master > Finance > Account Determination",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,
@@ -952,7 +956,7 @@
         "tags": [
           "Account Determination"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [
           {
             "name": "code",
@@ -1014,7 +1018,8 @@
         "x-screen": "Master > Finance > Account Determination",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,
@@ -52247,7 +52252,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [
           {
             "name": "id",
@@ -52387,7 +52392,8 @@
         "x-screen": "Master > Finance > Posting Rules",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,
@@ -52407,6 +52413,604 @@
             }
           }
         }
+      }
+    },
+    "/posting-rules/changes": {
+      "get": {
+        "operationId": "getPostingRulesChanges",
+        "summary": "Posting rule and account determination changes (status pending by default, approved, rejected, withdrawn or all)",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "kindLabel": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "payload": {
+                            "type": "object",
+                            "properties": {
+                              "glCode": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "before": {
+                            "type": "object",
+                            "properties": {
+                              "glCode": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "requestedBy": {
+                            "type": "string"
+                          },
+                          "requestedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 3,
+                      "kind": "account-role",
+                      "kindLabel": "Account role",
+                      "target": "premium_receivable",
+                      "payload": {
+                        "glCode": "1202002"
+                      },
+                      "before": {
+                        "glCode": "1202001"
+                      },
+                      "status": "pending",
+                      "requestedBy": "Accounting user",
+                      "requestedAt": "2026-09-30T02:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules > Approvals",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/changes/{changeId}": {
+      "get": {
+        "operationId": "getPostingRulesChangesChangeId",
+        "summary": "One configuration change with the rule version it concerns",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "before": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "kind": "account-role",
+                    "kindLabel": "Account role",
+                    "target": "premium_receivable",
+                    "payload": {
+                      "glCode": "1202002"
+                    },
+                    "before": {
+                      "glCode": "1202001"
+                    },
+                    "status": "pending",
+                    "requestedBy": "Accounting user",
+                    "requestedAt": "2026-09-30T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules > Approvals",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/changes/{changeId}/approve": {
+      "post": {
+        "operationId": "postPostingRulesChangesChangeIdApprove",
+        "summary": "Approve and apply a pending change; never the requester",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules",
+        "parameters": [
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "before": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "kind": "account-role",
+                    "kindLabel": "Account role",
+                    "target": "premium_receivable",
+                    "payload": {
+                      "glCode": "1202002"
+                    },
+                    "before": {
+                      "glCode": "1202001"
+                    },
+                    "status": "approved",
+                    "requestedBy": "Accounting user",
+                    "requestedAt": "2026-09-30T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules > Approvals",
+        "x-permissions": [
+          "approve:posting-rules"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Checked"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/changes/{changeId}/reject": {
+      "post": {
+        "operationId": "postPostingRulesChangesChangeIdReject",
+        "summary": "Reject (reason required) a pending change; never the requester",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules",
+        "parameters": [
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "before": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "kind": "account-role",
+                    "kindLabel": "Account role",
+                    "target": "premium_receivable",
+                    "payload": {
+                      "glCode": "1202002"
+                    },
+                    "before": {
+                      "glCode": "1202001"
+                    },
+                    "status": "rejected",
+                    "requestedBy": "Accounting user",
+                    "requestedAt": "2026-09-30T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules > Approvals",
+        "x-permissions": [
+          "approve:posting-rules"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Wrong account"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posting-rules/changes/{changeId}/withdraw": {
+      "post": {
+        "operationId": "postPostingRulesChangesChangeIdWithdraw",
+        "summary": "Withdraw a pending change (the requester or an approver)",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: write:settings, write:masters, write:posting-rules",
+        "parameters": [
+          {
+            "name": "changeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "payload": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "before": {
+                          "type": "object",
+                          "properties": {
+                            "glCode": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "kind": "account-role",
+                    "kindLabel": "Account role",
+                    "target": "premium_receivable",
+                    "payload": {
+                      "glCode": "1202002"
+                    },
+                    "before": {
+                      "glCode": "1202001"
+                    },
+                    "status": "withdrawn",
+                    "requestedBy": "Accounting user",
+                    "requestedAt": "2026-09-30T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Posting Rules > Approvals",
+        "x-permissions": [
+          "write:settings",
+          "write:masters",
+          "write:posting-rules"
+        ]
       }
     },
     "/posting-rules/events": {
@@ -52504,7 +53108,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters, write:posting-rules",
         "parameters": [
           {
             "name": "eventCode",
@@ -52644,7 +53248,8 @@
         "x-screen": "Master > Finance > Posting Rules",
         "x-permissions": [
           "write:settings",
-          "write:masters"
+          "write:masters",
+          "write:posting-rules"
         ],
         "requestBody": {
           "required": true,

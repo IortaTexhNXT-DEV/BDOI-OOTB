@@ -40,7 +40,7 @@ const CommissionTaxes = ({ onSaved, onError }) => {
     setSaving(true);
     try {
       const r = await postingRulesService.setCommissionTaxes(form);
-      handlers.current.onSaved(t("postingRules.commissionTaxes.saved"), r);
+      handlers.current.onSaved(r.change ? t("postingRules.changePending") : t("postingRules.commissionTaxes.saved"), r);
       load();
     } catch (e) {
       handlers.current.onError(e);

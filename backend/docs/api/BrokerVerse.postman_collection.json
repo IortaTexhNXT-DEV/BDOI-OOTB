@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (760 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (765 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -245,7 +245,7 @@
                 "commission-taxes"
               ]
             },
-            "description": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "description": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"ewtCode\": \"WC140\"\n}",
@@ -277,7 +277,7 @@
                     "commission-taxes"
                   ]
                 },
-                "description": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "description": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"ewtCode\": \"WC140\"\n}",
@@ -330,7 +330,7 @@
                 }
               ]
             },
-            "description": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "description": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"map\": {\n    \"cash\": \"1101001\",\n    \"check\": \"1102001\"\n  }\n}",
@@ -370,7 +370,7 @@
                     }
                   ]
                 },
-                "description": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "description": "Replace the payable account per payee type (payable-by-payee) or the cash account per payment mode (cash-by-payment-mode)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"map\": {\n    \"cash\": \"1101001\",\n    \"check\": \"1102001\"\n  }\n}",
@@ -423,7 +423,7 @@
                 }
               ]
             },
-            "description": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "description": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"glCode\": \"1202002\"\n}",
@@ -463,7 +463,7 @@
                     }
                   ]
                 },
-                "description": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "description": "Set the GL account of an account role (accounting.account.<role>) used by the posting rules\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"glCode\": \"1202002\"\n}",
@@ -557,7 +557,7 @@
                 "write-off-reasons"
               ]
             },
-            "description": "Add a write-off reason\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "description": "Add a write-off reason\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"code\": \"WAIVED_FEE\",\n  \"name\": \"Fee waived\",\n  \"glAccount\": \"4409001\",\n  \"maxAmount\": 500\n}",
@@ -589,7 +589,7 @@
                     "write-off-reasons"
                   ]
                 },
-                "description": "Add a write-off reason\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "description": "Add a write-off reason\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"code\": \"WAIVED_FEE\",\n  \"name\": \"Fee waived\",\n  \"glAccount\": \"4409001\",\n  \"maxAmount\": 500\n}",
@@ -642,7 +642,7 @@
                 }
               ]
             },
-            "description": "Update a write-off reason (name, GL account, limit, status)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "description": "Update a write-off reason (name, GL account, limit, status)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"glAccount\": \"4401009\",\n  \"status\": \"active\"\n}",
@@ -682,7 +682,7 @@
                     }
                   ]
                 },
-                "description": "Update a write-off reason (name, GL account, limit, status)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "description": "Update a write-off reason (name, GL account, limit, status)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"glAccount\": \"4401009\",\n  \"status\": \"active\"\n}",
@@ -34185,7 +34185,7 @@
                 }
               ]
             },
-            "description": "Activate or deactivate a rule version (an event keeps at least one version in force)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+            "description": "Activate or deactivate a rule version (an event keeps at least one version in force)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"active\": false\n}",
@@ -34225,7 +34225,7 @@
                     }
                   ]
                 },
-                "description": "Activate or deactivate a rule version (an event keeps at least one version in force)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+                "description": "Activate or deactivate a rule version (an event keeps at least one version in force)\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"active\": false\n}",
@@ -34247,6 +34247,389 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"eventCode\": \"policy.issue.broker_billed\",\n    \"event\": \"Policy issued – broker billed\",\n    \"version\": 1,\n    \"name\": \"Policy issued – broker billed\",\n    \"module\": \"policies\",\n    \"entryType\": \"NEW_BUSINESS\",\n    \"source\": \"booking\",\n    \"narration\": \"Premium billed – {{policyNumber}} ({{billNumber}})\",\n    \"branchSource\": \"policy_owner\",\n    \"effectiveFrom\": \"2000-01-01\",\n    \"active\": false,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"side\": \"Dr\",\n        \"accountType\": \"role\",\n        \"account\": \"premium_receivable\",\n        \"fallbackRole\": null,\n        \"amountKey\": \"gross\",\n        \"perParticipant\": false,\n        \"narration\": \"Premium receivable {{billNumber}}\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Posting rule and account determination changes (status pending by default, approved, rejected, withdrawn or all)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/changes?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "changes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Posting rule and account determination changes (status pending by default, approved, rejected, withdrawn or all)\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/changes?status=pending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "changes"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending"
+                    }
+                  ]
+                },
+                "description": "Posting rule and account determination changes (status pending by default, approved, rejected, withdrawn or all)\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"kind\": \"account-role\",\n      \"kindLabel\": \"Account role\",\n      \"target\": \"premium_receivable\",\n      \"payload\": {\n        \"glCode\": \"1202002\"\n      },\n      \"before\": {\n        \"glCode\": \"1202001\"\n      },\n      \"status\": \"pending\",\n      \"requestedBy\": \"Accounting user\",\n      \"requestedAt\": \"2026-09-30T02:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "One configuration change with the rule version it concerns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/changes/:changeId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "changes",
+                ":changeId"
+              ],
+              "variable": [
+                {
+                  "key": "changeId",
+                  "value": "",
+                  "description": "changeId (path parameter)"
+                }
+              ]
+            },
+            "description": "One configuration change with the rule version it concerns\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/changes/:changeId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "changes",
+                    ":changeId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "changeId",
+                      "value": "",
+                      "description": "changeId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One configuration change with the rule version it concerns\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kind\": \"account-role\",\n    \"kindLabel\": \"Account role\",\n    \"target\": \"premium_receivable\",\n    \"payload\": {\n      \"glCode\": \"1202002\"\n    },\n    \"before\": {\n      \"glCode\": \"1202001\"\n    },\n    \"status\": \"pending\",\n    \"requestedBy\": \"Accounting user\",\n    \"requestedAt\": \"2026-09-30T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve and apply a pending change; never the requester",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/changes/:changeId/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "changes",
+                ":changeId",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "changeId",
+                  "value": "",
+                  "description": "changeId (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve and apply a pending change; never the requester\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Checked\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/changes/:changeId/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "changes",
+                    ":changeId",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "changeId",
+                      "value": "",
+                      "description": "changeId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve and apply a pending change; never the requester\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Checked\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kind\": \"account-role\",\n    \"kindLabel\": \"Account role\",\n    \"target\": \"premium_receivable\",\n    \"payload\": {\n      \"glCode\": \"1202002\"\n    },\n    \"before\": {\n      \"glCode\": \"1202001\"\n    },\n    \"status\": \"approved\",\n    \"requestedBy\": \"Accounting user\",\n    \"requestedAt\": \"2026-09-30T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject (reason required) a pending change; never the requester",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/changes/:changeId/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "changes",
+                ":changeId",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "changeId",
+                  "value": "",
+                  "description": "changeId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject (reason required) a pending change; never the requester\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Wrong account\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/changes/:changeId/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "changes",
+                    ":changeId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "changeId",
+                      "value": "",
+                      "description": "changeId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject (reason required) a pending change; never the requester\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Wrong account\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kind\": \"account-role\",\n    \"kindLabel\": \"Account role\",\n    \"target\": \"premium_receivable\",\n    \"payload\": {\n      \"glCode\": \"1202002\"\n    },\n    \"before\": {\n      \"glCode\": \"1202001\"\n    },\n    \"status\": \"rejected\",\n    \"requestedBy\": \"Accounting user\",\n    \"requestedAt\": \"2026-09-30T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a pending change (the requester or an approver)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/changes/:changeId/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "changes",
+                ":changeId",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "changeId",
+                  "value": "",
+                  "description": "changeId (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a pending change (the requester or an approver)\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: write:settings, write:masters, write:posting-rules"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/changes/:changeId/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "changes",
+                    ":changeId",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "changeId",
+                      "value": "",
+                      "description": "changeId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a pending change (the requester or an approver)\n\nFront-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: write:settings, write:masters, write:posting-rules"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kind\": \"account-role\",\n    \"kindLabel\": \"Account role\",\n    \"target\": \"premium_receivable\",\n    \"payload\": {\n      \"glCode\": \"1202002\"\n    },\n    \"before\": {\n      \"glCode\": \"1202001\"\n    },\n    \"status\": \"withdrawn\",\n    \"requestedBy\": \"Accounting user\",\n    \"requestedAt\": \"2026-09-30T02:00:00Z\"\n  }\n}"
             }
           ]
         },
@@ -34328,7 +34711,7 @@
                 }
               ]
             },
-            "description": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+            "description": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters, write:posting-rules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"effectiveFrom\": \"2026-10-01\",\n  \"changeNote\": \"Premium taxes on their own lines\",\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"side\": \"Dr\",\n      \"accountType\": \"role\",\n      \"account\": \"premium_receivable\",\n      \"fallbackRole\": null,\n      \"amountKey\": \"gross\",\n      \"perParticipant\": false,\n      \"narration\": \"Premium receivable {{billNumber}}\"\n    }\n  ]\n}",
@@ -34369,7 +34752,7 @@
                     }
                   ]
                 },
-                "description": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters",
+                "description": "Save a new version of an event's rule (effective from a date); lines are validated and the sample journal must balance\n\nFront-end touchpoint: Master > Finance > Posting Rules\n\nAccess: write:settings, write:masters, write:posting-rules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"effectiveFrom\": \"2026-10-01\",\n  \"changeNote\": \"Premium taxes on their own lines\",\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"side\": \"Dr\",\n      \"accountType\": \"role\",\n      \"account\": \"premium_receivable\",\n      \"fallbackRole\": null,\n      \"amountKey\": \"gross\",\n      \"perParticipant\": false,\n      \"narration\": \"Premium receivable {{billNumber}}\"\n    }\n  ]\n}",

@@ -51,3 +51,13 @@ export async function withoutCommissionTaxes() {
   await query('UPDATE app_settings SET value = \'false\' WHERE key IN (\'accounting.broker_billed_commission_vat\', \'accounting.broker_billed_commission_ewt\')');
   clearSettingsCache();
 }
+/**
+ * Apply posting rule and account determination changes at once (no second approver, migration 0174), for suites that
+ * test the effect of a change. test/configuration-controls.test.js covers the approval.
+ */
+export async function withoutConfigurationApproval() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query('UPDATE app_settings SET value = \'false\' WHERE key = \'accounting.configuration_maker_checker\'');
+  clearSettingsCache();
+}

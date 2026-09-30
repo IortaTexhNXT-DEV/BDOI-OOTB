@@ -14,6 +14,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { AMOUNT_KEYS, EVENTS, RESOLVERS, activeRule, ruleOut, simulate } from '../accounting/lib/posting.js';
 import { today } from '../accounting/lib/http.js';
 import { commissionTaxSetup } from '../accounting/lib/commissionTax.js';
+import { assertChecker } from '../../lib/makerChecker.js';
 
 const SIDES = ['Dr', 'Cr'];
 const ACCOUNT_TYPES = ['role', 'gl', 'resolver', 'context'];
@@ -48,13 +49,16 @@ async function rulesWithLines(db, rows) {
 export async function events(db) {
   const date = await today();
   const counts = new Map((await db.query('SELECT event_code, count(*)::int AS n, max(updated_at) AS last FROM posting_rules GROUP BY event_code')).rows.map((r) => [r.event_code, r]));
+  // versions waiting for approval (maker-checker)
+  const pending = new Map((await db.query(`SELECT r.event_code, c.id, r.version FROM accounting_config_changes c JOIN posting_rules r ON r.id = c.rule_id
+    WHERE c.status = 'pending'`)).rows.map((r) => [r.event_code, { changeId: Number(r.id), version: r.version }]));
   const out = [];
   for (const [code, e] of Object.entries(EVENTS)) {
     let current = null;
     try { current = (await activeRule(db, code, date)).rule; } catch { current = null; }
     out.push({ eventCode: code, label: e.label, module: e.module, amountKeys: e.amounts || [], vars: e.vars || [], contextAccounts: e.contextAccounts || [], perParticipant: !!e.participants,
       activeRuleId: current?.id || null, activeVersion: current?.version || null, name: current?.name || e.label, description: current?.description || null,
-      effectiveFrom: current ? ruleOut(current).effectiveFrom : null, versions: counts.get(code)?.n || 0, lastChanged: counts.get(code)?.last || null });
+      effectiveFrom: current ? ruleOut(current).effectiveFrom : null, versions: counts.get(code)?.n || 0, lastChanged: counts.get(code)?.last || null, pending: pending.get(code) || null });
   }
   return out;
 }
@@ -128,7 +132,8 @@ export async function simulateRule(db, b) {
 
 /**
  * Save a new version of an event's rule. The sample journal (and, for co-insurance events, the co-insured sample) must
- * balance. Returns { before, after }.
+ * balance. With maker-checker (accounting.configuration_maker_checker) the version is stored pending and inactive until a
+ * different user approves the change. Returns { before, after, change }.
  */
 export async function createVersion(db, eventCode, b, user) {
   const ev = EVENTS[eventCode];
@@ -148,28 +153,46 @@ export async function createVersion(db, eventCode, b, user) {
     else if (!sim.balanced) problems.push({ path: 'lines', message: `The ${coInsurance ? 'co-insured ' : ''}sample journal does not balance: debit ${sim.totalDebit} vs credit ${sim.totalCredit}` });
   }
   if (problems.length) throw badRequest('Validation failed', problems);
+  const review = await configurationReview();
+  if (review) await assertNoPending(db, 'posting-rule-version', eventCode);
   const version = (prev?.version || 0) + 1;
-  const r = (await db.query(`INSERT INTO posting_rules(event_code, version, name, description, module, entry_type, source, narration, branch_source, effective_from, active, change_note, created_by, updated_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true,$11,$12,$12) RETURNING *`,
+  const r = (await db.query(`INSERT INTO posting_rules(event_code, version, name, description, module, entry_type, source, narration, branch_source, effective_from, active, change_note,
+      created_by, updated_by, approval_status, approved_by, approved_at)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$13,$14,$15,$16) RETURNING *`,
   [eventCode, version, draft.rule.name, b.description ?? prev?.description ?? null, ev.module, draft.rule.entry_type, draft.rule.source, draft.rule.narration, branchSource, effectiveFrom,
-    b.changeNote || null, user?.id ?? null])).rows[0];
+    !review, b.changeNote || null, user?.id ?? null, review ? 'pending' : 'approved', review ? null : user?.id ?? null, review ? null : new Date()])).rows[0];
   for (const l of lines) {
     await db.query(`INSERT INTO posting_rule_lines(rule_id, line_no, side, account_type, account, fallback_role, amount_key, per_participant, narration) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
       [r.id, l.line_no, l.side, l.account_type, l.account, l.fallback_role, l.amount_key, l.per_participant, l.narration]);
   }
-  return { before: prev ? await getRule(db, prev.id) : null, after: await getRule(db, r.id) };
+  const before = prev ? await getRule(db, prev.id) : null;
+  const change = review ? await requestChange(db, { kind: 'posting-rule-version', target: eventCode, ruleId: r.id, payload: { version, effectiveFrom },
+    before: before ? { version: before.version } : null, note: b.changeNote, user }) : null;
+  return { before, after: await getRule(db, r.id), change };
 }
 
-/** Activate / deactivate a version; an event always keeps at least one active version. */
-export async function setActive(db, id, active, user) {
+async function checkActive(db, id, active) {
   const r = (await db.query('SELECT * FROM posting_rules WHERE id = $1 FOR UPDATE', [Number(id) || 0])).rows[0];
   if (!r) throw notFound('Posting rule not found');
+  if (r.approval_status !== 'approved') throw conflict(`Version ${r.version} of ${r.event_code} is ${r.approval_status}; only an approved version can be activated or deactivated`);
   if (!active) {
-    const others = (await db.query('SELECT count(*)::int AS n FROM posting_rules WHERE event_code = $1 AND active AND id <> $2 AND effective_from <= $3::date', [r.event_code, r.id, await today()])).rows[0].n;
+    const others = (await db.query(`SELECT count(*)::int AS n FROM posting_rules WHERE event_code = $1 AND active AND approval_status = 'approved' AND id <> $2 AND effective_from <= $3::date`,
+      [r.event_code, r.id, await today()])).rows[0].n;
     if (!others) throw conflict(`Version ${r.version} is the only version of ${r.event_code} in force; save a new version before deactivating it`);
   }
+  return r;
+}
+
+/** Activate / deactivate a version (pending approval with maker-checker); an event always keeps at least one active version. */
+export async function setActive(db, id, active, user) {
+  const r = await checkActive(db, id, active);
+  if (await configurationReview()) {
+    const change = await requestChange(db, { kind: 'posting-rule-status', target: String(r.id), ruleId: r.id, payload: { active: !!active }, before: { active: r.active }, user });
+    const rule = await getRule(db, r.id);
+    return { before: rule, after: rule, change };
+  }
   await db.query('UPDATE posting_rules SET active = $2, updated_by = $3, updated_at = now() WHERE id = $1', [r.id, !!active, user?.id ?? null]);
-  return { before: await getRule(db, r.id).then((x) => ({ ...x, active: r.active })), after: await getRule(db, r.id) };
+  return { before: await getRule(db, r.id).then((x) => ({ ...x, active: r.active })), after: await getRule(db, r.id), change: null };
 }
 
 // ---------- account determination ----------
@@ -190,6 +213,8 @@ export async function accountDetermination(db) {
     cashByPaymentMode: (await getSetting('accounting.cash_account_by_payment_mode', {})) || {},
     writeOffReasons: await listWriteOffReasons(db, { all: true }),
     splitPremiumTaxes: (await getSetting('accounting.split_premium_taxes', true)) !== false,
+    makerChecker: await configurationReview(),
+    pendingChanges: (await listChanges(db)).filter((c) => ['account-role', 'account-map', 'commission-taxes'].includes(c.kind)),
   };
 }
 
@@ -199,25 +224,40 @@ async function assertGl(db, code, path = 'glCode') {
   return a;
 }
 
+/** Set the GL account of a role (pending approval with maker-checker). Returns { before, after, change }. */
 export async function setRoleAccount(db, role, glCode, user) {
   const key = `accounting.account.${role}`;
   const before = (await db.query('SELECT value FROM app_settings WHERE key = $1', [key])).rows[0];
   if (!before) throw notFound(`Unknown account role ${role}`);
   const a = await assertGl(db, glCode);
+  if (await configurationReview()) {
+    const change = await requestChange(db, { kind: 'account-role', target: role, payload: { glCode: a.code }, before: { glCode: before.value }, user });
+    return { before: { role, glCode: before.value }, after: { role, glCode: before.value, pendingGlCode: a.code }, change };
+  }
   await setSetting(key, a.code, user?.id ?? null);
-  return { before: { role, glCode: before.value }, after: { role, glCode: a.code, glName: a.name } };
+  return { before: { role, glCode: before.value }, after: { role, glCode: a.code, glName: a.name }, change: null };
 }
 
 const MAPS = { 'payable-by-payee': 'accounting.payable_account_by_payee', 'cash-by-payment-mode': 'accounting.cash_account_by_payment_mode' };
-export async function setMap(db, name, map, user) {
-  const key = MAPS[name];
-  if (!key) throw notFound(`Unknown account map ${name}`);
+async function cleanMap(db, name, map) {
+  if (!MAPS[name]) throw notFound(`Unknown account map ${name}`);
   if (!map || typeof map !== 'object' || Array.isArray(map) || !Object.keys(map).length) throw badRequest('Validation failed', [{ path: 'map', message: 'map must be an object of name -> GL code' }]);
   const clean = {};
   for (const [k, v] of Object.entries(map)) clean[String(k)] = (await assertGl(db, v, `map.${k}`)).code;
+  return clean;
+}
+
+/** Replace an account map (pending approval with maker-checker). Returns { before, after, change }. */
+export async function setMap(db, name, map, user) {
+  const clean = await cleanMap(db, name, map);
+  const key = MAPS[name];
   const before = await getSetting(key, {});
+  if (await configurationReview()) {
+    const change = await requestChange(db, { kind: 'account-map', target: name, payload: { map: clean }, before, user });
+    return { before, after: before, change };
+  }
   await setSetting(key, clean, user?.id ?? null);
-  return { before, after: clean };
+  return { before, after: clean, change: null };
 }
 
 // ---------- commission taxes (broker billed) ----------
@@ -253,11 +293,107 @@ export async function commissionTaxChanges(db, b) {
   return changes;
 }
 
+/** Change the commission tax set-up (pending approval with maker-checker). Returns { before, after, change }. */
 export async function setCommissionTaxes(db, b, user) {
   const before = await commissionTaxes(db);
-  for (const [key, value] of Object.entries(await commissionTaxChanges(db, b))) await setSetting(key, value, user?.id ?? null);
-  return { before, after: await commissionTaxes(db) };
+  const changes = await commissionTaxChanges(db, b);
+  if (await configurationReview()) {
+    const change = await requestChange(db, { kind: 'commission-taxes', target: 'commission-taxes', payload: { body: b, settings: changes },
+      before: { vat: { enabled: before.vat.enabled, code: before.vat.code }, ewt: { enabled: before.ewt.enabled, code: before.ewt.code } }, user });
+    return { before, after: before, change };
+  }
+  for (const [key, value] of Object.entries(changes)) await setSetting(key, value, user?.id ?? null);
+  return { before, after: await commissionTaxes(db), change: null };
 }
+
+// ---------- maker-checker on configuration changes ----------
+
+/** Whether posting rule and account determination changes wait for approval (accounting.configuration_maker_checker). */
+export const configurationReview = async () => (await getSetting('accounting.configuration_maker_checker', true)) !== false;
+
+export const CHANGE_LABELS = { 'posting-rule-version': 'New posting rule version', 'posting-rule-status': 'Posting rule version (de)activated',
+  'account-role': 'Account role', 'account-map': 'Account map', 'commission-taxes': 'Commission taxes' };
+
+async function assertNoPending(db, kind, target) {
+  const p = (await db.query('SELECT id FROM accounting_config_changes WHERE kind = $1 AND target = $2 AND status = \'pending\'', [kind, target])).rows[0];
+  if (p) throw conflict(`A change of ${target} (${CHANGE_LABELS[kind].toLowerCase()}) is already awaiting approval (request ${p.id}); approve, reject or withdraw it first`);
+}
+
+async function requestChange(db, { kind, target, ruleId = null, payload, before = null, note = null, user }) {
+  await assertNoPending(db, kind, target);
+  const r = (await db.query(`INSERT INTO accounting_config_changes(kind, target, rule_id, payload, before, change_note, requested_by) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+    [kind, target, ruleId, JSON.stringify(payload || {}), before === null ? null : JSON.stringify(before), note || null, user?.id ?? null])).rows[0];
+  return getChange(db, r.id);
+}
+
+const CHANGE_SELECT = `SELECT c.*, (SELECT display_name FROM users u WHERE u.id = c.requested_by) AS requested_by_name,
+  (SELECT display_name FROM users u WHERE u.id = c.decided_by) AS decided_by_name FROM accounting_config_changes c`;
+
+async function changeOut(db, c) {
+  return { id: Number(c.id), kind: c.kind, kindLabel: CHANGE_LABELS[c.kind], target: c.target, ruleId: c.rule_id, payload: c.payload, before: c.before, changeNote: c.change_note,
+    status: c.status, requestedBy: c.requested_by_name || c.requested_by, requestedById: c.requested_by, requestedAt: c.requested_at,
+    decidedBy: c.decided_by_name || c.decided_by, decidedAt: c.decided_at, decisionRemarks: c.decision_remarks, rule: c.rule_id ? await getRule(db, c.rule_id) : null };
+}
+
+export async function getChange(db, id) {
+  const c = (await db.query(`${CHANGE_SELECT} WHERE c.id = $1`, [Number(id) || 0])).rows[0];
+  if (!c) throw notFound('Configuration change not found');
+  return changeOut(db, c);
+}
+
+/** Configuration changes (status pending by default, or approved / rejected / withdrawn / all). */
+export async function listChanges(db, q = {}) {
+  const status = q.status || 'pending';
+  const rows = (await db.query(`${CHANGE_SELECT} WHERE ($1 = 'all' OR c.status = $1) ORDER BY c.requested_at DESC LIMIT 200`, [status])).rows;
+  const out = [];
+  for (const c of rows) out.push(await changeOut(db, c));
+  return out;
+}
+
+/**
+ * Approve (applies the change) or reject (reason required) a pending change. The approver holds approve:posting-rules
+ * (checked by the route) and is never the requester, whatever finance.maker_checker_enabled says.
+ */
+export async function decideChange(db, id, action, remarks, user) {
+  const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 FOR UPDATE', [Number(id) || 0])).rows[0];
+  if (!c) throw notFound('Configuration change not found');
+  if (c.status !== 'pending') throw conflict(`Change ${c.id} is already ${c.status}`);
+  await assertChecker(user, c.requested_by, 'posting rule or account determination change', { configurable: false });
+  if (action === 'reject') {
+    if (!String(remarks || '').trim()) throw badRequest('Validation failed', [{ path: 'remarks', message: 'A reason is required to reject' }]);
+    if (c.kind === 'posting-rule-version') await db.query('UPDATE posting_rules SET approval_status = \'rejected\', updated_by = $2, updated_at = now() WHERE id = $1', [c.rule_id, user?.id ?? null]);
+  } else if (c.kind === 'posting-rule-version') {
+    await db.query(`UPDATE posting_rules SET approval_status = 'approved', active = true, approved_by = $2, approved_at = now(), updated_by = $2, updated_at = now() WHERE id = $1`, [c.rule_id, user?.id ?? null]);
+  } else if (c.kind === 'posting-rule-status') {
+    // checked again: the versions in force may have changed since the request
+    await checkActive(db, c.rule_id, c.payload.active);
+    await db.query('UPDATE posting_rules SET active = $2, updated_by = $3, updated_at = now() WHERE id = $1', [c.rule_id, c.payload.active === true, user?.id ?? null]);
+  } else if (c.kind === 'account-role') {
+    await setSetting(`accounting.account.${c.target}`, (await assertGl(db, c.payload.glCode)).code, user?.id ?? null);
+  } else if (c.kind === 'account-map') {
+    await setSetting(MAPS[c.target], await cleanMap(db, c.target, c.payload.map), user?.id ?? null);
+  } else if (c.kind === 'commission-taxes') {
+    for (const [key, value] of Object.entries(await commissionTaxChanges(db, c.payload.body || {}))) await setSetting(key, value, user?.id ?? null);
+  }
+  const status = action === 'approve' ? 'approved' : 'rejected';
+  await db.query('UPDATE accounting_config_changes SET status = $2, decided_by = $3, decided_at = now(), decision_remarks = $4 WHERE id = $1', [c.id, status, user?.id ?? null, remarks || null]);
+  return getChange(db, c.id);
+}
+
+/** Withdraw a pending change (the requester, or a user who may approve it). */
+export async function withdrawChange(db, id, user) {
+  const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 FOR UPDATE', [Number(id) || 0])).rows[0];
+  if (!c) throw notFound('Configuration change not found');
+  if (c.status !== 'pending') throw conflict(`Change ${c.id} is already ${c.status}`);
+  const approver = user?.permissions?.includes('approve:posting-rules') || user?.roles?.includes('system-admin');
+  if (c.requested_by !== user?.id && !approver) throw conflict('Only the requester or an approver can withdraw the change');
+  if (c.kind === 'posting-rule-version') await db.query('UPDATE posting_rules SET approval_status = \'rejected\', updated_by = $2, updated_at = now() WHERE id = $1', [c.rule_id, user?.id ?? null]);
+  await db.query('UPDATE accounting_config_changes SET status = \'withdrawn\', decided_by = $2, decided_at = now() WHERE id = $1', [c.id, user?.id ?? null]);
+  return getChange(db, c.id);
+}
+
+/** Setting keys that change only through Account Determination while maker-checker is on. */
+export const isControlledSetting = (key) => key.startsWith('accounting.account.') || Object.values(MAPS).includes(key) || Object.values(COMMISSION_TAX_KEYS).includes(key);
 
 // ---------- write-off reasons ----------
 
@@ -287,4 +423,15 @@ export async function saveWriteOffReason(db, code, b, user) {
     : (await db.query(`INSERT INTO write_off_reasons(code, name, gl_account, max_amount, description, status, created_by, updated_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$7) RETURNING *`,
       [newCode, name, gl, max, b.description || null, status, user?.id ?? null])).rows[0];
   return { before: existing ? reasonOut(existing) : null, after: reasonOut(r) };
+}
+
+/**
+ * Generic settings screens (System Settings, Configuration) may not change an account role, an account map or the
+ * commission tax set-up while maker-checker is on: those go through Account Determination and its approval.
+ * changes = [[key, newValue, currentValue]]; unchanged values are ignored.
+ */
+export async function assertNotControlled(changes) {
+  if (!(await configurationReview())) return;
+  const blocked = changes.filter(([k, v, before]) => isControlledSetting(k) && JSON.stringify(v) !== JSON.stringify(before)).map(([k]) => k);
+  if (blocked.length) throw conflict(`${blocked.join(', ')} can only be changed on Master > Finance > Account Determination, where the change is approved by a second user`);
 }

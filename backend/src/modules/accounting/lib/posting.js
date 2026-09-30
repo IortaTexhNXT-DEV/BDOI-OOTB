@@ -146,13 +146,13 @@ const lineOut = (l) => ({ id: l.id, lineNo: l.line_no, side: l.side, accountType
 export const ruleOut = (r, lines) => ({
   id: r.id, eventCode: r.event_code, event: EVENTS[r.event_code]?.label || r.event_code, version: r.version, name: r.name, description: r.description, module: r.module,
   entryType: r.entry_type, source: r.source, narration: r.narration, branchSource: r.branch_source, effectiveFrom: r.effective_from instanceof Date ? r.effective_from.toISOString().slice(0, 10) : r.effective_from,
-  active: r.active, changeNote: r.change_note, createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
+  active: r.active, approvalStatus: r.approval_status || 'approved', approvedBy: r.approved_by || null, approvedAt: r.approved_at || null, changeNote: r.change_note, createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
   lines: (lines || []).map(lineOut),
 });
 
-/** The rule in force for an event on a date (latest effective version that is active). */
+/** The rule in force for an event on a date (latest effective version that is active and approved). */
 export async function activeRule(db, eventCode, date) {
-  const r = (await db.query(`SELECT * FROM posting_rules WHERE event_code = $1 AND active AND effective_from <= $2::date
+  const r = (await db.query(`SELECT * FROM posting_rules WHERE event_code = $1 AND active AND approval_status = 'approved' AND effective_from <= $2::date
     ORDER BY effective_from DESC, version DESC LIMIT 1`, [eventCode, date])).rows[0];
   if (!r) throw notFound(`No active posting rule for event ${eventCode} on ${date}`);
   const lines = (await db.query('SELECT * FROM posting_rule_lines WHERE rule_id = $1 ORDER BY line_no', [r.id])).rows;

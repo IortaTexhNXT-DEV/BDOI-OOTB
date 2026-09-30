@@ -38,8 +38,9 @@ const ROLE_PERMS = {
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer),
   // the insurer statement reconciliation approval (approve:insurer-reconciliation, permission added by migration 0172) and
-  // the credit control approvals: warranty extensions and client credit limits (approve:credit-control, migration 0173).
-  'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve'],
+  // the credit control approvals: warranty extensions and client credit limits (approve:credit-control, migration 0173),
+  // and posting rule / account determination changes: propose (write) and approve another user's change (migration 0174).
+  'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve', 'posting-rules:write', 'posting-rules:approve'],
 };
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };

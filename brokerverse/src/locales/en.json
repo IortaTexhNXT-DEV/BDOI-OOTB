@@ -6575,6 +6575,31 @@
       "rateGl": "{{rate}}% to {{gl}}",
       "inactiveCode": "A selected tax code is missing or inactive: nothing is booked for it until an active code is chosen.",
       "saved": "Commission tax set-up saved"
+    },
+    "versionPending": "Version {{version}} saved; it is used for posting once a second user approves it (Configuration Approvals)",
+    "changePending": "Change saved for approval; it takes effect once a second user approves it (Configuration Approvals)",
+    "pendingChanges": "Changes awaiting approval",
+    "reviewChanges": "Review",
+    "approvalsTitle": "Configuration Approvals",
+    "approvalsIntro": "Posting rule versions, their activation and account determination changes wait here for a second user with approval rights (Accounting Manager or System Administrator). The requester cannot approve their own change; nothing reaches the ledger before approval.",
+    "noChanges": "No configuration change",
+    "changeKind": "Change",
+    "changeTarget": "Of",
+    "changeBefore": "Before",
+    "changeAfter": "Requested",
+    "requested": "Requested",
+    "approve": "Approve",
+    "reject": "Reject",
+    "withdraw": "Withdraw",
+    "approveRemarks": "Approval remarks (optional)",
+    "rejectReason": "Reason for rejecting",
+    "changeDecided": "Change {{id}}: {{status}}",
+    "approval": {
+      "pending": "Pending approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn",
+      "all": "All"
     }
   },
   "bankReconciliation": {

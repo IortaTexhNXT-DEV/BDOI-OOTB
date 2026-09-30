@@ -66,8 +66,8 @@ const AccountDetermination = ({ section = "premium" }) => {
 
   const setRole = async (row, glCode) => {
     try {
-      await postingRulesService.setRole(row.role, glCode);
-      done(t("postingRules.roleSaved", { role: row.role, gl: glCode }));
+      const out = await postingRulesService.setRole(row.role, glCode);
+      done(out.change ? t("postingRules.changePending") : t("postingRules.roleSaved", { role: row.role, gl: glCode }));
       load();
     } catch (e) {
       fail(e);
@@ -75,8 +75,8 @@ const AccountDetermination = ({ section = "premium" }) => {
   };
   const saveMap = async (name, map) => {
     try {
-      await postingRulesService.setMap(name, map);
-      done(t("postingRules.mapSaved"));
+      const out = await postingRulesService.setMap(name, map);
+      done(out.change ? t("postingRules.changePending") : t("postingRules.mapSaved"));
       load();
     } catch (e) {
       fail(e);
@@ -136,6 +136,14 @@ const AccountDetermination = ({ section = "premium" }) => {
       {data && (
         <div className="mb-2">
           <Tag value={data.splitPremiumTaxes ? t("postingRules.taxesSplit") : t("postingRules.taxesNotSplit")} severity={data.splitPremiumTaxes ? "success" : "secondary"} icon="pi pi-percentage" />
+        </div>
+      )}
+      {data?.pendingChanges?.length > 0 && (
+        <div className="p-message p-message-warn p-3 mb-2">
+          <div className="font-semibold mb-1">{t("postingRules.pendingChanges")}</div>
+          {data.pendingChanges.map((c) => (
+            <div key={c.id}>{c.kindLabel} · {c.target} · {c.requestedBy} <Button label={t("postingRules.reviewChanges")} className="p-button-text p-button-sm" onClick={() => navigate("/master/finance/configuration-approvals")} /></div>
+          ))}
         </div>
       )}
       <div className="posting-rules__card">

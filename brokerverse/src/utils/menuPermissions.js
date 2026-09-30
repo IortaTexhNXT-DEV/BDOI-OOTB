@@ -107,10 +107,10 @@ export const roleMenuPermissions = {
       // instalment plans, premium warranty, credit limits, remittance ageing (approvals: accounting-manager, approve:credit-control)
       "Credit Control",
     ],
-    // Account Determination and Posting Rules: Accounting reads them (commission tax set-up included); changes are
-    // configuration made by the administrator
+    // Account Determination and Posting Rules: Accounting reads them; the Accounting Manager proposes changes and approves
+    // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
-      "Finance > Account Determination", "Finance > Posting Rules", "Finance > Insurer Statement Formats"],
+      "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Insurer Statement Formats"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],
