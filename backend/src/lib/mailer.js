@@ -31,10 +31,12 @@ export async function queueEmail({ to, cc, subject, html, template, entity, enti
   return r.rows[0].id;
 }
 
-export async function sendQueuedEmails() {
+/** Send queued messages (the email-outbox job); `ids` limits the run to those messages (Retry on the outbox screen). */
+export async function sendQueuedEmails({ ids = null } = {}) {
   const enabled = await getSetting('notification.email_enabled', false);
   const t = getTransport();
-  const rows = await many('SELECT * FROM email_outbox WHERE status = \'queued\' AND attempts < $1 ORDER BY id LIMIT $2', [MAX_ATTEMPTS, BATCH_SIZE]);
+  const rows = await many(`SELECT * FROM email_outbox WHERE status = 'queued' AND attempts < $1 AND ($3::bigint[] IS NULL OR id = ANY($3))
+    ORDER BY id LIMIT $2`, [MAX_ATTEMPTS, BATCH_SIZE, ids]);
   if (!enabled || !t) return { sent: 0, queued: rows.length, reason: !enabled ? 'notification.email_enabled is false' : 'SMTP_URL not set' };
   let sent = 0;
   for (const m of rows) {

@@ -165,6 +165,12 @@ export const menuList = [
         includes: ["/master/configuration/audit-trail"],
       },
       {
+        id: 24,
+        name: "E-mail Outbox",
+        path: "/master/configuration/email-outbox",
+        includes: ["/master/configuration/email-outbox"],
+      },
+      {
         id: 1,
         name: "Generals",
         submenu: [

@@ -30,6 +30,9 @@ async function post(path, body, fallbackError, timeoutMs = 15000) {
   }
 }
 
+/** Last answer of GET /email/sending-status: { at, value }. */
+let sendingCache = null;
+
 const emailService = {
   /** E-mail a quotation with the standard share_quote template. */
   shareQuote(to, quotationData, message = "") {
@@ -62,6 +65,41 @@ const emailService = {
     const result = await post("/generate", { template, context, recipient }, "Failed to prepare the e-mail content", 30000);
     return result.success ? { success: true, data: result.data.data } : result;
   },
+
+  /**
+   * Whether queued e-mail actually goes out: { enabled, smtpConfigured, active }. Read once and kept for a minute;
+   * null when the server cannot be asked (the caller then assumes sending works, as before).
+   */
+  async sendingStatus() {
+    if (sendingCache && Date.now() - sendingCache.at < 60000) return sendingCache.value;
+    try {
+      const response = await fetch(`${EMAIL_URL}/sending-status`, { headers: { ...authService.getAuthHeader() } });
+      const json = await response.json().catch(() => ({}));
+      const value = response.ok ? json.data || null : null;
+      sendingCache = { at: Date.now(), value };
+      return value;
+    } catch {
+      return null;
+    }
+  },
+
+  /** E-mail outbox (administrators): { data, sending, counts, total }. params: status, search, page, pageSize. */
+  async getOutbox(params = {}) {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
+    const response = await fetch(`${EMAIL_URL}/outbox${qs ? `?${qs}` : ""}`, { headers: { ...authService.getAuthHeader() } });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(json.message || "Failed to load the e-mail outbox");
+    return json;
+  },
+
+  /** Queue a failed e-mail again (sent at once when sending is enabled): { message, data }. */
+  async retryOutbox(id) {
+    const result = await post(`/outbox/${encodeURIComponent(id)}/retry`, {}, "Failed to retry the e-mail", 30000);
+    if (!result.success) throw new Error(result.error);
+    sendingCache = null;
+    return result.data;
+  },
 };
+
 
 export default emailService;

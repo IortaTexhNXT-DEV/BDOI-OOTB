@@ -231,7 +231,8 @@
     "Trail Balance": "Trail Balance",
     "Login": "Login",
     "All Reports": "All Reports",
-    "Trial Balance": "Trial Balance"
+    "Trial Balance": "Trial Balance",
+    "E-mail Outbox": "E-mail Outbox"
   },
   "header": {
     "notification": "Notification",
@@ -4011,7 +4012,8 @@
     "emailSubject": "Email subject",
     "emailContentHtml": "Email content (HTML)",
     "suggestedContentEditHint": "You can edit the subject and content before sending.",
-    "usingSuggestedContent": "Using the suggested content"
+    "usingSuggestedContent": "Using the suggested content",
+    "sentToRecipient": "Quote sent to {{to}}"
   },
   "fireLead": {
     "selectCategory": "Select Category",
@@ -6918,6 +6920,35 @@
       "channel": "Select how the response was received",
       "responseDate": "Enter the response date",
       "remarks": "Enter a reference or remarks"
+    }
+  },
+  "emailOutbox": {
+    "title": "E-mail Outbox",
+    "intro": "Every e-mail the system has queued: quotations, approval links, broker slips, placement orders, notices. Queued messages are sent by the E-mail outbox schedule; a failed message can be retried.",
+    "refresh": "Refresh",
+    "bannerActive": "E-mail sending is enabled: queued messages go out on the next run of the E-mail outbox schedule.",
+    "bannerInactive": "E-mail sending is not configured, so queued messages stay here and are not delivered.",
+    "reasonSmtp": "The mail server (SMTP_URL) is not set on the server.",
+    "reasonSwitch": "Send e-mails is switched off (System Settings, Notification).",
+    "queuedNotConfigured": "Queued - e-mail sending is not configured",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search recipient, subject or reference",
+    "empty": "No e-mails",
+    "retry": "Retry",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "columns": {
+      "status": "Status",
+      "to": "To",
+      "subject": "Subject",
+      "about": "Record",
+      "attempts": "Attempts",
+      "lastError": "Last error",
+      "created": "Created",
+      "sent": "Sent"
     }
   }
 }

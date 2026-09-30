@@ -46,4 +46,5 @@ and `email.template.placement_order`.
   `GET /placements/journey?productType=...` shows the journey that applies (product type, else line, else default).
 - Shares do not add up to 100% or two leads: `participants.js` refuses the save with the field that is wrong.
 - The policy cannot be issued: a participant has not bound yet, or the user lacks `write:policies`.
-- The e-mail to an insurer did not arrive: see the e-mail outbox (`email_outbox`, entity `broker_slip` or `placement`).
+- The e-mail to an insurer did not arrive: see Master > E-mail Outbox (`email_outbox`, entity `broker_slip` or `placement`),
+  which also says whether e-mail sending is configured.

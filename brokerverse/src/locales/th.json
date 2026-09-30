@@ -221,7 +221,8 @@
     "Payables": "เจ้าหนี้",
     "Journal": "สมุดรายวัน",
     "Trail Balance": "งบดุลทดลอง",
-    "Login": "เข้าสู่ระบบ"
+    "Login": "เข้าสู่ระบบ",
+    "E-mail Outbox": "E-mail Outbox"
   },
   "header": {
     "notification": "การแจ้งเตือน",
@@ -3576,7 +3577,8 @@
     "emailSubject": "หัวเรื่องอีเมล",
     "emailContentHtml": "เนื้อหาอีเมล (HTML)",
     "suggestedContentEditHint": "คุณแก้ไขหัวเรื่องและเนื้อหาได้ก่อนส่ง",
-    "usingSuggestedContent": "ใช้เนื้อหาที่แนะนำ"
+    "usingSuggestedContent": "ใช้เนื้อหาที่แนะนำ",
+    "sentToRecipient": "Quote sent to {{to}}"
   },
   "fireLead": {
     "selectCategory": "เลือกหมวดหมู่",
@@ -5005,6 +5007,35 @@
       "channel": "Select how the response was received",
       "responseDate": "Enter the response date",
       "remarks": "Enter a reference or remarks"
+    }
+  },
+  "emailOutbox": {
+    "title": "E-mail Outbox",
+    "intro": "Every e-mail the system has queued: quotations, approval links, broker slips, placement orders, notices. Queued messages are sent by the E-mail outbox schedule; a failed message can be retried.",
+    "refresh": "Refresh",
+    "bannerActive": "E-mail sending is enabled: queued messages go out on the next run of the E-mail outbox schedule.",
+    "bannerInactive": "E-mail sending is not configured, so queued messages stay here and are not delivered.",
+    "reasonSmtp": "The mail server (SMTP_URL) is not set on the server.",
+    "reasonSwitch": "Send e-mails is switched off (System Settings, Notification).",
+    "queuedNotConfigured": "Queued - e-mail sending is not configured",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search recipient, subject or reference",
+    "empty": "No e-mails",
+    "retry": "Retry",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "columns": {
+      "status": "Status",
+      "to": "To",
+      "subject": "Subject",
+      "about": "Record",
+      "attempts": "Attempts",
+      "lastError": "Last error",
+      "created": "Created",
+      "sent": "Sent"
     }
   }
 }
