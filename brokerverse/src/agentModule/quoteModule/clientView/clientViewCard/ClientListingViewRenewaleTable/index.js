@@ -35,6 +35,8 @@ const Index = ({ clientId, action }) => {
   const [renewalPolicy, setRenewalPolicy] = useState([]);
   const [filteredRenewals, setFilteredRenewals] = useState([]);
   const [loadingState, setLoadingState] = useState(false);
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loadingState && !filteredRenewals.length;
   const [error, setError] = useState(null);
   const [selectedRowData, setSelectedRowData] = useState(null);
 
@@ -416,7 +418,7 @@ const Index = ({ clientId, action }) => {
   };
 
   const renderPolicyNumber = (rowData) => {
-    if (loadingState) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -436,14 +438,14 @@ const Index = ({ clientId, action }) => {
 
   const renderRenewalDate = (rowData) => {
     const value = rowData.policyIssued || rowData.IssueDate;
-    if (loadingState) return <Skeleton width="6rem" />;
+    if (showSkeleton) return <Skeleton width="6rem" />;
     return <div className="date__text">{formatDate(value)}</div>;
   };
 
   const renderExpiryDate = (rowData) => {
     const expiryDate = rowData.policyExpiry || rowData.ExpiryDate;
     
-    if (loadingState) return <Skeleton width="6rem" />;
+    if (showSkeleton) return <Skeleton width="6rem" />;
     if (!expiryDate) return <div className="date__text">N/A</div>;
 
     // Calculate days until expiry
@@ -485,7 +487,7 @@ const Index = ({ clientId, action }) => {
   };
 
   const renderPremium = (rowData) => {
-    if (loadingState) return <Skeleton width="4rem" />;
+    if (showSkeleton) return <Skeleton width="4rem" />;
     const premium =
       rowData.grossPremium || rowData.totalPremium || rowData.GrossPremium || 0;
     return <div className="category__text">{premium}</div>;
@@ -497,7 +499,7 @@ const Index = ({ clientId, action }) => {
       rowData.ProductDescription ||
       rowData.type ||
       "MOTOR COMPREHENSIVE";
-    if (loadingState) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -506,7 +508,7 @@ const Index = ({ clientId, action }) => {
 
   const renderType = (rowData) => {
     const type = rowData.type || rowData.Status || rowData.status || "Pending";
-    if (loadingState) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 

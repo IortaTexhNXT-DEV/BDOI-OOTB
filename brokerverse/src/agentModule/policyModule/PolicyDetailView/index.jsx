@@ -309,7 +309,7 @@ const PolicyDetailView = () => {
     ({ policyMainReducers }) => ({
       policyDetails: policyMainReducers?.policyDetails,
       rawPolicyData: policyMainReducers?.rawPolicyData,
-      loading: policyMainReducers?.loading,
+      loading: policyMainReducers?.detailLoading,
       error: policyMainReducers?.error,
     })
   );

@@ -100,6 +100,8 @@ const LeadListingAllTable = ({ clientId }) => {
   const [endorsementData, setEndorsementData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loading && !filteredData.length;
   const [error, setError] = useState(null);
   const cities = [
     { name: "Policy Number", code: "policyNumber" },
@@ -305,7 +307,7 @@ const LeadListingAllTable = ({ clientId }) => {
   const renderPolicyNumber = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
 
-    if (loading) {
+    if (showSkeleton) {
       return (
         <div className="name__box__container">
           <Skeleton width="2rem" shape="circle" className="mr-2" />
@@ -330,7 +332,7 @@ const LeadListingAllTable = ({ clientId }) => {
 
   const renderEndorsementID = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
@@ -346,7 +348,7 @@ const LeadListingAllTable = ({ clientId }) => {
   const renderDes = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
 
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -357,7 +359,7 @@ const LeadListingAllTable = ({ clientId }) => {
 
   const renderDate = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
@@ -366,7 +368,7 @@ const LeadListingAllTable = ({ clientId }) => {
 
   const renderExpiryDate = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
@@ -378,7 +380,7 @@ const LeadListingAllTable = ({ clientId }) => {
     const status = normalized?.status || "processing";
     const className = STATUS_CLASS_MAP[status] || "company__status__type__green";
 
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="4rem" />;
     }
 
@@ -391,7 +393,7 @@ const LeadListingAllTable = ({ clientId }) => {
     const className =
       PAYMENT_CLASS_MAP[payment] || "endorsement__payment__type";
 
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="4rem" />;
     }
 
@@ -495,7 +497,7 @@ const LeadListingAllTable = ({ clientId }) => {
             field="type"
             headerStyle={headerStyle}
             body={(rowData) =>
-              loading ? (
+              showSkeleton ? (
                 <Skeleton width="6rem" />
               ) : (
                 normalizeEndorsement(rowData)?.type || rowData.Type || "N/A"

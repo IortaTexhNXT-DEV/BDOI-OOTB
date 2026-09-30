@@ -5854,11 +5854,12 @@
     height: 1.5rem;
   }
   .p-skeleton {
-    background-color: #e4e4e4;
-    border-radius: 6px;
+    background-color: #eef0f3;
+    border-radius: 4px;
   }
+  /* no moving shimmer: placeholders stay still while data loads */
   .p-skeleton:after {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+    display: none;
   }
   .p-tag {
     background: #0072d8;

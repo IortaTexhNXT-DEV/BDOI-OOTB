@@ -639,8 +639,9 @@ const LeadListingMotorTable = ({ lob = null }) => {
         </div>
       )}
       <div className="lead__table__container">
-        {loading ? (
-          <DataTable value={Array(5).fill({})} className="p-datatable-striped">
+        {/* placeholder rows only until the first page arrives; later refreshes keep the rows */}
+        {loading && !leadtabledata?.length ? (
+          <DataTable value={Array(5).fill({})}>
             <Column
               header={t("tables.name")}
               body={<Skeleton width="100%" height="24px" />}

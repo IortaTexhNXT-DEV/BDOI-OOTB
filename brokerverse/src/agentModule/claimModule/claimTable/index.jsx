@@ -122,6 +122,8 @@ const ClaimTable = () => {
   const [claims, setClaims] = useState([]);
   const [filteredClaims, setFilteredClaims] = useState([]);
   const [loading, setLoading] = useState(false);
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loading && !filteredClaims.length;
   const [error, setError] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [search, setSearch] = useState("");
@@ -236,7 +238,7 @@ const ClaimTable = () => {
 
   const renderClaimNumber = (rowData) => {
     const normalized = normalizeClaimRecord(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -255,7 +257,7 @@ const ClaimTable = () => {
   };
 
   const renderClientName = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -274,7 +276,7 @@ const ClaimTable = () => {
 
   const renderPolicyNumber = (rowData) => {
     const normalized = normalizeClaimRecord(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
     return (
@@ -285,7 +287,7 @@ const ClaimTable = () => {
   };
 
   const renderDate = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
     const normalized = normalizeClaimRecord(rowData);
@@ -293,7 +295,7 @@ const ClaimTable = () => {
   };
 
   const renderProductDescription = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -308,7 +310,7 @@ const ClaimTable = () => {
   };
 
   const renderStatus = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="4rem" />;
     }
     const normalized = normalizeClaimRecord(rowData);

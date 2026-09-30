@@ -129,6 +129,8 @@ const LeadListingAllTable = ({ clientId }) => {
   const [claims, setClaims] = useState([]);
   const [filteredClaims, setFilteredClaims] = useState([]);
   const [loading, setLoading] = useState(false);
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loading && !filteredClaims.length;
   const [error, setError] = useState(null);
 
   const template2 = useMemo(
@@ -246,7 +248,7 @@ const LeadListingAllTable = ({ clientId }) => {
 
   const renderPolicyNumber = (rowData) => {
     const normalized = normalizeClaimRecord(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return (
         <div className="name__box__container">
           <Skeleton width="2rem" shape="circle" className="mr-2" />
@@ -270,7 +272,7 @@ const LeadListingAllTable = ({ clientId }) => {
   };
 
   const renderClaimNumber = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
     const normalized = normalizeClaimRecord(rowData);
@@ -282,7 +284,7 @@ const LeadListingAllTable = ({ clientId }) => {
   };
 
   const renderDate = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
     const normalized = normalizeClaimRecord(rowData);
@@ -290,7 +292,7 @@ const LeadListingAllTable = ({ clientId }) => {
   };
 
   const renderExpiryDate = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
     const normalized = normalizeClaimRecord(rowData);
@@ -298,7 +300,7 @@ const LeadListingAllTable = ({ clientId }) => {
   };
 
   const renderStatus = (rowData) => {
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="4rem" />;
     }
     const normalized = normalizeClaimRecord(rowData);

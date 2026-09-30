@@ -52,6 +52,8 @@ const LeadListingAllTable = ({
         pagination: policyMainReducers?.pagination,
       };
     });
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loading && !(policyListData?.length || policyListSearchData?.length);
   const menu = useRef(null);
 
   const [selectedProducts] = useState([]);
@@ -167,16 +169,11 @@ const LeadListingAllTable = ({
     dispatch(policyListDataMiddleWare({ page: 1, pageSize: 200, filters }));
   };
 
-  useEffect(() => {
-    // Load initial policy data when component mounts
-    dispatch(policyListDataMiddleWare({ page: 1, pageSize: 200 }));
-  }, [dispatch]);
-
+  // Loads the list on mount (search starts empty) and again whenever the search or filters change.
   useEffect(() => {
     if (search) {
       debouncedSearch(search, globalFilter);
     } else if (search === "") {
-      // When search is cleared, reload with filters
       dispatch(policyListDataMiddleWare({ page: 1, pageSize: 200, filters }));
     }
     return () => {
@@ -475,7 +472,7 @@ const LeadListingAllTable = ({
   };
 
   const renderGrossPremium = (rowData) => {
-    if (loading) return <Skeleton width="100%" height="1.5rem" />;
+    if (showSkeleton) return <Skeleton width="100%" height="1.5rem" />;
     return (
       <div
         className="category__text"
@@ -494,7 +491,7 @@ const LeadListingAllTable = ({
   const renderPolicyExpiry = (rowData) => {
     const expiryDate = rowData.PolicyExpiry || rowData.expiry;
 
-    if (loading) return <Skeleton width="6rem" />;
+    if (showSkeleton) return <Skeleton width="6rem" />;
     if (!expiryDate) return <div className="date__text">N/A</div>;
 
     // Calculate days until expiry
@@ -541,7 +538,7 @@ const LeadListingAllTable = ({
   };
 
   const renderPayment = (rowData) => {
-    if (loading) return <Skeleton width="100px" height="2rem" />;
+    if (showSkeleton) return <Skeleton width="100px" height="2rem" />;
     return (
       <StatusBadge
         status={rowData.Payment || "Pending"}

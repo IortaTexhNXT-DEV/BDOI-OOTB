@@ -31,6 +31,8 @@ const LeadListingAllTable = () => {
         loading: quotationMainReducers?.loading,
       };
     });
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loading && !quotationListData?.length;
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectionMode] = useState("multiple");
@@ -175,7 +177,7 @@ const LeadListingAllTable = () => {
   };
 
   const renderQuoteId = (rowData) => {
-    if (loading) return <Skeleton width="100%" height="1.5rem" />;
+    if (showSkeleton) return <Skeleton width="100%" height="1.5rem" />;
     return (
       <div className="category__text" style={{ fontWeight: 500 }}>
         {rowData.QuoteId || "N/A"}
@@ -184,12 +186,12 @@ const LeadListingAllTable = () => {
   };
 
   const renderPolicyType = (rowData) => {
-    if (loading) return <Skeleton width="100%" height="1.5rem" />;
+    if (showSkeleton) return <Skeleton width="100%" height="1.5rem" />;
     return <div className="category__text">{rowData.PolicyType || "N/A"}</div>;
   };
 
   const renderLeadName = (rowData) => {
-    if (loading) return <Skeleton width="100%" height="1.5rem" />;
+    if (showSkeleton) return <Skeleton width="100%" height="1.5rem" />;
     return (
       <div className="category__text" style={{ textTransform: "capitalize" }}>
         {rowData.LeadName || t("quoteListing.unknownLead")}
@@ -198,12 +200,12 @@ const LeadListingAllTable = () => {
   };
 
   const renderDate = (rowData) => {
-    if (loading) return <Skeleton width="100%" height="1.5rem" />;
+    if (showSkeleton) return <Skeleton width="100%" height="1.5rem" />;
     return <div className="date__text">{rowData.Date || "N/A"}</div>;
   };
 
   const renderGrossPremium = (rowData) => {
-    if (loading) return <Skeleton width="100%" height="1.5rem" />;
+    if (showSkeleton) return <Skeleton width="100%" height="1.5rem" />;
     return (
       <div className="date__text" style={{ fontWeight: 600, color: "#2E7D32" }}>
         {rowData.GrossPremium}
@@ -212,7 +214,7 @@ const LeadListingAllTable = () => {
   };
 
   const renderStatus = (rowData) => {
-    if (loading) return <Skeleton width="100px" height="2rem" />;
+    if (showSkeleton) return <Skeleton width="100px" height="2rem" />;
     return (
       <StatusBadge
         status={rowData.Status}
