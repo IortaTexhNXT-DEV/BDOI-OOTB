@@ -8,7 +8,8 @@ Rules) and `/account-determination` (Master > Finance > Account Determination). 
 
 | File | What it does |
 |---|---|
-| `router.js` | Routes of both screens. |
+| `router.js` | Routes of both screens, the configuration approvals and the accounting flow. |
+| `flow.js` | Accounting flow help screen (Master > Finance > Accounting Flow): trigger and approval of every event (`EVENT_FLOW`) with the debit and credit lines of the rule in force and today's GL accounts. A new event needs its `EVENT_FLOW` entry (a test checks it). |
 | `service.js` | Event catalogue, rule versions (validation, simulation, activation), account roles and maps, commission tax set-up, write-off reasons, the maker-checker on configuration changes. |
 
 ## Main tables

@@ -6600,6 +6600,19 @@
       "rejected": "Rejected",
       "withdrawn": "Withdrawn",
       "all": "All"
+    },
+    "flow": {
+      "title": "Accounting Flow",
+      "intro": "What each operational event posts, read from the posting rules in force on {{date}}: the screen or action that triggers it, the approval before it posts, and the accounts it debits and credits. It changes as soon as an approved posting rule or account determination change takes effect.",
+      "allModules": "All modules",
+      "openRule": "Open the rule",
+      "trigger": "Triggered by",
+      "approval": "Approval",
+      "debit": "Debit",
+      "credit": "Credit",
+      "perInsurer": "per insurer",
+      "decidedAtPosting": "Decided when posting",
+      "else": "else"
     }
   },
   "bankReconciliation": {

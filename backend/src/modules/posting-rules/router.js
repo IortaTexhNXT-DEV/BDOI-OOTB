@@ -5,6 +5,7 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import * as svc from './service.js';
+import { accountingFlow } from './flow.js';
 
 const { router, define } = moduleRouter('Posting Rules', '/posting-rules');
 const ad = moduleRouter('Account Determination', '/account-determination');
@@ -36,6 +37,14 @@ define({
   method: 'GET', path: '/meta', summary: 'Pickers of the rule editor: sides, account types, account roles (with GL), resolvers, amount keys, branch sources', screen: S, middleware: read,
   response: { success: true, data: { sides: ['Dr', 'Cr'], accountTypes: ['role', 'gl', 'resolver', 'context'], roles: [{ role: 'premium_receivable', glCode: '1202001', glName: 'Premiums Receivable – Direct Clients' }], resolvers: [{ name: 'bank_account', label: 'Bank account of the receipt / payment' }], amountKeys: ['amount', 'gross'] } },
   handler: async (req, res) => ok(res, await svc.meta(pool)),
+});
+define({
+  method: 'GET', path: '/flow', summary: 'Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)',
+  screen: 'Master > Finance > Accounting Flow', middleware: read,
+  response: { success: true, data: { asOf: '2026-09-30', events: [{ eventCode: 'receipt.apply', label: 'Premium collection applied', trigger: 'Accounts > Receipts', approval: 'Finance only',
+    version: 1, debits: [{ side: 'Dr', amountKey: 'amount', account: { kind: 'resolver', label: 'Bank account of the receipt', glCode: null } }],
+    credits: [{ side: 'Cr', amountKey: 'amount', account: { kind: 'role', label: 'Premiums receivable', glCode: '1202001', glName: 'Premiums Receivable' } }] }] } },
+  handler: async (_req, res) => ok(res, await accountingFlow(pool)),
 });
 const changeExample = { id: 3, kind: 'account-role', kindLabel: 'Account role', target: 'premium_receivable', payload: { glCode: '1202002' }, before: { glCode: '1202001' }, status: 'pending',
   requestedBy: 'Accounting user', requestedAt: '2026-09-30T02:00:00Z' };

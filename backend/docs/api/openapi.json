@@ -53317,6 +53317,172 @@
         }
       }
     },
+    "/posting-rules/flow": {
+      "get": {
+        "operationId": "getPostingRulesFlow",
+        "summary": "Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "events": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "eventCode": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "trigger": {
+                                "type": "string"
+                              },
+                              "approval": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "integer"
+                              },
+                              "debits": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "side": {
+                                      "type": "string"
+                                    },
+                                    "amountKey": {
+                                      "type": "string"
+                                    },
+                                    "account": {
+                                      "type": "object",
+                                      "properties": {
+                                        "kind": {
+                                          "type": "string"
+                                        },
+                                        "label": {
+                                          "type": "string"
+                                        },
+                                        "glCode": {}
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "credits": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "side": {
+                                      "type": "string"
+                                    },
+                                    "amountKey": {
+                                      "type": "string"
+                                    },
+                                    "account": {
+                                      "type": "object",
+                                      "properties": {
+                                        "kind": {
+                                          "type": "string"
+                                        },
+                                        "label": {
+                                          "type": "string"
+                                        },
+                                        "glCode": {
+                                          "type": "string"
+                                        },
+                                        "glName": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-09-30",
+                    "events": [
+                      {
+                        "eventCode": "receipt.apply",
+                        "label": "Premium collection applied",
+                        "trigger": "Accounts > Receipts",
+                        "approval": "Finance only",
+                        "version": 1,
+                        "debits": [
+                          {
+                            "side": "Dr",
+                            "amountKey": "amount",
+                            "account": {
+                              "kind": "resolver",
+                              "label": "Bank account of the receipt",
+                              "glCode": null
+                            }
+                          }
+                        ],
+                        "credits": [
+                          {
+                            "side": "Cr",
+                            "amountKey": "amount",
+                            "account": {
+                              "kind": "role",
+                              "label": "Premiums receivable",
+                              "glCode": "1202001",
+                              "glName": "Premiums Receivable"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Accounting Flow",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
     "/posting-rules/meta": {
       "get": {
         "operationId": "getPostingRulesMeta",

@@ -34,6 +34,7 @@ const postingRulesService = {
   commissionTaxes: () => request("GET", "/account-determination/commission-taxes"),
   setCommissionTaxes: (body) => request("PUT", "/account-determination/commission-taxes", body),
   writeOffReasons: () => request("GET", "/accounting/write-off-reasons"),
+  flow: () => request("GET", "/posting-rules/flow"),
   // maker-checker on posting rule and account determination changes
   changes: (status) => request("GET", `/posting-rules/changes?status=${encodeURIComponent(status || "pending")}`),
   approveChange: (id, remarks) => request("POST", `/posting-rules/changes/${id}/approve`, remarks ? { remarks } : {}),

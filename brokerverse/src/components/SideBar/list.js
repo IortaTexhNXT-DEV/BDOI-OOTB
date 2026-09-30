@@ -422,6 +422,12 @@ export const menuList = [
             includes: ["/master/finance/configuration-approvals"],
           },
           {
+            id: 4,
+            name: "Accounting Flow",
+            path: "/master/finance/accounting-flow",
+            includes: ["/master/finance/accounting-flow"],
+          },
+          {
             id: 40,
             name: "Commission Rate Matrix",
             path: "/master/finance/commission-rate-matrix",
