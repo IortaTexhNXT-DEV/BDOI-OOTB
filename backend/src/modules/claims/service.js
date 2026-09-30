@@ -188,12 +188,32 @@ export async function postBrokerSettlement(claimId, user) {
     return jv;
   });
 }
-const throughBroker = (input, prev) => {
+/** Settlement types master (claims.settlement_types): [{ value, label, paidThroughBroker }]. */
+export async function settlementTypes() {
+  const list = await getSetting('claims.settlement_types', []);
+  return (Array.isArray(list) ? list : []).map((x) => (typeof x === 'string' ? { value: x, label: x } : x)).filter((x) => x?.value);
+}
+const throughBroker = async (input, prev) => {
   const v = input.paidThroughBroker ?? input.paidThroughBrokerFlag;
   if (v !== undefined && v !== null && v !== '') return v === true || String(v).toLowerCase() === 'true';
-  if (input.settlementType && /broker/i.test(String(input.settlementType))) return true;
+  if (input.settlementType) {
+    const type = (await settlementTypes()).find((x) => String(x.value).toLowerCase() === String(input.settlementType).toLowerCase());
+    if (type) return !!type.paidThroughBroker;
+    if (/broker/i.test(String(input.settlementType))) return true;
+  }
   return !!prev?.paidThroughBroker;
 };
+
+/** Masters the claim screens need: status labels, settlement types, causes of loss and the sections per line of business. */
+export async function claimsConfig() {
+  return {
+    statusLabels: await statusLabels(),
+    settlementTypes: await settlementTypes(),
+    lossCauses: (await getSetting('claims.loss_causes', {})) || {},
+    lobFields: (await getSetting('claims.lob_fields', { MOTOR: ['driver', 'vehicle'], default: [] })) || {},
+    makerChecker: !!(await getSetting('claims.settlement_maker_checker', true)),
+  };
+}
 
 /** Paged, filtered list: status (code or label), clientId, policyId, lob, handler, search, dateFrom/dateTo. */
 export async function listClaims(q, pg) {
@@ -349,7 +369,7 @@ export async function createClaim(input, user, files) {
         is_holder_driver, driver, third_party, policy_info, lead_id, quote_id, due_date, details, created_by)
       VALUES ($1,$2,$3,'registered',$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,($5::date + $24::int),$25,$26) RETURNING id`, [
       number, policy.id, policy.client_id, lossDate, reported, input.typeOfIncident || null, input.description || null,
-      toNum(input.estimatedClaimAmount) ?? 0, handler, lob, input.claimType || (lob === 'FIRE' ? 'Fire' : 'Motor'),
+      toNum(input.estimatedClaimAmount) ?? 0, handler, lob, input.claimType || lob.charAt(0) + lob.slice(1).toLowerCase(),
       input.claimPriority || await getSetting('claims.default_priority', 'Medium'), input.timeOfIncident || null,
       input.addressOfIncident || null, input.cityOfIncident || null, input.provinceOfIncident || null, input.insuranceCompanyClaimNumber || null,
       toBool(input.isPolicyHolderTheDriver), JSON.stringify(driver), JSON.stringify(parseJsonField(input.thirdPartyDetails, {})),
@@ -485,12 +505,18 @@ export async function settleClaim(id, input, user, files) {
   const row = await loadRow(id);
   const from = row.status;
   const amount = toNum(input.settlementAmount);
+  if (input.settlementType) {
+    const types = await settlementTypes();
+    if (types.length && !types.some((x) => String(x.value).toLowerCase() === String(input.settlementType).toLowerCase())) {
+      throw badRequest('Validation failed', [{ path: 'settlementType', message: `Settlement type "${input.settlementType}" is not in the settlement types master` }]);
+    }
+  }
   const settlement = {
     ...(row.settlement || {}), settlementType: input.settlementType || row.settlement?.settlementType || null,
     settlementIssueDate: (await businessDate(input.settlementIssueDate)) || row.settlement?.settlementIssueDate || null,
     settlementDate: (await businessDate(input.settlementDate)) || row.settlement?.settlementDate || null,
   };
-  settlement.paidThroughBroker = throughBroker(input, row.settlement);
+  settlement.paidThroughBroker = await throughBroker(input, row.settlement);
   if (input.payee) settlement.payee = String(input.payee);
   if (amount !== null) settlement.settlementAmount = amount;
   await saveFiles(files, row.id, user);

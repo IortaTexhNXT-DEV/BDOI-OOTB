@@ -164,6 +164,21 @@ describe('claims', () => {
     const cx = await ctx.api('get', `/claims/reports/criteria?startDate=${daysAgo(365)}&endDate=${daysAgo(-1)}&criteria=Open&reportType=excel`).buffer(true).parse(binary);
     expect(cx.body.subarray(0, 2).toString()).toBe('PK');
   });
+  it('serves the claim masters and rejects a settlement type outside the master', async () => {
+    const cfg = await as('c.maker', 'get', '/claims/config');
+    expect(cfg.status).toBe(200);
+    expect(cfg.body.data.settlementTypes.map((x) => x.value)).toEqual(expect.arrayContaining(['Cheque', 'Through Broker']));
+    expect(cfg.body.data.settlementTypes.find((x) => x.value === 'Through Broker').paidThroughBroker).toBe(true);
+    expect(cfg.body.data.lobFields.MOTOR).toEqual(['driver', 'vehicle']);
+    expect(cfg.body.data.lossCauses.FIRE).toContain('Fire');
+    expect(cfg.body.data.statusLabels['in-review']).toBe('Processing');
+    const c3 = (await register('c.maker', { ...base, lob: 'MARINE', claimType: '', estimatedClaimAmount: 1000 }, false)).body.data;
+    expect(c3.claimType).toBe('Marine');
+    await as('c.maker', 'put', `/claims/updatestatus/${c3.id}`).send({ claimStatus: 'Processing' });
+    const bad = await as('c.maker', 'put', `/claims/settle/${c3.id}`).field('settlementType', 'Barter').field('settlementAmount', '500');
+    expect(bad.status).toBe(400);
+    expect(JSON.stringify(bad.body)).toContain('settlementType');
+  });
   it('enforces permissions per persona', async () => {
     expect((await as('s.sales', 'get', '/claims')).status).toBe(200);
     expect((await register('s.sales', base, false)).status).toBe(403);

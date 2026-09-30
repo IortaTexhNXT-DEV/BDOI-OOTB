@@ -66,6 +66,13 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/config', summary: 'Claim masters for the claim screens: status labels, settlement types, causes of loss per line, sections per line of business', screen: 'Operations > Claims (all steps)',
+  middleware: read,
+  response: { success: true, data: { statusLabels: { registered: 'Pending', 'in-review': 'Processing' }, settlementTypes: [{ value: 'Cheque', label: 'Cheque to claimant (insurer direct)' }, { value: 'Through Broker', label: 'Paid through the broker', paidThroughBroker: true }],
+    lossCauses: { MOTOR: ['Collision', 'Other'], default: ['Other'] }, lobFields: { MOTOR: ['driver', 'vehicle'], default: [] }, makerChecker: true } },
+  handler: async (_req, res) => ok(res, await svc.claimsConfig()),
+});
+define({
   method: 'GET', path: '/audit-trail/:id', summary: 'Field-level audit trail of a claim', screen: 'Operations > Claims > Audit trail', middleware: [...read, ownRecord('claim')],
   query: { sort: 'desc' }, response: { success: true, data: [{ id: 1, timestamp: '2026-09-21T02:00:00Z', action: 'Status Changed', fieldName: 'claimStatus', oldValue: 'registered', newValue: 'in-review', user: 'j.claims' }], total: 1, sort: 'desc' },
   handler: async (req, res) => { const rows = await svc.auditTrail(req.params.id, req.query.sort); res.json({ success: true, data: rows, total: rows.length, sort: req.query.sort === 'asc' ? 'asc' : 'desc' }); },

@@ -1,0 +1,233 @@
+@import "../../../theme/bdoi/tokens";
+
+// Claim screens: one header, step bar, card and form grid for the whole claim journey.
+.claim-journey {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__head-side {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__title {
+    margin: 0 0 6px;
+    font-family: $font-heading;
+    font-size: 24px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 15px;
+    color: $color-text;
+    cursor: pointer;
+
+    .pi {
+      color: $brand-blue;
+    }
+
+    &:hover span:first-of-type {
+      text-decoration: underline;
+    }
+  }
+
+  &__ref::before {
+    content: "/";
+    margin-right: 8px;
+    color: $color-placeholder;
+  }
+
+  &__status.p-tag {
+    background: $brand-blue-050;
+    color: $brand-navy;
+    font-weight: 600;
+  }
+
+  &__steps.p-steps {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    padding: 12px 8px;
+
+    .p-steps-item .p-menuitem-link {
+      background: transparent;
+    }
+
+    .p-steps-number {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      font-size: 13px;
+    }
+
+    .p-steps-title {
+      font-size: 12px;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
+  &__card.p-card {
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+
+    .p-card-body {
+      padding: 20px 24px;
+    }
+  }
+
+  &__card-title {
+    margin: 0 0 16px;
+    font-family: $font-heading;
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  &__section + &__section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid $color-border;
+  }
+
+  &__section-title {
+    margin: 0 0 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: $brand-navy;
+  }
+
+  &__section-hint {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: $color-text-muted;
+  }
+
+  // label / value grid for read-only facts
+  &__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px 24px;
+    margin: 0;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    dt {
+      font-size: 12px;
+      color: $color-text-muted;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 14px;
+      color: $color-heading;
+    }
+  }
+
+  &__hint {
+    margin: 0 0 12px;
+    color: $color-text-muted;
+    font-size: 14px;
+  }
+
+  &__upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border: 1px dashed $color-border-strong;
+    border-radius: $radius-sm;
+
+    small {
+      color: $color-text-muted;
+    }
+  }
+
+  &__file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  &__errors {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border: 1px solid $color-border;
+    border-left: 3px solid $color-danger;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    color: $color-text;
+    font-size: 13px;
+
+    ul {
+      margin: 4px 0 0;
+      padding-left: 18px;
+    }
+  }
+
+  &__errors-title {
+    font-weight: 600;
+    color: $color-heading;
+  }
+
+  &__errors-server + &__errors-server,
+  ul + &__errors-server {
+    margin-top: 6px;
+  }
+
+  &__notice {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border: 1px solid $color-border;
+    border-left: 3px solid $brand-blue;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    font-size: 13px;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid $color-border;
+    flex-wrap: wrap;
+
+    .claim-journey__actions-start {
+      margin-right: auto;
+    }
+  }
+
+  .required-mark {
+    color: $color-danger;
+    margin-left: 2px;
+  }
+}

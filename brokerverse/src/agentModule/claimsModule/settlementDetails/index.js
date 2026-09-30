@@ -1,492 +1,259 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import useClaimHeader from "../useClaimHeader";
+import { useDispatch } from "react-redux";
+import { useFormik } from "formik";
 import { Button } from "primereact/button";
+import { FileUpload } from "primereact/fileupload";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import DropdownField from "../../component/DropdownField";
 import InputTextField from "../../component/inputText";
 import DatepickerField from "../../component/datePicker";
-import { FileUpload } from "primereact/fileupload";
-import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
-import "./index.scss";
+import FieldError from "../../../components/FieldError";
 import CustomToast from "../../../components/Toast";
-import customHistory from "../../../routes/customHistory";
-import { useDispatch, useSelector } from "react-redux";
-import { useFormik } from "formik";
 import { postSettlementClaimMiddleware } from "./Store/claimSettlementMiddleware";
-import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import claimsService from "../../../services/claimsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
-import logger from "../../../utility/logger";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import FormErrorSummary from "../shared/FormErrorSummary";
+import useClaimsConfig from "../shared/useClaimsConfig";
+import { EDITABLE_STATUSES, errorText, fromIsoDate, toIsoDate } from "../shared/claimJourney";
 
-const initialValues = {
-  settlementType: "",
-  settlementAmount: "",
-  settlementIssueDate: new Date(),
-  settlementDate: new Date(),
-  settlementDocument: null,
+const amountOf = (value) => {
+  const n = Number(String(value ?? "").replace(/,/g, ""));
+  return Number.isFinite(n) ? n : NaN;
 };
+const round2 = (value) => Math.round((value || 0) * 100) / 100;
 
-const parseAmount = (value) => {
-  const parsed = parseFloat(String(value ?? "").replace(/[^0-9.]/g, ""));
-  return Number.isFinite(parsed) ? parsed : NaN;
-};
-
-const round2 = (value) => Number((value || 0).toFixed(2));
-
+/** Settlement: type (settlement types master), amount and dates, with each co-insurer's share of the amount. */
 const SettlementDetails = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const params = useParams();
-  const { id } = params;
-  const [loading, setLoading] = useState(false);
-  const [claimData, setClaimData] = useState(null);
-
-  const items = [
-    { label: t("settlementDetails.cash"), value: "Cash" },
-    { label: t("settlementDetails.card"), value: "Card" },
-    { label: t("settlementDetails.cheque"), value: "Cheque" },
-  ];
-
+  const toastRef = useRef(null);
+  const fileUploadRef = useRef(null);
+  const config = useClaimsConfig();
+  const { id } = useParams();
   const claimId = id || location.state?.claimId || location.state?.id;
-
-  const {
-    policyHolderName: reduxPolicyHolderName,
-    claimNumber: reduxClaimNumber,
-  } = useSelector(({ claimDetailsMainReducers }) => ({
-    policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
-    policyNumber: claimDetailsMainReducers?.policyNumber || "",
-    claimNumber: claimDetailsMainReducers?.claimNumber || "",
-  }));
-
-  const header = useClaimHeader(claimId);
-  const policyHolderName = header.policyHolderName || reduxPolicyHolderName || t("common.loading");
-  const headerClaimNumber = header.claimNumber || reduxClaimNumber;
+  const [claim, setClaim] = useState(null);
+  const [loadError, setLoadError] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const fetchClaim = async () => {
-      if (!claimId) return;
-      const result = await claimsService.getClaimDetails(claimId);
-      if (cancelled) return;
-      if (result.success) {
-        const payload = result.data?.data || result.data || null;
-        setClaimData(payload);
-      }
-    };
-
-    fetchClaim();
-    return () => {
-      cancelled = true;
-    };
+    if (!claimId) return;
+    claimsService.getClaimDetails(claimId).then((result) => {
+      if (result.success) setClaim(result.data?.data || result.data);
+      else setLoadError(result.error);
+    });
   }, [claimId]);
 
+  const editable = !claim || EDITABLE_STATUSES.includes(claim.lifecycleStatus);
+  const typeOptions = (config.settlementTypes || []).map((x) => ({ label: x.label || x.value, value: x.value }));
+  const labels = {
+    settlementType: t("claimJourney.settlementType"),
+    settlementAmount: t("claimJourney.settlementAmount"),
+    settlementIssueDate: t("claimJourney.issueDate"),
+    settlementDate: t("claimJourney.settleDate"),
+  };
+
   const formik = useFormik({
-    initialValues: initialValues,
+    initialValues: { settlementType: "", settlementAmount: "", settlementIssueDate: toIsoDate(new Date()), settlementDate: toIsoDate(new Date()), settlementDocument: null },
     validate: (v) => {
       const e = {};
-      if (!v.settlementType) e.settlementType = t("settlementDetails.typeRequired", "Select the settlement type");
-      const amt = Number(String(v.settlementAmount ?? "").replace(/,/g, ""));
-      if (!v.settlementAmount || !Number.isFinite(amt) || amt <= 0) e.settlementAmount = t("settlementDetails.amountRequired", "Enter a settlement amount greater than zero");
-      if (!v.settlementIssueDate) e.settlementIssueDate = t("settlementDetails.issueDateRequired", "Issue date is required");
-      if (!v.settlementDate) e.settlementDate = t("settlementDetails.settleDateRequired", "Settle date is required");
-      if (v.settlementIssueDate && v.settlementDate && new Date(v.settlementDate) < new Date(new Date(v.settlementIssueDate).toDateString())) {
-        e.settlementDate = t("settlementDetails.settleBeforeIssue", "Settle date cannot be before the issue date");
-      }
+      const required = t("claimJourney.required");
+      if (!v.settlementType) e.settlementType = required;
+      const amount = amountOf(v.settlementAmount);
+      if (!(amount > 0)) e.settlementAmount = t("claimJourney.amountPositive");
+      if (!v.settlementIssueDate) e.settlementIssueDate = required;
+      if (!v.settlementDate) e.settlementDate = required;
+      if (v.settlementIssueDate && v.settlementDate && v.settlementDate < v.settlementIssueDate) e.settlementDate = t("claimJourney.settleBeforeIssue");
       return e;
     },
-    onSubmit: (values) => {
-      handleSubmit(values);
+    onSubmit: async (values) => {
+      setServerError("");
+      setSaving(true);
+      const result = await dispatch(
+        postSettlementClaimMiddleware({
+          claimId,
+          settlementData: { ...values, settlementAmount: String(amountOf(values.settlementAmount)) },
+        })
+      );
+      setSaving(false);
+      if (!result.type.endsWith("/fulfilled")) {
+        setServerError(errorText(result.payload, t("claimJourney.settlementFailed")));
+        return;
+      }
+      // with maker-checker on, the settlement waits for a second claims user
+      const saved = result.payload?.data || result.payload || {};
+      const pending = /pending/i.test(String(saved.claimStatus || saved.status || saved.statusCode || ""));
+      toastRef.current?.showToast({
+        severity: "success",
+        summary: pending ? t("claimJourney.settlementSubmitted") : t("claimJourney.settlementRecorded"),
+        detail: pending ? t("claimJourney.awaitingChecker") : "",
+      });
+      navigate(`/agent/claimdetailedview/${claimId}`, { replace: true });
     },
   });
 
-  const coInsuranceRows = useMemo(() => {
-    const isCoInsurance = Boolean(
-      claimData?.isCoInsurancePolicy ||
-        claimData?.isCoInsurance ||
-        claimData?.quotation?.isCoInsurance ||
-        claimData?.policy?.isCoInsurance
-    );
-    if (!isCoInsurance) return [];
-
-    const baseRows = (claimData?.coInsuranceSettlementRows || []).filter(
-      (row) => !row.isTotal
-    );
-    const participants =
-      baseRows.length > 0
-        ? baseRows
-        : (claimData?.quotation?.participantDetails || []).map(
-            (participant, index) => {
-              const sharePercentage = parseAmount(participant.sharePercentage);
-              const share = Number.isFinite(sharePercentage)
-                ? sharePercentage
-                : 0;
-              const totalClaim = Number(claimData?.estimatedClaimAmount) || 0;
-              const settlementBase =
-                Number(
-                  claimData?.claimSettlementAmountFinal ??
-                    claimData?.settlementAmount ??
-                    claimData?.estimatedClaimAmount
-                ) || 0;
-              return {
-                participantId: participant.id || `participant-${index}`,
-                insurer:
-                  participant.insuranceCompanyName ||
-                  participant.participantName ||
-                  "N/A",
-                role:
-                  index === 0
-                    ? t("settlementDetails.leadInsurer")
-                    : t("settlementDetails.coInsurer"),
-                sharePercentage: share,
-                claimAmount: round2((totalClaim * share) / 100),
-                settlementAmount: round2((settlementBase * share) / 100),
-                status: claimData?.claimStatus || "",
-                isTotal: false,
-              };
-            }
-          );
-
-    if (participants.length === 0) return [];
-
-    const formSettlement = parseAmount(formik.values.settlementAmount);
-    const useFormSettlement = Number.isFinite(formSettlement);
-
-    const mapped = participants.map((row, index) => {
-      const share = Number(row.sharePercentage) || 0;
-      const settlementAmount = useFormSettlement
-        ? round2((formSettlement * share) / 100)
-        : Number(row.settlementAmount) || 0;
-
+  // each participating insurer's share of the settlement being entered
+  const shares = useMemo(() => {
+    const insurers = claim?.participatingInsurers || [];
+    if (insurers.length < 2) return [];
+    const amount = amountOf(formik.values.settlementAmount);
+    const estimate = Number(claim.estimatedClaimAmount) || 0;
+    return insurers.map((p) => {
+      const share = Number(p.sharePercentage) || 0;
       return {
-        ...row,
-        role:
-          row.role === "Lead Insurer" || index === 0
-            ? t("settlementDetails.leadInsurer")
-            : t("settlementDetails.coInsurer"),
-        settlementAmount,
+        id: String(p.insurerId),
+        insurer: p.insuranceCompanyName,
+        role: p.isLead ? t("claimJourney.leadInsurer") : t("claimJourney.coInsurer"),
+        share: `${share}%`,
+        claimAmount: formatCurrency(round2((estimate * share) / 100)),
+        settlementAmount: formatCurrency(round2(((amount > 0 ? amount : 0) * share) / 100)),
       };
     });
+  }, [claim, formik.values.settlementAmount, t]);
 
-    const totalShare = round2(
-      mapped.reduce((sum, row) => sum + (Number(row.sharePercentage) || 0), 0)
-    );
-    const totalClaimAmount = round2(
-      mapped.reduce((sum, row) => sum + (Number(row.claimAmount) || 0), 0)
-    );
-    const totalSettlementAmount = round2(
-      mapped.reduce((sum, row) => sum + (Number(row.settlementAmount) || 0), 0)
-    );
-
-    return [
-      ...mapped,
-      {
-        participantId: "total",
-        insurer: t("settlementDetails.total"),
-        role: "",
-        sharePercentage: totalShare,
-        claimAmount: totalClaimAmount,
-        settlementAmount: totalSettlementAmount,
-        status: claimData?.claimStatus || mapped[0]?.status || "",
-        isTotal: true,
-      },
-    ];
-  }, [claimData, formik.values.settlementAmount, t]);
-
-  const handleSubmit = async (values) => {
-    if (!claimId) {
-      logger.error("No claim ID available for settlement");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const settlementData = {
-        settlementType: values.settlementType,
-        settlementAmount: values.settlementAmount,
-        settlementIssueDate: values.settlementIssueDate.toISOString(),
-        settlementDate: values.settlementDate.toISOString(),
-        settlementDocument: values.settlementDocument,
-      };
-
-      const result = await dispatch(
-        postSettlementClaimMiddleware({
-          claimId: claimId,
-          settlementData: settlementData,
-        })
-      );
-
-      if (result.type.endsWith("/fulfilled")) {
-        // with maker-checker on, the settlement waits for a second claims user
-        const saved = result.payload?.data || result.payload || {};
-        const pending = /pending/i.test(String(saved.claimStatus || saved.status || saved.statusCode || ""));
-        if (pending) {
-          toastRef.current.showToast({ severity: "success", summary: t("settlementDetails.submittedForApproval", "Settlement submitted for approval"), detail: t("settlementDetails.awaitingChecker", "A second claims user must approve it before the claim is settled") });
-        } else {
-          toastRef.current.showToast();
-        }
-        setTimeout(() => {
-          navigate(`/agent/claimdetailedview/${claimId}`);
-        }, 2000);
-      } else {
-        toastRef.current?.showToast("error", t("common.error", "Settlement not submitted"), String(result.payload || "Settlement submission failed"));
-      }
-    } catch (error) {
-      toastRef.current?.showToast("error", t("common.error", "Settlement not submitted"), error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fileUploadRef = useRef(null);
-  const [uploadImage, setuploadImage] = useState(null);
-  const handleUppendImg = (name, src) => {
-    setuploadImage(src?.objectURL);
-  };
-  const handleCancelUplaoded = () => {
-    setuploadImage(null);
-    fileUploadRef.current.clear();
-  };
-  const handleBackNavigation = () => {
-    customHistory.back();
-  };
-
-  const getRoleClass = (role, isTotal) => {
-    if (isTotal || !role) return "";
-    if (role === t("settlementDetails.leadInsurer") || role === "Lead Insurer") {
-      return "role-pill role-pill--lead";
-    }
-    return "role-pill role-pill--co";
-  };
-
-  const getStatusClass = (status) => {
-    const normalized = String(status || "").toLowerCase();
-    if (normalized === "settled") return "status-pill status-pill--settled";
-    return "status-pill";
-  };
+  const showErrors = formik.submitCount > 0;
+  const fieldError = (name) => (showErrors || formik.touched[name] ? formik.errors[name] : undefined);
+  const req = (label) => (
+    <>
+      {label}
+      <span className="required-mark">*</span>
+    </>
+  );
+  const dateField = (name) => (
+    <div className="col-12 md:col-6">
+      <DatepickerField
+        label={req(labels[name])}
+        value={fromIsoDate(formik.values[name])}
+        onChange={(e) => formik.setFieldValue(name, toIsoDate(e.value))}
+        disabled={!editable}
+      />
+      <FieldError error={fieldError(name)} />
+    </div>
+  );
+  const right = { textAlign: "right" };
 
   return (
-    <div>
-      <CustomToast
-        ref={toastRef}
-        message={t("settlementDetails.claimSettledSuccess")}
-      />
-      <div className="claim__settlementdetails__container">
-        <div className="claim__details__container__titles">
-          {t("settlementDetails.clients")}
-        </div>
-        <div
-          className="claim__details__container__back__btn mt-3 cursor-pointer"
-          onClick={handleBackNavigation}
-        >
-          <SvgLeftArrow />
-          <div className="claim__details__container__back__btn__title">
-            {policyHolderName} /{" "}
-            {headerClaimNumber
-              ? t("settlementDetails.claimLabel", {
-                  claimNumber: headerClaimNumber,
-                })
-              : t("common.loading")}
-          </div>
-        </div>
-        <Card>
-          <div className="claim__details__card__container__title">
-            {t("settlementDetails.claimSettlement")}
-          </div>
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropdownField
-                label={t("settlementDetails.settlementType")}
-                value={formik.values.settlementType}
-                onChange={(e) =>
-                  formik.setFieldValue("settlementType", e.value)
-                }
-                options={items}
-                optionLabel="label"
-                optionValue="value"
-                placeholder={t("settlementDetails.select")}
-              />
-              {formik.touched.settlementType && formik.errors.settlementType && (
-                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.settlementType}</div>
-              )}
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("settlementDetails.settlementAmount")}
-                value={formik.values.settlementAmount}
-                onChange={formik.handleChange("settlementAmount")}
-              />
-              {formik.touched.settlementAmount && formik.errors.settlementAmount && (
-                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.settlementAmount}</div>
-              )}
-            </div>
-          </div>
-
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DatepickerField
-                label={t("settlementDetails.issueDate")}
-                value={formik.values.settlementIssueDate}
-                onChange={(e) => {
-                  formik.setFieldValue("settlementIssueDate", e.value);
-                }}
-                dateFormat="dd/mm/yy"
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DatepickerField
-                label={t("settlementDetails.settleDate")}
-                value={formik.values.settlementDate}
-                onChange={(e) => {
-                  formik.setFieldValue("settlementDate", e.value);
-                }}
-                dateFormat="dd/mm/yy"
-              />
-              {formik.touched.settlementDate && formik.errors.settlementDate && (
-                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.settlementDate}</div>
-              )}
-            </div>
-          </div>
-
-          <div className="col-12 mt-4 p-0">
-            <div className="claim__request__upload__subtitle  mb-2">
-              {t("settlementDetails.documents")}
-            </div>
-
-            <div className="upload__card__container mt-2">
-              <div className="file_icon_selector">
-                <FileUpload
-                  ref={fileUploadRef}
-                  url="./upload"
-                  auto
-                  customUpload
-                  mode="basic"
-                  name="demo"
-                  accept=".png,.jpg,.jpeg"
-                  uploadHandler={(e) => {
-                    const file = e.files[0];
-                    formik.setFieldValue("settlementDocument", file);
-                    handleUppendImg(e.options.props.name, file, "the data");
-                  }}
+    <ClaimJourneyLayout
+      step="settlement"
+      holderName={claim?.policyHolderName}
+      reference={claim?.claimNumber ? t("claimJourney.claimRef", { number: claim.claimNumber }) : ""}
+      status={claim?.claimStatus}
+      onBack={() => navigate(claim?.clientId ? `/agent/clientview/${claim.clientId}` : "/agent/claim")}
+      title={t("claimJourney.settlementTitle")}
+    >
+      <CustomToast ref={toastRef} />
+      {!claim && !loadError && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
+      {loadError && <FormErrorSummary serverError={loadError} />}
+      {claim && !editable && <div className="claim-journey__notice">{t("claimJourney.settlementLocked", { status: claim.claimStatus })}</div>}
+      {claim && (
+        <>
+          <ClaimSection title={t("claimJourney.settlementSection")}>
+            <div className="grid">
+              <div className="col-12 md:col-6">
+                <DropdownField
+                  label={req(labels.settlementType)}
+                  value={formik.values.settlementType}
+                  onChange={(e) => formik.setFieldValue("settlementType", e.value)}
+                  options={typeOptions}
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder={t("claimJourney.select")}
+                  disabled={!editable}
                 />
-                <div className="icon_click_option">
-                  <SvgImageUpload />
-                </div>
-                <div className="upload__caption text-center">
-                  {t("settlementDetails.upload")}
-                </div>
-                <div className="upload__caption text-center">
-                  {t("settlementDetails.uploadMaxSize")}
-                </div>
+                <FieldError error={fieldError("settlementType")} />
               </div>
+              <div className="col-12 md:col-6">
+                <InputTextField
+                  label={req(labels.settlementAmount)}
+                  value={formik.values.settlementAmount}
+                  onChange={formik.handleChange("settlementAmount")}
+                  onBlur={() => formik.setFieldTouched("settlementAmount", true, false)}
+                  keyfilter="money"
+                  disabled={!editable}
+                />
+                <FieldError error={fieldError("settlementAmount")} />
+                {Number(claim.estimatedClaimAmount) > 0 && (
+                  <small className="claim-journey__hint">{t("claimJourney.estimateWas", { amount: formatCurrency(claim.estimatedClaimAmount) })}</small>
+                )}
+              </div>
+              {dateField("settlementIssueDate")}
+              {dateField("settlementDate")}
             </div>
-            {uploadImage && (
-              <div onClick={handleCancelUplaoded} className="mt-2">
-                <SvgUploadClose />
-              </div>
-            )}
-          </div>
+          </ClaimSection>
 
-          {coInsuranceRows.length > 0 && (
-            <div className="co-insurance-settlement-section mt-4">
-              <div className="co-insurance-settlement-section__header">
-                <div className="co-insurance-settlement-section__title">
-                  {t("settlementDetails.coInsuranceDetails")}
-                </div>
-                <span className="co-insurance-policy-badge">
-                  {t("settlementDetails.coInsurancePolicyYes")}
-                </span>
-              </div>
-
-              <table className="co-insurance-settlement-table">
-                <thead>
-                  <tr>
-                    <th>{t("settlementDetails.insurer")}</th>
-                    <th>{t("settlementDetails.role")}</th>
-                    <th className="numeric">
-                      {t("settlementDetails.sharePercent")}
-                    </th>
-                    <th className="numeric">
-                      {t("settlementDetails.claimAmount")}
-                    </th>
-                    <th className="numeric settlement">
-                      {t("settlementDetails.settlementAmountCol")}
-                    </th>
-                    <th>{t("settlementDetails.status")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coInsuranceRows.map((row) => (
-                    <tr
-                      key={row.participantId}
-                      className={row.isTotal ? "total-row" : ""}
-                    >
-                      <td className="insurer-cell">{row.insurer}</td>
-                      <td>
-                        {row.role ? (
-                          <span className={getRoleClass(row.role, row.isTotal)}>
-                            {row.role}
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="numeric">
-                        {`${Number(row.sharePercentage) || 0}%`}
-                      </td>
-                      <td className="numeric">
-                        {formatCurrency(row.claimAmount)}
-                      </td>
-                      <td className="numeric settlement">
-                        {formatCurrency(row.settlementAmount)}
-                      </td>
-                      <td>
-                        {row.status ? (
-                          <span className={getStatusClass(row.status)}>
-                            {row.status === "Settled"
-                              ? t("settlementDetails.settled")
-                              : row.status}
-                          </span>
-                        ) : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="co-insurance-settlement-note">
-                {t("settlementDetails.settlementAmountNote")}
-              </div>
-            </div>
+          {shares.length > 0 && (
+            <ClaimSection title={t("claimJourney.coInsurance")} hint={t("claimJourney.sharesHint")}>
+              <DataTable value={shares} size="small" dataKey="id">
+                <Column field="insurer" header={t("claimJourney.insurer")} />
+                <Column field="role" header={t("claimJourney.role")} />
+                <Column field="share" header={t("claimJourney.share")} alignHeader="right" bodyStyle={right} />
+                <Column field="claimAmount" header={t("claimJourney.estimatedAmount")} alignHeader="right" bodyStyle={right} />
+                <Column field="settlementAmount" header={t("claimJourney.settlementAmount")} alignHeader="right" bodyStyle={right} />
+              </DataTable>
+            </ClaimSection>
           )}
 
-          <div className="claimrequest__back__but">
-            <Button
-              onClick={handleBackNavigation}
-              link
-              className="claim__back__but"
-            >
-              {t("settlementDetails.back")}
-            </Button>
-            <Button
-              onClick={formik.handleSubmit}
-              className="claim__snd__but"
-              disabled={loading}
-              loading={loading}
-            >
-              {loading
-                ? t("settlementDetails.submitting")
-                : t("settlementDetails.submit")}
-            </Button>
-          </div>
-        </Card>
-      </div>
-    </div>
+          <ClaimSection title={t("claimJourney.settlementDocuments")} hint={t("claimJourney.optional")}>
+            <div className="claim-journey__upload">
+              {formik.values.settlementDocument ? (
+                <span className="claim-journey__file">
+                  <i className="pi pi-file" aria-hidden="true" />
+                  {formik.values.settlementDocument.name}
+                  <Button
+                    type="button"
+                    icon="pi pi-times"
+                    text
+                    rounded
+                    aria-label={t("claimJourney.removeFile")}
+                    onClick={() => {
+                      formik.setFieldValue("settlementDocument", null);
+                      fileUploadRef.current?.clear();
+                    }}
+                  />
+                </span>
+              ) : (
+                <FileUpload
+                  ref={fileUploadRef}
+                  mode="basic"
+                  auto
+                  customUpload
+                  name="settlementDocument"
+                  accept=".png,.jpg,.jpeg,.pdf"
+                  maxFileSize={2000000}
+                  chooseLabel={t("claimJourney.chooseFile")}
+                  disabled={!editable}
+                  invalidFileSizeMessageSummary={t("claimJourney.fileTooLarge")}
+                  invalidFileSizeMessageDetail=""
+                  uploadHandler={(e) => {
+                    formik.setFieldValue("settlementDocument", e.files[0]);
+                    e.options.clear();
+                  }}
+                />
+              )}
+              <small>{t("claimJourney.fileRule")}</small>
+            </div>
+          </ClaimSection>
+
+          <FormErrorSummary errors={formik.errors} labels={labels} show={showErrors} serverError={serverError} />
+        </>
+      )}
+      <ClaimActions>
+        <Button
+          type="button"
+          label={t("claimJourney.back")}
+          outlined
+          onClick={() => navigate(`/agent/claimrequest/settlementapproval/${claimId}`, { state: { claimId } })}
+          disabled={saving}
+        />
+        <Button type="button" label={t("claimJourney.submitSettlement")} onClick={formik.handleSubmit} loading={saving} disabled={saving || !claim || !editable} />
+      </ClaimActions>
+    </ClaimJourneyLayout>
   );
 };
 
