@@ -103,7 +103,7 @@ const Index = () => {
             <span className="p-input-icon-left" style={{ width: "100%" }}>
               <i className="pi pi-search" />
               <InputText
-                placeholder={t("financeMasters.searchCustomers")}
+                placeholder={t("financeMasters.searchDepartments")}
                 className="searchinput_left"
               />
             </span>

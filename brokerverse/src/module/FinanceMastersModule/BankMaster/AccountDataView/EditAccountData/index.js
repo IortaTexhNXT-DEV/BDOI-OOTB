@@ -363,7 +363,6 @@ function EditAccountDetail({ action }) {
           label="Update"
           onClick={formik.handleSubmit}
 
-          disabled={!formik.isValid}
         />
       </div>
       <CheckEditData

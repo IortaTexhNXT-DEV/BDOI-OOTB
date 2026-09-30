@@ -28,7 +28,7 @@ const receiptsReducer = createSlice({
     });
     builder.addCase(getCompanyListMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      state.companyTableList = [action.payload];
+      state.companyTableList = Array.isArray(action.payload) ? action.payload : [];
     });
     builder.addCase(getCompanyListMiddleware.rejected, (state, action) => {
       state.loading = false;
@@ -69,7 +69,7 @@ const receiptsReducer = createSlice({
     });
     builder.addCase(postAddCompanyMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      const newItem2 = { ...action.payload, id: nextId++ };
+      const newItem2 = { id: nextId++, ...action.payload };
       state.companyTableList = [...state.companyTableList, newItem2];
     });
     builder.addCase(postAddCompanyMiddleware.rejected, (state, action) => {

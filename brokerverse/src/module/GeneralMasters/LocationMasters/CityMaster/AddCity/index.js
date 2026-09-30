@@ -294,7 +294,6 @@ function AddCity({ action }) {
           <Button
             className="submit_button p-0"
             label={t("generalMasters.save")}
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           />
         )}
@@ -304,7 +303,6 @@ function AddCity({ action }) {
           <Button
             className="submit_button p-0"
             label={t("generalMasters.update")}
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           />
         )}

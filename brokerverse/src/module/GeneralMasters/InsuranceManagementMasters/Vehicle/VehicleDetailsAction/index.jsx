@@ -124,7 +124,7 @@ const VehicleDetailsAction = ({ action }) => {
   return (
     <div className="action__vehicle_container">
       <div className="grid m-0 top-container">
-        <CustomToast ref={toastRef} message="Vehicle Code VC1234 is added" />
+        <CustomToast ref={toastRef} message={`Vehicle Code ${formik.values.vehicleCode || ""} is added`} />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="svgback_container">
@@ -266,7 +266,6 @@ const VehicleDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -275,7 +274,6 @@ const VehicleDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

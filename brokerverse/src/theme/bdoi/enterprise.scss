@@ -77,13 +77,16 @@ $text-strong: #1f2937;
 
   h1,
   h2,
-  .page-title {
+  .page-title,
+  .label_header {
     color: $color-heading;
   }
 
-  // Page titles: one size everywhere.
+  // Page titles: one size everywhere (.label_header is the title of the master add / edit / view screens; without
+  // it here the generic 13px form label rule below shrank those titles to field-label size).
   h1,
-  .page-title {
+  .page-title,
+  .label_header {
     font-size: 24px;
     line-height: 32px;
     font-weight: 800;

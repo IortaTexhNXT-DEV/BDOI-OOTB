@@ -222,7 +222,6 @@ const AddPettyCash = () => {
         <Button
           label={t("financeMasters.save")}
           className="save__add__btn"
-          disabled={!formik.isValid}
           onClick={formik.handleSubmit}
         />
       </div>

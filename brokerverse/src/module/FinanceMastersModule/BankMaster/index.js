@@ -267,7 +267,7 @@ const BankMaster = () => {
             <span className="p-input-icon-left" style={{ width: "100%" }}>
               <i className="pi pi-search" />
               <InputText
-                placeholder={t("financeMasters.searchCustomers")}
+                placeholder={t("financeMasters.searchBanks")}
                 className="searchinput_left"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

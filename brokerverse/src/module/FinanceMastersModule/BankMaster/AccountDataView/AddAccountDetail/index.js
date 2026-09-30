@@ -357,7 +357,6 @@ function AddAccountDetail() {
           onClick={() => {
             formik.handleSubmit();
           }}
-          disabled={!formik.isValid}
         />
       </div>
 

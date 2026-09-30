@@ -7,7 +7,7 @@ import SvgDot from "../../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
 import { useFormik } from "formik";
@@ -15,6 +15,8 @@ import CustomToast from "../../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getCompanyEditData,
+  getCompanyViewMiddleWare,
   patchCompanyEditMiddleware,
   postAddCompanyMiddleware,
 } from "../store/companyMiddleware";
@@ -167,6 +169,15 @@ function AddCompany({ action }) {
   useEffect(() => {
     setFormikValues();
   }, [getcompanyEdit]);
+
+  // Opened by address (bookmark, refresh): load the record of the route instead of relying on the list click
+  const { id: routeId } = useParams();
+  useEffect(() => {
+    if (!routeId) return;
+    if (action === "edit" && String(getcompanyEdit?.id) !== String(routeId)) dispatch(getCompanyEditData(routeId));
+    if (action === "view" && String(companyView?.id) !== String(routeId)) dispatch(getCompanyViewMiddleWare(routeId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeId, action]);
 
   // Logo: uploaded to the file store; the canonical object URL (without the expiring signature) is saved on the company
   const [logoUploading, setLogoUploading] = useState(false);
@@ -625,7 +636,6 @@ function AddCompany({ action }) {
           <Button
             className="submit_button p-0"
             label={t("generalMasters.save")}
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           />
         )}
@@ -635,7 +645,6 @@ function AddCompany({ action }) {
           <Button
             className="submit_button p-0"
             label={t("generalMasters.update")}
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           />
         )}

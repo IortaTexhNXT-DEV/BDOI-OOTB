@@ -328,14 +328,14 @@ function AddState({ action }) {
 
       <div className="next_container">
         {action === "add" && (
-          <Button className="submit_button p-0" label={t("generalMasters.save")} disabled={!formik.isValid}
+          <Button className="submit_button p-0" label={t("generalMasters.save")}
             onClick={() => { formik.handleSubmit(); }}
           />
         )}
       </div>
       <div className="next_container">
         {action === "edit" && (
-          <Button className="submit_button p-0" label={t("generalMasters.update")} disabled={!formik.isValid}
+          <Button className="submit_button p-0" label={t("generalMasters.update")}
             onClick={() => { formik.handleSubmit(); }}
           />
         )}

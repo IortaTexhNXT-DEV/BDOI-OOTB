@@ -580,13 +580,11 @@ const AddEmployee = ({ action }) => {
             onClick={() => {
               formik.handleSubmit();
             }}
-            disabled={!formik.isValid}
           />
         )}
         {action === "edit" && (
           <Button
             className="save__add__btn"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update
@@ -595,8 +593,7 @@ const AddEmployee = ({ action }) => {
       </div>
       <CustomToast
         ref={toastRef}
-        message="Employee Code CC1234 
-        is added"
+        message={`Employee Code ${formik.values.employeeCode || ""} is added`}
       />
     </div>
   );

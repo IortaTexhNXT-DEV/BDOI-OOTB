@@ -156,7 +156,6 @@ const TableData = ({ navigate }) => {
           field="productName"
           header="Product Name"
           className="fieldvalue_container"
-          body={(rowData) => rowData.productName?.toUpperCase()}
         ></Column>
         <Column
           field="lineofBusiness"
@@ -177,16 +176,10 @@ const TableData = ({ navigate }) => {
           body={(rowData) => (rowData.customerSegment ? t(`productClassification.segments.${rowData.customerSegment}`) : "-")}
         ></Column>
         <Column
-          field="commissionCode"
-          header="Commission Code"
+          field="modifiedBy"
+          header="Modified By"
           className="fieldvalue_container"
-          body={(rowData) => rowData.commissionCode?.toUpperCase()}
-        ></Column>
-        <Column
-          field="modifiedby"
-          header="Modified by"
-          className="fieldvalue_container"
-          body={(rowData) => rowData.modifiedby?.toUpperCase()}
+          body={(rowData) => rowData.modifiedBy || rowData.updatedBy || rowData.createdBy || "-"}
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
@@ -195,7 +188,7 @@ const TableData = ({ navigate }) => {
         ></Column>
         <Column
           field="status"
-          header="status"
+          header="Status"
           className="fieldvalue_container"
           body={(columnData) => <MasterStatusToggle type="product" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>

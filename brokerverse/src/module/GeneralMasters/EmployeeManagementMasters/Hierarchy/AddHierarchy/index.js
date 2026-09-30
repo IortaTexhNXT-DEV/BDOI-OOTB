@@ -217,13 +217,11 @@ const AddHierarchy = ({ action }) => {
             onClick={() => {
               formik.handleSubmit();
             }}
-            disabled={!formik.isValid}
           />
         )}
         {action === "edit" && (
           <Button
             className="save__add__btn"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update
