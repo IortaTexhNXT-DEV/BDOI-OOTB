@@ -19,6 +19,8 @@
  *        Cr Commission Receivable – Insurers (cash + EWT)
  *   The note moves Open -> Partially collected -> Collected; when collected, agent commission on its policies becomes
  *   eligible (commission.require_full_payment).
+ * - The client's payment to the insurer is recorded without posting (clientPayments.js); the unbilled grid and the
+ *   note's lines show it, and direct_bill.client_payment_required can hold the approval of a note until it is recorded.
  */
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
@@ -35,6 +37,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays } from '../../lib/dates.js';
+import { assertClientPaid, clientPaymentStatus } from './clientPayments.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -247,6 +250,12 @@ export const itemOut = (it, ewt = 0) => ({
   netReceivable: round2(Number(it.amount) - Number(it.commission) * ewt), bookingJournal: it.booking_jv_number, debitNoteId: it.debit_note_id, status: it.status,
 });
 
+/** The client's payment to the insurer on the row's policy (see clientPayments.js). */
+const withClientPayment = (row, status) => {
+  const s = status.get(row.policyId);
+  return { ...row, clientPaymentStatus: s?.statusLabel || 'Unpaid', clientPaid: s?.paid || 0, clientPaymentReference: s?.lastReference || null };
+};
+
 async function findInsurer(ref, required = true) {
   if (ref === undefined || ref === null || ref === '') {
     if (required) throw badRequest('Validation failed', [{ path: 'insurerCode', message: 'Insurer is required' }]);
@@ -272,7 +281,8 @@ export async function unbilledItems(qs) {
   if (qs.search) add('(p.policy_number ILIKE \'%\' || ? || \'%\' OR COALESCE(p.insured_name, c.display_name) ILIKE \'%\' || $' + (vals.length + 1) + ' || \'%\')', qs.search);
   const rows = await many(`${ITEM_SQL} WHERE ${conds.join(' AND ')} ORDER BY ic.name, it.booked_on, p.policy_number`, vals);
   const ewt = await ewtRate();
-  const data = rows.map((r) => itemOut(r, ewt));
+  const paid = await clientPaymentStatus(pool, rows.map((r) => r.policy_id));
+  const data = rows.map((r) => withClientPayment(itemOut(r, ewt), paid));
   const sum = (k) => round2(data.reduce((s, x) => s + x[k], 0));
   return { data, summary: { count: data.length, grossPremium: sum('grossPremium'), commission: sum('commission'), vat: sum('vat'), totalDue: sum('totalDue'), expectedEwt: sum('expectedEwt'), netReceivable: sum('netReceivable'), ewtRate: ewt } };
 }
@@ -324,7 +334,8 @@ export async function getDebitNote(id) {
   const lines = await many('SELECT * FROM commission_debit_note_lines WHERE debit_note_id = $1 ORDER BY line_no, id', [d.id]);
   const cols = await many(`SELECT x.*, j.jv_number, (SELECT display_name FROM users u WHERE u.id = x.created_by) AS created_by_name
     FROM commission_debit_note_collections x LEFT JOIN journal_vouchers j ON j.id = x.journal_id WHERE x.debit_note_id = $1 ORDER BY x.received_date, x.created_at`, [d.id]);
-  return { ...debitNoteOut(d), lines: lines.map(lineOut), collections: cols.map(collectionOut) };
+  const paid = await clientPaymentStatus(pool, lines.map((l) => l.policy_id));
+  return { ...debitNoteOut(d), lines: lines.map((l) => withClientPayment(lineOut(l), paid)), collections: cols.map(collectionOut) };
 }
 
 export async function listDebitNotes(qs, pg) {
@@ -432,6 +443,7 @@ export async function decideDebitNote(id, action, body, user) {
     await assertChecker(user, d.created_by, 'debit note');
     await assertChecker(user, d.submitted_by, 'debit note');
     if (action === 'approve') {
+      await assertClientPaid(db, d.id, d.dn_number);
       // the approver's remarks go to the audit trail (logged by the route), not onto the printed note
       await db.query('UPDATE commission_debit_notes SET status = \'open\', approved_by = $2, approved_at = now(), updated_by = $2, updated_at = now() WHERE id = $1', [d.id, user.id]);
     } else {

@@ -50,6 +50,12 @@ export const TRANSACTION_TABLES = [
   'bank_statements', 'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations', 'bank_reconciliation_history',
   // comsub adjustments on return premium, claim settlement cash, refunds due from insurers
   'commission_adjustments', 'claim_settlement_movements', 'insurer_refund_credits',
+  // client payments to insurers recorded on direct-bill policies
+  'direct_bill_client_payments',
+  // insurer statement reconciliation (statement formats are configuration and stay)
+  'insurer_statements', 'insurer_statement_lines', 'insurer_statement_resolutions',
+  // credit control (client credit limits are a column of clients)
+  'premium_instalment_plans', 'premium_instalments', 'premium_warranty_extensions', 'premium_warranty_actions', 'client_credit_exceptions',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

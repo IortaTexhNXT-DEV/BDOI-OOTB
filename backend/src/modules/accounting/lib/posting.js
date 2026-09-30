@@ -17,18 +17,19 @@ import { getSetting } from '../../../lib/settings.js';
 import { badRequest, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
 import { account, cashAccountFor, createJournal, payableAccountFor } from './ledger.js';
+import { commissionTaxAccount } from './commissionTax.js';
 
 const P = (insurerName, share, amounts) => ({ insurerId: null, insurerName, share, amounts });
 /** Business events: label, module, amount keys the operation supplies, template variables and a sample context. */
 export const EVENTS = {
   'policy.issue.broker_billed': { label: 'Policy issued – broker billed', module: 'policies', participants: true,
-    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'net_premium'], vars: ['policyNumber', 'billNumber', 'insurer', 'participantSuffix'],
-    sample: { amounts: { gross: 11200, net_premium: 10000, vat: 0, dst: 0, lgt: 0, commission: 1500, due_to_insurer: 9700 }, vars: { policyNumber: 'POL-SAMPLE', billNumber: 'INV-SAMPLE', insurer: 'Sample Insurer', participantSuffix: '' } } },
+    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'net_premium', 'commission_vat', 'commission_ewt'], vars: ['policyNumber', 'billNumber', 'insurer', 'participantSuffix'],
+    sample: { amounts: { gross: 11200, net_premium: 10000, vat: 0, dst: 0, lgt: 0, commission: 1500, commission_vat: 180, commission_ewt: 150, due_to_insurer: 9670 }, vars: { policyNumber: 'POL-SAMPLE', billNumber: 'INV-SAMPLE', insurer: 'Sample Insurer', participantSuffix: '' } } },
   'endorsement.additional_premium': { label: 'Endorsement – additional premium', module: 'endorsements', participants: true, sameAs: 'policy.issue.broker_billed' },
   'policy.renewal.broker_billed': { label: 'Renewal – broker billed', module: 'policies', participants: true, sameAs: 'policy.issue.broker_billed' },
   'endorsement.return_premium': { label: 'Endorsement – return premium', module: 'endorsements', participants: true,
-    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'receivable_credit', 'refund'], vars: ['policyNumber', 'reference', 'billNumber', 'clientName', 'insurer', 'participantSuffix'],
-    sample: { amounts: { gross: 1120, vat: 0, dst: 0, lgt: 0, commission: 150, due_to_insurer: 970, receivable_credit: 620, refund: 500 },
+    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'receivable_credit', 'refund', 'commission_vat', 'commission_ewt'], vars: ['policyNumber', 'reference', 'billNumber', 'clientName', 'insurer', 'participantSuffix'],
+    sample: { amounts: { gross: 1120, vat: 0, dst: 0, lgt: 0, commission: 150, commission_vat: 18, commission_ewt: 15, due_to_insurer: 967, receivable_credit: 620, refund: 500 },
       vars: { policyNumber: 'POL-SAMPLE', reference: 'END-SAMPLE', billNumber: 'INV-SAMPLE', clientName: 'Sample Client', insurer: 'Sample Insurer', participantSuffix: '' } } },
   'policy.cancel': { label: 'Policy cancellation', module: 'endorsements', participants: true, sameAs: 'endorsement.return_premium' },
   'receipt.apply': { label: 'Premium collection applied', module: 'receipts', amounts: ['amount'], vars: ['policyNumber', 'receiptSuffix', 'memoRef', 'billNumber'],
@@ -67,6 +68,10 @@ export const EVENTS = {
     sample: { amounts: { adjustments: 250, net: 9950 }, vars: { reference: 'STL-SAMPLE', insurer: 'Sample Insurer' }, payeeType: 'Insurer' } },
   'remittance.adjustment': { label: 'Remittance adjustment', module: 'remittance', amounts: ['amount'], vars: ['reference', 'adjustmentType', 'reason', 'insurer'],
     sample: { amounts: { amount: -300 }, vars: { reference: 'ADJ-SAMPLE', adjustmentType: 'Credit note', reason: 'Rate correction', insurer: 'Sample Insurer' }, payeeType: 'Insurer' } },
+  'insurer_statement.adjustment': { label: 'Insurer statement adjustment', module: 'remittance', amounts: ['premium', 'commission'],
+    vars: ['statementNumber', 'statementRef', 'insurer', 'policyNumber', 'note'], contextAccounts: ['commission_offset'],
+    sample: { amounts: { premium: 250, commission: -120 }, vars: { statementNumber: 'ISR-SAMPLE', statementRef: 'SOA-SAMPLE', insurer: 'Sample Insurer', policyNumber: 'POL-SAMPLE', note: 'Rate correction' },
+      payeeType: 'Insurer', accounts: { commission_offset: '1203001' } } },
   'remittance.transfer': { label: 'Remittance electronic transfer', module: 'remittance', amounts: ['amount'], vars: ['reference', 'beneficiary', 'method'],
     sample: { amounts: { amount: 9700 }, vars: { reference: 'TRF-SAMPLE', beneficiary: 'Sample Insurer', method: 'instapay' }, payeeType: 'Insurer' } },
   'insurer.refund_due': { label: 'Refund due from insurer (return premium already remitted)', module: 'remittance', participants: true,
@@ -116,6 +121,10 @@ export const RESOLVERS = {
     resolve: async (db, ctx) => ctx.accounts?.bank || (await bankAccountGl(db, ctx.bankAccount)) || cashAccountFor(ctx.paymentMode) },
   cash_by_payment_mode: { label: 'Cash account of the payment mode', resolve: async (db, ctx) => cashAccountFor(ctx.paymentMode) },
   payable_by_payee: { label: 'Payable account of the payee type', resolve: async (db, ctx) => payableAccountFor(ctx.payeeType || 'Insurer') },
+  commission_vat_account: { label: 'GL account of the commission output VAT tax code (else the fallback role)',
+    resolve: async (db, ctx, line) => (await commissionTaxAccount(db, 'vat')) || account(line.fallback_role || 'output_vat') },
+  commission_ewt_account: { label: 'GL account of the commission EWT tax code (else the fallback role)',
+    resolve: async (db, ctx, line) => (await commissionTaxAccount(db, 'ewt')) || account(line.fallback_role || 'creditable_wht') },
   write_off_reason: { label: 'GL account of the write-off reason',
     resolve: async (db, ctx, line) => {
       if (ctx.writeOffReason) {
@@ -137,13 +146,13 @@ const lineOut = (l) => ({ id: l.id, lineNo: l.line_no, side: l.side, accountType
 export const ruleOut = (r, lines) => ({
   id: r.id, eventCode: r.event_code, event: EVENTS[r.event_code]?.label || r.event_code, version: r.version, name: r.name, description: r.description, module: r.module,
   entryType: r.entry_type, source: r.source, narration: r.narration, branchSource: r.branch_source, effectiveFrom: r.effective_from instanceof Date ? r.effective_from.toISOString().slice(0, 10) : r.effective_from,
-  active: r.active, changeNote: r.change_note, createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
+  active: r.active, approvalStatus: r.approval_status || 'approved', approvedBy: r.approved_by || null, approvedAt: r.approved_at || null, changeNote: r.change_note, createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
   lines: (lines || []).map(lineOut),
 });
 
-/** The rule in force for an event on a date (latest effective version that is active). */
+/** The rule in force for an event on a date (latest effective version that is active and approved). */
 export async function activeRule(db, eventCode, date) {
-  const r = (await db.query(`SELECT * FROM posting_rules WHERE event_code = $1 AND active AND effective_from <= $2::date
+  const r = (await db.query(`SELECT * FROM posting_rules WHERE event_code = $1 AND active AND approval_status = 'approved' AND effective_from <= $2::date
     ORDER BY effective_from DESC, version DESC LIMIT 1`, [eventCode, date])).rows[0];
   if (!r) throw notFound(`No active posting rule for event ${eventCode} on ${date}`);
   const lines = (await db.query('SELECT * FROM posting_rule_lines WHERE rule_id = $1 ORDER BY line_no', [r.id])).rows;

@@ -421,6 +421,18 @@ export const menuList = [
             includes: ["/master/finance/posting-rules"],
           },
           {
+            id: 3,
+            name: "Configuration Approvals",
+            path: "/master/finance/configuration-approvals",
+            includes: ["/master/finance/configuration-approvals"],
+          },
+          {
+            id: 4,
+            name: "Accounting Flow",
+            path: "/master/finance/accounting-flow",
+            includes: ["/master/finance/accounting-flow"],
+          },
+          {
             id: 40,
             name: "Commission Rate Matrix",
             path: "/master/finance/commission-rate-matrix",
@@ -527,6 +539,12 @@ export const menuList = [
             name: "Bank Transaction Types",
             path: "/master/finance/bank-transaction-types",
             includes: ["/master/finance/bank-transaction-types"],
+          },
+          {
+            id: 23,
+            name: "Insurer Statement Formats",
+            path: "/master/finance/insurer-statement-formats",
+            includes: ["/master/finance/insurer-statement-formats"],
           },
           {
             id: 9,
@@ -1037,6 +1055,28 @@ export const menuList = [
           { id: 5, name: "Deposits in Transit", path: "/accounts/bank-reconciliation/reports/bank-deposits-in-transit", includes: ["/accounts/bank-reconciliation/reports/bank-deposits-in-transit"] },
           { id: 6, name: "Unmatched Bank Lines", path: "/accounts/bank-reconciliation/reports/bank-unmatched-lines", includes: ["/accounts/bank-reconciliation/reports/bank-unmatched-lines"] },
           { id: 7, name: "Bank Book", path: "/accounts/bank-reconciliation/reports/bank-book", includes: ["/accounts/bank-reconciliation/reports/bank-book"] },
+        ],
+      },
+      {
+        id: 23,
+        name: "Insurer Reconciliation",
+        submenu: [
+          {
+            id: 1,
+            name: "Insurer Statements",
+            path: "/accounts/insurer-reconciliation/statements",
+            includes: ["/accounts/insurer-reconciliation/statements"],
+          },
+        ],
+      },
+      {
+        id: 24,
+        name: "Credit Control",
+        submenu: [
+          { id: 1, name: "Instalment Plans", path: "/accounts/credit-control/instalments", includes: ["/accounts/credit-control/instalments"] },
+          { id: 2, name: "Premium Warranty Monitor", path: "/accounts/credit-control/warranty", includes: ["/accounts/credit-control/warranty"] },
+          { id: 3, name: "Client Credit Limits", path: "/accounts/credit-control/limits", includes: ["/accounts/credit-control/limits"] },
+          { id: 4, name: "Remittance Ageing", path: "/accounts/credit-control/remittance-ageing", includes: ["/accounts/credit-control/remittance-ageing"] },
         ],
       },
       {

@@ -31,7 +31,15 @@ const postingRulesService = {
   setMap: (name, map) => request("PUT", `/account-determination/maps/${encodeURIComponent(name)}`, { map }),
   addWriteOffReason: (reason) => request("POST", "/account-determination/write-off-reasons", reason),
   updateWriteOffReason: (code, reason) => request("PUT", `/account-determination/write-off-reasons/${encodeURIComponent(code)}`, reason),
+  commissionTaxes: () => request("GET", "/account-determination/commission-taxes"),
+  setCommissionTaxes: (body) => request("PUT", "/account-determination/commission-taxes", body),
   writeOffReasons: () => request("GET", "/accounting/write-off-reasons"),
+  flow: () => request("GET", "/posting-rules/flow"),
+  // maker-checker on posting rule and account determination changes
+  changes: (status) => request("GET", `/posting-rules/changes?status=${encodeURIComponent(status || "pending")}`),
+  approveChange: (id, remarks) => request("POST", `/posting-rules/changes/${id}/approve`, remarks ? { remarks } : {}),
+  rejectChange: (id, remarks) => request("POST", `/posting-rules/changes/${id}/reject`, { remarks }),
+  withdrawChange: (id) => request("POST", `/posting-rules/changes/${id}/withdraw`, {}),
   glAccounts: () => request("GET", "/accounting/accounts?status=active"),
 };
 

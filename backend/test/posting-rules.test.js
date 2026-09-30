@@ -7,9 +7,11 @@ import { allocate, policyParticipants } from '../src/modules/accounting/lib/coin
 import { returnPremium, findPolicy } from '../src/modules/receipts/receivables.js';
 import { bookDirectBill } from '../src/modules/remittance/directbill.js';
 import { eligiblePolicies } from '../src/modules/remittance/service.js';
+import { withoutCommissionTaxes, withoutConfigurationApproval } from './helpers.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+// these suites check the journals of the original rules; commission taxes (rule version 2) are in commission-taxes.test.js
+beforeAll(async () => { ctx = await setupFinance(); await withoutCommissionTaxes(); await withoutConfigurationApproval(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -293,7 +295,9 @@ describe('Posting Rules and Account Determination screens', () => {
     expect(ev.status).toBe(200);
     expect(ev.body.data.map((e) => e.eventCode)).toEqual(expect.arrayContaining(['policy.issue.broker_billed', 'receipt.apply', 'endorsement.return_premium', 'policy.cancel',
       'claim.settlement.paid_through_broker', 'write_off', 'ri.cession', 'ri.recovery', 'remittance.transfer', 'incentive.accrual']));
-    expect(ev.body.data.every((e) => e.activeVersion === 1)).toBe(true);
+    // premium bookings and returns are on version 2 (commission taxes, migration 0170)
+    const taxed = ['policy.issue.broker_billed', 'endorsement.additional_premium', 'policy.renewal.broker_billed', 'endorsement.return_premium', 'policy.cancel'];
+    expect(ev.body.data.every((e) => e.activeVersion === (taxed.includes(e.eventCode) ? 2 : 1))).toBe(true);
     const meta = await ctx.as('maker')('get', '/posting-rules/meta');
     expect(meta.body.data.roles.find((r) => r.role === 'premium_receivable').glCode).toBe('1202001');
     // finance reads, configuration writes

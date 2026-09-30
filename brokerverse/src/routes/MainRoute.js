@@ -220,6 +220,13 @@ import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRu
 import BankStatementFormats from "../module/BankReconciliation/StatementFormats";
 import BankTransactionTypes from "../module/BankReconciliation/TransactionTypes";
 import BankRecReportPage from "../module/BankReconciliation/ReportPage";
+import InsurerStatements from "../module/InsurerReconciliation/Statements";
+import InsurerStatementWorkspace from "../module/InsurerReconciliation/Workspace";
+import InsurerStatementFormats from "../module/InsurerReconciliation/Formats";
+import InstalmentPlans from "../module/CreditControl/InstalmentPlans";
+import WarrantyMonitor from "../module/CreditControl/WarrantyMonitor";
+import CreditLimits from "../module/CreditControl/CreditLimits";
+import RemittanceAgeing from "../module/CreditControl/RemittanceAgeing";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -241,6 +248,8 @@ import ReportTemplateMaster from "../module/FinanceMastersModule/RemittanceMaste
 import AgencyBillMaster from "../module/FinanceMastersModule/RemittanceMaster/AgencyBillMaster";
 import AccountDetermination from "../module/FinanceMastersModule/AccountDetermination";
 import PostingRules from "../module/FinanceMastersModule/PostingRules";
+import ConfigurationApprovals from "../module/FinanceMastersModule/ConfigurationApprovals";
+import AccountingFlow from "../module/FinanceMastersModule/AccountingFlow";
 import CoInsuranceRegister from "../module/Reports/FinancialReports/CoInsuranceRegister";
 import DueToInsurers from "../module/Reports/FinancialReports/DueToInsurers";
 // K13-K17 Remittance Masters
@@ -992,6 +1001,7 @@ const Maincomponent = () => {
           <Route path="master/finance/taxation-legacy" element={<TaxationMaster />} />
           <Route path="master/finance/close-checklist" element={<CloseChecklist />} />
           <Route path="master/finance/bank-statement-formats" element={<BankStatementFormats />} />
+          <Route path="master/finance/insurer-statement-formats" element={<InsurerStatementFormats />} />
           <Route path="master/finance/bank-transaction-types" element={<BankTransactionTypes />} />
           <Route
             path="master/finance/taxation/addtaxation"
@@ -1052,6 +1062,8 @@ const Maincomponent = () => {
             path="master/finance/posting-rules"
             element={<PostingRules />}
           />
+          <Route path="master/finance/configuration-approvals" element={<ConfigurationApprovals />} />
+          <Route path="master/finance/accounting-flow" element={<AccountingFlow />} />
 
           {/* Remittance Master Routes */}
           <Route
@@ -1746,6 +1758,12 @@ const Maincomponent = () => {
           <Route path="/accounts/bank-reconciliation/reconciliations" element={<BankReconciliations />} />
           <Route path="/accounts/bank-reconciliation/reconciliations/:id" element={<BankReconciliationRun />} />
           <Route path="/accounts/bank-reconciliation/reports/:code" element={<BankRecReportPage />} />
+          <Route path="/accounts/insurer-reconciliation/statements" element={<InsurerStatements />} />
+          <Route path="/accounts/insurer-reconciliation/statements/:id" element={<InsurerStatementWorkspace />} />
+          <Route path="/accounts/credit-control/instalments" element={<InstalmentPlans />} />
+          <Route path="/accounts/credit-control/warranty" element={<WarrantyMonitor />} />
+          <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />
+          <Route path="/accounts/credit-control/remittance-ageing" element={<RemittanceAgeing />} />
 
           {/* OperationalReports */}
           <Route

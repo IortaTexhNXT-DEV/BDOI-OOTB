@@ -5,12 +5,17 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import * as svc from './service.js';
+import { accountingFlow } from './flow.js';
 
 const { router, define } = moduleRouter('Posting Rules', '/posting-rules');
 const ad = moduleRouter('Account Determination', '/account-determination');
-// Finance reads the rules and the account map; changing them is configuration (administrator / business analyst)
+// Finance reads the rules and the account map. Changes are proposed by configuration users or Accounting
+// (write:posting-rules) and, with accounting.configuration_maker_checker, take effect when a different user with
+// approve:posting-rules (Accounting Manager, System Administrator) approves them.
 const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings')];
-const write = [requireAuth, requirePermission('write:settings', 'write:masters')];
+const write = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules')];
+const approve = [requireAuth, requirePermission('approve:posting-rules')];
+const pendingNote = (r, applied) => (r.change ? `${applied}; it takes effect once approved (request ${r.change.id})` : applied);
 const S = 'Master > Finance > Posting Rules';
 const A = 'Master > Finance > Account Determination';
 
@@ -32,6 +37,46 @@ define({
   method: 'GET', path: '/meta', summary: 'Pickers of the rule editor: sides, account types, account roles (with GL), resolvers, amount keys, branch sources', screen: S, middleware: read,
   response: { success: true, data: { sides: ['Dr', 'Cr'], accountTypes: ['role', 'gl', 'resolver', 'context'], roles: [{ role: 'premium_receivable', glCode: '1202001', glName: 'Premiums Receivable – Direct Clients' }], resolvers: [{ name: 'bank_account', label: 'Bank account of the receipt / payment' }], amountKeys: ['amount', 'gross'] } },
   handler: async (req, res) => ok(res, await svc.meta(pool)),
+});
+define({
+  method: 'GET', path: '/flow', summary: 'Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)',
+  screen: 'Master > Finance > Accounting Flow', middleware: read,
+  response: { success: true, data: { asOf: '2026-09-30', events: [{ eventCode: 'receipt.apply', label: 'Premium collection applied', trigger: 'Accounts > Receipts', approval: 'Finance only',
+    version: 1, debits: [{ side: 'Dr', amountKey: 'amount', account: { kind: 'resolver', label: 'Bank account of the receipt', glCode: null } }],
+    credits: [{ side: 'Cr', amountKey: 'amount', account: { kind: 'role', label: 'Premiums receivable', glCode: '1202001', glName: 'Premiums Receivable' } }] }] } },
+  handler: async (_req, res) => ok(res, await accountingFlow(pool)),
+});
+const changeExample = { id: 3, kind: 'account-role', kindLabel: 'Account role', target: 'premium_receivable', payload: { glCode: '1202002' }, before: { glCode: '1202001' }, status: 'pending',
+  requestedBy: 'Accounting user', requestedAt: '2026-09-30T02:00:00Z' };
+define({
+  method: 'GET', path: '/changes', summary: 'Posting rule and account determination changes (status pending by default, approved, rejected, withdrawn or all)', screen: `${S} > Approvals`,
+  middleware: read, query: { status: 'pending' }, response: { success: true, data: [changeExample] },
+  handler: async (req, res) => ok(res, await svc.listChanges(pool, req.query)),
+});
+define({
+  method: 'GET', path: '/changes/:changeId', summary: 'One configuration change with the rule version it concerns', screen: `${S} > Approvals`, middleware: read,
+  response: { success: true, data: changeExample }, handler: async (req, res) => ok(res, await svc.getChange(pool, req.params.changeId)),
+});
+for (const action of ['approve', 'reject']) {
+  define({
+    method: 'POST', path: `/changes/:changeId/${action}`, summary: `${action === 'approve' ? 'Approve and apply' : 'Reject (reason required)'} a pending change; never the requester`,
+    screen: `${S} > Approvals`, middleware: [...approve, validate(z.object({ remarks: z.string().max(1000).optional() }))], request: { remarks: action === 'approve' ? 'Checked' : 'Wrong account' },
+    response: { success: true, data: { ...changeExample, status: action === 'approve' ? 'approved' : 'rejected' } },
+    handler: async (req, res) => {
+      const r = await withTransaction((db) => svc.decideChange(db, req.params.changeId, action, req.body?.remarks, req.user));
+      await audit(req, { entity: 'accounting_config_change', entityId: r.id, action, after: r });
+      ok(res, r, `Change ${r.id} ${r.status}`);
+    },
+  });
+}
+define({
+  method: 'POST', path: '/changes/:changeId/withdraw', summary: 'Withdraw a pending change (the requester or an approver)', screen: `${S} > Approvals`, middleware: write,
+  response: { success: true, data: { ...changeExample, status: 'withdrawn' } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => svc.withdrawChange(db, req.params.changeId, req.user));
+    await audit(req, { entity: 'accounting_config_change', entityId: r.id, action: 'withdraw', after: r });
+    ok(res, r, `Change ${r.id} withdrawn`);
+  },
 });
 define({
   method: 'GET', path: '/', summary: 'Posting rules with their lines, every version (filter eventCode, module)', screen: S, middleware: read, query: { eventCode: 'receipt.apply' },
@@ -56,7 +101,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.createVersion(db, req.params.eventCode, req.body, req.user));
     await audit(req, { entity: 'posting_rule', entityId: r.after.id, action: 'create-version', before: r.before, after: r.after });
-    created(res, r.after, `Version ${r.after.version} of ${r.after.eventCode} saved`);
+    created(res, { ...r.after, change: r.change }, pendingNote(r, `Version ${r.after.version} of ${r.after.eventCode} saved`));
   },
 });
 define({
@@ -65,7 +110,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.setActive(db, req.params.id, req.body.active, req.user));
     await audit(req, { entity: 'posting_rule', entityId: r.after.id, action: req.body.active ? 'activate' : 'deactivate', before: r.before, after: r.after });
-    ok(res, r.after, `Version ${r.after.version} ${req.body.active ? 'activated' : 'deactivated'}`);
+    ok(res, { ...r.after, change: r.change }, pendingNote(r, `Version ${r.after.version} ${req.body.active ? 'activated' : 'deactivated'}`));
   },
 });
 define({
@@ -92,7 +137,7 @@ ad.define({
   handler: async (req, res) => {
     const r = await svc.setRoleAccount(pool, req.params.role, req.body.glCode, req.user);
     await audit(req, { entity: 'account_role', entityId: req.params.role, action: 'update', before: r.before, after: r.after });
-    ok(res, r.after, `${req.params.role} now posts to ${r.after.glCode}`);
+    ok(res, { ...r.after, change: r.change }, r.change ? pendingNote(r, `${req.params.role} to post to ${r.change.payload.glCode}`) : `${req.params.role} now posts to ${r.after.glCode}`);
   },
 });
 ad.define({
@@ -101,7 +146,24 @@ ad.define({
   handler: async (req, res) => {
     const r = await svc.setMap(pool, req.params.name, req.body.map, req.user);
     await audit(req, { entity: 'account_map', entityId: req.params.name, action: 'update', before: r.before, after: r.after });
-    ok(res, r.after, 'Account map saved');
+    ok(res, r.change ? { ...r.after, change: r.change } : r.after, pendingNote(r, 'Account map saved'));
+  },
+});
+const taxExample = { vat: { enabled: true, code: 'VAT12-OUT', ratePercent: 12, glAccount: '2204003', fallbackRole: 'output_vat' },
+  ewt: { enabled: true, code: 'WC139', ratePercent: 10, atc: 'WC139', glAccount: '1302001', fallbackRole: 'creditable_wht' } };
+ad.define({
+  method: 'GET', path: '/commission-taxes', summary: 'Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL account) and the tax codes to choose from', screen: A, middleware: read,
+  response: { success: true, data: { ...taxExample, taxCodes: [{ code: 'WC139', taxType: 'EWT', rate: 10, atc: 'WC139', glAccount: '1302001', active: true }] } },
+  handler: async (req, res) => ok(res, await svc.commissionTaxes(pool)),
+});
+ad.define({
+  method: 'PUT', path: '/commission-taxes', summary: 'Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)', screen: A,
+  middleware: [...write, validate(z.object({ vatEnabled: z.boolean().optional(), ewtEnabled: z.boolean().optional(), vatCode: z.string().optional(), ewtCode: z.string().optional() }))],
+  request: { ewtCode: 'WC140' }, response: { success: true, data: taxExample },
+  handler: async (req, res) => {
+    const r = await svc.setCommissionTaxes(pool, req.body, req.user);
+    await audit(req, { entity: 'account_map', entityId: 'commission-taxes', action: 'update', before: r.before, after: r.after });
+    ok(res, { ...r.after, change: r.change }, pendingNote(r, 'Commission tax set-up saved'));
   },
 });
 ad.define({

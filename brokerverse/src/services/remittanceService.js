@@ -68,6 +68,11 @@ export const remittanceService = {
   collectDebitNote: (dnId, payload) => post(`${R}/direct-bill/${id(dnId)}/collections`, payload),
   reverseDebitNoteCollection: (dnId, collectionId, reason) => post(`${R}/direct-bill/${id(dnId)}/collections/${id(collectionId)}/reverse`, { reason }),
   changeBillingMode: (payload) => post(`${R}/direct-bill/billing-mode`, payload),
+  // the client's payment to the insurer on a direct-bill policy (recorded only, nothing is posted)
+  clientPayments: (policyId) => get(`${R}/direct-bill/policies/${id(policyId)}/client-payments`),
+  recordClientPayment: (policyId, payload) => post(`${R}/direct-bill/policies/${id(policyId)}/client-payments`, payload),
+  voidClientPayment: (paymentId, reason) => post(`${R}/direct-bill/client-payments/${id(paymentId)}/void`, { reason }),
+  listClientPayments: (params) => get(`${R}/direct-bill/client-payments`, params),
   /** Opens the printable debit note (PDF fetched with the session token). */
   openDebitNotePdf: async (dnId) => {
     const response = await fetch(`${BASE_URL}${R}/direct-bill/${id(dnId)}/pdf`, { headers: { ...authService.getAuthHeader() } });

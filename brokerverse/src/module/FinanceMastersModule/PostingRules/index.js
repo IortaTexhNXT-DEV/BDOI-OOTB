@@ -133,7 +133,9 @@ const PostingRules = () => {
     try {
       const out = await postingRulesService.saveVersion(selected.eventCode, { lines: edit.lines, effectiveFrom: edit.effectiveFrom, changeNote: edit.changeNote || undefined,
         narration: edit.narration || null, branchSource: edit.branchSource });
-      toast.current?.show({ severity: "success", summary: t("postingRules.saved"), detail: t("postingRules.versionSaved", { version: out.version }), life: 4000 });
+      toast.current?.show(out.change
+        ? { severity: "info", summary: t("postingRules.saved"), detail: t("postingRules.versionPending", { version: out.version }), life: 6000 }
+        : { severity: "success", summary: t("postingRules.saved"), detail: t("postingRules.versionSaved", { version: out.version }), life: 4000 });
       setEdit(null);
       await loadEvents();
       await loadVersions(selected, out.id);
@@ -146,7 +148,8 @@ const PostingRules = () => {
 
   const toggleActive = async () => {
     try {
-      await postingRulesService.setActive(rule.id, !rule.active);
+      const out = await postingRulesService.setActive(rule.id, !rule.active);
+      if (out.change) toast.current?.show({ severity: "info", summary: t("postingRules.saved"), detail: t("postingRules.changePending"), life: 6000 });
       await loadEvents();
       await loadVersions(selected, rule.id);
     } catch (e) {
@@ -169,7 +172,7 @@ const PostingRules = () => {
     return <InputText value={l.account} onChange={(e) => setLine(i, { account: e.target.value })} placeholder={(selected?.contextAccounts || []).join(", ") || "account key"} className="w-full" />;
   };
 
-  const versionOptions = versions.map((v) => ({ label: `v${v.version} · ${v.effectiveFrom}${v.active ? "" : ` (${t("postingRules.inactive")})`}${v.id === selected?.activeRuleId ? ` · ${t("postingRules.inForce")}` : ""}`, value: v.id }));
+  const versionOptions = versions.map((v) => ({ label: `v${v.version} · ${v.effectiveFrom}${v.approvalStatus && v.approvalStatus !== "approved" ? ` (${t(`postingRules.approval.${v.approvalStatus}`)})` : v.active ? "" : ` (${t("postingRules.inactive")})`}${v.id === selected?.activeRuleId ? ` · ${t("postingRules.inForce")}` : ""}`, value: v.id }));
 
   return (
     <div className="posting-rules">
@@ -196,7 +199,12 @@ const PostingRules = () => {
             <DataTable value={shown} loading={loading} selectionMode="single" selection={selected} onSelectionChange={(e) => choose(e.value)} dataKey="eventCode"
               size="small" stripedRows scrollable scrollHeight="560px" emptyMessage={t("postingRules.noEvents")}>
               <Column header={t("postingRules.event")} body={(e) => (<div><div className="font-semibold">{e.label}</div><code className="text-500">{e.eventCode}</code> <span className="text-500 text-sm">· {e.module}</span></div>)} />
-              <Column header={t("postingRules.version")} style={{ width: "5.5rem" }} body={(e) => (e.activeVersion ? <Tag value={`v${e.activeVersion}`} severity="success" /> : <Tag value={t("postingRules.none")} severity="danger" />)} />
+              <Column header={t("postingRules.version")} style={{ width: "5.5rem" }} body={(e) => (
+                <span className="flex flex-column gap-1">
+                  {e.activeVersion ? <Tag value={`v${e.activeVersion}`} severity="success" /> : <Tag value={t("postingRules.none")} severity="danger" />}
+                  {e.pending && <Tag value={`v${e.pending.version} ${t("postingRules.approval.pending")}`} severity="warning" />}
+                </span>
+              )} />
             </DataTable>
           </div>
         </div>
@@ -246,7 +254,8 @@ const PostingRules = () => {
                         <InputSwitch checked={coInsurance} onChange={(e) => setCoInsurance(e.value)} /> {t("postingRules.coInsuredSample")}
                       </span>
                     )}
-                    <Button label={rule.active ? t("postingRules.deactivate") : t("postingRules.activate")} icon={rule.active ? "pi pi-ban" : "pi pi-check"} className="p-button-text" onClick={toggleActive} />
+                    <Button label={rule.active ? t("postingRules.deactivate") : t("postingRules.activate")} icon={rule.active ? "pi pi-ban" : "pi pi-check"} className="p-button-text" onClick={toggleActive}
+                      disabled={rule.approvalStatus && rule.approvalStatus !== "approved"} />
                     <Button label={t("postingRules.history")} icon="pi pi-history" className="p-button-text" onClick={openHistory} />
                   </div>
                 </>

@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
+import { withoutCommissionTaxes } from './helpers.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+beforeAll(async () => { ctx = await setupFinance(); await withoutCommissionTaxes(); });
 afterAll(async () => { await pool.end(); });
 
 describe('disbursements / payment vouchers', () => {

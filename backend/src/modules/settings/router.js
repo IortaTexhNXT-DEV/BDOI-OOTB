@@ -7,6 +7,7 @@ import { many, query } from '../../db/pool.js';
 import { ok } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
 import { businessTimeZone } from '../../lib/dates.js';
+import { assertNotControlled } from '../posting-rules/service.js';
 
 const { router, define } = moduleRouter('System Settings', '/settings');
 
@@ -29,6 +30,7 @@ define({
   request: { settings: { 'tax.vat_rate': 0.12, 'branding.primary_color': '#0072d8' } }, response: { success: true },
   handler: async (req, res) => {
     const before = Object.fromEntries((await getSettings()).map((s) => [s.key, s.value]));
+    await assertNotControlled(Object.entries(req.body.settings).map(([k, v]) => [k, v, before[k]]));
     for (const [k, v] of Object.entries(req.body.settings)) {
       const exists = (await query('SELECT editable FROM app_settings WHERE key = $1', [k])).rows[0];
       if (!exists || !exists.editable) continue;

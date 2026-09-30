@@ -13,6 +13,8 @@ import { onPolicyPremiumCollected } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
+import { commissionTaxSetup, commissionTaxes, ratesOf } from '../accounting/lib/commissionTax.js';
+import { syncDueDate } from '../credit-control/instalments.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
   ic.name AS insurer_name, ic.short_name AS insurer_short, ic.commission_rate AS insurer_commission_rate, pr.name AS product_name, pr.line AS product_line
@@ -57,19 +59,29 @@ function taxesOf(breakdown, split, room) {
 }
 
 /**
- * Split of a premium amount between the insurers of the policy: per participant gross, commission, premium taxes and the
- * premium due to the insurer. A single-insurer policy is one participant at 100% with the commission of commissionFor().
- * On a co-insured policy each insurer's commission is its own rate on its share of the net premium (commissionFor() with
- * the insurer's master rate when the participant has no rate), unless a commission amount is given (split by share).
+ * Premium due to the insurer on a share: gross less premium taxes, commission and the VAT on the commission (borne by the
+ * insurer), plus the EWT the insurer withholds on the commission (the broker pays it back with the premium).
  */
-export async function premiumSplit(db, policy, gross, breakdown = {}, source = 'policy', { commission: given = null, parts: known = null, ratios = null } = {}) {
+const dueToInsurer = (gross, commission, tax, ctax) => round2(gross - commission - tax.vat - tax.dst - tax.lgt - ctax.commission_vat + ctax.commission_ewt);
+
+/**
+ * Split of a premium amount between the insurers of the policy: per participant gross, commission, premium taxes, the
+ * taxes on the commission (output VAT, EWT withheld by the insurer) and the premium due to the insurer. A single-insurer
+ * policy is one participant at 100% with the commission of commissionFor(). On a co-insured policy each insurer's
+ * commission is its own rate on its share of the net premium (commissionFor() with the insurer's master rate when the
+ * participant has no rate), unless a commission amount is given (split by share).
+ * taxRates = { vat, ewt } fractions for the commission taxes (default: the tax codes in force, see commissionTax.js).
+ */
+export async function premiumSplit(db, policy, gross, breakdown = {}, source = 'policy', { commission: given = null, parts: known = null, ratios = null, taxRates = null } = {}) {
   const parts = known || (await policyParticipants(policy.id, db));
   const split = await splitTaxes();
+  const rates = taxRates || ratesOf(await commissionTaxSetup(db));
   if (!isCoInsured(parts)) {
     const commission = given ?? (await commissionFor(policy, gross, breakdown, source));
-    const tax = taxesOf(breakdown, split, gross - commission);
-    return { coInsured: false, commission, taxes: tax, parts: [{ insurerId: policy.insurance_company_id, insurerName: policy.insurer_name || parts[0]?.insurerName || 'insurer', share: 100, isLead: true,
-      amounts: { gross, commission, ...tax, due_to_insurer: round2(gross - commission - tax.vat - tax.dst - tax.lgt) } }] };
+    const ctax = commissionTaxes(commission, rates);
+    const tax = taxesOf(breakdown, split, gross - commission - ctax.commission_vat);
+    return { coInsured: false, commission, taxes: tax, commissionTaxes: ctax, parts: [{ insurerId: policy.insurance_company_id, insurerName: policy.insurer_name || parts[0]?.insurerName || 'insurer', share: 100, isLead: true,
+      amounts: { gross, commission, ...tax, ...ctax, due_to_insurer: dueToInsurer(gross, commission, tax, ctax) } }] };
   }
   const w = parts.map((p) => p.share);
   const grossS = allocate(gross, w);
@@ -84,11 +96,17 @@ export async function premiumSplit(db, policy, gross, breakdown = {}, source = '
       else comms.push(await commissionFor({ ...policy, insurance_company_id: p.insurerId, insurer_commission_rate: p.insurerCommissionRate, commission_amount: p.commissionAmount, premium_total: p.premiumTotal }, grossS[i], { netPremium: netS[i] }, source));
     }
   }
-  const tax = taxesOf(breakdown, split, gross - comms.reduce((s, c) => s + c, 0));
+  // each insurer is billed VAT on, and withholds EWT from, its own commission
+  const ctaxS = comms.map((c) => commissionTaxes(c, rates));
+  const ctax = { commission_vat: round2(ctaxS.reduce((s, t) => s + t.commission_vat, 0)), commission_ewt: round2(ctaxS.reduce((s, t) => s + t.commission_ewt, 0)) };
+  const tax = taxesOf(breakdown, split, gross - comms.reduce((s, c) => s + c, 0) - ctax.commission_vat);
   const taxS = { vat: allocate(tax.vat, w), dst: allocate(tax.dst, w), lgt: allocate(tax.lgt, w) };
-  const out = parts.map((p, i) => ({ insurerId: p.insurerId, insurerName: p.insurerName, share: p.share, isLead: p.isLead,
-    amounts: { gross: grossS[i], commission: comms[i], vat: taxS.vat[i], dst: taxS.dst[i], lgt: taxS.lgt[i], due_to_insurer: round2(grossS[i] - comms[i] - taxS.vat[i] - taxS.dst[i] - taxS.lgt[i]) } }));
-  return { coInsured: true, commission: round2(comms.reduce((s, c) => s + c, 0)), taxes: tax, parts: out };
+  const out = parts.map((p, i) => {
+    const t = { vat: taxS.vat[i], dst: taxS.dst[i], lgt: taxS.lgt[i] };
+    return { insurerId: p.insurerId, insurerName: p.insurerName, share: p.share, isLead: p.isLead,
+      amounts: { gross: grossS[i], commission: comms[i], ...t, ...ctaxS[i], due_to_insurer: dueToInsurer(grossS[i], comms[i], t, ctaxS[i]) } };
+  });
+  return { coInsured: true, commission: round2(comms.reduce((s, c) => s + c, 0)), taxes: tax, commissionTaxes: ctax, parts: out };
 }
 
 /** Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount, commissionAmount } */
@@ -103,10 +121,11 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const { commission } = split;
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, $3::date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays, await today()])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
-      net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by)
-    VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+      net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by, commission_vat, commission_ewt)
+    VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
   [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await getSetting('currency.default', 'PHP')), round2(breakdown.netPremium || gross),
-    round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null])).rows[0];
+    round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null,
+    split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt])).rows[0];
   const jv = await postBooking(db, r, policy, split, user);
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
@@ -118,10 +137,10 @@ async function postBooking(db, r, policy, split, user) {
   if (split.coInsured) {
     for (const p of split.parts) {
       const a = p.amounts;
-      await db.query(`INSERT INTO receivable_participants(receivable_id, insurance_company_id, is_lead, share_percent, gross, commission, taxes, due_to_insurer)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (receivable_id, insurance_company_id) DO UPDATE SET share_percent = EXCLUDED.share_percent, gross = EXCLUDED.gross,
-          commission = EXCLUDED.commission, taxes = EXCLUDED.taxes, due_to_insurer = EXCLUDED.due_to_insurer`,
-      [r.id, p.insurerId, p.isLead, p.share, a.gross, a.commission, round2(a.vat + a.dst + a.lgt), a.due_to_insurer]);
+      await db.query(`INSERT INTO receivable_participants(receivable_id, insurance_company_id, is_lead, share_percent, gross, commission, taxes, due_to_insurer, commission_vat, commission_ewt)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (receivable_id, insurance_company_id) DO UPDATE SET share_percent = EXCLUDED.share_percent, gross = EXCLUDED.gross,
+          commission = EXCLUDED.commission, taxes = EXCLUDED.taxes, due_to_insurer = EXCLUDED.due_to_insurer, commission_vat = EXCLUDED.commission_vat, commission_ewt = EXCLUDED.commission_ewt`,
+      [r.id, p.insurerId, p.isLead, p.share, a.gross, a.commission, round2(a.vat + a.dst + a.lgt), a.due_to_insurer, a.commission_vat || 0, a.commission_ewt || 0]);
     }
   }
   const gross = Number(r.amount);
@@ -129,7 +148,7 @@ async function postBooking(db, r, policy, split, user) {
     source: 'booking', entryType: ENTRY_BY_SOURCE[r.source] || 'NEW_BUSINESS', entrySubType: split.coInsured ? 'CO_INSURANCE' : null, transactionCode: r.bill_number,
     referenceType: 'Policy', referenceId: policy.id, clientId: r.client_id || policy.client_id, policyId: policy.id, policyNumber: policy.policy_number, dueDate: r.due_date,
     description: `Premium billed – ${policy.policy_number} (${r.bill_number})`,
-    amounts: { gross, net_premium: Number(r.net_premium) || gross, commission: split.commission, ...split.taxes, due_to_insurer: round2(split.parts.reduce((s, p) => s + p.amounts.due_to_insurer, 0)) },
+    amounts: { gross, net_premium: Number(r.net_premium) || gross, commission: split.commission, ...split.taxes, ...split.commissionTaxes, due_to_insurer: round2(split.parts.reduce((s, p) => s + p.amounts.due_to_insurer, 0)) },
     participants: split.parts, vars: { policyNumber: policy.policy_number, billNumber: r.bill_number, insurer: policy.insurer_name || 'insurer', participantSuffix: '' },
   }, { db, user });
 }
@@ -149,7 +168,8 @@ export async function ensureBooked(db, rcv, policy, user) {
   const split = await premiumSplit(db, policy, bookable, { vat: Number(rcv.vat) * ratio, dst: Number(rcv.dst) * ratio, lgt: Number(rcv.lgt) * ratio, netPremium: Number(rcv.net_premium) * ratio },
     rcv.source, { commission: Math.min(commission, bookable) });
   const jv = await postBooking(db, { ...rcv, amount: bookable }, policy, split, user);
-  const upd = (await db.query('UPDATE receivables SET booking_jv_id = $2, commission_amount = CASE WHEN commission_amount > 0 THEN commission_amount ELSE $3 END WHERE id = $1 RETURNING *', [rcv.id, jv.id, commission])).rows[0];
+  const upd = (await db.query(`UPDATE receivables SET booking_jv_id = $2, commission_amount = CASE WHEN commission_amount > 0 THEN commission_amount ELSE $3 END,
+    commission_vat = $4, commission_ewt = $5 WHERE id = $1 RETURNING *`, [rcv.id, jv.id, commission, split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt])).rows[0];
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [rcv.id, rcv.policy_id, rcv.client_id]);
   return upd;
 }
@@ -177,6 +197,8 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   const upd = (await db.query(`UPDATE receivables SET balance = balance - $2, last_payment_at = now(), updated_at = now(),
       status = CASE WHEN balance - $2 <= 0 THEN 'paid' ELSE 'partial' END WHERE id = $1 RETURNING *`, [rcv.id, amount])).rows[0];
   if (Number(upd.balance) <= 0) await db.query('UPDATE collection_items SET closed_at = COALESCE(closed_at, now()), updated_at = now() WHERE receivable_id = $1', [rcv.id]);
+  // on an instalment plan the bill is next due on its first instalment not yet paid
+  await syncDueDate(db, rcv.id);
   await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null]);
   return upd;
@@ -236,7 +258,8 @@ async function applyToBill(db, ctx, amount) {
  * return premium or cancellation takes back commission and taxes at the rate they were booked.
  */
 async function bookedRatios(db, policyId) {
-  const all = (await db.query(`SELECT COALESCE(sum(commission_amount), 0) AS c, COALESCE(sum(amount), 0) AS a FROM receivables
+  const all = (await db.query(`SELECT COALESCE(sum(commission_amount), 0) AS c, COALESCE(sum(amount), 0) AS a,
+      COALESCE(sum(commission_vat), 0) AS cv, COALESCE(sum(commission_ewt), 0) AS ce FROM receivables
     WHERE policy_id = $1 AND status <> 'cancelled' AND booking_jv_id IS NOT NULL`, [policyId])).rows[0];
   const per = (await db.query(`SELECT rp.insurance_company_id, sum(rp.commission) AS c, sum(rp.gross) AS a FROM receivable_participants rp
     JOIN receivables r ON r.id = rp.receivable_id WHERE r.policy_id = $1 AND r.status <> 'cancelled' GROUP BY rp.insurance_company_id`, [policyId])).rows;
@@ -246,7 +269,9 @@ async function bookedRatios(db, policyId) {
   const booked = (await db.query(`SELECT l.account_code, sum(l.credit) AS c FROM journal_lines l JOIN receivables r ON r.booking_jv_id = l.jv_id
     WHERE r.policy_id = $1 AND r.status <> 'cancelled' AND l.account_code = ANY($2) GROUP BY l.account_code`, [policyId, Object.values(codes)])).rows;
   const taxes = Object.fromEntries(Object.entries(codes).map(([k, code]) => [k, Number(all.a) > 0 ? Number(booked.find((b) => b.account_code === code)?.c || 0) / Number(all.a) : 0]));
-  return { overall: Number(all.a) > 0 ? Number(all.c) / Number(all.a) : null, byInsurer: new Map(per.filter((x) => Number(x.a) > 0).map((x) => [x.insurance_company_id, Number(x.c) / Number(x.a)])), taxes };
+  // commission VAT and EWT go back at the rates they were booked (none on bills booked before they were taxed)
+  const commissionTaxRates = Number(all.c) > 0 ? { vat: Number(all.cv) / Number(all.c), ewt: Number(all.ce) / Number(all.c) } : null;
+  return { overall: Number(all.a) > 0 ? Number(all.c) / Number(all.a) : null, commissionTaxRates, byInsurer: new Map(per.filter((x) => Number(x.a) > 0).map((x) => [x.insurance_company_id, Number(x.c) / Number(x.a)])), taxes };
 }
 
 /**
@@ -274,7 +299,7 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
   const taxes = { netPremium: Math.abs(num(breakdown.netPremium)) || undefined,
     vat: given3 ? Math.abs(num(breakdown.vat)) : round2(gross * ratios.taxes.vat), dst: given3 ? Math.abs(num(breakdown.dst)) : round2(gross * ratios.taxes.dst),
     lgt: given3 ? Math.abs(num(breakdown.lgt)) : round2(gross * ratios.taxes.lgt) };
-  const split = await premiumSplit(db, policy, gross, taxes, 'endorsement', { commission: given, ratios: ratios.byInsurer });
+  const split = await premiumSplit(db, policy, gross, taxes, 'endorsement', { commission: given, ratios: ratios.byInsurer, taxRates: ratios.commissionTaxRates });
   let remaining = gross;
   const credits = [];
   for (const r of open) {
@@ -294,7 +319,7 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
     transactionCode: reference || policy.policy_number, referenceType: endorsementId ? 'Endorsement' : 'Policy', referenceId: endorsementId || policy.id,
     clientId: policy.client_id, policyId: policy.id, policyNumber: policy.policy_number,
     description: `${kind === 'cancellation' ? 'Policy cancelled' : 'Return premium'} – ${policy.policy_number}${reference ? ` (${reference})` : ''}`,
-    amounts: { gross, commission: split.commission, ...split.taxes, due_to_insurer: round2(split.parts.reduce((s, p) => s + p.amounts.due_to_insurer, 0)), receivable_credit: credited, refund },
+    amounts: { gross, commission: split.commission, ...split.taxes, ...split.commissionTaxes, due_to_insurer: round2(split.parts.reduce((s, p) => s + p.amounts.due_to_insurer, 0)), receivable_credit: credited, refund },
     participants: split.parts,
     vars: { policyNumber: policy.policy_number, reference: reference || '', billNumber: billNumbers || policy.bill_number || '', clientName: policy.client_name || 'client', insurer: policy.insurer_name || 'insurer', participantSuffix: '' },
   }, { db, user });

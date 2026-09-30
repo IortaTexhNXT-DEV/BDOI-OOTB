@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withoutCommissionTaxes } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 
 let ctx;
@@ -25,6 +25,7 @@ async function waitForJob(jobId) {
 
 beforeAll(async () => {
   ctx = await setup();
+  await withoutCommissionTaxes();
   await makeUser('u.maker', ['processing']);
   await makeUser('u.checker', ['processing']);
   await makeUser('f.finance', ['accounting']);

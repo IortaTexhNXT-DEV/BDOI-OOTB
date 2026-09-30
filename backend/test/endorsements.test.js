@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withoutCommissionTaxes } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -36,6 +36,7 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  await withoutCommissionTaxes();
   cs = await persona('e.cs', ['operations']);
   finance = await persona('e.finance', ['accounting']);
 });

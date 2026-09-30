@@ -16,6 +16,7 @@ import { createInsurerRemittance } from '../disbursements/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { companyName } from '../../lib/letterhead.js';
+import { resolveCreditTerms } from '../commission-rates/terms.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -224,8 +225,9 @@ async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, bi
   return id;
 }
 
-async function defaultDueDate(from) {
-  const days = Number(await getSetting('remittance.default_due_days', 30)) || 30;
+/** Due date of a remittance: the insurer's remittance terms (remittance_terms_days), else remittance.default_due_days. */
+async function defaultDueDate(from, insurerId = null) {
+  const days = insurerId ? (await resolveCreditTerms(insurerId)).remittanceTermsDays : (Number(await getSetting('remittance.default_due_days', 30)) || 30);
   const d = new Date(`${isoDate(from) || (await businessToday())}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
@@ -237,7 +239,7 @@ export async function createRemittance(b, user) {
   const ins = await findInsurer(b.insurerId ?? b.insurerCode, { required: kind === 'direct-bill' });
   if (!Array.isArray(b.lines) || !b.lines.length) throw badRequest('Validation failed', [{ path: 'lines', message: 'At least one policy line is required' }]);
   const lines = await buildLines(b.lines, kind === 'direct-bill' ? ins?.id : null);
-  const dueDate = isoDate(b.dueDate) || await defaultDueDate(b.remittanceDate);
+  const dueDate = isoDate(b.dueDate) || await defaultDueDate(b.remittanceDate, kind === 'direct-bill' ? ins?.id : null);
   const id = await withTransaction((c) => insertRemittance(c, { kind, insurerId: ins?.id, period: b.period, dueDate, lines, remarks: b.remarks, date: isoDate(b.remittanceDate), userId: user.id }));
   return getRemittance(id);
 }
