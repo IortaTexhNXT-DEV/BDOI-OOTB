@@ -5562,7 +5562,7 @@
     "primaryColor": "Primary Color",
     "secondaryColor": "Secondary Color",
     "selectColor": "Select color or use hex",
-    "hexHint": "Hex code (e.g. #0056b3) — picker and presets stay in sync",
+    "hexHint": "Hex code, for example #0072d8. The picker and the presets stay in sync.",
     "themePreview": "Theme preview",
     "saved": "System settings saved",
     "saveFailed": "Failed to save settings",

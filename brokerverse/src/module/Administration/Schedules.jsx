@@ -118,7 +118,7 @@ const Schedules = () => {
         <Column field="name" header="Job" />
         <Column field="description" header="What it does" />
         <Column header={timeZone ? `Schedule (${timeZone})` : "Schedule"} body={(j) => <span title={j.cron}>{describeCron(j.cron)}</span>} />
-        <Column header="Enabled" body={(j) => (j.enabled ? "Yes" : "No")} />
+        <Column header="Status" body={(j) => <Tag value={j.enabled ? "Scheduled" : "Switched off"} severity={j.enabled ? "success" : "secondary"} />} />
         <Column header="Next run" body={(j) => (j.enabled && j.nextRunAt ? fmt(j.nextRunAt) : "-")} />
         <Column header="Last run" body={(j) => fmt(j.lastRunAt)} />
         <Column header="Last status" body={(j) => statusTag(j.lastStatus)} />

@@ -49,8 +49,11 @@ export async function getSetting(key, fallback = null) {
   cache.set(key, { value: v, at: Date.now() });
   return v;
 }
+/** Settings with who changed them last (display name when the editor is a user) and whether they can be edited on screen. */
 export async function getSettings(group) {
-  const rows = await many(group ? 'SELECT key, value, "group", label, type FROM app_settings WHERE "group" = $1 ORDER BY key' : 'SELECT key, value, "group", label, type FROM app_settings ORDER BY "group", key', group ? [group] : []);
+  const rows = await many(`SELECT s.key, s.value, s."group", s.label, s.type, s.editable, s.updated_at AS "updatedAt", COALESCE(u.display_name, s.updated_by) AS "updatedBy"
+    FROM app_settings s LEFT JOIN users u ON u.id = s.updated_by
+    ${group ? 'WHERE s."group" = $1' : ''} ORDER BY s."group", s.key`, group ? [group] : []);
   return rows;
 }
 export async function setSetting(key, value, userId = null) {

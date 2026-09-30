@@ -537,7 +537,7 @@ const SystemSettingsPage = () => {
               <small className="hex-hint">
                 {t(
                   "systemSettings.hexHint",
-                  "Hex code (e.g. #0072d8) — picker and presets stay in sync"
+                  "Hex code, for example #0072d8. The picker and the presets stay in sync."
                 )}
               </small>
             </div>
@@ -584,7 +584,7 @@ const SystemSettingsPage = () => {
               <small className="hex-hint">
                 {t(
                   "systemSettings.hexHint",
-                  "Hex code (e.g. #0072d8) — picker and presets stay in sync"
+                  "Hex code, for example #0072d8. The picker and the presets stay in sync."
                 )}
               </small>
             </div>
