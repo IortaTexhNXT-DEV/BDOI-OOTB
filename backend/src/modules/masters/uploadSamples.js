@@ -33,7 +33,7 @@ export const MASTER_TEMPLATES = [
   },
   {
     type: 'product', menu: 'Master > Generals > Insurance Management > Product',
-    samples: [{ productCode: 'TRAVEL', productName: 'Travel Insurance', productDescription: 'Individual and family travel cover', lineofBusiness: 'ACCIDENT' }],
+    samples: [{ productCode: 'STUDENT-PA', productName: 'Student Personal Accident', productDescription: 'School accident cover for enrolled students', lineofBusiness: 'ACCIDENT', businessType: 'package', customerSegment: 'retail' }],
   },
   {
     type: 'policy-type', menu: 'Master > Generals > Insurance Management > Product (policy types)',

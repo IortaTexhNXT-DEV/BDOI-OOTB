@@ -5037,5 +5037,19 @@
       "created": "Created",
       "sent": "Sent"
     }
+  },
+  "productClassification": {
+    "businessType": "Business Type",
+    "customerSegment": "Customer Segment",
+    "select": "Select",
+    "businessTypes": {
+      "package": "Package",
+      "non_package": "Non-package"
+    },
+    "segments": {
+      "retail": "Retail",
+      "corporate": "Corporate",
+      "both": "Retail and corporate"
+    }
   }
 }

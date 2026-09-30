@@ -185,22 +185,24 @@ const placementBody = z.object({
 });
 
 define({
-  method: 'GET', path: '/journey', summary: 'Placement journey for a line of business / product type (placement.journey): brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip',
+  method: 'GET', path: '/journey', summary: 'Placement journey for a line of business / product type: the business type default (placement.journey_by_business_type) overridden by placement.journey; brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip',
   screen: `${PS} / Quotation > Send to insurer`, middleware: canRead, query: { lob: 'FIRE', productType: 'Fire and Allied Perils' },
-  response: { success: true, data: { brokerSlip: 'optional', quotationSlip: 'optional', placementSlip: 'required', directPolicy: 'optional', lob: 'FIRE', key: 'FIRE' } },
+  response: { success: true, data: { brokerSlip: 'optional', quotationSlip: 'optional', placementSlip: 'required', directPolicy: 'optional', lob: 'FIRE', businessType: 'non_package', source: 'businessType', key: 'non_package' } },
   handler: async (req, res) => res.json({ success: true, data: await journeyFor({ lob: req.query.lob, productType: req.query.productType, productId: req.query.productId }) }),
 });
 define({
-  method: 'GET', path: '/options', summary: 'Reference data of the placement screens: active insurers (insurer master), products with their LOB and journey, default billing mode',
-  screen: `${PS} / ${BS} (forms)`, middleware: canRead,
-  response: { success: true, data: { insurers: [{ id: 2, code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.', commissionRate: 0.15 }], products: [{ id: 3, code: 'FIRE', name: 'Fire and Allied Perils', lob: 'FIRE', journey: { placementSlip: 'required' } }], defaultBillingMode: 'broker' } },
-  handler: async (_req, res) => {
+  method: 'GET', path: '/options', summary: 'Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode',
+  screen: `${PS} / ${BS} (forms)`, middleware: canRead, query: { businessType: 'non_package' },
+  response: { success: true, data: { insurers: [{ id: 2, code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.', commissionRate: 0.15 }], products: [{ id: 3, code: 'FIRE', name: 'Fire and Allied Perils', lob: 'FIRE', businessType: 'non_package', customerSegment: 'corporate', journey: { placementSlip: 'required' } }], defaultBillingMode: 'broker' } },
+  handler: async (req, res) => {
     const insurers = await many(`SELECT id, code, name, short_name AS "shortName", commission_rate AS "commissionRate", contact_email AS "contactEmail"
       FROM insurance_companies WHERE status = 'active' ORDER BY name`);
+    const businessType = ['package', 'non_package'].includes(req.query.businessType) ? req.query.businessType : null;
     const products = [];
-    for (const p of await many("SELECT id, code, name, line FROM products WHERE status = 'active' ORDER BY name")) {
+    for (const p of await many(`SELECT id, code, name, line, business_type, customer_segment FROM products
+      WHERE status = 'active' AND ($1::text IS NULL OR business_type = $1) ORDER BY name`, [businessType])) {
       const journey = await journeyFor({ productId: p.id, productType: p.name });
-      products.push({ id: p.id, code: p.code, name: p.name, line: p.line, lob: journey.lob, journey });
+      products.push({ id: p.id, code: p.code, name: p.name, line: p.line, lob: journey.lob, businessType: p.business_type, customerSegment: p.customer_segment, journey });
     }
     const defaultBillingMode = (await getSetting('direct_bill.default_billing_mode', 'broker')) || 'broker';
     res.json({ success: true, data: { insurers: insurers.map((i) => ({ ...i, commissionRate: i.commissionRate === null ? null : Number(i.commissionRate) })), products, defaultBillingMode } });
