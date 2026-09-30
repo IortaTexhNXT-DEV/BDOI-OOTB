@@ -895,7 +895,8 @@ class QuotationService {
     }
   }
 
-  async request(path, options = {}) {
+  /** The whole response body; throws with the server message (field messages for a validation error). */
+  async requestBody(path, options = {}) {
     const response = await fetch(`${this.baseURL}${path}`, {
       ...options,
       headers: {
@@ -905,9 +906,35 @@ class QuotationService {
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok || body.success === false) {
-      throw new Error(body.message || `Request failed (${response.status})`);
+      const detail = Array.isArray(body.errors) ? body.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
+      throw new Error((body.message === "Validation failed" && detail) || body.message || detail || `Request failed (${response.status})`);
     }
-    return body.data;
+    return body;
+  }
+
+  async request(path, options = {}) {
+    return (await this.requestBody(path, options)).data;
+  }
+
+  /** Approval link of a PendingCustomer quotation: { approvalUrl, expiresAt, reissued }. */
+  getApprovalLink(quotationId) {
+    return this.request(`/quotations/${encodeURIComponent(quotationId)}/approval-link`);
+  }
+
+  /** Customer responses recorded for a quotation and the channels offered: { data, channels }. */
+  getCustomerResponses(quotationId) {
+    return this.requestBody(`/quotations/${encodeURIComponent(quotationId)}/customer-responses`);
+  }
+
+  /**
+   * Record the customer's answer received outside the approval link.
+   * response: { outcome: accepted | declined | revise, channel, responseDate (YYYY-MM-DD), reference, remarks, attachmentKey, attachmentName }
+   */
+  recordCustomerResponse(quotationId, response) {
+    return this.requestBody(`/quotations/${encodeURIComponent(quotationId)}/customer-response`, {
+      method: "POST",
+      body: JSON.stringify(response),
+    });
   }
 
   /** Server-side premium breakdown (cover premiums, taxes, gross, commission) for a quotation document. */

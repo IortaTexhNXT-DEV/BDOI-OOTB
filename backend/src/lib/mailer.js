@@ -15,6 +15,16 @@ const getTransport = () => {
   return transport;
 };
 
+/**
+ * Whether queued e-mail actually leaves the system: SMTP_URL must be set and notification.email_enabled on.
+ * Screens use it to tell the user that a message was only queued.
+ */
+export async function emailSendingStatus() {
+  const enabled = Boolean(await getSetting('notification.email_enabled', false));
+  const smtpConfigured = Boolean(config.smtpUrl);
+  return { enabled, smtpConfigured, active: enabled && smtpConfigured };
+}
+
 /** Queue an e-mail in email_outbox. The email-outbox job sends it (every 5 minutes by the seed). */
 export async function queueEmail({ to, cc, subject, html, template, entity, entityId }) {
   const r = await query('INSERT INTO email_outbox(to_address, cc, subject, body_html, template, entity, entity_id) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id', [to, cc || null, subject, html, template || null, entity || null, entityId == null ? null : String(entityId)]);

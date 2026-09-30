@@ -4969,5 +4969,42 @@
     "saveFailed": "บันทึกการตั้งค่าไม่สำเร็จ",
     "uploadSuccess": "อัปโหลดไฟล์สำเร็จ",
     "uploadFailed": "อัปโหลดไฟล์ไม่สำเร็จ"
+  },
+  "customerResponse": {
+    "waiting": "Waiting for customer approval",
+    "copyLink": "Copy approval link",
+    "linkCopied": "Approval link copied. Paste it in Viber, WhatsApp or a text message to the customer.",
+    "copyManually": "Your browser did not allow copying. Select the link below and copy it.",
+    "record": "Record customer response",
+    "title": "Record customer response",
+    "outcome": "Customer's answer",
+    "outcomes": {
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "revise": "Revise"
+    },
+    "outcomeHelp": {
+      "accepted": "The quotation becomes Customer Accepted and can go on to placement or policy.",
+      "declined": "The quotation is closed as declined by the customer.",
+      "revise": "The quotation goes back to Draft so the terms can be changed and sent again."
+    },
+    "channel": "Received by",
+    "channelPlaceholder": "Select the channel",
+    "responseDate": "Response date",
+    "reference": "Reference",
+    "referencePlaceholder": "e.g. Viber message time, signed form number",
+    "remarks": "Remarks",
+    "attachment": "Attachment (optional): screenshot, signed form or e-mail",
+    "cancel": "Cancel",
+    "save": "Record response",
+    "recorded": "Customer response recorded. Quotation status: {{status}}",
+    "uploadFailed": "The attachment could not be uploaded",
+    "emailNotConfiguredTitle": "E-mail not sent",
+    "emailNotConfigured": "The quotation is now waiting for the customer, but e-mail sending is not configured, so no e-mail was sent. Use Copy approval link to send the link by Viber or WhatsApp, or Record customer response when the customer answers.",
+    "errors": {
+      "channel": "Select how the response was received",
+      "responseDate": "Enter the response date",
+      "remarks": "Enter a reference or remarks"
+    }
   }
 }

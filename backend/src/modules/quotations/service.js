@@ -5,7 +5,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
-import { queueEmail } from '../../lib/mailer.js';
+import { queueEmail, emailSendingStatus } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
 import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
 import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
@@ -171,29 +171,68 @@ function approvalToken(quoteId, hours) {
   throw new Error('Could not generate an approval token');
 }
 
-/** Draft -> PendingCustomer: e-mail the customer a signed approval link and notify the Processing Team. */
+/** Public approval page address for a token (general.frontend_url + /approve-quote). */
+const approvalUrlFor = async (token) => `${String((await getSetting('general.frontend_url')) || '').replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
+
+/** The quotation's approval token while it verifies and is the latest one issued, else null. */
+function currentToken(q) {
+  if (!q.approval_token || q.approval_token_hash !== sha(q.approval_token)) return null;
+  try {
+    const payload = jwt.verify(q.approval_token, config.jwtSecret, { algorithms: ['HS256'] });
+    return { token: q.approval_token, expiresAt: new Date(payload.exp * 1000).toISOString() };
+  } catch { return null; }
+}
+
+/** Issue a new approval token for the quotation; the previous link stops working. */
+async function issueApprovalToken(q) {
+  const hours = Number(await getSetting('quotations.approval_link_ttl_hours', 168));
+  const token = approvalToken(q.id, hours);
+  await query('UPDATE quotes SET approval_token = $2, approval_token_hash = $3 WHERE id = $1', [q.id, token, sha(token)]);
+  return { token, hours, expiresAt: new Date(Date.now() + hours * 3600 * 1000).toISOString() };
+}
+
+/**
+ * Draft -> PendingCustomer: e-mail the customer a signed approval link and notify the Processing Team.
+ * When e-mail sending is not configured the quotation still moves to PendingCustomer (an e-mail, when there is an
+ * address, waits in the outbox), so staff can share the link another way or record the customer's answer.
+ */
 export async function sendForApproval(id, user) {
   const q = await getQuoteRow(id);
   if (!['draft', 'sent'].includes(q.status)) throw badRequest(`Only Draft quotations can be sent for approval (current: ${quoteStatusOut(q.status)})`);
+  const email = await emailSendingStatus();
   // Quotations without a lead (e.g. renewals of imported policies) go to the client's address.
   const client = q.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [q.client_id]) : null;
-  const to = q.lead_row?.email || client?.email;
-  if (!to) throw badRequest(q.lead_row ? 'The lead has no e-mail address; add one before sending the quotation' : 'The client has no e-mail address; add one before sending the quotation');
-  const hours = Number(await getSetting('quotations.approval_link_ttl_hours', 168));
-  const token = approvalToken(q.id, hours);
-  const url = `${String((await getSetting('general.frontend_url')) || '').replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
-  const t = await emailTemplate('quote_approval');
+  const to = q.lead_row?.email || client?.email || null;
+  if (!to && email.active) throw badRequest(q.lead_row ? 'The lead has no e-mail address; add one before sending the quotation' : 'The client has no e-mail address; add one before sending the quotation');
+  const { token, hours } = await issueApprovalToken(q);
+  const url = await approvalUrlFor(token);
   const v = await vars(q, { approvalUrl: url, validHours: hours, ...(!q.lead_row?.id && client?.display_name ? { customerName: client.display_name } : {}) });
-  await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
-  await query("UPDATE quotes SET status = 'sent', approval_token_hash = $2, approval_sent_to = $3, approval_sent_at = now(), updated_by = $4, updated_at = now() WHERE id = $1",
-    [q.id, sha(token), to, user.id]);
+  let emailId = null;
+  if (to) {
+    const t = await emailTemplate('quote_approval');
+    emailId = await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
+  }
+  await query("UPDATE quotes SET status = 'sent', approval_sent_to = $2, approval_sent_at = now(), updated_by = $3, updated_at = now() WHERE id = $1",
+    [q.id, to, user.id]);
   if (await getSetting('notification.approval_requests', true)) {
     for (const u of await usersWithRoles(await getSetting('quotations.approval_notify_roles', ['processing']))) {
       await notify({ userId: u.id, type: 'approval', title: 'Quotation sent for approval', message: `Quotation ${q.quote_number} (${v.customerName}, ${await formatMoney(q.premium_total, v.currency)}) was sent to the customer for approval`,
         link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
     }
   }
-  return { sentTo: to, approvalUrl: url, before: q, after: await getQuoteRow(q.id) };
+  return { sentTo: to, approvalUrl: url, emailId, emailSending: email.active, before: q, after: await getQuoteRow(q.id) };
+}
+
+/**
+ * Approval link of a PendingCustomer quotation, to share by Viber / WhatsApp. The current link is returned while it
+ * is valid, so copying it does not break the one already e-mailed; an expired link is replaced by a new one.
+ */
+export async function approvalLink(id) {
+  const q = await getQuoteRow(id);
+  if (q.status !== 'sent') throw badRequest(`Only a PendingCustomer quotation has an approval link (current: ${quoteStatusOut(q.status)})`);
+  const current = currentToken(q);
+  const issued = current || await issueApprovalToken(q);
+  return { quote: q, approvalUrl: await approvalUrlFor(issued.token), expiresAt: issued.expiresAt, reissued: !current };
 }
 
 /** Public link: preview or accept. The token must be the latest one issued for the quotation. */

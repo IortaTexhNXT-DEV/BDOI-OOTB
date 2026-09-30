@@ -1,0 +1,31 @@
+.customer-response-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+
+  .waiting-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background-color: #fef3c7;
+    font-size: 14px;
+  }
+}
+
+.customer-response-dialog {
+  label {
+    display: block;
+    margin: 12px 0 4px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .muted {
+    margin: 0;
+    color: #6c737f;
+    font-size: 13px;
+  }
+}
