@@ -471,7 +471,7 @@ const Calculations = () => {
             />
             <Column
               field="agentCount"
-              header="Agents"
+              header="Sales person"
               style={{ width: "8%", textAlign: "center" }}
             />
             <Column field="submittedBy" header="Submitted By" style={{ width: "12%" }} />
@@ -619,7 +619,7 @@ const Calculations = () => {
                   </span>
                 </div>
                 <div className="detail-item">
-                  <label>Agent Count:</label>
+                  <label>Sales persons:</label>
                   <span>{calculationDetails.agentCount}</span>
                 </div>
                 <div className="detail-item">
@@ -638,7 +638,7 @@ const Calculations = () => {
             <TabPanel header={`Agent Details (${calculationDetails.details?.length || 0})`}>
               {calculationDetails.details && calculationDetails.details.length > 0 ? (
                 <DataTable value={calculationDetails.details} className="detail-table">
-                  <Column field="agentName" header="Agent Name" />
+                  <Column field="agentName" header="Sales person" />
                   <Column field="program" header="Program" />
                   <Column field="achievementPercent" header="Achievement %" body={(data) => `${data.achievementPercent}%`} />
                   <Column field="baseIncentive" header="Base Incentive" body={(data) => formatCurrency(data.baseIncentive)} />

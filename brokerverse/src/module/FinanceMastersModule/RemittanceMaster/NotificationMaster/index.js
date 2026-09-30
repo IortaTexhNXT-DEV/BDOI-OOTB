@@ -163,7 +163,7 @@ const NotificationMaster = () => {
 
   const recipientTypeOptions = [
     { label: "Client", value: "Client" },
-    { label: "Agent", value: "Agent" },
+    { label: "Sales person", value: "Agent" },
     { label: "Approver", value: "Approver" },
     { label: "Manager", value: "Manager" },
     { label: "Finance Head", value: "Finance Head" },

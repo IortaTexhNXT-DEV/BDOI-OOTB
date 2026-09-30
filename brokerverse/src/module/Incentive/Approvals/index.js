@@ -431,7 +431,7 @@ const Approvals = () => {
             />
             <Column
               field="agentCount"
-              header="Agents"
+              header="Sales person"
               style={{ width: "8%", textAlign: "center" }}
             />
             <Column
@@ -508,7 +508,7 @@ const Approvals = () => {
                     </span>
                   </div>
                   <div className="detail-item">
-                    <label>Agent Count:</label>
+                    <label>Sales persons:</label>
                     <span>{selectedApproval.agentCount}</span>
                   </div>
                   <div className="detail-item">
@@ -565,7 +565,7 @@ const Approvals = () => {
             <TabPanel header={`Agent Details (${selectedApproval.details?.length || 0})`}>
               {selectedApproval.details && selectedApproval.details.length > 0 ? (
                 <DataTable value={selectedApproval.details} className="detail-table">
-                  <Column field="agentName" header="Agent Name" />
+                  <Column field="agentName" header="Sales person" />
                   <Column field="program" header="Program" />
                   <Column field="achievementPercent" header="Achievement %" body={(data) => `${data.achievementPercent}%`} />
                   <Column field="baseIncentive" header="Base Incentive" body={(data) => formatCurrency(data.baseIncentive)} />

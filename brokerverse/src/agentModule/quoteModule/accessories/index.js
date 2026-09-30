@@ -210,7 +210,7 @@ const Accessories = ({ action, flow }) => {
         if (leadData.generatedLeadId) {
           parts.push(`Lead ID : ${leadData.generatedLeadId}`);
         }
-        return parts.join(" / ") || "Lead";
+        return parts.join(" / ") || "Prospect";
       }
       return leadRefId ? `${t("agent.leadIdLabel")} ${leadRefId}` : t("agent.loadingLeadData");
     }

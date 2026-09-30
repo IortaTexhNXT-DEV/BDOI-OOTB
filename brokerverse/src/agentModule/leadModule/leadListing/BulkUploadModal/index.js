@@ -132,7 +132,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     <Dialog
       visible={visible}
       onHide={handleClose}
-      header="Bulk Upload Leads"
+      header="Bulk upload prospects"
       className="bulk-upload-modal"
       style={{ width: '600px' }}
       modal

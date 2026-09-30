@@ -249,15 +249,15 @@ export const EmployeeCreationCard = ({ flow, action }) => {
 
   return (
     <div className="card_overall_container mt-4">
-      <CustomToast ref={toastRef} message="Lead Created Successfully" />
+      <CustomToast ref={toastRef} message="Prospect created" />
       {/* <form onSubmit={formik.handleSubmit}> */}
       <Card
         title={
           action === "post"
-            ? "Create Lead"
+            ? "Create prospect"
             : flow === "client"
             ? "Edit Client"
-            : "Edit Lead"
+            : "Edit prospect"
         }
       >
         {action === "post" ? (

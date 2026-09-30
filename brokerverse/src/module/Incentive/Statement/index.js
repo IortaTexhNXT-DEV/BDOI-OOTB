@@ -156,7 +156,7 @@ const Statement = () => {
   // Handle export statement
   const handleExportStatement = () => {
     downloadCsv(`incentive_statement_${statementData.agentCode}_${selectedPeriod}.csv`, statementData.programBreakdown, [
-      { field: () => statementData.agentName, header: "Agent" },
+      { field: () => statementData.agentName, header: "Sales person" },
       { field: () => statementData.period, header: "Period" },
       { field: "program", header: "Program" },
       { field: "target", header: "Target" },

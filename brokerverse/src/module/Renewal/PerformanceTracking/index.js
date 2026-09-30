@@ -552,7 +552,7 @@ const PerformanceTracking = () => {
                 <div className="charts-grid">
                   <Card className="comparison-chart">
                     <div className="chart-header">
-                      <h3>Agent Performance Comparison</h3>
+                      <h3>Sales Performance Comparison</h3>
                       <Badge value="Dual metrics" severity="info" />
                     </div>
                     <Chart
@@ -565,7 +565,7 @@ const PerformanceTracking = () => {
 
                   <Card className="leaderboard-card">
                     <div className="chart-header">
-                      <h3>Agent Leaderboard</h3>
+                      <h3>Sales Leaderboard</h3>
                     </div>
                     <DataTable
                       value={performanceData.byAgent || []}
@@ -579,7 +579,7 @@ const PerformanceTracking = () => {
                       />
                       <Column
                         body={agentNameTemplate}
-                        header="Agent"
+                        header="Sales person"
                         style={{ width: '180px' }}
                       />
                       <Column

@@ -79,7 +79,7 @@ const NegotiationWorkspace = () => {
   ];
 
   const agentFilterOptions = [
-    { label: "All Agents", value: "All" },
+    { label: "All sales persons", value: "All" },
     ...[...new Set(negotiations.map(n => n.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
@@ -526,7 +526,7 @@ const NegotiationWorkspace = () => {
               </div>
 
               <div className="search-field">
-                <label>Agent</label>
+                <label>Sales person</label>
                 <Dropdown
                   value={agentFilter}
                   onChange={(e) => setAgentFilter(e.value)}

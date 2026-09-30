@@ -189,7 +189,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
         <div>
 
             <div className="order__summary__main__title">
-                {flow === "renewal" ? "Client" : "Leads"}
+                {flow === "renewal" ? "Client" : "Prospects"}
             </div>
             <div
                 onClick={handleLeadNavigation}
@@ -200,7 +200,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                 <div className="order__summary__back__btn__title">
                     {flow === "renewal"
                         ? "Carson Darrin / Client ID : 12345678"
-                        : "Lead ID : 12345678"}
+                        : "Prospect ID : 12345678"}
                 </div>
             </div>
 

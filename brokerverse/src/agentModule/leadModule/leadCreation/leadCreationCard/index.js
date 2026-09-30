@@ -153,7 +153,7 @@ const LeadCreationCard = ({ flow, action }) => {
               );
             } else {
               showErrorToast(
-                "Lead created but ID not found. Please try creating quote from lead listing."
+                "Prospect created but its ID was not returned. Create the quote from the Prospects list."
               );
               setTimeout(() => {
                 navigate("/agent/leadlisting");
@@ -458,8 +458,8 @@ const LeadCreationCard = ({ flow, action }) => {
         ref={toastRef}
         message={
           action === "edit"
-            ? "Lead Updated Successfully"
-            : "Lead Created Successfully"
+            ? "Prospect updated"
+            : "Prospect created"
         }
       />
       <CustomToast

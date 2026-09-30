@@ -512,11 +512,11 @@ const RetentionAnalytics = () => {
               </div>
             </TabPanel>
 
-            <TabPanel header="Agent Performance">
+            <TabPanel header="Sales Performance">
               <div className="charts-grid">
                 <Card className="chart-card">
                   <div className="chart-header">
-                    <h3>Agent Performance Comparison</h3>
+                    <h3>Sales Performance Comparison</h3>
                     <Badge value="Dual axis" severity="info" />
                   </div>
                   <div className="chart-container">
@@ -531,7 +531,7 @@ const RetentionAnalytics = () => {
 
                 <Card className="agent-leaderboard">
                   <div className="chart-header">
-                    <h3>Agent Leaderboard</h3>
+                    <h3>Sales Leaderboard</h3>
                   </div>
                   <DataTable
                     value={shownAgents}
@@ -544,7 +544,7 @@ const RetentionAnalytics = () => {
                     />
                     <Column
                       field="agentName"
-                      header="Agent"
+                      header="Sales person"
                       style={{ width: '140px' }}
                     />
                     <Column
@@ -670,7 +670,7 @@ const RetentionAnalytics = () => {
                 <div className="action-content">
                   <i className="pi pi-users"></i>
                   <div className="action-text">
-                    <h4>Agent Training Opportunity</h4>
+                    <h4>Sales Training Opportunity</h4>
                     <p>Carlos Mendoza's performance is below average. Consider additional training or support.</p>
                   </div>
                 </div>

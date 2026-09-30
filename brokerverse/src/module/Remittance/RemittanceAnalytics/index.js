@@ -505,9 +505,9 @@ const RemittanceAnalytics = () => {
                 </Card>
 
                 <Card className="performers-card">
-                  <h4>Top Agents by Performance</h4>
+                  <h4>Top sales by Performance</h4>
                   <DataTable value={topAgents} stripedRows>
-                    <Column field="agentName" header="Agent" />
+                    <Column field="agentName" header="Sales person" />
                     <Column field="clientCount" header="Clients" />
                     <Column
                       field="totalCommission"

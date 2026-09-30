@@ -29,7 +29,7 @@ export const quotationListDataMiddleWare = createAsyncThunk(
             ? `${quotation.lead.firstName || ""} ${
                 quotation.lead.lastName || ""
               }`.trim()
-            : quotation.leadName || "Unknown Lead";
+            : quotation.leadName || "Unknown prospect";
 
           return {
             id: quotation.quotationId || quotation.id || (index + 1).toString(),

@@ -734,7 +734,7 @@ const AtRiskAnalysis = () => {
                     <InputText
                       value={actionPlan.assignedTo}
                       onChange={(e) => setActionPlan({...actionPlan, assignedTo: e.target.value})}
-                      placeholder="Agent name"
+                      placeholder="Sales person"
                     />
                   </div>
 
