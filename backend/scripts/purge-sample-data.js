@@ -50,6 +50,8 @@ export const TRANSACTION_TABLES = [
   'bank_statements', 'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations', 'bank_reconciliation_history',
   // comsub adjustments on return premium, claim settlement cash, refunds due from insurers
   'commission_adjustments', 'claim_settlement_movements', 'insurer_refund_credits',
+  // client payments to insurers recorded on direct-bill policies
+  'direct_bill_client_payments',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

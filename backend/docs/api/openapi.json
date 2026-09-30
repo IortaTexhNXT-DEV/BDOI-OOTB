@@ -70076,6 +70076,249 @@
         }
       }
     },
+    "/remittance/direct-bill/client-payments": {
+      "get": {
+        "operationId": "getRemittanceDirectBillClientPayments",
+        "summary": "Client payments to insurers recorded on direct-bill policies (insurerCode, from / to payment date, status recorded | voided | all, search)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "insurerCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "MALAYAN"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "policyId": {
+                            "type": "string"
+                          },
+                          "policyNo": {
+                            "type": "string"
+                          },
+                          "paymentDate": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "integer"
+                          },
+                          "insurerReference": {
+                            "type": "string"
+                          },
+                          "paymentMode": {
+                            "type": "string"
+                          },
+                          "proofKey": {
+                            "type": "string"
+                          },
+                          "proofFileName": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "policyId": "pol_1",
+                      "policyNo": "POL-2026-00001",
+                      "paymentDate": "2026-09-20",
+                      "amount": 125250,
+                      "insurerReference": "MIC-OR-778812",
+                      "paymentMode": "bank-transfer",
+                      "proofKey": "/api/s3/object/direct-bill-payments/or-778812.pdf",
+                      "proofFileName": "or-778812.pdf",
+                      "status": "recorded"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Direct Bill Processing",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/direct-bill/client-payments/{paymentId}/void": {
+      "post": {
+        "operationId": "postRemittanceDirectBillClientPaymentsPaymentIdVoid",
+        "summary": "Void a client payment recorded in error (reason required)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "policyNo": {
+                          "type": "string"
+                        },
+                        "paymentDate": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "integer"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "paymentMode": {
+                          "type": "string"
+                        },
+                        "proofKey": {
+                          "type": "string"
+                        },
+                        "proofFileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "policyId": "pol_1",
+                    "policyNo": "POL-2026-00001",
+                    "paymentDate": "2026-09-20",
+                    "amount": 125250,
+                    "insurerReference": "MIC-OR-778812",
+                    "paymentMode": "bank-transfer",
+                    "proofKey": "/api/s3/object/direct-bill-payments/or-778812.pdf",
+                    "proofFileName": "or-778812.pdf",
+                    "status": "voided"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Direct Bill Processing > Client payment",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Recorded on the wrong policy"
+              }
+            }
+          }
+        }
+      }
+    },
     "/remittance/direct-bill/policies": {
       "get": {
         "operationId": "getRemittanceDirectBillPolicies",
@@ -70279,6 +70522,283 @@
           "read:remittance",
           "write:remittance"
         ]
+      }
+    },
+    "/remittance/direct-bill/policies/{policyId}/client-payments": {
+      "get": {
+        "operationId": "getRemittanceDirectBillPoliciesPolicyIdClientPayments",
+        "summary": "Payments the client made to the insurer on a direct-bill policy, with its payment status (Unpaid, Partially paid, Paid)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "policyNo": {
+                          "type": "string"
+                        },
+                        "premium": {
+                          "type": "integer"
+                        },
+                        "paid": {
+                          "type": "integer"
+                        },
+                        "balance": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "policyId": {
+                                "type": "string"
+                              },
+                              "policyNo": {
+                                "type": "string"
+                              },
+                              "paymentDate": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              },
+                              "insurerReference": {
+                                "type": "string"
+                              },
+                              "paymentMode": {
+                                "type": "string"
+                              },
+                              "proofKey": {
+                                "type": "string"
+                              },
+                              "proofFileName": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyId": "pol_1",
+                    "policyNo": "POL-2026-00001",
+                    "premium": 125250,
+                    "paid": 125250,
+                    "balance": 0,
+                    "status": "paid",
+                    "statusLabel": "Paid",
+                    "items": [
+                      {
+                        "id": 1,
+                        "policyId": "pol_1",
+                        "policyNo": "POL-2026-00001",
+                        "paymentDate": "2026-09-20",
+                        "amount": 125250,
+                        "insurerReference": "MIC-OR-778812",
+                        "paymentMode": "bank-transfer",
+                        "proofKey": "/api/s3/object/direct-bill-payments/or-778812.pdf",
+                        "proofFileName": "or-778812.pdf",
+                        "status": "recorded"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Direct Bill Processing > Client payment",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      },
+      "post": {
+        "operationId": "postRemittanceDirectBillPoliciesPolicyIdClientPayments",
+        "summary": "Record the client's payment to the insurer on a direct-bill policy (date, amount, insurer OR / reference, proof); no journal is posted",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "policyNo": {
+                          "type": "string"
+                        },
+                        "paymentDate": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "integer"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "paymentMode": {
+                          "type": "string"
+                        },
+                        "proofKey": {
+                          "type": "string"
+                        },
+                        "proofFileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "policyId": "pol_1",
+                    "policyNo": "POL-2026-00001",
+                    "paymentDate": "2026-09-20",
+                    "amount": 125250,
+                    "insurerReference": "MIC-OR-778812",
+                    "paymentMode": "bank-transfer",
+                    "proofKey": "/api/s3/object/direct-bill-payments/or-778812.pdf",
+                    "proofFileName": "or-778812.pdf",
+                    "status": "recorded"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Direct Bill Processing > Client payment",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentDate": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "insurerReference": {
+                    "type": "string"
+                  },
+                  "paymentMode": {
+                    "type": "string"
+                  },
+                  "proofKey": {
+                    "type": "string"
+                  },
+                  "proofFileName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "paymentDate": "2026-09-20",
+                "amount": 125250,
+                "insurerReference": "MIC-OR-778812",
+                "paymentMode": "bank-transfer",
+                "proofKey": "/api/s3/object/direct-bill-payments/or-778812.pdf",
+                "proofFileName": "or-778812.pdf"
+              }
+            }
+          }
+        }
       }
     },
     "/remittance/direct-bill/summary": {

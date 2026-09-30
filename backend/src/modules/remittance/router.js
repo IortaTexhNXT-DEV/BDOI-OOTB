@@ -8,6 +8,8 @@ import * as masters from '../masters/service.js';
 import * as svc from './service.js';
 import * as items from './items.js';
 import * as directBill from './directbill.js';
+import * as clientPayments from './clientPayments.js';
+import { pool, withTransaction } from '../../db/pool.js';
 import { businessTimeZone } from '../../lib/dates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { commissionDebitNoteDoc } from '../documents/templates.js';
@@ -167,6 +169,40 @@ define({
     const r = await directBill.changeBillingMode(b.policyId || b.policyNumber, b.billingMode, req.user, { reason: b.reason });
     await audit(req, { entity: 'policy', entityId: r.policyId, action: 'change-billing-mode', before: { billingMode: r.before }, after: r });
     ok(res, r, `${r.policyNumber} is now ${r.billingModeLabel.toLowerCase()}`);
+  },
+});
+// client's payment to the insurer on direct-bill policies (recorded only; nothing is posted)
+const paymentExample = { id: 1, policyId: 'pol_1', policyNo: 'POL-2026-00001', paymentDate: '2026-09-20', amount: 125250, insurerReference: 'MIC-OR-778812', paymentMode: 'bank-transfer',
+  proofKey: '/api/s3/object/direct-bill-payments/or-778812.pdf', proofFileName: 'or-778812.pdf', status: 'recorded' };
+define({
+  method: 'GET', path: '/direct-bill/client-payments', summary: 'Client payments to insurers recorded on direct-bill policies (insurerCode, from / to payment date, status recorded | voided | all, search)',
+  screen: S('Direct Bill Processing'), middleware: read, query: { insurerCode: 'MALAYAN', from: '2026-09-01', to: '2026-09-30' }, response: { success: true, data: [paymentExample] },
+  handler: async (req, res) => ok(res, await clientPayments.listClientPayments(pool, req.query)),
+});
+define({
+  method: 'GET', path: '/direct-bill/policies/:policyId/client-payments', summary: 'Payments the client made to the insurer on a direct-bill policy, with its payment status (Unpaid, Partially paid, Paid)',
+  screen: S('Direct Bill Processing > Client payment'), middleware: read,
+  response: { success: true, data: { policyId: 'pol_1', policyNo: 'POL-2026-00001', premium: 125250, paid: 125250, balance: 0, status: 'paid', statusLabel: 'Paid', items: [paymentExample] } },
+  handler: async (req, res) => ok(res, await clientPayments.policyClientPayments(pool, req.params.policyId)),
+});
+define({
+  method: 'POST', path: '/direct-bill/policies/:policyId/client-payments', summary: 'Record the client\'s payment to the insurer on a direct-bill policy (date, amount, insurer OR / reference, proof); no journal is posted',
+  screen: S('Direct Bill Processing > Client payment'), middleware: write,
+  request: { paymentDate: '2026-09-20', amount: 125250, insurerReference: 'MIC-OR-778812', paymentMode: 'bank-transfer', proofKey: '/api/s3/object/direct-bill-payments/or-778812.pdf', proofFileName: 'or-778812.pdf' },
+  response: { success: true, data: paymentExample },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => clientPayments.recordClientPayment(db, req.params.policyId, req.body || {}, req.user));
+    await audit(req, { entity: 'direct_bill_client_payment', entityId: r.id, action: 'create', after: r });
+    created(res, r, `Payment ${r.insurerReference} recorded on ${r.policyNo}`);
+  },
+});
+define({
+  method: 'POST', path: '/direct-bill/client-payments/:paymentId/void', summary: 'Void a client payment recorded in error (reason required)', screen: S('Direct Bill Processing > Client payment'), middleware: write,
+  request: { reason: 'Recorded on the wrong policy' }, response: { success: true, data: { ...paymentExample, status: 'voided' } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => clientPayments.voidClientPayment(db, req.params.paymentId, req.body?.reason, req.user));
+    await audit(req, { entity: 'direct_bill_client_payment', entityId: r.after.id, action: 'void', before: r.before, after: r.after });
+    ok(res, r.after, `Payment ${r.after.insurerReference} voided`);
   },
 });
 define({

@@ -22,6 +22,7 @@ import reportsService from "../../../services/reportsService";
 import { calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 import { promptText } from "../../../utility/dialogs";
+import ClientPaymentDialog, { PAYMENT_SEVERITY } from "./ClientPaymentDialog";
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 const firstOfMonth = () => {
@@ -30,6 +31,10 @@ const firstOfMonth = () => {
 };
 const STATUS_FILTERS = ["All", "Draft", "Pending Approval", "Open", "Partially Collected", "Collected", "Rejected", "Cancelled"];
 const MODE_LABELS = { "bank-transfer": "Bank transfer", check: "Cheque", cash: "Cash", card: "Card", gcash: "GCash", online: "Online" };
+const PAYMENT_RULES = {
+  any: "A commission debit note can only be approved once the client's payment to the insurer is recorded on each of its policies.",
+  full: "A commission debit note can only be approved once each of its policies is paid in full to the insurer (recorded client payments).",
+};
 
 /**
  * Remittance > Direct Bill Processing.
@@ -48,6 +53,8 @@ const DirectBillProcessing = () => {
   const [insurerOptions, setInsurerOptions] = useState([]);
   const [lineOptions, setLineOptions] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
+  const [paymentRule, setPaymentRule] = useState("none");
+  const [paymentPolicy, setPaymentPolicy] = useState(null); // { policyId, policyNo } of the client payment dialog
 
   // raise debit note
   const [insurer, setInsurer] = useState(null);
@@ -88,7 +95,10 @@ const DirectBillProcessing = () => {
       .catch((e) => showError(toast, e));
     // payment modes are the modes mapped to a GL cash account (accounting.cash_account_by_payment_mode)
     loadSettings()
-      .then((s) => setPaymentModes(Object.keys(s["accounting.cash_account_by_payment_mode"] || {}).map((m) => ({ label: MODE_LABELS[m] || m, value: m }))))
+      .then((s) => {
+        setPaymentModes(Object.keys(s["accounting.cash_account_by_payment_mode"] || {}).map((m) => ({ label: MODE_LABELS[m] || m, value: m })));
+        setPaymentRule(s["direct_bill.client_payment_required"] || "none");
+      })
       .catch((e) => showError(toast, e));
   }, [loadSummary]);
 
@@ -258,6 +268,16 @@ const DirectBillProcessing = () => {
   };
 
   const money = (field) => (row) => formatCurrency(row[field]);
+  const clientPaymentBody = (row) => (
+    <div className="flex align-items-center gap-1">
+      <Tag value={row.clientPaymentStatus || "Unpaid"} severity={PAYMENT_SEVERITY[row.clientPaymentStatus] || "danger"} />
+      <Button icon="pi pi-credit-card" className="p-button-text p-button-sm" tooltip="Record client payment to insurer" onClick={() => setPaymentPolicy({ policyId: row.policyId, policyNo: row.policyNo })} />
+    </div>
+  );
+  const reloadAfterPayment = async () => {
+    if (items.length) await loadItems();
+    if (viewNote) setViewNote(await remittanceService.getDebitNote(viewNote.id));
+  };
   const statusTag = (row) => <Tag value={row.status} severity={statusSeverity(row.statusCode === "collected" ? "completed" : row.statusCode)} />;
 
   const noteActions = (row) => (
@@ -317,6 +337,7 @@ const DirectBillProcessing = () => {
           </div>
         ))}
       </div>
+      {PAYMENT_RULES[paymentRule] && <Message severity="warn" className="w-full justify-content-start mb-3" text={PAYMENT_RULES[paymentRule]} />}
       {summary?.pendingApproval > 0 && (
         <Message severity="info" className="w-full justify-content-start mb-3" text={`${summary.pendingApproval} debit note(s) awaiting approval`} />
       )}
@@ -364,6 +385,7 @@ const DirectBillProcessing = () => {
               <Column field="vat" header="VAT" body={money("vat")} className="text-right" />
               <Column field="totalDue" header="Total Due" body={(r) => <strong>{formatCurrency(r.totalDue)}</strong>} className="text-right" />
               <Column field="expectedEwt" header="EWT" body={money("expectedEwt")} className="text-right" />
+              <Column field="clientPaymentStatus" header="Client paid insurer" body={clientPaymentBody} style={{ minWidth: "11rem" }} />
               <Column field="bookingJournal" header="Booked in" />
             </DataTable>
 
@@ -508,6 +530,7 @@ const DirectBillProcessing = () => {
               <Column field="commission" header="Commission" body={money("commission")} className="text-right" />
               <Column field="vat" header="VAT" body={money("vat")} className="text-right" />
               <Column field="amount" header="Total" body={money("amount")} className="text-right" />
+              <Column field="clientPaymentStatus" header="Client paid insurer" body={clientPaymentBody} style={{ minWidth: "11rem" }} />
             </DataTable>
             <h4>Collections</h4>
             <DataTable value={viewNote.collections} size="small" stripedRows emptyMessage="No payment recorded yet">
@@ -528,6 +551,8 @@ const DirectBillProcessing = () => {
           </>
         )}
       </Dialog>
+
+      <ClientPaymentDialog policy={paymentPolicy} paymentModes={paymentModes} toast={toast} onClose={() => setPaymentPolicy(null)} onChanged={reloadAfterPayment} />
 
       <Dialog className="direct-bill-dialog" header={decision ? `${{ approve: "Approve", reject: "Reject", cancel: "Cancel" }[decision.action]} ${decision.note.dnNumber}` : ""} visible={!!decision}
         style={{ width: "min(520px, 95vw)" }} onHide={() => setDecision(null)}

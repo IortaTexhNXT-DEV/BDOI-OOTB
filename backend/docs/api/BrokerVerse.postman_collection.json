@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (719 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (723 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -45733,6 +45733,182 @@
           ]
         },
         {
+          "name": "Client payments to insurers recorded on direct-bill policies (insurerCode, from / to payment date, status recorded | voided | all, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/client-payments?insurerCode=MALAYAN&from=2026-09-01&to=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                "client-payments"
+              ],
+              "query": [
+                {
+                  "key": "insurerCode",
+                  "value": "MALAYAN"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                }
+              ]
+            },
+            "description": "Client payments to insurers recorded on direct-bill policies (insurerCode, from / to payment date, status recorded | voided | all, search)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/client-payments?insurerCode=MALAYAN&from=2026-09-01&to=2026-09-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    "client-payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "insurerCode",
+                      "value": "MALAYAN"
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-09-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    }
+                  ]
+                },
+                "description": "Client payments to insurers recorded on direct-bill policies (insurerCode, from / to payment date, status recorded | voided | all, search)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"policyId\": \"pol_1\",\n      \"policyNo\": \"POL-2026-00001\",\n      \"paymentDate\": \"2026-09-20\",\n      \"amount\": 125250,\n      \"insurerReference\": \"MIC-OR-778812\",\n      \"paymentMode\": \"bank-transfer\",\n      \"proofKey\": \"/api/s3/object/direct-bill-payments/or-778812.pdf\",\n      \"proofFileName\": \"or-778812.pdf\",\n      \"status\": \"recorded\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Void a client payment recorded in error (reason required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/client-payments/:paymentId/void",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                "client-payments",
+                ":paymentId",
+                "void"
+              ],
+              "variable": [
+                {
+                  "key": "paymentId",
+                  "value": "",
+                  "description": "paymentId (path parameter)"
+                }
+              ]
+            },
+            "description": "Void a client payment recorded in error (reason required)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Recorded on the wrong policy\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/client-payments/:paymentId/void",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    "client-payments",
+                    ":paymentId",
+                    "void"
+                  ],
+                  "variable": [
+                    {
+                      "key": "paymentId",
+                      "value": "",
+                      "description": "paymentId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Void a client payment recorded in error (reason required)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Recorded on the wrong policy\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"policyId\": \"pol_1\",\n    \"policyNo\": \"POL-2026-00001\",\n    \"paymentDate\": \"2026-09-20\",\n    \"amount\": 125250,\n    \"insurerReference\": \"MIC-OR-778812\",\n    \"paymentMode\": \"bank-transfer\",\n    \"proofKey\": \"/api/s3/object/direct-bill-payments/or-778812.pdf\",\n    \"proofFileName\": \"or-778812.pdf\",\n    \"status\": \"voided\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Unbilled direct-bill commission, insurer-wise (insurerCode, from / to booking date, productLine, search) with commission, VAT, total due and expected EWT",
           "request": {
             "method": "GET",
@@ -45816,6 +45992,172 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"dbi_1\",\n      \"policyId\": \"pol_1\",\n      \"policyNo\": \"POL-2026-00001\",\n      \"reference\": \"POL-2026-00001\",\n      \"source\": \"policy\",\n      \"insuredName\": \"Juan Dela Cruz\",\n      \"product\": \"Private Car Comprehensive\",\n      \"lineOfBusiness\": \"MOTOR\",\n      \"bookedOn\": \"2026-09-15\",\n      \"grossPremium\": 30000,\n      \"netPremium\": 25000,\n      \"commissionRate\": 18,\n      \"commission\": 4500,\n      \"vat\": 540,\n      \"totalDue\": 5040,\n      \"expectedEwt\": 450,\n      \"netReceivable\": 4590,\n      \"bookingJournal\": \"JV-2026-00012\"\n    }\n  ],\n  \"summary\": {\n    \"count\": 1,\n    \"grossPremium\": 30000,\n    \"commission\": 4500,\n    \"vat\": 540,\n    \"totalDue\": 5040,\n    \"expectedEwt\": 450,\n    \"netReceivable\": 4590,\n    \"ewtRate\": 0.1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payments the client made to the insurer on a direct-bill policy, with its payment status (Unpaid, Partially paid, Paid)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/policies/:policyId/client-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                "policies",
+                ":policyId",
+                "client-payments"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Payments the client made to the insurer on a direct-bill policy, with its payment status (Unpaid, Partially paid, Paid)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/policies/:policyId/client-payments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    "policies",
+                    ":policyId",
+                    "client-payments"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Payments the client made to the insurer on a direct-bill policy, with its payment status (Unpaid, Partially paid, Paid)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyId\": \"pol_1\",\n    \"policyNo\": \"POL-2026-00001\",\n    \"premium\": 125250,\n    \"paid\": 125250,\n    \"balance\": 0,\n    \"status\": \"paid\",\n    \"statusLabel\": \"Paid\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"policyId\": \"pol_1\",\n        \"policyNo\": \"POL-2026-00001\",\n        \"paymentDate\": \"2026-09-20\",\n        \"amount\": 125250,\n        \"insurerReference\": \"MIC-OR-778812\",\n        \"paymentMode\": \"bank-transfer\",\n        \"proofKey\": \"/api/s3/object/direct-bill-payments/or-778812.pdf\",\n        \"proofFileName\": \"or-778812.pdf\",\n        \"status\": \"recorded\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the client's payment to the insurer on a direct-bill policy (date, amount, insurer OR / reference, proof); no journal is posted",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/policies/:policyId/client-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                "policies",
+                ":policyId",
+                "client-payments"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the client's payment to the insurer on a direct-bill policy (date, amount, insurer OR / reference, proof); no journal is posted\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentDate\": \"2026-09-20\",\n  \"amount\": 125250,\n  \"insurerReference\": \"MIC-OR-778812\",\n  \"paymentMode\": \"bank-transfer\",\n  \"proofKey\": \"/api/s3/object/direct-bill-payments/or-778812.pdf\",\n  \"proofFileName\": \"or-778812.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/policies/:policyId/client-payments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    "policies",
+                    ":policyId",
+                    "client-payments"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the client's payment to the insurer on a direct-bill policy (date, amount, insurer OR / reference, proof); no journal is posted\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Client payment\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"paymentDate\": \"2026-09-20\",\n  \"amount\": 125250,\n  \"insurerReference\": \"MIC-OR-778812\",\n  \"paymentMode\": \"bank-transfer\",\n  \"proofKey\": \"/api/s3/object/direct-bill-payments/or-778812.pdf\",\n  \"proofFileName\": \"or-778812.pdf\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"policyId\": \"pol_1\",\n    \"policyNo\": \"POL-2026-00001\",\n    \"paymentDate\": \"2026-09-20\",\n    \"amount\": 125250,\n    \"insurerReference\": \"MIC-OR-778812\",\n    \"paymentMode\": \"bank-transfer\",\n    \"proofKey\": \"/api/s3/object/direct-bill-payments/or-778812.pdf\",\n    \"proofFileName\": \"or-778812.pdf\",\n    \"status\": \"recorded\"\n  }\n}"
             }
           ]
         },
