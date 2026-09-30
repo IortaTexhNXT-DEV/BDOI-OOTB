@@ -49,6 +49,23 @@ const openPdf = async (path) => {
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 
+/** Download a server-generated file (XLSX / CSV) under its own name. */
+const download = async (path, fileName) => {
+  const response = await fetch(`${BASE_URL}${path}`, { headers: { ...authService.getAuthHeader() } });
+  if (!response.ok) {
+    const json = await response.json().catch(() => null);
+    throw new Error(json?.message || `Could not download the file (${response.status})`);
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
+
 const enc = encodeURIComponent;
 
 const bespokeService = {
@@ -104,6 +121,7 @@ const bespokeService = {
   claimMovement: async (claimId, body) => (await request("POST", `/bespoke/layers/claims/${enc(claimId)}/movements`, body)).data,
   claimRecovery: async (claimId, body) => (await request("POST", `/bespoke/layers/claims/${enc(claimId)}/recoveries`, body)).data,
   outstandingRecoveries: async (params) => (await request("GET", `/bespoke/layers/reports/outstanding-recoveries${queryString(params)}`)).data,
+  downloadRecoveries: (params) => download(`/bespoke/layers/reports/outstanding-recoveries${queryString({ ...params, format: "xlsx" })}`, "outstanding-recoveries.xlsx"),
 
   // facultative reinsurance
   facOptions: async () => (await request("GET", "/bespoke/facultative/options")).data,
@@ -118,6 +136,7 @@ const bespokeService = {
   facRecoveryReceipt: async (recoveryId, body) => (await request("POST", `/bespoke/facultative/recoveries/${enc(recoveryId)}/receive`, body)).data,
   facStatement: async (params) => (await request("GET", `/bespoke/facultative/reports/statement${queryString(params)}`)).data,
   facAgeing: async (params) => (await request("GET", `/bespoke/facultative/reports/ageing${queryString(params)}`)).data,
+  downloadFacStatement: (params) => download(`/bespoke/facultative/reports/statement${queryString({ ...params, format: "xlsx" })}`, "facultative-statement.xlsx"),
   openFacPdf: (id) => openPdf(`/bespoke/facultative/${enc(id)}/pdf`),
 };
 

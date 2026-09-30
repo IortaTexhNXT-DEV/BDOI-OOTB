@@ -4,6 +4,7 @@
  */
 import { clauseRouter, composerRouter, templateRouter } from './composerRouter.js';
 import { linkRouter, roomRouter } from './roomRouter.js';
+import { layersRouter } from './layersRouter.js';
 
 export default composerRouter;
 export const mount = '/bespoke/slips';
@@ -12,4 +13,5 @@ export const extraMounts = [
   ['/bespoke/slip-templates', templateRouter],
   ['/bespoke/rooms', roomRouter],
   ['/bespoke/underwriter-link', linkRouter],
+  ['/bespoke/layers', layersRouter],
 ];
