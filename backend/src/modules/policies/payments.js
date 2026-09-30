@@ -13,6 +13,7 @@ import { hasPermission } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2, num, isoDate, today } from '../accounting/lib/http.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const DEFAULT_MODES = ['bank-transfer', 'check', 'online', 'cash'];
 const MODE_LABELS = { 'bank-transfer': 'Bank transfer', check: 'Cheque', online: 'Online payment', cash: 'Cash', card: 'Card', gcash: 'GCash' };
@@ -21,7 +22,7 @@ const NEEDS_REFERENCE = ['bank-transfer', 'check', 'online', 'card', 'gcash'];
 export const canPostReceipts = (user) => hasPermission(user, 'write:receipts');
 
 export const captureRow = (x) => ({
-  id: x.id, policyId: x.policy_id, policyNumber: x.policy_number, receivableId: x.receivable_id, billNumber: x.bill_number,
+  id: x.id, arNumber: x.ar_number || null, policyId: x.policy_id, policyNumber: x.policy_number, receivableId: x.receivable_id, billNumber: x.bill_number,
   amount: Number(x.amount), paymentMode: x.payment_mode, paymentModeLabel: MODE_LABELS[x.payment_mode] || x.payment_mode, referenceNo: x.reference_no,
   paymentDate: isoDate(x.paid_on), proofKey: x.proof_key, proofFileName: x.proof_file_name, remarks: x.remarks, status: x.status,
   receiptId: x.receipt_id, receiptNumber: x.receipt_number || null, clientName: x.client_name || null, clientCode: x.client_code || null,
@@ -29,7 +30,7 @@ export const captureRow = (x) => ({
   rejectedAt: x.rejected_at, rejectReason: x.reject_reason, createdAt: x.created_at,
 });
 
-const CAPTURE_SQL = `SELECT pp.*, p.policy_number, r.bill_number, rc.receipt_number, c.display_name AS client_name, c.client_code,
+export const CAPTURE_SQL = `SELECT pp.*, p.policy_number, r.bill_number, rc.receipt_number, c.display_name AS client_name, c.client_code,
   (SELECT display_name FROM users WHERE id = pp.submitted_by) AS submitted_by_name, (SELECT display_name FROM users WHERE id = pp.confirmed_by) AS confirmed_by_name
   FROM policy_payments pp JOIN policies p ON p.id = pp.policy_id LEFT JOIN receivables r ON r.id = pp.receivable_id
   LEFT JOIN receipts rc ON rc.id = pp.receipt_id LEFT JOIN clients c ON c.id = p.client_id`;
@@ -116,8 +117,9 @@ export async function capturePayment(db, policy, body, user) {
   await db.query('SELECT id FROM receivables WHERE id = $1 FOR UPDATE', [bill.id]);
   const available = round2(Number(bill.balance) - (await pendingOn(db, bill.id)));
   if (amount > available) throw badRequest(`Amount ${amount.toFixed(2)} exceeds what remains to be paid on bill ${bill.bill_number} (${available.toFixed(2)}${available < Number(bill.balance) ? ' after payments awaiting verification' : ''})`);
-  const c = (await db.query(`INSERT INTO policy_payments(policy_id, receivable_id, amount, payment_mode, reference_no, paid_on, proof_key, proof_file_name, remarks, submitted_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`, [policy.id, bill.id, amount, mode, reference || null, paidOn, body.proofKey || null, body.proofFileName || null, body.remarks || null, user.id])).rows[0];
+  const arNumber = await nextDocumentNumber('acknowledgement_receipt', { db, unique: { table: 'policy_payments', column: 'ar_number' } });
+  const c = (await db.query(`INSERT INTO policy_payments(policy_id, receivable_id, amount, payment_mode, reference_no, paid_on, proof_key, proof_file_name, remarks, submitted_by, ar_number)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`, [policy.id, bill.id, amount, mode, reference || null, paidOn, body.proofKey || null, body.proofFileName || null, body.remarks || null, user.id, arNumber])).rows[0];
   await db.query('UPDATE policies SET payment_method = $2, updated_at = now() WHERE id = $1', [policy.id, modeDef.label]);
   let receipt = null;
   if (canPostReceipts(user)) receipt = await confirm(db, c, user);
@@ -153,4 +155,20 @@ export async function listCaptures(db, q = {}) {
   const status = q.status || 'submitted';
   const rows = (await db.query(`${CAPTURE_SQL} WHERE ($1 = 'all' OR pp.status = $1) ORDER BY pp.created_at DESC LIMIT 500`, [status])).rows;
   return rows.map(captureRow);
+}
+
+/**
+ * A captured payment with what its acknowledgement receipt prints (client, policy, bill, received by). Payments
+ * recorded before acknowledgement receipts were numbered get their AR number on the first print.
+ */
+export async function captureForReceipt(db, id) {
+  let row = (await db.query(`${CAPTURE_SQL} WHERE pp.id = $1 OR pp.ar_number = $1`, [id])).rows[0];
+  if (!row) throw notFound('Payment not found');
+  if (!row.ar_number) {
+    const n = await nextDocumentNumber('acknowledgement_receipt', { db, unique: { table: 'policy_payments', column: 'ar_number' } });
+    await db.query('UPDATE policy_payments SET ar_number = $2 WHERE id = $1 AND ar_number IS NULL', [row.id, n]);
+    row = (await db.query(`${CAPTURE_SQL} WHERE pp.id = $1`, [row.id])).rows[0];
+  }
+  const client = (await db.query(`SELECT c.display_name, c.client_code, c.tin, c.address, c.city, c.state FROM policies p JOIN clients c ON c.id = p.client_id WHERE p.id = $1`, [row.policy_id])).rows[0] || {};
+  return { ...captureRow(row), client, policyId: row.policy_id };
 }

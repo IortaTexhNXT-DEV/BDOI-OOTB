@@ -13,6 +13,7 @@ import { mapColumns } from '../documents/tabular.js';
 import { clientFromLead } from '../clients/service.js';
 import { issuePolicy, insurerId, getPolicyRow, updatePolicy } from '../policies/service.js';
 import { assertKyc } from '../policies/kyc.js';
+import { publicWebUrl } from '../../lib/publicWeb.js';
 import { createLead } from '../leads/service.js';
 import { premiumBreakdown } from './premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -175,8 +176,8 @@ function approvalToken(quoteId, hours) {
   throw new Error('Could not generate an approval token');
 }
 
-/** Public approval page address for a token (general.frontend_url + /approve-quote). */
-const approvalUrlFor = async (token) => `${String((await getSetting('general.frontend_url')) || '').replace(/\/$/, '')}/approve-quote?token=${encodeURIComponent(token)}`;
+/** Public approval page address for a token (public web address + /approve-quote). */
+const approvalUrlFor = async (token) => `${await publicWebUrl()}/approve-quote?token=${encodeURIComponent(token)}`;
 
 /** The quotation's approval token while it verifies and is the latest one issued, else null. */
 function currentToken(q) {

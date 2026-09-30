@@ -11,6 +11,7 @@ import { Message } from "primereact/message";
 import { Tag } from "primereact/tag";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import policyService from "../../services/policyService";
+import documentTemplateService from "../../services/documentTemplateService";
 import S3FileUpload from "../S3FileUpload";
 import { formatDate as formatAppDate } from "../../utility/dateFormat";
 import { promptText } from "../../utility/dialogs";
@@ -156,6 +157,14 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
     loadSummary();
   };
 
+  const [printing, setPrinting] = useState(null);
+  const print = async (key, run) => {
+    setPrinting(key);
+    const r = await run();
+    setPrinting(null);
+    if (!r?.success) showToast("error", "Could not print the receipt", r?.error);
+  };
+
   const openGateway = () => {
     const url = summary?.gateway?.url;
     if (!url) return;
@@ -198,7 +207,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
               <div className="flex align-items-center gap-2">
                 <RadioButton inputId="pay-later" name="payOption" value="pay-later" onChange={(e) => setOption(e.value)} checked={option === "pay-later"} />
                 <label htmlFor="pay-later">
-                  <strong>Pay later</strong> — the bill stays open; record the payment when the client pays
+                  <strong>Pay later</strong>: the bill stays open; record the payment when the client pays
                 </label>
               </div>
               {modes.map((m) => (
@@ -206,7 +215,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                   <RadioButton inputId={`mode-${m.value}`} name="payOption" value={m.value} onChange={(e) => setOption(e.value)} checked={option === m.value} />
                   <label htmlFor={`mode-${m.value}`}>
                     <strong>{m.label}</strong>
-                    {m.value === "online" && !summary.gateway?.enabled ? " — paid online by the client; enter the transaction reference" : ""}
+                    {m.value === "online" && !summary.gateway?.enabled ? ": paid online by the client; enter the transaction reference" : ""}
                   </label>
                 </div>
               ))}
@@ -266,7 +275,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                   <InputTextarea id="pay-remarks" className="w-full" rows={1} autoResize value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} />
                 </div>
                 <div className="col-12">
-                  <label className="block mb-2">Proof of payment (deposit slip, cheque image, screenshot) — optional</label>
+                  <label className="block mb-2">Proof of payment (deposit slip, cheque image, screenshot), optional</label>
                   <S3FileUpload
                     accept=".pdf,.png,.jpg,.jpeg"
                     maxFileSize={10 * 1024 * 1024}
@@ -306,7 +315,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
 
       {captures.length > 0 && (
         <Card className="mt-3">
-          <div className="table__header">Payments recorded</div>
+          <h3 className="text-base font-semibold m-0 mb-1">Payments recorded</h3>
           {captures.map((c) => (
             <div key={c.id} className="flex flex-wrap align-items-center justify-content-between gap-2 py-3 border-bottom-1 surface-border">
               <div>
@@ -314,7 +323,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                   {c.paymentModeLabel} · {formatCurrency(c.amount)} · {formatAppDate(c.paymentDate)}
                 </div>
                 <div className="text-sm text-600">
-                  Ref {c.referenceNo || "—"}
+                  {c.arNumber ? `AR ${c.arNumber} · ` : ""}Ref {c.referenceNo || "-"}
                   {c.billNumber ? ` · Bill ${c.billNumber}` : ""}
                   {c.receiptNumber ? ` · Receipt ${c.receiptNumber}` : ""}
                   {c.submittedBy ? ` · by ${c.submittedBy}` : ""}
@@ -328,6 +337,26 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
               </div>
               <div className="flex align-items-center gap-2">
                 <Tag value={STATUS_LABEL[c.status] || c.status} severity={STATUS_SEVERITY[c.status]} />
+                {c.status !== "rejected" && (
+                  <Button
+                    size="small"
+                    text
+                    icon="pi pi-print"
+                    label="Acknowledgement receipt"
+                    loading={printing === `ar-${c.id}`}
+                    onClick={() => print(`ar-${c.id}`, () => documentTemplateService.getAcknowledgementReceiptPdf(c.id, c.arNumber))}
+                  />
+                )}
+                {c.receiptId && (
+                  <Button
+                    size="small"
+                    text
+                    icon="pi pi-print"
+                    label="Official receipt"
+                    loading={printing === `or-${c.id}`}
+                    onClick={() => print(`or-${c.id}`, () => documentTemplateService.getReceiptPdf(c.receiptId, { fileName: `official-receipt-${c.receiptNumber || c.receiptId}.pdf` }))}
+                  />
+                )}
                 {summary.canConfirm && c.status === "submitted" && (
                   <>
                     <Button size="small" label="Confirm" icon="pi pi-check" onClick={() => handleConfirm(c)} disabled={saving} />

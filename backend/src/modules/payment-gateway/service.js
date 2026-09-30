@@ -16,6 +16,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { config } from '../../config.js';
 import { SCOPE } from '../../lib/scope.js';
 import { METHODS, providerOf } from './providers.js';
+import { publicWebUrl } from '../../lib/publicWeb.js';
 
 const run = (db) => db || { query };
 
@@ -119,7 +120,7 @@ const LINK_SELECT = `SELECT pl.*, g.name AS gateway_name, g.provider, g.mode, r.
     (SELECT u.display_name FROM users u WHERE u.id = pl.created_by) AS created_by_name
   FROM payment_links pl JOIN payment_gateways g ON g.code = pl.gateway_code LEFT JOIN receipts r ON r.id = pl.receipt_id LEFT JOIN policies p ON p.id = pl.policy_id`;
 
-export const publicUrlOf = async (token) => `${String((await getSetting('general.frontend_url')) || '').replace(/\/$/, '')}/pay/${encodeURIComponent(token)}`;
+export const publicUrlOf = async (token) => `${await publicWebUrl()}/pay/${encodeURIComponent(token)}`;
 
 export async function linkOut(r) {
   return {

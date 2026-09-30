@@ -79,12 +79,5 @@ export const ChargesBreakdown = ({ premium, discount, lines, total, basePremium,
   );
 };
 
-/** Copy text to the clipboard (payment links). */
-export const copyText = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-};
+/** Copy text to the clipboard (payment links), with the fallback for pages served over plain http. */
+export { copyText } from "../../utility/clipboard";

@@ -5,6 +5,7 @@ import authService from "../../../services/authService";
 import TwoFactorCodeForm from "./TwoFactorCodeForm";
 import { apiError } from "./passwordRules";
 import "./security.scss";
+import { copyText } from "../../../utility/clipboard";
 
 /** "JBSWY3DP..." -> "JBSW Y3DP ..." (easier to type into an authenticator app). */
 const grouped = (secret) => String(secret || "").replace(/(.{4})/g, "$1 ").trim();
@@ -33,11 +34,10 @@ const TwoFactorEnrolment = ({ token, onEnabled, onCancel, intro }) => {
   }, [token, t]);
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(setup.secret);
+    if (await copyText(setup.secret)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } else {
       setCopied(false);
     }
   };

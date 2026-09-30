@@ -4,7 +4,8 @@ import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { paging } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
-import { withTransaction } from '../../db/pool.js';
+import { one, withTransaction } from '../../db/pool.js';
+import { kycPrefill } from '../policies/kyc.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { sendEntity, actor, renderTemplate, emailTemplate } from '../documents/common.js';
 import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
@@ -180,6 +181,16 @@ define({
     const r = await svc.approvalLink(req.params.id);
     if (r.reissued) await audit(req, { entity: 'quotation', entityId: r.quote.id, action: 'approval-link', after: { expiresAt: r.expiresAt } });
     res.json({ success: true, data: { approvalUrl: r.approvalUrl, expiresAt: r.expiresAt, reissued: r.reissued } });
+  },
+});
+define({
+  method: 'GET', path: '/:id/kyc-prefill', summary: 'ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form',
+  screen: `${SCREEN} > Convert policy > Customer information`, middleware: [...canRead, ownRecord('quote')],
+  response: { success: true, data: { idType: 'PhilSys ID', idCardNumber: '1234-5678-9012', chassisNumber: 'MR0FB8CD3P0123456', motorNumber: '2GD1234567', plateNumber: 'NBC 1234' } },
+  handler: async (req, res) => {
+    const q = await svc.getQuoteRow(req.params.id);
+    const clientId = q.client_id || (q.lead_id ? (await one('SELECT id FROM clients WHERE lead_id = $1 ORDER BY created_at LIMIT 1', [q.lead_id]))?.id : null);
+    res.json({ success: true, data: await kycPrefill({ clientId, quoteId: q.id }) });
   },
 });
 define({

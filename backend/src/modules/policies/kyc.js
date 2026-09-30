@@ -9,6 +9,7 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { badRequest } from '../../lib/errors.js';
+import { query } from '../../db/pool.js';
 
 export const KYC_DEFAULT_REQUIRED = {
   MOTOR: ['idType', 'idNumber', 'idImage', 'chassisNumber', 'motorNumber', 'plateOrMvFile'],
@@ -72,4 +73,29 @@ export async function assertKyc({ lob, sources }) {
     throw badRequest(`Policy cannot be issued without the customer's KYC and vehicle identifiers. Missing: ${missing.join('; ')}`,
       missing.map((m) => ({ path: 'kyc', message: m })));
   }
+}
+
+/** The identifiers shown on the issue-policy dialog (dialog field -> KYC item). */
+export const KYC_PREFILL_FIELDS = { idType: 'idType', idCardNumber: 'idNumber', chassisNumber: 'chassisNumber', motorNumber: 'motorNumber', plateNumber: 'plateNumber' };
+const ID_ITEMS = new Set(['idType', 'idNumber']);
+
+/**
+ * Values already captured for a policy about to be issued, so the user only verifies them: the ID from the client's
+ * earlier policies, then the renewed policy, the quotation (its vehicle, its document) and the placement slip (later
+ * sources win, as in the issuance check). Vehicle identifiers never come from the client's other vehicles.
+ */
+export async function kycPrefill({ clientId = null, quoteId = null, placementDoc = null }, db = { query }) {
+  const q = quoteId ? (await db.query('SELECT doc, vehicle FROM quotes WHERE id = $1', [quoteId])).rows[0] : null;
+  const renewedFrom = q?.doc?.renewedFromPolicyId || q?.doc?.renewal?.policyId;
+  const expiring = renewedFrom ? (await db.query('SELECT doc, details FROM policies WHERE id = $1', [renewedFrom])).rows[0] : null;
+  const history = clientId ? (await db.query(`SELECT doc, details FROM policies WHERE client_id = $1 AND status <> 'cancelled' ORDER BY created_at DESC LIMIT 5`, [clientId])).rows : [];
+  const v = q?.vehicle || {};
+  const legacyVehicle = { chassisNumber: v.chassisNo, motorNumber: v.engineNo, plateNumber: v.plateNo };
+  const idSources = history.reverse().flatMap((p) => [p.details, p.doc]);
+  const sources = [expiring?.details, expiring?.doc, legacyVehicle, q?.doc?.insuranceVehicleDetails?.[0], q?.doc, placementDoc];
+  const out = {};
+  for (const [field, item] of Object.entries(KYC_PREFILL_FIELDS)) {
+    out[field] = kycValue(ID_ITEMS.has(item) ? [...idSources, ...sources] : sources, item) || '';
+  }
+  return out;
 }

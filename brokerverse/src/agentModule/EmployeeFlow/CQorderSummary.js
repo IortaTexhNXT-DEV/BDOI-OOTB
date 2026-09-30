@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card"; 
 import { Button } from "primereact/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import useSignatoryOptions from "../quoteModule/utils/useSignatoryOptions";
+import useSignatoryOptions, { NoSignatoryHint } from "../quoteModule/utils/useSignatoryOptions";
 import { useDispatch } from "react-redux";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { postOrderSummaryMiddleware } from "../quoteModule/orderSummary/store/orderSummaryMiddleware";
@@ -62,6 +62,12 @@ const CQOrderSummary = ({ action, flow }) => {
     },
   });
   const signatoryOptions = useSignatoryOptions(formik.values.AuthorizedSignature);
+  useEffect(() => {
+    if (!formik.values.AuthorizedSignature && signatoryOptions.defaultValue) {
+      formik.setFieldValue("AuthorizedSignature", signatoryOptions.defaultValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signatoryOptions.defaultValue]);
 
   const handleDiscountChange = (amount) => {
     const newDiscount = Math.max(0, Math.min(discount + amount, 30));
@@ -177,6 +183,7 @@ const CQOrderSummary = ({ action, flow }) => {
                 formik.errors.AuthorizedSignature
               }
             />
+            <NoSignatoryHint options={signatoryOptions} />
           </div>
 
           <div class="col-12 md:col-6 lg:col-6 xl:col-6">

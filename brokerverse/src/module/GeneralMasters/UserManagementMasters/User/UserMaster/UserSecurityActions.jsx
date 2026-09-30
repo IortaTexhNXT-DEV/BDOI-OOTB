@@ -11,6 +11,7 @@ import { confirmAction, notifyError, notifySuccess } from "../../../../../utilit
 import { formatDate } from "../../../../../utility/dateFormat";
 import "../../../../../agentModule/authModule/security/security.scss";
 import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
+import { copyText } from "../../../../../utility/clipboard";
 
 const PRIVILEGED_ROLES = ADMIN_ROLES;
 const readList = (key) => {
@@ -46,12 +47,7 @@ const TemporaryPasswordDialog = ({ result, onHide }) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(result.temporaryPassword);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
+    setCopied(await copyText(result.temporaryPassword));
   };
   return (
     <Dialog

@@ -19,7 +19,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { clientFromLead, createClientInTx } from '../clients/service.js';
 import { issuePolicy, getPolicyRow } from '../policies/service.js';
-import { assertKyc } from '../policies/kyc.js';
+import { assertKyc, kycPrefill } from '../policies/kyc.js';
 import { premiumBreakdown } from '../quotations/premium.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { normaliseParticipants, writeParticipants, participantsOf, participantInputs, leadOf, legacyParticipantDetails } from './participants.js';
@@ -78,11 +78,19 @@ function timeline(p, journey) {
   ];
 }
 
+/** Client already created from a lead (clients.lead_id), else null. */
+async function clientOfLead(leadId, db) {
+  if (!leadId) return null;
+  return (await (db || { query }).query('SELECT id FROM clients WHERE lead_id = $1 ORDER BY created_at LIMIT 1', [leadId])).rows[0]?.id || null;
+}
+
 export async function placementById(id, db = null) {
   const row = await getPlacementRow(id, db);
   const participants = await participantsOf('placement', row.id, db);
   const journey = await journeyFor({ lob: row.lob, productType: row.product_type, productId: row.product_id }, db);
-  return { ...toPlacement(row, participants), journey, timeline: timeline(row, journey) };
+  // identifiers already captured, to pre-fill the issue-policy dialog
+  const kyc = row.policy_id ? null : await kycPrefill({ clientId: row.client_id || await clientOfLead(row.lead_id, db), quoteId: row.quote_id, placementDoc: row.doc }, db || undefined);
+  return { ...toPlacement(row, participants), journey, timeline: timeline(row, journey), kycPrefill: kyc };
 }
 
 /** Premium breakdown of a direct placement: the net premium agreed with the insurer, taxes from the LOB rates. */

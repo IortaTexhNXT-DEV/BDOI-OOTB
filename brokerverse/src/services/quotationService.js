@@ -916,6 +916,16 @@ class QuotationService {
     return (await this.requestBody(path, options)).data;
   }
 
+  /** Active authorised signatories [{ id, name, designation, signatureKey, isDefault }], the default one first. */
+  getSignatories() {
+    return this.request("/master/signatory/get-all-signatory");
+  }
+
+  /** ID and vehicle identifiers already captured for the insured of a quotation (pre-fill of the convert steps). */
+  getKycPrefill(quotationId) {
+    return this.request(`/quotations/${encodeURIComponent(quotationId)}/kyc-prefill`);
+  }
+
   /** Approval link of a PendingCustomer quotation: { approvalUrl, expiresAt, reissued }. */
   getApprovalLink(quotationId) {
     return this.request(`/quotations/${encodeURIComponent(quotationId)}/approval-link`);

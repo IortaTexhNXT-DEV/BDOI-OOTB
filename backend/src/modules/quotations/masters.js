@@ -8,6 +8,7 @@ import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { many } from '../../db/pool.js';
 import { ok } from '../../lib/respond.js';
 import { premiumBreakdown } from './premium.js';
+import { activeSignatories } from '../documents/signatory.js';
 
 const { router, define } = moduleRouter('Quotation masters', '');
 const SCREEN = 'Operations > Quotation > Create Quote (policy / coverage details)';
@@ -70,9 +71,10 @@ define({
     FROM commission_referrers WHERE lower(status) = 'active' ORDER BY name`)),
 });
 define({
-  method: 'GET', path: '/master/signatory/get-all-signatory', summary: 'Authorised signatories', screen: `${SCREEN} > Order summary`, middleware: canRead,
-  response: { success: true, data: [{ id: 1, name: 'Maria Regina Cruz', designation: 'President & CEO' }] },
-  handler: async (_req, res) => ok(res, await many("SELECT id, name, designation, signature_key AS \"signatureKey\" FROM signatories WHERE status = 'active' ORDER BY name")),
+  method: 'GET', path: '/master/signatory/get-all-signatory', summary: 'Authorised signatories (active), the default one first', screen: `${SCREEN} > Order summary`, middleware: canRead,
+  response: { success: true, data: [{ id: 1, name: 'Maria Regina Cruz', designation: 'President & CEO', signatureKey: null, isDefault: true }] },
+  // the default signatory (documents.default_signatory, else the first active one) comes first
+  handler: async (_req, res) => ok(res, await activeSignatories()),
 });
 define({
   method: 'GET', path: '/master/banks/get-all-banks', summary: 'Banks / mortgagees', screen: 'Operations > Quotation > Convert to policy (mortgagee)', middleware: canRead,

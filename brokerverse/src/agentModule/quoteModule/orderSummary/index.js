@@ -12,7 +12,7 @@ import CustomToast from "../../../components/Toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
 import { useFormik } from "formik";
-import useSignatoryOptions from "../utils/useSignatoryOptions";
+import useSignatoryOptions, { NoSignatoryHint } from "../utils/useSignatoryOptions";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createQuotationMiddleware,
@@ -29,9 +29,8 @@ import { transformToBackendFormat } from "../utils/quotationDataTransform";
 import policyRenewalService from "../../../services/policyRenewalService";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import leadService from "../../../services/leadService";
-import CommissionReferralSection, {
-  defaultCommissionDetails,
-} from "./CommissionReferralSection";
+// The referral / commission split is internal: it is kept on the quotation but not shown on the order summary
+import { defaultCommissionDetails } from "./CommissionReferralSection";
 import { notifyError } from "../../../utility/dialogs";
 import logger from "../../../utility/logger";
 
@@ -679,11 +678,11 @@ const OrderSummary = ({ action, flow }) => {
     },
   });
 
-  // Authorised signatories from the Signatories master; the first one is proposed when none is chosen yet
+  // Authorised signatories from the Signatories master; the configured default is proposed when none is chosen yet
   const signatoryOptions = useSignatoryOptions(formik.values.authorizedSignature);
   useEffect(() => {
-    if (!formik.values.authorizedSignature && signatoryOptions.length) {
-      formik.setFieldValue("authorizedSignature", signatoryOptions[0].value);
+    if (!formik.values.authorizedSignature && signatoryOptions.defaultValue) {
+      formik.setFieldValue("authorizedSignature", signatoryOptions.defaultValue);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signatoryOptions, formik.values.authorizedSignature]);
@@ -862,7 +861,7 @@ const OrderSummary = ({ action, flow }) => {
             </div>
           </div>
 
-          {/* Right column: Discount % → Commission → Authorized Signature */}
+          {/* Right column: discount and authorised signature */}
           <div class="col-12 md:col-6 lg:col-6 xl:col-6">
             <div className="discount__dynamic__card">
               <div className="discount__dynamic__card__title">
@@ -895,20 +894,6 @@ const OrderSummary = ({ action, flow }) => {
               <div className="discount__action__text">{t("agent.maxPercent")}</div>
             </div>
             <div className="mt-2">
-              <CommissionReferralSection
-                value={formik.values.commissionDetails}
-                onChange={(next) =>
-                  formik.setFieldValue("commissionDetails", next)
-                }
-                netPremium={formik.values.netPremium}
-                discount={formik.values.discount}
-                insurerName={quotationData?.insuranceCompanyName || quotationData?.InsuranceCompanyName}
-                productCode="MOTOR"
-                lob="motor"
-                renewal={flow === "renewal"}
-              />
-            </div>
-            <div className="mt-2">
               <DropdownField
                 label={t("agent.authorizedSignature")}
                 value={formik.values.authorizedSignature}
@@ -922,6 +907,7 @@ const OrderSummary = ({ action, flow }) => {
                   formik.errors.authorizedSignature
                 }
               />
+              <NoSignatoryHint options={signatoryOptions} />
             </div>
           </div>
         </div>

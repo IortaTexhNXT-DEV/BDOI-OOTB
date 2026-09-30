@@ -73,6 +73,20 @@ const CustomerInfo = ({ action }) => {
   const [isLoadingQuotation, setIsLoadingQuotation] = useState(false);
   const [quotationLoadError, setQuotationLoadError] = useState(null);
   const [leadData, setLeadData] = useState(null);
+  // identifiers already captured for the insured (earlier policies, the renewed policy, the quotation)
+  const [prefill, setPrefill] = useState({});
+
+  useEffect(() => {
+    if (!quotationId) return undefined;
+    let active = true;
+    quotationService
+      .getKycPrefill(quotationId)
+      .then((data) => active && setPrefill(data || {}))
+      .catch((error) => logger.error("KYC pre-fill not loaded:", error));
+    return () => {
+      active = false;
+    };
+  }, [quotationId]);
 
   // Load quotation details if not in state
   useEffect(() => {
@@ -136,14 +150,14 @@ const CustomerInfo = ({ action }) => {
     // If we have quotation details with vehicle info, use those
     if (quotationDetails) {
       return {
-        IdType: quotationDetails.idType || "",
+        IdType: quotationDetails.idType || prefill.idType || "",
         IdCardImage: quotationDetails.idCardImage || "",
-        IdCardNumber: quotationDetails.idCardNumber || "",
-        MotorNumber: quotationDetails.motorNumber || "",
-        ChassisNumber: quotationDetails.chassisNumber || "",
+        IdCardNumber: quotationDetails.idCardNumber || prefill.idCardNumber || "",
+        MotorNumber: quotationDetails.motorNumber || prefill.motorNumber || "",
+        ChassisNumber: quotationDetails.chassisNumber || prefill.chassisNumber || "",
         Mortgage: quotationDetails.mortgage || "",
         CertNumber: quotationDetails.certNumber || "",
-        PlateNumber: quotationDetails.plateNumber || "",
+        PlateNumber: quotationDetails.plateNumber || prefill.plateNumber || "",
         MVFileNumber: quotationDetails.MvFileNumber || "",
         AuthenCode: quotationDetails.authenCode || "",
         Aluminium: quotationDetails.aluminum || "",
@@ -175,7 +189,7 @@ const CustomerInfo = ({ action }) => {
 
   const initialValues = useMemo(
     () => getInitialValues(),
-    [quotationDetails, action]
+    [quotationDetails, action, prefill]
   );
 
   const handleSubmit = async (values) => {
@@ -439,9 +453,22 @@ const CustomerInfo = ({ action }) => {
       }
     }
   }, []);
+  // back to the prospect or client the quotation was prepared for, else to the quotation
   const handleLeadNavigation = () => {
-    navigate("/agent/leadlisting");
+    const insured = quotationDetails?.insured;
+    if (insured?.type === "client" && insured.id) navigate(`/agent/clientview/${insured.id}`);
+    else if (quotationDetails?.leadRefId) navigate("/agent/leadlisting");
+    else navigate(quotationId ? `/agent/quotedetailview/${quotationId}` : "/agent/quotelisting");
   };
+
+  const insuredName =
+    quotationDetails?.insured?.name ||
+    (leadData ? `${leadData.firstName || ""} ${leadData.lastName || ""}`.trim() : "") ||
+    (quotationDetails?.lead ? `${quotationDetails.lead.firstName || ""} ${quotationDetails.lead.lastName || ""}`.trim() : "");
+  const insuredRef = quotationDetails?.insured?.number || leadData?.generatedLeadId || quotationDetails?.lead?.generatedLeadId || "";
+  const insuredLabel = quotationDetails
+    ? [insuredName, insuredRef && (quotationDetails.insured?.type === "client" ? `${t("agent.clientIdLabel")} ${insuredRef}` : `${t("agent.leadIdLabel")} ${insuredRef}`)].filter(Boolean).join(" / ")
+    : t("common.loading");
 
   // Show loading state while fetching quotation
   if (isLoadingQuotation) {
@@ -501,11 +528,7 @@ const CustomerInfo = ({ action }) => {
             <span className="icon__container">
               <SvgLeftArrow />
             </span>
-            {leadData
-              ? `${leadData.firstName || ""} ${leadData.lastName || ""} / ${t("agent.leadIdLabel")} ${leadData.generatedLeadId || ""}`
-              : quotationDetails?.leadRefId
-              ? `${t("agent.leadIdLabel")} ${quotationDetails.lead?.generatedLeadId || ""}`
-              : t("agent.loadingLeadData")}
+            {insuredLabel}
           </div>
         </div>
         <div className="customer__info__quote__title">
@@ -520,14 +543,8 @@ const CustomerInfo = ({ action }) => {
         <div class="grid m-0">
           <div class="col-12 mt-2">
             <InputTextField
-              label="Insured Name"
-              value={
-                quotationDetails?.lead
-                  ? `${quotationDetails.lead.firstName || ""} ${
-                      quotationDetails.lead.lastName || ""
-                    }`.trim()
-                  : "Loading..."
-              }
+              label={t("agent.insuredName")}
+              value={insuredName}
               disabled
             />
           </div>

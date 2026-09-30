@@ -7,7 +7,7 @@
  *   generatedBy, format, footerNote | footer, pageSize: 'A4' | 'A3' | 'LETTER', orientation: 'portrait' | 'landscape',
  *   autoFit (reports: shrink the font, then A3) }
  * Sections: { heading, rows: [[label, value]], columns: 2 } | { heading, table: { columns, rows, widths?, totals?,
- *   totalRow?, fontSize? } } | { heading, text } | { heading, signatures: ['Prepared by' | { label, name }] }
+ *   totalRow?, fontSize? } } | { heading, text } | { heading, signatures: ['Prepared by' | { label, name, title, image }] }
  *   | { note } | { spacer: points } | { pageBreak: true }
  */
 import { PAGE_SIZES } from './writer.js';
@@ -19,11 +19,11 @@ import { allocateWidths, prepareTable, CELL_PAD } from './table.js';
 const COLORS = { text: '#1a1a1a', muted: '#5f6b76', rule: '#b8c2cc', zebra: '#f3f6f9', total: '#e3e9f0', headingBg: '#e9eff5' };
 const decoded = new WeakMap();
 
-/** Decoded logo image for a letterhead ({ buffer } or an already decoded image); cached per buffer. */
+/** Decoded logo image for a letterhead ({ buffer } or an already decoded image); cached per buffer. Also used for signatures. */
 function logoImage(letterhead) {
   const logo = letterhead?.logo;
   if (!logo) return null;
-  if (logo.pixels || logo.type === 'jpeg') return logo.width ? logo : null;
+  if (logo.pixels || (logo.type === 'jpeg' && logo.width)) return logo;
   if (!Buffer.isBuffer(logo.buffer)) return null;
   if (!decoded.has(logo.buffer)) decoded.set(logo.buffer, loadImage(logo.buffer));
   return decoded.get(logo.buffer);
@@ -193,22 +193,37 @@ export class DocRenderer {
     this.y -= 6;
   }
 
+  /** Signature image of a block ({ buffer } of an uploaded PNG / JPEG, or already decoded), registered once. */
+  signatureImage(img) {
+    const src = logoImage({ logo: img });
+    return src ? { src, handle: this.w.addImage(src) } : null;
+  }
+
+  /** Signature blocks: { label, name?, title? (designation), image? (signature) } or a plain label. */
   signatures(items, perRow) {
     const list = items.map((s) => (typeof s === 'string' ? { label: s } : s));
     const n = perRow || Math.min(list.length, this.W > 700 ? 5 : 4);
     const gap = 22;
     const bw = (this.avail - gap * (n - 1)) / n;
     for (let i = 0; i < list.length; i += n) {
-      this.ensure(62);
+      const row = list.slice(i, i + n);
+      const withTitle = row.some((s) => s.title);
+      this.ensure(withTitle ? 72 : 62);
       const lineY = this.y - 38;
-      list.slice(i, i + n).forEach((s, k) => {
+      row.forEach((s, k) => {
         const x = this.M + k * (bw + gap);
+        const img = this.signatureImage(s.image);
+        if (img) {
+          const scale = Math.min(32 / img.src.height, (bw - 8) / img.src.width, 1);
+          this.page.image(img.handle, x + 2, lineY + 2, img.src.width * scale, img.src.height * scale);
+        }
         this.page.line(x, lineY, x + bw, lineY, { color: '#333333', width: 0.6 });
         this.page.text(x, lineY - 10, s.label, { size: 8, bold: true, color: COLORS.text });
-        if (s.name) this.page.text(x, lineY - 20, s.name, { size: 8, color: COLORS.muted });
+        if (s.name) this.page.text(x, lineY - 20, s.name, { size: 8, color: COLORS.text });
         else this.page.text(x, lineY - 20, 'Signature over printed name / date', { size: 6.5, color: COLORS.muted });
+        if (s.title) this.page.text(x, lineY - 29, s.title, { size: 7, color: COLORS.muted });
       });
-      this.y = lineY - 30;
+      this.y = lineY - (withTitle ? 39 : 30);
     }
   }
 

@@ -16,6 +16,7 @@ import documentTemplateService from "../../../../services/documentTemplateServic
 import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { notifyError, notifySuccess, notifyWarn } from "../../../../utility/dialogs";
 import { notifyEmailOutcome } from "../../../../utility/emailNotice";
+import { copyText } from "../../../../utility/clipboard";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
@@ -69,13 +70,9 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   };
 
   const handleCopyToClipboard = async () => {
-    try {
-      const quoteUrl = `${window.location.origin}/agent/quotedetailview/${quotationData?.quotationId}`;
-      await navigator.clipboard.writeText(quoteUrl);
-      notifySuccess("Link copied to clipboard!");
-    } catch (err) {
-      notifyError("Failed to copy link");
-    }
+    const quoteUrl = `${window.location.origin}/agent/quotedetailview/${quotationData?.quotationId}`;
+    if (await copyText(quoteUrl)) notifySuccess(t("shareOption.linkCopied"));
+    else notifyError(t("shareOption.copyFailed"));
   };
 
   const handleDownload = async () => {

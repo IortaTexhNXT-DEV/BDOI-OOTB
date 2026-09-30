@@ -84,6 +84,27 @@ describe('policy payment capture (no mock payment)', () => {
     expect(integrity.unbalanced).toBe(0);
   });
 
+  it('every capture has an acknowledgement receipt number and a printable acknowledgement receipt', async () => {
+    const s = await ctx.as('agent')('get', `/policies/${pol.policy.id}/payments`);
+    const capture = s.body.data.captures.find((c) => c.id === captureId);
+    expect(capture.arNumber).toMatch(/^AR-\d{4}-\d{5}$/);
+    const binary = (res, cb) => { const d = []; res.on('data', (x) => d.push(x)); res.on('end', () => cb(null, Buffer.concat(d))); };
+    const pdf = await ctx.as('agent')('get', `/document-templates/acknowledgement-receipt/${captureId}`).buffer(true).parse(binary);
+    expect(pdf.status).toBe(200);
+    expect(pdf.headers['content-type']).toMatch(/pdf/);
+    const text = pdf.body.toString('latin1');
+    expect(text).toContain('(Acknowledgment Receipt)');
+    expect(text).toContain(capture.arNumber);
+    expect(text).toContain(`(${pol.policy.policy_number})`);
+    expect(text).toContain('(Received by)');
+    // a payment recorded before acknowledgement receipts were numbered is numbered on its first print
+    await q('UPDATE policy_payments SET ar_number = NULL WHERE id = $1', [captureId]);
+    const again = await ctx.as('agent')('get', `/document-templates/acknowledgement-receipt/${captureId}`).buffer(true).parse(binary);
+    expect(again.status).toBe(200);
+    expect((await q('SELECT ar_number FROM policy_payments WHERE id = $1', [captureId]))[0].ar_number).toMatch(/^AR-/);
+    expect((await ctx.as('agent')('get', '/document-templates/acknowledgement-receipt/pp_missing')).status).toBe(404);
+  });
+
   it('finance can reject a capture; a finance capture is confirmed at once', async () => {
     const p2 = await makePolicy({ net: 4000, owner: ctx.userIds.agent });
     await withTransaction((db) => createReceivable(db, { policyId: p2.policy.id, amount: p2.gross, user: { id: ctx.userIds.agent } }));

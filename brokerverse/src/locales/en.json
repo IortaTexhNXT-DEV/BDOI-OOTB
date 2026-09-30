@@ -2686,7 +2686,9 @@
     "selectInsuranceCompany": "Select Insurance Company",
     "updateQuote": "Update quote",
     "vehicleTypeRequired": "Choose the vehicle type (it sets the CTPL tariff premium)",
-    "seatingCapacityInvalid": "Enter the seating capacity (1 to 99), including the driver"
+    "seatingCapacityInvalid": "Enter the seating capacity (1 to 99), including the driver",
+    "noSignatories": "No active signatory in the Signatories master yet.",
+    "openSignatoryMaster": "Add one"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -3991,7 +3993,9 @@
   "shareOption": {
     "email": "Email",
     "whatsApp": "WhatsApp",
-    "copyLink": "Copy Link",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied to the clipboard",
+    "copyFailed": "Your browser did not allow copying. Select the link and copy it.",
     "download": "Download",
     "downloading": "Downloading...",
     "sendToInsurer": "Send to Insurer",
@@ -5151,7 +5155,7 @@
     "reversedSuccess": "Transaction {{code}} reversed successfully",
     "cancelledSuccess": "Transaction {{code}} cancelled successfully",
     "success": "Success",
-    "normalBooking": "Normal Booking",
+    "normalBooking": "New business",
     "coInsurance": "Co-Insurance",
     "coInsurancePolicy": "Co-Insurance Policy",
     "endorsementPositive": "Endorsement (+)",
@@ -5180,7 +5184,9 @@
     "clients": "Clients",
     "clientIdLabel": "Client ID",
     "failedToFetchEntries": "Failed to fetch policy accounting entries",
-    "pageReportTemplate": "Showing {first} to {last} of {totalRecords} entries"
+    "pageReportTemplate": "Showing {first} to {last} of {totalRecords} entries",
+    "endorsement": "Endorsement",
+    "back": "Back"
   },
   "collectionDetail": {
     "backToCollections": "Back to Collections",
@@ -6189,7 +6195,8 @@
       "chassisNumber": "Chassis number",
       "motorNumber": "Motor number",
       "plateNumber": "Plate number",
-      "fromQuote": "From the quotation if blank"
+      "fromQuote": "From the quotation if blank",
+      "notCaptured": "Not captured yet"
     },
     "journey": {
       "title": "Placement journey",
@@ -6440,7 +6447,8 @@
       "title": "Issue policy",
       "policyNumber": "Policy number",
       "policyNumberPlaceholder": "Blank: numbered by the system",
-      "note": "All participants confirmed. The policy is issued with the participants and their references; the premium bill (or the direct-bill commission) and the commission accrual are created."
+      "note": "All participants confirmed. The policy is issued with the participants and their references; the premium bill (or the direct-bill commission) and the commission accrual are created.",
+      "verifyNote": "The identifiers below are filled in from the client, the quotation and earlier policies. Check them before issuing."
     },
     "validation": {
       "title": "Check the form",

@@ -12,20 +12,12 @@ import s3Service from "../../../services/s3Service";
 import { notifyError, notifySuccess } from "../../../utility/dialogs";
 import { calendarDateFormat, toIsoDate } from "../../../utility/dateFormat";
 import { getStatusLabel } from "../../../utils/statusHelpers";
+import { copyText } from "../../../utility/clipboard";
 import "./index.scss";
 
 const OUTCOMES = ["accepted", "declined", "revise"];
 const emptyForm = () => ({ outcome: "accepted", channel: null, responseDate: new Date(), reference: "", remarks: "", file: null });
 
-/** Put text on the clipboard; false when the browser refuses (plain http, permissions). */
-const copyText = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 /**
  * Actions of a quotation waiting for the customer (PendingCustomer): the waiting notice, "Copy approval link" to share

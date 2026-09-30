@@ -4,13 +4,14 @@
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
-import { many, one } from '../../db/pool.js';
+import { many, one, withTransaction } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
 import { buildPdf, sendPdf } from './pdf.js';
-import { quoteDoc, policyScheduleDoc, receiptDoc, printablePolicy } from './templates.js';
+import { quoteDoc, policyScheduleDoc, receiptDoc, acknowledgementReceiptDoc, printablePolicy } from './templates.js';
+import { captureForReceipt } from '../policies/payments.js';
 import { quoteById } from '../quotations/service.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
-import { ownRecord } from '../../lib/scope.js';
+import { ownRecord, assertVisible } from '../../lib/scope.js';
 
 const { router, define } = moduleRouter('Documents', '');
 const readQuotes = [requireAuth, requirePermission('read:quotations')];
@@ -44,6 +45,19 @@ define({
       lines = await many(`SELECT * FROM receipt_lines WHERE receipt_id = $1 AND ($2::text[] IS NULL OR id = ANY($2)) ORDER BY line_no`, [r.id, ids.length ? ids : null]);
     } catch { lines = []; }
     sendPdf(res, buildPdf(await receiptDoc(r, lines)), `receipt-${r.receipt_number}.pdf`);
+  },
+});
+define({
+  method: 'GET', path: '/document-templates/acknowledgement-receipt/:paymentId', summary: 'Acknowledgement receipt (AR) PDF of a premium payment recorded on a policy (payment id or AR number)',
+  screen: 'Operations > Policy > Payment > Payments recorded > Print acknowledgement receipt',
+  middleware: [requireAuth, requirePermission('read:policies', 'read:receipts')],
+  response: 'application/pdf',
+  handler: async (req, res) => {
+    const ref = await one('SELECT policy_id FROM policy_payments WHERE id = $1 OR ar_number = $1', [req.params.paymentId]);
+    if (!ref) throw notFound('Payment not found');
+    await assertVisible(req, 'policy', ref.policy_id);
+    const c = await withTransaction((db) => captureForReceipt(db, req.params.paymentId));
+    sendPdf(res, buildPdf(await acknowledgementReceiptDoc(c)), `acknowledgement-receipt-${c.arNumber}.pdf`);
   },
 });
 export default router;

@@ -9,6 +9,7 @@ import { Toast } from "primereact/toast";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import { Button } from "primereact/button";
 import accountingService from "../../../services/accountingService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -56,10 +57,15 @@ const EntryTypeBadge = ({ entryType, entrySubType, t }) => {
       };
     }
     const configs = {
-      NORMAL_BOOKING: {
+      NEW_BUSINESS: {
         label: t("accounting.normalBooking"),
         severity: "success",
         icon: "pi pi-book",
+      },
+      ENDORSEMENT: {
+        label: t("accounting.endorsement"),
+        severity: "info",
+        icon: "pi pi-pencil",
       },
       ENDORSEMENT_POSITIVE: {
         label: t("accounting.endorsementPositive"),
@@ -107,7 +113,8 @@ const EntryTypeBadge = ({ entryType, entrySubType, t }) => {
     };
     return (
       configs[type] || {
-        label: type || "N/A",
+        // a code without its own label reads as words: "COMMISSION_ADJUSTMENT" -> "Commission adjustment"
+        label: type ? type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, " ") : "-",
         severity: "secondary",
         icon: "pi pi-circle",
       }
@@ -134,7 +141,8 @@ const PremiumAccountingEntries = () => {
   const [selectedEntryType, setSelectedEntryType] = useState(null);
   const entryTypeOptions = [
     { label: t("accounting.allTypes"), value: null },
-    { label: t("accounting.normalBooking"), value: "NORMAL_BOOKING" },
+    { label: t("accounting.normalBooking"), value: "NEW_BUSINESS" },
+    { label: t("accounting.endorsement"), value: "ENDORSEMENT" },
     { label: t("accounting.coInsurance"), value: "CO_INSURANCE" },
     { label: t("accounting.endorsementPositiveLabel"), value: "ENDORSEMENT_POSITIVE" },
     { label: t("accounting.endorsementNegativeLabel"), value: "ENDORSEMENT_NEGATIVE" },
@@ -234,8 +242,14 @@ const PremiumAccountingEntries = () => {
   }, [entries, selectedEntryType]);
 
 
+  // back to the screen the user came from (policy detail, accounting query, all clients view), else the policy
+  const goBack = () => {
+    if (location.key !== "default") navigate(-1);
+    else navigate(`/agent/policydetail/${policyId}`);
+  };
   const breadcrumbItems = [
-    { label: t("policyAccounting.policy"), command: () => navigate("/agent/clientlisting") },
+    { label: t("policyAccounting.policy"), command: () => navigate("/agent/policy") },
+    ...(policyInfo.policyNumber ? [{ label: policyInfo.policyNumber, command: () => navigate(`/agent/policydetail/${policyId}`) }] : []),
     { label: t("accounting.premiumAccountingEntries") },
   ];
 
@@ -272,6 +286,7 @@ const PremiumAccountingEntries = () => {
         </div>
 
         <div className="policy-info">
+          <Button type="button" icon="pi pi-arrow-left" label={t("accounting.back")} text onClick={goBack} className="p-0 mr-2" />
           <h2>{t("accounting.policyNumberLabel")} {policyInfo.policyNumber}</h2>
           {isCoInsurance ? (
             <Tag
@@ -310,6 +325,8 @@ const PremiumAccountingEntries = () => {
           currentPageReportTemplate={t("accounting.pageReportTemplate")}
           emptyMessage={t("accounting.noEntriesFound")}
           className="transactions-table"
+          scrollable
+          tableStyle={{ minWidth: "64rem" }}
         >
           <Column
             field="transactionCode"

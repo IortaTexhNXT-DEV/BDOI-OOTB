@@ -9,6 +9,7 @@ import { printContext } from '../../lib/pdf/index.js';
 import { amountInWords, formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { round2 } from '../../lib/money.js';
 import { num } from './common.js';
+import { signatoryFor, signatureBlock } from './signatory.js';
 
 const money = (v) => round2(num(v));
 const present = (v) => v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-';
@@ -169,7 +170,8 @@ export async function quoteDoc(q) {
     ['Product', q.productType], ['Policy type', await policyTypeLabel(q.insurancePolicyType)], ['Insurer', q.insuranceCompanyName], ['Currency', q.currency],
     ['Broker slip', q.brokerSlipNumber]]),
   sections: [riskSection(q, f), coverageSection(q, f), premiumTable(q, q.currency), ...security, ...market,
-    { heading: 'Remarks', text: q.remarks || 'This quotation is subject to the insurer\'s terms, conditions and final underwriting approval.' }] };
+    { heading: 'Remarks', text: q.remarks || 'This quotation is subject to the insurer\'s terms, conditions and final underwriting approval.' },
+    { signatures: [signatureBlock(`For ${brokerName(h) || 'the broker'}`, await signatoryFor(q.authorizedSignature))], perRow: 2 }] };
 }
 
 /** Risk of a broker slip or placement slip: the motor vehicle, else the generic risk details, else the quote-shaped risk. */
@@ -282,6 +284,32 @@ export async function receiptDoc(r, lines, h0 = null) {
         { label: 'LGT', type: 'money' }, { label: 'Amount paid', type: 'money' }], rows: [...applied, totals], totalRow: true } },
       { heading: 'Remarks', text: r.remarks || 'Thank you for your payment.' },
       { signatures: [{ label: 'Authorized signature' }], perRow: 3 },
+    ] };
+}
+
+/**
+ * Acknowledgement receipt (AR) of a premium payment captured on a policy: the broker (letterhead with TIN), received
+ * from (client, TIN, address), the amount in figures and words, what it pays (policy, bill), mode and reference, the
+ * official receipt once Accounting has confirmed the payment, and the staff member who received it. `c` is
+ * policies/payments.js#captureForReceipt.
+ */
+export async function acknowledgementReceiptDoc(c) {
+  const h = await header('Acknowledgment Receipt', c.arNumber);
+  const f = formatters(h);
+  const currency = h.format?.currency || 'PHP';
+  const cl = c.client || {};
+  const address = [cl.address, cl.city, cl.state].filter(present).join(', ');
+  const status = c.status === 'confirmed' ? `Confirmed${c.receiptNumber ? `, official receipt ${c.receiptNumber}` : ''}` : c.status === 'rejected' ? 'Rejected' : 'Awaiting verification by Accounting';
+  const note = (await getSetting('documents.acknowledgement_receipt_note', '')) || '';
+  return { ...h, footerNote: note,
+    meta: kv([['Date received', f.date(c.paymentDate)], ['Received from', c.clientName], ['Customer code', c.clientCode], ['TIN', cl.tin], ['Address', address],
+      ['Amount', f.ccy(c.amount, currency), { bold: true }], ['Payment mode', c.paymentModeLabel], ['Reference', c.referenceNo], ['Status', status]]),
+    sections: [
+      { heading: 'Amount in words', text: amountInWords(c.amount, currency), bold: true },
+      { heading: `Payment for (${currency})`, table: { columns: ['Policy no.', 'Bill no.', 'Official receipt', { label: 'Amount received', type: 'money' }],
+        rows: [[val(c.policyNumber), val(c.billNumber), val(c.receiptNumber), money(c.amount)]] } },
+      ...(present(c.remarks) ? [{ heading: 'Remarks', text: c.remarks }] : []),
+      { signatures: [{ label: 'Received by', name: c.submittedBy || null }, { label: 'Received from (client)' }], perRow: 2 },
     ] };
 }
 

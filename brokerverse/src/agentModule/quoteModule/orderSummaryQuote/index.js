@@ -12,7 +12,7 @@ import CustomToast from "../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
 import { useFormik } from "formik";
-import useSignatoryOptions from "../utils/useSignatoryOptions";
+import useSignatoryOptions, { NoSignatoryHint } from "../utils/useSignatoryOptions";
 import { postOrderSummaryMiddleware } from "./store/orderSummaryMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuotationMiddleware, updateQuotationMiddleware } from "../Store/quotationMiddleware";
@@ -171,7 +171,7 @@ const OrderSummary = () => {
         Discount: existingOrderSummary.discount || "",
         NCD: existingOrderSummary.NCD || "",
         GrossPremium: existingOrderSummary.grossPremium || "",
-        AuthorizedSignature: existingOrderSummary.authorizedSignature || signatoryOptions[0]?.value,
+        AuthorizedSignature: existingOrderSummary.authorizedSignature || signatoryOptions.defaultValue,
       };
     }
     
@@ -185,7 +185,7 @@ const OrderSummary = () => {
         Discount: calculatedOrderSummary.discount || "",
         NCD: calculatedOrderSummary.NCD || "",
         GrossPremium: calculatedOrderSummary.grossPremium || "",
-        AuthorizedSignature: signatoryOptions[0]?.value || "",
+        AuthorizedSignature: signatoryOptions.defaultValue || "",
       };
     }
     
@@ -315,6 +315,7 @@ const OrderSummary = () => {
                 formik.errors.AuthorizedSignature
               }
             />
+            <NoSignatoryHint options={signatoryOptions} />
           </div>
 
           <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">

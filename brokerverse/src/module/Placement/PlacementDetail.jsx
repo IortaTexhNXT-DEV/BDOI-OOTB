@@ -83,7 +83,7 @@ const PlacementDetail = () => {
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
         {["draft", "sent"].includes(p.status) && <Button label={p.status === "sent" ? t("placement.actions.resend") : t("placement.actions.sendToInsurers")} icon="pi pi-send" className="ml-2" loading={busy}
           onClick={() => act(() => placementService.sendPlacement(p.id), (r) => withQueuedNotice(t("placement.messages.sent", { count: r.sent?.length || 0 }), emailSending))} />}
-        {canIssue && <Button label={t("placement.actions.issuePolicy")} icon="pi pi-verified" severity="success" className="ml-2" onClick={() => setIssuing({ policyNumber: "", kyc: {} })} />}
+        {canIssue && <Button label={t("placement.actions.issuePolicy")} icon="pi pi-verified" severity="success" className="ml-2" onClick={() => setIssuing({ policyNumber: "", kyc: { ...(p.kycPrefill || {}) } })} />}
         {!["issued", "cancelled"].includes(p.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={() => setCancelling({ reason: "" })} />}
       </PageHeader>
 
@@ -172,6 +172,7 @@ const PlacementDetail = () => {
         {issuing && (
           <>
             <p className="muted">{t("placement.issue.note")}</p>
+            {p.lob === "MOTOR" && <p className="muted">{t("placement.issue.verifyNote")}</p>}
             <label htmlFor="pol-no">{t("placement.issue.policyNumber")}</label>
             <InputText id="pol-no" value={issuing.policyNumber} onChange={(e) => setIssuing({ ...issuing, policyNumber: e.target.value })} className="w-full mb-2" placeholder={t("placement.issue.policyNumberPlaceholder")} />
             {p.lob === "MOTOR" && (
@@ -179,7 +180,7 @@ const PlacementDetail = () => {
                 {["idType", "idCardNumber", "chassisNumber", "motorNumber", "plateNumber"].map((k) => (
                   <div className="col-12 md:col-6" key={k}>
                     <label>{t(`placement.kyc.${k}`)}</label>
-                    <InputText value={issuing.kyc[k] || ""} onChange={(e) => setIssuing({ ...issuing, kyc: { ...issuing.kyc, [k]: e.target.value } })} className="w-full" placeholder={t("placement.kyc.fromQuote")} />
+                    <InputText value={issuing.kyc[k] || ""} onChange={(e) => setIssuing({ ...issuing, kyc: { ...issuing.kyc, [k]: e.target.value } })} className="w-full" placeholder={t("placement.kyc.notCaptured")} />
                   </div>
                 ))}
               </div>
