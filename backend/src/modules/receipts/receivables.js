@@ -109,15 +109,19 @@ export async function premiumSplit(db, policy, gross, breakdown = {}, source = '
   return { coInsured: true, commission: round2(comms.reduce((s, c) => s + c, 0)), taxes: tax, commissionTaxes: ctax, parts: out };
 }
 
-/** Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount, commissionAmount } */
-export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, user = null }) {
+/**
+ * Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount, commissionAmount }.
+ * `split` (optional): the split per insurer in the shape of premiumSplit(), used as given.
+ */
+export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, user = null, split: given = null }) {
   // Direct bill: the client pays the insurer, so the broker has no premium receivable (commission is billed to the insurer)
   if (policy.billing_mode === 'direct') throw badRequest(`Policy ${policy.policy_number} is direct billed: the client pays the insurer, so no premium is billed or collected by the broker`);
   const gross = round2(amount);
   if (!(gross > 0)) throw badRequest('Receivable amount must be greater than zero');
   const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db })).premiumWarrantyDays;
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
-  const split = await premiumSplit(db, policy, gross, breakdown, source);
+  // a package gives its own split (each insurer carries its own sections); otherwise the premium is split by share
+  const split = given || await premiumSplit(db, policy, gross, breakdown, source);
   const { commission } = split;
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, $3::date) + $2::int)::date AS d', [policy.inception_date || (await today()), creditDays, await today()])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
