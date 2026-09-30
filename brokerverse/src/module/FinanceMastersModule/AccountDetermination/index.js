@@ -13,6 +13,7 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import postingRulesService from "../../../services/postingRulesService";
+import CommissionTaxes from "./CommissionTaxes";
 import "../PostingRules/index.scss";
 
 const SECTIONS = ["premium", "customer", "miscellaneous", "ri-claims", "other"];
@@ -149,6 +150,9 @@ const AccountDetermination = ({ section = "premium" }) => {
             {mapTable("payable-by-payee", "payable")}
             <h4>{t("postingRules.cashByPaymentMode")}</h4>
             {mapTable("cash-by-payment-mode", "cash")}
+          </TabPanel>
+          <TabPanel header={t("postingRules.commissionTaxes.title")}>
+            <CommissionTaxes onSaved={(msg) => done(msg)} onError={fail} />
           </TabPanel>
           <TabPanel header={t("postingRules.writeOffReasons")}>
             <div className="flex justify-content-end mb-2">

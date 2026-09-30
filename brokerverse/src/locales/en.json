@@ -6564,7 +6564,18 @@
       "other": "Other"
     },
     "moveUp": "Move up",
-    "removeLine": "Remove line"
+    "removeLine": "Remove line",
+    "commissionTaxes": {
+      "title": "Commission taxes",
+      "intro": "Broker-billed policies: the output VAT on the brokerage commission and the expanded withholding tax the insurer withholds on it, booked when the premium is billed, as on direct-bill commission. The premium due to the insurer is reduced by the VAT and increased by the EWT. Rates, ATC and GL accounts come from the tax codes master; a code without a GL account posts to the account role shown.",
+      "vat": "Output VAT on commission",
+      "ewt": "EWT withheld by the insurer",
+      "on": "Booked",
+      "off": "Not booked",
+      "rateGl": "{{rate}}% to {{gl}}",
+      "inactiveCode": "A selected tax code is missing or inactive: nothing is booked for it until an active code is chosen.",
+      "saved": "Commission tax set-up saved"
+    }
   },
   "bankReconciliation": {
     "title": "Bank Reconciliation",

@@ -31,6 +31,8 @@ const postingRulesService = {
   setMap: (name, map) => request("PUT", `/account-determination/maps/${encodeURIComponent(name)}`, { map }),
   addWriteOffReason: (reason) => request("POST", "/account-determination/write-off-reasons", reason),
   updateWriteOffReason: (code, reason) => request("PUT", `/account-determination/write-off-reasons/${encodeURIComponent(code)}`, reason),
+  commissionTaxes: () => request("GET", "/account-determination/commission-taxes"),
+  setCommissionTaxes: (body) => request("PUT", "/account-determination/commission-taxes", body),
   writeOffReasons: () => request("GET", "/accounting/write-off-reasons"),
   glAccounts: () => request("GET", "/accounting/accounts?status=active"),
 };

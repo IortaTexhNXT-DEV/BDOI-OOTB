@@ -104,6 +104,23 @@ ad.define({
     ok(res, r.after, 'Account map saved');
   },
 });
+const taxExample = { vat: { enabled: true, code: 'VAT12-OUT', ratePercent: 12, glAccount: '2204003', fallbackRole: 'output_vat' },
+  ewt: { enabled: true, code: 'WC139', ratePercent: 10, atc: 'WC139', glAccount: '1302001', fallbackRole: 'creditable_wht' } };
+ad.define({
+  method: 'GET', path: '/commission-taxes', summary: 'Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL account) and the tax codes to choose from', screen: A, middleware: read,
+  response: { success: true, data: { ...taxExample, taxCodes: [{ code: 'WC139', taxType: 'EWT', rate: 10, atc: 'WC139', glAccount: '1302001', active: true }] } },
+  handler: async (req, res) => ok(res, await svc.commissionTaxes(pool)),
+});
+ad.define({
+  method: 'PUT', path: '/commission-taxes', summary: 'Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)', screen: A,
+  middleware: [...write, validate(z.object({ vatEnabled: z.boolean().optional(), ewtEnabled: z.boolean().optional(), vatCode: z.string().optional(), ewtCode: z.string().optional() }))],
+  request: { ewtCode: 'WC140' }, response: { success: true, data: taxExample },
+  handler: async (req, res) => {
+    const r = await svc.setCommissionTaxes(pool, req.body, req.user);
+    await audit(req, { entity: 'account_map', entityId: 'commission-taxes', action: 'update', before: r.before, after: r.after });
+    ok(res, r.after, 'Commission tax set-up saved');
+  },
+});
 ad.define({
   method: 'GET', path: '/write-off-reasons', summary: 'Write-off reasons with their GL account (all statuses)', screen: A, middleware: read,
   response: { success: true, data: [{ id: 1, code: 'BAD_DEBT', name: 'Uncollectible premium (bad debt)', glAccount: '4401009', maxAmount: null, status: 'active' }] },

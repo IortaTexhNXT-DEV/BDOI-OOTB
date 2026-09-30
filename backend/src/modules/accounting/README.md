@@ -12,6 +12,7 @@ posting goes through, the client ledger, entry matching and the trial balance. T
 | `service.js` | Ledger queries: entry search, client ledger, matching, trial balance, periods, chart of accounts. |
 | `lib/ledger.js` | `createJournal`, `postJournal`, `reverseJournal`, `cancelJournal`. Checks that debits equal credits, that accounts are active and that the period is open. |
 | `lib/posting.js` | `postEvent(eventCode, context)`: turns a business event (policy issued, receipt applied, ...) into journal lines using the posting rule of the event. The list of events is `EVENTS`. |
+| `lib/commissionTax.js` | Output VAT and EWT on broker-billed commission: rates and GL accounts from the tax codes master (`tax.commission_vat_code`, `tax.commission_ewt_code`). |
 | `lib/coinsurance.js` | Splits amounts between co-insurers by share (the rounding remainder goes to the lead). |
 | `lib/http.js` | Small request and response helpers used by the finance modules (list envelope, `NO_DATA_FOUND`). |
 | `lib/files.js` | Stores generated finance files (CSV) in the uploads area. |
@@ -40,6 +41,10 @@ wrong journal is refused even if it bypasses `createJournal`.
   insurer, commission income ...). Edited on Master > Finance > Account Determination.
 - `accounting.payable_account_by_payee`, `accounting.cash_account_by_payment_mode`: account maps.
 - `accounting.auto_post_system_entries`, `accounting.split_premium_taxes`.
+- `accounting.broker_billed_commission_vat`, `accounting.broker_billed_commission_ewt`, `tax.commission_vat_code`,
+  `tax.commission_ewt_code`: taxes on the commission of broker-billed business (Account Determination, Commission
+  taxes tab). The booking credits output VAT and debits the creditable withholding tax the insurer withholds; the
+  premium due to the insurer is net of the VAT and includes the EWT, and the insurer payment voucher pays that amount.
 - `finance.maker_checker_enabled`: approver must differ from the maker (`lib/makerChecker.js`).
 
 ## Debugging

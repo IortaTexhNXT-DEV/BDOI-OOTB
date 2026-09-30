@@ -26,7 +26,9 @@ module (`disbursements`, `invoice_lists`).
 
 Broker-billed premium: the client pays the broker (receipts module). A settlement lists the insurer's policies with
 collected premium; when it is approved, `service.js` raises the insurer payment voucher in Disbursement for the
-collected premium. The cheque approval there posts the payment journal. Settlement credit and debit notes post
+collected premium, net of the commission and the output VAT on it, plus the EWT the insurer withholds on the
+commission (`receivables.commission_vat` / `commission_ewt`, pro rata to the premium collected; the invoice list shows
+them in `vat` and `wht`). The cheque approval there posts the payment journal. Settlement credit and debit notes post
 through the posting rule `remittance.settlement`.
 
 Direct bill: the client pays the insurer. At issue the broker books commission receivable from the insurer

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (717 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (719 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -173,6 +173,132 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sections\": [\n      {\n        \"section\": \"premium\",\n        \"roles\": [\n          {\n            \"role\": \"premium_receivable\",\n            \"label\": \"Premiums receivable\",\n            \"glCode\": \"1202001\",\n            \"glName\": \"Premiums Receivable – Direct Clients\",\n            \"usedBy\": [\n              \"policy.issue.broker_billed\"\n            ]\n          }\n        ]\n      }\n    ],\n    \"payableByPayee\": {\n      \"Insurer\": \"2201001\"\n    },\n    \"cashByPaymentMode\": {\n      \"cash\": \"1101001\"\n    },\n    \"writeOffReasons\": [\n      {\n        \"code\": \"BAD_DEBT\",\n        \"name\": \"Uncollectible premium\",\n        \"glAccount\": \"4401009\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL account) and the tax codes to choose from",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/account-determination/commission-taxes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "account-determination",
+                "commission-taxes"
+              ]
+            },
+            "description": "Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL account) and the tax codes to choose from\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/account-determination/commission-taxes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "account-determination",
+                    "commission-taxes"
+                  ]
+                },
+                "description": "Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL account) and the tax codes to choose from\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"vat\": {\n      \"enabled\": true,\n      \"code\": \"VAT12-OUT\",\n      \"ratePercent\": 12,\n      \"glAccount\": \"2204003\",\n      \"fallbackRole\": \"output_vat\"\n    },\n    \"ewt\": {\n      \"enabled\": true,\n      \"code\": \"WC139\",\n      \"ratePercent\": 10,\n      \"atc\": \"WC139\",\n      \"glAccount\": \"1302001\",\n      \"fallbackRole\": \"creditable_wht\"\n    },\n    \"taxCodes\": [\n      {\n        \"code\": \"WC139\",\n        \"taxType\": \"EWT\",\n        \"rate\": 10,\n        \"atc\": \"WC139\",\n        \"glAccount\": \"1302001\",\n        \"active\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/account-determination/commission-taxes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "account-determination",
+                "commission-taxes"
+              ]
+            },
+            "description": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ewtCode\": \"WC140\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/account-determination/commission-taxes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "account-determination",
+                    "commission-taxes"
+                  ]
+                },
+                "description": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)\n\nFront-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ewtCode\": \"WC140\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"vat\": {\n      \"enabled\": true,\n      \"code\": \"VAT12-OUT\",\n      \"ratePercent\": 12,\n      \"glAccount\": \"2204003\",\n      \"fallbackRole\": \"output_vat\"\n    },\n    \"ewt\": {\n      \"enabled\": true,\n      \"code\": \"WC139\",\n      \"ratePercent\": 10,\n      \"atc\": \"WC139\",\n      \"glAccount\": \"1302001\",\n      \"fallbackRole\": \"creditable_wht\"\n    }\n  }\n}"
             }
           ]
         },

@@ -303,6 +303,276 @@
         ]
       }
     },
+    "/account-determination/commission-taxes": {
+      "get": {
+        "operationId": "getAccountDeterminationCommissionTaxes",
+        "summary": "Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL account) and the tax codes to choose from",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "vat": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "ratePercent": {
+                              "type": "integer"
+                            },
+                            "glAccount": {
+                              "type": "string"
+                            },
+                            "fallbackRole": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "ewt": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "ratePercent": {
+                              "type": "integer"
+                            },
+                            "atc": {
+                              "type": "string"
+                            },
+                            "glAccount": {
+                              "type": "string"
+                            },
+                            "fallbackRole": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "taxCodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "taxType": {
+                                "type": "string"
+                              },
+                              "rate": {
+                                "type": "integer"
+                              },
+                              "atc": {
+                                "type": "string"
+                              },
+                              "glAccount": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "vat": {
+                      "enabled": true,
+                      "code": "VAT12-OUT",
+                      "ratePercent": 12,
+                      "glAccount": "2204003",
+                      "fallbackRole": "output_vat"
+                    },
+                    "ewt": {
+                      "enabled": true,
+                      "code": "WC139",
+                      "ratePercent": 10,
+                      "atc": "WC139",
+                      "glAccount": "1302001",
+                      "fallbackRole": "creditable_wht"
+                    },
+                    "taxCodes": [
+                      {
+                        "code": "WC139",
+                        "taxType": "EWT",
+                        "rate": 10,
+                        "atc": "WC139",
+                        "glAccount": "1302001",
+                        "active": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      },
+      "put": {
+        "operationId": "putAccountDeterminationCommissionTaxes",
+        "summary": "Change the commission tax set-up (switch VAT / EWT on or off, choose their tax codes)",
+        "tags": [
+          "Account Determination"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Account Determination\n\nAccess: write:settings, write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "vat": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "ratePercent": {
+                              "type": "integer"
+                            },
+                            "glAccount": {
+                              "type": "string"
+                            },
+                            "fallbackRole": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "ewt": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "ratePercent": {
+                              "type": "integer"
+                            },
+                            "atc": {
+                              "type": "string"
+                            },
+                            "glAccount": {
+                              "type": "string"
+                            },
+                            "fallbackRole": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "vat": {
+                      "enabled": true,
+                      "code": "VAT12-OUT",
+                      "ratePercent": 12,
+                      "glAccount": "2204003",
+                      "fallbackRole": "output_vat"
+                    },
+                    "ewt": {
+                      "enabled": true,
+                      "code": "WC139",
+                      "ratePercent": 10,
+                      "atc": "WC139",
+                      "glAccount": "1302001",
+                      "fallbackRole": "creditable_wht"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Account Determination",
+        "x-permissions": [
+          "write:settings",
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ewtCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "ewtCode": "WC140"
+              }
+            }
+          }
+        }
+      }
+    },
     "/account-determination/maps/{name}": {
       "put": {
         "operationId": "putAccountDeterminationMapsName",

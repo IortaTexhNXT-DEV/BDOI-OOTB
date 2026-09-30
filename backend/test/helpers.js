@@ -41,3 +41,13 @@ export async function loginAs(app, username, password) {
   const r = await request(app).post('/api/auth/login').send({ username, password });
   return r.body.accessToken;
 }
+/**
+ * Switch off the output VAT and EWT on broker-billed commission (migration 0170), for suites whose expected figures
+ * are the premium due to insurers without commission taxes. test/commission-taxes.test.js covers them switched on.
+ */
+export async function withoutCommissionTaxes() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query('UPDATE app_settings SET value = \'false\' WHERE key IN (\'accounting.broker_billed_commission_vat\', \'accounting.broker_billed_commission_ewt\')');
+  clearSettingsCache();
+}

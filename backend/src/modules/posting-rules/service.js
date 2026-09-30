@@ -13,6 +13,7 @@ import { getSetting, setSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { AMOUNT_KEYS, EVENTS, RESOLVERS, activeRule, ruleOut, simulate } from '../accounting/lib/posting.js';
 import { today } from '../accounting/lib/http.js';
+import { commissionTaxSetup } from '../accounting/lib/commissionTax.js';
 
 const SIDES = ['Dr', 'Cr'];
 const ACCOUNT_TYPES = ['role', 'gl', 'resolver', 'context'];
@@ -217,6 +218,45 @@ export async function setMap(db, name, map, user) {
   const before = await getSetting(key, {});
   await setSetting(key, clean, user?.id ?? null);
   return { before, after: clean };
+}
+
+// ---------- commission taxes (broker billed) ----------
+
+const COMMISSION_TAX_KEYS = { vatEnabled: 'accounting.broker_billed_commission_vat', ewtEnabled: 'accounting.broker_billed_commission_ewt',
+  vatCode: 'tax.commission_vat_code', ewtCode: 'tax.commission_ewt_code' };
+
+/** Output VAT and EWT on broker-billed commission: switches, tax codes (rate, ATC, GL) and the accounts posting falls back to. */
+export async function commissionTaxes(db) {
+  const setup = await commissionTaxSetup(db);
+  const fallback = async (role) => (await db.query('SELECT value #>> \'{}\' AS gl FROM app_settings WHERE key = $1', [`accounting.account.${role}`])).rows[0]?.gl || null;
+  const codes = (await db.query(`SELECT code, description, tax_type, rate, atc, gl_account, active FROM tax_codes WHERE tax_type IN ('VAT', 'EWT') AND applies_to IN ('sales', 'both')
+    ORDER BY tax_type, sort_order, code`)).rows.map((t) => ({ code: t.code, description: t.description, taxType: t.tax_type, rate: Number(t.rate), atc: t.atc, glAccount: t.gl_account, active: t.active }));
+  const out = (kind, role) => ({ enabled: setup[kind].enabled, code: setup[kind].code, ratePercent: Math.round(setup[kind].rate * 10000) / 100, atc: setup[kind].atc,
+    description: setup[kind].description, glAccount: setup[kind].glAccount, fallbackRole: role, codeFound: setup[kind].found, codeActive: setup[kind].active });
+  return { vat: { ...out('vat', 'output_vat'), fallbackGl: await fallback('output_vat') }, ewt: { ...out('ewt', 'creditable_wht'), fallbackGl: await fallback('creditable_wht') }, taxCodes: codes };
+}
+
+/** Settings changes of the commission tax set-up (validated): { key: value }. */
+export async function commissionTaxChanges(db, b) {
+  const changes = {};
+  for (const [field, key] of Object.entries(COMMISSION_TAX_KEYS)) {
+    if (b[field] === undefined) continue;
+    if (field.endsWith('Enabled')) { changes[key] = b[field] === true; continue; }
+    const code = String(b[field] || '').trim();
+    const t = (await db.query('SELECT tax_type, active FROM tax_codes WHERE code = $1', [code])).rows[0];
+    const want = field === 'vatCode' ? 'VAT' : 'EWT';
+    if (!t || t.tax_type !== want) throw badRequest('Validation failed', [{ path: field, message: `${code || 'Tax code'} is not a ${want} tax code` }]);
+    if (!t.active) throw badRequest('Validation failed', [{ path: field, message: `Tax code ${code} is inactive` }]);
+    changes[key] = code;
+  }
+  if (!Object.keys(changes).length) throw badRequest('Validation failed', [{ path: 'body', message: 'Nothing to change' }]);
+  return changes;
+}
+
+export async function setCommissionTaxes(db, b, user) {
+  const before = await commissionTaxes(db);
+  for (const [key, value] of Object.entries(await commissionTaxChanges(db, b))) await setSetting(key, value, user?.id ?? null);
+  return { before, after: await commissionTaxes(db) };
 }
 
 // ---------- write-off reasons ----------

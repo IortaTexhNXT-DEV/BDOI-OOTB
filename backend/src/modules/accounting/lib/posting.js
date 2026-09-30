@@ -17,18 +17,19 @@ import { getSetting } from '../../../lib/settings.js';
 import { badRequest, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
 import { account, cashAccountFor, createJournal, payableAccountFor } from './ledger.js';
+import { commissionTaxAccount } from './commissionTax.js';
 
 const P = (insurerName, share, amounts) => ({ insurerId: null, insurerName, share, amounts });
 /** Business events: label, module, amount keys the operation supplies, template variables and a sample context. */
 export const EVENTS = {
   'policy.issue.broker_billed': { label: 'Policy issued – broker billed', module: 'policies', participants: true,
-    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'net_premium'], vars: ['policyNumber', 'billNumber', 'insurer', 'participantSuffix'],
-    sample: { amounts: { gross: 11200, net_premium: 10000, vat: 0, dst: 0, lgt: 0, commission: 1500, due_to_insurer: 9700 }, vars: { policyNumber: 'POL-SAMPLE', billNumber: 'INV-SAMPLE', insurer: 'Sample Insurer', participantSuffix: '' } } },
+    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'net_premium', 'commission_vat', 'commission_ewt'], vars: ['policyNumber', 'billNumber', 'insurer', 'participantSuffix'],
+    sample: { amounts: { gross: 11200, net_premium: 10000, vat: 0, dst: 0, lgt: 0, commission: 1500, commission_vat: 180, commission_ewt: 150, due_to_insurer: 9670 }, vars: { policyNumber: 'POL-SAMPLE', billNumber: 'INV-SAMPLE', insurer: 'Sample Insurer', participantSuffix: '' } } },
   'endorsement.additional_premium': { label: 'Endorsement – additional premium', module: 'endorsements', participants: true, sameAs: 'policy.issue.broker_billed' },
   'policy.renewal.broker_billed': { label: 'Renewal – broker billed', module: 'policies', participants: true, sameAs: 'policy.issue.broker_billed' },
   'endorsement.return_premium': { label: 'Endorsement – return premium', module: 'endorsements', participants: true,
-    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'receivable_credit', 'refund'], vars: ['policyNumber', 'reference', 'billNumber', 'clientName', 'insurer', 'participantSuffix'],
-    sample: { amounts: { gross: 1120, vat: 0, dst: 0, lgt: 0, commission: 150, due_to_insurer: 970, receivable_credit: 620, refund: 500 },
+    amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'receivable_credit', 'refund', 'commission_vat', 'commission_ewt'], vars: ['policyNumber', 'reference', 'billNumber', 'clientName', 'insurer', 'participantSuffix'],
+    sample: { amounts: { gross: 1120, vat: 0, dst: 0, lgt: 0, commission: 150, commission_vat: 18, commission_ewt: 15, due_to_insurer: 967, receivable_credit: 620, refund: 500 },
       vars: { policyNumber: 'POL-SAMPLE', reference: 'END-SAMPLE', billNumber: 'INV-SAMPLE', clientName: 'Sample Client', insurer: 'Sample Insurer', participantSuffix: '' } } },
   'policy.cancel': { label: 'Policy cancellation', module: 'endorsements', participants: true, sameAs: 'endorsement.return_premium' },
   'receipt.apply': { label: 'Premium collection applied', module: 'receipts', amounts: ['amount'], vars: ['policyNumber', 'receiptSuffix', 'memoRef', 'billNumber'],
@@ -116,6 +117,10 @@ export const RESOLVERS = {
     resolve: async (db, ctx) => ctx.accounts?.bank || (await bankAccountGl(db, ctx.bankAccount)) || cashAccountFor(ctx.paymentMode) },
   cash_by_payment_mode: { label: 'Cash account of the payment mode', resolve: async (db, ctx) => cashAccountFor(ctx.paymentMode) },
   payable_by_payee: { label: 'Payable account of the payee type', resolve: async (db, ctx) => payableAccountFor(ctx.payeeType || 'Insurer') },
+  commission_vat_account: { label: 'GL account of the commission output VAT tax code (else the fallback role)',
+    resolve: async (db, ctx, line) => (await commissionTaxAccount(db, 'vat')) || account(line.fallback_role || 'output_vat') },
+  commission_ewt_account: { label: 'GL account of the commission EWT tax code (else the fallback role)',
+    resolve: async (db, ctx, line) => (await commissionTaxAccount(db, 'ewt')) || account(line.fallback_role || 'creditable_wht') },
   write_off_reason: { label: 'GL account of the write-off reason',
     resolve: async (db, ctx, line) => {
       if (ctx.writeOffReason) {
