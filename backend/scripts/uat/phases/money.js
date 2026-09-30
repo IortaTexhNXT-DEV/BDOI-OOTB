@@ -34,8 +34,19 @@ async function remitToInsurer(ctx, insurerCode, rows, remitDate, { payNow = true
   await acc.post('/remittance/remittances/process', { ids: [rem.id] });
   await approveItem(ctx, rem.id, 'Collections agreed to the official receipts');
   const available = listOf(await acc.get('/remittance/settlements/available-policies', { insurerCode, perPage: 500 })).filter((l) => l.remittanceId === rem.id);
-  const settlement = dataOf(await acc.post('/remittance/settlements', { insurerCode, settlementPeriod: [`${period}-01`, monthEnd(`${period}-01`)], lineIds: available.map((l) => l.id),
-    remarks: `Settlement of remittance ${rem.remittanceNumber || rem.code || rem.id}` }));
+  const settlementCall = acc.post('/remittance/settlements', { insurerCode, settlementPeriod: [`${period}-01`, monthEnd(`${period}-01`)], lineIds: available.map((l) => l.id),
+    remarks: `Settlement of remittance ${rem.remittanceNumber || rem.code || rem.id}` });
+  let settlement;
+  try {
+    settlement = dataOf(await settlementCall);
+  } catch (e) {
+    // a small collection below the minimum settlement amount waits for the next settlement to that insurer
+    if (/below the minimum settlement amount/i.test(JSON.stringify(e.details || e.message))) {
+      log.count('Remittances held for the next settlement (below the minimum amount)');
+      return null;
+    }
+    throw e;
+  }
   await acc.post(`/remittance/settlements/${settlement.id}/submit`, { paymentMethod: 'check', bankAccount: 'BDO-OPS' });
   await approveItem(ctx, settlement.id, 'Settlement checked; release the cheque');
   const s = dataOf(await acc.get(`/remittance/settlements/${settlement.id}`));

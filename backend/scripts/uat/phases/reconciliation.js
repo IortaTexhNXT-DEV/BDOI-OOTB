@@ -20,7 +20,8 @@ async function openingBalance(ctx) {
   const jv = dataOf(await ctx.as.accounting1.post('/journal-vouchers', { transactionCode: 'JV01', transactionDescription: 'Go-live: balance of the BDO operating account', date,
     entries: [{ mainAccount: '1102001', entryType: 'Debit', currencyCode: 'PHP', foreignAmount: OPENING_BALANCE, remarks: 'Balance per bank at go-live', branchCode: 'HO', departmentCode: 'FI' },
       { mainAccount: '5101001', entryType: 'Credit', currencyCode: 'PHP', foreignAmount: OPENING_BALANCE, remarks: 'Opening balance brought forward from the old system', branchCode: 'HO', departmentCode: 'FI' }] }));
-  await ctx.as.accounting2.post(`/journal-vouchers/${jv.id}/approve`, {});
+  // above the Accounting officer's journal voucher authority (Authority Matrix): the Accounting Manager approves it
+  await ctx.as.manager1.post(`/journal-vouchers/${jv.id}/approve`, {});
   ctx.log.count('Manual journal vouchers approved');
 }
 
