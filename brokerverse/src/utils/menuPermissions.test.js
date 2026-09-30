@@ -134,3 +134,39 @@ describe("Sales & Marketing menu", () => {
     expect(isPathAllowed("/agent/leadlisting", menuList, ["claims"])).toBe(false);
   });
 });
+
+describe("bespoke placement menu", () => {
+  const placementItems = (roles) =>
+    (filterMenuForRoles(menuList, roles).find((m) => m.name === "Operations")?.submenu || [])
+      .find((i) => i.name === "Placement")?.submenu.map((i) => i.name) || [];
+  const masterItems = (roles) => (filterMenuForRoles(menuList, roles).find((m) => m.name === "Master")?.submenu || []).map((i) => i.name);
+
+  it("the Processing Team and the administrator get every bespoke screen and the wording masters", () => {
+    const all = ["Slip Composer", "Underwriter Room", "Layering & Co-insurance", "Facultative RI"];
+    expect(placementItems(["system-admin"])).toEqual(all);
+    expect(placementItems(["processing"])).toEqual(all);
+    expect(masterItems(["processing"])).toEqual(["Clause Library", "Slip Templates"]);
+    for (const p of ["/placement/bespoke/composer/csl_1", "/placement/bespoke/rooms/uwr_1", "/master/placement/clause-library", "/master/placement/slip-templates"]) {
+      expect(isPathAllowed(p, menuList, ["processing"])).toBe(true);
+    }
+  });
+  it("Operations composes slips, runs rooms and keeps layers, and reads the clause library", () => {
+    expect(placementItems(["operations"])).toEqual(["Slip Composer", "Underwriter Room", "Layering & Co-insurance"]);
+    expect(masterItems(["operations"])).toEqual(["Clause Library"]);
+    expect(isPathAllowed("/placement/bespoke/facultative", menuList, ["operations"])).toBe(false);
+    expect(isPathAllowed("/master/placement/slip-templates", menuList, ["operations"])).toBe(false);
+  });
+  it("Accounting and the Accounting Manager reconcile layers and settle facultative binders", () => {
+    for (const roles of [["accounting"], ["accounting-manager", "accounting"]]) {
+      expect(placementItems(roles)).toEqual(["Layering & Co-insurance", "Facultative RI"]);
+      expect(isPathAllowed("/placement/bespoke/facultative/fac_1", menuList, roles)).toBe(true);
+      expect(isPathAllowed("/placement/bespoke/composer", menuList, roles)).toBe(false);
+    }
+  });
+  it("sales and claims do not see the bespoke screens", () => {
+    for (const role of ["sales", "claims"]) {
+      expect(placementItems([role])).toEqual([]);
+      expect(isPathAllowed("/placement/bespoke/layering", menuList, [role])).toBe(false);
+    }
+  });
+});

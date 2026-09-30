@@ -185,6 +185,8 @@ export async function brokerSlipDoc(b, offer = null) {
     ['Submitted', f.date(b.submissionDate)], ['Response due', f.date(b.responseDueDate)], ['Our reference', offer?.offerNumber]]),
   sections: [slipRisk(b, f), ...(lineOf(b) === 'MOTOR' ? [coverageSection({ ...(b.doc || {}), lob: 'MOTOR' }, f)] : []),
     covers.length ? coversTable(covers, b.currency) : { heading: 'Requested covers', text: 'As per the risk details.' },
+    // wording composed for this request (bespoke module, Slip Composer), when there is one
+    ...(b.composedWording || []),
     { heading: 'Information requested', text: 'Please quote your premium and rate, deductibles, special terms and conditions, the line (share %) you can write and the validity of your offer.' },
     { heading: 'Remarks', text: b.remarks || `Submitted by ${brokerName(h)}.` }] };
 }
@@ -205,6 +207,8 @@ export async function placementSlipDoc(pl, focus = null) {
   return { ...h, meta: kv(meta),
     sections: [slipRisk(pl, f), coverageSection({ ...(pl.doc || {}), ...pl, totalSumInsured: pl.sumInsured }, f), ...(mine ? [] : [premiumTable(pl, pl.currency)]), ...shareTable,
       securitySection(pl.participants, pl.currency, focus, company),
+      // wording composed for this placement (bespoke module, Slip Composer), when there is one
+      ...(pl.composedWording || []),
       { heading: 'Order', text: `${company} places this risk with the insurer(s) above for the share(s) shown and requests confirmation of cover and the policy / certificate number.${pl.remarks ? ` ${pl.remarks}` : ''}` },
       { heading: 'Acceptance', signatures: [{ label: 'For the broker' }, { label: 'For the insurer' }] }] };
 }

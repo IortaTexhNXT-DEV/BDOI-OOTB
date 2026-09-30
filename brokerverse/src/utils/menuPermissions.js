@@ -31,6 +31,12 @@ const OPERATIONS_PROCESSING = [
   "Sales & Marketing > Placement Slips",
 ];
 
+// Non-packaged (bespoke) placements: the Processing Team runs all of it; Operations composes slips, runs underwriter
+// rooms and keeps the co-insurance layers; Accounting reconciles participants and settles facultative binders.
+const PLACEMENT_ALL = "Placement";
+const PLACEMENT_OPERATIONS = ["Placement > Slip Composer", "Placement > Underwriter Room", "Placement > Layering & Co-insurance"];
+const PLACEMENT_ACCOUNTING = ["Placement > Layering & Co-insurance", "Placement > Facultative RI"];
+
 /** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
 export const ADMIN_ROLE = "system-admin";
 export const ADMIN_ROLES = [ADMIN_ROLE];
@@ -61,7 +67,9 @@ export const roleMenuPermissions = {
       "Risk Mapping",
       "Product Analytics",
     ],
-    operations: OPERATIONS_PROCESSING,
+    operations: [...OPERATIONS_PROCESSING, PLACEMENT_ALL],
+    // wording masters of the bespoke slips
+    master: ["Clause Library", "Slip Templates"],
     reinsurance: [
       "Treaty Dashboard",
       "Cession Tracking",
@@ -75,7 +83,9 @@ export const roleMenuPermissions = {
   operations: {
     dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
-    operations: OPERATIONS_ALL,
+    operations: [...OPERATIONS_ALL, ...PLACEMENT_OPERATIONS],
+    // reads the clause library (maintained by the Processing Team)
+    master: ["Clause Library"],
     reports: ["All Reports", "Operational Reports"],
   },
   claims: {
@@ -88,7 +98,7 @@ export const roleMenuPermissions = {
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
   accounting: {
     dashboard: ["Executive Dashboard"],
-    operations: ["Open Items", "Payments"],
+    operations: ["Open Items", "Payments", ...PLACEMENT_ACCOUNTING],
     accounts: [
       "Receipts",
       "Collections",

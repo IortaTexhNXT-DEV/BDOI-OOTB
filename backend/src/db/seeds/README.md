@@ -58,5 +58,6 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/63_bank_reconciliation.sql` | sample | sample bank accounts linked to their GL cash accounts; last month's BDO statement built from the sample ledger (plus interest, final tax, service charge) |
 | `64_product_classification.sql` | reference | package / non-package business type and customer segment of the products (Philippine practice), the additional package and non-package products (travel, householder, micro-insurance, group PA, CAR, EAR, machinery breakdown, marine hull, money and securities), the two fields on the Product master |
 | `70_security.sql` | reference | security configuration |
+| `80_bespoke_permissions.sql` | reference | roles holding the bespoke placement permissions (read / write:bespoke, write:clause-library, write:bespoke-finance; migration 0200) |
 
 No test users are seeded: the tests and the end-to-end checks create their own users.

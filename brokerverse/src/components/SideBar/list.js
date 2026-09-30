@@ -170,6 +170,19 @@ export const menuList = [
         includes: ["/master/configuration/email-outbox"],
       },
       {
+        // wording of bespoke slips (Operations > Placement > Slip Composer)
+        id: 25,
+        name: "Clause Library",
+        path: "/master/placement/clause-library",
+        includes: ["/master/placement/clause-library"],
+      },
+      {
+        id: 26,
+        name: "Slip Templates",
+        path: "/master/placement/slip-templates",
+        includes: ["/master/placement/slip-templates"],
+      },
+      {
         id: 1,
         name: "Generals",
         submenu: [
@@ -729,6 +742,42 @@ export const menuList = [
             path: "/placement/placement-slips",
             includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
             permissions: ["read:quotations"],
+          },
+        ],
+      },
+      {
+        // Non-packaged (bespoke) corporate risks: composed slips, underwriter rooms, layered co-insurance, facultative
+        id: 35,
+        name: "Placement",
+        icon: <SvgAgentLeadIcon color="#9DA4AE" />,
+        submenu: [
+          {
+            id: 36,
+            name: "Slip Composer",
+            path: "/placement/bespoke/composer",
+            includes: ["/placement/bespoke/composer"],
+            permissions: ["read:bespoke"],
+          },
+          {
+            id: 37,
+            name: "Underwriter Room",
+            path: "/placement/bespoke/rooms",
+            includes: ["/placement/bespoke/rooms"],
+            permissions: ["read:bespoke"],
+          },
+          {
+            id: 38,
+            name: "Layering & Co-insurance",
+            path: "/placement/bespoke/layering",
+            includes: ["/placement/bespoke/layering"],
+            permissions: ["read:bespoke"],
+          },
+          {
+            id: 39,
+            name: "Facultative RI",
+            path: "/placement/bespoke/facultative",
+            includes: ["/placement/bespoke/facultative"],
+            permissions: ["read:bespoke"],
           },
         ],
       },

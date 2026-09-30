@@ -19,6 +19,8 @@ import * as plc from './placements.js';
 import { journeyFor } from './journey.js';
 import { many } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
+import { latestComposedFor } from '../bespoke/composer.js';
+import { composedSections } from '../bespoke/printing.js';
 
 const canRead = [requireAuth, requirePermission('read:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
@@ -170,6 +172,8 @@ bs.define({
   handler: async (req, res) => {
     const s = await slips.slipById(req.params.id);
     const offer = req.query.insurerId ? s.offers.find((o) => Number(o.insuranceCompanyId) === Number(req.query.insurerId)) : null;
+    const composed = await latestComposedFor('broker_slip', s.id);
+    if (composed) s.composedWording = composedSections(composed);
     sendPdf(res, buildPdf(await brokerSlipDoc(s, offer)), `broker-slip-${s.slipNumber}${offer ? `-${offer.insuranceCompanyId}` : ''}.pdf`);
   },
 });
@@ -328,6 +332,8 @@ define({
   handler: async (req, res) => {
     const p = await plc.placementById(req.params.id);
     const focus = req.query.insurerId || (req.query.all ? null : p.participants.find((x) => x.isLead)?.insuranceCompanyId);
+    const composed = await latestComposedFor('placement', p.id);
+    if (composed) p.composedWording = composedSections(composed);
     sendPdf(res, buildPdf(await placementSlipDoc(p, focus)), `placement-slip-${p.placementNumber}${focus ? `-${focus}` : ''}.pdf`);
   },
 });

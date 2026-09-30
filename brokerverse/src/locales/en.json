@@ -238,7 +238,14 @@
     "Quick Quote": "Quick Quote",
     "Request for Quotation": "Request for Quotation (Broker Slip)",
     "Quotations": "Quotations",
-    "Placement Slips": "Placement Slips"
+    "Placement Slips": "Placement Slips",
+    "Placement": "Placement",
+    "Slip Composer": "Slip Composer",
+    "Underwriter Room": "Underwriter Room",
+    "Layering & Co-insurance": "Layering & Co-insurance",
+    "Facultative RI": "Facultative RI",
+    "Clause Library": "Clause Library",
+    "Slip Templates": "Slip Templates"
   },
   "header": {
     "notification": "Notification",
@@ -7320,5 +7327,114 @@
     "remitBy": "Remit by (terms)",
     "daysOverdue": "Days overdue",
     "amountDue": "Amount due"
+  },
+  "bespoke": {
+    "actions": {
+      "add": "Add",
+      "down": "Move down",
+      "finalise": "Finalise",
+      "print": "Print",
+      "remove": "Remove",
+      "reopen": "Reopen",
+      "save": "Save",
+      "up": "Move up"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "draft": "Draft",
+      "final": "Final",
+      "cancelled": "Cancelled"
+    },
+    "clauseType": {
+      "clause": "Clause",
+      "warranty": "Warranty",
+      "exclusion": "Exclusion",
+      "endorsement": "Endorsement",
+      "condition": "Condition",
+      "deductible": "Deductible",
+      "subjectivity": "Subjectivity"
+    },
+    "diff": {
+      "added": "Added",
+      "removed": "Removed",
+      "changed": "Changed",
+      "moved": "Moved",
+      "version": "Library version"
+    },
+    "fields": {
+      "category": "Category",
+      "changeNote": "Change note",
+      "changedBy": "Changed by",
+      "clauseType": "Type",
+      "code": "Code",
+      "description": "Description",
+      "effective": "Effective",
+      "effectiveFrom": "Effective from",
+      "heading": "Heading",
+      "insured": "Insured",
+      "lines": "Lines of business",
+      "link": "Request / placement",
+      "name": "Name",
+      "number": "Number",
+      "status": "Status",
+      "text": "Text",
+      "title": "Title",
+      "updated": "Last change",
+      "version": "Version",
+      "wording": "Wording"
+    },
+    "library": {
+      "title": "Clause Library",
+      "subtitle": "Clauses, warranties, exclusions, endorsements, conditions, deductibles and subjectivities with versioned wording for bespoke slips",
+      "new": "New clause",
+      "search": "Search code, title or wording",
+      "allTypes": "All types",
+      "allLines": "All lines",
+      "allStatuses": "All statuses",
+      "empty": "No clauses found",
+      "saved": "Clause saved",
+      "versions": "Wording versions",
+      "placeholderHint": "Insert a placeholder:",
+      "effectiveHint": "A changed wording becomes a new version from this date; the previous version ends the day before."
+    },
+    "templates": {
+      "title": "Slip Templates",
+      "subtitle": "Sections and library clauses a new bespoke slip starts from",
+      "new": "New template",
+      "empty": "No slip templates",
+      "saved": "Slip template saved",
+      "clauses": "Clauses"
+    },
+    "composer": {
+      "title": "Slip Composer",
+      "subtitle": "Compose the wording of a Request for Quotation or placement slip from the clause library, with manuscript changes and version history",
+      "new": "New slip",
+      "search": "Search number, title or insured",
+      "empty": "No composed slips yet",
+      "forRfq": "Request for Quotation",
+      "forPlacement": "Placement slip",
+      "chooseLink": "Choose the request or placement slip",
+      "template": "Start from",
+      "blank": "Blank slip (standard sections)",
+      "titleHint": "Leave empty to use the request or placement number",
+      "start": "Start composing",
+      "sections": "Sections",
+      "addSection": "Add section",
+      "newSection": "New section",
+      "clauses": "Clauses",
+      "pickClause": "Choose a clause from the library",
+      "addClause": "Add clause",
+      "addManuscript": "Add manuscript clause",
+      "manuscript": "Manuscript",
+      "restore": "Restore the library wording",
+      "useLatest": "Use library version {{version}}",
+      "values": "Placeholder values",
+      "missing": "Not filled",
+      "noPlaceholders": "The wording has no placeholders.",
+      "history": "Version history",
+      "compare": "Compare",
+      "diffTitle": "Changes from version {{from}} to version {{to}}"
+    }
   }
 }

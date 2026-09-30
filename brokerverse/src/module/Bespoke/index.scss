@@ -1,0 +1,81 @@
+// Bespoke placement screens: slip composer, clause library, templates, underwriter room, layering, facultative binders.
+.bespoke-page {
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-row { margin-bottom: 0.25rem; }
+  .row-actions { display: inline-flex; gap: 0.1rem; margin-left: auto; }
+  .placeholder-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem; margin-top: 0.35rem; }
+  .wording-cell { white-space: pre-wrap; font-size: 0.85rem; }
+
+  .clause-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.6rem;
+    background: #fafbfc;
+
+    .clause-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .clause-no { font-weight: 600; color: #374151; }
+    .clause-title { flex: 1 1 14rem; min-width: 10rem; }
+  }
+
+  .clause-order li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0;
+  }
+
+  .version-list, .timeline-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    > li {
+      border-left: 3px solid #cbd5e1;
+      padding: 0.25rem 0 0.6rem 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+  }
+  .change-list { margin: 0.25rem 0 0; padding-left: 1.1rem; font-size: 0.82rem; }
+
+  .totals-row td { font-weight: 600; background: #f3f6f9; }
+  .problem { color: #b91c1c; font-size: 0.85rem; margin-top: 0.35rem; }
+  .ok { color: #047857; font-size: 0.85rem; margin-top: 0.35rem; }
+
+  .layer-card {
+    border: 1px solid #dbe3ec;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .message {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #f3f6f9;
+
+    &.from-underwriter { background: #eef6ff; }
+    .meta { font-size: 0.75rem; color: #6b7280; }
+  }
+}
+
+.bespoke-diff {
+  white-space: pre-wrap;
+
+  .diff-insert { background: #dcfce7; color: #14532d; }
+  .diff-delete { background: #fee2e2; color: #7f1d1d; text-decoration: line-through; }
+}
+.diff-block { margin: 0.75rem 0; }

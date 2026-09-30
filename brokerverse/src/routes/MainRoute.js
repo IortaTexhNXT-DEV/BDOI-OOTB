@@ -299,6 +299,10 @@ import BrokerSlipDetail from "../module/Placement/BrokerSlipDetail";
 import PlacementList from "../module/Placement/PlacementList";
 import PlacementDetail from "../module/Placement/PlacementDetail";
 import DirectPlacementForm from "../module/Placement/DirectPlacementForm";
+// Non-packaged (bespoke) placements: slip composer, underwriter rooms, layering, facultative binders, wording masters
+import SlipComposer from "../module/Bespoke/SlipComposer";
+import ClauseLibrary from "../module/Bespoke/ClauseLibrary";
+import SlipTemplates from "../module/Bespoke/SlipTemplates";
 import RemittanceAdjustments from "../module/Remittance/RemittanceAdjustments";
 import RemittanceNotifications from "../module/Remittance/RemittanceNotifications";
 import RemittanceHistory from "../module/Remittance/RemittanceHistory";
@@ -1197,6 +1201,11 @@ const Maincomponent = () => {
           <Route path="/placement/placement-slips/new" element={<DirectPlacementForm mode="placement" />} />
           <Route path="/placement/placement-slips/:id" element={<PlacementDetail />} />
           <Route path="/placement/record-issued-policy" element={<DirectPlacementForm mode="record" />} />
+          {/* Bespoke placements */}
+          <Route path="/placement/bespoke/composer" element={<SlipComposer />} />
+          <Route path="/placement/bespoke/composer/:id" element={<SlipComposer />} />
+          <Route path="/master/placement/clause-library" element={<ClauseLibrary />} />
+          <Route path="/master/placement/slip-templates" element={<SlipTemplates />} />
           <Route
             path="finance/remittance/adjustments"
             element={<RemittanceAdjustments />}

@@ -1,0 +1,12 @@
+/**
+ * Non-packaged (bespoke) placements: clause library and slip templates, slip composer, underwriter rooms, layering and
+ * co-insurance ledger, facultative reinsurance binders. See README.md.
+ */
+import { clauseRouter, composerRouter, templateRouter } from './composerRouter.js';
+
+export default composerRouter;
+export const mount = '/bespoke/slips';
+export const extraMounts = [
+  ['/bespoke/clauses', clauseRouter],
+  ['/bespoke/slip-templates', templateRouter],
+];
