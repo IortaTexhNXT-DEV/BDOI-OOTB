@@ -385,7 +385,7 @@ const OrderSummary = () => {
               <div className="back__btn__container">
                 <Button
                   className="back__btn"
-                  onClick={() => handleBackNavigation}
+                  onClick={handleBackNavigation}
                 >
                   {t("agent.back")}
                 </Button>

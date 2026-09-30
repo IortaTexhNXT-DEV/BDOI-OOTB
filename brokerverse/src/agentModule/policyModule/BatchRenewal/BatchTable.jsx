@@ -15,12 +15,11 @@ import { Divider } from "primereact/divider";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
-import { useDispatch, useSelector } from "react-redux";
-import { policyListDataMiddleWare } from "../store/policyMiddleWare";
+import { useDispatch } from "react-redux";
 import BatchRenewalService from "../../../services/batchRenewalService";
 import { useNavigate } from "react-router-dom";
 import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import logger from "../../../utility/logger";
 
@@ -30,9 +29,6 @@ export default function BatchTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const toast = useRef(null);
-  const { policyListData } = useSelector(({ policyMainReducers }) => ({
-    policyListData: policyMainReducers?.policyListData || [],
-  }));
 
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showBatchDetailsModal, setShowBatchDetailsModal] = useState(false);
@@ -44,46 +40,42 @@ export default function BatchTable() {
   const [, setQueueJobId] = useState(null);
   const [queueProgress, setQueueProgress] = useState(null);
   const initialBatchCriteria = {
-    expiryDateFrom: null,
-    expiryDateTo: null,
-    insuranceCompanyName: "",
-    productType: "",
+    expiryFrom: null,
+    expiryTo: null,
+    insurerId: "",
+    productId: "",
     premiumMin: null,
     premiumMax: null,
     clientName: "",
-    paymentStatus: "",
+    paymentStatus: "All",
   };
   const [batchCriteria, setBatchCriteria] = useState(initialBatchCriteria);
+  // defaults (expiry window from today, from settings) and insurer / product choices from the masters
+  const [renewalOptions, setRenewalOptions] = useState({ insurers: [], products: [], paymentStatuses: ["All", "Paid", "Unpaid"] });
+  const [listing, setListing] = useState(false);
+  const [listed, setListed] = useState(false);
 
   const pollingInterval = useRef(null);
 
-  // Filter Options
-  const paymentStatusOptions = [
-    { label: "All", value: "" },
-    { label: "Completed", value: "Completed" },
-    { label: "Pending", value: "Pending" },
-    { label: "Reviewing", value: "Reviewing" },
-    { label: "Failed", value: "Failed" },
-  ];
+  const paymentStatusOptions = (renewalOptions.paymentStatuses || []).map((v) => ({ label: t(`batchRenewal.payment${v}`, v), value: v }));
+  const productTypeOptions = [{ label: t("batchRenewal.all"), value: "" }, ...renewalOptions.products.map((p) => ({ label: p.name, value: String(p.id) }))];
+  const insuranceCompanyOptions = [{ label: t("batchRenewal.all"), value: "" }, ...renewalOptions.insurers.map((i) => ({ label: i.name, value: String(i.id) }))];
 
-  const productTypeOptions = [
-    { label: "All", value: "" },
-    { label: "Motor Comprehensive", value: "Comprehensive Motor Insurance" },
-    { label: "Fire and Allied Perils", value: "Fire and Allied Perils" },
-  ];
-
-  // Extract unique insurance companies from policy data
-  const insuranceCompanyOptions = [
-    { label: "All", value: "" },
-    ...Array.from(
-      new Set(policyListData.map((policy) => policy.insuranceCompanyName))
-    )
-      .filter(Boolean)
-      .map((company) => ({ label: company, value: company })),
-  ];
+  const toDate = (iso) => (iso ? new Date(`${iso}T00:00:00`) : null);
+  const openCreateBatch = async () => {
+    setShowBatchModal(true);
+    setSelectedPolicies([]);
+    setListed(false);
+    try {
+      const o = await BatchRenewalService.getRenewalOptions();
+      setRenewalOptions((prev) => ({ ...prev, ...o }));
+      setBatchCriteria({ ...initialBatchCriteria, expiryFrom: toDate(o.expiryFrom), expiryTo: toDate(o.expiryTo) });
+    } catch (error) {
+      logger.error("Renewal options not loaded:", error);
+    }
+  };
 
   useEffect(() => {
-    dispatch(policyListDataMiddleWare({ page: 1, pageSize: 200 }));
     fetchBatches();
 
     return () => {
@@ -114,41 +106,28 @@ export default function BatchTable() {
     }));
   };
 
+  // renewable policies for the criteria: due, in the grace period or lapsed but still renewable; renewed ones are left out
   const generatePolicyList = async () => {
+    setListing(true);
     try {
-      const result = await dispatch(
-        policyListDataMiddleWare({
-          filters: batchCriteria,
-          page: 1,
-          pageSize: 200,
-        })
-      );
-
-      // Check if the action was fulfilled and get the data
-      if (result.type.endsWith("/fulfilled")) {
-        const transformedData = result.payload.transformedData;
-        setSelectedPolicies(transformedData);
-      } else {
-        logger.error("Failed to fetch policies:", result.payload);
-      }
+      const policies = await BatchRenewalService.getRenewablePolicies({
+        ...batchCriteria,
+        expiryFrom: batchCriteria.expiryFrom ? toIsoDate(batchCriteria.expiryFrom) : "",
+        expiryTo: batchCriteria.expiryTo ? toIsoDate(batchCriteria.expiryTo) : "",
+      });
+      setSelectedPolicies(policies.filter((p) => p.renewalState !== "in-progress").map((p) => ({ ...p, isSelected: true })));
+      setListed(true);
     } catch (error) {
-      logger.error("Error generating policy list:", error);
+      notifyError(error?.response?.data?.message || t("batchRenewal.listFailed"));
+    } finally {
+      setListing(false);
     }
   };
 
   const clearCriteria = () => {
-    setBatchCriteria({
-      expiryDateFrom: null,
-      expiryDateTo: null,
-      insuranceCompanyName: "",
-      productType: "",
-      premiumMin: null,
-      premiumMax: null,
-      clientName: "",
-      paymentStatus: "",
-    });
+    setBatchCriteria(initialBatchCriteria);
     setSelectedPolicies([]);
-    dispatch(policyListDataMiddleWare({ page: 1, pageSize: 200 }));
+    setListed(false);
   };
 
   const generateBatchRenewal = async () => {
@@ -163,8 +142,8 @@ export default function BatchTable() {
         policies: selectedPolicies
           .filter((policy) => policy.isSelected)
           .map((policy) => ({
-            policyId: policy.policyNumber,
-            isSelected: false,
+            policyId: policy.policyId,
+            isSelected: true,
           })),
         status: "Draft",
       };
@@ -553,10 +532,7 @@ export default function BatchTable() {
           <Button
             label={t("batchRenewal.createBatch")}
             icon="pi pi-plus"
-            onClick={() => {
-              setShowBatchModal(true);
-              clearCriteria();
-            }}
+            onClick={openCreateBatch}
             className="p-button-primary"
           />
         </div>
@@ -687,9 +663,9 @@ export default function BatchTable() {
                   {t("batchRenewal.expiryDateFrom")}
                 </label>
                 <Calendar
-                  value={batchCriteria.expiryDateFrom}
+                  value={batchCriteria.expiryFrom}
                   onChange={(e) =>
-                    handleCriteriaChange("expiryDateFrom", e.value)
+                    handleCriteriaChange("expiryFrom", e.value)
                   }
                   placeholder="Select Date"
                   style={{ width: "100%" }}
@@ -702,10 +678,11 @@ export default function BatchTable() {
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">{t("batchRenewal.expiryDateTo")}</label>
                 <Calendar
-                  value={batchCriteria.expiryDateTo}
+                  value={batchCriteria.expiryTo}
                   onChange={(e) =>
-                    handleCriteriaChange("expiryDateTo", e.value)
+                    handleCriteriaChange("expiryTo", e.value)
                   }
+                  minDate={batchCriteria.expiryFrom || undefined}
                   placeholder="Select Date"
                   style={{ width: "100%" }}
                   dateFormat={calendarDateFormat()}
@@ -719,10 +696,11 @@ export default function BatchTable() {
                   Insurance Company
                 </label>
                 <Dropdown
-                  value={batchCriteria.insuranceCompanyName}
+                  value={batchCriteria.insurerId}
                   onChange={(e) =>
-                    handleCriteriaChange("insuranceCompanyName", e.value)
+                    handleCriteriaChange("insurerId", e.value)
                   }
+                  filter
                   options={insuranceCompanyOptions}
                   placeholder="Select Company"
                   style={{ width: "100%" }}
@@ -733,8 +711,9 @@ export default function BatchTable() {
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">{t("batchRenewal.productType")}</label>
                 <Dropdown
-                  value={batchCriteria.product}
-                  onChange={(e) => handleCriteriaChange("product", e.value)}
+                  value={batchCriteria.productId}
+                  onChange={(e) => handleCriteriaChange("productId", e.value)}
+                  filter
                   options={productTypeOptions}
                   placeholder="Select Product"
                   style={{ width: "100%" }}
@@ -814,8 +793,9 @@ export default function BatchTable() {
                 className="p-button-outlined"
               />
               <Button
-                label="Generate Policy List"
+                label={t("batchRenewal.generatePolicyList")}
                 icon="pi pi-search"
+                loading={listing}
                 onClick={generatePolicyList}
                 className="p-button-primary"
               />
@@ -823,13 +803,18 @@ export default function BatchTable() {
           </div>
 
           {/* Selected Policies List */}
+          {listed && selectedPolicies.length === 0 && (
+            <div className="col-12">
+              <p className="text-color-secondary m-0">{t("batchRenewal.noRenewablePolicies")}</p>
+            </div>
+          )}
           {selectedPolicies.length > 0 && (
             <>
               <Divider />
               <div className="col-12">
                 <DataTable
                   value={selectedPolicies}
-                  dataKey="PolicyNumber"
+                  dataKey="policyId"
                   paginator
                   rows={10}
                   rowsPerPageOptions={[5, 10, 25]}
@@ -876,7 +861,7 @@ export default function BatchTable() {
                         onChange={(e) => {
                           const newSelectedPolicies = selectedPolicies.map(
                             (policy) =>
-                              policy.id === rowData.id
+                              policy.policyId === rowData.policyId
                                 ? { ...policy, isSelected: e.target.checked }
                                 : policy
                           );
@@ -890,7 +875,8 @@ export default function BatchTable() {
                     header="Policy Number"
                     sortable
                   />
-                  <Column field="ClientName" header="Client Name" sortable />
+                  <Column field="clientName" header={t("batchRenewal.clientName")} sortable />
+                  <Column field="product" header={t("batchRenewal.productType")} sortable />
                   <Column
                     field="insuranceCompanyName"
                     header="Insurance Company"
@@ -903,15 +889,20 @@ export default function BatchTable() {
                     body={(rowData) => formatCurrency(rowData.grossPremium)}
                   />
                   <Column
-                    field="expiry"
-                    header="Expiry Date"
+                    field="expiryDate"
+                    header={t("batchRenewal.expiryDate")}
                     sortable
-                    body={(rowData) => formatDate(rowData.expiry)}
+                    body={(rowData) => formatDate(rowData.expiryDate)}
                   />
                   <Column
                     field="paymentStatus"
-                    header="Payment Status"
+                    header={t("batchRenewal.paymentStatus")}
                     sortable
+                  />
+                  <Column
+                    field="renewalStateLabel"
+                    header={t("batchRenewal.renewalState")}
+                    body={(rowData) => <Tag value={rowData.renewalStateLabel} severity={rowData.renewalState === "due" ? "info" : "warning"} />}
                   />
                 </DataTable>
               </div>

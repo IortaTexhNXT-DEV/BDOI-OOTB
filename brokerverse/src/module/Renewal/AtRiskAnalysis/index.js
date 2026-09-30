@@ -299,7 +299,9 @@ const AtRiskAnalysis = () => {
     return (
       <div className="days-cell">
         <i className={`pi ${icon} ${severity}`}></i>
-        <span className={severity}>{days} days</span>
+        <span className={severity}>
+          {days < 0 ? t("renewalPolicy.expiredAgo", { count: -days }) : t("renewalPolicy.expiresIn", { count: days })}
+        </span>
       </div>
     );
   };
@@ -597,27 +599,31 @@ const AtRiskAnalysis = () => {
                         rangeColor="#FEE2E2"
                       />
                       <div className="score-info">
-                        <span className="score-label">Risk Score</span>
-                        <span className="score-category">{selectedPolicy.riskCategory} Risk</span>
+                        <span className="score-label">{t("renewal.riskScore")}: {selectedPolicy.riskScore}</span>
+                        <span className="score-category">{t("renewal.riskBand", { band: selectedPolicy.riskCategory })}</span>
                       </div>
                     </div>
 
                     <div className="policy-summary">
                       <div className="summary-item">
-                        <label>Policy:</label>
+                        <label>{t("renewal.policyNumberLabel")}</label>
                         <span>{selectedPolicy.policyNumber}</span>
                       </div>
                       <div className="summary-item">
-                        <label>Insured:</label>
+                        <label>{t("renewal.insuredNameLabel")}</label>
                         <span>{selectedPolicy.insuredName}</span>
                       </div>
                       <div className="summary-item">
-                        <label>Premium:</label>
+                        <label>{t("renewal.currentPremium")}</label>
                         <span>{formatCurrency(selectedPolicy.currentPremium)}</span>
                       </div>
                       <div className="summary-item">
-                        <label>Expires In:</label>
-                        <span>{selectedPolicy.daysToExpiry} days</span>
+                        <label>{selectedPolicy.daysToExpiry < 0 ? t("renewal.expired") : t("renewal.expiresIn")}</label>
+                        <span>
+                          {selectedPolicy.daysToExpiry < 0
+                            ? t("renewalPolicy.expiredAgo", { count: -selectedPolicy.daysToExpiry })
+                            : t("renewalPolicy.expiresIn", { count: selectedPolicy.daysToExpiry })}
+                        </span>
                       </div>
                     </div>
                   </div>

@@ -1,3 +1,4 @@
+import StepErrors from "../../../../components/StepErrors";
 import { formatNumber } from "../../../../utility/currencyConverter";
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,6 +38,8 @@ const CoverageDetailsCard = ({
   installmentType,
 }) => {
   const { t } = useTranslation();
+  // why the renewal step could not be saved, shown on the step
+  const [stepError, setStepError] = useState(null);
   // Motor tariff (Product Configurator): fixed CTPL premium per vehicle class, Auto Passenger PA limits and rate.
   const motorTariff = useMotorTariff();
   // Limits offered come from Master > Configuration (quote.bodily_injury_limits / quote.property_damage_limits)
@@ -381,7 +384,7 @@ const CoverageDetailsCard = ({
         .saveRenewalWizard(policyId, { coverageDetails: coverageDetailsData })
         .then((response) => {
           if (!response.success) {
-            notifyError(`Could not save the renewal: ${response.error}`);
+            setStepError({ message: response.error, errors: response.errors });
             return;
           }
           navigate(
@@ -698,6 +701,10 @@ const CoverageDetailsCard = ({
   const initialValue = getFormValues();
 
   const handleBackNavigation = () => {
+    if (flow === "renewal") {
+      navigate("/agent/expired-policies");
+      return;
+    }
     customHistory.back();
   };
 
@@ -1276,8 +1283,13 @@ const CoverageDetailsCard = ({
               />
             </div>
           </div>
+          {flow === "renewal" && stepError && (
+            <div className="col-12">
+              <StepErrors error={stepError} />
+            </div>
+          )}
           <div className="col-12 md:col-6 lg:col-6 back__next__btn__container ">
-            {flow === "normal" && (
+            {(flow === "normal" || flow === "renewal") && (
               <div className="back__btn__container">
                 <Button className="back__btn" onClick={handleBackNavigation}>
                   {t("coverageDetailsCard.back")}

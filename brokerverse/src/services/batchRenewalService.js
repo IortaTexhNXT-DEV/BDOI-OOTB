@@ -37,6 +37,31 @@ class BatchRenewalService {
   }
 
   /**
+   * Criteria defaults (expiry window from today, grace period) and the insurer / product choices.
+   * @returns {Promise<Object>} { expiryFrom, expiryTo, insurers, products, paymentStatuses }
+   */
+  static async getRenewalOptions() {
+    const response = await getRequest("policy-renewals/options");
+    return response.data?.data || {};
+  }
+
+  /**
+   * Policies that can be renewed for the criteria, each with its renewal state (due, grace period, lapsed renewable).
+   * @param {Object} criteria - expiryFrom, expiryTo, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus
+   * @returns {Promise<Object[]>} policies
+   */
+  static async getRenewablePolicies(criteria = {}) {
+    const q = new URLSearchParams();
+    // renewable policies only unless the caller says otherwise (renewableOnly: "")
+    Object.entries({ renewableOnly: "true", limit: "500", ...criteria }).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== "") q.set(k, v);
+    });
+    const response = await getRequest(`policy-renewals/renewable-policies?${q.toString()}`);
+    const body = response.data || {};
+    return body.data || body.policies || [];
+  }
+
+  /**
    * Get batch by ID
    * @param {string} batchId - Batch ID
    * @returns {Promise<Object>} Batch details

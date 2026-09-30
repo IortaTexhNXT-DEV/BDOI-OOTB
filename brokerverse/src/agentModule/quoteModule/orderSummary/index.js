@@ -1,3 +1,4 @@
+import StepErrors from "../../../components/StepErrors";
 import React, { useRef, useState, useEffect } from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
@@ -223,6 +224,8 @@ const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => 
 
 const OrderSummary = ({ action, flow }) => {
   const { t } = useTranslation();
+  // why the renewal step could not be saved, shown on the step
+  const [stepError, setStepError] = useState(null);
   const params = useParams();
   const { quotationId, leadRefId, id: policyId } = params;
 
@@ -368,7 +371,7 @@ const OrderSummary = ({ action, flow }) => {
         },
       });
       if (!response.success || !response.data?.quotationId) {
-        notifyError(`Failed to create the renewal quotation: ${response.error || "unknown error"}`);
+        setStepError({ message: response.error || t("stepErrors.quotationFailed"), errors: response.errors });
         return;
       }
       setToastMessage(
@@ -631,6 +634,11 @@ const OrderSummary = ({ action, flow }) => {
     }
   };
   const handleBackNavigation = () => {
+    // a renewal goes back to its accessories step; history may not hold it (opened from a link or after a reload)
+    if (flow === "renewal" && policyId) {
+      navigate(`/agent/renewalquote/accessories/accessorirsdetails/${policyId}`, { state: { policyId } });
+      return;
+    }
     customHistory.back();
   };
 
@@ -913,11 +921,12 @@ const OrderSummary = ({ action, flow }) => {
         </div>
         <div class="grid m-0">
           <div className="col-12 p-0">
+            {flow === "renewal" && stepError && <div className="col-12"><StepErrors error={stepError} /></div>}
             <div className="back__next__btn__container">
               <div className="back__btn__container">
                 <Button
                   className="back__btn"
-                  onClick={() => handleBackNavigation}
+                  onClick={handleBackNavigation}
                 >
                   {t("agent.back")}
                 </Button>

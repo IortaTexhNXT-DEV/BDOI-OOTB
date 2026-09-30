@@ -513,6 +513,89 @@ small.p-error {
   border-color: $color-danger !important;
 }
 
+// ---------------------------------------------------------------- status tags
+// Status tags are small and tinted with dark text: they mark a state without shouting.
+
+@mixin bv-tag($fg, $bg) {
+  background: $bg;
+  color: $fg;
+}
+
+.p-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  @include bv-tag($brand-navy, $brand-blue-050);
+
+  &.p-tag-success {
+    @include bv-tag($color-success, $color-success-050);
+  }
+
+  &.p-tag-info {
+    @include bv-tag($brand-navy, $brand-blue-050);
+  }
+
+  &.p-tag-warning {
+    @include bv-tag($color-warning, $color-warning-050);
+  }
+
+  &.p-tag-danger {
+    @include bv-tag($color-danger, $color-danger-050);
+  }
+
+  &.p-tag-secondary,
+  &.p-tag-contrast {
+    @include bv-tag($color-text, #f1f2f4);
+  }
+
+  .p-tag-icon {
+    font-size: 11px;
+  }
+}
+
+// cells that must stay on one line (numbers, dates, codes)
+.p-datatable .bv-nowrap {
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------- label / value rows in dialogs
+// Dialogs render outside the page, so screen stylesheets nested under the page do not reach them; detail rows
+// ("Policy number" and its value) are laid out here for every dialog.
+
+.p-dialog {
+  :is(.detail-item, .summary-item, .plan-item, .info-item) {
+    display: grid;
+    grid-template-columns: minmax(9rem, 40%) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid $color-border;
+    font-size: 14px;
+
+    > label,
+    > strong:first-child {
+      margin: 0;
+      font-weight: 600;
+      color: $color-text-muted;
+    }
+
+    > span,
+    > div {
+      color: $color-heading;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .score-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
 // ---------------------------------------------------------------- accessibility
 
 // "Add" controls of the master and voucher lists are real buttons (keyboard and screen reader accessible); the

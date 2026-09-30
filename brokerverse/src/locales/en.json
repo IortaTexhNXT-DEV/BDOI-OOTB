@@ -944,7 +944,15 @@
     "completeRenewal": "Complete Renewal",
     "pipelineRefreshed": "Pipeline refreshed: {{created}} added, {{lapsed}} lapsed",
     "confirmCompleteRenewal": "Renew policy {{policy}} for a new term?",
-    "allNoticesSent": "All notices sent"
+    "allNoticesSent": "All notices sent",
+    "expired": "Expired",
+    "expiresIn": "Expires",
+    "riskBand": "{{band}} risk",
+    "noTimeline": "Nothing recorded yet. Add a note or send the renewal quotation to start the timeline.",
+    "chooseNegotiation": "Select a renewal from the list to see its timeline, details and communications.",
+    "addNote": "Add note",
+    "requestApproval": "Request approval",
+    "negotiations": "Negotiations"
   },
   "pettyCash": {
     "accounts": "Accounts",
@@ -3993,7 +4001,16 @@
     "selectCompany": "Select Company",
     "selectProduct": "Select Product",
     "insuranceCompany": "Insurance Company",
-    "minPremium": "Min Premium (₱)"
+    "minPremium": "Min Premium (₱)",
+    "all": "All",
+    "paymentAll": "All",
+    "paymentPaid": "Paid",
+    "paymentUnpaid": "Unpaid",
+    "generatePolicyList": "Generate policy list",
+    "listFailed": "The policy list could not be generated",
+    "noRenewablePolicies": "No renewable policy matches these criteria. Widen the expiry dates or clear a filter.",
+    "expiryDate": "Expiry date",
+    "renewalState": "Renewal state"
   },
   "shareOption": {
     "email": "Email",
@@ -7859,5 +7876,46 @@
     "cancel": "Cancel",
     "back": "Back",
     "continue": "Continue"
+  },
+  "stepErrors": {
+    "title": "This step cannot be saved yet",
+    "quotationFailed": "The renewal quotation could not be created"
+  },
+  "renewalPolicy": {
+    "expiryFrom": "Expiry from",
+    "expiryTo": "Expiry to",
+    "state": "Renewal state",
+    "search": "Search",
+    "searchPlaceholder": "Policy number, client or client code",
+    "apply": "Search",
+    "loadFailed": "The policies could not be loaded",
+    "empty": "No policy in this window. Widen the expiry dates or change the state.",
+    "policyNumber": "Policy number",
+    "client": "Client",
+    "product": "Product",
+    "insurer": "Insurer",
+    "salesPerson": "Sales person",
+    "expiry": "Expiry",
+    "term": "Expires",
+    "premium": "Premium",
+    "payment": "Payment",
+    "expiresToday": "Today",
+    "expiresIn_one": "In {{count}} day",
+    "expiresIn_other": "In {{count}} days",
+    "expiredAgo_one": "{{count}} day ago",
+    "expiredAgo_other": "{{count}} days ago",
+    "renew": "Renew",
+    "continue": "Continue renewal",
+    "openNewPolicy": "Open {{number}}",
+    "quoteAsNew": "Quote as new business",
+    "states": {
+      "All": "All",
+      "due": "Due for renewal",
+      "grace": "In grace period",
+      "lapsed": "Lapsed, renewable",
+      "in-progress": "Renewal in progress",
+      "renewed": "Renewed",
+      "closed": "Lapsed"
+    }
   }
 }

@@ -1,3 +1,4 @@
+import StepErrors from "../../../components/StepErrors";
 import React, { useEffect, useMemo, useRef } from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
@@ -18,6 +19,8 @@ import logger from "../../../utility/logger";
 
 const Accessories = ({ action, flow }) => {
   const { t } = useTranslation();
+  // why the renewal step could not be saved, shown on the step
+  const [stepError, setStepError] = React.useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id: policyId } = useParams();
@@ -85,7 +88,7 @@ const Accessories = ({ action, flow }) => {
         .saveRenewalWizard(policyId, { accessories: accessoriesData })
         .then((response) => {
           if (!response.success) {
-            notifyError(`Could not save the renewal: ${response.error}`);
+            setStepError({ message: response.error, errors: response.errors });
             return;
           }
           navigate(`/agent/renewalquote/ordersummary/${policyId}`, {
@@ -120,6 +123,10 @@ const Accessories = ({ action, flow }) => {
     }
   };
   const handleBackNavigation = () => {
+    if (flow === "renewal" && policyId) {
+      navigate(`/agent/renewalquote/coveragedetails/coveragedetail/${policyId}`, { state: { policyId } });
+      return;
+    }
     customHistory.back();
   };
 
@@ -332,6 +339,7 @@ const Accessories = ({ action, flow }) => {
             </div>
           </div>
           <div class="grid mt-2">
+            {flow === "renewal" && stepError && <div className="col-12"><StepErrors error={stepError} /></div>}
             <div className="back__button__container col-12 md:col-12 lg:col-12">
               <div className="back__text__container">
                 <Button

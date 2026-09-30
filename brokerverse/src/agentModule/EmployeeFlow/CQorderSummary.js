@@ -367,7 +367,7 @@ const CQOrderSummary = ({ action, flow }) => {
               <div className="back__btn__container">
                 <Button
                   className="back__btn"
-                  onClick={() => handleBackNavigation}
+                  onClick={handleBackNavigation}
                 >
                   Back
                 </Button>

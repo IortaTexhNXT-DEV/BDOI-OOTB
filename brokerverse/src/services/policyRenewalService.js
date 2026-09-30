@@ -99,6 +99,8 @@ class PolicyRenewalService {
         return {
           success: false,
           error: data?.message || data?.error || `Request failed (status ${response.status})`,
+          // field problems of a step (422): [{ path, message }]
+          errors: Array.isArray(data?.errors) ? data.errors : [],
         };
       }
       return { success: true, data: data?.data ?? data, message: data?.message || "" };

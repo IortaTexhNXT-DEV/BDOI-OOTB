@@ -418,6 +418,7 @@ const NegotiationWorkspace = () => {
           <div className="timeline-meta">
             <span className="timeline-method">{item.method}</span>
             <span className="timeline-date">{formatAppDate(item.date)}</span>
+            {item.by && <span className="timeline-by">{item.by}</span>}
           </div>
         </div>
         <div className="timeline-description">
@@ -589,25 +590,25 @@ const NegotiationWorkspace = () => {
         <div className="workspace-section">
           <Card>
             <div className="workspace-header">
-              <h3>Negotiation Workspace</h3>
+              <h3>{t("renewal.negotiations")}</h3>
               <div className="workspace-actions">
                 <Button
-                  label="Add Update"
+                  label={t("renewal.addNote")}
                   icon="pi pi-plus"
+                  outlined
                   onClick={handleAddUpdate}
                   disabled={!selectedNegotiation}
                 />
                 <Button
-                  label="Request Approval"
+                  label={t("renewal.requestApproval")}
                   icon="pi pi-arrow-up"
-                  className="p-button-warning"
+                  outlined
                   onClick={handleRequestApproval}
                   disabled={!selectedNegotiation || selectedNegotiation.currentStage === 'Pending Approval'}
                 />
                 <Button
-                  label="Send Communication"
+                  label={t("renewal.sendCommunication")}
                   icon="pi pi-send"
-                  className="p-button-info"
                   onClick={handleSendCommunication}
                   disabled={!selectedNegotiation}
                 />
@@ -670,9 +671,13 @@ const NegotiationWorkspace = () => {
                   <TabView>
                     <TabPanel header={t("renewal.timeline")}>
                       <div className="timeline-container">
+                        {!(selectedNegotiation.timeline || []).length && (
+                          <p className="text-color-secondary m-0">{t("renewal.noTimeline")}</p>
+                        )}
                         <Timeline
                           value={selectedNegotiation.timeline}
                           content={timelineItemTemplate}
+                          align="left"
                           className="negotiation-timeline"
                         />
                       </div>
@@ -816,7 +821,7 @@ const NegotiationWorkspace = () => {
                   <div className="no-selection">
                     <i className="pi pi-comments"></i>
                     <h3>Select a negotiation to view details</h3>
-                    <p>Choose a negotiation from the list to see timeline, details, and communications</p>
+                    <p>{t("renewal.chooseNegotiation")}</p>
                   </div>
                 )}
               </SplitterPanel>
