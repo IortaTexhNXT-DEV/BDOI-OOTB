@@ -79,5 +79,16 @@ export function isoDate(v) {
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 }
 
+/**
+ * Posting date of a business document: its own date (issue date, cheque date ...) when it is not in the future, else
+ * today's business date. Journals of a document entered late are dated with the document, so the ledger, the
+ * production registers and the month-end close agree on the month; the period checks of the ledger still apply.
+ */
+export async function postingDate(documentDate) {
+  const now = await today();
+  const d = isoDate(documentDate);
+  return d && d <= now ? d : now;
+}
+
 /** YYYY-MM-DD plus n calendar days (date arithmetic in UTC, so no time-zone shift). */
 export const addDays = (iso, n) => new Date(Date.parse(`${iso}T00:00:00Z`) + Number(n) * DAY_MS).toISOString().slice(0, 10);

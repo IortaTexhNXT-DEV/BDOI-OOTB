@@ -84,6 +84,47 @@ To serve BrokerVerse on the existing address (for example `brokerverse-dev.inxtu
 3. Update the variables: `CORS_ORIGINS` on `api` (add the custom web address), `PUBLIC_BASE_URL` on `api` if the API
    has a custom domain, and `REACT_APP_BASE_URL` on `web`, then redeploy `web` so the build takes the new address.
 
+## Loading UAT data
+
+`backend/scripts/uat-scenario.js` loads six months of synthetic broking business (personas, insurers, retail and
+corporate clients, placements, billing, claims, renewals, remittances, reconciliations, month-end closes) through the
+public API of a running `api` service. It needs nothing but Node, so it runs as a one-off service built from the same
+repository; no Dockerfile is added. Run it once, on a UAT environment only, never on production data.
+
+1. **New > GitHub Repo >** the same repository. Rename the service to `uat-loader`.
+2. **Settings > Source:** branch `brokerverse-platform`, **Root Directory** `/backend` (the same folder as `api`; its
+   build is reused and the script is part of it).
+3. **Settings > Deploy:**
+   - **Custom Start Command:** `node scripts/uat-scenario.js`
+   - **Restart Policy:** Never (the script ends when the data is loaded; a restart would only find the data already
+     there).
+   - No healthcheck path, no volume, no public domain: the service only calls `api` over the private network.
+4. **Variables** (Raw Editor):
+
+   ```
+   API_BASE=http://api.railway.internal:8000/api
+   ADMIN_USER=BrokerVerse
+   ADMIN_PASSWORD=<current password of the BrokerVerse administrator>
+   PERSONA_PASSWORD=<password for the persona users the script creates>
+   UAT_SEED=brokerverse-uat
+   UAT_SCALE=1
+   UAT_REPORT=none
+   ```
+
+   - `ADMIN_PASSWORD` is the administrator's password as it is now (it may have been changed since the first
+     sign-in). `${{api.ADMIN_PASSWORD}}` can be used when it has not.
+   - `PERSONA_PASSWORD` must meet the password policy (8 characters or more, upper and lower case, a digit and a
+     symbol). The personas (`uat.maria.sales`, `uat.jose.processing`, `uat.liza.accounting`, `uat.teresa.manager`
+     and the others) sign in with it; give it to the UAT testers.
+   - `api.railway.internal` is the private address of the `api` service (rename it if the API service has another
+     name); the port is the `PORT` of `api`.
+   - `UAT_SCALE=2` doubles the volume; `UAT_SEED` changes the names and amounts.
+5. **Deploy.** Follow the deploy logs: every step is printed, failed steps with the API call and the answer, then the
+   counts per entity. The run takes a few minutes. The service ends with exit code 0 when every step passed.
+6. **Delete the `uat-loader` service** afterwards (**Settings > Danger > Delete Service**). The data stays in the
+   database. Running it again is harmless: an inactive client named `UAT-MARKER` records the completed run, and a second
+   run only signs in, checks the masters and runs the reports.
+
 ## Checks when something is wrong
 
 | What you see | Cause and fix |

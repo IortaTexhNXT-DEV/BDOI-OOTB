@@ -11,7 +11,7 @@ import { premiumBreakdown } from '../quotations/premium.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
-import { isoDate } from '../../lib/dates.js';
+import { isoDate, postingDate } from '../../lib/dates.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -254,16 +254,18 @@ export async function completeEndorsement(body, userId) {
     const billingMode = normaliseBillingMode(body.billingMode) || e.billing_mode || p.billing_mode || 'broker';
     const dp = e.changes?.premiumChange?.delta;
     const breakdown = dp && num(dp.netPremium) ? { netPremium: Math.abs(num(dp.netPremium)), vat: dp.valueAddedTax, dst: dp.documentaryStampTax, lgt: dp.localGovernmentTax } : {};
+    // the premium change is booked on the endorsement's issue date (today when none is given or it is in the future)
+    const bookedOn = await postingDate(completion.issuedDate);
     if (billingMode === 'direct' && delta !== 0) {
       // direct bill: the client pays the insurer; the commission on the premium change is due from (or returned to) the insurer
-      await bookDirectBill(db, { policy: p, amount: delta, breakdown, source: 'endorsement', reference: e.endorsement_number, endorsementId: e.id, user: { id: userId } });
+      await bookDirectBill(db, { policy: p, amount: delta, breakdown, source: 'endorsement', reference: e.endorsement_number, endorsementId: e.id, date: bookedOn, user: { id: userId } });
     } else if (delta > 0) {
       // additional premium is billed like any premium: receivable, booking journal and collection item (finance routine)
       if (p.billing_mode === 'direct') {
         const { createReceivable: financeReceivable, findPolicy } = await import('../receipts/receivables.js');
-        receivableId = (await financeReceivable(db, { policy: { ...(await findPolicy(db, p.id)), billing_mode: 'broker' }, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
+        receivableId = (await financeReceivable(db, { policy: { ...(await findPolicy(db, p.id)), billing_mode: 'broker' }, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, date: bookedOn, user: { id: userId } })).id;
       } else {
-        receivableId = (await createReceivable(db, { policyId: p.id, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, user: { id: userId } })).id;
+        receivableId = (await createReceivable(db, { policyId: p.id, amount: delta, source: 'endorsement', reference: e.endorsement_number, breakdown, date: bookedOn, user: { id: userId } })).id;
       }
     }
     // A return premium (negative delta) or a cancellation on a broker-billed policy is credited to the open bills; what the
@@ -274,7 +276,7 @@ export async function completeEndorsement(body, userId) {
       const fp = await findPolicy(db, p.id);
       if (fp && fp.billing_mode !== 'direct') {
         credit = await returnPremium(db, { policy: fp, amount: delta < 0 ? -delta : 0, breakdown, kind: e.is_cancel ? 'cancellation' : 'return-premium',
-          reference: e.endorsement_number, endorsementId: e.id, user: { id: userId } });
+          reference: e.endorsement_number, endorsementId: e.id, date: bookedOn, user: { id: userId } });
       }
     }
     if (credit) completion.returnPremium = credit;

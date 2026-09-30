@@ -14,6 +14,6 @@ export default [
     },
   },
   // Command-line scripts (migrate, seed, API export, purge) report progress on the console.
-  { files: ['src/db/*.js', 'src/tools/*.js', 'scripts/*.js'], rules: { 'no-console': 'off' } },
+  { files: ['src/db/*.js', 'src/tools/*.js', 'scripts/**/*.js'], rules: { 'no-console': 'off' } },
   { files: ['test/**'], languageOptions: { globals: { ...globals.node } } },
 ];

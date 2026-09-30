@@ -348,7 +348,10 @@ async function raiseInsurerVoucher(c, item, lineIds, user) {
   try {
     // the settlement's maker owns the voucher, so the cheque approval stays with a different finance user
     const maker = item.created_by ? { id: item.created_by } : user;
-    voucher = await createInsurerRemittance(c, { insuranceCompanyId: item.insurance_company_id, policyIds, transactionCode: 'REMT', remarks: `Settlement ${item.reference_no}` }, maker);
+    // only premium collected up to the end of the settlement period: a later collection on the same policy belongs to
+    // the next settlement, so the voucher agrees with the settlement it pays
+    const periodEnd = Array.isArray(item.data?.settlementPeriod) ? item.data.settlementPeriod[1] || null : null;
+    voucher = await createInsurerRemittance(c, { insuranceCompanyId: item.insurance_company_id, policyIds, toDate: periodEnd, transactionCode: 'REMT', remarks: `Settlement ${item.reference_no}` }, maker);
   } catch (e) {
     if (e.status !== 409) throw e; // 409: nothing collected and not yet remitted for these policies
   }

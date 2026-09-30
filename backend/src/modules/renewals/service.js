@@ -3,7 +3,7 @@
  * ordered notices (first, second, final), contact log, maker-checker approval, renewal completion (new policy term)
  * and lapse / reinstatement.
  */
-import { many, one, pool, query, withTransaction } from '../../db/pool.js';
+import { many, one, query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
@@ -374,38 +374,52 @@ export async function completeRenewal(id, user, input = {}) {
   const inception = (await businessDate(input.inceptionDate)) || r.effective_date || addDays(r.policy_expiry, 1);
   const expiry = (await businessDate(input.expiryDate)) || r.expiry_date || addDays(addYears(inception, 1), -1);
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
-  const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { unique: { table: 'policies', column: 'policy_number' } });
   const commission = r.premium_total > 0 ? round2((r.commission_amount / r.premium_total) * premium) : 0;
+  const issuedOn = (await businessDate(input.issuedDate)) || (await today());
   const result = await withTransaction(async (db) => {
     const lock = await db.query('SELECT status FROM renewals WHERE id = $1 FOR UPDATE', [r.id]);
     if (lock.rows[0].status !== r.status) throw conflict('The renewal was updated by someone else; reload and try again');
-    // the renewal term keeps the expiring policy's billing mode (broker billed or direct bill)
-    const np = await db.query(`INSERT INTO policies(policy_number, client_id, product_id, policy_type_id, insurance_company_id, owner_user_id, status,
-        inception_date, expiry_date, sum_insured, premium_total, commission_amount, currency, details, renewed_from, created_by, billing_mode)
-      VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8,$9,$10,$11,$12,$13,$14,$15,
-        COALESCE((SELECT billing_mode FROM policies WHERE id = $14), 'broker')) RETURNING id, policy_number`, [
-      policyNumber, r.policy_client_id, r.product_id, r.policy_type_id, r.insurance_company_id, r.policy_owner, inception, expiry, r.sum_insured, premium, commission,
-      r.currency, JSON.stringify({ ...(r.policy_details || {}), businessType: 'Renewal', renewal: { renewalId: r.id, renewalNumber: r.renewal_number, previousPolicyId: r.policy_id, previousPolicyNumber: r.policy_number }, coverageDetails: r.coverage_details || undefined }),
+    const old = (await db.query('SELECT net_premium, premium_total, product_type, lob, insured_name, doc, lead_id FROM policies WHERE id = $1', [r.policy_id])).rows[0];
+    // net premium of the new term: the re-rated one when the quoted premium is taken, else in the expiring term's proportion
+    const quoted = r.premium_breakdown || {};
+    const takesQuote = Number(quoted.grossPremium) > 0 && Math.abs(Number(quoted.grossPremium) - premium) < 0.01 && Number(quoted.netPremium) > 0;
+    const net = takesQuote ? round2(quoted.netPremium)
+      : Number(old.premium_total) > 0 && Number(old.net_premium) > 0 ? round2((Number(old.net_premium) / Number(old.premium_total)) * premium) : premium;
+    const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
+    // the renewal term keeps the expiring policy's billing mode (broker billed or direct bill), product, line, insured and
+    // risk details, and is issued today (or on the issue date given)
+    const np = await db.query(`INSERT INTO policies(policy_number, client_id, lead_id, product_id, policy_type_id, insurance_company_id, owner_user_id, status,
+        inception_date, expiry_date, issued_date, sum_insured, net_premium, premium_total, commission_amount, currency, product_type, lob, insured_name, doc, details,
+        renewed_from, created_by, billing_mode)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
+        COALESCE((SELECT billing_mode FROM policies WHERE id = $21), 'broker')) RETURNING id, policy_number`, [
+      policyNumber, r.policy_client_id, old.lead_id, r.product_id, r.policy_type_id, r.insurance_company_id, r.policy_owner, inception, expiry, issuedOn, r.sum_insured, net, premium,
+      commission, r.currency, old.product_type, old.lob, old.insured_name, JSON.stringify(old.doc || {}),
+      JSON.stringify({ ...(r.policy_details || {}), businessType: 'Renewal', renewal: { renewalId: r.id, renewalNumber: r.renewal_number, previousPolicyId: r.policy_id, previousPolicyNumber: r.policy_number }, coverageDetails: r.coverage_details || undefined }),
       r.policy_id, user?.username ?? null]);
     const newPolicy = np.rows[0];
     // the renewal term keeps the expiring term's co-insurance participants (shares), split on the renewal premium
     const { copyParticipants } = await import('../placement/participants.js');
     await copyParticipants(db, { type: 'policy', id: r.policy_id }, { type: 'policy', id: newPolicy.id },
-      { sumInsured: r.sum_insured, premium: 0, taxes: 0, premiumTotal: premium, commissionAmount: commission },
+      { sumInsured: r.sum_insured, premium: net, taxes: round2(premium - net), premiumTotal: premium, commissionAmount: commission },
       { fallbackInsurerId: r.insurance_company_id, userId: user?.id || null, keepReferences: false });
     await db.query('UPDATE policies SET status = \'renewed\', renewed_to = $2, updated_at = now() WHERE id = $1', [r.policy_id, newPolicy.id]);
     await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now() WHERE id = $1`, [r.id, newPolicy.id, premium]);
     await db.query('UPDATE renewal_quotes SET status = \'accepted\' WHERE renewal_id = $1 AND status = \'generated\'', [r.id]);
     await activity(db, r.id, user, { type: 'Renewed', description: `Renewed as policy ${newPolicy.policy_number} (${inception} to ${expiry})` });
-    return newPolicy;
+    // the bill (direct bill: the commission due from the insurer) and the producer's commission are booked in the same
+    // transaction, so a renewed term is never left without its accounting
+    let bill = null;
+    if (await getSetting('renewals.create_receivable', true) && premium > 0) {
+      const { createReceivable, accrueCommission } = await import('../policies/service.js');
+      bill = await createReceivable(db, { policyId: newPolicy.id, amount: premium, source: 'renewal', reference: r.renewal_number || null, date: issuedOn, user,
+        breakdown: { netPremium: net, vat: quoted.vat, dst: quoted.dst, lgt: quoted.lgt, commissionAmount: commission } });
+      await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [newPolicy.id, bill.bill_number]);
+      await accrueCommission(db, { policyId: newPolicy.id, agentUserId: r.policy_owner, basis: net, rate: net > 0 ? commission / net : 0, period: inception.slice(0, 7), user });
+    }
+    return { ...newPolicy, receivableId: bill?.id ?? null };
   });
-  let receivableId = null;
-  if (await getSetting('renewals.create_receivable', true) && premium > 0) {
-    const { createReceivable } = await import('../policies/service.js');
-    const rcv = await createReceivable(pool, { policyId: result.id, amount: premium, source: 'renewal', reference: r.renewal_number || null, user });
-    receivableId = rcv.id;
-    await query('UPDATE policies SET bill_number = $2 WHERE id = $1', [result.id, rcv.bill_number]);
-  }
+  const { receivableId } = result;
   if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'info', title: `Policy renewed: ${r.policy_number}`, message: `New term ${result.policy_number} from ${inception} to ${expiry}`, link: `/agent/policydetail/${result.id}`, entity: 'policy', entityId: result.id });
   return { before: r, newPolicy: { id: result.id, policyNumber: result.policy_number, inceptionDate: inception, expiryDate: expiry, premium, receivableId }, renewal: await getRenewal(r.id) };
 }
@@ -537,6 +551,14 @@ export async function createRenewalQuote(policyRef, input, user) {
     renewal: { renewalId: r.id, renewalNumber: r.renewal_number, policyId: policy.id, policyNumber: policy.policy_number, previousExpiryDate: policy.expiry_date },
     remarks: input.remarks || `Renewal of policy ${policy.policy_number}`,
   };
+  // Lines other than motor are not priced from cover rates here: the renewal is quoted on the net premium entered on the
+  // wizard, else the expiring term's (a quotation without premium could be accepted but never issued).
+  const lob = String(pre.lob || '').toUpperCase();
+  if (lob && lob !== 'MOTOR') {
+    const given = Number(input.coverageDetails?.netPremium ?? input.orderSummary?.netPremium);
+    body.netPremium = given > 0 ? given : Number(pre.netPremium) || undefined;
+    delete body.lossAndDamageCoverage;
+  }
   if (pre.leadId) body.leadRefId = pre.leadId;
   const existing = await one(`SELECT id, status FROM quotes WHERE doc->'renewal'->>'renewalId' = $1 AND deleted_at IS NULL AND status IN ('draft', 'sent')
     ORDER BY created_at DESC LIMIT 1`, [r.id]);
