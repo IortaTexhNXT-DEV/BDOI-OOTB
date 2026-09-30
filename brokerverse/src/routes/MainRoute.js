@@ -303,6 +303,7 @@ import DirectPlacementForm from "../module/Placement/DirectPlacementForm";
 import SlipComposer from "../module/Bespoke/SlipComposer";
 import ClauseLibrary from "../module/Bespoke/ClauseLibrary";
 import SlipTemplates from "../module/Bespoke/SlipTemplates";
+import UnderwriterRoom from "../module/Bespoke/UnderwriterRoom";
 import RemittanceAdjustments from "../module/Remittance/RemittanceAdjustments";
 import RemittanceNotifications from "../module/Remittance/RemittanceNotifications";
 import RemittanceHistory from "../module/Remittance/RemittanceHistory";
@@ -1204,6 +1205,8 @@ const Maincomponent = () => {
           {/* Bespoke placements */}
           <Route path="/placement/bespoke/composer" element={<SlipComposer />} />
           <Route path="/placement/bespoke/composer/:id" element={<SlipComposer />} />
+          <Route path="/placement/bespoke/rooms" element={<UnderwriterRoom />} />
+          <Route path="/placement/bespoke/rooms/:id" element={<UnderwriterRoom />} />
           <Route path="/master/placement/clause-library" element={<ClauseLibrary />} />
           <Route path="/master/placement/slip-templates" element={<SlipTemplates />} />
           <Route

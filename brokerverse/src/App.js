@@ -5,6 +5,7 @@ import Maincomponent from "./routes/MainRoute";
 import "./App.scss";
 import AgentLogin from "./agentModule/authModule/Login";
 import ApproveQuote from "./agentModule/ApproveQuote";
+import UnderwriterRoomPublic from "./module/Bespoke/UnderwriterRoomPublic";
 import { isAuthenticated, getUserData } from "./utility/tokenManager";
 import { NotificationProvider } from "./context/NotificationContext";
 import { fetchSystemSettings } from "./module/SystemSettings/store/systemSettingsSlice";
@@ -71,6 +72,8 @@ const App = () => {
             element={hasToken ? <Navigate to="/" replace /> : <AgentLogin />}
           />
           <Route path="/approve-quote" element={<ApproveQuote />} />
+          {/* invited underwriter of a bespoke placement: signed link, no sign-in */}
+          <Route path="/underwriter-room" element={<UnderwriterRoomPublic />} />
           <Route
             path="/"
             element={
