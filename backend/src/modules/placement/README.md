@@ -2,7 +2,8 @@
 
 The broking journey from a client's risk to an issued policy: Broker Slip (ask several insurers for terms), Quotation
 Slip (the quotations module), Placement Slip (firm order to the chosen insurers) and policy issuance. Routes are under
-`/broker-slips` and `/placements` (Operations > Broker Slips, Placement Slips, Record Issued Policy). Access follows the
+`/broker-slips` and `/placements` (Operations > Sales & Marketing > Request for Quotation (Broker Slip), Placement Slips,
+Record Issued Policy). Access follows the
 quotation permissions (`read:quotations`, `write:quotations`); issuing a policy also needs `write:policies`.
 
 ## Files

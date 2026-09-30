@@ -45,6 +45,7 @@ import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../.
 import logger from "../../../utility/logger";
 import { notifyWarn } from "../../../utility/dialogs";
 import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
+import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -1578,6 +1579,27 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.back")}
             className="p-button-outlined"
             onClick={() => setStep(2)}
+          />
+          {/* same prospect and risk, sent to the market instead of priced from the tariff */}
+          <RequestForQuotationButton
+            disabled={!createdLeadId || !hasAtLeastOneSi}
+            prefill={{
+              leadRefId: createdLeadId,
+              leadName: personalDetails.CompanyName || [personalDetails.FirstName, personalDetails.LastName].filter(Boolean).join(" "),
+              productType: "Fire and Allied Perils",
+              riskDetails: {
+                location: riskDetails.LocationAddress,
+                locationCode: riskDetails.LocationCodeDescription,
+                occupancy: riskDetails.OccupancyType,
+                natureOfBusiness: riskDetails.NatureOfBusiness,
+                construction: riskDetails.ConstructionType,
+                buildingType: riskDetails.BuildingType,
+                floors: riskDetails.NoOfFloors,
+                earthquakeZone: riskDetails.EarthquakeZone,
+                fireProtection: riskDetails.FireProtection,
+              },
+              requestedCovers: SMI_ENTRY_FIELDS.map((f) => ({ cover: t(f.labelKey), sumInsured: Number(siValues[f.key]) || 0 })),
+            }}
           />
           <Button
             label={t("fireLead.continueToPreview")}

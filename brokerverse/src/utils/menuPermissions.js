@@ -12,16 +12,23 @@
 
 const OPERATIONS_ALL = [
   "Home",
-  "Leads/Prospects",
+  "Sales & Marketing",
   "Clients",
-  "Quotation",
-  "Broker Slips",
-  "Placement Slips",
   "Policy",
   "Claims",
   "Renewals",
   "Open Items",
   "Payments",
+];
+
+// The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
+// quotations and placement slips. Quick Quote creates prospects and quotations, which is Sales and Operations work.
+const OPERATIONS_PROCESSING = [
+  ...OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing"),
+  "Sales & Marketing > Prospects",
+  "Sales & Marketing > Request for Quotation",
+  "Sales & Marketing > Quotations",
+  "Sales & Marketing > Placement Slips",
 ];
 
 /** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
@@ -54,7 +61,7 @@ export const roleMenuPermissions = {
       "Risk Mapping",
       "Product Analytics",
     ],
-    operations: OPERATIONS_ALL,
+    operations: OPERATIONS_PROCESSING,
     reinsurance: [
       "Treaty Dashboard",
       "Cession Tracking",

@@ -12,7 +12,7 @@ import { today } from '../../lib/dates.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
 const legacy = moduleRouter('Leads', '/lead');
-const SCREEN = 'Operations > Leads/Prospects';
+const SCREEN = 'Operations > Sales & Marketing > Prospects';
 const canRead = [requireAuth, requirePermission('read:leads')];
 const canWrite = [requireAuth, requirePermission('write:leads')];
 

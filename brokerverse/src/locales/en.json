@@ -232,7 +232,13 @@
     "Login": "Login",
     "All Reports": "All Reports",
     "Trial Balance": "Trial Balance",
-    "E-mail Outbox": "E-mail Outbox"
+    "E-mail Outbox": "E-mail Outbox",
+    "Sales & Marketing": "Sales & Marketing",
+    "Prospects": "Prospects",
+    "Quick Quote": "Quick Quote",
+    "Request for Quotation": "Request for Quotation (Broker Slip)",
+    "Quotations": "Quotations",
+    "Placement Slips": "Placement Slips"
   },
   "header": {
     "notification": "Notification",
@@ -2922,7 +2928,7 @@
     "bankAccount": "Bank account"
   },
   "leads": {
-    "title": "Leads",
+    "title": "Prospects",
     "subtitle": "Manage your leads and prospects",
     "totalLeads": "Total Leads",
     "last7Days": "Last 7 Days",
@@ -2944,7 +2950,7 @@
     "source": "Source",
     "createdDate": "Created Date",
     "noLeads": "No leads found",
-    "createLead": "Create Lead",
+    "createLead": "Create Prospect",
     "bulkUpload": "Bulk Upload",
     "allCategories": "All Categories",
     "new": "New",
@@ -6183,7 +6189,7 @@
     "journey": {
       "title": "Placement journey",
       "steps": {
-        "brokerSlip": "Broker Slip",
+        "brokerSlip": "Request for Quotation",
         "quotationSlip": "Quotation Slip",
         "placementSlip": "Placement Slip",
         "sent": "Sent to insurer(s)",
@@ -6195,7 +6201,7 @@
         "optional": "Optional",
         "skip": "Not used"
       },
-      "hint": "Journey for this product: broker slip {{brokerSlip}}, placement slip {{placementSlip}}",
+      "hint": "Journey for this product: request for quotation {{brokerSlip}}, placement slip {{placementSlip}}",
       "issued": "Issued",
       "placementRequired": "This line requires a Placement Slip before the policy is issued"
     },
@@ -6230,12 +6236,12 @@
       "submitToMarket": "Submit to market"
     },
     "brokerSlip": {
-      "title": "Broker Slip",
-      "listTitle": "Broker Slips",
-      "listSubtitle": "Market submissions: the risk presented to several insurers, their offers and the comparison that leads to the Quotation Slip.",
-      "new": "New Broker Slip",
-      "newTitle": "New Broker Slip",
-      "newSubtitle": "Describe the risk and choose the insurers to approach; each receives a request for quotation.",
+      "title": "Request for Quotation (Broker Slip)",
+      "listTitle": "Requests for Quotation (Broker Slips)",
+      "listSubtitle": "Non-package risks presented to several insurers: their offers and the comparison that leads to the Quotation Slip.",
+      "new": "New Request for Quotation",
+      "newTitle": "New Request for Quotation (Broker Slip)",
+      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation.",
       "dueDefault": "From the settings",
       "tabResponses": "Market responses ({{count}})",
       "tabCompare": "Compare offers",
@@ -6403,14 +6409,15 @@
     },
     "customer": {
       "client": "Client",
-      "lead": "Lead",
+      "lead": "Prospect",
       "new": "New insured",
       "companyName": "Company name",
       "firstName": "First name",
       "lastName": "Last name",
       "email": "E-mail",
       "searchClient": "Search clients by name or code",
-      "searchLead": "Search leads by name"
+      "searchLead": "Search prospects by name",
+      "contactNumber": "Contact number"
     },
     "risk": {
       "itemPlaceholder": "Item (e.g. Location)",
@@ -6963,6 +6970,22 @@
       "retail": "Retail",
       "corporate": "Corporate",
       "both": "Retail and corporate"
+    }
+  },
+  "salesMarketing": {
+    "newProspect": "New prospect",
+    "includePackage": "Include package products",
+    "requestQuotes": "Request quotes from insurers",
+    "requestQuotesHint": "Send this prospect and risk to several insurers as a Request for Quotation (broker slip) instead of pricing it here",
+    "quickQuote": {
+      "title": "Quick Quote",
+      "subtitle": "Package products: standard tariff and wording, quoted on the spot. Non-package risks go to the insurers through a Request for Quotation.",
+      "nonPackage": "Request for Quotation (non-package)",
+      "none": "No product is classified as a package product. Set the business type on Master > Generals > Insurance Management > Product.",
+      "wizard": "Quote wizard: enter the customer and the vehicle, and the premium is priced from the tariff.",
+      "noWizard": "No quote wizard for this product yet: request the terms from the insurers.",
+      "start": "Start quote",
+      "request": "Request quotation"
     }
   }
 }

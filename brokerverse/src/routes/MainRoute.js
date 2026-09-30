@@ -285,6 +285,7 @@ import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
 // Placement journey: Broker Slip -> Quotation Slip -> Placement Slip -> Policy
 import BrokerSlipList from "../module/Placement/BrokerSlipList";
 import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
+import QuickQuote from "../module/Sales/QuickQuote";
 import BrokerSlipDetail from "../module/Placement/BrokerSlipDetail";
 import PlacementList from "../module/Placement/PlacementList";
 import PlacementDetail from "../module/Placement/PlacementDetail";
@@ -1176,6 +1177,7 @@ const Maincomponent = () => {
             element={<DirectBillProcessing />}
           />
           {/* Placement journey */}
+          <Route path="/sales/quick-quote" element={<QuickQuote />} />
           <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
           <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
           <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />

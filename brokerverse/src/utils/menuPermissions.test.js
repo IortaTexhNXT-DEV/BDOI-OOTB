@@ -98,3 +98,27 @@ describe("bank reconciliation menu", () => {
     }
   });
 });
+
+describe("Sales & Marketing menu", () => {
+  const items = (roles) =>
+    (filterMenuForRoles(menuList, roles).find((m) => m.name === "Operations")?.submenu || [])
+      .find((i) => i.name === "Sales & Marketing")?.submenu.map((i) => i.name) || [];
+
+  it("groups prospects, quick quote, requests for quotation, quotations and placement slips", () => {
+    expect(items(["system-admin"])).toEqual(["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips"]);
+    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(5);
+  });
+  it("the Processing Team works the market side but does not create quick quotes; claims has no sales menu", () => {
+    expect(items(["processing"])).toEqual(["Prospects", "Request for Quotation", "Quotations", "Placement Slips"]);
+    expect(isPathAllowed("/sales/quick-quote", menuList, ["processing"])).toBe(false);
+    expect(items(["claims"])).toEqual([]);
+  });
+  it("keeps the old addresses working", () => {
+    for (const p of ["/agent/leadlisting", "/agent/createlead/fire-allied-perils", "/agent/quotedetailview/qt_1", "/agent/Quotation",
+      "/placement/broker-slips", "/placement/broker-slips/new", "/placement/placement-slips/plc_1", "/sales/quick-quote"]) {
+      expect(isPathAllowed(p, menuList, ["sales"])).toBe(true);
+    }
+    expect(isPathAllowed("/placement/broker-slips/bs_1", menuList, ["processing"])).toBe(true);
+    expect(isPathAllowed("/agent/leadlisting", menuList, ["claims"])).toBe(false);
+  });
+});

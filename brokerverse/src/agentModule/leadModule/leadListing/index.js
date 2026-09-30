@@ -145,6 +145,7 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
+            handleClickPackageProduct();
           }}
         >
           <div>
@@ -170,6 +171,7 @@ const LeadListing = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
+            handleClickPackageProduct();
           }}
         >
           <div>
@@ -206,6 +208,11 @@ const LeadListing = () => {
 
   const handleClickEmployeeBenefit = () => {
     navigate("/agent/createlead/employee-benefit");
+  };
+
+  // travel and householder are package products: Quick Quote lists them with the way to quote each
+  const handleClickPackageProduct = () => {
+    navigate("/sales/quick-quote");
   };
 
   const handleBulkUploadSuccess = () => {

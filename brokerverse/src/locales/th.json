@@ -222,7 +222,13 @@
     "Journal": "สมุดรายวัน",
     "Trail Balance": "งบดุลทดลอง",
     "Login": "เข้าสู่ระบบ",
-    "E-mail Outbox": "E-mail Outbox"
+    "E-mail Outbox": "E-mail Outbox",
+    "Sales & Marketing": "Sales & Marketing",
+    "Prospects": "Prospects",
+    "Quick Quote": "Quick Quote",
+    "Request for Quotation": "Request for Quotation (Broker Slip)",
+    "Quotations": "Quotations",
+    "Placement Slips": "Placement Slips"
   },
   "header": {
     "notification": "การแจ้งเตือน",
@@ -5050,6 +5056,43 @@
       "retail": "Retail",
       "corporate": "Corporate",
       "both": "Retail and corporate"
+    }
+  },
+  "placement": {
+    "brokerSlip": {
+      "title": "Request for Quotation (Broker Slip)",
+      "listTitle": "Requests for Quotation (Broker Slips)",
+      "listSubtitle": "Non-package risks presented to several insurers: their offers and the comparison that leads to the Quotation Slip.",
+      "new": "New Request for Quotation",
+      "newTitle": "New Request for Quotation (Broker Slip)",
+      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation."
+    },
+    "customer": {
+      "lead": "Prospect",
+      "searchLead": "Search prospects by name",
+      "contactNumber": "Contact number"
+    },
+    "journey": {
+      "steps": {
+        "brokerSlip": "Request for Quotation"
+      },
+      "hint": "Journey for this product: request for quotation {{brokerSlip}}, placement slip {{placementSlip}}"
+    }
+  },
+  "salesMarketing": {
+    "newProspect": "New prospect",
+    "includePackage": "Include package products",
+    "requestQuotes": "Request quotes from insurers",
+    "requestQuotesHint": "Send this prospect and risk to several insurers as a Request for Quotation (broker slip) instead of pricing it here",
+    "quickQuote": {
+      "title": "Quick Quote",
+      "subtitle": "Package products: standard tariff and wording, quoted on the spot. Non-package risks go to the insurers through a Request for Quotation.",
+      "nonPackage": "Request for Quotation (non-package)",
+      "none": "No product is classified as a package product. Set the business type on Master > Generals > Insurance Management > Product.",
+      "wizard": "Quote wizard: enter the customer and the vehicle, and the premium is priced from the tariff.",
+      "noWizard": "No quote wizard for this product yet: request the terms from the insurers.",
+      "start": "Start quote",
+      "request": "Request quotation"
     }
   }
 }

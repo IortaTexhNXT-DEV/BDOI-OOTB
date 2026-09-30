@@ -20,7 +20,7 @@ import mastersRouter from './masters.js';
 import emailRouter from './email.js';
 
 const { router, define } = moduleRouter('Quotations', '/quotations');
-const SCREEN = 'Operations > Quotation';
+const SCREEN = 'Operations > Sales & Marketing > Quotations';
 const canRead = [requireAuth, requirePermission('read:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
 

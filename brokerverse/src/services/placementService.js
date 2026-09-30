@@ -44,7 +44,7 @@ const enc = encodeURIComponent;
 
 const placementService = {
   // reference data and configuration
-  options: async () => (await request("GET", "/placements/options")).data,
+  options: async (params) => (await request("GET", `/placements/options${queryString(params)}`)).data,
   journey: async (params) => (await request("GET", `/placements/journey${queryString(params)}`)).data,
   searchClients: async (search) => {
     const data = (await request("GET", `/clients${queryString({ search, pageSize: 20 })}`)).data;

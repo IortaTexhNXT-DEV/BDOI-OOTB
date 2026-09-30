@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
@@ -8,6 +8,7 @@ import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
+import { Checkbox } from "primereact/checkbox";
 import { Toast } from "primereact/toast";
 import placementService from "../../services/placementService";
 import { calendarDateFormat } from "../../utility/dateFormat";
@@ -17,18 +18,30 @@ import "./index.scss";
 
 const blankCover = () => ({ cover: "", sumInsured: null, deductible: "" });
 
-/** New Broker Slip: the risk presented to the market (request for quotation to several insurers). */
+/** The picked lead of a prefilled request (from the Fire / IAR quote cards or Quick Quote). */
+const prefilledCustomer = (prefill) =>
+  prefill?.leadRefId
+    ? { kind: "lead", selected: { id: prefill.leadRefId, label: `${prefill.leadName || prefill.leadRefId} (${prefill.leadRefId})`, name: prefill.leadName || "" } }
+    : { kind: "lead" };
+
+/**
+ * New Request for Quotation (broker slip): the risk presented to the market, several insurers asked for terms. Mostly
+ * for non-package products; the customer is an existing prospect or client, or a new prospect entered here.
+ * location.state.prefill: { leadRefId, leadName, productId, productType, riskDetails, requestedCovers }.
+ */
 const BrokerSlipCreate = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const prefill = useLocation().state?.prefill || null;
   const toast = useRef(null);
   const options = usePlacementOptions();
-  const [customer, setCustomer] = useState({ kind: "lead" });
-  const [productId, setProductId] = useState(null);
-  const [insuredName, setInsuredName] = useState("");
-  const [riskDetails, setRiskDetails] = useState({});
+  const [customer, setCustomer] = useState(() => prefilledCustomer(prefill));
+  const [productId, setProductId] = useState(prefill?.productId || null);
+  const [showPackage, setShowPackage] = useState(false);
+  const [insuredName, setInsuredName] = useState(prefill?.leadName || "");
+  const [riskDetails, setRiskDetails] = useState(prefill?.riskDetails || {});
   const [vehicle, setVehicle] = useState({ vehicleBrand: "", vehicleModel: "", modelYear: "", plateNumber: "", fmv: null });
-  const [covers, setCovers] = useState([blankCover()]);
+  const [covers, setCovers] = useState(() => (prefill?.requestedCovers?.length ? prefill.requestedCovers.map((c) => ({ ...blankCover(), ...c })) : [blankCover()]));
   const [insurers, setInsurers] = useState([]);
   const [inception, setInception] = useState(null);
   const [expiry, setExpiry] = useState(null);
@@ -36,14 +49,26 @@ const BrokerSlipCreate = () => {
   const [remarks, setRemarks] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // a prefilled product type is matched to the product master once the options are loaded
+  useEffect(() => {
+    if (productId || !prefill?.productType || !options.products.length) return;
+    const wanted = String(prefill.productType).toLowerCase();
+    const match = options.products.find((p) => p.name.toLowerCase() === wanted || String(p.code).toLowerCase() === wanted);
+    if (match) setProductId(match.id);
+  }, [options.products, prefill, productId]);
+
   const product = options.products.find((p) => p.id === productId);
+  // non-package products are placed through requests for quotation; package ones are offered on request
+  const productChoices = options.products.filter((p) => showPackage || p.businessType !== "package" || p.id === productId);
   const motor = product?.lob === "MOTOR";
   const sumInsured = useMemo(() => round2(covers.reduce((s, c) => s + (Number(c.sumInsured) || 0), 0)), [covers]);
   const setCover = (i, patch) => setCovers(covers.map((c, k) => (k === i ? { ...c, ...patch } : c)));
 
   const save = async (submit) => {
-    const who = customerFields(customer);
-    if (!who.leadRefId && !who.clientId) return toast.current?.show({ severity: "warn", summary: t("placement.validation.title"), detail: t("placement.validation.customer"), life: 3500 });
+    // a new prospect is saved as a lead together with the request
+    const who = customer.kind === "new" ? { prospect: customerFields(customer) } : customerFields(customer);
+    const namedProspect = who.prospect && (who.prospect.companyName || who.prospect.firstName);
+    if (!who.leadRefId && !who.clientId && !namedProspect) return toast.current?.show({ severity: "warn", summary: t("placement.validation.title"), detail: t("placement.validation.customer"), life: 3500 });
     if (!product) return toast.current?.show({ severity: "warn", summary: t("placement.validation.title"), detail: t("placement.validation.product"), life: 3500 });
     if (!insurers.length) return toast.current?.show({ severity: "warn", summary: t("placement.validation.title"), detail: t("placement.validation.insurers"), life: 3500 });
     setSaving(true);
@@ -75,11 +100,15 @@ const BrokerSlipCreate = () => {
         <div className="grid">
           <div className="col-12 md:col-6">
             <label>{t("placement.fields.customer")} *</label>
-            <CustomerPicker value={customer} onChange={setCustomer} />
+            <CustomerPicker value={customer} onChange={setCustomer} allowNew newLabel={t("salesMarketing.newProspect")} />
           </div>
           <div className="col-12 md:col-3">
             <label>{t("placement.fields.product")} *</label>
-            <Dropdown value={productId} options={options.products.map((p) => ({ label: `${p.name} (${p.lob})`, value: p.id }))} onChange={(e) => setProductId(e.value)} filter className="w-full" placeholder={t("placement.fields.chooseProduct")} />
+            <Dropdown value={productId} options={productChoices.map((p) => ({ label: `${p.name} (${p.lob})`, value: p.id }))} onChange={(e) => setProductId(e.value)} filter className="w-full" placeholder={t("placement.fields.chooseProduct")} />
+            <div className="flex align-items-center gap-2 mt-1">
+              <Checkbox inputId="rfq-package" checked={showPackage} onChange={(e) => setShowPackage(e.checked)} />
+              <label htmlFor="rfq-package" className="m-0">{t("salesMarketing.includePackage")}</label>
+            </div>
             {product && <small className="hint">{t("placement.journey.hint", { brokerSlip: t(`placement.journey.mode.${product.journey.brokerSlip}`), placementSlip: t(`placement.journey.mode.${product.journey.placementSlip}`) })}</small>}
           </div>
           <div className="col-12 md:col-3">
