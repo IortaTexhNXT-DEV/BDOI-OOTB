@@ -7,6 +7,7 @@ import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { assertPeriodOpen, createJournal, postJournal, reverseJournal } from '../accounting/lib/ledger.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
+import { assertAuthority } from '../access-control/service.js';
 
 const MANUAL_SOURCES = ['manual', 'correction', 'reversal'];
 export const headerRow = (j) => ({
@@ -121,6 +122,8 @@ export async function approve(db, ref, user) {
   const j = await getJv(db, ref, true);
   if (j.status !== 'for-approval') throw conflict(`Voucher ${j.jv_number} is ${j.status}; only vouchers awaiting approval can be approved`);
   await assertChecker(user, j.created_by, 'journal voucher');
+  const debits = (await db.query('SELECT COALESCE(sum(debit), 0) AS total FROM journal_lines WHERE jv_id = $1', [j.id])).rows[0].total;
+  await assertAuthority(db, user, 'journal_voucher', Number(debits));
   return postJournal(db, j.id, user);
 }
 

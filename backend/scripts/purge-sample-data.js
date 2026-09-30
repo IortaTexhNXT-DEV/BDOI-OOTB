@@ -60,6 +60,8 @@ export const TRANSACTION_TABLES = [
   // demo configuration and go too (tax and charge rules, LGU rates and gateway settings stay)
   'package_endorsements', 'package_sections', 'package_quotes', 'package_bundle_sections', 'package_bundles', 'insurer_rate_tables',
   'payment_events', 'payment_links',
+  // access reviews and delegations (the authority matrix and segregation-of-duties rules are configuration and stay)
+  'access_review_items', 'access_reviews', 'user_delegations',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

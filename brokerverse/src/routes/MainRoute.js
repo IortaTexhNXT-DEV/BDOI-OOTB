@@ -295,6 +295,12 @@ import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
 import BrokerSlipList from "../module/Placement/BrokerSlipList";
 import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
 import QuickQuote from "../module/Sales/QuickQuote";
+import UserAccessMatrix from "../module/AccessControl/UserAccessMatrix";
+import RolePermissions from "../module/AccessControl/RolePermissions";
+import AuthorityMatrix from "../module/AccessControl/AuthorityMatrix";
+import Delegations from "../module/AccessControl/Delegations";
+import SodRules from "../module/AccessControl/SodRules";
+import AccessReviews from "../module/AccessControl/AccessReviews";
 import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
 import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
@@ -1195,6 +1201,12 @@ const Maincomponent = () => {
           />
           {/* Placement journey */}
           <Route path="/sales/quick-quote" element={<QuickQuote />} />
+          <Route path="/master/generals/usermanagement/access-matrix" element={<UserAccessMatrix />} />
+          <Route path="/master/generals/usermanagement/role-permissions" element={<RolePermissions />} />
+          <Route path="/master/generals/usermanagement/authority-matrix" element={<AuthorityMatrix />} />
+          <Route path="/master/generals/usermanagement/delegations" element={<Delegations />} />
+          <Route path="/master/generals/usermanagement/segregation-of-duties" element={<SodRules />} />
+          <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
           <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
           <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />

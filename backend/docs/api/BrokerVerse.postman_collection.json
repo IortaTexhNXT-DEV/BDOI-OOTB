@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (821 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (845 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -123,6 +123,1689 @@
               "if (token) { pm.collectionVariables.set('token', token); if (pm.environment) pm.environment.set('token', token); }"
             ]
           }
+        }
+      ]
+    },
+    {
+      "name": "Access Control",
+      "item": [
+        {
+          "name": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-check?type=payment_voucher&amount=250000&userId=usr_1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-check"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "payment_voucher"
+                },
+                {
+                  "key": "amount",
+                  "value": "250000"
+                },
+                {
+                  "key": "userId",
+                  "value": "usr_1"
+                }
+              ]
+            },
+            "description": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-check?type=payment_voucher&amount=250000&userId=usr_1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-check"
+                  ],
+                  "query": [
+                    {
+                      "key": "type",
+                      "value": "payment_voucher"
+                    },
+                    {
+                      "key": "amount",
+                      "value": "250000"
+                    },
+                    {
+                      "key": "userId",
+                      "value": "usr_1"
+                    }
+                  ]
+                },
+                "description": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"found\": true,\n    \"limit\": 1000000,\n    \"unlimited\": false,\n    \"source\": \"role accounting\",\n    \"withinLimit\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Authority limits with their history (filter by status / transaction type)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-limits?status=pending&transactionType=payment_voucher",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-limits"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "transactionType",
+                  "value": "payment_voucher"
+                }
+              ]
+            },
+            "description": "Authority limits with their history (filter by status / transaction type)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-limits?status=pending&transactionType=payment_voucher",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-limits"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "key": "transactionType",
+                      "value": "payment_voucher"
+                    }
+                  ]
+                },
+                "description": "Authority limits with their history (filter by status / transaction type)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Propose a limit for a role or a user; it applies once another administrator approves it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-limits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-limits"
+              ]
+            },
+            "description": "Propose a limit for a role or a user; it applies once another administrator approves it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionType\": \"payment_voucher\",\n  \"roleCode\": \"accounting\",\n  \"maxAmount\": 1000000,\n  \"remarks\": \"Per the board resolution on signing authority\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-limits",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-limits"
+                  ]
+                },
+                "description": "Propose a limit for a role or a user; it applies once another administrator approves it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionType\": \"payment_voucher\",\n  \"roleCode\": \"accounting\",\n  \"maxAmount\": 1000000,\n  \"remarks\": \"Per the board resolution on signing authority\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"pending\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw an active limit",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-limits/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-limits",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw an active limit\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-limits/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-limits",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw an active limit\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"retired\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or reject a proposed limit (not by the person who proposed it)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-limits/:id/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-limits",
+                ":id",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or reject a proposed limit (not by the person who proposed it)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-limits/:id/decision",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-limits",
+                    ":id",
+                    "decision"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or reject a proposed limit (not by the person who proposed it)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"approve\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-matrix",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-matrix"
+              ]
+            },
+            "description": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-matrix",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-matrix"
+                  ]
+                },
+                "description": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"roles\": [],\n    \"rows\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"cells\": {\n          \"accounting\": {\n            \"maxAmount\": 500000,\n            \"set\": true,\n            \"pending\": null\n          }\n        }\n      }\n    ],\n    \"userLimits\": [],\n    \"withoutLimit\": \"allow\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delegations of authority (?active=true for current and future ones)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/delegations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "delegations"
+              ]
+            },
+            "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/delegations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "delegations"
+                  ]
+                },
+                "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"delegatorName\": \"Teresa Villaroman\",\n      \"delegateName\": \"Ramon Almario\",\n      \"dateFrom\": \"2026-10-01\",\n      \"dateTo\": \"2026-10-10\",\n      \"inEffect\": false\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delegate approval authority for a period (leave, travel); empty transaction types = all",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/delegations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "delegations"
+              ]
+            },
+            "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"payment_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-01\",\n  \"dateTo\": \"2026-10-10\",\n  \"reason\": \"Annual leave\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/delegations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "delegations"
+                  ]
+                },
+                "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"payment_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-01\",\n  \"dateTo\": \"2026-10-10\",\n  \"reason\": \"Annual leave\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "End a delegation early",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/delegations/:id/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "delegations",
+                ":id",
+                "revoke"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "End a delegation early\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/delegations/:id/revoke",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "delegations",
+                    ":id",
+                    "revoke"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "End a delegation early\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"revoked\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Access reviews (recertification campaigns) with progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews"
+              ]
+            },
+            "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews"
+                  ]
+                },
+                "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Q4 2026 access review\",\n      \"dueDate\": \"2026-12-15\",\n      \"status\": \"open\",\n      \"users\": 14,\n      \"pending\": 3\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start an access review of every active user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews"
+              ]
+            },
+            "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Q4 2026 access review\",\n  \"dueDate\": \"2026-12-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews"
+                  ]
+                },
+                "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Q4 2026 access review\",\n  \"dueDate\": \"2026-12-15\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"items\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One access review with every user and decision (?format=xlsx|csv to download)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"items\": [\n      {\n        \"username\": \"maria.rivera\",\n        \"roles\": [\n          \"sales\"\n        ],\n        \"decision\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close a review once every user has been decided",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"closed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Keep or revoke one user's access (revoke deactivates the account and signs it out)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews/:id/items/:itemId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews",
+                ":id",
+                "items",
+                ":itemId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "itemId",
+                  "value": "",
+                  "description": "itemId (path parameter)"
+                }
+              ]
+            },
+            "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"keep\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews/:id/items/:itemId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews",
+                    ":id",
+                    "items",
+                    ":itemId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "itemId",
+                      "value": "",
+                      "description": "itemId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"keep\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Permissions down, roles across: what each role may do (inherited roles listed per role)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/role-matrix",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "role-matrix"
+              ]
+            },
+            "description": "Permissions down, roles across: what each role may do (inherited roles listed per role)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/role-matrix",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "role-matrix"
+                  ]
+                },
+                "description": "Permissions down, roles across: what each role may do (inherited roles listed per role)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"roles\": [\n      {\n        \"code\": \"accounting\",\n        \"name\": \"Accounting\",\n        \"inherits\": []\n      }\n    ],\n    \"rows\": [\n      {\n        \"code\": \"read:policies\",\n        \"module\": \"policies\",\n        \"grants\": {\n          \"accounting\": true\n        }\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rules a set of roles would break (used by the user form before saving)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-check"
+              ]
+            },
+            "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users, read:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roles\": [\n    \"processing\",\n    \"accounting\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-check"
+                  ]
+                },
+                "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users, read:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"roles\": [\n    \"processing\",\n    \"accounting\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"name\": \"Placement and payment\",\n      \"action\": \"block\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Segregation-of-duties rules: pairs of roles one person may not hold together",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-rules"
+              ]
+            },
+            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-rules"
+                  ]
+                },
+                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"SOD-PROC-ACCT\",\n      \"roleA\": \"processing\",\n      \"roleB\": \"accounting\",\n      \"action\": \"block\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a segregation-of-duties rule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-rules"
+              ]
+            },
+            "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SOD-OPS-ACCT\",\n  \"name\": \"Servicing and payment\",\n  \"roleA\": \"operations\",\n  \"roleB\": \"accounting\",\n  \"action\": \"warn\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-rules"
+                  ]
+                },
+                "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"SOD-OPS-ACCT\",\n  \"name\": \"Servicing and payment\",\n  \"roleA\": \"operations\",\n  \"roleB\": \"accounting\",\n  \"action\": \"warn\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 6\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a segregation-of-duties rule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-rules/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-rules",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales and collection\",\n  \"roleA\": \"sales\",\n  \"roleB\": \"accounting\",\n  \"action\": \"block\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-rules/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-rules",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Sales and collection\",\n  \"roleA\": \"sales\",\n  \"roleB\": \"accounting\",\n  \"action\": \"block\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 4\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Switch off a segregation-of-duties rule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-rules/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-rules",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-rules/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-rules",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 4\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Transaction types of the authority matrix",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/transaction-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "transaction-types"
+              ]
+            },
+            "description": "Transaction types of the authority matrix\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/transaction-types",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "transaction-types"
+                  ]
+                },
+                "description": "Transaction types of the authority matrix\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"payment_voucher\",\n      \"name\": \"Payment voucher and cheque release\",\n      \"measure\": \"amount\",\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rename, describe or switch off a transaction type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/transaction-types/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "transaction-types",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Rename, describe or switch off a transaction type\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cheque release\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/transaction-types/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "transaction-types",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Rename, describe or switch off a transaction type\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Cheque release\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"payment_voucher\",\n    \"name\": \"Cheque release\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/user-matrix?status=active&format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "user-matrix"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ]
+            },
+            "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > User Access Matrix\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/user-matrix?status=active&format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "user-matrix"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "active"
+                    },
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ]
+                },
+                "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > User Access Matrix\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"roles\": [\n      {\n        \"code\": \"sales\",\n        \"name\": \"Sales & Marketing\"\n      }\n    ],\n    \"dormantDays\": 90,\n    \"rows\": [\n      {\n        \"username\": \"maria.rivera\",\n        \"roles\": [\n          \"sales\"\n        ],\n        \"status\": \"active\",\n        \"dormant\": false,\n        \"sodConflicts\": []\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "End every session of a user (lost device, suspected misuse, role change)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/users/:id/sign-out",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "users",
+                ":id",
+                "sign-out"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/users/:id/sign-out",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "users",
+                    ":id",
+                    "sign-out"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"signedOut\": true\n  }\n}"
+            }
+          ]
         }
       ]
     },

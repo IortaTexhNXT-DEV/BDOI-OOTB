@@ -87,3 +87,10 @@ export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
 
 // Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
 export { housekeeping } from './housekeeping.js';
+
+/** Deactivate accounts nobody has signed in to for access.dormant_days (Master > User Management). */
+export const dormantUsers = async () => {
+  const { pool } = await import('../db/pool.js');
+  if (!(await pool.query("SELECT to_regclass('authority_limits') IS NOT NULL AS ok")).rows[0].ok) return { skipped: 'access control not migrated' };
+  return (await import('../modules/access-control/service.js')).deactivateDormant(pool);
+};

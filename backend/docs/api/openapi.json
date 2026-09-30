@@ -18,6 +18,9 @@
   ],
   "tags": [
     {
+      "name": "Access Control"
+    },
+    {
       "name": "Account Determination"
     },
     {
@@ -178,6 +181,2030 @@
     }
   ],
   "paths": {
+    "/access-control/authority-check": {
+      "get": {
+        "operationId": "getAccessControlAuthorityCheck",
+        "summary": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "payment_voucher"
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 250000
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "usr_1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "found": {
+                          "type": "boolean"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "unlimited": {
+                          "type": "boolean"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "withinLimit": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "found": true,
+                    "limit": 1000000,
+                    "unlimited": false,
+                    "source": "role accounting",
+                    "withinLimit": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix"
+      }
+    },
+    "/access-control/authority-limits": {
+      "get": {
+        "operationId": "getAccessControlAuthorityLimits",
+        "summary": "Authority limits with their history (filter by status / transaction type)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending"
+          },
+          {
+            "name": "transactionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "payment_voucher"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": []
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlAuthorityLimits",
+        "summary": "Propose a limit for a role or a user; it applies once another administrator approves it",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "pending"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transactionType": {
+                    "type": "string"
+                  },
+                  "roleCode": {
+                    "type": "string"
+                  },
+                  "maxAmount": {
+                    "type": "integer"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "transactionType": "payment_voucher",
+                "roleCode": "accounting",
+                "maxAmount": 1000000,
+                "remarks": "Per the board resolution on signing authority"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/authority-limits/{id}": {
+      "delete": {
+        "operationId": "deleteAccessControlAuthorityLimitsId",
+        "summary": "Withdraw an active limit",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "retired"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "approve:access-control"
+        ]
+      }
+    },
+    "/access-control/authority-limits/{id}/decision": {
+      "post": {
+        "operationId": "postAccessControlAuthorityLimitsIdDecision",
+        "summary": "Approve or reject a proposed limit (not by the person who proposed it)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "approve:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "approve"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/authority-matrix": {
+      "get": {
+        "operationId": "getAccessControlAuthorityMatrix",
+        "summary": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "roles": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "cells": {
+                                "type": "object",
+                                "properties": {
+                                  "accounting": {
+                                    "type": "object",
+                                    "properties": {
+                                      "maxAmount": {
+                                        "type": "integer"
+                                      },
+                                      "set": {
+                                        "type": "boolean"
+                                      },
+                                      "pending": {}
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "userLimits": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "withoutLimit": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "roles": [],
+                    "rows": [
+                      {
+                        "code": "journal_voucher",
+                        "cells": {
+                          "accounting": {
+                            "maxAmount": 500000,
+                            "set": true,
+                            "pending": null
+                          }
+                        }
+                      }
+                    ],
+                    "userLimits": [],
+                    "withoutLimit": "allow"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/delegations": {
+      "get": {
+        "operationId": "getAccessControlDelegations",
+        "summary": "Delegations of authority (?active=true for current and future ones)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Delegations\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "delegatorName": {
+                            "type": "string"
+                          },
+                          "delegateName": {
+                            "type": "string"
+                          },
+                          "dateFrom": {
+                            "type": "string"
+                          },
+                          "dateTo": {
+                            "type": "string"
+                          },
+                          "inEffect": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "delegatorName": "Teresa Villaroman",
+                      "delegateName": "Ramon Almario",
+                      "dateFrom": "2026-10-01",
+                      "dateTo": "2026-10-10",
+                      "inEffect": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Delegations",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlDelegations",
+        "summary": "Delegate approval authority for a period (leave, travel); empty transaction types = all",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Delegations",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "delegatorId": {
+                    "type": "string"
+                  },
+                  "delegateId": {
+                    "type": "string"
+                  },
+                  "transactionTypes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "dateFrom": {
+                    "type": "string"
+                  },
+                  "dateTo": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "delegatorId": "usr_1",
+                "delegateId": "usr_2",
+                "transactionTypes": [
+                  "payment_voucher"
+                ],
+                "dateFrom": "2026-10-01",
+                "dateTo": "2026-10-10",
+                "reason": "Annual leave"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/delegations/{id}/revoke": {
+      "post": {
+        "operationId": "postAccessControlDelegationsIdRevoke",
+        "summary": "End a delegation early",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "revoked"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Delegations",
+        "x-permissions": [
+          "write:access-control"
+        ]
+      }
+    },
+    "/access-control/reviews": {
+      "get": {
+        "operationId": "getAccessControlReviews",
+        "summary": "Access reviews (recertification campaigns) with progress",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "users": {
+                            "type": "integer"
+                          },
+                          "pending": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Q4 2026 access review",
+                      "dueDate": "2026-12-15",
+                      "status": "open",
+                      "users": 14,
+                      "pending": 3
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Access Reviews",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlReviews",
+        "summary": "Start an access review of every active user",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "items": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Access Reviews",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "dueDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Q4 2026 access review",
+                "dueDate": "2026-12-15"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/reviews/{id}": {
+      "get": {
+        "operationId": "getAccessControlReviewsId",
+        "summary": "One access review with every user and decision (?format=xlsx|csv to download)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "decision": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "items": [
+                      {
+                        "username": "maria.rivera",
+                        "roles": [
+                          "sales"
+                        ],
+                        "decision": "pending"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Access Reviews",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/reviews/{id}/close": {
+      "post": {
+        "operationId": "postAccessControlReviewsIdClose",
+        "summary": "Close a review once every user has been decided",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "closed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Access Reviews",
+        "x-permissions": [
+          "write:access-control"
+        ]
+      }
+    },
+    "/access-control/reviews/{id}/items/{itemId}": {
+      "post": {
+        "operationId": "postAccessControlReviewsIdItemsItemId",
+        "summary": "Keep or revoke one user's access (revoke deactivates the account and signs it out)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Access Reviews",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "keep"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/role-matrix": {
+      "get": {
+        "operationId": "getAccessControlRoleMatrix",
+        "summary": "Permissions down, roles across: what each role may do (inherited roles listed per role)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "inherits": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "module": {
+                                "type": "string"
+                              },
+                              "grants": {
+                                "type": "object",
+                                "properties": {
+                                  "accounting": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "roles": [
+                      {
+                        "code": "accounting",
+                        "name": "Accounting",
+                        "inherits": []
+                      }
+                    ],
+                    "rows": [
+                      {
+                        "code": "read:policies",
+                        "module": "policies",
+                        "grants": {
+                          "accounting": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/sod-check": {
+      "post": {
+        "operationId": "postAccessControlSodCheck",
+        "summary": "Rules a set of roles would break (used by the user form before saving)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > User\n\nAccess: write:users, read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "name": "Placement and payment",
+                      "action": "block"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > User",
+        "x-permissions": [
+          "write:users",
+          "read:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "roles": [
+                  "processing",
+                  "accounting"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/sod-rules": {
+      "get": {
+        "operationId": "getAccessControlSodRules",
+        "summary": "Segregation-of-duties rules: pairs of roles one person may not hold together",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "roleA": {
+                            "type": "string"
+                          },
+                          "roleB": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "code": "SOD-PROC-ACCT",
+                      "roleA": "processing",
+                      "roleB": "accounting",
+                      "action": "block"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Segregation of Duties",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlSodRules",
+        "summary": "Add a segregation-of-duties rule",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 6
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "roleA": {
+                    "type": "string"
+                  },
+                  "roleB": {
+                    "type": "string"
+                  },
+                  "action": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "SOD-OPS-ACCT",
+                "name": "Servicing and payment",
+                "roleA": "operations",
+                "roleB": "accounting",
+                "action": "warn"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/sod-rules/{id}": {
+      "put": {
+        "operationId": "putAccessControlSodRulesId",
+        "summary": "Change a segregation-of-duties rule",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 4
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "roleA": {
+                    "type": "string"
+                  },
+                  "roleB": {
+                    "type": "string"
+                  },
+                  "action": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Sales and collection",
+                "roleA": "sales",
+                "roleB": "accounting",
+                "action": "block"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAccessControlSodRulesId",
+        "summary": "Switch off a segregation-of-duties rule",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 4
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ]
+      }
+    },
+    "/access-control/transaction-types": {
+      "get": {
+        "operationId": "getAccessControlTransactionTypes",
+        "summary": "Transaction types of the authority matrix",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "measure": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "payment_voucher",
+                      "name": "Payment voucher and cheque release",
+                      "measure": "amount",
+                      "active": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/transaction-types/{code}": {
+      "put": {
+        "operationId": "putAccessControlTransactionTypesCode",
+        "summary": "Rename, describe or switch off a transaction type",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "payment_voucher",
+                    "name": "Cheque release"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Authority Matrix",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Cheque release"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/user-matrix": {
+      "get": {
+        "operationId": "getAccessControlUserMatrix",
+        "summary": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > User Access Matrix\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "active"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "dormantDays": {
+                          "type": "integer"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "dormant": {
+                                "type": "boolean"
+                              },
+                              "sodConflicts": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "roles": [
+                      {
+                        "code": "sales",
+                        "name": "Sales & Marketing"
+                      }
+                    ],
+                    "dormantDays": 90,
+                    "rows": [
+                      {
+                        "username": "maria.rivera",
+                        "roles": [
+                          "sales"
+                        ],
+                        "status": "active",
+                        "dormant": false,
+                        "sodConflicts": []
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > User Access Matrix",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/users/{id}/sign-out": {
+      "post": {
+        "operationId": "postAccessControlUsersIdSignOut",
+        "summary": "End every session of a user (lost device, suspected misuse, role change)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > User\n\nAccess: write:users",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "signedOut": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "userId": "usr_1",
+                    "signedOut": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > User",
+        "x-permissions": [
+          "write:users"
+        ]
+      }
+    },
     "/account-determination": {
       "get": {
         "operationId": "getAccountDetermination",

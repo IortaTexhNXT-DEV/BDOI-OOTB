@@ -15,6 +15,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/service.js';
+import { assertAuthority } from '../access-control/service.js';
 import { renderTemplate } from './docs.js';
 import { companyName } from '../../lib/letterhead.js';
 import { printContext, buildPdf } from '../../lib/pdf/index.js';
@@ -528,6 +529,7 @@ export async function approveSettlement(id, { decision = 'approve', approvedAmou
     return { from, claim: await getClaim(row.id) };
   }
   const amount = toNum(approvedAmount) ?? row.settlement?.settlementAmount;
+  await assertAuthority(pool, user, 'claim_settlement', amount);
   const settlement = { ...(row.settlement || {}), approvedBy: user?.username, approvedAt: new Date().toISOString() };
   await transition(row, 'approved', user, { note: note || `Settlement of ${amount} approved`, action: 'Settlement Approved', sets: { approved_amount: round2(amount), settlement: JSON.stringify(settlement), settlement_approved_by: user?.id ?? null, settlement_approved_at: new Date() } });
   if (await getSetting('claims.auto_settle_on_approval', true)) {

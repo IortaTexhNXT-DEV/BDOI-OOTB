@@ -13,6 +13,7 @@ import { findClient, findPolicy } from '../receipts/receivables.js';
 import { payLines, lineView } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postingDate } from '../../lib/dates.js';
+import { assertAuthority } from '../access-control/service.js';
 
 const AGENT = 'Agent/Referrer';
 /** Payee types of a payment voucher. */
@@ -298,6 +299,7 @@ export async function updateCheckbook(db, id, b, user) {
   } else if (c.status === 'Pending' && next === 'Approved') {
     const amount = round2(b.totaleAmount === undefined ? Number(c.totale_amount) : num(b.totaleAmount));
     if (!(amount > 0)) throw badRequest('Cheque amount must be greater than zero');
+    await assertAuthority(db, user, 'payment_voucher', amount);
     await approveCheque(db, c, amount, user);
   } else if (c.status === 'Approved' && next === 'Printed') {
     await db.query('UPDATE checkbooks SET status = \'Printed\', printed_by = $2, printed_at = now(), updated_at = now() WHERE id = $1', [id, user.id]);

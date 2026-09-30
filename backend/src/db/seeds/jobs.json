@@ -68,5 +68,12 @@
     "description": "Purge old job runs, sent e-mails, sign-in history, expired sessions and reset codes, read notifications and completed queue jobs after the retention periods in System Settings (Housekeeping tab); the audit trail is kept",
     "cron": "45 2 * * *",
     "handler": "housekeeping"
+  },
+  {
+    "code": "dormant-users",
+    "name": "Dormant accounts",
+    "description": "Deactivate active accounts with no sign-in for access.dormant_days days (the built-in administrator excepted)",
+    "cron": "45 1 * * *",
+    "handler": "dormantUsers"
   }
 ]

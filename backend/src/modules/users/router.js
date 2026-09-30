@@ -9,6 +9,7 @@ import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { assertPasswordAllowed, passwordPolicy, recordHistory, savePassword } from '../../lib/password.js';
 import { temporaryPassword as temporaryPasswordFor } from '../../lib/secrets.js';
 import { loginHistory } from '../../lib/loginHistory.js';
+import { assertSod } from '../access-control/service.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
 const admin = [requireAuth, requirePermission('write:users')];
@@ -63,12 +64,17 @@ const userSchema = z.object({
   roles: z.array(z.string()).min(1), mustChangePassword: z.boolean().optional(),
 });
 
+/** Replace a user's roles. Refuses a combination a blocking segregation-of-duties rule forbids; returns the warnings of the others. */
 async function setRoles(client, userId, codes) {
   const rows = (await client.query('SELECT id, code FROM roles WHERE code = ANY($1)', [codes])).rows;
   if (rows.length !== codes.length) throw badRequest(`Unknown role(s): ${codes.filter((c) => !rows.find((r) => r.code === c)).join(', ')}`);
+  const warnings = await assertSod(client, codes);
   await client.query('DELETE FROM user_roles WHERE user_id = $1', [userId]);
   for (const r of rows) await client.query('INSERT INTO user_roles(user_id, role_id) VALUES ($1,$2)', [userId, r.id]);
+  return warnings;
 }
+
+const withWarnings = (message, warnings) => (warnings?.length ? `${message}. Segregation of duties: ${warnings.join('; ')}` : message);
 
 define({
   method: 'GET', path: '/', summary: 'List users (search, role, status, paging)', screen: 'Master > User Management > User', middleware: viewer,
@@ -152,11 +158,12 @@ define({
     const temporaryPassword = b.password ? null : temporaryPasswordFor(await passwordPolicy());
     if (temporaryPassword) b.mustChangePassword = true;
     const hash = await bcrypt.hash(b.password || temporaryPassword, 10);
+    let warnings = [];
     const id = await withTransaction(async (c) => {
       const r = await c.query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, phone, employee_code, branch_code, department, designation, reporting_to, status, must_change_password, created_by)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
         [b.username, hash, b.displayName || [b.firstName, b.lastName].filter(Boolean).join(' ') || b.username, b.firstName, b.lastName, b.email || null, b.phone, b.employeeCode, b.branchCode, b.department, b.designation, b.reportingTo, b.status || 'active', b.mustChangePassword ?? !b.password, req.user.username]);
-      await setRoles(c, r.rows[0].id, b.roles);
+      warnings = await setRoles(c, r.rows[0].id, b.roles);
       await recordHistory(r.rows[0].id, hash, c);
       return r.rows[0].id;
     });
@@ -164,7 +171,8 @@ define({
     await audit(req, { entity: 'user', entityId: id, action: 'create', after: { ...b, password: undefined } });
     // The temporary password is returned once (never stored in clear or logged); the administrator passes it on.
     if (temporaryPassword) res.set('Cache-Control', 'no-store');
-    created(res, { ...userRow(u), ...(temporaryPassword ? { temporaryPassword } : {}) }, temporaryPassword ? 'User created with a temporary password' : 'User created');
+    created(res, { ...userRow(u), ...(temporaryPassword ? { temporaryPassword } : {}) },
+      withWarnings(temporaryPassword ? 'User created with a temporary password' : 'User created', warnings));
   },
 });
 define({
@@ -190,20 +198,21 @@ define({
     }
     const rolesChanged = !!b.roles && [...b.roles].sort().join(',') !== [...(before.roles || [])].sort().join(',');
     const deactivated = !!b.status && b.status !== 'active' && before.status === 'active';
+    let warnings = [];
     await withTransaction(async (c) => {
       await c.query(`UPDATE users SET display_name = COALESCE($2, display_name), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), email = COALESCE($5, email),
         phone = COALESCE($6, phone), employee_code = COALESCE($7, employee_code), branch_code = COALESCE($8, branch_code), department = COALESCE($9, department), designation = COALESCE($10, designation),
         reporting_to = COALESCE($11, reporting_to), status = COALESCE($12, status), must_change_password = COALESCE($13, must_change_password), updated_by = $14 WHERE id = $1`,
         [before.id, b.displayName, b.firstName, b.lastName, b.email || null, b.phone, b.employeeCode, b.branchCode, b.department, b.designation, b.reportingTo, b.status, b.mustChangePassword, req.user.username]);
       if (b.password) await savePassword(before.id, b.password, { db: c });
-      if (b.roles) await setRoles(c, before.id, b.roles);
+      if (b.roles) warnings = await setRoles(c, before.id, b.roles);
       // New roles take effect at once (the next request refreshes the token); a new password or a deactivation ends every session.
       if (b.password || deactivated) await revokeSessions(before.id, { refresh: true, db: c });
       else if (rolesChanged) await revokeSessions(before.id, { db: c });
     });
     const after = await loadUser('u.id = $1', [before.id]);
     await audit(req, { entity: 'user', entityId: before.id, action: 'update', before: publicUser(before), after: publicUser(after) });
-    ok(res, userRow(after), 'User updated');
+    ok(res, userRow(after), withWarnings('User updated', warnings));
   },
 });
 define({
