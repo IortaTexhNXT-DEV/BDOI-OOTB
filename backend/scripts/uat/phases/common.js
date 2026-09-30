@@ -94,7 +94,7 @@ export async function payPremium(ctx, { policy, amount, date, mode, captureBy = 
     return r.receipt;
   }
   const receipt = dataOf(await ctx.as.accounting1.post('/receipts', { ...(bill ? { receivableId: bill } : { policyId: policy.id }), amount, paymentMode, referenceNo: ref, receiptDate: on,
-    bankAccountCode: paymentMode === 'cash' ? undefined : 'UAT-BDO-OPS', remarks: `Premium payment ${policy.policyNumber}` }));
+    bankAccountCode: paymentMode === 'cash' ? undefined : 'BDO-OPS', remarks: `Premium payment ${policy.policyNumber}` }));
   ctx.log.count('Official receipts entered by accounting');
   return receipt;
 }

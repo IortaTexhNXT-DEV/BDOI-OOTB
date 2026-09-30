@@ -1,33 +1,15 @@
 /**
- * Run marker: an inactive client named UAT-MARKER whose extra data records the scenario runs. A completed marker makes
- * a second run skip the business steps, so the data is never loaded twice.
+ * Whether the data was loaded before. The records are entered the way staff would enter them, so nothing marks them as
+ * generated: a database that already holds policies entered by the persona users counts as loaded, and a second run then
+ * skips the business steps (the data is never loaded twice). Load it on a database without business records.
  */
-import { dataOf, listOf } from '../http.js';
-
-export const MARKER_NAME = 'UAT-MARKER';
+import { listOf } from '../http.js';
 
 export async function findMarker(ctx) {
-  const rows = listOf(await ctx.as.sysadmin.get('/clients', { search: MARKER_NAME, pageSize: 10 }));
-  const row = rows.find((c) => c.companyName === MARKER_NAME);
-  if (!row) return null;
-  ctx.markerId = row.clientId || row.id;
-  return row.uatRun || { state: 'unknown' };
+  const policies = listOf(await ctx.as.sysadmin.get('/policies', { page: 1, pageSize: 1 }));
+  return policies.length ? { state: 'complete', completedAt: 'an earlier run', seed: ctx.cfg.seed } : null;
 }
 
-export async function startMarker(ctx, existing) {
-  const run = { state: 'running', seed: ctx.cfg.seed, scale: ctx.cfg.scale, startedAt: new Date().toISOString(), months: ctx.months.map((m) => m.period) };
-  if (existing && ctx.markerId) {
-    await ctx.as.sysadmin.put(`/clients/${ctx.markerId}`, { uatRun: run });
-    return;
-  }
-  const c = dataOf(await ctx.as.sysadmin.post('/clients', { companyName: MARKER_NAME, leadCategory: 'Corporate', status: 'inactive', notes: 'Marker of the UAT data scenario (not a client)', uatRun: run }));
-  ctx.markerId = c.clientId || c.id;
-}
+export async function startMarker() {}
 
-export async function finishMarker(ctx) {
-  const counts = Object.fromEntries(ctx.log.counts);
-  await ctx.as.sysadmin.put(`/clients/${ctx.markerId}`, {
-    status: 'inactive',
-    uatRun: { state: 'complete', seed: ctx.cfg.seed, scale: ctx.cfg.scale, completedAt: new Date().toISOString(), failedSteps: ctx.log.failures.length, counts },
-  });
-}
+export async function finishMarker() {}

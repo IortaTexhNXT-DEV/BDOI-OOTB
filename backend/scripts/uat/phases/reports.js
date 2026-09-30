@@ -9,7 +9,7 @@ import { dataOf, listOf } from '../http.js';
 function paramsFor(ctx, def, criterion) {
   const p = { FromDate: ctx.months[0].start, ToDate: ctx.today, ReportCriteria: criterion, perPage: 500 };
   const props = def.parameters?.properties || {};
-  if (props.BankAccount) p.BankAccount = 'UAT-BDO-OPS';
+  if (props.BankAccount) p.BankAccount = 'BDO-OPS';
   return p;
 }
 

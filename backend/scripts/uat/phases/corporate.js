@@ -7,7 +7,7 @@ import { dataOf } from '../http.js';
 import { addDays, addMonths, minDate } from '../dates.js';
 import { company, COMPANIES, createLead, customerAnswer, businessDay, insurerCodeOf } from './common.js';
 
-const MARKET = ['UAT-PCIC', 'UAT-LUZ', 'UAT-VIS', 'UAT-MIN', 'UAT-ARC', 'UAT-TALA', 'UAT-HAR'];
+const MARKET = ['PCIC', 'LUZ', 'VIS', 'MIN', 'ARC', 'TALA', 'HAR'];
 
 /** Risk of each non-package product: covers, sum insured and the premium the market quotes. */
 const RISKS = {
@@ -201,10 +201,10 @@ async function recordIssued(ctx) {
   const r = await as.processing1.post('/placements/record-issued-policy', {
     clientId: client.clientId, productId: ctx.products.BOND.id, productType: 'Surety Bond', policyNumber: number, issuedDate: issueDate, inceptionDate: issueDate, expiryDate: addMonths(issueDate, 12),
     sumInsured: 15000000, netPremium: 67500, riskDetails: { obligee: 'Department of Public Works and Highways', contract: 'Road widening, package 3' },
-    participants: [{ insuranceCompanyId: ctx.insurers['UAT-TALA'].id, sharePercent: 100, isLead: true, insurerReference: number }],
+    participants: [{ insuranceCompanyId: ctx.insurers['TALA'].id, sharePercent: 100, isLead: true, insurerReference: number }],
   });
   const pol = r.data?.policy || r.policy;
-  ctx.policies.push({ id: pol.id || pol.policyId, policyNumber: pol.policyNumber, clientId: pol.clientId, leadId: client.leadId, segment: 'corporate', product: 'BOND', lob: pol.lob, insurerCode: 'UAT-TALA',
+  ctx.policies.push({ id: pol.id || pol.policyId, policyNumber: pol.policyNumber, clientId: pol.clientId, leadId: client.leadId, segment: 'corporate', product: 'BOND', lob: pol.lob, insurerCode: 'TALA',
     gross: Number(pol.grossPremium), net: Number(pol.netPremium), issueDate, inception: pol.inception, expiry: pol.expiry, billing: pol.billingMode || 'broker', sales: 'sales1', month: month.period });
   ctx.log.count('Policies recorded as already issued (direct policy entry)');
 }

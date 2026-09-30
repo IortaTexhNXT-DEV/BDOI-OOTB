@@ -16,7 +16,7 @@ async function reinsurance(ctx) {
     log.count('Reinsurers');
   }
   const year = ctx.today.slice(0, 4);
-  const number = `UAT-QS-PROP-${year}`;
+  const number = `QS-PROP-${year}`;
   let treaty = listOf(await p1.get('/reinsurance/treaties')).find((t) => t.treatyNumber === number);
   if (!treaty) {
     treaty = dataOf(await p1.post('/reinsurance/treaties', { treatyNumber: number, name: `Property Quota Share ${year}`, type: 'Quota Share', lineOfBusiness: 'Fire', reinsurers: [re.id || re.reinsurerId],
@@ -38,7 +38,7 @@ async function reinsurance(ctx) {
 
 async function incentives(ctx) {
   const { as, log } = ctx;
-  const code = 'UAT-INC-NB';
+  const code = 'INC-NB';
   const programs = listOf(await as.sysadmin.get('/incentive/programs'));
   if (!programs.some((p) => p.programCode === code)) {
     await as.sysadmin.post('/incentive/programs', { programCode: code, programName: 'New Business Premium (Account Executives)', programType: 'Target Based', applicableTo: ['Individual Agent'],

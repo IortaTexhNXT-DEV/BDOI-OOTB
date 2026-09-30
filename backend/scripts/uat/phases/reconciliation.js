@@ -64,7 +64,7 @@ const bdoCsv = (lines) => Buffer.from(['Posting Date,Description,Debit,Credit,Ru
 
 async function bankMonth(ctx, month, state) {
   const acc = ctx.as.accounting1;
-  const code = 'UAT-BDO-OPS';
+  const code = 'BDO-OPS';
   const ws = dataOf(await acc.get('/bank-reconciliation/workspace', { bankAccount: code, period: month.period }));
   const carriedIds = new Set(state.carried.map((c) => c.id));
   const book = ws.bookLines.filter((b) => !b.matchId && b.date >= month.start && b.date <= month.end && !carriedIds.has(b.id));
@@ -103,7 +103,7 @@ async function bankMonth(ctx, month, state) {
 
 async function currentMonthStatement(ctx, month, state) {
   const acc = ctx.as.accounting1;
-  const code = 'UAT-BDO-OPS';
+  const code = 'BDO-OPS';
   const cutOff = addDays(ctx.today, -3);
   const ws = dataOf(await acc.get('/bank-reconciliation/workspace', { bankAccount: code, period: month.period }));
   const carriedIds = new Set(state.carried.map((c) => c.id));
@@ -146,10 +146,10 @@ async function insurerStatement(ctx, code, format, remitted) {
   const periodFrom = remitted.map((r) => r.date).sort()[0];
   const periodTo = remitted.map((r) => r.date).sort().at(-1);
   let csv;
-  if (format === 'UAT-PCIC-SOA') {
+  if (format === 'PCIC-SOA') {
     csv = ['Policy Number,Assured,Date Remitted,OR Number,Gross Premium,Commission,Premium Taxes,Amount Received',
       ...listed.map((l) => [l.policyNo, l.insured, mdY(l.date), l.reference, money(l.gross), money(l.commission), money(l.taxes || 0), money(l.paid)].map(cell).join(',')), 'TOTAL,,,,,,,'];
-  } else if (format === 'UAT-LUZ-SOA') {
+  } else if (format === 'LUZ-SOA') {
     csv = ['Pol No,Insured Name,Payment Date,Reference,Premium,Brokerage,Net Remitted',
       ...listed.map((l) => [l.policyNo, l.insured, dmY(l.date), l.reference, money(l.gross), money(l.commission), money(l.paid)].map(cell).join(','))];
   } else {
@@ -202,7 +202,7 @@ export async function reconciliation(ctx) {
   // insurer statements for the insurers with the most remittances
   const byInsurer = new Map();
   for (const r of ctx.remitted || []) byInsurer.set(r.insurerCode, [...(byInsurer.get(r.insurerCode) || []), r]);
-  const picks = [['UAT-PCIC', 'UAT-PCIC-SOA'], ['UAT-LUZ', 'UAT-LUZ-SOA'], [[...byInsurer.keys()].find((k) => !['UAT-PCIC', 'UAT-LUZ'].includes(k)), 'GENERIC']];
+  const picks = [['PCIC', 'PCIC-SOA'], ['LUZ', 'LUZ-SOA'], [[...byInsurer.keys()].find((k) => !['PCIC', 'LUZ'].includes(k)), 'GENERIC']];
   for (const [code, format] of picks) {
     if (!code || !byInsurer.get(code)?.length) { log.note(`No remittance to ${code || 'a third insurer'}: its statement of account was not reconciled`); continue; }
     await log.step(`Insurer statement of account ${code} (${format})`, () => insurerStatement(ctx, code, format, byInsurer.get(code)));

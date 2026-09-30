@@ -25,7 +25,7 @@ export async function goLive(ctx) {
     const si = fire ? rnd.amount(2000000, 8000000, 100000) : rnd.amount(v.value[0], v.value[1], 10000);
     const net = Math.round(si * (fire ? 0.0022 : 0.0165));
     const gross = Math.round(net * (fire ? 1.2725 : 1.2525) * 100) / 100 + (fire ? 0 : 610.4);
-    const insurer = ctx.insurers[rnd.pick(['UAT-PCIC', 'UAT-LUZ', 'UAT-VIS', 'UAT-MIN'])];
+    const insurer = ctx.insurers[rnd.pick(['PCIC', 'LUZ', 'VIS', 'MIN'])];
     rows.push({ 'Policy Number': `OLD-${fire ? 'FI' : 'MC'}-${inception.slice(0, 4)}-${rnd.digits(5)}`, 'Insured Name': `${p.firstName} ${p.lastName}`, 'First Name': p.firstName,
       'Last Name': p.lastName, Email: p.emailId, 'Contact Number': p.contactNumber, 'Product Type': fire ? 'Fire' : 'Motor', 'Insurance Company': insurer.name,
       'Inception Date': inception, 'Expiry Date': expiry, 'Issue Date': addDays(inception, -rnd.int(3, 10)), 'Sum Insured': si, 'Net Premium': net, 'Gross Premium': gross,

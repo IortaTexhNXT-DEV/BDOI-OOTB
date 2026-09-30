@@ -234,9 +234,9 @@ async function claims(ctx) {
         // the insurer pays the broker, the broker pays the insured by cheque
         const pos = dataOf(await c1.get(`/claims/${id}/settlement-cash`));
         for (const ins of pos.insurers) {
-          await as.accounting1.post(`/claims/${id}/settlement-cash/funds-received`, { insurerId: ins.insurerId, amount: ins.recoverable, bankAccount: 'UAT-BDO-OPS', date: settleOn, reference: `RA-${rnd.digits(6)}` });
+          await as.accounting1.post(`/claims/${id}/settlement-cash/funds-received`, { insurerId: ins.insurerId, amount: ins.recoverable, bankAccount: 'BDO-OPS', date: settleOn, reference: `RA-${rnd.digits(6)}` });
         }
-        await as.accounting1.post(`/claims/${id}/settlement-cash/paid-to-claimant`, { amount: x.settle, bankAccount: 'UAT-BDO-OPS', paymentMode: 'check', reference: `CHK ${rnd.digits(7)}`,
+        await as.accounting1.post(`/claims/${id}/settlement-cash/paid-to-claimant`, { amount: x.settle, bankAccount: 'BDO-OPS', paymentMode: 'check', reference: `CHK ${rnd.digits(7)}`,
           payee: pol.insuredName, date: minDate(addDays(settleOn, 3), ctx.today) });
         log.count('Claim settlements paid through the broker');
       }

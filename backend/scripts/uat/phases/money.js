@@ -36,7 +36,7 @@ async function remitToInsurer(ctx, insurerCode, rows, remitDate, { payNow = true
   const available = listOf(await acc.get('/remittance/settlements/available-policies', { insurerCode, perPage: 500 })).filter((l) => l.remittanceId === rem.id);
   const settlement = dataOf(await acc.post('/remittance/settlements', { insurerCode, settlementPeriod: [`${period}-01`, monthEnd(`${period}-01`)], lineIds: available.map((l) => l.id),
     remarks: `Settlement of remittance ${rem.remittanceNumber || rem.code || rem.id}` }));
-  await acc.post(`/remittance/settlements/${settlement.id}/submit`, { paymentMethod: 'check', bankAccount: 'UAT-BDO-OPS' });
+  await acc.post(`/remittance/settlements/${settlement.id}/submit`, { paymentMethod: 'check', bankAccount: 'BDO-OPS' });
   await approveItem(ctx, settlement.id, 'Settlement checked; release the cheque');
   const s = dataOf(await acc.get(`/remittance/settlements/${settlement.id}`));
   const pvId = s.disbursementId || s.data?.disbursementId;
@@ -118,11 +118,11 @@ async function commission(ctx) {
 async function pettyCash(ctx) {
   const { as, log } = ctx;
   const acc = as.accounting1;
-  const code = 'UAT-PCF-MKT';
+  const code = 'PCF-MKT';
   const existing = listOf(await acc.get('/petty-cash/funds', { search: code })).find((f) => (f.pettyCashCode || f.code) === code);
   const first = ctx.months[0].start;
   if (!existing) {
-    await acc.post('/petty-cash/funds', { code, description: 'Makati head office petty cash', fundSize: 20000, maxLimit: 5000, minimumCashbox: 3000, bankAccountCode: 'UAT-BDO-OPS',
+    await acc.post('/petty-cash/funds', { code, description: 'Makati head office petty cash', fundSize: 20000, maxLimit: 5000, minimumCashbox: 3000, bankAccountCode: 'BDO-OPS',
       branchCode: 'HO', departmentCode: 'FI', transactionDate: addDays(first, 2) });
     log.count('Petty cash funds');
   }

@@ -54,24 +54,24 @@ export const COMPANIES = [
 
 /** Fictional Philippine non-life insurers (the reference seed's insurers are left as they are and not used). */
 export const INSURERS = [
-  { code: 'UAT-PCIC', name: 'Pacific Crest Insurance Corp.', short: 'Pacific Crest', city: 'Makati', rate: 0.175, warrantyDays: 60, remitDays: 30, ewt: true },
-  { code: 'UAT-LUZ', name: 'Luzon Bay Assurance Inc.', short: 'Luzon Bay', city: 'Pasig', rate: 0.15, warrantyDays: 45, remitDays: 30, ewt: true },
-  { code: 'UAT-VIS', name: 'Visayas Mutual General Insurance Co.', short: 'Visayas Mutual', city: 'Cebu City', rate: 0.16, warrantyDays: 60, remitDays: 45, ewt: true },
-  { code: 'UAT-MIN', name: 'Mindanao Shield Insurance Corp.', short: 'Mindanao Shield', city: 'Davao City', rate: 0.15, warrantyDays: 30, remitDays: 30, ewt: true },
-  { code: 'UAT-ARC', name: 'Archipelago General Insurance Co., Inc.', short: 'Archipelago General', city: 'Makati', rate: 0.18, warrantyDays: 90, remitDays: 60, ewt: true },
-  { code: 'UAT-TALA', name: 'Tala Guaranty and Surety Insurance Corp.', short: 'Tala Guaranty', city: 'Quezon City', rate: 0.14, warrantyDays: 45, remitDays: 30, ewt: true },
-  { code: 'UAT-HAR', name: 'Harbor Point Non-Life Insurance Inc.', short: 'Harbor Point', city: 'Manila', rate: 0.15, warrantyDays: 60, remitDays: 30, ewt: true },
+  { code: 'PCIC', name: 'Pacific Crest Insurance Corp.', short: 'Pacific Crest', city: 'Makati', rate: 0.175, warrantyDays: 60, remitDays: 30, ewt: true },
+  { code: 'LUZ', name: 'Luzon Bay Assurance Inc.', short: 'Luzon Bay', city: 'Pasig', rate: 0.15, warrantyDays: 45, remitDays: 30, ewt: true },
+  { code: 'VIS', name: 'Visayas Mutual General Insurance Co.', short: 'Visayas Mutual', city: 'Cebu City', rate: 0.16, warrantyDays: 60, remitDays: 45, ewt: true },
+  { code: 'MIN', name: 'Mindanao Shield Insurance Corp.', short: 'Mindanao Shield', city: 'Davao City', rate: 0.15, warrantyDays: 30, remitDays: 30, ewt: true },
+  { code: 'ARC', name: 'Archipelago General Insurance Co., Inc.', short: 'Archipelago General', city: 'Makati', rate: 0.18, warrantyDays: 90, remitDays: 60, ewt: true },
+  { code: 'TALA', name: 'Tala Guaranty and Surety Insurance Corp.', short: 'Tala Guaranty', city: 'Quezon City', rate: 0.14, warrantyDays: 45, remitDays: 30, ewt: true },
+  { code: 'HAR', name: 'Harbor Point Non-Life Insurance Inc.', short: 'Harbor Point', city: 'Manila', rate: 0.15, warrantyDays: 60, remitDays: 30, ewt: true },
 ];
 
 /** Commission rates per insurer code and product code (fractions); missing pairs use the insurer's rate. */
 export const COMMISSION_OVERRIDES = [
-  ['UAT-PCIC', 'MOTOR', 0.20], ['UAT-PCIC', 'CTPL', 0.10], ['UAT-PCIC', 'FIRE', 0.225], ['UAT-PCIC', 'IAR', 0.20],
-  ['UAT-LUZ', 'MOTOR', 0.175], ['UAT-LUZ', 'PA', 0.25], ['UAT-LUZ', 'TRAVEL', 0.30], ['UAT-LUZ', 'MARINE', 0.20],
-  ['UAT-VIS', 'FIRE', 0.20], ['UAT-VIS', 'HOME', 0.25], ['UAT-VIS', 'CAR', 0.15], ['UAT-VIS', 'EAR', 0.15],
-  ['UAT-MIN', 'IAR', 0.175], ['UAT-MIN', 'MONEY', 0.20], ['UAT-MIN', 'CGL', 0.20],
-  ['UAT-ARC', 'EB', 0.10], ['UAT-ARC', 'MARINE', 0.225], ['UAT-ARC', 'FIRE', 0.20],
-  ['UAT-TALA', 'CGL', 0.175], ['UAT-TALA', 'MONEY', 0.20], ['UAT-TALA', 'MOTOR', 0.15],
-  ['UAT-HAR', 'MARINE', 0.25], ['UAT-HAR', 'CAR', 0.175], ['UAT-HAR', 'PA', 0.25],
+  ['PCIC', 'MOTOR', 0.20], ['PCIC', 'CTPL', 0.10], ['PCIC', 'FIRE', 0.225], ['PCIC', 'IAR', 0.20],
+  ['LUZ', 'MOTOR', 0.175], ['LUZ', 'PA', 0.25], ['LUZ', 'TRAVEL', 0.30], ['LUZ', 'MARINE', 0.20],
+  ['VIS', 'FIRE', 0.20], ['VIS', 'HOME', 0.25], ['VIS', 'CAR', 0.15], ['VIS', 'EAR', 0.15],
+  ['MIN', 'IAR', 0.175], ['MIN', 'MONEY', 0.20], ['MIN', 'CGL', 0.20],
+  ['ARC', 'EB', 0.10], ['ARC', 'MARINE', 0.225], ['ARC', 'FIRE', 0.20],
+  ['TALA', 'CGL', 0.175], ['TALA', 'MONEY', 0.20], ['TALA', 'MOTOR', 0.15],
+  ['HAR', 'MARINE', 0.25], ['HAR', 'CAR', 0.175], ['HAR', 'PA', 0.25],
 ];
 
 /** Vehicles for motor quotations: brand, model, class of the motor tariff, typical market value range. */
@@ -97,6 +97,6 @@ export const DESTINATIONS = ['Japan', 'South Korea', 'Singapore', 'Hong Kong', '
 
 /** Bank accounts of the broker (bank account master), with the GL cash account each is linked to. */
 export const BANK_ACCOUNTS = [
-  { code: 'UAT-BDO-OPS', name: 'Operating Account', bankCode: 'BDO', bankName: 'Banco de Oro', accountNumber: '0071-2345-6789', accountType: 'Current Account' },
-  { code: 'UAT-MBT-COL', name: 'Premium Collection Account', bankCode: 'MBT', bankName: 'Metrobank', accountNumber: '152-7-15298765-4', accountType: 'Current Account' },
+  { code: 'BDO-OPS', name: 'Operating Account', bankCode: 'BDO', bankName: 'Banco de Oro', accountNumber: '0071-2345-6789', accountType: 'Current Account' },
+  { code: 'MBT-COL', name: 'Premium Collection Account', bankCode: 'MBT', bankName: 'Metrobank', accountNumber: '152-7-15298765-4', accountType: 'Current Account' },
 ];

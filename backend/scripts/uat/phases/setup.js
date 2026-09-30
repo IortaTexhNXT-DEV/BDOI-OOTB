@@ -7,31 +7,37 @@ import { Session, ApiError, dataOf, listOf } from '../http.js';
 import { INSURERS, COMMISSION_OVERRIDES, BANK_ACCOUNTS } from '../data.js';
 import { todayIn, timeline, monthStart, addMonths } from '../dates.js';
 
+/** Job titles shown on the user records, by role. */
+const DESIGNATIONS = {
+  'system-admin': 'System Administrator', sales: 'Account Executive', processing: 'Placement Officer', operations: 'Client Service Officer',
+  claims: 'Claims Officer', accounting: 'Accounting Officer', 'accounting-manager': 'Accounting Manager',
+};
+
 /** Persona users: key, username, name, roles. The key is how the phases refer to them. */
 export const PERSONAS = [
-  ['sysadmin', 'uat.bea.admin', 'Beatriz Lacson', ['system-admin']],
-  ['sales1', 'uat.maria.sales', 'Maria Consuelo Rivera', ['sales']],
-  ['sales2', 'uat.paolo.sales', 'Paolo Enrique Dizon', ['sales']],
-  ['processing1', 'uat.jose.processing', 'Jose Antonio Bernardo', ['processing']],
-  ['processing2', 'uat.rica.processing', 'Rica Mae Fernandez', ['processing']],
-  ['operations', 'uat.ana.operations', 'Ana Lorraine Buenaventura', ['operations']],
-  ['claims1', 'uat.carlo.claims', 'Carlo Miguel Estrada', ['claims']],
-  ['claims2', 'uat.joy.claims', 'Joy Anne Macaraeg', ['claims']],
-  ['accounting1', 'uat.liza.accounting', 'Liza Marie Quiambao', ['accounting']],
-  ['accounting2', 'uat.nestor.accounting', 'Nestor Pangilinan', ['accounting']],
-  ['manager1', 'uat.teresa.manager', 'Teresa Villaroman', ['accounting-manager']],
-  ['manager2', 'uat.ramon.manager', 'Ramon Almario', ['accounting-manager']],
+  ['sysadmin', 'beatriz.lacson', 'Beatriz Lacson', ['system-admin']],
+  ['sales1', 'maria.rivera', 'Maria Consuelo Rivera', ['sales']],
+  ['sales2', 'paolo.dizon', 'Paolo Enrique Dizon', ['sales']],
+  ['processing1', 'jose.bernardo', 'Jose Antonio Bernardo', ['processing']],
+  ['processing2', 'rica.fernandez', 'Rica Mae Fernandez', ['processing']],
+  ['operations', 'ana.buenaventura', 'Ana Lorraine Buenaventura', ['operations']],
+  ['claims1', 'carlo.estrada', 'Carlo Miguel Estrada', ['claims']],
+  ['claims2', 'joy.macaraeg', 'Joy Anne Macaraeg', ['claims']],
+  ['accounting1', 'liza.quiambao', 'Liza Marie Quiambao', ['accounting']],
+  ['accounting2', 'nestor.pangilinan', 'Nestor Pangilinan', ['accounting']],
+  ['manager1', 'teresa.villaroman', 'Teresa Villaroman', ['accounting-manager']],
+  ['manager2', 'ramon.almario', 'Ramon Almario', ['accounting-manager']],
 ];
 
 async function ensurePersona(ctx, [key, username, name, roles]) {
   const { admin, api, cfg, log } = ctx;
   const [first, ...rest] = name.split(' ');
-  const email = `${username.replace(/^uat\./, '')}@uat-broker.example.ph`;
+  const email = `${username}@example.ph`;
   const found = listOf(await admin.get('/users', { search: username, perPage: 5 })).find((u) => u.username === username);
   const session = new Session(api, username, name);
   if (!found) {
     // Without a password the administrator gets a temporary one; the persona changes it at the first sign-in.
-    const created = dataOf(await admin.post('/users', { username, displayName: name, firstName: first, lastName: rest.join(' '), email, roles, branchCode: 'HO', designation: roles[0] }));
+    const created = dataOf(await admin.post('/users', { username, displayName: name, firstName: first, lastName: rest.join(' '), email, roles, branchCode: 'HO', designation: DESIGNATIONS[roles[0]] || roles[0] }));
     log.hide(created.temporaryPassword);
     await session.login(created.temporaryPassword, { newPassword: cfg.personaPassword });
     log.count('Persona users created');
@@ -65,7 +71,7 @@ async function ensureInsurers(ctx) {
     if (!row) {
       const place = { Makati: 'Ayala Ave.', Pasig: 'Ortigas Center', 'Cebu City': 'Cebu Business Park', 'Davao City': 'J.P. Laurel Ave.', 'Quezon City': 'Eastwood City', Manila: 'Port Area' };
       row = dataOf(await s.post('/masters/insurance-company', {
-        insuranceCompanyCode: ins.code, insuranceCompanyName: ins.name, shortName: ins.short, insuranceCompanyDescription: 'Non-life insurer (UAT scenario, fictional)',
+        insuranceCompanyCode: ins.code, insuranceCompanyName: ins.name, shortName: ins.short, insuranceCompanyDescription: 'Non-life insurer',
         tin: `${rnd.digits(3)}-${rnd.digits(3)}-${rnd.digits(3)}-000`, addressLine1: `${rnd.int(10, 40)}/F ${ins.short} Tower, ${place[ins.city] || 'Central Business District'}`,
         city: ins.city, state: ins.city === 'Cebu City' ? 'Cebu' : ins.city === 'Davao City' ? 'Davao del Sur' : 'Metro Manila', country: 'Philippines',
         email: `underwriting@${ins.short.toLowerCase().replace(/[^a-z]/g, '')}.example.ph`, phoneNumber: `(02) 8${rnd.digits(3)}-${rnd.digits(4)}`,
@@ -96,26 +102,26 @@ async function ensureCommissionRates(ctx) {
     if (!ins || !prod) continue;
     if (existing.some((r) => r.insuranceCompanyId === ins.id && r.productId === prod.id)) continue;
     await ctx.log.step(`Commission rate ${code} / ${product} ${(rate * 100).toFixed(1)}%`, async () => {
-      await s.post('/commission-rates', { insuranceCompanyId: ins.id, productId: prod.id, policyType: 'new', rate, effectiveFrom: start, remarks: 'Agreed brokerage (UAT)' });
+      await s.post('/commission-rates', { insuranceCompanyId: ins.id, productId: prod.id, policyType: 'new', rate, effectiveFrom: start, remarks: 'Agreed brokerage per the broker agreement' });
       ctx.log.count('Commission rate rows');
     });
   }
   // renewals earn a lower rate with one insurer, so the matrix has a renewal row too
-  const pcic = ctx.insurers['UAT-PCIC'];
+  const pcic = ctx.insurers['PCIC'];
   const motor = ctx.products.MOTOR;
   if (pcic && motor && !existing.some((r) => r.insuranceCompanyId === pcic.id && r.productId === motor.id && r.policyType === 'renewal')) {
-    await ctx.log.step('Commission rate UAT-PCIC / MOTOR renewal', async () => {
-      await s.post('/commission-rates', { insuranceCompanyId: pcic.id, productId: motor.id, policyType: 'renewal', rate: 0.175, effectiveFrom: start, remarks: 'Renewal brokerage (UAT)' });
+    await ctx.log.step('Commission rate PCIC / MOTOR renewal', async () => {
+      await s.post('/commission-rates', { insuranceCompanyId: pcic.id, productId: motor.id, policyType: 'renewal', rate: 0.175, effectiveFrom: start, remarks: 'Renewal brokerage per the broker agreement' });
       ctx.log.count('Commission rate rows');
     });
   }
   const check = dataOf(await s.get('/commission-rates/resolve', { insurerId: pcic.id, productId: motor.id, policyType: 'new' }));
-  if (Math.abs(Number(check.rate) - 0.2) > 0.0001) throw new Error(`Commission rate resolution returned ${check.rate} for UAT-PCIC motor (expected 0.20)`);
+  if (Math.abs(Number(check.rate) - 0.2) > 0.0001) throw new Error(`Commission rate resolution returned ${check.rate} for PCIC motor (expected 0.20)`);
 }
 
 async function ensureBankAccounts(ctx) {
   const s = ctx.as.sysadmin;
-  const gl = { 'UAT-BDO-OPS': '1102001', 'UAT-MBT-COL': '1102003' };
+  const gl = { 'BDO-OPS': '1102001', 'MBT-COL': '1102003' };
   const reconcileFrom = ctx.months[0].start;
   for (const b of BANK_ACCOUNTS) {
     let row = await masterByCode(s, 'bank-account', 'accountCode', b.code);
@@ -137,8 +143,8 @@ async function ensureInsurerFormats(ctx) {
   const s = ctx.as.accounting1;
   const formats = listOf(await s.get('/insurer-reconciliation/formats'));
   const wanted = [
-    { code: 'UAT-PCIC-SOA', insurer: 'UAT-PCIC', name: 'Pacific Crest statement of account', columns: { policyNo: 'policy number', insured: 'assured', date: 'date remitted', reference: 'or number', grossPremium: 'gross premium', commission: 'commission', taxes: 'premium taxes', amountPaid: 'amount received' }, dateFormat: 'MM/DD/YYYY' },
-    { code: 'UAT-LUZ-SOA', insurer: 'UAT-LUZ', name: 'Luzon Bay remittance confirmation', columns: { policyNo: 'pol no', insured: 'insured name', date: 'payment date', reference: 'reference', grossPremium: 'premium', commission: 'brokerage', amountPaid: 'net remitted' }, dateFormat: 'DD/MM/YYYY' },
+    { code: 'PCIC-SOA', insurer: 'PCIC', name: 'Pacific Crest statement of account', columns: { policyNo: 'policy number', insured: 'assured', date: 'date remitted', reference: 'or number', grossPremium: 'gross premium', commission: 'commission', taxes: 'premium taxes', amountPaid: 'amount received' }, dateFormat: 'MM/DD/YYYY' },
+    { code: 'LUZ-SOA', insurer: 'LUZ', name: 'Luzon Bay remittance confirmation', columns: { policyNo: 'pol no', insured: 'insured name', date: 'payment date', reference: 'reference', grossPremium: 'premium', commission: 'brokerage', amountPaid: 'net remitted' }, dateFormat: 'DD/MM/YYYY' },
   ];
   for (const f of wanted) {
     if (formats.some((x) => x.code === f.code)) continue;

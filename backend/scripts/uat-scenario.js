@@ -15,8 +15,8 @@
  *   UAT_MONTHS        months of history (default 6, the current month included)
  *   UAT_REPORT        run log file (default docs/e2e/UAT_SCENARIO_RUN.md of the repository; "none" to skip)
  *
- * Idempotent: an inactive client named UAT-MARKER records a completed run; a second run finds it and only checks the
- * reports and dashboards (masters and personas are looked up before they are created). Exit code 1 when a step failed.
+ * Load it once, on a database without business records: when policies already exist the business steps are skipped
+ * and only the reports and dashboards are checked (masters and personas are looked up before they are created). Exit code 1 when a step failed.
  */
 import fs from 'node:fs';
 import { loadConfig } from './uat/config.js';

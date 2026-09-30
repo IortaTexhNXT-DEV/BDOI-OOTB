@@ -9,7 +9,7 @@ import { VEHICLES, MOTORCYCLES, COLOURS, DESTINATIONS } from '../data.js';
 import { addDays, addMonths, minDate } from '../dates.js';
 import { person, createLead, customerAnswer, uploadFile, businessDay, insurerCodeOf } from './common.js';
 
-const MOTOR_INSURERS = ['UAT-PCIC', 'UAT-LUZ', 'UAT-VIS', 'UAT-MIN', 'UAT-ARC', 'UAT-HAR'];
+const MOTOR_INSURERS = ['PCIC', 'LUZ', 'VIS', 'MIN', 'ARC', 'HAR'];
 
 /** The retail book: product per prospect and what happens to the quotation. */
 function retailPlan(ctx) {
@@ -101,7 +101,7 @@ async function rfqSale(ctx, item, lead, prospect) {
   const spec = RFQ[item.product](rnd);
   const inception = item.product === 'TRAVEL' ? addDays(issueDate, rnd.int(3, 20)) : addDays(issueDate, rnd.int(0, 5));
   const expiry = item.product === 'TRAVEL' ? addDays(inception, spec.term) : addMonths(inception, 12);
-  const market = rnd.sample(['UAT-PCIC', 'UAT-LUZ', 'UAT-VIS', 'UAT-HAR', 'UAT-ARC'], 2);
+  const market = rnd.sample(['PCIC', 'LUZ', 'VIS', 'HAR', 'ARC'], 2);
   const product = ctx.products[item.product];
   const slip = await sales.post('/broker-slips', { leadRefId: lead.id, productId: product.id, productType: spec.productType, riskDetails: spec.riskDetails,
     requestedCovers: spec.requestedCovers, sumInsured: spec.sumInsured, insurers: market, inceptionDate: inception, expiryDate: expiry,
