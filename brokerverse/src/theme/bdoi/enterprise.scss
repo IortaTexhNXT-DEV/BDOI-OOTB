@@ -464,6 +464,38 @@ $text-strong: #1f2937;
   to { background-position: 150% 0; }
 }
 
+// ---------------------------------------------------------------- stable layout while data loads
+
+// A paginated list keeps the height of a few rows while it is empty or loading, so the rows arriving do not push the
+// paginator and everything under it down the page.
+.main__content .p-datatable:has(> .p-paginator-bottom) > .p-datatable-wrapper {
+  min-height: 24rem;
+}
+
+// Space held for a status banner that appears once its data has loaded (the height of a one-line Message).
+.bv-banner-placeholder {
+  min-height: 3.1rem;
+  margin-bottom: 1rem;
+}
+
+// A row of status tags shown once the data has loaded keeps its line from the start.
+.bv-tag-row {
+  min-height: 1.75rem;
+}
+
+// Dashboard charts and tiles hold their size before their figures arrive.
+.main__content {
+  .chart-card,
+  .revenue-card {
+    min-height: 20rem;
+  }
+
+  .kpi-value {
+    display: inline-block;
+    min-height: 2.5rem;
+  }
+}
+
 // ---------------------------------------------------------------- print (vouchers, receipts, reports)
 
 @media print {

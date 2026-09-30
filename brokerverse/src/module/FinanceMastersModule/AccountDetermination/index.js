@@ -133,11 +133,12 @@ const AccountDetermination = ({ section = "premium" }) => {
       <BreadCrumb home={{ label: t("postingRules.master") }} className="posting-rules__crumbs" separatorIcon={<SvgDot color={"#000"} />}
         model={[{ label: t("postingRules.finance") }, { label: t("postingRules.accountDetermination"), url: "/master/finance/account-determination" }]} />
       <p className="posting-rules__intro">{t("postingRules.accountDeterminationIntro")}</p>
-      {data && (
-        <div className="mb-2">
+      {/* the row is there before the data arrives, so the tabs below do not move */}
+      <div className="mb-2 bv-tag-row">
+        {data && (
           <Tag value={data.splitPremiumTaxes ? t("postingRules.taxesSplit") : t("postingRules.taxesNotSplit")} severity={data.splitPremiumTaxes ? "success" : "secondary"} icon="pi pi-percentage" />
-        </div>
-      )}
+        )}
+      </div>
       {data?.pendingChanges?.length > 0 && (
         <div className="p-message p-message-warn p-3 mb-2">
           <div className="font-semibold mb-1">{t("postingRules.pendingChanges")}</div>

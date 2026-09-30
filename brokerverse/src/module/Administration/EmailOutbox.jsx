@@ -70,7 +70,8 @@ const EmailOutbox = () => {
   };
 
   const banner = () => {
-    if (!sending) return null;
+    // same height as the banner until the sending status arrives, so the list below does not jump
+    if (!sending) return <div className="bv-banner-placeholder" aria-hidden="true" />;
     if (sending.active) return <Message severity="success" className="w-full mb-3" text={t("emailOutbox.bannerActive")} />;
     const reasons = [
       !sending.smtpConfigured && t("emailOutbox.reasonSmtp"),

@@ -226,8 +226,14 @@ const LeadListingAllTable = () => {
   };
   const [search, setSearch] = useState("");
   const debounceTimerRef = useRef(null);
+  // the list is loaded once on open (effect above); the search runs only when the search text changes
+  const searchReadyRef = useRef(false);
 
   useEffect(() => {
+    if (!searchReadyRef.current) {
+      searchReadyRef.current = true;
+      return undefined;
+    }
     // Clear previous timer if it exists
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
