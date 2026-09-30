@@ -123,14 +123,13 @@ const Configuration = () => {
     return (
       <div key={r.key} className={`cfg__row${dirty ? " is-changed" : ""}${wide ? " is-wide" : ""}`}>
         <div className="cfg__row-text">
-          <label htmlFor={r.key} className="cfg__label">{r.label}</label>
+          <label htmlFor={r.key} className="cfg__label" title={`Reference: ${r.key}`}>{r.label}</label>
           <div className="cfg__meta">
             {showGroup ? <span>{groupTitle(r.group)}</span> : null}
             {r.view.managed ? <span>Changed on <Link to={r.view.managed.path}>{r.view.managed.label}</Link></span> : null}
             {r.editable === false ? <span>Read only</span> : null}
             {r.updatedBy && !String(r.updatedBy).match(/^(seed|system)$/i) ? <span>Last changed by {r.updatedBy} on {when(r.updatedAt)}</span> : null}
             {dirty ? <Tag value="Not saved" severity="warning" className="cfg__dirty" /> : null}
-            <span className="cfg__key" title="Setting key, for support">{r.key}</span>
           </div>
         </div>
         <div className="cfg__row-editor">{editorFor(r)}</div>

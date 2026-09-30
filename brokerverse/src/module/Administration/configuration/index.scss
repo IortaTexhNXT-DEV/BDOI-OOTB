@@ -221,10 +221,6 @@
       box-shadow: inset 3px 0 0 #f59e0b;
     }
 
-    &:hover .cfg__key {
-      opacity: 1;
-    }
-
     @media (max-width: 720px) {
       grid-template-columns: 1fr;
     }
@@ -250,15 +246,6 @@
 
   .cfg__dirty {
     font-size: 0.6875rem;
-  }
-
-  // the technical key is there for support staff, faint until the row is hovered
-  .cfg__key {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 0.6875rem;
-    color: #94a3b8;
-    opacity: 0;
-    transition: opacity 0.15s ease;
   }
 
   .cfg__row-editor {
