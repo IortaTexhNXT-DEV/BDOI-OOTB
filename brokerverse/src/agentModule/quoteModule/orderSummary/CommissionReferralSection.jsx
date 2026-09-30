@@ -3,6 +3,8 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import CommissionService from "../../../services/commissionService";
+import mastersService from "../../../services/mastersService";
+import numberingService from "../../../services/numberingService";
 import { formatCurrency, currencySymbol } from "../../../utility/currencyConverter";
 import "./CommissionReferralSection.scss";
 
@@ -50,9 +52,46 @@ const comsubAmount = (fixed, pct, netPremium) => {
   return Number((f + net * (p / 100)).toFixed(2));
 };
 
-const CommissionReferralSection = ({ value, onChange, netPremium, discount }) => {
+/** Where a matrix rate comes from, in words ("Bayanihan General Assurance Corp. · Motor Vehicle Insurance"). */
+const rateScopeLabel = (insurer, product, level) =>
+  [insurer?.label || "All insurers", product?.label || "All products"].join(" · ") + (level ? ` (${level})` : "");
+
+const CommissionReferralSection = ({ value, onChange, netPremium, discount, insurerName, productCode, lob, renewal = false }) => {
   const details = value || defaultCommissionDetails();
   const [referrerOptions, setReferrerOptions] = useState([]);
+
+  // Brokerage from the Commission Rate Matrix for the insurer and product of the quote (it was a fixed 18%, so
+  // the matrix rates never reached a quote or its policy's commission lines).
+  useEffect(() => {
+    if (!insurerName && !productCode) return undefined;
+    let cancelled = false;
+    (async () => {
+      const [insurers, products] = await Promise.all([
+        mastersService.options("insurance-company"),
+        mastersService.options("product"),
+      ]);
+      const insurer = insurers.find((o) => [o.value, o.label, o.code].includes(insurerName));
+      const product = products.find((o) => [o.code, o.value, o.label].includes(productCode));
+      const resolved = await numberingService.resolveRate({
+        insurerId: insurer?.id,
+        productId: product?.id,
+        lob: lob || undefined,
+        policyType: renewal ? "renewal" : "new",
+      });
+      if (cancelled || !resolved || resolved.rate === undefined || resolved.rate === null) return;
+      const pct = Number((Number(resolved.rate) * 100).toFixed(4));
+      const scope = rateScopeLabel(insurer, product, resolved.level);
+      if (pct !== details.brokeragePct || scope !== details.productLabel) {
+        onChange({ ...details, brokeragePct: pct, commissionCode: "Commission Rate Matrix", productLabel: scope });
+      }
+    })().catch(() => {
+      // the rate stays as it is; the server applies the matrix again when the quote is priced
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [insurerName, productCode, lob, renewal]);
 
   useEffect(() => {
     let cancelled = false;
@@ -206,12 +245,9 @@ const CommissionReferralSection = ({ value, onChange, netPremium, discount }) =>
           <span className="cr-badge">auto-filled · editable</span>
         </div>
         <p className="cr-help">
-          Comsub rate auto-fills from{" "}
-          <strong>{details.commissionCode || "COMM001"}</strong> (
-          {details.productLabel || "Motor · All insurers"}) when you pick a
-          referrer + level, and can be adjusted below. Brokerage{" "}
-          <strong>{brokeragePct}%</strong> is the income from the insurer;
-          comsub is payable to the referrer.
+          Brokerage <strong>{brokeragePct}%</strong> is the income from the insurer
+          ({details.commissionCode || "Commission Rate Matrix"}: {details.productLabel || "All insurers"}). Comsub
+          is payable to the referrer: it fills in when you pick a referrer and level, and can be adjusted below.
         </p>
       </div>
 

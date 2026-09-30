@@ -241,7 +241,7 @@ function AddBankMaster() {
 
             <InputField
               classNames="field__container"
-              label="IFSC Code"
+              label="SWIFT / BIC Code"
               placeholder={"Enter"}
               value={formik.values.ifscCode}
               onChange={formik.handleChange("ifscCode")}
@@ -454,7 +454,7 @@ function AddBankMaster() {
 
       <div className="next_container">
 
-        <Button className="submit_button p-0" label="Save" disabled={!formik.isValid}
+        <Button className="submit_button p-0" label="Save"
           onClick={() => { formik.handleSubmit(); }}
         />
       </div>

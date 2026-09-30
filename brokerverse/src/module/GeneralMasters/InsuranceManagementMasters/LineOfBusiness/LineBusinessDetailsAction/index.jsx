@@ -112,7 +112,7 @@ const LineBusinessDetailsAction = ({ action }) => {
       <div className="grid m-0 top-container">
         <CustomToast
           ref={toastRef}
-          message="Line of Business LOB1234 is added"
+          message={`Line of Business ${formik.values.lineofBusinessCode || ""} is added`}
         />
                 <div className="col-12 p-0">
           <div className="svgback_container">
@@ -222,7 +222,6 @@ const LineBusinessDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -231,7 +230,6 @@ const LineBusinessDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

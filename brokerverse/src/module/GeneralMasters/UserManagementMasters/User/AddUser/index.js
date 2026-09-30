@@ -9,7 +9,6 @@ import { useFormik } from "formik";
 import SvgBack from "../../../../../assets/icons/SvgBack";
 import CustomToast from "../../../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
-import EditUser from "../EditUser";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserListByIdMiddleware,
@@ -198,10 +197,6 @@ const AddUser = ({ action }) => {
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
-  const formikEdit = useFormik({
-    initialValues: initialValue,
-    onSubmit: handleSubmit,
-  });
   useEffect(() => {
     if (action === "edit" || action === "view") {
       // Use userDetailList or userEditData
@@ -272,6 +267,7 @@ const AddUser = ({ action }) => {
               }
               onChange={formik.handleChange("username")}
               label={t("generalMasters.username")}
+              required
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder={t("generalMasters.enter")}
@@ -291,6 +287,7 @@ const AddUser = ({ action }) => {
               }
               onChange={formik.handleChange("email")}
               label={t("generalMasters.eMail")}
+              required
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder={t("generalMasters.enter")}
@@ -310,6 +307,7 @@ const AddUser = ({ action }) => {
               }
               onChange={formik.handleChange("displayName")}
               label={t("generalMasters.displayName")}
+              required
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder={t("generalMasters.enter")}
@@ -355,11 +353,6 @@ const AddUser = ({ action }) => {
           </div>
         </div>
       </div>
-      {action === "edit" && (
-        <div style={{ width: "100%" }}>
-          <EditUser />
-        </div>
-      )}
 
       <div className="col-12 btn__view__Add mt-2">
         {action === "add" && (
@@ -369,14 +362,13 @@ const AddUser = ({ action }) => {
             onClick={() => {
               formik.handleSubmit();
             }}
-            disabled={!formik.isValid}
           />
         )}
         {action === "edit" && (
           <Button
             className="save__add__btn"
             onClick={() => {
-              formikEdit.handleSubmit();
+              formik.handleSubmit();
             }}
           >
             Update

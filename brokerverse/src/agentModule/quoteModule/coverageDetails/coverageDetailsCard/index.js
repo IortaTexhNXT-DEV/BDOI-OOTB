@@ -27,6 +27,7 @@ import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductCo
 import { notifyError } from "../../../../utility/dialogs";
 import { amountOptions, bodilyInjuryOptions, propertyDamageOptions } from "../../../../utility/quoteOptions";
 import logger from "../../../../utility/logger";
+import coverageInputErrors from "./coverageInputErrors";
 
 const CoverageDetailsCard = ({
   action,
@@ -328,6 +329,7 @@ const CoverageDetailsCard = ({
   const dispatch = useDispatch();
 
   const handleclick = (values) => {
+    if (blockedByInputErrors()) return;
     // Prepare coverage details data in proper format
     const coverageDetailsData = {
       lossAndDamageCoverage: values.LossandDamagecoverage,
@@ -439,7 +441,19 @@ const CoverageDetailsCard = ({
     }
   };
 
+  // A negative or empty sum insured, or a rate outside 0 to 100, is not priced (it gave negative premiums)
+  const blockedByInputErrors = () => {
+    const inputErrors = coverageInputErrors(formik.values, { includeActsOfNature, includeRoadsideAssistance, includePersonalAccident });
+    const fields = Object.keys(inputErrors);
+    if (!fields.length) return false;
+    formik.setTouched({ ...formik.touched, ...Object.fromEntries(fields.map((k) => [k, true])) }, false);
+    formik.setErrors(inputErrors);
+    setshow(true);
+    return true;
+  };
+
   const hadlecalculation = () => {
+    if (blockedByInputErrors()) return;
     // Calculate all premiums based on coverage, rates, and sum insured
     // Map PascalCase form fields to camelCase for computeAllPremiums
     const computed = computeAllPremiums({

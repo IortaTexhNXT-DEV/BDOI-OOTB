@@ -188,7 +188,6 @@ const TableData = ({ navigate }) => {
           header={t("generalMasters.companyName")}
           className="fieldvalue_container"
           headerStyle={headerstyle}
-          body={(rowData) => rowData.insuranceCompanyName?.toUpperCase()}
         ></Column>
         <Column
           field="email"
@@ -203,11 +202,11 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
         ></Column>
         <Column
-          field="modifiedby"
+          field="modifiedBy"
           header={t("generalMasters.modifiedBy")}
           headerStyle={headerstyle}
           className="fieldvalue_container"
-          body={(rowData) => rowData.modifiedby?.toUpperCase()}
+          body={(rowData) => rowData.modifiedBy || rowData.updatedBy || rowData.createdBy || "-"}
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"

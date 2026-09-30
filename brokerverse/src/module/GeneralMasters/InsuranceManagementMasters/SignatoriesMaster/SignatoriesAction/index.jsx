@@ -110,7 +110,7 @@ const SignatoriesDetailsAction = ({ action }) => {
   return (
     <div className="signtoriesaction__cover_container">
       <div className="grid m-0 top-container">
-        <CustomToast ref={toastRef} message="Signatory Code 001234 is added" />
+        <CustomToast ref={toastRef} message={`Signatory Code ${formik.values.signatoryCode || ""} is added`} />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="svgback_container">
@@ -222,7 +222,6 @@ const SignatoriesDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -231,7 +230,6 @@ const SignatoriesDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

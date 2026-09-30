@@ -324,13 +324,11 @@ const AddDesignation = ({ action }) => {
               onClick={() => {
                 formik.handleSubmit();
               }}
-              disabled={!formik.isValid}
             />
           )}
           {action === "edit" && (
             <Button
               className="save__add__btn"
-              disabled={!formik.isValid}
               onClick={formik.handleSubmit}
             >
               {t("generalMasters.update")}
@@ -339,8 +337,7 @@ const AddDesignation = ({ action }) => {
         </div>
         <CustomToast
           ref={toastRef}
-          message="Designation Code CC1234 
-is added"
+          message={`Designation Code ${formik.values.designationCode || ""} is added`}
         />
       </div>
     </div>

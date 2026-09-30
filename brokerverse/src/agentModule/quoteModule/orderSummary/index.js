@@ -902,6 +902,10 @@ const OrderSummary = ({ action, flow }) => {
                 }
                 netPremium={formik.values.netPremium}
                 discount={formik.values.discount}
+                insurerName={quotationData?.insuranceCompanyName || quotationData?.InsuranceCompanyName}
+                productCode="MOTOR"
+                lob="motor"
+                renewal={flow === "renewal"}
               />
             </div>
             <div className="mt-2">

@@ -11,6 +11,7 @@ import quotationService from "../../../services/quotationService";
 import s3Service from "../../../services/s3Service";
 import { notifyError, notifySuccess } from "../../../utility/dialogs";
 import { calendarDateFormat, toIsoDate } from "../../../utility/dateFormat";
+import { getStatusLabel } from "../../../utils/statusHelpers";
 import "./index.scss";
 
 const OUTCOMES = ["accepted", "declined", "revise"];
@@ -93,7 +94,7 @@ const CustomerResponseActions = ({ quotationId, onRecorded, notice }) => {
         remarks: form.remarks.trim() || undefined,
         ...attachment,
       });
-      notifySuccess(t("customerResponse.recorded", { status: body.data?.quotationStatus }));
+      notifySuccess(t("customerResponse.recorded", { status: getStatusLabel(body.data?.quotationStatus) }));
       setOpen(false);
       onRecorded?.(body.data);
     } catch (e) {

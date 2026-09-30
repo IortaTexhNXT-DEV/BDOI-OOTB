@@ -208,7 +208,6 @@ const Index = () => {
               header={t("generalMasters.companyName")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.CompanyName?.toUpperCase()}
             ></Column>
             <Column
               field="LicenseNumber"

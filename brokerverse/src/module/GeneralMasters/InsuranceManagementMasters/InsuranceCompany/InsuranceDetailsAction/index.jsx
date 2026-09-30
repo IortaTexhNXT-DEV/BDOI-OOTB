@@ -101,6 +101,10 @@ const InsuranceDetailsAction = ({ action }) => {
         errors[key] = t("numberingMasters.creditTerms.daysInvalid");
       }
     });
+    // TIN (printed on commission debit notes and the withholding tax returns): 9 to 14 digits, dashes allowed
+    if (values.tin && !/^\d{3}-?\d{3}-?\d{3}(-?\d{3,5})?$/.test(String(values.tin).trim())) {
+      errors.tin = t("generalMasters.tinInvalid", "Enter the TIN as 000-000-000 or 000-000-000-00000");
+    }
     if (!values.phoneNumber) {
       errors.phoneNumber = "Phone Number is required";
     } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.phoneNumber)) {
@@ -144,6 +148,7 @@ const InsuranceDetailsAction = ({ action }) => {
       country: countryData,
       email: getInsurancePatchData?.email,
       phoneNumber: getInsurancePatchData?.phoneNumber,
+      tin: getInsurancePatchData?.tin || "",
       premiumWarrantyDays: getInsurancePatchData?.premiumWarrantyDays ?? "",
       remittanceTermsDays: getInsurancePatchData?.remittanceTermsDays ?? "",
       defaultBillingMode: getInsurancePatchData?.defaultBillingMode ?? "",
@@ -178,6 +183,7 @@ const InsuranceDetailsAction = ({ action }) => {
       country: "",
       email: "",
       phoneNumber: "",
+      tin: "",
       premiumWarrantyDays: "",
       remittanceTermsDays: "",
       defaultBillingMode: "",
@@ -513,6 +519,20 @@ const InsuranceDetailsAction = ({ action }) => {
               </div>
             )}
           </div>
+          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+            <InputField
+              disabled={action === "view"}
+              classNames="input__field__corrections"
+              className="input__label__corrections"
+              placeholder="000-000-000-00000"
+              label={t("generalMasters.tin", "TIN")}
+              value={(action === "view" ? getInsuranceView?.tin : formik.values.tin) || ""}
+              onChange={(e) => formik.setFieldValue("tin", e.target.value)}
+            />
+            {formik.touched.tin && formik.errors.tin && (
+              <div style={{ fontSize: 12, color: "red" }}>{formik.errors.tin}</div>
+            )}
+          </div>
           <div className="col-12 p-0 pl-2 pt-3">
             <div className="insurance__credit__terms__title">{t("numberingMasters.creditTerms.title")}</div>
             <div className="insurance__credit__terms__hint">{t("numberingMasters.creditTerms.hint")}</div>
@@ -554,6 +574,7 @@ const InsuranceDetailsAction = ({ action }) => {
               ]}
             />
           </div>
+          {action !== "add" && (<>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
               disabled={true}
@@ -592,13 +613,13 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
           </div>
+          </>)}
         </div>
       </div>
       <div className="flex justify-content-end mt-5">
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -607,7 +628,6 @@ const InsuranceDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

@@ -16,6 +16,7 @@ import {
   postInsuranceProductMiddleWare,
 } from "../store/insuranceProductMiddleware";
 import mastersService from "../../../../../services/mastersService";
+import useMasterOptions from "../../../common/useMasterOptions";
 
 const BUSINESS_TYPES = ["package", "non_package"];
 const CUSTOMER_SEGMENTS = ["retail", "corporate", "both"];
@@ -26,6 +27,11 @@ const ProductMatserDetailsAction = ({ action }) => {
   const { id } = useParams();
   const toastRef = useRef(null);
   const navigation = useNavigate();
+  // Line of business from its master; products keep the lower-case code (motor, fire, ...)
+  const lobOptions = useMasterOptions("line-of-business", { valueKey: "code" }).map((o) => ({
+    label: o.label,
+    value: String(o.value || "").toLowerCase(),
+  }));
 
   useEffect(() => {
     if ((action === "edit" || action === "view") && id != null) {
@@ -47,10 +53,10 @@ const ProductMatserDetailsAction = ({ action }) => {
     {
       label: `${
         action === "add"
-          ? "Add Line of Business"
+          ? "Add Product"
           : action === "edit"
-          ? "Edit Line of Business"
-          : "Line of Business Details"
+          ? "Edit Product"
+          : "Product Details"
       }`,
     },
   ];
@@ -138,7 +144,7 @@ const ProductMatserDetailsAction = ({ action }) => {
   return (
     <div className="action__product__master_container">
       <div className="grid m-0 top-container">
-        <CustomToast ref={toastRef} message="Product Code CC1234 is added" />
+        <CustomToast ref={toastRef} message={`Product Code ${formik.values.productCode || ""} is added`} />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="svgback_container">
@@ -147,10 +153,10 @@ const ProductMatserDetailsAction = ({ action }) => {
             </span>
             <div className="main__account__title">
               {action === "add"
-                ? "Add Line of Business"
+                ? "Add Product"
                 : action === "edit"
-                ? "Edit Line of Business"
-                : "Line of Business Details"}
+                ? "Edit Product"
+                : "Product Details"}
             </div>
           </div>
         </div>
@@ -221,16 +227,19 @@ const ProductMatserDetailsAction = ({ action }) => {
               )}
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
-            <InputField
-              disabled={action === "view" ? true : false}
-              classNames="input__field__corrections"
-              className="input__label__corrections"
-              placeholder="Enter"
-              label={t("generalMasters.lineOfBusiness")}
+            <label className="input__label__corrections block mb-1" htmlFor="lineofBusiness">{t("generalMasters.lineOfBusiness")}</label>
+            <Dropdown
+              inputId="lineofBusiness"
+              disabled={action === "view"}
+              className="w-full"
               value={formik.values.lineofBusiness}
-              onChange={(e) =>
-                formik.setFieldValue("lineofBusiness", e.target.value)
+              options={
+                formik.values.lineofBusiness && !lobOptions.some((o) => o.value === formik.values.lineofBusiness)
+                  ? [...lobOptions, { label: formik.values.lineofBusiness, value: formik.values.lineofBusiness }]
+                  : lobOptions
               }
+              onChange={(e) => formik.setFieldValue("lineofBusiness", e.value)}
+              placeholder={t("productClassification.select")}
             />
             {formik.touched.lineofBusiness && formik.errors.lineofBusiness && (
               <div style={{ fontSize: 12, color: "red" }}>
@@ -259,6 +268,7 @@ const ProductMatserDetailsAction = ({ action }) => {
               )}
             </div>
           ))}
+          {action !== "add" && (<>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
               disabled={true}
@@ -283,13 +293,13 @@ const ProductMatserDetailsAction = ({ action }) => {
               }
             />
           </div>
+          </>)}
         </div>
       </div>
       <div className="flex justify-content-end mt-5">
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -298,7 +308,6 @@ const ProductMatserDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

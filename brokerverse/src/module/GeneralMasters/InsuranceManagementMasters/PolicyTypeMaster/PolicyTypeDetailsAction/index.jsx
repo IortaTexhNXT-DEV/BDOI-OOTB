@@ -118,7 +118,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
       <div className="grid m-0 top-container">
         <CustomToast
           ref={toastRef}
-          message="Policy type Code CC1234 is added"
+          message={`Policy Type Code ${formik.values.policyTypeCode || ""} is added`}
         />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
@@ -247,7 +247,6 @@ const PolicyTypeDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             {t("generalMasters.save")}
@@ -256,7 +255,6 @@ const PolicyTypeDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

@@ -1016,6 +1016,30 @@ const QuoteDetailView = ({ action }) => {
                         : "N/A"}
                     </label>
                   </div>
+                  {/* Priced covers of the quote: the detail showed the sum insured, CTPL and APPA only */}
+                  {[
+                    [t("coverageDetailsCard.ownDamageCoverage"), quotationData?.lossAndDamageCoverage, quotationData?.lossAndDamageCoverageRate, quotationData?.lossAndDamageCoveragePremium],
+                    [t("coverageDetailsCard.actsOfNature", "Acts of Nature"), null, quotationData?.actsOfNatureRate, quotationData?.actsOfNaturePremium],
+                    [t("coverageDetailsCard.bodilyInjury", "Bodily Injury"), quotationData?.bodilyInjury, null, quotationData?.bodilyInjuryCoveragePremium],
+                    [t("coverageDetailsCard.propertyDamage", "Property Damage"), quotationData?.propertyDamage, null, quotationData?.propertyDamageCoveragePremium],
+                    [t("coverageDetailsCard.roadsideAssistance", "Roadside Assistance"), null, quotationData?.roadsideAssistanceRate, quotationData?.roadsideAssistancePremium],
+                    [t("coverageDetailsCard.personalAccidentCover", "Personal Accident Cover"), null, quotationData?.personalAccidentCoverRate, quotationData?.personalAccidentCoverPremium],
+                  ]
+                    .filter(([, , , premium]) => Number(String(premium ?? "").replace(/,/g, "")) > 0)
+                    .map(([label, limit, rate, premium]) => (
+                      <div className="quote_details" key={label}>
+                        <label className="insurance_text">{label}</label>
+                        <label className="alpha_text">
+                          {[
+                            limit ? formatCurrency(Number(String(limit).replace(/,/g, ""))) : null,
+                            rate ? `${rate}%` : null,
+                            formatCurrency(Number(String(premium).replace(/,/g, ""))),
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </label>
+                      </div>
+                    ))}
                   <div className="quote_details">
                     <label className="insurance_text">{t("coverageDetailsCard.ctplTariffPremium")}</label>
                     <label className="alpha_text">
