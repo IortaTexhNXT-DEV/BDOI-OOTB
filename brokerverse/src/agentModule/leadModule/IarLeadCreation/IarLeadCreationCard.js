@@ -43,6 +43,9 @@ import {
 import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
 import useTaxRates from "../../quoteModule/utils/useTaxRates";
 import logger from "../../../utility/logger";
+import { notifyWarn } from "../../../utility/dialogs";
+import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
+import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -759,7 +762,8 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       );
       if (result.success) {
         setQuotationStatus("PendingCustomer");
-        toastRef.current?.showToast({
+        if (result.data?.emailSending === false) notifyWarn(t("customerResponse.emailNotConfigured"));
+        else toastRef.current?.showToast({
           detail: t("iarLead.quoteSentToCustomer", "Quote sent to customer for approval"),
         });
       } else if (result.error?.includes?.("PendingCustomer")) {
@@ -1387,6 +1391,21 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       </div>
       <div className="flex justify-content-between gap-2 mt-4">
         <Button label={t("common.back", "Back")} outlined onClick={() => setStep(2)} />
+        {/* same prospect and risk, sent to the market instead of priced from the tariff */}
+        <RequestForQuotationButton
+          disabled={!createdLeadId || !calculatedPremium.totalSumInsured}
+          prefill={{
+            leadRefId: createdLeadId,
+            leadName: personalFormik.values.CompanyName || [personalFormik.values.FirstName, personalFormik.values.LastName].filter(Boolean).join(" "),
+            productType: IAR_PRODUCT_TYPE,
+            riskDetails: Object.fromEntries(iarSections.map((s) => [s.sectionLabel, s.riskLocation || s.remarks])),
+            // one requested cover per section: the sum of its items' perils
+            requestedCovers: (calculatedPremium.sections || []).map((s) => ({
+              cover: iarSections.find((x) => x.id === s.sectionId)?.sectionLabel || s.sectionLabel,
+              sumInsured: (s.items || []).reduce((sum, item) => sum + (item.perils || []).reduce((a, p) => a + (Number(p.sumInsured) || 0), 0), 0),
+            })),
+          }}
+        />
         <Button
           label={t("common.continue", "Continue")}
           loading={isSaving}
@@ -1607,23 +1626,11 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             onClick={() => setStep(3)}
           />
           {quotationStatus === "PendingCustomer" ? (
-            <div
-              className="waiting-notice"
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#fef3c7",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                fontSize: 14,
-              }}
-            >
-              <i className="pi pi-clock" style={{ marginRight: "8px" }} />
-              {t(
-                "quoteDetailView.waitingForCustomerApproval",
-                "Waiting for customer approval"
-              )}
-            </div>
+            <CustomerResponseActions
+              quotationId={createdQuotationId}
+              notice={t("quoteDetailView.waitingForCustomerApproval", "Waiting for customer approval")}
+              onRecorded={fetchQuotationStatus}
+            />
           ) : (
             <Button
               label={t(

@@ -33,7 +33,7 @@ const insurerRef = z.union([z.number(), z.string().min(1), z.object({}).passthro
 
 // ---------------------------------------------------------------- Broker slips
 const bs = moduleRouter('Broker Slips', '/broker-slips');
-const BS = 'Operations > Broker Slips';
+const BS = 'Operations > Sales & Marketing > Request for Quotation (Broker Slip)';
 const slipExample = { brokerSlipId: 'bs_1', slipNumber: 'BS-2026-00001', status: 'submitted', insuredName: 'Cebu Cold Storage Corp.', productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000,
   submissionDate: '2026-09-20', responseDueDate: '2026-09-27', offers: [{ offerId: 'ofr_1', offerNumber: 'OFR-2026-00001', insuranceCompanyName: 'Malayan Insurance Co., Inc.', status: 'offered', premium: 212500, rate: 0.25, taxes: 31556.25, premiumTotal: 244056.25, offeredShare: 60, validityDate: '2026-10-20' }] };
 const slipBody = z.object({
@@ -42,6 +42,12 @@ const slipBody = z.object({
   requestedCovers: z.array(z.object({ cover: z.string().optional(), sumInsured: money, deductible: z.string().optional().nullable(), remarks: z.string().optional().nullable() }).passthrough()).optional(),
   sumInsured: money, currency: z.string().max(3).optional(), inceptionDate: z.string().optional().nullable(), expiryDate: z.string().optional().nullable(), responseDueDate: z.string().optional().nullable(),
   insurers: z.array(insurerRef).optional(), remarks: z.string().max(2000).optional().nullable(),
+  // a new prospect entered on the Request for Quotation instead of an existing lead or client
+  prospect: z.object({
+    companyName: z.string().trim().max(200).optional().nullable(), firstName: z.string().trim().max(100).optional().nullable(),
+    lastName: z.string().trim().max(100).optional().nullable(), emailId: z.string().email('emailId must be a valid e-mail').optional().nullable().or(z.literal('')),
+    contactNumber: z.string().max(40).optional().nullable(),
+  }).refine((p) => p.companyName || p.firstName, { message: 'Enter the company name or the first name of the prospect', path: ['companyName'] }).optional(),
 });
 
 bs.define({
@@ -61,6 +67,7 @@ bs.define({
   response: { success: true, ...slipExample, status: 'draft' },
   handler: async (req, res) => {
     const s = await slips.createSlip(req.body, req.user.id);
+    if (s.newProspectId) await audit(req, { entity: 'lead', entityId: s.newProspectId, action: 'create', after: { ...req.body.prospect, source: 'request-for-quotation', slipNumber: s.slipNumber } });
     await audit(req, { entity: 'broker_slip', entityId: s.id, action: 'create', after: { slipNumber: s.slipNumber, insurers: s.offers.map((o) => o.insuranceCompanyName) } });
     sendEntity(res, s, { status: 201, message: `Broker slip ${s.slipNumber} created` });
   },
@@ -169,7 +176,7 @@ bs.define({
 
 // ---------------------------------------------------------------- Placement slips
 const { router, define } = moduleRouter('Placement Slips', '/placements');
-const PS = 'Operations > Placement Slips';
+const PS = 'Operations > Sales & Marketing > Placement Slips';
 const participantExample = { participantId: 11, insuranceCompanyId: 2, insuranceCompanyName: 'Malayan Insurance Co., Inc.', isLead: true, sharePercent: 60, sumInsured: 51000000, premium: 127500, taxes: 18933.75, premiumTotal: 146433.75, commissionAmount: 19125, insurerReference: null, status: 'pending' };
 const placementExample = { placementId: 'plc_1', placementNumber: 'PS-2026-00001', source: 'quote', status: 'draft', placementStatus: 'Draft', quotationNumber: 'QT-2026-00007', insuredName: 'Cebu Cold Storage Corp.',
   productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000, netPremium: 212500, grossPremium: 244056.25, inceptionDate: '2026-10-01', expiryDate: '2027-10-01', participants: [participantExample] };
@@ -185,22 +192,24 @@ const placementBody = z.object({
 });
 
 define({
-  method: 'GET', path: '/journey', summary: 'Placement journey for a line of business / product type (placement.journey): brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip',
+  method: 'GET', path: '/journey', summary: 'Placement journey for a line of business / product type: the business type default (placement.journey_by_business_type) overridden by placement.journey; brokerSlip, quotationSlip, placementSlip, directPolicy = required | optional | skip',
   screen: `${PS} / Quotation > Send to insurer`, middleware: canRead, query: { lob: 'FIRE', productType: 'Fire and Allied Perils' },
-  response: { success: true, data: { brokerSlip: 'optional', quotationSlip: 'optional', placementSlip: 'required', directPolicy: 'optional', lob: 'FIRE', key: 'FIRE' } },
+  response: { success: true, data: { brokerSlip: 'optional', quotationSlip: 'optional', placementSlip: 'required', directPolicy: 'optional', lob: 'FIRE', businessType: 'non_package', source: 'businessType', key: 'non_package' } },
   handler: async (req, res) => res.json({ success: true, data: await journeyFor({ lob: req.query.lob, productType: req.query.productType, productId: req.query.productId }) }),
 });
 define({
-  method: 'GET', path: '/options', summary: 'Reference data of the placement screens: active insurers (insurer master), products with their LOB and journey, default billing mode',
-  screen: `${PS} / ${BS} (forms)`, middleware: canRead,
-  response: { success: true, data: { insurers: [{ id: 2, code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.', commissionRate: 0.15 }], products: [{ id: 3, code: 'FIRE', name: 'Fire and Allied Perils', lob: 'FIRE', journey: { placementSlip: 'required' } }], defaultBillingMode: 'broker' } },
-  handler: async (_req, res) => {
+  method: 'GET', path: '/options', summary: 'Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode',
+  screen: `${PS} / ${BS} (forms)`, middleware: canRead, query: { businessType: 'non_package' },
+  response: { success: true, data: { insurers: [{ id: 2, code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.', commissionRate: 0.15 }], products: [{ id: 3, code: 'FIRE', name: 'Fire and Allied Perils', lob: 'FIRE', businessType: 'non_package', customerSegment: 'corporate', journey: { placementSlip: 'required' } }], defaultBillingMode: 'broker' } },
+  handler: async (req, res) => {
     const insurers = await many(`SELECT id, code, name, short_name AS "shortName", commission_rate AS "commissionRate", contact_email AS "contactEmail"
       FROM insurance_companies WHERE status = 'active' ORDER BY name`);
+    const businessType = ['package', 'non_package'].includes(req.query.businessType) ? req.query.businessType : null;
     const products = [];
-    for (const p of await many("SELECT id, code, name, line FROM products WHERE status = 'active' ORDER BY name")) {
+    for (const p of await many(`SELECT id, code, name, line, business_type, customer_segment FROM products
+      WHERE status = 'active' AND ($1::text IS NULL OR business_type = $1) ORDER BY name`, [businessType])) {
       const journey = await journeyFor({ productId: p.id, productType: p.name });
-      products.push({ id: p.id, code: p.code, name: p.name, line: p.line, lob: journey.lob, journey });
+      products.push({ id: p.id, code: p.code, name: p.name, line: p.line, lob: journey.lob, businessType: p.business_type, customerSegment: p.customer_segment, journey });
     }
     const defaultBillingMode = (await getSetting('direct_bill.default_billing_mode', 'broker')) || 'broker';
     res.json({ success: true, data: { insurers: insurers.map((i) => ({ ...i, commissionRate: i.commissionRate === null ? null : Number(i.commissionRate) })), products, defaultBillingMode } });

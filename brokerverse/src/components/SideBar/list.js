@@ -4,7 +4,6 @@ import SvgAgentItemsIcon from "../../assets/agentIcon/SvgAgentItemsIcon";
 import SvgAgentLeadIcon from "../../assets/agentIcon/SvgAgentLeadIcon";
 import SvgAgentPaymentIcon from "../../assets/agentIcon/SvgAgentPaymentIcon";
 import SvgPolicyIcon from "../../assets/agentIcon/SvgPolicyIcon";
-import SvgQuotationIcon from "../../assets/agentIcon/SvgQuotationIcon";
 import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
 import SvgMassterIcon from "../../assets/icons/SvgMassterIcon";
 import SvgReportsIcon from "../../assets/icons/SvgReportsIcon";
@@ -163,6 +162,12 @@ export const menuList = [
         name: "Audit Trail",
         path: "/master/configuration/audit-trail",
         includes: ["/master/configuration/audit-trail"],
+      },
+      {
+        id: 24,
+        name: "E-mail Outbox",
+        path: "/master/configuration/email-outbox",
+        includes: ["/master/configuration/email-outbox"],
       },
       {
         id: 1,
@@ -632,35 +637,82 @@ export const menuList = [
         permissions: ["read:home"],
       },
       {
-        name: "Leads/Prospects",
+        // Sales & Marketing: prospects, quick quotes for package products, requests for quotation (broker slips) and
+        // quotations for non-package risks, and the placement slips that bind them with the insurers
+        id: 29,
+        name: "Sales & Marketing",
         icon: <SvgAgentLeadIcon color="#9DA4AE" />,
-        path: "/agent/leadlisting",
-        includes: [
-          "/agent/createlead/employee-benefit",
-          "/agent/createlead/fire-allied-perils",
-          "/agent/leadlisting",
-          "/agent/createlead",
-          "/createquote/policydetails/createquote/",
-          "/createquote/coveragedetails/coveragecreate/",
-          "/createquote/accessories/accessoriescreate/",
-          "/agent/createquote/ordersummary",
-          "/agent/quotedetailview",
-          "/agent/convertpolicy/customerinfo/view/",
-          "/agent/convertpolicy/customerinfo/fire/new/",
-          "/agent/convertpolicy/uploadvehiclephotos",
-          "/agent/coveragedetailedview",
-          "/agent/policyapproval",
-          "/agent/uploadpolicy",
-          "/agent/createquote/policydetails/createquote/",
-          "/agent/createquote/coveragedetails/coveragecreate/",
-          "/agent/leadedit",
-          "/agent/createquote/accessories/accessoriescreate/",
-          "/agent/quotelisting",
-          "/agent/convertpolicy/customerinfo/edit/",
-          "/agent/editquote/policydetails/quotedetails/",
-          "/agent/quotedetailedit",
+        submenu: [
+          {
+            id: 30,
+            // the prospect (lead) list and the motor quote and policy conversion screens opened from it
+            name: "Prospects",
+            path: "/agent/leadlisting",
+            includes: [
+              "/agent/createlead/employee-benefit",
+              "/agent/createlead/fire-allied-perils",
+              "/agent/leadlisting",
+              "/agent/createlead",
+              "/createquote/policydetails/createquote/",
+              "/createquote/coveragedetails/coveragecreate/",
+              "/createquote/accessories/accessoriescreate/",
+              "/agent/createquote/ordersummary",
+              "/agent/quotedetailview",
+              "/agent/convertpolicy/customerinfo/view/",
+              "/agent/convertpolicy/customerinfo/fire/new/",
+              "/agent/convertpolicy/uploadvehiclephotos",
+              "/agent/coveragedetailedview",
+              "/agent/policyapproval",
+              "/agent/uploadpolicy",
+              "/agent/createquote/policydetails/createquote/",
+              "/agent/createquote/coveragedetails/coveragecreate/",
+              "/agent/leadedit",
+              "/agent/createquote/accessories/accessoriescreate/",
+              "/agent/quotelisting",
+              "/agent/convertpolicy/customerinfo/edit/",
+              "/agent/editquote/policydetails/quotedetails/",
+              "/agent/quotedetailedit",
+            ],
+            permissions: ["read:leads"],
+          },
+          {
+            id: 31,
+            name: "Quick Quote",
+            path: "/sales/quick-quote",
+            includes: ["/sales/quick-quote"],
+            permissions: ["write:quotations"],
+          },
+          {
+            // the broker slip is the request for quotation sent to several insurers
+            id: 32,
+            name: "Request for Quotation",
+            path: "/placement/broker-slips",
+            includes: ["/placement/broker-slips"],
+            permissions: ["read:quotations"],
+          },
+          {
+            id: 33,
+            name: "Quotations",
+            path: "/agent/Quotation",
+            includes: [
+              "/agent/Quotation",
+              "/agent/employee-benefit/create-quote",
+              "/agent/employee-benefit/create-quote-employeebulkupload",
+              "/agent/employee-benefit/create-quote-Coverage-details",
+              "/agent/employee-benefit/create-quote-order-summary",
+              "/agent/employee-benefit/create-quote-quote-details",
+            ],
+            permissions: ["read:quotations"],
+          },
+          {
+            // firm orders to the insurers, binding and policy issuance; direct policy entry
+            id: 34,
+            name: "Placement Slips",
+            path: "/placement/placement-slips",
+            includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
+            permissions: ["read:quotations"],
+          },
         ],
-        permissions: ["read:leads"],
       },
       {
         name: "Clients",
@@ -706,36 +758,6 @@ export const menuList = [
           "/agent/employee-benefit/client-policy-details",
         ],
         permissions: ["read:clients"],
-      },
-      {
-        name: "Quotation",
-        icon: <SvgQuotationIcon color="#9DA4AE" />,
-        path: "/agent/Quotation",
-        includes: [
-          "/agent/Quotation",
-          "/agent/employee-benefit/create-quote",
-          "/agent/employee-benefit/create-quote-employeebulkupload",
-          "/agent/employee-benefit/create-quote-Coverage-details",
-          "/agent/employee-benefit/create-quote-order-summary",
-          "/agent/employee-benefit/create-quote-quote-details",
-        ],
-        permissions: ["read:quotations"],
-      },
-      {
-        // Placement journey (market submission): Broker Slip -> Quotation Slip
-        name: "Broker Slips",
-        icon: <SvgQuotationIcon color="#9DA4AE" />,
-        path: "/placement/broker-slips",
-        includes: ["/placement/broker-slips"],
-        permissions: ["read:quotations"],
-      },
-      {
-        // Firm orders to the insurers, binding and policy issuance; direct policy entry
-        name: "Placement Slips",
-        icon: <SvgPolicyIcon color="#9DA4AE" />,
-        path: "/placement/placement-slips",
-        includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
-        permissions: ["read:quotations"],
       },
       {
         name: "Policy",

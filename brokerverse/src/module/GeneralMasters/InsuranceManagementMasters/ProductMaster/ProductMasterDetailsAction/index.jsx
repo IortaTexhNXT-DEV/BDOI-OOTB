@@ -6,6 +6,7 @@ import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
@@ -15,6 +16,9 @@ import {
   postInsuranceProductMiddleWare,
 } from "../store/insuranceProductMiddleware";
 import mastersService from "../../../../../services/mastersService";
+
+const BUSINESS_TYPES = ["package", "non_package"];
+const CUSTOMER_SEGMENTS = ["retail", "corporate", "both"];
 
 const ProductMatserDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -67,6 +71,12 @@ const ProductMatserDetailsAction = ({ action }) => {
     if (!values.lineofBusiness) {
       errors.lineofBusiness = t("validation.fieldRequired");
     }
+    if (!values.businessType) {
+      errors.businessType = t("validation.fieldRequired");
+    }
+    if (!values.customerSegment) {
+      errors.customerSegment = t("validation.fieldRequired");
+    }
 
     return errors;
   };
@@ -93,6 +103,8 @@ const ProductMatserDetailsAction = ({ action }) => {
     const modifiedBy = data[0]?.modifiedBy;
     const modifiedOn = data[0]?.modifiedOn;
     const lineofBusiness = data[0]?.lineofBusiness;
+    const businessType = data[0]?.businessType;
+    const customerSegment = data[0]?.customerSegment;
 
     const updatedValues = {
       productCode: productCode ?? "",
@@ -101,6 +113,8 @@ const ProductMatserDetailsAction = ({ action }) => {
       modifiedBy: modifiedBy ?? "",
       modifiedOn: modifiedOn ?? "",
       lineofBusiness: lineofBusiness ?? "",
+      businessType: businessType ?? "",
+      customerSegment: customerSegment ?? "both",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -111,6 +125,8 @@ const ProductMatserDetailsAction = ({ action }) => {
       productName: "",
       productDescription: "",
       lineofBusiness: "",
+      businessType: "",
+      customerSegment: "both",
       modifiedBy: "",
       modifiedOn: "",
     },
@@ -222,6 +238,27 @@ const ProductMatserDetailsAction = ({ action }) => {
               </div>
             )}
           </div>
+          {/* Package: tariff products sold quickly (quick quote); non-package: placed per risk through the slips */}
+          {[
+            { name: "businessType", options: BUSINESS_TYPES, label: t("productClassification.businessType"), prefix: "productClassification.businessTypes" },
+            { name: "customerSegment", options: CUSTOMER_SEGMENTS, label: t("productClassification.customerSegment"), prefix: "productClassification.segments" },
+          ].map((f) => (
+            <div key={f.name} className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+              <label className="input__label__corrections block mb-1" htmlFor={f.name}>{f.label}</label>
+              <Dropdown
+                inputId={f.name}
+                disabled={action === "view"}
+                className="w-full"
+                value={formik.values[f.name]}
+                options={f.options.map((value) => ({ value, label: t(`${f.prefix}.${value}`) }))}
+                onChange={(e) => formik.setFieldValue(f.name, e.value)}
+                placeholder={t("productClassification.select")}
+              />
+              {formik.touched[f.name] && formik.errors[f.name] && (
+                <div style={{ fontSize: 12, color: "red" }}>{formik.errors[f.name]}</div>
+              )}
+            </div>
+          ))}
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
               disabled={true}

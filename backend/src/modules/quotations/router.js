@@ -15,11 +15,12 @@ import { premiumBreakdown } from './premium.js';
 import { motorTariff, vehicleClass, vehicleOf } from './motorTariff.js';
 import { ownRecord, withScope, assertVisible } from '../../lib/scope.js';
 import * as svc from './service.js';
+import * as responses from './customerResponses.js';
 import mastersRouter from './masters.js';
 import emailRouter from './email.js';
 
 const { router, define } = moduleRouter('Quotations', '/quotations');
-const SCREEN = 'Operations > Quotation';
+const SCREEN = 'Operations > Sales & Marketing > Quotations';
 const canRead = [requireAuth, requirePermission('read:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
 
@@ -163,8 +164,47 @@ define({
   middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
   handler: async (req, res) => {
     const r = await svc.sendForApproval(req.params.id, req.user);
-    await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo } });
-    res.json({ success: true, message: `Quotation sent to ${r.sentTo} for approval`, sentTo: r.sentTo, approvalUrl: r.approvalUrl, data: out(r.after) });
+    await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo, emailSending: r.emailSending } });
+    let message = `Quotation sent to ${r.sentTo} for approval`;
+    if (!r.emailSending) {
+      message = `${r.sentTo ? `The e-mail to ${r.sentTo} is queued, but e-mail` : 'E-mail'} sending is not configured, so the customer has not been e-mailed. `
+        + 'Share the approval link (Copy approval link) or record the customer\'s response when it comes in.';
+    }
+    res.json({ success: true, message, sentTo: r.sentTo, approvalUrl: r.approvalUrl, emailSending: r.emailSending, emailQueued: Boolean(r.emailId), data: out(r.after) });
+  },
+});
+define({
+  method: 'GET', path: '/:id/approval-link', summary: 'Approval link of a PendingCustomer quotation, to share by Viber / WhatsApp (the current link while valid, else a new one)', screen: `${SCREEN} > Quote detail > Copy approval link`,
+  middleware: [...canWrite, ownRecord('quote')], response: { success: true, data: { approvalUrl: 'http://localhost:3000/approve-quote?token=...', expiresAt: '2026-10-07T02:00:00.000Z', reissued: false } },
+  handler: async (req, res) => {
+    const r = await svc.approvalLink(req.params.id);
+    if (r.reissued) await audit(req, { entity: 'quotation', entityId: r.quote.id, action: 'approval-link', after: { expiresAt: r.expiresAt } });
+    res.json({ success: true, data: { approvalUrl: r.approvalUrl, expiresAt: r.expiresAt, reissued: r.reissued } });
+  },
+});
+define({
+  method: 'GET', path: '/:id/customer-responses', summary: 'Customer responses recorded for a quotation (newest first) and the channels offered', screen: `${SCREEN} > Quote detail > Record customer response`,
+  middleware: [...canRead, ownRecord('quote')],
+  response: { success: true, data: [{ id: 1, outcome: 'accepted', channel: 'Viber/WhatsApp', responseDate: '2026-09-30', reference: 'Viber 09:14', fromStatus: 'PendingCustomer', toStatus: 'CustomerAccepted' }], channels: ['E-mail', 'Phone', 'Viber/WhatsApp', 'Meeting', 'Signed form'] },
+  handler: async (req, res) => res.json({ success: true, data: await responses.listResponses(req.params.id), channels: await responses.responseChannels() }),
+});
+const responseBody = z.object({
+  outcome: z.enum(responses.OUTCOMES), channel: z.string().trim().min(1).max(60),
+  responseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use the date format YYYY-MM-DD'),
+  reference: z.string().trim().max(200).optional().nullable(), remarks: z.string().trim().max(2000).optional().nullable(),
+  attachmentKey: z.string().max(500).optional().nullable(), attachmentName: z.string().max(255).optional().nullable(),
+}).refine((b) => b.reference || b.remarks, { message: 'Enter a reference or remarks', path: ['remarks'] });
+define({
+  method: 'POST', path: '/:id/customer-response', summary: 'Record the customer\'s response received outside the approval link (accepted, declined, revise) with its evidence; the status follows quotations.customer_response_status and quotations.transitions',
+  screen: `${SCREEN} > Quote detail > Record customer response`, middleware: [...canWrite, ownRecord('quote'), validate(responseBody)],
+  request: { outcome: 'accepted', channel: 'Viber/WhatsApp', responseDate: '2026-09-30', reference: 'Viber message 09:14', remarks: 'Confirmed by the owner', attachmentKey: 'quotation-responses/1-a-screenshot.png', attachmentName: 'screenshot.png' },
+  response: { success: true, message: 'Customer response recorded: CustomerAccepted', data: { ...example, quotationStatus: 'CustomerAccepted' }, response: { id: 1, outcome: 'accepted', channel: 'Viber/WhatsApp' } },
+  handler: async (req, res) => {
+    const r = await responses.recordResponse(req.params.id, req.body, req.user);
+    const after = out(r.after);
+    await audit(req, { entity: 'quotation', entityId: after.id, action: 'customer-response', before: { quotationStatus: out(r.before).quotationStatus },
+      after: { quotationStatus: after.quotationStatus, outcome: r.response.outcome, channel: r.response.channel, responseDate: r.response.responseDate, reference: r.response.reference, responseId: r.response.id } });
+    res.json({ success: true, message: `Customer response recorded: ${after.quotationStatus}`, data: after, response: r.response });
   },
 });
 define({

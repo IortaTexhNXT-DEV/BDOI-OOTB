@@ -9,7 +9,7 @@ import { ok } from '../../lib/respond.js';
  * Reads only reference data, so any signed-in user may call them.
  */
 const { router, define } = moduleRouter('Addresses', '/addresses');
-const SCREEN = 'Operations > Leads/Prospects > Create Lead (address fields)';
+const SCREEN = 'Operations > Sales & Marketing > Prospects > Create Lead (address fields)';
 
 /** Accept a numeric id, a code or a name for the parent record. */
 const parentMatch = (alias) => `(${alias}.id::text = $1 OR lower(${alias}.code) = lower($1) OR lower(${alias}.name) = lower($1))`;

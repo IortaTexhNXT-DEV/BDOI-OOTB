@@ -87,6 +87,7 @@ import SchedulesPage from "../module/Administration/Schedules";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import AuditTrailPage from "../module/Administration/AuditTrail";
+import EmailOutboxPage from "../module/Administration/EmailOutbox";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/CompanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
 import InsuranceCompany from "../module/GeneralMasters/InsuranceManagementMasters/InsuranceCompany";
@@ -284,6 +285,7 @@ import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
 // Placement journey: Broker Slip -> Quotation Slip -> Placement Slip -> Policy
 import BrokerSlipList from "../module/Placement/BrokerSlipList";
 import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
+import QuickQuote from "../module/Sales/QuickQuote";
 import BrokerSlipDetail from "../module/Placement/BrokerSlipDetail";
 import PlacementList from "../module/Placement/PlacementList";
 import PlacementDetail from "../module/Placement/PlacementDetail";
@@ -916,6 +918,7 @@ const Maincomponent = () => {
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
+          <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
           <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 
@@ -1174,6 +1177,7 @@ const Maincomponent = () => {
             element={<DirectBillProcessing />}
           />
           {/* Placement journey */}
+          <Route path="/sales/quick-quote" element={<QuickQuote />} />
           <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
           <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
           <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />

@@ -4,6 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { many, one, query } from '../../db/pool.js';
 import { VISIBLE_TO_USER as MINE } from './service.js';
 import { paging, pageMeta } from '../../lib/respond.js';
+import outboxRouter from './outbox.js';
 
 const { router, define } = moduleRouter('Notifications', '/notifications');
 const row = (n) => ({ id: n.id, type: n.type, priority: n.priority, title: n.title, message: n.message, link: n.link, entity: n.entity, entityId: n.entity_id, isRead: n.is_read, readAt: n.read_at, createdAt: n.created_at });
@@ -64,3 +65,4 @@ define({
 });
 export default router;
 export const mount = '/notifications';
+export const extraMounts = [['/email', outboxRouter]];

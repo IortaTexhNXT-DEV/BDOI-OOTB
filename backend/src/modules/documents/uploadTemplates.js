@@ -77,7 +77,7 @@ const fileBase = (label) => String(label).replace(/&/g, 'and').replace(/[^A-Za-z
 export function staticUploads() {
   return [
     {
-      id: 'leads', file: 'Leads_Upload_Template.xlsx', title: 'Leads upload', menu: 'Operations > Leads/Prospects > Bulk Upload', route: 'POST /api/leads/bulk-upload (multipart field "file")',
+      id: 'leads', file: 'Leads_Upload_Template.xlsx', title: 'Leads upload', menu: 'Operations > Sales & Marketing > Prospects > Bulk Upload', route: 'POST /api/leads/bulk-upload (multipart field "file")',
       columns: LEAD_UPLOAD_COLUMNS, maxRows: IMPORT_ROWS,
       samples: [
         { firstName: 'Maria', lastName: 'Santos', DOB: '1988-04-12', gender: 'Female', emailId: 'maria.santos@example.ph', contactNumber: '09171234567', houseNo: '12 Mabini St.', barangay: 'San Antonio',

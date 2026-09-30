@@ -14,6 +14,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { insurerId } from '../policies/service.js';
 import { taxRates } from '../quotations/premium.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
+import { createLead } from '../leads/service.js';
 
 export const SLIP_STATUSES = ['draft', 'submitted', 'responses-in', 'closed', 'cancelled'];
 const OPEN = ['draft', 'submitted', 'responses-in'];
@@ -135,11 +136,23 @@ export async function partyName(db, { leadRefId, clientId }) {
 
 const coversTotal = (covers) => round2((covers || []).reduce((s, c) => s + num(c.sumInsured), 0));
 
-export async function createSlip(body, userId) {
+/**
+ * Create a broker slip (Request for Quotation). A new prospect (body.prospect) is saved as a lead in the same
+ * transaction when no lead or client is given; its id is returned as newProspectId.
+ */
+export async function createSlip(input, userId) {
+  let newProspectId = null;
   const id = await withTransaction(async (db) => {
-    await assertParty(db, body);
+    const body = { ...input };
     const productId = body.productId ? Number(body.productId) : null;
     const lob = await resolveLob({ lob: body.lob, productId, productType: body.productType }, db);
+    if (!body.leadRefId && !body.clientId && body.prospect) {
+      const p = body.prospect;
+      const lead = await createLead({ ...p, leadCategory: p.companyName ? 'Corporate' : 'Retail', lob }, userId, db);
+      newProspectId = lead.id;
+      body.leadRefId = lead.id;
+    }
+    await assertParty(db, body);
     const journey = await journeyFor({ lob, productType: body.productType, productId }, db);
     assertStep(journey, 'brokerSlip', ['skip'], `Broker slips are not used for ${journey.lob}: start with the Quotation Slip`);
     const defaults = (await getSetting('broker_slips.default_insurers', [])) || [];
@@ -155,7 +168,8 @@ export async function createSlip(body, userId) {
     await addOffers(db, r.rows[0].id, insurers, userId);
     return r.rows[0].id;
   });
-  return slipById(id);
+  const slip = await slipById(id);
+  return newProspectId ? { ...slip, newProspectId } : slip;
 }
 
 export async function updateSlip(id, body, userId) {

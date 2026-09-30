@@ -15,6 +15,7 @@ import emailService from "../../../../services/emailService";
 import documentTemplateService from "../../../../services/documentTemplateService";
 import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { notifyError, notifySuccess, notifyWarn } from "../../../../utility/dialogs";
+import { notifyEmailOutcome } from "../../../../utility/emailNotice";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
@@ -130,11 +131,8 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       });
 
       if (result.success) {
-        notifySuccess(
-          result.partial
-            ? t("shareOption.sentToInsurersPartial")
-            : t("shareOption.sentToInsurersSuccess")
-        );
+        if (result.partial) notifyWarn(t("shareOption.sentToInsurersPartial"));
+        else notifyEmailOutcome(t("shareOption.sentToInsurersSuccess"));
         resetInsurerForm();
         setModalVisible(false);
       } else {
@@ -262,7 +260,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       }
 
       if (result.success) {
-        notifySuccess(`Quote sent successfully to ${emailAddress}!`);
+        notifyEmailOutcome(t("shareOption.sentToRecipient", { to: emailAddress }));
         setEmailAddress("");
         setCustomMessage("");
         setShowEmailForm(false);

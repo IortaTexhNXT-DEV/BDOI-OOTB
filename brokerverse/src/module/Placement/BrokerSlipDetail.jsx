@@ -16,6 +16,7 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import placementService from "../../services/placementService";
 import s3Service from "../../services/s3Service";
+import { useEmailSending, withQueuedNotice } from "../../utility/emailNotice";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat } from "../../utility/dateFormat";
 import { Field, JourneyTimeline, PageHeader, StatusTag, formatDate, round2, usePlacementOptions } from "./shared";
@@ -31,6 +32,8 @@ const BrokerSlipDetail = () => {
   const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
+  // broker slips and placement slips go to the insurers by e-mail
+  const emailSending = useEmailSending();
   const options = usePlacementOptions();
   const [slip, setSlip] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -147,7 +150,7 @@ const BrokerSlipDetail = () => {
         <StatusTag status={slip.status} />
         <Button label={t("placement.actions.slipPdf")} icon="pi pi-file-pdf" severity="secondary" outlined onClick={() => placementService.openSlipPdf(slip.id).catch((e) => notify("error", e.message))} className="ml-2" />
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}
-        {slip.status === "draft" && <Button label={t("placement.actions.submitToMarket")} icon="pi pi-send" onClick={() => act(() => placementService.submitSlip(slip.id), (r) => t("placement.messages.submitted", { count: r.sent?.length || 0 }))} loading={busy} className="ml-2" />}
+        {slip.status === "draft" && <Button label={t("placement.actions.submitToMarket")} icon="pi pi-send" onClick={() => act(() => placementService.submitSlip(slip.id), (r) => withQueuedNotice(t("placement.messages.submitted", { count: r.sent?.length || 0 }), emailSending))} loading={busy} className="ml-2" />}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.more")} icon="pi pi-times" severity="danger" text onClick={() => setClosing({ status: "cancelled", reason: "" })} className="ml-2" />}
       </PageHeader>
 

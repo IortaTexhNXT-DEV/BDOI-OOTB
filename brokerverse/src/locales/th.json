@@ -221,7 +221,14 @@
     "Payables": "เจ้าหนี้",
     "Journal": "สมุดรายวัน",
     "Trail Balance": "งบดุลทดลอง",
-    "Login": "เข้าสู่ระบบ"
+    "Login": "เข้าสู่ระบบ",
+    "E-mail Outbox": "E-mail Outbox",
+    "Sales & Marketing": "Sales & Marketing",
+    "Prospects": "Prospects",
+    "Quick Quote": "Quick Quote",
+    "Request for Quotation": "Request for Quotation (Broker Slip)",
+    "Quotations": "Quotations",
+    "Placement Slips": "Placement Slips"
   },
   "header": {
     "notification": "การแจ้งเตือน",
@@ -3576,7 +3583,8 @@
     "emailSubject": "หัวเรื่องอีเมล",
     "emailContentHtml": "เนื้อหาอีเมล (HTML)",
     "suggestedContentEditHint": "คุณแก้ไขหัวเรื่องและเนื้อหาได้ก่อนส่ง",
-    "usingSuggestedContent": "ใช้เนื้อหาที่แนะนำ"
+    "usingSuggestedContent": "ใช้เนื้อหาที่แนะนำ",
+    "sentToRecipient": "Quote sent to {{to}}"
   },
   "fireLead": {
     "selectCategory": "เลือกหมวดหมู่",
@@ -4969,5 +4977,122 @@
     "saveFailed": "บันทึกการตั้งค่าไม่สำเร็จ",
     "uploadSuccess": "อัปโหลดไฟล์สำเร็จ",
     "uploadFailed": "อัปโหลดไฟล์ไม่สำเร็จ"
+  },
+  "customerResponse": {
+    "waiting": "Waiting for customer approval",
+    "copyLink": "Copy approval link",
+    "linkCopied": "Approval link copied. Paste it in Viber, WhatsApp or a text message to the customer.",
+    "copyManually": "Your browser did not allow copying. Select the link below and copy it.",
+    "record": "Record customer response",
+    "title": "Record customer response",
+    "outcome": "Customer's answer",
+    "outcomes": {
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "revise": "Revise"
+    },
+    "outcomeHelp": {
+      "accepted": "The quotation becomes Customer Accepted and can go on to placement or policy.",
+      "declined": "The quotation is closed as declined by the customer.",
+      "revise": "The quotation goes back to Draft so the terms can be changed and sent again."
+    },
+    "channel": "Received by",
+    "channelPlaceholder": "Select the channel",
+    "responseDate": "Response date",
+    "reference": "Reference",
+    "referencePlaceholder": "e.g. Viber message time, signed form number",
+    "remarks": "Remarks",
+    "attachment": "Attachment (optional): screenshot, signed form or e-mail",
+    "cancel": "Cancel",
+    "save": "Record response",
+    "recorded": "Customer response recorded. Quotation status: {{status}}",
+    "uploadFailed": "The attachment could not be uploaded",
+    "emailNotConfiguredTitle": "E-mail not sent",
+    "emailNotConfigured": "The quotation is now waiting for the customer, but e-mail sending is not configured, so no e-mail was sent. Use Copy approval link to send the link by Viber or WhatsApp, or Record customer response when the customer answers.",
+    "errors": {
+      "channel": "Select how the response was received",
+      "responseDate": "Enter the response date",
+      "remarks": "Enter a reference or remarks"
+    }
+  },
+  "emailOutbox": {
+    "title": "E-mail Outbox",
+    "intro": "Every e-mail the system has queued: quotations, approval links, broker slips, placement orders, notices. Queued messages are sent by the E-mail outbox schedule; a failed message can be retried.",
+    "refresh": "Refresh",
+    "bannerActive": "E-mail sending is enabled: queued messages go out on the next run of the E-mail outbox schedule.",
+    "bannerInactive": "E-mail sending is not configured, so queued messages stay here and are not delivered.",
+    "reasonSmtp": "The mail server (SMTP_URL) is not set on the server.",
+    "reasonSwitch": "Send e-mails is switched off (System Settings, Notification).",
+    "queuedNotConfigured": "Queued - e-mail sending is not configured",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search recipient, subject or reference",
+    "empty": "No e-mails",
+    "retry": "Retry",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "columns": {
+      "status": "Status",
+      "to": "To",
+      "subject": "Subject",
+      "about": "Record",
+      "attempts": "Attempts",
+      "lastError": "Last error",
+      "created": "Created",
+      "sent": "Sent"
+    }
+  },
+  "productClassification": {
+    "businessType": "Business Type",
+    "customerSegment": "Customer Segment",
+    "select": "Select",
+    "businessTypes": {
+      "package": "Package",
+      "non_package": "Non-package"
+    },
+    "segments": {
+      "retail": "Retail",
+      "corporate": "Corporate",
+      "both": "Retail and corporate"
+    }
+  },
+  "placement": {
+    "brokerSlip": {
+      "title": "Request for Quotation (Broker Slip)",
+      "listTitle": "Requests for Quotation (Broker Slips)",
+      "listSubtitle": "Non-package risks presented to several insurers: their offers and the comparison that leads to the Quotation Slip.",
+      "new": "New Request for Quotation",
+      "newTitle": "New Request for Quotation (Broker Slip)",
+      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation."
+    },
+    "customer": {
+      "lead": "Prospect",
+      "searchLead": "Search prospects by name",
+      "contactNumber": "Contact number"
+    },
+    "journey": {
+      "steps": {
+        "brokerSlip": "Request for Quotation"
+      },
+      "hint": "Journey for this product: request for quotation {{brokerSlip}}, placement slip {{placementSlip}}"
+    }
+  },
+  "salesMarketing": {
+    "newProspect": "New prospect",
+    "includePackage": "Include package products",
+    "requestQuotes": "Request quotes from insurers",
+    "requestQuotesHint": "Send this prospect and risk to several insurers as a Request for Quotation (broker slip) instead of pricing it here",
+    "quickQuote": {
+      "title": "Quick Quote",
+      "subtitle": "Package products: standard tariff and wording, quoted on the spot. Non-package risks go to the insurers through a Request for Quotation.",
+      "nonPackage": "Request for Quotation (non-package)",
+      "none": "No product is classified as a package product. Set the business type on Master > Generals > Insurance Management > Product.",
+      "wizard": "Quote wizard: enter the customer and the vehicle, and the premium is priced from the tariff.",
+      "noWizard": "No quote wizard for this product yet: request the terms from the insurers.",
+      "start": "Start quote",
+      "request": "Request quotation"
+    }
   }
 }

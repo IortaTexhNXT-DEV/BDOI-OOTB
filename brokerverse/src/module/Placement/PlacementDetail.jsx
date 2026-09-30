@@ -8,6 +8,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
 import placementService from "../../services/placementService";
+import { useEmailSending, withQueuedNotice } from "../../utility/emailNotice";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { hasPermission } from "../../utils/canOpen";
 import { Field, JourneyTimeline, PageHeader, ParticipantEditor, ParticipantsTable, StatusTag, formatDate, participantProblem, usePlacementOptions } from "./shared";
@@ -21,6 +22,8 @@ const PlacementDetail = () => {
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
   const options = usePlacementOptions();
+  // broker slips and placement slips go to the insurers by e-mail
+  const emailSending = useEmailSending();
   const [p, setP] = useState(null);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(null);
@@ -79,7 +82,7 @@ const PlacementDetail = () => {
         {editable && <Button label={t("placement.actions.editParticipants")} icon="pi pi-users" severity="secondary" outlined className="ml-2"
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
         {["draft", "sent"].includes(p.status) && <Button label={p.status === "sent" ? t("placement.actions.resend") : t("placement.actions.sendToInsurers")} icon="pi pi-send" className="ml-2" loading={busy}
-          onClick={() => act(() => placementService.sendPlacement(p.id), (r) => t("placement.messages.sent", { count: r.sent?.length || 0 }))} />}
+          onClick={() => act(() => placementService.sendPlacement(p.id), (r) => withQueuedNotice(t("placement.messages.sent", { count: r.sent?.length || 0 }), emailSending))} />}
         {canIssue && <Button label={t("placement.actions.issuePolicy")} icon="pi pi-verified" severity="success" className="ml-2" onClick={() => setIssuing({ policyNumber: "", kyc: {} })} />}
         {!["issued", "cancelled"].includes(p.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={() => setCancelling({ reason: "" })} />}
       </PageHeader>

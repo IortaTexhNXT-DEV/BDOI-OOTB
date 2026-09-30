@@ -207,12 +207,13 @@ export const JourneyTimeline = ({ steps }) => {
 };
 
 /** Customer picker: an existing client or lead (autocomplete), or (optionally) a new insured. */
-export const CustomerPicker = ({ value, onChange, allowNew = false }) => {
+/** Customer of a slip: an existing client or lead, or (allowNew) a new one typed in; newLabel names that choice. */
+export const CustomerPicker = ({ value, onChange, allowNew = false, newLabel }) => {
   const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState([]);
   const timer = useRef(null);
   const kind = value?.kind || "client";
-  const kinds = [{ label: t("placement.customer.client"), value: "client" }, { label: t("placement.customer.lead"), value: "lead" }, ...(allowNew ? [{ label: t("placement.customer.new"), value: "new" }] : [])];
+  const kinds = [{ label: t("placement.customer.client"), value: "client" }, { label: t("placement.customer.lead"), value: "lead" }, ...(allowNew ? [{ label: newLabel || t("placement.customer.new"), value: "new" }] : [])];
   const search = (e) => {
     clearTimeout(timer.current);
     timer.current = setTimeout(async () => {
@@ -246,6 +247,10 @@ export const CustomerPicker = ({ value, onChange, allowNew = false }) => {
             <label htmlFor="new-email">{t("placement.customer.email")}</label>
             <InputText id="new-email" value={value?.emailId || ""} onChange={(e) => onChange({ ...value, kind, emailId: e.target.value })} className="w-full" />
           </div>
+          <div className="col-12 md:col-6">
+            <label htmlFor="new-phone">{t("placement.customer.contactNumber")}</label>
+            <InputText id="new-phone" value={value?.contactNumber || ""} onChange={(e) => onChange({ ...value, kind, contactNumber: e.target.value })} className="w-full" />
+          </div>
         </div>
       ) : (
         <AutoComplete value={value?.selected || ""} suggestions={suggestions} completeMethod={search} field="label" onChange={(e) => onChange({ kind, selected: e.value })}
@@ -258,7 +263,9 @@ export const CustomerPicker = ({ value, onChange, allowNew = false }) => {
 /** API fields for the picked customer. */
 export const customerFields = (c) => {
   if (!c) return {};
-  if (c.kind === "new") return { companyName: c.companyName || undefined, firstName: c.firstName || undefined, lastName: c.lastName || undefined, emailId: c.emailId || undefined };
+  if (c.kind === "new") {
+    return { companyName: c.companyName || undefined, firstName: c.firstName || undefined, lastName: c.lastName || undefined, emailId: c.emailId || undefined, contactNumber: c.contactNumber || undefined };
+  }
   const id = c.selected?.id;
   if (!id) return {};
   return c.kind === "lead" ? { leadRefId: id } : { clientId: id };

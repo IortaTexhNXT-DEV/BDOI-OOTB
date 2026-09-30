@@ -56,6 +56,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `61_direct_bill.sql` | reference | direct-bill configuration and report columns |
 | `63_bank_reconciliation.sql` | reference | bank reconciliation: document numbering series (BST, BRC), GL cash account and statement format fields on the bank account master, month-end checklist wording, report catalogue rows (bank reconciliation statement, outstanding cheques, deposits in transit, unmatched bank lines, bank book) |
 | `sample/63_bank_reconciliation.sql` | sample | sample bank accounts linked to their GL cash accounts; last month's BDO statement built from the sample ledger (plus interest, final tax, service charge) |
+| `64_product_classification.sql` | reference | package / non-package business type and customer segment of the products (Philippine practice), the additional package and non-package products (travel, householder, micro-insurance, group PA, CAR, EAR, machinery breakdown, marine hull, money and securities), the two fields on the Product master |
 | `70_security.sql` | reference | security configuration |
 
 No test users are seeded: the tests and the end-to-end checks create their own users.

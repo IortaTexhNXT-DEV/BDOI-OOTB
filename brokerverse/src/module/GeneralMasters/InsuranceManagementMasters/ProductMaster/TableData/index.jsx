@@ -165,6 +165,18 @@ const TableData = ({ navigate }) => {
           body={(rowData) => rowData.lineofBusiness?.toUpperCase()}
         ></Column>
         <Column
+          field="businessType"
+          header={t("productClassification.businessType")}
+          className="fieldvalue_container"
+          body={(rowData) => (rowData.businessType ? t(`productClassification.businessTypes.${rowData.businessType}`) : "-")}
+        ></Column>
+        <Column
+          field="customerSegment"
+          header={t("productClassification.customerSegment")}
+          className="fieldvalue_container"
+          body={(rowData) => (rowData.customerSegment ? t(`productClassification.segments.${rowData.customerSegment}`) : "-")}
+        ></Column>
+        <Column
           field="commissionCode"
           header="Commission Code"
           className="fieldvalue_container"

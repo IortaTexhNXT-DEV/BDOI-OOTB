@@ -43,6 +43,9 @@ import {
 } from "./fireRiskConstants";
 import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
 import logger from "../../../utility/logger";
+import { notifyWarn } from "../../../utility/dialogs";
+import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
+import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -1354,7 +1357,8 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       const result = await quotationService.sendQuotationForApproval(createdQuotationId);
       if (result.success) {
         await fetchQuotationStatus();
-        toastRef.current?.showToast({ detail: t("fireLead.quoteSentToCustomer") });
+        if (result.data?.emailSending === false) notifyWarn(t("customerResponse.emailNotConfigured"));
+        else toastRef.current?.showToast({ detail: t("fireLead.quoteSentToCustomer") });
       } else {
         if (result.error?.includes?.("PendingCustomer")) {
           await fetchQuotationStatus();
@@ -1575,6 +1579,27 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.back")}
             className="p-button-outlined"
             onClick={() => setStep(2)}
+          />
+          {/* same prospect and risk, sent to the market instead of priced from the tariff */}
+          <RequestForQuotationButton
+            disabled={!createdLeadId || !hasAtLeastOneSi}
+            prefill={{
+              leadRefId: createdLeadId,
+              leadName: personalDetails.CompanyName || [personalDetails.FirstName, personalDetails.LastName].filter(Boolean).join(" "),
+              productType: "Fire and Allied Perils",
+              riskDetails: {
+                location: riskDetails.LocationAddress,
+                locationCode: riskDetails.LocationCodeDescription,
+                occupancy: riskDetails.OccupancyType,
+                natureOfBusiness: riskDetails.NatureOfBusiness,
+                construction: riskDetails.ConstructionType,
+                buildingType: riskDetails.BuildingType,
+                floors: riskDetails.NoOfFloors,
+                earthquakeZone: riskDetails.EarthquakeZone,
+                fireProtection: riskDetails.FireProtection,
+              },
+              requestedCovers: SMI_ENTRY_FIELDS.map((f) => ({ cover: t(f.labelKey), sumInsured: Number(siValues[f.key]) || 0 })),
+            }}
           />
           <Button
             label={t("fireLead.continueToPreview")}
@@ -1804,20 +1829,11 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           onClick={() => setStep(3)}
         />
         {quotationStatus === "PendingCustomer" ? (
-          <div
-            className="waiting-notice"
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#fef3c7",
-              borderRadius: "6px",
-              display: "flex",
-              alignItems: "center",
-              fontSize: 14,
-            }}
-          >
-            <i className="pi pi-clock" style={{ marginRight: "8px" }}></i>
-            {t("fireLead.waitingForCustomerApproval")}
-          </div>
+          <CustomerResponseActions
+            quotationId={createdQuotationId}
+            notice={t("fireLead.waitingForCustomerApproval")}
+            onRecorded={fetchQuotationStatus}
+          />
         ) : (
           <Button
             label={t("fireLead.sendToCustomer")}

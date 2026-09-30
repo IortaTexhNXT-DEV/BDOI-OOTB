@@ -33,6 +33,7 @@ import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 import { notifyError } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
+import CustomerResponseActions from "../customerResponse/CustomerResponseActions";
 import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
@@ -389,12 +390,12 @@ const QuoteDetailView = ({ action }) => {
       const result = await response.json();
 
       if (result.success) {
-        toast.current?.show({
-          severity: "success",
-          summary: t("quoteDetailView.success"),
-          detail: t("quoteDetailView.quoteSentToSuccess", { sentTo: result.sentTo }),
-          life: 3000,
-        });
+        // e-mail sending off: the quotation still waits for the customer, but nobody was e-mailed
+        toast.current?.show(
+          result.emailSending === false
+            ? { severity: "warn", summary: t("customerResponse.emailNotConfiguredTitle"), detail: t("customerResponse.emailNotConfigured"), life: 10000 }
+            : { severity: "success", summary: t("quoteDetailView.success"), detail: t("quoteDetailView.quoteSentToSuccess", { sentTo: result.sentTo }), life: 3000 }
+        );
         // Refresh quotation data
         const refreshed = await dispatch(
           getQuotationByIdMiddleware(quotationData.quotationId)
@@ -1266,22 +1267,11 @@ const QuoteDetailView = ({ action }) => {
 
                 {/* PendingCustomer: Waiting for customer */}
                 {quotationData?.quotationStatus === "PendingCustomer" && (
-                  <div
-                    className="waiting-notice"
-                    style={{
-                      padding: "10px",
-                      backgroundColor: "#fef3c7",
-                      borderRadius: "6px",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <i
-                      className="pi pi-clock"
-                      style={{ marginRight: "8px" }}
-                    ></i>
-                    {t("quoteDetailView.waitingForCustomerApproval")}
-                  </div>
+                  <CustomerResponseActions
+                    quotationId={quotationData.quotationId}
+                    notice={t("quoteDetailView.waitingForCustomerApproval")}
+                    onRecorded={loadQuotation}
+                  />
                 )}
               </div>
             )}
