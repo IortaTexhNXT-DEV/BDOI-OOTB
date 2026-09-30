@@ -23,6 +23,8 @@ export function toClient(r, policies = null) {
     contactNumber: r.phone, phone: r.phone, DOB: r.birth_date, gender: r.gender, houseNo: r.house_no, barangay: r.barangay,
     city: r.city, province: r.state, country: r.country, zipCode: r.postal_code, roadThanon: r.road, soiAlley: r.soi,
     mooVillage: r.moo, leadCategory: r.lead_category, leadId: r.lead_id, status: r.status, source: r.source,
+    // set on Accounts > Credit Control > Client Credit Limits (approve:credit-control), not on the client form
+    creditLimit: r.credit_limit === null || r.credit_limit === undefined ? null : Number(r.credit_limit),
     policies: policies ?? r.policies ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }

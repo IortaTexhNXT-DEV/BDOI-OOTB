@@ -45,7 +45,7 @@ Approval: every work item that needs approval opens a row in `remittance_approva
 ## Key settings
 
 `remittance.approval_levels`, `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
-`remittance.default_due_days`, `remittance.transfer_methods`, `remittance.status_labels`,
+`remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels`,
 `remittance.bill_email_subject` / `_body`, `remittance.statement_email_subject` / `_body`,
 `remittance.reconciliation_bank_account`, `remittance.reconciliation_tolerance`, and the `direct_bill.*` group
 (default billing mode, VAT registration, insurer EWT rate, debit note due days, e-mail text, client payment required

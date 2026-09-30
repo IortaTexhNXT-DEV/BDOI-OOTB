@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (741 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (760 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -13092,6 +13092,1526 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rate\": 0.175,\n    \"source\": \"matrix\",\n    \"ruleId\": 1,\n    \"level\": \"insurer + product\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Credit Control",
+      "item": [
+        {
+          "name": "Client credit limits with the open broker-billed premium (exposure) and what is left (search, overOnly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/clients?overOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "overOnly",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Client credit limits with the open broker-billed premium (exposure) and what is left (search, overOnly)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/clients?overOnly=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "clients"
+                  ],
+                  "query": [
+                    {
+                      "key": "overOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Client credit limits with the open broker-billed premium (exposure) and what is left (search, overOnly)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientCode\": \"CL-2026-00001\",\n      \"clientName\": \"ABC Corp\",\n      \"creditLimit\": 500000,\n      \"exposure\": 520000,\n      \"available\": -20000,\n      \"overLimit\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Exposure of a client with a new premium amount against its credit limit (warning before issuing a policy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/clients/:clientId/credit-check?amount=125250",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "clients",
+                ":clientId",
+                "credit-check"
+              ],
+              "query": [
+                {
+                  "key": "amount",
+                  "value": "125250"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "clientId",
+                  "value": "",
+                  "description": "clientId (path parameter)"
+                }
+              ]
+            },
+            "description": "Exposure of a client with a new premium amount against its credit limit (warning before issuing a policy)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/clients/:clientId/credit-check?amount=125250",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "clients",
+                    ":clientId",
+                    "credit-check"
+                  ],
+                  "query": [
+                    {
+                      "key": "amount",
+                      "value": "125250"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "clientId",
+                      "value": "",
+                      "description": "clientId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Exposure of a client with a new premium amount against its credit limit (warning before issuing a policy)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"creditLimit\": 500000,\n    \"exposure\": 400000,\n    \"exposureAfter\": 525250,\n    \"exceeds\": true,\n    \"exceededBy\": 25250\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set a client's credit limit (null removes it)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/clients/:clientId/credit-limit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "clients",
+                ":clientId",
+                "credit-limit"
+              ],
+              "variable": [
+                {
+                  "key": "clientId",
+                  "value": "",
+                  "description": "clientId (path parameter)"
+                }
+              ]
+            },
+            "description": "Set a client's credit limit (null removes it)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: approve:credit-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"creditLimit\": 500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/clients/:clientId/credit-limit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "clients",
+                    ":clientId",
+                    "credit-limit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "clientId",
+                      "value": "",
+                      "description": "clientId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Set a client's credit limit (null removes it)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: approve:credit-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"creditLimit\": 500000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"creditLimit\": 500000\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Broker-billed policies issued over the client's credit limit (openOnly = not yet acknowledged)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/credit-exceptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "credit-exceptions"
+              ]
+            },
+            "description": "Broker-billed policies issued over the client's credit limit (openOnly = not yet acknowledged)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/credit-exceptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "credit-exceptions"
+                  ]
+                },
+                "description": "Broker-billed policies issued over the client's credit limit (openOnly = not yet acknowledged)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"clientName\": \"ABC Corp\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"creditLimit\": 500000,\n      \"exposureAfter\": 525250,\n      \"exceededBy\": 25250\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Acknowledge a credit limit exception (remarks)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/credit-exceptions/:id/acknowledge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "credit-exceptions",
+                ":id",
+                "acknowledge"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Acknowledge a credit limit exception (remarks)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: write:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Approved by the account manager\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/credit-exceptions/:id/acknowledge",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "credit-exceptions",
+                    ":id",
+                    "acknowledge"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Acknowledge a credit limit exception (remarks)\n\nFront-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: write:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Approved by the account manager\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"acknowledged\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel an instalment plan (the bill keeps its current due date)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/instalment-plans/:planId/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "instalment-plans",
+                ":planId",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "",
+                  "description": "planId (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel an instalment plan (the bill keeps its current due date)\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: write:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Client paid in full\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/instalment-plans/:planId/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "instalment-plans",
+                    ":planId",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "planId",
+                      "value": "",
+                      "description": "planId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel an instalment plan (the bill keeps its current due date)\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: write:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Client paid in full\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"ipl_1\",\n    \"policyId\": \"pol_1\",\n    \"receivableId\": \"rcv_1\",\n    \"billNumber\": \"INV-2026-00012\",\n    \"frequency\": \"monthly\",\n    \"instalmentCount\": 4,\n    \"status\": \"cancelled\",\n    \"instalments\": [\n      {\n        \"seq\": 1,\n        \"dueDate\": \"2026-10-15\",\n        \"amount\": 3131.25,\n        \"paid\": 3131.25,\n        \"outstanding\": 0,\n        \"status\": \"paid\",\n        \"daysPastDue\": 0\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Outstanding instalments of active plans aged on their due dates (clientId, policyId, insurerId, overdueOnly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/instalments/ageing?overdueOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "instalments",
+                "ageing"
+              ],
+              "query": [
+                {
+                  "key": "overdueOnly",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Outstanding instalments of active plans aged on their due dates (clientId, policyId, insurerId, overdueOnly)\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/instalments/ageing?overdueOnly=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "instalments",
+                    "ageing"
+                  ],
+                  "query": [
+                    {
+                      "key": "overdueOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Outstanding instalments of active plans aged on their due dates (clientId, policyId, insurerId, overdueOnly)\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"count\": 1,\n      \"outstanding\": 3131.25,\n      \"current\": 0,\n      \"b1\": 3131.25\n    },\n    \"rows\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Premium bills of a broker-billed policy, their instalment plans and a proposed schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/policies/:policyId/instalment-plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "policies",
+                ":policyId",
+                "instalment-plans"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Premium bills of a broker-billed policy, their instalment plans and a proposed schedule\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/policies/:policyId/instalment-plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "policies",
+                    ":policyId",
+                    "instalment-plans"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Premium bills of a broker-billed policy, their instalment plans and a proposed schedule\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyNumber\": \"POL-2026-00001\",\n    \"bills\": [],\n    \"plans\": [\n      {\n        \"id\": \"ipl_1\",\n        \"policyId\": \"pol_1\",\n        \"receivableId\": \"rcv_1\",\n        \"billNumber\": \"INV-2026-00012\",\n        \"frequency\": \"monthly\",\n        \"instalmentCount\": 4,\n        \"status\": \"active\",\n        \"instalments\": [\n          {\n            \"seq\": 1,\n            \"dueDate\": \"2026-10-15\",\n            \"amount\": 3131.25,\n            \"paid\": 3131.25,\n            \"outstanding\": 0,\n            \"status\": \"paid\",\n            \"daysPastDue\": 0\n          }\n        ]\n      }\n    ],\n    \"frequencies\": {\n      \"monthly\": 1,\n      \"quarterly\": 3\n    },\n    \"proposal\": {\n      \"count\": 4,\n      \"instalments\": []\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Save the instalment plan of a bill: generated from the terms, or the edited instalments (must add up to the bill); replaces its active plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/policies/:policyId/instalment-plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "policies",
+                ":policyId",
+                "instalment-plans"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Save the instalment plan of a bill: generated from the terms, or the edited instalments (must add up to the bill); replaces its active plan\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: write:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receivableId\": \"rcv_1\",\n  \"frequency\": \"monthly\",\n  \"instalments\": [\n    {\n      \"dueDate\": \"2026-10-15\",\n      \"amount\": 6262.5\n    },\n    {\n      \"dueDate\": \"2026-11-15\",\n      \"amount\": 6262.5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/policies/:policyId/instalment-plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "policies",
+                    ":policyId",
+                    "instalment-plans"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Save the instalment plan of a bill: generated from the terms, or the edited instalments (must add up to the bill); replaces its active plan\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: write:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"receivableId\": \"rcv_1\",\n  \"frequency\": \"monthly\",\n  \"instalments\": [\n    {\n      \"dueDate\": \"2026-10-15\",\n      \"amount\": 6262.5\n    },\n    {\n      \"dueDate\": \"2026-11-15\",\n      \"amount\": 6262.5\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"ipl_1\",\n    \"policyId\": \"pol_1\",\n    \"receivableId\": \"rcv_1\",\n    \"billNumber\": \"INV-2026-00012\",\n    \"frequency\": \"monthly\",\n    \"instalmentCount\": 4,\n    \"status\": \"active\",\n    \"instalments\": [\n      {\n        \"seq\": 1,\n        \"dueDate\": \"2026-10-15\",\n        \"amount\": 3131.25,\n        \"paid\": 3131.25,\n        \"outstanding\": 0,\n        \"status\": \"paid\",\n        \"daysPastDue\": 0\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Schedule generated from the terms (frequency, number of instalments, first due date, down payment); nothing is saved",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/policies/:policyId/instalment-plans/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "policies",
+                ":policyId",
+                "instalment-plans",
+                "preview"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Schedule generated from the terms (frequency, number of instalments, first due date, down payment); nothing is saved\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"frequency\": \"monthly\",\n  \"count\": 4,\n  \"firstDueDate\": \"2026-10-15\",\n  \"downPayment\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/policies/:policyId/instalment-plans/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "policies",
+                    ":policyId",
+                    "instalment-plans",
+                    "preview"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Schedule generated from the terms (frequency, number of instalments, first due date, down payment); nothing is saved\n\nFront-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"frequency\": \"monthly\",\n  \"count\": 4,\n  \"firstDueDate\": \"2026-10-15\",\n  \"downPayment\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"seq\": 1,\n      \"dueDate\": \"2026-10-15\",\n      \"amount\": 3131.25\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Premium collected and not yet remitted to insurers, aged on the remittance terms (insurerId, asOf, overdueOnly; format=xlsx or csv to download)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/remittance-ageing?overdueOnly=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "remittance-ageing"
+              ],
+              "query": [
+                {
+                  "key": "overdueOnly",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Premium collected and not yet remitted to insurers, aged on the remittance terms (insurerId, asOf, overdueOnly; format=xlsx or csv to download)\n\nFront-end touchpoint: Accounts > Credit Control > Remittance Ageing\n\nAccess: read:collections, read:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/remittance-ageing?overdueOnly=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "remittance-ageing"
+                  ],
+                  "query": [
+                    {
+                      "key": "overdueOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Premium collected and not yet remitted to insurers, aged on the remittance terms (insurerId, asOf, overdueOnly; format=xlsx or csv to download)\n\nFront-end touchpoint: Accounts > Credit Control > Remittance Ageing\n\nAccess: read:collections, read:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"total\": 11025,\n      \"current\": 0,\n      \"b1\": 11025\n    },\n    \"insurers\": [\n      {\n        \"insurerName\": \"FPG Insurance\",\n        \"total\": 11025\n      }\n    ],\n    \"rows\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Premium warranty monitor: broker-billed policies past (breached) or near (at-risk) their premium payment warranty and unpaid (status attention | breached | at-risk | all, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty?status=breached",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "breached"
+                }
+              ]
+            },
+            "description": "Premium warranty monitor: broker-billed policies past (breached) or near (at-risk) their premium payment warranty and unpaid (status attention | breached | at-risk | all, search)\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty?status=breached",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "breached"
+                    }
+                  ]
+                },
+                "description": "Premium warranty monitor: broker-billed policies past (breached) or near (at-risk) their premium payment warranty and unpaid (status attention | breached | at-risk | all, search)\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"breached\": 1,\n      \"atRisk\": 0\n    },\n    \"rows\": [\n      {\n        \"policyNumber\": \"POL-2026-00001\",\n        \"deadline\": \"2026-09-15\",\n        \"daysPastDeadline\": 15,\n        \"premiumDue\": 12525,\n        \"status\": \"breached\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reminders, extensions and cancellation requests of a policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/:policyId/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                ":policyId",
+                "actions"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reminders, extensions and cancellation requests of a policy\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/:policyId/actions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    ":policyId",
+                    "actions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reminders, extensions and cancellation requests of a policy\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"reminder\",\n      \"notes\": \"Premium due\",\n      \"createdBy\": \"Accounting\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request the cancellation of a breached policy for non-payment: a draft cancellation endorsement for Operations; the policy is not cancelled here",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/:policyId/cancellation-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                ":policyId",
+                "cancellation-request"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Request the cancellation of a breached policy for non-payment: a draft cancellation endorsement for Operations; the policy is not cancelled here\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Three reminders sent\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/:policyId/cancellation-request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    ":policyId",
+                    "cancellation-request"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request the cancellation of a breached policy for non-payment: a draft cancellation endorsement for Operations; the policy is not cancelled here\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notes\": \"Three reminders sent\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"endorsementNumber\": \"END-2026-00031\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request an extension of the premium warranty deadline (approved by another user with approve:credit-control)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/:policyId/extensions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                ":policyId",
+                "extensions"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Request an extension of the premium warranty deadline (approved by another user with approve:credit-control)\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestedDeadline\": \"2026-10-15\",\n  \"reason\": \"Awaiting corporate cheque\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/:policyId/extensions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    ":policyId",
+                    "extensions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request an extension of the premium warranty deadline (approved by another user with approve:credit-control)\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"requestedDeadline\": \"2026-10-15\",\n  \"reason\": \"Awaiting corporate cheque\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"pending\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send the client a premium reminder (collection e-mail) and log it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/:policyId/remind",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                ":policyId",
+                "remind"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Send the client a premium reminder (collection e-mail) and log it\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Your premium is past the warranty date\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/:policyId/remind",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    ":policyId",
+                    "remind"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Send the client a premium reminder (collection e-mail) and log it\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notes\": \"Your premium is past the warranty date\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"emailId\": \"em_1\",\n    \"to\": \"client@example.ph\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Warranty extension requests awaiting approval",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/extensions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                "extensions"
+              ]
+            },
+            "description": "Warranty extension requests awaiting approval\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/extensions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    "extensions"
+                  ]
+                },
+                "description": "Warranty extension requests awaiting approval\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"policyNumber\": \"POL-2026-00001\",\n      \"currentDeadline\": \"2026-09-15\",\n      \"requestedDeadline\": \"2026-10-15\",\n      \"reason\": \"Awaiting corporate cheque\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a warranty extension request; not the requester",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/extensions/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                "extensions",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a warranty extension request; not the requester\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: approve:credit-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Cheque confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/extensions/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    "extensions",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a warranty extension request; not the requester\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: approve:credit-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Cheque confirmed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject (reason required) a warranty extension request; not the requester",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/credit-control/warranty/extensions/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "credit-control",
+                "warranty",
+                "extensions",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject (reason required) a warranty extension request; not the requester\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: approve:credit-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Cheque confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/credit-control/warranty/extensions/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "credit-control",
+                    "warranty",
+                    "extensions",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject (reason required) a warranty extension request; not the requester\n\nFront-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: approve:credit-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Cheque confirmed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"rejected\"\n  }\n}"
             }
           ]
         }

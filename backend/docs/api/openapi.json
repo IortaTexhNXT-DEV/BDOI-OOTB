@@ -54,6 +54,9 @@
       "name": "Commission Rate Matrix"
     },
     {
+      "name": "Credit Control"
+    },
+    {
       "name": "Dashboards"
     },
     {
@@ -21165,6 +21168,1914 @@
           "write:masters",
           "read:commission"
         ]
+      }
+    },
+    "/credit-control/clients": {
+      "get": {
+        "operationId": "getCreditControlClients",
+        "summary": "Client credit limits with the open broker-billed premium (exposure) and what is left (search, overOnly)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "overOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "clientCode": {
+                            "type": "string"
+                          },
+                          "clientName": {
+                            "type": "string"
+                          },
+                          "creditLimit": {
+                            "type": "integer"
+                          },
+                          "exposure": {
+                            "type": "integer"
+                          },
+                          "available": {
+                            "type": "integer"
+                          },
+                          "overLimit": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "clientCode": "CL-2026-00001",
+                      "clientName": "ABC Corp",
+                      "creditLimit": 500000,
+                      "exposure": 520000,
+                      "available": -20000,
+                      "overLimit": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Client Credit Limits",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/clients/{clientId}/credit-check": {
+      "get": {
+        "operationId": "getCreditControlClientsClientIdCreditCheck",
+        "summary": "Exposure of a client with a new premium amount against its credit limit (warning before issuing a policy)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 125250
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "creditLimit": {
+                          "type": "integer"
+                        },
+                        "exposure": {
+                          "type": "integer"
+                        },
+                        "exposureAfter": {
+                          "type": "integer"
+                        },
+                        "exceeds": {
+                          "type": "boolean"
+                        },
+                        "exceededBy": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "creditLimit": 500000,
+                    "exposure": 400000,
+                    "exposureAfter": 525250,
+                    "exceeds": true,
+                    "exceededBy": 25250
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Client Credit Limits",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/clients/{clientId}/credit-limit": {
+      "put": {
+        "operationId": "putCreditControlClientsClientIdCreditLimit",
+        "summary": "Set a client's credit limit (null removes it)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: approve:credit-control",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "creditLimit": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "creditLimit": 500000
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Client Credit Limits",
+        "x-permissions": [
+          "approve:credit-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "creditLimit": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "creditLimit": 500000
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/credit-exceptions": {
+      "get": {
+        "operationId": "getCreditControlCreditExceptions",
+        "summary": "Broker-billed policies issued over the client's credit limit (openOnly = not yet acknowledged)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: read:collections",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "clientName": {
+                            "type": "string"
+                          },
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "creditLimit": {
+                            "type": "integer"
+                          },
+                          "exposureAfter": {
+                            "type": "integer"
+                          },
+                          "exceededBy": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "clientName": "ABC Corp",
+                      "policyNumber": "POL-2026-00001",
+                      "creditLimit": 500000,
+                      "exposureAfter": 525250,
+                      "exceededBy": 25250
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Client Credit Limits",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/credit-exceptions/{id}/acknowledge": {
+      "post": {
+        "operationId": "postCreditControlCreditExceptionsIdAcknowledge",
+        "summary": "Acknowledge a credit limit exception (remarks)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Client Credit Limits\n\nAccess: write:collections",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "acknowledged": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "acknowledged": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Client Credit Limits",
+        "x-permissions": [
+          "write:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Approved by the account manager"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/instalment-plans/{planId}/cancel": {
+      "post": {
+        "operationId": "postCreditControlInstalmentPlansPlanIdCancel",
+        "summary": "Cancel an instalment plan (the bill keeps its current due date)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: write:collections",
+        "parameters": [
+          {
+            "name": "planId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "receivableId": {
+                          "type": "string"
+                        },
+                        "billNumber": {
+                          "type": "string"
+                        },
+                        "frequency": {
+                          "type": "string"
+                        },
+                        "instalmentCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "instalments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "seq": {
+                                "type": "integer"
+                              },
+                              "dueDate": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "number"
+                              },
+                              "paid": {
+                                "type": "number"
+                              },
+                              "outstanding": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "daysPastDue": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "ipl_1",
+                    "policyId": "pol_1",
+                    "receivableId": "rcv_1",
+                    "billNumber": "INV-2026-00012",
+                    "frequency": "monthly",
+                    "instalmentCount": 4,
+                    "status": "cancelled",
+                    "instalments": [
+                      {
+                        "seq": 1,
+                        "dueDate": "2026-10-15",
+                        "amount": 3131.25,
+                        "paid": 3131.25,
+                        "outstanding": 0,
+                        "status": "paid",
+                        "daysPastDue": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Instalment Plans",
+        "x-permissions": [
+          "write:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Client paid in full"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/instalments/ageing": {
+      "get": {
+        "operationId": "getCreditControlInstalmentsAgeing",
+        "summary": "Outstanding instalments of active plans aged on their due dates (clientId, policyId, insurerId, overdueOnly)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "outstanding": {
+                              "type": "number"
+                            },
+                            "current": {
+                              "type": "integer"
+                            },
+                            "b1": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "count": 1,
+                      "outstanding": 3131.25,
+                      "current": 0,
+                      "b1": 3131.25
+                    },
+                    "rows": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Instalment Plans",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/policies/{policyId}/instalment-plans": {
+      "get": {
+        "operationId": "getCreditControlPoliciesPolicyIdInstalmentPlans",
+        "summary": "Premium bills of a broker-billed policy, their instalment plans and a proposed schedule",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "bills": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "plans": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "policyId": {
+                                "type": "string"
+                              },
+                              "receivableId": {
+                                "type": "string"
+                              },
+                              "billNumber": {
+                                "type": "string"
+                              },
+                              "frequency": {
+                                "type": "string"
+                              },
+                              "instalmentCount": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "instalments": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "seq": {
+                                      "type": "integer"
+                                    },
+                                    "dueDate": {
+                                      "type": "string"
+                                    },
+                                    "amount": {
+                                      "type": "number"
+                                    },
+                                    "paid": {
+                                      "type": "number"
+                                    },
+                                    "outstanding": {
+                                      "type": "integer"
+                                    },
+                                    "status": {
+                                      "type": "string"
+                                    },
+                                    "daysPastDue": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "frequencies": {
+                          "type": "object",
+                          "properties": {
+                            "monthly": {
+                              "type": "integer"
+                            },
+                            "quarterly": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "proposal": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "instalments": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyNumber": "POL-2026-00001",
+                    "bills": [],
+                    "plans": [
+                      {
+                        "id": "ipl_1",
+                        "policyId": "pol_1",
+                        "receivableId": "rcv_1",
+                        "billNumber": "INV-2026-00012",
+                        "frequency": "monthly",
+                        "instalmentCount": 4,
+                        "status": "active",
+                        "instalments": [
+                          {
+                            "seq": 1,
+                            "dueDate": "2026-10-15",
+                            "amount": 3131.25,
+                            "paid": 3131.25,
+                            "outstanding": 0,
+                            "status": "paid",
+                            "daysPastDue": 0
+                          }
+                        ]
+                      }
+                    ],
+                    "frequencies": {
+                      "monthly": 1,
+                      "quarterly": 3
+                    },
+                    "proposal": {
+                      "count": 4,
+                      "instalments": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Instalment Plans",
+        "x-permissions": [
+          "read:collections"
+        ]
+      },
+      "post": {
+        "operationId": "postCreditControlPoliciesPolicyIdInstalmentPlans",
+        "summary": "Save the instalment plan of a bill: generated from the terms, or the edited instalments (must add up to the bill); replaces its active plan",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: write:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "receivableId": {
+                          "type": "string"
+                        },
+                        "billNumber": {
+                          "type": "string"
+                        },
+                        "frequency": {
+                          "type": "string"
+                        },
+                        "instalmentCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "instalments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "seq": {
+                                "type": "integer"
+                              },
+                              "dueDate": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "number"
+                              },
+                              "paid": {
+                                "type": "number"
+                              },
+                              "outstanding": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "daysPastDue": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "ipl_1",
+                    "policyId": "pol_1",
+                    "receivableId": "rcv_1",
+                    "billNumber": "INV-2026-00012",
+                    "frequency": "monthly",
+                    "instalmentCount": 4,
+                    "status": "active",
+                    "instalments": [
+                      {
+                        "seq": 1,
+                        "dueDate": "2026-10-15",
+                        "amount": 3131.25,
+                        "paid": 3131.25,
+                        "outstanding": 0,
+                        "status": "paid",
+                        "daysPastDue": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Instalment Plans",
+        "x-permissions": [
+          "write:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "receivableId": {
+                    "type": "string"
+                  },
+                  "frequency": {
+                    "type": "string"
+                  },
+                  "instalments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "receivableId": "rcv_1",
+                "frequency": "monthly",
+                "instalments": [
+                  {
+                    "dueDate": "2026-10-15",
+                    "amount": 6262.5
+                  },
+                  {
+                    "dueDate": "2026-11-15",
+                    "amount": 6262.5
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/policies/{policyId}/instalment-plans/preview": {
+      "post": {
+        "operationId": "postCreditControlPoliciesPolicyIdInstalmentPlansPreview",
+        "summary": "Schedule generated from the terms (frequency, number of instalments, first due date, down payment); nothing is saved",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Instalment Plans\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "seq": {
+                            "type": "integer"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "seq": 1,
+                      "dueDate": "2026-10-15",
+                      "amount": 3131.25
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Instalment Plans",
+        "x-permissions": [
+          "read:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "frequency": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "integer"
+                  },
+                  "firstDueDate": {
+                    "type": "string"
+                  },
+                  "downPayment": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "frequency": "monthly",
+                "count": 4,
+                "firstDueDate": "2026-10-15",
+                "downPayment": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/remittance-ageing": {
+      "get": {
+        "operationId": "getCreditControlRemittanceAgeing",
+        "summary": "Premium collected and not yet remitted to insurers, aged on the remittance terms (insurerId, asOf, overdueOnly; format=xlsx or csv to download)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Remittance Ageing\n\nAccess: read:collections, read:remittance",
+        "parameters": [
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "current": {
+                              "type": "integer"
+                            },
+                            "b1": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "insurerName": {
+                                "type": "string"
+                              },
+                              "total": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "total": 11025,
+                      "current": 0,
+                      "b1": 11025
+                    },
+                    "insurers": [
+                      {
+                        "insurerName": "FPG Insurance",
+                        "total": 11025
+                      }
+                    ],
+                    "rows": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Remittance Ageing",
+        "x-permissions": [
+          "read:collections",
+          "read:remittance"
+        ]
+      }
+    },
+    "/credit-control/warranty": {
+      "get": {
+        "operationId": "getCreditControlWarranty",
+        "summary": "Premium warranty monitor: broker-billed policies past (breached) or near (at-risk) their premium payment warranty and unpaid (status attention | breached | at-risk | all, search)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "breached"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "breached": {
+                              "type": "integer"
+                            },
+                            "atRisk": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "deadline": {
+                                "type": "string"
+                              },
+                              "daysPastDeadline": {
+                                "type": "integer"
+                              },
+                              "premiumDue": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "breached": 1,
+                      "atRisk": 0
+                    },
+                    "rows": [
+                      {
+                        "policyNumber": "POL-2026-00001",
+                        "deadline": "2026-09-15",
+                        "daysPastDeadline": 15,
+                        "premiumDue": 12525,
+                        "status": "breached"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/warranty/{policyId}/actions": {
+      "get": {
+        "operationId": "getCreditControlWarrantyPolicyIdActions",
+        "summary": "Reminders, extensions and cancellation requests of a policy",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string"
+                          },
+                          "notes": {
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "action": "reminder",
+                      "notes": "Premium due",
+                      "createdBy": "Accounting"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/warranty/{policyId}/cancellation-request": {
+      "post": {
+        "operationId": "postCreditControlWarrantyPolicyIdCancellationRequest",
+        "summary": "Request the cancellation of a breached policy for non-payment: a draft cancellation endorsement for Operations; the policy is not cancelled here",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "endorsementNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "endorsementNumber": "END-2026-00031"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "write:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "notes": "Three reminders sent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/warranty/{policyId}/extensions": {
+      "post": {
+        "operationId": "postCreditControlWarrantyPolicyIdExtensions",
+        "summary": "Request an extension of the premium warranty deadline (approved by another user with approve:credit-control)",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "pending"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "write:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestedDeadline": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "requestedDeadline": "2026-10-15",
+                "reason": "Awaiting corporate cheque"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/warranty/{policyId}/remind": {
+      "post": {
+        "operationId": "postCreditControlWarrantyPolicyIdRemind",
+        "summary": "Send the client a premium reminder (collection e-mail) and log it",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: write:collections",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "emailId": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "emailId": "em_1",
+                    "to": "client@example.ph"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "write:collections"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "notes": "Your premium is past the warranty date"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/warranty/extensions": {
+      "get": {
+        "operationId": "getCreditControlWarrantyExtensions",
+        "summary": "Warranty extension requests awaiting approval",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: read:collections",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "currentDeadline": {
+                            "type": "string"
+                          },
+                          "requestedDeadline": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "policyNumber": "POL-2026-00001",
+                      "currentDeadline": "2026-09-15",
+                      "requestedDeadline": "2026-10-15",
+                      "reason": "Awaiting corporate cheque"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "read:collections"
+        ]
+      }
+    },
+    "/credit-control/warranty/extensions/{id}/approve": {
+      "post": {
+        "operationId": "postCreditControlWarrantyExtensionsIdApprove",
+        "summary": "Approve a warranty extension request; not the requester",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: approve:credit-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "approve:credit-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Cheque confirmed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/credit-control/warranty/extensions/{id}/reject": {
+      "post": {
+        "operationId": "postCreditControlWarrantyExtensionsIdReject",
+        "summary": "Reject (reason required) a warranty extension request; not the requester",
+        "tags": [
+          "Credit Control"
+        ],
+        "description": "Front-end touchpoint: Accounts > Credit Control > Premium Warranty Monitor\n\nAccess: approve:credit-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "rejected"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Credit Control > Premium Warranty Monitor",
+        "x-permissions": [
+          "approve:credit-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Cheque confirmed"
+              }
+            }
+          }
+        }
       }
     },
     "/agent/get-dashboard-details": {

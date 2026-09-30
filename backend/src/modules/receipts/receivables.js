@@ -14,6 +14,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { commissionTaxSetup, commissionTaxes, ratesOf } from '../accounting/lib/commissionTax.js';
+import { syncDueDate } from '../credit-control/instalments.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
   ic.name AS insurer_name, ic.short_name AS insurer_short, ic.commission_rate AS insurer_commission_rate, pr.name AS product_name, pr.line AS product_line
@@ -196,6 +197,8 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   const upd = (await db.query(`UPDATE receivables SET balance = balance - $2, last_payment_at = now(), updated_at = now(),
       status = CASE WHEN balance - $2 <= 0 THEN 'paid' ELSE 'partial' END WHERE id = $1 RETURNING *`, [rcv.id, amount])).rows[0];
   if (Number(upd.balance) <= 0) await db.query('UPDATE collection_items SET closed_at = COALESCE(closed_at, now()), updated_at = now() WHERE receivable_id = $1', [rcv.id]);
+  // on an instalment plan the bill is next due on its first instalment not yet paid
+  await syncDueDate(db, rcv.id);
   await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null]);
   return upd;

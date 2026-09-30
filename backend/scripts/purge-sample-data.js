@@ -54,6 +54,8 @@ export const TRANSACTION_TABLES = [
   'direct_bill_client_payments',
   // insurer statement reconciliation (statement formats are configuration and stay)
   'insurer_statements', 'insurer_statement_lines', 'insurer_statement_resolutions',
+  // credit control (client credit limits are a column of clients)
+  'premium_instalment_plans', 'premium_instalments', 'premium_warranty_extensions', 'premium_warranty_actions', 'client_credit_exceptions',
 ];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];

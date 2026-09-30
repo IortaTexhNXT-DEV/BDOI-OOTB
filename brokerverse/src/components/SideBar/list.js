@@ -1036,6 +1036,16 @@ export const menuList = [
         ],
       },
       {
+        id: 24,
+        name: "Credit Control",
+        submenu: [
+          { id: 1, name: "Instalment Plans", path: "/accounts/credit-control/instalments", includes: ["/accounts/credit-control/instalments"] },
+          { id: 2, name: "Premium Warranty Monitor", path: "/accounts/credit-control/warranty", includes: ["/accounts/credit-control/warranty"] },
+          { id: 3, name: "Client Credit Limits", path: "/accounts/credit-control/limits", includes: ["/accounts/credit-control/limits"] },
+          { id: 4, name: "Remittance Ageing", path: "/accounts/credit-control/remittance-ageing", includes: ["/accounts/credit-control/remittance-ageing"] },
+        ],
+      },
+      {
         id: 21,
         name: "Tax",
         submenu: [

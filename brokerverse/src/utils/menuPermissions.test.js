@@ -92,7 +92,8 @@ describe("persona walk: menu grants match the API", () => {
 describe("finance control screens", () => {
   it("accounting and the accounting manager reach the insurer reconciliation, its formats, account determination and posting rules; sales does not", () => {
     for (const p of ["/accounts/insurer-reconciliation/statements", "/accounts/insurer-reconciliation/statements/isr_1", "/master/finance/insurer-statement-formats",
-      "/master/finance/account-determination", "/master/finance/posting-rules"]) {
+      "/master/finance/account-determination", "/master/finance/posting-rules", "/accounts/credit-control/instalments", "/accounts/credit-control/warranty",
+      "/accounts/credit-control/limits", "/accounts/credit-control/remittance-ageing"]) {
       expect(isPathAllowed(p, menuList, ["accounting"])).toBe(true);
       expect(isPathAllowed(p, menuList, ["accounting-manager", "accounting"])).toBe(true);
       expect(isPathAllowed(p, menuList, ["sales"])).toBe(false);

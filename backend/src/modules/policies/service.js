@@ -302,7 +302,10 @@ export async function issuePolicy(db, src, body, userId) {
   await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
   const commission = await accrueCommission(db, { policyId, quoteId: src.quoteId, agentUserId: src.agentUserId, basis: src.netPremium, rate: src.commissionRate,
     period: inception.slice(0, 7), details: details.commissionDetails, user: { id: userId } });
-  return { policyId, receivable, commission };
+  // the policy is issued whatever the client's credit limit; going over it only warns Accounting
+  const { warnIfOverLimit } = await import('../credit-control/limits.js');
+  const creditWarning = await warnIfOverLimit(db, { clientId: src.clientId, policyId, amount: Number(receivable.amount), user: { id: userId } });
+  return { policyId, receivable, commission, creditWarning };
 }
 
 /** Columns of the policy bulk upload (Policies > Bulk Upload); the upload template is built from this list. */

@@ -104,6 +104,8 @@ export const roleMenuPermissions = {
       "Bank Reconciliation",
       // insurer statements of account (approval: accounting-manager, approve:insurer-reconciliation)
       "Insurer Reconciliation",
+      // instalment plans, premium warranty, credit limits, remittance ageing (approvals: accounting-manager, approve:credit-control)
+      "Credit Control",
     ],
     // Account Determination and Posting Rules: Accounting reads them (commission tax set-up included); changes are
     // configuration made by the administrator

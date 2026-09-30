@@ -222,6 +222,10 @@ import BankRecReportPage from "../module/BankReconciliation/ReportPage";
 import InsurerStatements from "../module/InsurerReconciliation/Statements";
 import InsurerStatementWorkspace from "../module/InsurerReconciliation/Workspace";
 import InsurerStatementFormats from "../module/InsurerReconciliation/Formats";
+import InstalmentPlans from "../module/CreditControl/InstalmentPlans";
+import WarrantyMonitor from "../module/CreditControl/WarrantyMonitor";
+import CreditLimits from "../module/CreditControl/CreditLimits";
+import RemittanceAgeing from "../module/CreditControl/RemittanceAgeing";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -1748,6 +1752,10 @@ const Maincomponent = () => {
           <Route path="/accounts/bank-reconciliation/reports/:code" element={<BankRecReportPage />} />
           <Route path="/accounts/insurer-reconciliation/statements" element={<InsurerStatements />} />
           <Route path="/accounts/insurer-reconciliation/statements/:id" element={<InsurerStatementWorkspace />} />
+          <Route path="/accounts/credit-control/instalments" element={<InstalmentPlans />} />
+          <Route path="/accounts/credit-control/warranty" element={<WarrantyMonitor />} />
+          <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />
+          <Route path="/accounts/credit-control/remittance-ageing" element={<RemittanceAgeing />} />
 
           {/* OperationalReports */}
           <Route
