@@ -2578,7 +2578,7 @@
     "coverageDetailsLabel": "Coverage details",
     "paymentDetailsLabel": "Payment Details",
     "insurancePolicyType": "Insurance Policy Type",
-    "accountCode": "Account Code",
+    "accountCode": "Referrer (agent / account code)",
     "emailId": "Email ID",
     "vehicleBrand": "Vehicle Brand",
     "modelYear": "Model Year",
@@ -4599,7 +4599,10 @@
     "ctplTariffPremium": "CTPL (Insurance Commission tariff, inclusive of taxes and fees)",
     "ctplNeedsVehicleType": "Choose the vehicle type on Policy Details to price CTPL",
     "appaSeats": "Seats covered (driver and passengers)",
-    "ctplThreeYear": "Brand-new vehicle: 3-year CTPL (LTO 3-year registration)"
+    "ctplThreeYear": "Brand-new vehicle: 3-year CTPL (LTO 3-year registration)",
+    "actsOfNature": "Acts of Nature",
+    "roadsideAssistance": "Roadside Assistance",
+    "personalAccidentCover": "Personal Accident Cover"
   },
   "finance": {
     "monthly": "Monthly",
@@ -4756,7 +4759,7 @@
     "yes": "Yes",
     "no": "No",
     "insurancePolicyType": "Insurance Policy Type",
-    "accountCode": "Account Code",
+    "accountCode": "Referrer (agent / account code)",
     "coInsuranceParticipants": "Co-Insurance Participants",
     "primary": "PRIMARY",
     "riskDetails": "Risk Details",
