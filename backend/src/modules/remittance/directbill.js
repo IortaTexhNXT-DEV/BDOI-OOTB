@@ -25,7 +25,7 @@
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { queueEmail } from '../../lib/mailer.js';
+import { documentAttachment, queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
 import { cashAccountFor, reverseJournal } from '../accounting/lib/ledger.js';
 import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
@@ -475,7 +475,7 @@ export async function cancelDebitNote(id, body, user) {
   return { before, after: await getDebitNote(id) };
 }
 
-/** Queue the debit note e-mail to the insurer (direct_bill.email_subject / email_body). */
+/** Queue the debit note e-mail to the insurer (direct_bill.email_subject / email_body) with the debit note PDF attached. */
 export async function sendDebitNote(id, body, user) {
   const dn = await getDebitNote(id);
   if (!['open', 'partial'].includes(dn.statusCode)) throw conflict(`Debit note ${dn.dnNumber} must be approved before it is sent`);
@@ -484,7 +484,8 @@ export async function sendDebitNote(id, body, user) {
   const vars = { dnNumber: dn.dnNumber, insurerName: dn.insurerName, amount: `${dn.currency} ${dn.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
     dueDate: dn.dueDate, companyName: await companyName() };
   await queueEmail({ to, subject: renderTemplate(await getSetting('direct_bill.email_subject'), vars, { html: false }),
-    html: renderTemplate(await getSetting('direct_bill.email_body'), vars), template: 'commission-debit-note', entity: 'commission_debit_note', entityId: dn.id });
+    html: renderTemplate(await getSetting('direct_bill.email_body'), vars), template: 'commission-debit-note', entity: 'commission_debit_note', entityId: dn.id,
+    attachments: [documentAttachment('commission-debit-note', { debitNoteId: dn.id }, `debit-note-${dn.dnNumber}.pdf`)] });
   await one('UPDATE commission_debit_notes SET sent_to = $2, sent_at = now(), updated_by = $3, updated_at = now() WHERE id = $1 RETURNING id', [dn.id, to, user.id]);
   return { ...(await getDebitNote(dn.id)), emailedTo: to };
 }

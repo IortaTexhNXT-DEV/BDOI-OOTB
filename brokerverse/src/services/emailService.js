@@ -8,17 +8,22 @@ import { BASE_URL } from "../utility/constant";
 const EMAIL_URL = `${BASE_URL}/email`;
 
 async function post(path, body, fallbackError, timeoutMs = 15000) {
+  return postUrl(`${EMAIL_URL}${path}`, body, fallbackError, timeoutMs);
+}
+
+async function postUrl(url, body, fallbackError, timeoutMs = 15000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(`${EMAIL_URL}${path}`, {
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
       body: JSON.stringify(body),
       signal: controller.signal,
     });
     const json = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(json.message || fallbackError);
+    // a validation failure names the field: show its message ("The client has no e-mail address; enter one")
+    if (!response.ok) throw new Error((Array.isArray(json.errors) && json.errors[0]?.message) || json.message || fallbackError);
     return { success: true, data: json };
   } catch (error) {
     return {
@@ -81,6 +86,16 @@ const emailService = {
     } catch {
       return null;
     }
+  },
+
+  /** E-mail an official receipt to the client with its PDF attached: body { to, cc, note }; data: { message, data: { emailId, to } }. */
+  emailReceipt(receiptId, body) {
+    return postUrl(`${BASE_URL}/receipts/${encodeURIComponent(receiptId)}/email`, body, "Failed to e-mail the receipt", 30000);
+  },
+
+  /** E-mail the premium invoice / statement of account of a bill (receivable id or bill number) with its PDF attached. */
+  emailInvoice(billId, body) {
+    return postUrl(`${BASE_URL}/billing-statement/bills/${encodeURIComponent(billId)}/email`, body, "Failed to e-mail the invoice", 30000);
   },
 
   /** E-mail outbox (administrators): { data, sending, counts, total }. params: status, search, page, pageSize. */

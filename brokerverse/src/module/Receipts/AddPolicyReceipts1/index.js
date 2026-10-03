@@ -307,7 +307,7 @@ function BranchAdding() {
       const remaining = round2(bill.balance - amount);
       // back to the receipts list, where the new receipt is shown first and highlighted
       navigate("/accounts/receipts", {
-        state: { recorded: { receiptId: receipt?.receiptId, receiptNumber: receipt?.receiptNumber, billNumber: bill.billNumber, amount, remaining, customerName: values.customerName } },
+        state: { recorded: { receiptId: receipt?.receiptId, receiptNumber: receipt?.receiptNumber, billNumber: bill.billNumber, amount, remaining, customerName: values.customerName, clientEmail: receipt?.clientEmail || "" } },
       });
     } catch (error) {
       showErrorMessage(apiError(error) || t("accounts.addReceipts.paymentFailed"), t("accounts.receipts.error"));

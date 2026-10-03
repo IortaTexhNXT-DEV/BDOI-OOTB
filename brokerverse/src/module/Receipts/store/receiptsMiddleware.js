@@ -157,6 +157,8 @@ export const getReceiptsListByIdMiddleware = createAsyncThunk(
       return {
         receiptId: response.data.receiptId,
         receiptNumber: response.data.receiptNumber,
+        clientEmail: response.data.clientEmail || null,
+        receiptStatus: response.data.receiptStatus || null,
         receiptDetailList: transformedData,
         paymentDetails: {
           totalPayment: response.data.receiptsList?.reduce((total, item) => total + parseFloat(item.lcAmount || 0), 0).toFixed(2),

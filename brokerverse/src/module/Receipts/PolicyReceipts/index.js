@@ -6,6 +6,8 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Message } from "primereact/message";
 import documentTemplateService from "../../../services/documentTemplateService";
+import emailService from "../../../services/emailService";
+import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
@@ -209,6 +211,7 @@ const PolicyReceipts = () => {
   const location = useLocation();
   // the receipt just recorded on Record Receipt: confirmed here, shown first in the list and highlighted
   const [recorded, setRecorded] = useState(location.state?.recorded || null);
+  const [emailRecordedOpen, setEmailRecordedOpen] = useState(false);
   const dismissRecorded = () => {
     setRecorded(null);
     navigate(location.pathname + location.search, { replace: true, state: null });
@@ -691,11 +694,22 @@ const PolicyReceipts = () => {
                 </div>
                 <div className="receipt-recorded__actions">
                   {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-print" label={t("accounts.receipts.printReceipt")} onClick={printRecorded} />}
+                  {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-envelope" label={t("emailDocument.emailReceipt")} onClick={() => setEmailRecordedOpen(true)} />}
                   <Button type="button" size="small" outlined icon="pi pi-plus" label={t("accounts.receipts.recordAnother")} onClick={() => navigate("/accounts/receipts/addreceipts")} />
                   <Button type="button" size="small" text icon="pi pi-times" aria-label={t("accounts.receipts.dismiss")} onClick={dismissRecorded} />
                 </div>
               </div>
             }
+          />
+        )}
+        {recorded?.receiptId && (
+          <EmailDocumentDialog
+            visible={emailRecordedOpen}
+            onHide={() => setEmailRecordedOpen(false)}
+            title={t("emailDocument.emailReceiptTitle", { number: recorded.receiptNumber })}
+            defaultTo={recorded.clientEmail || ""}
+            fileName={`receipt-${recorded.receiptNumber}.pdf`}
+            send={(body) => emailService.emailReceipt(recorded.receiptId, body)}
           />
         )}
         <div className="listlable_textcontainer">
