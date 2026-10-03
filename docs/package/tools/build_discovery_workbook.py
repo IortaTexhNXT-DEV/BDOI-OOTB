@@ -452,7 +452,12 @@ def main():
     for col in 'BCDEFGHI':
         summary.column_dimensions[col].width = 13
     summary.freeze_panes = 'A2'
-    wb.move_sheet('Summary', offset=-(len(wb.sheetnames) - 2))
+    wb.move_sheet('Summary', offset=1 - wb.sheetnames.index('Summary'))
+    for ws in (ins, summary):
+        ws.page_setup.orientation = 'landscape'
+        ws.page_setup.fitToWidth = 1
+        ws.page_setup.fitToHeight = 0
+        ws.sheet_properties.pageSetUpPr.fitToPage = True
     wb.save(OUT)
     print(OUT, {k: len(v[1]) for k, v in SHEETS.items()})
 
