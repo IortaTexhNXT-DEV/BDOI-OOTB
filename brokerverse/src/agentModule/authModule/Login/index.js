@@ -17,7 +17,7 @@ import TwoFactorEnrolment from "../security/TwoFactorEnrolment";
 import ChangePasswordForm from "../security/ChangePasswordForm";
 import ForgotPassword from "../security/ForgotPassword";
 
-const bdoBannerImage = "/bdoi/login-photo.jpg";
+const bdoBannerImage = "/brand/login-panel.svg";
 const initialValue = {
   EmailAddress: "",
   Password: "",
