@@ -121,7 +121,7 @@ export function recalculateIarPremiumDetails(premiumDetails = {}) {
   const vatPercent =
     premiumDetails.vatPercent != null
       ? Number(premiumDetails.vatPercent)
-      : 0; // callers pass the configured VAT (tax.vat_rate)
+      : 0; // callers pass the VAT of the premium tax and charge engine
   const valueAddedTax = Number(
     ((totalPremiumPreLevy * vatPercent) / 100).toFixed(2)
   );

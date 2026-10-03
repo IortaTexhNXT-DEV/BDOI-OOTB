@@ -13,6 +13,7 @@
  * without a GL account falls back to the account roles output_vat / creditable_wht (Account Determination). Each tax
  * can be switched off (accounting.broker_billed_commission_vat / _ewt), e.g. for a broker that is not VAT registered.
  */
+import { query } from '../../../db/pool.js';
 import { getSetting } from '../../../lib/settings.js';
 import { round2 } from '../../../lib/money.js';
 
@@ -20,7 +21,19 @@ const ZERO = { commission_vat: 0, commission_ewt: 0 };
 
 async function taxCodeRow(db, code) {
   if (!code) return null;
-  return (await db.query('SELECT code, description, tax_type, rate, atc, gl_account, active FROM tax_codes WHERE code = $1', [String(code)])).rows[0] || null;
+  return (await db.query('SELECT code, description, tax_type, rate, atc, gl_account, payee_kind, active FROM tax_codes WHERE code = $1', [String(code)])).rows[0] || null;
+}
+
+/**
+ * Rate of a tax code (Master > Finance > Taxation, tax_codes), the one source of every commission tax rate: output VAT
+ * and EWT on broker-billed and direct-bill commission, and the withholding tax on sub-agent / agent commission.
+ * { code, rate (fraction, 0.12), found, active, atc, glAccount, payeeKind, description }; a missing or inactive code
+ * gives rate 0, so nothing is withheld or charged on a code the tax team withdrew.
+ */
+export async function taxCodeRate(db, code) {
+  const row = await taxCodeRow(db || { query }, code);
+  return { code: code || null, rate: row?.active ? Number(row.rate) / 100 : 0, found: !!row, active: !!row?.active, atc: row?.atc || null, glAccount: row?.gl_account || null,
+    payeeKind: row?.payee_kind || null, description: row?.description || null };
 }
 
 /**

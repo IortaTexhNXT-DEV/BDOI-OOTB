@@ -7,6 +7,7 @@ import { round2 } from '../../lib/money.js';
 import { addDays, DAY_MS } from '../../lib/dates.js';
 import { account, createJournal } from '../accounting/lib/ledger.js';
 import { bounds } from './checks.js';
+import { baseCurrency, exchangeRateOn } from '../../lib/currency.js';
 
 const days = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / DAY_MS);
 const isoOf = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10));
@@ -51,26 +52,17 @@ export async function deferCommission(db, p, { user, runId }) {
 
 /** Month-end rate of a currency into the base currency from the dated Exchange Rate master (null when missing). */
 export async function monthEndRate(db, currency, base, date) {
-  const r = (await db.query(`SELECT (data->>'ExchangeRate')::numeric AS rate FROM master_records
-     WHERE type_code = 'exchange-rate' AND status NOT IN ('deleted','inactive') AND upper(data->>'CurrencyCode') = upper($1) AND upper(data->>'ToCurrencyCode') = upper($2)
-       AND (data->>'EffectiveFrom')::date <= $3::date AND COALESCE(NULLIF(data->>'EffectiveTo', ''), '9999-12-31')::date >= $3::date
-     ORDER BY (data->>'EffectiveFrom')::date DESC, id DESC LIMIT 1`, [currency, base, date])).rows[0];
-  if (r) return Number(r.rate);
-  const inverse = (await db.query(`SELECT (data->>'ExchangeRate')::numeric AS rate FROM master_records
-     WHERE type_code = 'exchange-rate' AND status NOT IN ('deleted','inactive') AND upper(data->>'CurrencyCode') = upper($2) AND upper(data->>'ToCurrencyCode') = upper($1)
-       AND (data->>'EffectiveFrom')::date <= $3::date AND COALESCE(NULLIF(data->>'EffectiveTo', ''), '9999-12-31')::date >= $3::date
-     ORDER BY (data->>'EffectiveFrom')::date DESC, id DESC LIMIT 1`, [currency, base, date])).rows[0];
-  return inverse && Number(inverse.rate) ? 1 / Number(inverse.rate) : null;
+  return exchangeRateOn(db, currency, base, date);
 }
 
 /**
  * FX revaluation: foreign-currency balances (lines carrying a foreign amount) of monetary accounts
- * (accounting.fx_revaluation_account_types) are restated at the month-end rate of the Exchange Rate master; the
- * difference goes to unrealised FX gain / loss and is reversed on day 1 of the next period.
+ * (accounting.fx_revaluation_account_types) are restated into the base currency (Currency master) at the month-end
+ * rate of the Exchange Rate master, the same rates journal vouchers convert at; the difference goes to unrealised FX gain / loss and is reversed on day 1 of the next period.
  */
 export async function revalueFx(db, p, { user, runId }) {
   const { end } = bounds(p);
-  const base = String((await getSetting('currency.default', 'PHP')) || 'PHP').toUpperCase();
+  const base = await baseCurrency(db);
   const types = (await getSetting('accounting.fx_revaluation_account_types', ['asset', 'liability'])) || ['asset', 'liability'];
   const rows = (await db.query(`SELECT l.account_code, upper(l.currency_code) AS ccy,
         sum(CASE WHEN l.debit > 0 THEN l.foreign_amount ELSE -l.foreign_amount END) AS fc, sum(l.debit - l.credit) AS book

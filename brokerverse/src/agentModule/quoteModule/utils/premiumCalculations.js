@@ -295,8 +295,8 @@ const validatePremiumCalculation = ({
 };
 
 /**
- * Tax rates used on screen: the configured tax.* rates (GET /settings?group=tax, see useTaxRates), the same rates the
- * server prices with. Values kept in an old product template ("Taxes and fees") are ignored: one source of truth.
+ * Tax rates used on screen: the premium tax and charge engine's rates (Premium Taxes & LGU Rates, see useTaxRates),
+ * the same engine the server prices with. Values kept in an old product template ("Taxes and fees") are ignored: one source of truth.
  * @param {Object} _productConfigurator - kept for the callers' signature; template taxes are not used
  * @param {Object} settingsRates - decimal rates from useTaxRates
  * @returns {Object} Tax rates as decimals (e.g., 0.12 for 12%)

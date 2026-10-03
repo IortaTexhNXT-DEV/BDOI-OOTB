@@ -133,8 +133,8 @@ const leadToPersonalFormValues = (lead) => {
 
 const IarLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
-  // VAT from Master > Configuration > Taxes (tax.vat_rate), the rate the server prices the quotation with
-  const taxRates = useTaxRates();
+  // VAT of the fire line from the premium tax and charge engine, the rate the server prices the quotation with
+  const taxRates = useTaxRates("fire");
   const vatPercentConfigured = Number(((Number(taxRates.valueAddedTax) || 0) * 100).toFixed(4));
   const ageLimits = useAgeLimits();
   const navigate = useNavigate();

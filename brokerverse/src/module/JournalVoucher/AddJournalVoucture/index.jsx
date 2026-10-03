@@ -496,6 +496,7 @@ const AddJournalVocture = () => {
       )}
       <div className="col-12">
         <AddData
+          voucherDate={formik.values.date}
           visible={visible}
           setVisible={setVisible}
           handleUpdate={handleUpdate}
@@ -506,6 +507,7 @@ const AddJournalVocture = () => {
       </div>
       <div className="col-12">
         <EditData
+          voucherDate={formik.values.date}
           visibleEdit={visibleEdit}
           setVisibleEdit={setVisibleEdit}
           handleUpdate={handleUpdate}

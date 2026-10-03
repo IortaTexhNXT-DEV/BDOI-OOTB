@@ -5,6 +5,7 @@
  * balance and period when a journal becomes 'posted'.
  */
 import { getSetting } from '../../../lib/settings.js';
+import { baseCurrency } from '../../../lib/currency.js';
 import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
@@ -83,7 +84,7 @@ export async function createJournal(db, j, user) {
   const status = j.status || (autoPost ? 'posted' : 'pending');
   const period = j.period || periodOf(date);
   if (status === 'posted') await assertPeriodOpen(db, date, user, period);
-  const currency = j.currency || (await getSetting('currency.default', 'PHP'));
+  const currency = j.currency || (await baseCurrency());
   const number = await nextDocumentNumber('journal', { db });
   const h = (await db.query(`INSERT INTO journal_vouchers(jv_number, jv_date, description, status, total_debit, total_credit, source, kind,
       transaction_code, entry_type, entry_sub_type, reference_type, reference_id, client_id, policy_id, policy_number, currency, due_date,

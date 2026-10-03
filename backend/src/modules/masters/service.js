@@ -7,6 +7,7 @@ import { many, one, query } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { asBool, isoDate, params, parseStatus, statusLabel } from './helpers.js';
 import { assertSinglePrimary, afterCompanyChange } from './company.js';
+import { checkBaseCurrency, setBaseCurrency, withoutBaseFlag } from './currency.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
@@ -419,6 +420,7 @@ export async function createRecord(t, body, user) {
   const { status } = valid;
   await assertUnique(t, values);
   await assertSinglePrimary(t, values, status || 'active');
+  const { makeBase } = await checkBaseCurrency(t, values, { status: status || 'active' });
   let id;
   if (t.storage === 'generic') {
     const r = await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by, updated_by)
@@ -427,7 +429,7 @@ export async function createRecord(t, body, user) {
       JSON.stringify(values), status || 'active', user.id]).catch(pgConflict(t));
     id = r.rows[0].id;
   } else {
-    const { cols, attrs } = await tableColumns(t, values);
+    const { cols, attrs } = await tableColumns(t, makeBase ? withoutBaseFlag(t, values) : values);
     const p = params();
     const names = Object.keys(cols);
     const sql = `INSERT INTO ${q(t.table_name)} (${[...names.map(q), 'attrs', 'status', 'created_by', 'updated_by'].join(', ')})
@@ -435,6 +437,7 @@ export async function createRecord(t, body, user) {
     const r = await query(sql, p.values).catch(pgConflict(t));
     id = r.rows[0].id;
   }
+  if (makeBase) await setBaseCurrency(id);
   await afterCompanyChange(t, user.id);
   return getRecord(t, id);
 }
@@ -446,6 +449,7 @@ export async function updateRecord(t, id, body, user) {
   assertDateOrder(t, { ...before, ...values });
   await assertUnique(t, { ...before, ...values }, id);
   await assertSinglePrimary(t, { ...before, ...values }, status || (before.isActive ? 'active' : 'inactive'), id);
+  const { makeBase } = await checkBaseCurrency(t, values, { before, status: status || (before.isActive ? 'active' : 'inactive') });
   if (t.storage === 'generic') {
     const keep = ([k]) => t.fields.some((f) => f.name === k) || (t.allow_extra && !SYSTEM_KEYS.has(k));
     const merged = { ...Object.fromEntries(Object.entries(before).filter(keep)), ...values };
@@ -453,13 +457,14 @@ export async function updateRecord(t, id, body, user) {
     await query(`UPDATE master_records SET data = $2, code = $3, name = $4, status = COALESCE($5, status), updated_by = $6, updated_at = now() WHERE id = $1`,
       [Number(id), JSON.stringify(merged), t.code_field ? merged[t.code_field] ?? null : null, t.label_field ? merged[t.label_field] ?? null : null, status || null, user.id]).catch(pgConflict(t));
   } else {
-    const { cols, attrs } = await tableColumns(t, values);
+    const { cols, attrs } = await tableColumns(t, makeBase ? withoutBaseFlag(t, values) : values);
     const p = params([Number(id)]);
     const sets = Object.keys(cols).map((c) => `${q(c)} = ${p.add(cols[c])}`);
     sets.push(`attrs = attrs || ${p.add(JSON.stringify(attrs))}::jsonb`, `updated_by = ${p.add(user.id)}`, 'updated_at = now()');
     if (status) sets.push(`status = ${p.add(status)}`);
     await query(`UPDATE ${q(t.table_name)} SET ${sets.join(', ')} WHERE id = $1`, p.values).catch(pgConflict(t));
   }
+  if (makeBase) await setBaseCurrency(id);
   await afterCompanyChange(t, user.id);
   return { before, after: await getRecord(t, id) };
 }
@@ -468,6 +473,7 @@ export async function setRecordStatus(t, id, status, user) {
   assertNotRetired(t);
   const before = await getRecord(t, id);
   await assertSinglePrimary(t, before, status, id);
+  await checkBaseCurrency(t, {}, { before, status });
   const table = t.storage === 'generic' ? 'master_records' : q(t.table_name);
   await query(`UPDATE ${table} SET status = $2, updated_by = $3, updated_at = now() WHERE id = $1`, [Number(id), status, user.id]);
   await afterCompanyChange(t, user.id);

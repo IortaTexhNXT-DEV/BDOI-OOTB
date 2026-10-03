@@ -141,7 +141,7 @@ const CoverageChange = ({
   const vehicleClassInfo = findVehicleClass(motorTariff, vehicleType);
   const vehicleCode = vehicleClassInfo?.value || vehicleType;
   const appaSeats = Number(seatingCapacity) || vehicleClassInfo?.defaultSeats || 0;
-  // same tax source as the quotation: the product template, else app_settings (tax.vat_rate / dst_rate / lgt_rate)
+  // same tax source as the quotation: the premium tax and charge engine (Premium Taxes & LGU Rates)
   const settingsTaxRates = useTaxRates();
   const taxRates = useMemo(
     () => getTaxRates(productConfigurator, settingsTaxRates),

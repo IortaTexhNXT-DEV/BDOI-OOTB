@@ -4,6 +4,7 @@
  * receiptStatus is Converted when every line is Paid, Draft otherwise, Cancelled after cancellation (all reversed).
  */
 import { getSetting } from '../../lib/settings.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { isoDate, num, round2, str, today } from '../accounting/lib/http.js';
@@ -173,7 +174,7 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
   [number, policy?.id || null, client?.id || policy?.client_id || null, b.paymentMode || (await getSetting('receipts.default_payment_mode', 'bank-transfer')), str(b.referenceNo),
     b.bankId || null, isoDate(b.receiptDate || b.receivedDate) || (await today()), str(b.remarks), user?.id ?? null, b.receiptType || 'Payment', str(b.transactionCode) || 'PAYMENT', txn,
     client?.client_code || client?.id || str(b.customerCode), str(b.name) || client?.display_name || policy?.client_name || null, str(b.branchCode), str(b.departmentCode),
-    b.currencyCode || (await getSetting('currency.default', 'PHP')), policy?.policy_number || null, str(b.receiptNumber), source])).rows[0];
+    b.currencyCode || (await baseCurrency()), policy?.policy_number || null, str(b.receiptNumber), source])).rows[0];
   // the bank account the money was deposited to: its GL account is debited (posting rule receipt.apply, resolver bank_account)
   if (str(b.bankAccountCode ?? b.bankAccount)) {
     header.bank_account_code = str(b.bankAccountCode ?? b.bankAccount);

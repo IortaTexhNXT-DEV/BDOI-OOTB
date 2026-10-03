@@ -84,12 +84,12 @@ describe('renewals', () => {
     const q = await ctx.api('post', `/renewals/${rn.id}/quote`);
     expect(q.status).toBe(200);
     const d = q.body.data;
-    // motor rate 0.0275 x 1,000,000 = 27,500; one claim => 10% loading; taxes VAT 12%, DST 12.5%, LGT 0.75%
+    // motor rate 0.0275 x 1,000,000 = 27,500; one claim => 10% loading; taxes VAT 12%, DST P0.50 per P4.00 or fraction, LGT 0.75%
     expect(d.premiumCalculation.basePremium).toBe(27500);
     expect(d.premiumCalculation.claimsLoading).toBe(2750);
     const net = 30250;
     expect(d.premiumCalculation.subtotal).toBe(net);
-    const total = Math.round((net + net * 0.12 + net * 0.125 + net * 0.0075) * 100) / 100;
+    const total = Math.round((net + net * 0.12 + Math.ceil(net / 4) * 0.5 + net * 0.0075) * 100) / 100;
     expect(d.quotedPremium).toBeCloseTo(total, 1);
     expect(d.previousPremium).toBe(30000);
     expect(d.premiumVariance).toBeCloseTo(total - 30000, 1);

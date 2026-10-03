@@ -49,8 +49,9 @@ describe('quotations: create, premium, workflow, conversion', () => {
     expect(r.body.quotationStatus).toBe('Draft');
     // 15,000 + 5,000 + BI 2,000 + PD 2,000 + Auto Passenger PA 250 (50,000 x 5 seats x 0.1% from the motor tariff)
     expect(r.body.netPremium).toBe(24250);
-    const [vat, dst, lgt] = await Promise.all(['vat', 'dst', 'lgt'].map(async (k) => Number((await q("SELECT value#>>'{}' AS v FROM app_settings WHERE key = $1", [`tax.${k}_rate`]))[0].v)));
-    expect(r.body.grossPremium).toBeCloseTo(24250 * (1 + vat + dst + lgt), 1);
+    const [vat, lgt] = await Promise.all(['vat', 'lgt'].map(async (k) => Number((await q("SELECT value#>>'{}' AS v FROM app_settings WHERE key = $1", [`tax.${k}_rate`]))[0].v)));
+    // DST P0.50 on each P4.00 of premium or fractional part (NIRC section 184)
+    expect(r.body.grossPremium).toBeCloseTo(24250 * (1 + vat + lgt) + Math.ceil(24250 / 4) * 0.5, 1);
     expect(r.body.insuranceCompanyName).toBe('Malayan Insurance Co., Inc.');
     expect(r.body.commissionAmount).toBeCloseTo(24250 * 0.15, 2);
     quoteId = r.body.quotationId;

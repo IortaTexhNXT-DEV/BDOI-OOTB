@@ -92,7 +92,7 @@ export const MASTER_TEMPLATES = [
   {
     type: 'currency', button: true, menu: 'Master > Finance > Currency',
     samples: [{ CurrencyCode: 'HKD', ISOcode: 'HKD', SmallestUnit: 'Cent', UnitDescription: 'Hong Kong cent', CurrencyName: 'Hong Kong Dollar', Description: 'Hong Kong Dollar',
-      CurrencyFormat: '#,##0.00', NumberofDecimals: '2', symbol: 'HK$', isBase: 'No', exchangeRate: '7.40' }],
+      CurrencyFormat: '#,##0.00', NumberofDecimals: '2', symbol: 'HK$', isBase: 'No' }],
   },
   {
     type: 'exchange-rate', menu: 'Master > Finance > Exchange Rate',

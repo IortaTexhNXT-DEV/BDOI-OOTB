@@ -11,6 +11,7 @@ import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, round2, num } from '../accounting/lib/http.js';
 import { formatMoney } from '../../lib/money.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
+import { taxCodeRate } from '../accounting/lib/commissionTax.js';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cycleLabel = (d) => { const x = new Date(d); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
@@ -21,11 +22,21 @@ export const LINE_STATUSES = ['Accrued', 'Eligible', 'Approved', 'Paid'];
 const LINE_SQL = `SELECT c.*, r.name AS referrer_name, r.wht_applicable AS referrer_wht_applicable FROM commissions c
   LEFT JOIN commission_referrers r ON r.id = c.referrer_id`;
 
+/**
+ * Withholding tax code of a referrer's commission: the payee's own choice (commission_referrers.wht_code), else the
+ * code for its referrer type (commission.wht_code_by_type), else commission.default_wht_code. The rate is the tax
+ * code's (Master > Finance > Taxation).
+ */
+export async function whtCodeFor(ref) {
+  if (ref.wht_code) return ref.wht_code;
+  const byType = (await getSetting('commission.wht_code_by_type', {})) || {};
+  return byType[ref.referrer_type] || (await getSetting('commission.default_wht_code', 'WI515'));
+}
+export async function whtTaxFor(ref) {
+  return taxCodeRate(null, await whtCodeFor(ref));
+}
 export async function whtPctFor(ref) {
-  if (ref.wht_rate !== null && ref.wht_rate !== undefined) return round2(Number(ref.wht_rate) * 100);
-  const byType = (await getSetting('commission.wht_rate_by_type', {})) || {};
-  const rate = byType[ref.referrer_type] ?? (await getSetting('tax.withholding_rate', 0.05));
-  return round2(Number(rate) * 100);
+  return round2((await whtTaxFor(ref)).rate * 100);
 }
 /** Referrers shown as commission accounts: external / unlinked referrers, or users holding a commission-earning role. */
 async function eligibleSql(alias, params) {
@@ -100,10 +111,12 @@ const sumNet = (ls) => round2(ls.reduce((s, l) => s + Number(l.net_amount), 0));
 export async function referrerSummaryRow(db, ref) {
   const lines = await referrerLines(db, ref.id);
   const { cur } = bucket(lines);
-  const whtPct = await whtPctFor(ref);
+  const wht = await whtTaxFor(ref);
+  const whtPct = round2(wht.rate * 100);
+  const payee = wht.payeeKind === 'corporate' || (wht.payeeKind !== 'individual' && ref.referrer_type === 'External') ? 'Company' : 'Individual';
   return {
     id: ref.id, name: ref.name, type: ref.referrer_type, level: ref.level, policies: new Set(lines.filter((l) => l.status !== 'Reversed').map((l) => l.policy_id)).size,
-    netPayable: sumNet(cur), whtType: `${ref.referrer_type === 'External' ? 'Company' : 'Individual'} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct,
+    netPayable: sumNet(cur), whtType: `${payee} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct, whtCode: wht.code,
     bankAccount: maskAccount(ref), bankAccountMissing: !ref.bank_account_no, payoutBlockedReason: await payoutBlockReason(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
   };
 }
@@ -472,19 +485,32 @@ export async function dashboard(db, scope = null) {
   };
 }
 
+/** A payee's withholding tax code: an active EWT code of the tax codes master (null: the referrer type's code). */
+async function checkWhtCode(db, code) {
+  if (code === undefined || code === null || code === '') return null;
+  const row = (await db.query('SELECT code, tax_type, active FROM tax_codes WHERE upper(code) = upper($1)', [String(code)])).rows[0];
+  if (!row || !row.active || !['EWT', 'FWT'].includes(row.tax_type)) {
+    throw badRequest('Validation failed', [{ path: 'whtCode', message: `${code} is not an active withholding tax code (Master > Finance > Taxation)` }]);
+  }
+  return row.code;
+}
+
 export async function upsertReferrer(db, id, b, user) {
+  if (b.whtRate !== undefined && b.whtRate !== null) {
+    throw badRequest('Validation failed', [{ path: 'whtRate', message: 'Withholding tax is chosen by tax code (whtCode, Master > Finance > Taxation), not by rate' }]);
+  }
   const vals = [b.name, b.type || 'Agent', b.level ?? null, b.parentReferrerId || null, b.userId || null, b.tin || null, b.email || null, b.phone || null,
-    b.whtRate ?? null, b.whtApplicable ?? true, b.bankName || null, b.bankAccountNo || null, b.status || 'Active'];
+    await checkWhtCode(db, b.whtCode), b.whtApplicable ?? true, b.bankName || null, b.bankAccountNo || null, b.status || 'Active'];
   if (id) {
     await getReferrer(db, id);
     await db.query(`UPDATE commission_referrers SET name = COALESCE($2,name), referrer_type = $3, level = $4, parent_referrer_id = $5, user_id = $6, tin = $7, email = $8,
-      phone = $9, wht_rate = $10, wht_applicable = $11, bank_name = $12, bank_account_no = $13, status = $14, updated_at = now() WHERE id = $1`, [id, ...vals]);
+      phone = $9, wht_code = $10, wht_applicable = $11, bank_name = $12, bank_account_no = $13, status = $14, updated_at = now() WHERE id = $1`, [id, ...vals]);
     return id;
   }
   const newId = b.id || `ref-${String(b.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30)}`;
   const exists = (await db.query('SELECT 1 FROM commission_referrers WHERE id = $1', [newId])).rows[0];
   if (exists) throw conflict(`Referrer ${newId} already exists`);
-  await db.query(`INSERT INTO commission_referrers(id, name, referrer_type, level, parent_referrer_id, user_id, tin, email, phone, wht_rate, wht_applicable,
+  await db.query(`INSERT INTO commission_referrers(id, name, referrer_type, level, parent_referrer_id, user_id, tin, email, phone, wht_code, wht_applicable,
     bank_name, bank_account_no, status, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`, [newId, ...vals, user.id]);
   return newId;
 }

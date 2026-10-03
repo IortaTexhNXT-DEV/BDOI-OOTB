@@ -4,6 +4,7 @@
  * voucher. Both go through the same approval.
  */
 import { getSetting } from '../../lib/settings.js';
+import { baseCurrency, rateToBase } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { assertPeriodOpen, createJournal, postJournal, reverseJournal } from '../accounting/lib/ledger.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
@@ -52,29 +53,45 @@ export async function history(db, q, pg) {
   return { rows: rows.map(headerRow), total };
 }
 
-async function rateFor(db, currency, base) {
-  if (!currency || currency === base) return 1;
-  const c = (await db.query('SELECT exchange_rate, is_base FROM currencies WHERE code = $1 AND status = \'active\'', [currency])).rows[0];
-  if (!c) throw badRequest(`Unknown currency ${currency}`);
-  return c.is_base ? 1 : Number(c.exchange_rate);
-}
-
-/** Convert voucher entries (Debit / Credit, foreign amount, currency) to ledger lines in the base currency. */
-export async function toLines(db, entries) {
-  const base = await getSetting('currency.default', 'PHP');
+/**
+ * Convert voucher entries (Debit / Credit, foreign amount, currency) to ledger lines in the base currency (Currency
+ * master, is_base). A foreign-currency line converts at the rate of the dated Exchange Rate master in force on the
+ * voucher date (amount in base = foreign amount x rate); the rate is stored on the line. A local amount sent with a
+ * foreign-currency line must agree with that conversion.
+ */
+export async function toLines(db, entries, date) {
+  if (!Array.isArray(entries) || !entries.length) throw badRequest('entries are required');
+  const base = await baseCurrency(db);
+  const on = date || (await today());
   const known = new Set((await db.query('SELECT code FROM gl_accounts WHERE code = ANY($1)', [entries.flatMap((e) => [e.subAccount, e.mainAccount].filter(Boolean))])).rows.map((r) => r.code));
   const out = [];
   for (const [i, e] of entries.entries()) {
     const side = String(e.entryType || '').toLowerCase();
     if (!['debit', 'credit'].includes(side)) throw badRequest(`Entry ${i + 1}: entryType must be Debit or Credit`);
-    const rate = await rateFor(db, e.currencyCode, base);
-    const local = e.localAmount !== undefined && e.localAmount !== '' && e.localAmount !== null ? round2(num(e.localAmount)) : round2(num(e.foreignAmount) / rate);
+    const currency = String(e.currencyCode || base).toUpperCase();
+    const given = e.localAmount !== undefined && e.localAmount !== '' && e.localAmount !== null ? round2(num(e.localAmount)) : null;
+    let rate = 1;
+    let local;
+    if (currency === base) {
+      local = given ?? round2(num(e.foreignAmount));
+    } else {
+      if (e.foreignAmount === undefined || e.foreignAmount === null || e.foreignAmount === '') throw badRequest(`Entry ${i + 1}: foreignAmount is required for a ${currency} line`);
+      try {
+        rate = await rateToBase(db, currency, on, base);
+      } catch (err) {
+        throw badRequest(`Entry ${i + 1}: ${err.message}`);
+      }
+      local = round2(num(e.foreignAmount) * rate);
+      if (given !== null && Math.abs(given - local) > 0.01) {
+        throw badRequest(`Entry ${i + 1}: local amount ${given} does not match ${e.foreignAmount} ${currency} at the ${on} rate ${rate} (${local})`);
+      }
+    }
     if (!(local > 0)) throw badRequest(`Entry ${i + 1}: amount must be greater than zero`);
     const accountCode = e.subAccount && known.has(e.subAccount) ? e.subAccount : e.mainAccount;
     if (!accountCode) throw badRequest(`Entry ${i + 1}: mainAccount is required`);
     out.push({ accountCode, debit: side === 'debit' ? local : 0, credit: side === 'credit' ? local : 0, memo: e.remarks || null, mainAccount: e.mainAccount, subAccount: e.subAccount || null,
       mainAccountDescription: e.mainAccountDescription, subAccountDescription: e.subAccountDescription, branchCode: e.branchCode, branchDescription: e.branchCodeDescription,
-      departmentCode: e.departmentCode, departmentDescription: e.departmentDescription, currencyCode: e.currencyCode || base, foreignAmount: e.foreignAmount === undefined ? null : round2(num(e.foreignAmount)), exchangeRate: rate });
+      departmentCode: e.departmentCode, departmentDescription: e.departmentDescription, currencyCode: currency, foreignAmount: e.foreignAmount === undefined ? null : round2(num(e.foreignAmount)), exchangeRate: rate });
   }
   return out;
 }
@@ -83,8 +100,9 @@ const approvalStatus = async () => ((await getSetting('journal.require_approval'
 
 export async function createManual(db, b, user) {
   const status = await approvalStatus();
-  return createJournal(db, { date: isoDate(b.date || b.voucherDate) || (await today()), description: b.transactionDescription || b.description || null, source: 'manual', manual: true,
-    transactionCode: b.transactionCode, entryType: 'JOURNAL_VOUCHER', referenceType: 'JournalVoucher', status, requiresApproval: status !== 'posted', lines: await toLines(db, b.entries) }, user);
+  const date = isoDate(b.date || b.voucherDate) || (await today());
+  return createJournal(db, { date, description: b.transactionDescription || b.description || null, source: 'manual', manual: true,
+    transactionCode: b.transactionCode, entryType: 'JOURNAL_VOUCHER', referenceType: 'JournalVoucher', status, requiresApproval: status !== 'posted', lines: await toLines(db, b.entries, date) }, user);
 }
 
 async function assertNoPendingAdjustment(db, original) {
@@ -113,7 +131,7 @@ export async function createCorrection(db, b, user) {
   const jv = await createJournal(db, { date, description: b.description || `Correction of ${original.jv_number}`, source: 'correction', kind: 'correction', manual: true,
     transactionCode: b.correctionJVTransactionCode || b.transactionCode || original.transaction_code, entryType: original.entry_type || 'JOURNAL_VOUCHER', referenceType: 'JournalVoucher',
     referenceId: original.id, correctionOf: original.id, status: status === 'posted' ? 'pending' : status, requiresApproval: status !== 'posted',
-    lines: [...reversal, ...(await toLines(db, b.entries))] }, user);
+    lines: [...reversal, ...(await toLines(db, b.entries, date))] }, user);
   if (status === 'posted') return postJournal(db, jv.id, user);
   return jv;
 }

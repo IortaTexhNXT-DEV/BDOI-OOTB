@@ -77,8 +77,8 @@ const given = (v) => v !== undefined && v !== null && v !== '';
 const TOLERANCE = 0.01 + 1e-9;
 
 /**
- * Price a coverage change on the server with the quotation premium routine (premium.default_rates, tax.*_rate and
- * premium.taxes_by_lob): the policy's current cover inputs overlaid with the edited ones. Returns null when the change
+ * Price a coverage change on the server with the quotation premium routine (premium.default_rates and the premium tax
+ * and charge engine): the policy's current cover inputs overlaid with the edited ones. Returns null when the change
  * carries no sum insured (nothing to price). When no pricing input differs from the policy the premium is unchanged.
  */
 async function priceCoverageChange(cc, policy) {

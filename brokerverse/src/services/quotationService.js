@@ -983,19 +983,25 @@ class QuotationService {
     return this.request("/master/account-codes");
   }
 
-  /** Tax rates (decimals) from settings: { valueAddedTax, documentaryStampTax, localGovernmentTax }. */
   /** Motor tariff: vehicle classes (fixed CTPL premium, own damage rate, default seats) and Auto Passenger PA limits/rate. */
   async getMotorTariff() {
     return this.request("/quotations/motor-tariff");
   }
 
-  async getTaxRates() {
-    const rows = await this.request("/settings?group=tax");
-    const rate = (key) => Number(rows.find((row) => row.key === key)?.value) || 0;
+  /**
+   * Effective tax rates (decimals) of a line from the premium tax and charge engine (Master > Premium Taxes & LGU
+   * Rates), the engine the server prices quotations and renewals with: { valueAddedTax, documentaryStampTax,
+   * localGovernmentTax, fireServiceTax }. Priced on a nominal premium, so they are rates, not amounts.
+   */
+  async getTaxRates(line = "motor") {
+    const NOMINAL = 1000000;
+    const c = await this.request("/premium-charges/calculate", { method: "POST", body: JSON.stringify({ premium: NOMINAL, line }) });
+    const rate = (v) => Math.round(((Number(v) || 0) / NOMINAL) * 1e6) / 1e6;
     return {
-      valueAddedTax: rate("tax.vat_rate"),
-      documentaryStampTax: rate("tax.dst_rate"),
-      localGovernmentTax: rate("tax.lgt_rate"),
+      valueAddedTax: rate(c?.vat),
+      documentaryStampTax: rate(c?.dst),
+      localGovernmentTax: rate(c?.lgt),
+      fireServiceTax: rate(c?.fst),
     };
   }
 }

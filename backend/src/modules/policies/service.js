@@ -1,4 +1,5 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { notFound, badRequest, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { num, round2, lobOf } from '../documents/common.js';
@@ -217,7 +218,7 @@ async function referrerAccrual() {
 /**
  * Commission accrual at issuance. With a referrer chain in the quote's commissionDetails the commission module creates
  * the lines; otherwise one brokerage line is accrued for the producing agent (basis = net premium, withholding at
- * tax.withholding_rate).
+ * the rate of the tax code commission.default_wht_code, Master > Finance > Taxation).
  */
 export async function accrueCommission(db, { policyId, quoteId = null, endorsementId = null, agentUserId, basis, rate, period, details = null, user = null }) {
   const accrue = hasReferrers(details) ? await referrerAccrual() : null;
@@ -230,7 +231,8 @@ export async function accrueCommission(db, { policyId, quoteId = null, endorseme
   // administrators and back-office users who key in a policy do not.
   const agent = agentUserId ? await eligibleCommissionUser(db, agentUserId) : null;
   if (!agent) return null;
-  const wht = Number(await getSetting('tax.withholding_rate', 0.05));
+  const { taxCodeRate } = await import('../accounting/lib/commissionTax.js');
+  const wht = (await taxCodeRate(db, await getSetting('commission.default_wht_code', 'WI515'))).rate;
   const amount = round2(basis * rate);
   const withholding = round2(amount * wht);
   const status = await getSetting('commission.initial_status', 'Accrued');
@@ -359,7 +361,7 @@ export async function importPolicy(db, p, userId, { migration = false } = {}) {
     : Number(await getSetting('commission.default_rate', 0.15));
   return issuePolicy(db, {
     clientId: cl.rows[0].id, insuranceCompanyId: icId, sumInsured: p.sumInsured, netPremium: p.netPremium, grossPremium: p.grossPremium,
-    commissionAmount: round2(p.netPremium * rate), commissionRate: rate, currency: await getSetting('currency.default', 'PHP'),
+    commissionAmount: round2(p.netPremium * rate), commissionRate: rate, currency: await baseCurrency(),
     insuredName: p.insuredName, productType: p.productType, lob: lobOf(p.productType), agentUserId: userId, ownerUserId: userId,
     doc: { plateNumber: p.plateNumber, source: migration ? 'go-live-migration' : 'bulk-upload' }, migration,
   }, { policyNumber: p.policyNumber, inception: p.inception, expiry: p.expiry, issuedDate: p.issuedDate, paymentStatus: p.paymentStatus, insuranceCompanyName: p.insuranceCompanyName }, userId);

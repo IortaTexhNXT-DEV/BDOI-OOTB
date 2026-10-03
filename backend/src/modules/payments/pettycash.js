@@ -3,7 +3,7 @@
  * (Dr Expense + Input VAT / Cr Petty Cash Fund + WHT Payable), receipts (cash returned: Dr Petty Cash Fund / Cr account)
  * and replenishments (Dr Petty Cash Fund / Cr Cash in Bank). available_cash is kept in step with every posting.
  */
-import { getSetting } from '../../lib/settings.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { formatMoney } from '../../lib/money.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { account, reverseJournal } from '../accounting/lib/ledger.js';
@@ -48,7 +48,7 @@ export async function createFund(db, b, user) {
   const f = (await db.query(`INSERT INTO petty_cash_funds(code, description, transaction_number, transaction_date, fund_size, max_limit, minimum_cashbox, available_cash, bank_code, bank_account_code,
       main_account, sub_account, currency, branch_code, department_code, custodian_user_id, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$5,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
   [b.code, str(b.description), txn, isoDate(b.transactionDate) || (await today()), size, round2(num(b.maxLimit)), round2(num(b.minimumCashbox)), str(b.bankCode), str(b.bankAccountCode),
-    str(b.mainAccountCode), str(b.subAccountCode), b.currency || (await getSetting('currency.default', 'PHP')), str(b.branchCode), str(b.departmentCode), b.custodianUserId || null, user.id])).rows[0];
+    str(b.mainAccountCode), str(b.subAccountCode), b.currency || (await baseCurrency()), str(b.branchCode), str(b.departmentCode), b.custodianUserId || null, user.id])).rows[0];
   const jv = await postEvent('pettycash.fund', { source: 'petty-cash', entryType: 'PETTY_CASH_FUND', referenceType: 'PettyCash', referenceId: f.id, transactionCode: txn, description: `Petty cash fund ${f.code} established`,
     branchCode: f.branch_code, departmentCode: f.department_code, bankAccount: f.bank_account_code, accounts: { fund: await fundAccount(db, f) },
     amounts: { amount: size }, vars: { fundCode: f.code } }, { db, user });

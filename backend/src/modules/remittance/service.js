@@ -3,6 +3,7 @@
  * and automated remittance generation from policies not yet remitted.
  */
 import { ADMIN_ROLES, isAdmin } from '../../lib/auth.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
@@ -212,7 +213,7 @@ async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, bi
   const comm = round2(lines.reduce((s, l) => s + l.commission, 0));
   const tax = round2(lines.reduce((s, l) => s + l.tax, 0));
   const number = await nextDocumentNumber('remittance');
-  const currency = await getSetting('currency.default', 'PHP');
+  const currency = await baseCurrency();
   const r = await c.query(`INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, remarks, created_by,
       remittance_date, due_date, policy_count, currency, bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, updated_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10, COALESCE($11::date, $22::date), $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $10) RETURNING id`,
@@ -590,7 +591,7 @@ export async function sendBill(id, b, user) {
   if (!to && r.agent_user_id) to = (await one('SELECT email FROM users WHERE id = $1', [r.agent_user_id]))?.email;
   if (!to && r.insurance_company_id) to = r.insurer_email;
   if (to) {
-    const currency = r.currency || (await getSetting('currency.default', 'PHP'));
+    const currency = r.currency || (await baseCurrency());
     const vars = { billNumber: r.bill_number, billDate: r.remittance_date, currency, amount: round2(Number(r.net_due) + Number(r.previous_balance)).toLocaleString('en-US', { minimumFractionDigits: 2 }),
       dueDate: r.due_date, companyName: await companyName() };
     await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.bill_email_subject'), vars, { html: false }), html: renderTemplate(await getSetting('remittance.bill_email_body'), vars),

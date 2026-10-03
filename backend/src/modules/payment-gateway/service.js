@@ -8,6 +8,7 @@
  * the webhook; confirm.js applies the payment.
  */
 import crypto from 'node:crypto';
+import { baseCurrency } from '../../lib/currency.js';
 import { query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -192,7 +193,7 @@ export async function createLink(b, user, opts = {}) {
         amount, fee, total, currency, gateway_code, method, expires_at, policy_id, created_by, updated_by)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16, now() + make_interval(hours => $17), $18, $19, $19) RETURNING id`,
     [number, token, target.type, target.targetId, target.targetNumber, target.clientId || null, b.payerName || target.payerName || null, b.payerEmail || target.payerEmail || null,
-      target.payerMobile || null, target.description, target.amount, fee, total, await getSetting('currency.default', 'PHP'), g.code, b.method || null, hours, target.policyId || null, user?.id ?? null]);
+      target.payerMobile || null, target.description, target.amount, fee, total, await baseCurrency(), g.code, b.method || null, hours, target.policyId || null, user?.id ?? null]);
     return r.rows[0].id;
   });
   const row = await linkRow(id);

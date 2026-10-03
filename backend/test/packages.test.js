@@ -75,7 +75,7 @@ describe('insurer rate tables and comparison', () => {
     expect(cols[2].keyBenefits.length).toBe(5);
     const client = await sales('post', '/packages/compare').send({ productId: 'HOME', sumInsured: 1000000, clientView: true });
     expect(client.body.data.columns[0].commissionRate).toBeUndefined();
-    expect(client.body.data.columns[0].lgt).toBe(4); // LGT rule rate without a location
+    expect(client.body.data.columns[0].lgt).toBe(15); // LGT rule rate without a location: 0.75% since migration 0236 (was 0.2%: 4)
     expect((await sales('post', '/packages/compare').send({ productId: homeId, sumInsured: 0 })).status).toBe(400);
     expect((await sales('post', '/packages/compare').send({ productId: homeId, sumInsured: 1000, lguCode: 'NOPE' })).status).toBe(400);
     expect((await claims('post', '/packages/compare').send({ productId: homeId, sumInsured: 1000 })).status).toBe(403);

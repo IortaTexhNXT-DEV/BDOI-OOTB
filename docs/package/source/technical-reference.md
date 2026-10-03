@@ -524,7 +524,7 @@ A screen works only when the data its module reads exists. The table lists, per 
 
 | Back-end module | Must exist first |
 |---|---|
-| quotations | Products and Insurance Company masters; coverages and vehicle masters for motor; motor tariff (seeded); premium tax settings (`premium.taxes_by_lob`); Commission Rate Matrix; a prospect or client |
+| quotations | Products and Insurance Company masters; coverages and vehicle masters for motor; motor tariff (seeded); Premium Taxes & LGU Rates (premium_charge_rules, lgu_tax_rates); Commission Rate Matrix; a prospect or client |
 | placement | Client or prospect; Insurance Company and Products masters; numbering series for broker slips and placements |
 | packages | Package Bundles; Insurer Rate Tables in force for the date; Premium Taxes & LGU Rates; Payment Gateways for payment links |
 | policies | Accepted quotation or bound placement; insurer credit terms; posting rules and account roles for the booking journal; open accounting period |

@@ -3,6 +3,7 @@
  * maker-checker approval, payment, agent statements, "my programs" and reports.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
@@ -82,7 +83,7 @@ async function programValues(b, before) {
   return {
     name: b.programName ?? before?.name, description: b.description ?? before?.description ?? null, metric, target: baseTarget, reward: b.reward ?? before?.reward ?? null,
     period_from: from, period_to: to, status, program_type: programType || null, applicable_to: JSON.stringify(b.applicableTo ?? before?.applicable_to ?? []), target_metric: targetMetric,
-    stretch_target: stretch, currency: b.Currency || b.currency || before?.currency || (await getSetting('currency.default', 'PHP')), calculation_frequency: freq || null,
+    stretch_target: stretch, currency: b.Currency || b.currency || before?.currency || (await baseCurrency()), calculation_frequency: freq || null,
     structure: JSON.stringify(b.structure !== undefined ? validateStructure(b.structure) : before?.structure ?? []), eligibility: JSON.stringify(b.eligibility ?? before?.eligibility ?? {}),
   };
 }
