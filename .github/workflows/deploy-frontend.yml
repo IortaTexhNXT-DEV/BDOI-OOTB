@@ -24,7 +24,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - brokerverse-platform
 
 concurrency:
   group: deploy-main
