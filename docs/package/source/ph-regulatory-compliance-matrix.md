@@ -1,0 +1,145 @@
+---
+title: Regulatory Compliance
+subtitle: Matrix for Philippine brokers
+version: 1.0
+date: 03 October 2026
+prepared: iorta TechNXT
+reviewed:
+approved:
+acronyms: IC=Insurance Commission; BIR=Bureau of Internal Revenue; NIRC=National Internal Revenue Code; EOPT=Ease of Paying Taxes Act (RA 11976); VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; CAS=Computerized Accounting System; ATP=Authority to Print; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; LGU=Local government unit; CTPL=Compulsory Third Party Liability; LTO=Land Transportation Office; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); DPO=Data protection officer; AMLA=Anti-Money Laundering Act (RA 9160, as amended); AMLC=Anti-Money Laundering Council; CDD=Customer due diligence; KYC=Know your customer; OR=Official receipt
+---
+
+# Introduction
+
+## Purpose
+
+This matrix shows how BrokerVerse OOTB supports the main regulatory obligations of a Philippine non-life insurance broker. For each obligation it gives the requirement in general terms, the screens, settings and reports of BrokerVerse that support it, and what remains the broker's responsibility.
+
+## How to read this matrix
+
+- **Requirement** describes the obligation in general terms. It is not a legal text and does not quote circulars, regulations or rulings. The broker's compliance officer, tax adviser and DPO confirm the requirements that apply to the broker, at the current state of the law, and the exact forms, deadlines and formats.
+- **How BrokerVerse supports it** names the screens (by menu path), settings (Master > Configuration keys) and reports as they are in BrokerVerse OOTB version 1.0. Delivered values (rates, days) are the values the system ships with and can be changed in configuration.
+- **Broker's responsibility** lists what the system does not do, and what the broker must decide, verify, file or keep.
+
+> This document is not legal or tax advice. The system produces records, working papers and controls. Registrations, filings, payments to government, notifications and the interpretation of the law remain with the broker.
+
+# General controls used throughout
+
+Several controls support every obligation in this matrix. They are referred to below without repeating them.
+
+| Control | How BrokerVerse provides it |
+|---|---|
+| Personal user IDs and role-based access | Seven roles; deny by default; menus and every API action checked against the role's permissions (Master > Generals > User Management) |
+| Maker-checker | Quotations, journal vouchers, payment vouchers, commission payouts, remittances, debit notes, claim settlements, month-end and year-end close, bank reconciliations (user manual, chapter 3) |
+| Audit trail | Master > Audit Trail: every create, update, approval, report run and sign-in, with before and after values; entries are kept (`housekeeping.audit_log_days` is 0) |
+| Numbered documents | 52 number series in Master > Configuration > Document Numbering; counters only move forward |
+| Period control | Accounts > Period End > Period Management: open, soft-closed, closed and locked periods; reopening needs a remark and is recorded |
+| Printed documents | Every document and report PDF carries the letterhead of the primary company (name, address, TIN, contact details) from the Company master |
+
+# Insurance Code (RA 10607): broker obligations
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Records of business. A licensed broker keeps complete records of the insurance it places (clients, insurers, policies, premiums, commissions) and makes them available to the IC on examination. | Placement records: Request for Quotation (broker slips, offers), Quotations, Placement Slips with each insurer's confirmation, policies with participants, endorsements, claims, renewals, each with its number series and audit trail. Reports: Production Register, Premium by Product / Month / Insurer, Co-insurance Register, Broker Commission Statement, Claims Position, Renewal Retention (Reports > All Reports; XLSX, CSV or PDF) | Keep records for the period the IC requires, including records of the old system; provide them on examination; keep the IC licence current (licence number held on the Company master) |
+| Premiums collected are held for the insurer. Premium a broker collects from clients belongs to the insurer and must be accounted for separately from the broker's own funds. | The ledger keeps premium due to each insurer apart from commission income: the policy journal credits Premiums Payable to Insurers per insurer and Brokerage Commission Income separately; VAT, DST and LGT on premium go to their own accounts (`accounting.split_premium_taxes`). The delivered chart of accounts has Cash in Bank - Premium Trust Account (Clients' Money); bank accounts can be set up as Trust Account and linked to it. Reports: Due to Insurers by Co-insurer, Aged Payables to Insurers | Decide whether to keep premiums in a separate trust bank account and receive collections there; reconcile it monthly (Accounts > Bank Reconciliation) |
+| Remittance to insurers within the agreed terms. The broker remits premium collected, net of its commission where the agreement allows, within the terms agreed with each insurer. | Insurance Company master: Remittance Terms (days after collection), else `remittance.default_due_days` (delivered 30). Accounts > Remittance: Automated Processing builds the remittance per insurer net of commission, with approval levels by amount (`remittance.approval_levels`), settlement by payment voucher, Electronic Transfer records, Tracking, Statements and Reconciliation. Accounts > Credit Control > Remittance Ageing; Aged Payables to Insurers | Agree the terms with each insurer and enter them; run the remittance and make the payments in time; settle the amounts due at go-live by payment voucher |
+| Premium payment and credit terms. Under the Insurance Code a non-life policy is not binding until the premium is paid, except where a credit term is allowed, for example under broker agreements with the insurers. | Insurance Company master: Premium Payment Warranty (days), else `collections.default_credit_days` (delivered 30), sets the due date of each premium bill. Accounts > Collections with ageing (30, 60, 90, 120 days); Collection reminders job (daily 08:00); Accounts > Credit Control > Premium Warranty Monitor and Instalment Plans; claims on a policy with unpaid premium are refused (`claims.block_unpaid_premium`) | Agree the credit terms with each insurer; follow up unpaid premium; notify the insurer and handle cancellation for non-payment as the insurer agreement and the law require |
+| Receipts for premium collected. Every collection is acknowledged with a receipt and accounted for. | Accounts > Receipts: official receipts against open bills from the Official Receipt series, printed on the letterhead; only Accounting posts receipts; other roles record the payment for verification; returned cheques cancel the receipt and reopen the bill. Receipts Register; Collection Report | Register the receipt series with the BIR (see chapter 6) and set the next number to match; keep cancelled receipts |
+| Commission. The broker accounts for the commission it earns from each insurer and for commission it shares with sub-agents or referrers. | Commission per insurer, product and cover (Master > Generals > Commission, Commission Rate Matrix); commission income per insurer on each policy; direct bill commission debit notes; referrer commission payable only after full collection (`commission.require_full_payment`) with withholding tax. Broker Commission Statement; Commission Dashboard | Ensure commission rates match the agreements and the limits that apply; ensure sharing with referrers is allowed under the IC rules for the persons concerned |
+| Placement with authorised insurers. A broker places business with insurers authorised to do business in the Philippines. | Policies are placed with and issued for insurers kept in the Insurance Company master (Master > Generals > Insurance Management) | Keep the insurer master to authorised insurers; check the status of each insurer's certificate of authority |
+| Reports to the IC. The broker submits the reports and financial statements the IC requires. | Financial statements (Accounts > Period End > Financial Statements; Income Statement, Balance Sheet, Trial Balance reports) and production reports provide the figures | Prepare and file the IC reports in the IC's format; the system has no IC-format report |
+
+# BIR: taxes, receipts and books
+
+## Books of accounts and Computerized Accounting System
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Books of accounts. A taxpayer keeps books of accounts (journals and ledgers) and preserves them, with supporting documents, for the period the NIRC requires. | Double-entry general ledger: every operational event posts a journal from its posting rule (Master > Finance > Posting Rules); Journal Voucher, Correction JV, Reversal JV; General Ledger Detail, Journal Register, Trial Balance, Trial Balance (Opening / Movement / Closing), Income Statement, Balance Sheet. Journals cannot be posted unbalanced, on inactive accounts or into closed periods; each journal points back to its source document | Decide the form of the books (computerized books, or printed loose-leaf books) with the tax adviser; print, bind or submit them as the BIR requires; preserve them for the required period |
+| Registration of a computerized accounting system. A taxpayer who keeps its books or issues its receipts or invoices with a computerized system registers it with the BIR, or obtains the acknowledgement the current regulations provide for, before use. | The system provides what a registration file typically needs: a description of the modules and controls (this documentation package and the user manual), sample outputs of journals, ledgers, trial balance and receipts, the number series with their counters, the audit trail, user access controls and period locks | File the registration or acknowledgement application under the current BIR rules, with the system description and sample outputs; register any change the BIR requires to be registered; keep the system version on record |
+| Taxpayer details on documents. Registered name, address and TIN appear on documents and BIR forms. | Company master: company name, TIN, address; printed on every document and report. BIR group in Master > Configuration: `bir.withholding_agent_tin`, `bir.registered_name`, `bir.registered_address`, `bir.zip_code` (delivered empty) for the BIR forms | Fill in the BIR settings before the first filing; keep the Company master the same as the BIR registration |
+
+## Invoices and receipts
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Invoices and receipts under the EOPT Act. Under the EOPT Act the invoice is the primary document for a sale of services, including VAT on services; an official receipt is a supplementary document. Invoices and receipts are registered and printed or generated as the BIR requires. | Number series for the documents the broker issues: invoice / bill (INV), official receipt (OR, RT), commission debit note to insurers (DN), payment voucher (PV), BIR Form 2307 (CWT) and others; next numbers can continue the old system's numbering; printed on the letterhead with TIN | Decide with the tax adviser which BrokerVerse documents serve as the broker's registered invoices and receipts (for example the commission debit note or another invoice for commission income); register the series (ATP or the system-generated equivalent) and set the numbering to match; verify the printed layout carries every field the BIR requires; layout changes are outside the OOTB scope |
+| Cancelled and voided documents are kept. | A receipt is cancelled with a reason (its payment journals are reversed and the bill reopens), not deleted; a BIR Form 2307 certificate is cancelled with a reason; the audit trail keeps each change | Keep the cancelled originals as the BIR requires |
+
+## VAT or percentage tax on commission
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| VAT on the broker's commission. A VAT-registered broker charges output VAT on its commission and fees, claims input VAT on purchases, and files the quarterly VAT return. | Output VAT on commission: direct bill commission debit notes add 12% VAT (`direct_bill.commission_vat_rate`); commission booked with Output VAT Payable. Tax codes for VAT output 12%, input 12%, zero-rated and exempt (Master > Finance > Taxation). Accounts > Tax > VAT Summary: vatable revenue, output VAT, input VAT and net VAT payable per month or quarter, as the working paper for the VAT return (BIR Form 2550Q) | Confirm with the tax adviser how VAT applies to each commission stream, including commission netted from premium remittances; file and pay the VAT return; check the VAT Summary against the ledger before filing |
+| Percentage tax for a non-VAT broker. A broker that is not VAT-registered pays percentage tax on its gross sales or receipts instead of VAT. | `direct_bill.broker_vat_registered` (delivered on) removes VAT from commission debit notes when switched off. Commission income is in the ledger by insurer (Income Statement, General Ledger Detail) | Compute and file the percentage tax return (BIR Form 2551Q); the system has no percentage tax working paper; add a tax code in Taxation only with the tax adviser |
+
+## Withholding taxes
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| EWT on payments the broker makes. As withholding agent, the broker withholds expanded withholding tax on commission paid to agents and referrers and on other income payments subject to it, remits it, and issues BIR Form 2307 to the payee. | Withholding on referrer commission by payee type (`commission.wht_rate_by_type`: Agent 5%, Sub-agent 5%, External 10% delivered); EWT tax codes with ATC (for example WI139 and WC139 on broker commission, WI515 on commission of sales representatives and referrers; ATC per payee type in `bir.atc_by_payee`); payment vouchers post the tax withheld. Accounts > Tax > BIR Form 2307, Issued by us: certificates per payee and quarter with number series CWT; QAP: Quarterly Alphalist of Payees for the quarterly remittance return (BIR Form 1601-EQ) | Confirm rates and ATC per payee with the tax adviser, including the payee's sworn declarations where rates depend on them; file and pay the monthly (BIR Form 0619-E) and quarterly (1601-EQ) returns with the QAP; issue Form 2307 to payees on time; prepare the annual information return and alphalist |
+| CWT withheld from the broker. Insurers and clients that are withholding agents withhold tax on commission paid to the broker and issue BIR Form 2307; the broker claims the credit. | Direct bill: the insurer's EWT (`direct_bill.insurer_ewt_rate`, delivered 10%) is posted to Creditable Withholding Tax (BIR 2307) when the debit note collection is recorded. Accounts > Tax > BIR Form 2307, Received; SAWT: Summary Alphalist of Withholding Taxes for the income tax return | Collect the Forms 2307 from insurers and clients and match them to the Received list; attach the SAWT to the returns as required; follow up missing certificates |
+| Final withholding where it applies. | Final withholding tax codes are in the Taxation master | Confirm with the tax adviser whether any payment is subject to final withholding |
+
+## Summary lists and alphalists
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Summary List of Sales and Purchases. VAT-registered taxpayers who meet the BIR thresholds submit quarterly summary lists of sales and purchases. | Accounts > Tax > SLSP Sales and SLSP Purchases, in the BIR column order, as CSV, Excel or PDF | Check whether the broker is required to submit; validate the files with the BIR's validation tools and current format before submission (user manual, chapter 18) |
+| Alphalists in the BIR format. | SAWT and QAP give the figures in the BIR column order | Validate against the current BIR format and the eFPS or eBIRForms validation before filing; the system does not file |
+
+# Taxes and charges on premium
+
+These taxes are imposed on the insurance premium and are paid to the government by the insurer. The broker bills them to the client as part of the gross premium and passes them to the insurer with the premium.
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Documentary stamp tax on non-life policies. The NIRC imposes DST on non-life insurance policies, computed on the premium charged (PHP 0.50 on each PHP 4.00 of premium or fractional part). | DST at 12.5% of the net premium (`tax.dst_rate`) on every quotation, policy, endorsement and renewal; shown on the quotation and billing statement; booked to Premium DST due to insurers and remitted with the premium. Package pricing in Premium Taxes & LGU Rates can count each PHP 4.00 unit with the fraction rounded up | Confirm with each insurer the DST basis and rounding the insurer applies, so the broker's bill agrees with the insurer's policy; the insurer files and pays the DST |
+| Local government tax on premium. Local government units may impose a tax on premiums, at rates set by local ordinance. | LGT at 0.75% of net premium (`tax.lgt_rate`) on quotations; Master > Finance > Premium Taxes & LGU Rates holds a rate per city or municipality used by package pricing; booked to Premium LGT due to insurers | Confirm with each insurer the LGT rate it applies for the client's location and keep the rates current |
+| VAT on non-life premium. Non-life premium is subject to VAT, which the insurer reports. | VAT at 12% of net premium (`tax.vat_rate`) on lines set in `premium.taxes_by_lob`; products with the premium tax regime use premium tax instead (Premium Taxes & LGU Rates) | Confirm the tax regime of each product with the insurer |
+| Fire service tax on fire insurance premium (Fire Code, RA 9514). | FST at 2% (`tax.fst_rate`) on fire and industrial all risks lines (`premium.taxes_by_lob`) | Confirm the lines to which each insurer applies FST |
+| Return premium. Taxes follow the premium on endorsements and cancellations. | Return premium gives negative tax amounts; each charge is rounded to 2 decimals on its own so printed totals add up | Agree the treatment of taxes on return premium with each insurer |
+
+# CTPL and motor rules
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| CTPL. Compulsory Third Party Liability cover is required for the registration of a motor vehicle with the LTO, at the premium set by the IC tariff for the vehicle class. | Product Configurator > Product Templates > MOT-003-2025 Motor Insurance Basic Plan, tab CTPL & Auto PA: CTPL 1-year and 3-year amounts per vehicle class, default seats. The vehicle class on a quotation sets the CTPL amount; CTPL is read-only, inclusive of taxes and fees, not taxed again and never discounted; 3-year CTPL offered for brand-new vehicles where the class has a 3-year tariff | Keep the tariff equal to the current IC tariff and the insurers' rates (the delivered amounts were confirmed on 29 September 2026); complete the CTPL authentication and certificate in the insurer's or the government's system, which is outside BrokerVerse |
+| CTPL certificate details. The policy records the certificate issued. | Policy fields Cert Number and Authen Code (CTPL certificate number and authentication code) | Record the certificate number and authentication code for each CTPL policy |
+| Vehicle and owner identification. Motor policies identify the vehicle and the insured. | Motor policy issue is refused without government ID type, number and image, chassis number, motor number, and plate or MV file number (`policy.kyc_required_fields`); accepted IDs in `policy.kyc_id_types` | Verify the documents presented; keep the list of accepted IDs current |
+| Auto Passenger Personal Accident. | Priced per seat from the motor template | Confirm rates and limits with the insurers |
+
+# Data Privacy Act (RA 10173)
+
+The broker is the personal information controller for the personal data of prospects, clients, claimants, referrers and staff held in BrokerVerse. iorta TechNXT, as host and support provider, acts as personal information processor under the agreement with the broker.
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Lawful, proportionate processing. Personal data is collected for declared, specified purposes and only as much as needed. | Required fields are limited by configuration: KYC items are required for motor only by default (`policy.kyc_required_fields`); TIN is required for corporate prospects | Define the purposes and the legal basis; publish a privacy notice; obtain consent where consent is the basis; decide which optional fields the teams fill in |
+| Organisational, physical and technical security measures. | Role-based access, deny by default, checked by the server on every action; password policy (8 characters, mixed case, digit, symbol, history 5, expiry 90 days); lockout after 5 wrong passwords; idle sign-out after 30 minutes; two-step verification for the roles set in `security.require_2fa_roles`; two-step secrets encrypted at rest; documents served only to signed-in users or through signed links that expire (`FILE_URL_TTL_SECONDS`, default 30 minutes); upload types checked against file content (`uploads.allowed_types`); passwords and tokens redacted from logs; HTTPS | Set the two-step verification roles (recommended: system-admin, accounting, accounting-manager); grant roles on a need-to-know basis; keep devices and browsers secure; adopt the security policy the DPA and NPC rules require |
+| Access control and review. | Master > Generals > User Management: User Access Matrix, Segregation of Duties, Access Reviews; Audit Trail of sign-ins and changes; login history | Review access at least as often as the broker's policy says (iorta TechNXT recommends monthly for administrators); remove leavers at once |
+| Data subject rights: to be informed, to access, to correct, to object, to erasure or blocking, to data portability. | Client and prospect records can be viewed, exported through the reports and corrected on the Clients and Prospects screens, with the change in the audit trail | Run the procedure for requests from data subjects; there is no dedicated erasure or anonymisation function in this release, so erasure requests are assessed by the DPO against the retention the law requires and handled through support as a data correction |
+| Retention and disposal. Personal data is kept only as long as needed for the purpose or as the law requires, then disposed of securely. | Operational logs are deleted after their retention days (`housekeeping.*`: sign-in history 365 days, sent e-mails 180 days, read notifications 180 days); business records and the audit trail are kept. Proposed retention per record type in architecture document 10 | Set the retention schedule with the compliance officer (insurance, tax and AMLA retention rules apply too); approve any disposal |
+| Personal data breach management. Breaches that meet the NPC criteria are notified to the NPC and the affected data subjects within 72 hours of knowledge. | Detection support: login history, audit trail, monitoring alarms on failed sign-ins and locked accounts; iorta TechNXT informs the broker of a suspected breach without delay (Production Support Approach and Standards) | Assess the breach, notify the NPC and data subjects, keep the breach register and file the reports the NPC requires; the DPO leads |
+| DPO and registration. | Not a system function | Appoint a DPO; register with the NPC where the rules require it; train staff |
+| Outsourcing and transfer. Processing by a service provider is covered by an agreement; data processed outside the Philippines stays under the controller's accountability. | iorta TechNXT hosts BrokerVerse on AWS, region ap-southeast-1 (Singapore), unless agreed otherwise | Sign the outsourcing or data processing agreement; disclose the processing and its location in the privacy notice |
+
+# Anti-Money Laundering Act (where applicable)
+
+Persons supervised or regulated by the IC are covered persons under the AMLA, as amended. Whether and how the obligations apply to a given broker and transaction is confirmed by the broker's compliance officer under the AMLA, its implementing rules and the IC's guidelines.
+
+| Requirement | How BrokerVerse supports it | Broker's responsibility |
+|---|---|---|
+| Customer due diligence. Identify and verify the customer and, for juridical persons, the entity and its authorised persons, before or during the business relationship. | Client and prospect records: name, birth date, gender, address, contact details, TIN (required for corporate prospects), company name; government ID type, number and image required for motor issue and configurable for other lines (`policy.kyc_required_fields`); accepted IDs in `policy.kyc_id_types`; documents attached to the client and policy | Adopt a money laundering and terrorist financing prevention programme; apply risk-based CDD, including enhanced due diligence where required and beneficial ownership for juridical persons; extend the KYC fields required to other lines in the setting if the programme requires it |
+| Record keeping. Keep customer identification and transaction records for at least five years, or longer where a case is pending. | Business records, documents and the audit trail are kept; nothing is deleted by housekeeping except operational logs | Set and enforce the retention; keep records of the old system for the remaining period |
+| Covered and suspicious transaction reporting to the AMLC. | Transaction data for review: Receipts Register (payment mode, amount, reference), Collection Report, SOA/Premium Receivable, client accounting history (Accounts > All Clients Accounting) | Monitor transactions, identify covered and suspicious transactions and report them to the AMLC; the system has no transaction monitoring, sanctions or PEP screening, or AMLC reporting function |
+| Training and compliance testing. | User manual and role decks for system use | AMLA training of staff; internal audit of compliance |
+
+# Summary of what remains with the broker
+
+- All registrations and filings: IC reports, BIR returns, alphalists and certificates, CAS registration or acknowledgement and the registration of invoices and receipts, NPC registration and breach notifications, AMLC reports.
+- Confirmation of every rate, ATC and GL account delivered with the system, by the broker's tax adviser, and of the motor tariff, by the insurers.
+- The choice of documents that serve as registered invoices and receipts, and the check of their printed layout.
+- Retention schedules for business records and personal data, and disposal.
+- Policies and procedures: credit control and cancellation, premium trust account, AMLA programme, privacy management programme, access reviews.
+- Keeping the configuration current when laws, rates and agreements change, using Master > Configuration, Master > Finance > Taxation, Premium Taxes & LGU Rates and the Product Configurator.
